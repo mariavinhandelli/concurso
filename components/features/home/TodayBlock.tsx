@@ -1,6 +1,7 @@
 // components/features/home/TodayBlock.tsx
 // Bloco "hoje": dois cards de pendentes (revisões + flashcards) clicáveis,
 // e uma faixa fina com meta do dia (editável via popover) + acerto recente.
+// No mobile os cards empilham (1 coluna) e a faixa quebra em linhas.
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -10,9 +11,11 @@ import { buildDailyQueue } from '@/services/flashcards.service';
 import { getGoalsSummary, setDailyTarget, type GoalsSummary } from '@/services/goals.service';
 import { getAcertoRecente } from '@/services/metrics.service';
 import { theme } from '@/lib/theme';
+import { useUI } from '@/components/layout/UIContext';
 
 export function TodayBlock() {
   const router = useRouter();
+  const { isMobile } = useUI();
   const [revisoes, setRevisoes] = useState<number | null>(null);
   const [flashcards, setFlashcards] = useState<number | null>(null);
   const [goals, setGoals] = useState<GoalsSummary | null>(null);
@@ -65,8 +68,8 @@ export function TodayBlock() {
 
   return (
     <div style={styles.wrap}>
-      {/* Dois cards de pendentes */}
-      <div style={styles.cards}>
+      {/* Dois cards de pendentes — empilham no mobile */}
+      <div style={{ ...styles.cards, gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr' }}>
         <button style={styles.card} onClick={() => router.push('/reviews')}>
           <div style={styles.cardLeft}>
             <div style={styles.iconBox}>
@@ -103,7 +106,7 @@ export function TodayBlock() {
       </div>
 
       {/* Faixa fina: meta do dia (clicável p/ editar) + acerto recente */}
-      <div style={styles.strip}>
+      <div style={{ ...styles.strip, flexWrap: isMobile ? 'wrap' : 'nowrap' }}>
         <div style={styles.metaWrap}>
           <button style={styles.stripBtn} onClick={() => setEditing((v) => !v)} title="Ajustar meta">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={theme.inkSoft} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>
@@ -131,7 +134,7 @@ export function TodayBlock() {
           )}
         </div>
 
-        <div style={styles.bar}>
+        <div style={{ ...styles.bar, order: isMobile ? 3 : 0, flexBasis: isMobile ? '100%' : undefined }}>
           <div style={{ ...styles.barFill, width: `${metaPct}%` }} />
         </div>
 
@@ -145,10 +148,10 @@ export function TodayBlock() {
 }
 
 const styles: Record<string, React.CSSProperties> = {
-  wrap: { fontFamily: theme.font },
+  wrap: { fontFamily: theme.font, minWidth: 0 },
   cards: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 14 },
-  card: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, background: theme.card, border: `0.5px solid ${theme.line}`, borderRadius: theme.radius, boxShadow: theme.shadow, padding: '18px 20px', cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit', width: '100%' },
-  cardLeft: { display: 'flex', alignItems: 'center', gap: 14 },
+  card: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, background: theme.card, border: `0.5px solid ${theme.line}`, borderRadius: theme.radius, boxShadow: theme.shadow, padding: '18px 20px', cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit', width: '100%', minWidth: 0 },
+  cardLeft: { display: 'flex', alignItems: 'center', gap: 14, minWidth: 0 },
   iconBox: { width: 44, height: 44, borderRadius: 11, background: theme.tealBg, display: 'grid', placeItems: 'center', flexShrink: 0 },
   cardText: { minWidth: 0 },
   cardNum: { fontSize: 22, fontWeight: 700, color: theme.ink, lineHeight: 1.1 },
@@ -156,7 +159,7 @@ const styles: Record<string, React.CSSProperties> = {
   strip: { display: 'flex', alignItems: 'center', gap: 16, padding: '4px 4px' },
   metaWrap: { position: 'relative', flexShrink: 0 },
   stripBtn: { display: 'flex', alignItems: 'center', gap: 7, fontSize: 13.5, color: theme.inkSoft, whiteSpace: 'nowrap', background: 'transparent', border: 'none', cursor: 'pointer', fontFamily: 'inherit', padding: 0 },
-  stripItem: { display: 'flex', alignItems: 'center', gap: 7, fontSize: 13.5, color: theme.inkSoft, whiteSpace: 'nowrap' },
+  stripItem: { display: 'flex', alignItems: 'center', gap: 7, fontSize: 13.5, color: theme.inkSoft, whiteSpace: 'nowrap', flexShrink: 0 },
   stripVal: { color: theme.ink, fontWeight: 600 },
   bar: { flex: 1, height: 6, background: theme.muted, borderRadius: 999, overflow: 'hidden', minWidth: 40 },
   barFill: { height: '100%', background: theme.teal, borderRadius: 999, transition: 'width .4s ease' },

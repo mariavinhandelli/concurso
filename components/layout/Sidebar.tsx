@@ -84,15 +84,32 @@ const NAV = [
 export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
-  const { collapsed, toggleCollapsed } = useUI();
+  const { collapsed, toggleCollapsed, isMobile, mobileOpen, setMobileOpen } = useUI();
   const [hover, setHover] = useState<string | null>(null);
 
-  const W = collapsed ? 72 : 244;
+  // No mobile o drawer é sempre largura cheia (nunca "só ícones") e a seta de colapso
+  // não tem função; quem comanda é o estado mobileOpen via translateX.
+  const isCollapsed = isMobile ? false : collapsed;
+  const W = isMobile ? 244 : (collapsed ? 72 : 244);
+
+  function go(href: string) {
+    router.push(href);
+    if (isMobile) setMobileOpen(false); // fecha o drawer ao navegar
+  }
 
   return (
-    <aside style={{ ...styles.aside, width: W }}>
-      <div style={{ ...styles.brand, justifyContent: collapsed ? 'center' : 'space-between' }}>
-        {!collapsed && (
+    <aside
+      style={{
+        ...styles.aside,
+        width: W,
+        // Mobile: drawer sobreposto que desliza. Desktop: largura fixa, transform neutro.
+        transform: isMobile && !mobileOpen ? 'translateX(-100%)' : 'translateX(0)',
+        boxShadow: isMobile && mobileOpen ? '4px 0 24px -6px rgba(20,28,30,.4)' : 'none',
+        transition: 'width .24s cubic-bezier(.2,.7,.3,1), transform .26s cubic-bezier(.2,.7,.3,1)',
+      }}
+    >
+      <div style={{ ...styles.brand, justifyContent: isCollapsed ? 'center' : 'space-between' }}>
+        {!isCollapsed && (
           <div style={styles.brandInner}>
             <div style={styles.logo}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={SB.logoInk} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
@@ -105,11 +122,20 @@ export function Sidebar() {
             </div>
           </div>
         )}
-        <button onClick={toggleCollapsed} style={styles.collapseBtn}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={SB.iconIdle} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ transform: collapsed ? 'rotate(180deg)' : 'none', transition: 'transform .2s' }}>
-            <path d="M15 18l-6-6 6-6" />
-          </svg>
-        </button>
+        {isMobile ? (
+          // Mobile: botão de fechar (X) no lugar da seta de colapso.
+          <button onClick={() => setMobileOpen(false)} style={styles.collapseBtn} aria-label="Fechar menu">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={SB.iconIdle} strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M18 6L6 18M6 6l12 12" />
+            </svg>
+          </button>
+        ) : (
+          <button onClick={toggleCollapsed} style={styles.collapseBtn} aria-label="Recolher menu">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={SB.iconIdle} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ transform: collapsed ? 'rotate(180deg)' : 'none', transition: 'transform .2s' }}>
+              <path d="M15 18l-6-6 6-6" />
+            </svg>
+          </button>
+        )}
       </div>
 
       <nav style={styles.nav}>
@@ -119,12 +145,12 @@ export function Sidebar() {
           return (
             <button
               key={n.href}
-              onClick={() => router.push(n.href)}
+              onClick={() => go(n.href)}
               onMouseEnter={() => setHover(n.href)}
               onMouseLeave={() => setHover(null)}
               style={{
                 ...styles.item,
-                justifyContent: collapsed ? 'center' : 'flex-start',
+                justifyContent: isCollapsed ? 'center' : 'flex-start',
                 color: active ? SB.textActive : SB.textIdle,
                 background: active ? SB.activeBg : isHover ? SB.hoverBg : 'transparent',
                 fontWeight: active ? 600 : 500,
@@ -133,7 +159,7 @@ export function Sidebar() {
               <IconWrapper color={active ? SB.textActive : SB.iconIdle}>
                 {n.icon}
               </IconWrapper>
-              {!collapsed && <span>{n.label}</span>}
+              {!isCollapsed && <span>{n.label}</span>}
             </button>
           );
         })}
@@ -143,7 +169,7 @@ export function Sidebar() {
 }
 
 const styles: Record<string, CSSProperties> = {
-  aside: { flexShrink: 0, height: '100vh', position: 'fixed', top: 0, left: 0, zIndex: 30, background: SB.bg, borderRight: `0.5px solid ${SB.border}`, padding: '20px 14px', display: 'flex', flexDirection: 'column', gap: 4, fontFamily: 'var(--font-geist-sans), sans-serif', transition: 'width .24s cubic-bezier(.2,.7,.3,1)', overflow: 'hidden' },
+  aside: { flexShrink: 0, height: '100vh', position: 'fixed', top: 0, left: 0, zIndex: 30, background: SB.bg, borderRight: `0.5px solid ${SB.border}`, padding: '20px 14px', display: 'flex', flexDirection: 'column', gap: 4, fontFamily: 'var(--font-geist-sans), sans-serif', overflow: 'hidden' },
   brand: { display: 'flex', alignItems: 'center', height: 40, marginBottom: 18, padding: '0 4px' },
   brandInner: { display: 'flex', alignItems: 'center', gap: 10 },
   logo: { width: 32, height: 32, borderRadius: 9, background: '#fff', display: 'grid', placeItems: 'center', flexShrink: 0 },

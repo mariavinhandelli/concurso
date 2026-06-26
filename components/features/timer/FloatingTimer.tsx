@@ -57,7 +57,8 @@ export function FloatingTimer() {
         aria-label="Iniciar sessão de estudo"
         title="Iniciar sessão de estudo"
       >
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+        {/* fill explícito (não currentColor) — garante contraste em todas as paletas, inclusive grafite */}
+        <svg width="22" height="22" viewBox="0 0 24 24" fill={theme.onTeal}>
           <path d="M8 5v14l11-7z" />
         </svg>
       </button>
@@ -135,4 +136,5 @@ const styles: Record<string, React.CSSProperties> = {
   primary: { flex: 1, padding: '9px 0', borderRadius: theme.radiusSm, border: 'none', background: theme.teal, color: theme.onTeal, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
   overlay: { position: 'fixed', inset: 0, zIndex: 70, background: 'rgba(30,28,24,0.4)', display: 'grid', placeItems: 'center', padding: 20 },
   feedbackCard: { background: theme.card, borderRadius: theme.radius, padding: 24, width: '100%', maxWidth: 420, maxHeight: '88vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,0.18)' },
+  error: { color: theme.danger, fontSize: 13, margin: '0 0 12px' },
 };

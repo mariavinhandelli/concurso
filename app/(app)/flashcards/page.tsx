@@ -12,6 +12,7 @@ import { listSubjectOptions, listTopicOptions, type PickerOption } from '@/servi
 import { CardForm } from '@/components/features/flashcards/CardForm';
 import { FlashcardEngine } from '@/components/features/flashcards/FlashcardEngine';
 import { theme } from '@/lib/theme';
+import { useUI } from '@/components/layout/UIContext';
 
 type Tab = 'cards' | 'review';
 type Level = 'subjects' | 'topics' | 'cards';
@@ -26,6 +27,7 @@ export default function FlashcardsPage() {
 
 function FlashcardsContent() {
   const params = useSearchParams();
+  const { isMobile } = useUI();
   const [tab, setTab] = useState<Tab>('cards');
   const [session, setSession] = useState<QueueCard[] | null>(null);
 
@@ -59,9 +61,9 @@ function FlashcardsContent() {
   }
 
   return (
-    <div style={styles.container}>
+    <div style={{ ...styles.container, padding: isMobile ? '20px 16px' : '34px 40px' }}>
       <div style={styles.header}>
-        <h1 style={styles.h1}>Flashcards</h1>
+        <h1 style={{ ...styles.h1, fontSize: isMobile ? 25 : 30 }}>Flashcards</h1>
         <p style={styles.sub}>Crie, organize e revise seus cards.</p>
       </div>
 
@@ -184,7 +186,7 @@ function CardsTab({ onStudy }: { onStudy: (queue: QueueCard[]) => void }) {
           <p style={styles.crumb}>Escolha a matéria</p>
           {subjects.map((s) => (
             <div key={s.id} style={styles.navItem}>
-              <span onClick={() => openSubject(s)} style={{ flex: 1, cursor: 'pointer' }}>{s.name}</span>
+              <span onClick={() => openSubject(s)} style={{ flex: 1, cursor: 'pointer', minWidth: 0 }}>{s.name}</span>
               {counts[s.id] ? <span style={styles.count}>{counts[s.id]}</span> : null}
               {counts[s.id] ? (
                 <button onClick={() => studySubject(s)} style={styles.studyBtn}>Estudar</button>
@@ -239,7 +241,7 @@ function CardsTab({ onStudy }: { onStudy: (queue: QueueCard[]) => void }) {
 }
 
 const styles: Record<string, React.CSSProperties> = {
-  container: { maxWidth: 680, margin: '0 auto', padding: '34px 40px', fontFamily: theme.font },
+  container: { maxWidth: 680, margin: '0 auto', padding: '34px 40px', fontFamily: theme.font, minWidth: 0 },
   header: { marginBottom: 22 },
   h1: { fontSize: 30, fontWeight: 800, color: theme.ink, letterSpacing: -0.8, margin: 0 },
   sub: { fontSize: 14.5, color: theme.inkSoft, margin: '6px 0 0', fontWeight: 500 },
@@ -257,11 +259,11 @@ const styles: Record<string, React.CSSProperties> = {
   newBtn: { padding: '11px 0', borderRadius: 12, border: 'none', background: theme.teal, color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer', marginBottom: 4, fontFamily: 'inherit' },
   muted: { color: theme.inkFaint, fontSize: 14 },
   list: { display: 'flex', flexDirection: 'column', gap: 8 },
-  navItem: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, background: theme.card, borderRadius: 12, border: `0.5px solid ${theme.line}`, padding: '13px 15px', cursor: 'pointer', fontSize: 14, color: theme.ink, fontWeight: 500 },
-  count: { fontSize: 11, color: theme.inkSoft, background: theme.muted, padding: '2px 8px', borderRadius: 10, fontWeight: 600 },
-  studyBtn: { padding: '5px 13px', borderRadius: 8, border: 'none', background: theme.tealBg, color: theme.tealDeep, fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
-  cardsHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
-  studyTopicBtn: { padding: '7px 15px', borderRadius: 10, border: 'none', background: theme.teal, color: '#fff', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+  navItem: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, background: theme.card, borderRadius: 12, border: `0.5px solid ${theme.line}`, padding: '13px 15px', cursor: 'pointer', fontSize: 14, color: theme.ink, fontWeight: 500, minWidth: 0 },
+  count: { fontSize: 11, color: theme.inkSoft, background: theme.muted, padding: '2px 8px', borderRadius: 10, fontWeight: 600, flexShrink: 0 },
+  studyBtn: { padding: '5px 13px', borderRadius: 8, border: 'none', background: theme.tealBg, color: theme.tealDeep, fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', flexShrink: 0 },
+  cardsHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, flexWrap: 'wrap' },
+  studyTopicBtn: { padding: '7px 15px', borderRadius: 10, border: 'none', background: theme.teal, color: '#fff', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', flexShrink: 0 },
   cardItem: { position: 'relative', background: theme.card, borderRadius: 12, border: `0.5px solid ${theme.line}`, padding: '13px 15px' },
   cardFront: { fontSize: 14, color: theme.ink, fontWeight: 600, paddingRight: 20 },
   cardBack: { fontSize: 13, color: theme.inkSoft, marginTop: 4 },

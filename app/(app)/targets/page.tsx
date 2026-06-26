@@ -12,9 +12,11 @@ import {
 } from '@/services/targetExams.service';
 import { listAllBoards, createBoard, type Board } from '@/services/boards.service';
 import { theme } from '@/lib/theme';
+import { useUI } from '@/components/layout/UIContext';
 
 export default function TargetsPage() {
   const router = useRouter();
+  const { isMobile } = useUI();
   const [targets, setTargets] = useState<TargetExam[]>([]);
   const [boards, setBoards] = useState<Board[]>([]);
   const [loading, setLoading] = useState(true);
@@ -140,9 +142,9 @@ export default function TargetsPage() {
   const bancaObrigatoria = phase === 'pos';
 
   return (
-    <div style={styles.container}>
+    <div style={{ ...styles.container, padding: isMobile ? '20px 16px' : '34px 40px' }}>
       <div style={styles.header}>
-        <h1 style={styles.h1}>Concursos-alvo</h1>
+        <h1 style={{ ...styles.h1, fontSize: isMobile ? 25 : 30 }}>Concursos-alvo</h1>
         <p style={styles.sub}>Cadastre o concurso e abra para montar o edital e definir os pesos.</p>
       </div>
 
@@ -177,7 +179,7 @@ export default function TargetsPage() {
               <button onClick={() => { setAddingBoard(false); setNewBoardName(''); }} style={styles.miniBtnGhost}>Cancelar</button>
             </div>
           ) : (
-            <div style={styles.selectWrap}>
+            <div style={{ ...styles.selectWrap, flexBasis: isMobile ? '100%' : undefined }}>
               <select
                 value={boardId}
                 onChange={(e) => {
@@ -195,11 +197,11 @@ export default function TargetsPage() {
             </div>
           )}
 
-          <input value={orgao} onChange={(e) => setOrgao(e.target.value)} placeholder="Órgão (ex: TCE-GO)" style={styles.input} />
-          <input value={cargo} onChange={(e) => setCargo(e.target.value)} placeholder="Cargo (ex: Auditor)" style={styles.input} />
-          <input value={ano} onChange={(e) => setAno(e.target.value)} placeholder="Ano" type="number" style={{ ...styles.input, maxWidth: 90 }} />
+          <input value={orgao} onChange={(e) => setOrgao(e.target.value)} placeholder="Órgão (ex: TCE-GO)" style={{ ...styles.input, flexBasis: isMobile ? '100%' : undefined }} />
+          <input value={cargo} onChange={(e) => setCargo(e.target.value)} placeholder="Cargo (ex: Auditor)" style={{ ...styles.input, flexBasis: isMobile ? '100%' : undefined }} />
+          <input value={ano} onChange={(e) => setAno(e.target.value)} placeholder="Ano" type="number" style={{ ...styles.input, maxWidth: isMobile ? '100%' : 90, flexBasis: isMobile ? '100%' : undefined }} />
         </div>
-        <button onClick={handleCreate} style={styles.addBtn}>Adicionar concurso</button>
+        <button onClick={handleCreate} style={{ ...styles.addBtn, width: isMobile ? '100%' : undefined }}>Adicionar concurso</button>
       </div>
 
       {error && <p style={styles.error}>{error}</p>}
@@ -211,7 +213,7 @@ export default function TargetsPage() {
       ) : (
         <div style={styles.list}>
           {targets.map((t) => (
-            <div key={t.id} style={styles.targetRow}>
+            <div key={t.id} style={{ ...styles.targetRow, flexWrap: isMobile ? 'wrap' : 'nowrap' }}>
               {/* Estrela de foco */}
               <button
                 onClick={() => handleSetPrimary(t.id, t.is_primary)}
@@ -237,8 +239,8 @@ export default function TargetsPage() {
                 </span>
               </div>
 
-              {/* Ações à direita */}
-              <div style={styles.targetActions}>
+              {/* Ações à direita — quebram pra 2ª linha no mobile */}
+              <div style={{ ...styles.targetActions, ...(isMobile ? { width: '100%', justifyContent: 'flex-end', marginTop: 4 } : {}) }}>
                 {t.phase === 'pre' && (
                   <button onClick={() => handlePromote(t)} style={styles.promoteBtn}>
                     Edital saiu →
@@ -266,7 +268,7 @@ export default function TargetsPage() {
 }
 
 const styles: Record<string, React.CSSProperties> = {
-  container: { maxWidth: 720, margin: '0 auto', padding: '34px 40px', fontFamily: theme.font },
+  container: { maxWidth: 720, margin: '0 auto', padding: '34px 40px', fontFamily: theme.font, minWidth: 0 },
   header: { marginBottom: 22 },
   h1: { fontSize: 30, fontWeight: 800, color: theme.ink, letterSpacing: -0.8, margin: 0 },
   sub: { fontSize: 14.5, color: theme.inkSoft, margin: '6px 0 0', fontWeight: 500 },
@@ -286,7 +288,7 @@ const styles: Record<string, React.CSSProperties> = {
   error: { color: theme.danger, fontSize: 13, marginBottom: 12 },
   muted: { color: theme.inkFaint, fontSize: 14 },
   list: { display: 'flex', flexDirection: 'column', gap: 8 },
-  targetRow: { display: 'flex', alignItems: 'center', gap: 12, background: theme.card, borderRadius: 12, border: `0.5px solid ${theme.line}`, padding: '12px 14px', transition: 'border-color .15s' },
+  targetRow: { display: 'flex', alignItems: 'center', gap: 12, background: theme.card, borderRadius: 12, border: `0.5px solid ${theme.line}`, padding: '12px 14px', transition: 'border-color .15s', minWidth: 0 },
   starBtn: { border: 'none', background: 'transparent', cursor: 'pointer', padding: 4, display: 'flex', alignItems: 'center', flexShrink: 0 },
   targetMain: { flex: 1, display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', cursor: 'pointer', minWidth: 0 },
   targetLabel: { fontSize: 15, color: theme.ink, fontWeight: 500 },

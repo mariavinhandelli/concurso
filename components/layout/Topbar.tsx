@@ -1,5 +1,6 @@
 // components/layout/Topbar.tsx
 // Barra superior: fundo ivory + sombra na borda inferior (profundidade).
+// À esquerda (só mobile): hambúrguer que abre o drawer.
 // À direita: registrar estudo (+), notificações, toggle de tema, e avatar com menu.
 'use client';
 
@@ -13,7 +14,7 @@ import { NotificationBell } from './NotificationBell';
 
 export function Topbar() {
   const router = useRouter();
-  const { theme: mode, toggleTheme, avatarUrl, setAvatarUrl } = useUI();
+  const { theme: mode, toggleTheme, avatarUrl, setAvatarUrl, isMobile, toggleMobile } = useUI();
   const [email, setEmail] = useState<string | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [logOpen, setLogOpen] = useState(false);
@@ -45,14 +46,30 @@ export function Topbar() {
   const initial = (email?.[0] ?? '?').toUpperCase();
 
   return (
-    <header style={styles.bar}>
+    <header style={{ ...styles.bar, padding: isMobile ? '0 16px' : '0 28px' }}>
+      {/* Esquerda: hambúrguer (só mobile). No desktop fica vazio e o space-between empurra tudo pra direita. */}
+      <div style={styles.left}>
+        {isMobile && (
+          <button onClick={toggleMobile} style={styles.iconBtn} title="Abrir menu" aria-label="Abrir menu">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={theme.inkSoft} strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M3 12h18M3 6h18M3 18h18" />
+            </svg>
+          </button>
+        )}
+      </div>
+
       <div style={styles.right}>
-        {/* Registrar estudo manual (+) */}
-        <button onClick={() => setLogOpen(true)} style={styles.addBtn} title="Registrar estudo" aria-label="Registrar estudo">
+        {/* Registrar estudo manual (+) — no mobile colapsa pra só o ícone */}
+        <button
+          onClick={() => setLogOpen(true)}
+          style={{ ...styles.addBtn, padding: isMobile ? 0 : '0 16px 0 13px', width: isMobile ? 38 : undefined, justifyContent: 'center' }}
+          title="Registrar estudo"
+          aria-label="Registrar estudo"
+        >
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M12 5v14M5 12h14" />
           </svg>
-          <span style={styles.addLabel}>Registrar</span>
+          {!isMobile && <span style={styles.addLabel}>Registrar</span>}
         </button>
 
         {/* Notificações */}
@@ -124,12 +141,13 @@ const styles: Record<string, React.CSSProperties> = {
   bar: {
     height: 60, flexShrink: 0, background: theme.bg,
     boxShadow: '0 1px 0 ' + theme.line + ', 0 6px 16px -10px rgba(40,40,30,.18)',
-    display: 'flex', alignItems: 'center', justifyContent: 'flex-end',
+    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
     padding: '0 28px', position: 'sticky', top: 0, zIndex: 20, fontFamily: theme.font,
   },
+  left: { display: 'flex', alignItems: 'center' },
   right: { display: 'flex', alignItems: 'center', gap: 6 },
   addBtn: {
-    display: 'flex', alignItems: 'center', gap: 7, height: 38, padding: '0 16px 0 13px',
+    display: 'flex', alignItems: 'center', gap: 7, height: 38,
     borderRadius: 10, border: 'none', background: theme.teal, cursor: 'pointer',
     marginRight: 4, fontFamily: 'inherit',
   },
@@ -141,7 +159,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   sep: { width: 1, height: 22, background: theme.line, margin: '0 8px' },
   avatarBtn: {
-    width: 36, height: 36, borderRadius: '50%', border: `0.5px solid ${theme.line}`,
+    width: 36, height: 36, borderRadius: '50%', border: `0.5px solid ${theme.card}`,
     background: theme.teal, cursor: 'pointer', overflow: 'hidden', padding: 0,
     display: 'grid', placeItems: 'center',
   },

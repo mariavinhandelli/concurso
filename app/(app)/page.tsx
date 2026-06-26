@@ -5,6 +5,7 @@ import { Suspense, useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { theme } from '@/lib/theme';
+import { useUI } from '@/components/layout/UIContext';
 
 import { useTimer } from '@/components/features/timer/TimerContext';
 import { StreakBar } from '@/components/features/streak/StreakBar';
@@ -16,6 +17,7 @@ import { ExamCountdown } from '@/components/features/dashboard/ExamCountdown';
 function HomeContent() {
   const params = useSearchParams();
   const timer = useTimer();
+  const { isMobile } = useUI();
 
   const topicId = params.get('topicId');
   const subjectId = params.get('subjectId');
@@ -49,14 +51,20 @@ function HomeContent() {
   });
 
   return (
-    <div style={styles.wrap}>
+    <div style={{ ...styles.wrap, padding: isMobile ? '20px 16px' : '34px 40px' }}>
       {/* cabeçalho: saudação + data da prova no topo */}
       <div style={styles.topbar}>
-        <div>
-          <h1 style={styles.h1}>{nome ? `Olá, ${nome}` : 'Olá'}</h1>
+        <div style={{ minWidth: 0 }}>
+          <h1 style={{ ...styles.h1, fontSize: isMobile ? 24 : 28 }}>{nome ? `Olá, ${nome}` : 'Olá'}</h1>
           <p style={styles.sub}>{hoje.charAt(0).toUpperCase() + hoje.slice(1)}</p>
         </div>
-        <div style={styles.countdownSlot}>
+        {/* No mobile o countdown vira uma linha própria, ocupando 100% e podendo encolher. */}
+        <div style={{
+          ...styles.countdownSlot,
+          flexShrink: isMobile ? 1 : 0,
+          flexBasis: isMobile ? '100%' : 'auto',
+          minWidth: 0,
+        }}>
           <ExamCountdown />
         </div>
       </div>
@@ -91,10 +99,10 @@ export default function Home() {
 }
 
 const styles: Record<string, React.CSSProperties> = {
-  wrap: { maxWidth: 980, margin: '0 auto', padding: '34px 40px', fontFamily: theme.font },
+  wrap: { maxWidth: 980, margin: '0 auto', padding: '34px 40px', fontFamily: theme.font, minWidth: 0 },
   topbar: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 22, gap: 16, flexWrap: 'wrap' },
   h1: { fontSize: 28, fontWeight: 800, color: theme.ink, letterSpacing: -0.6, margin: 0 },
   sub: { fontSize: 14, color: theme.inkSoft, margin: '4px 0 0', fontWeight: 500 },
   countdownSlot: { flexShrink: 0 },
-  streakStrip: { background: theme.card, border: `0.5px solid ${theme.line}`, borderRadius: theme.radius, boxShadow: theme.shadow, padding: 16, marginBottom: 16 },
+  streakStrip: { background: theme.card, border: `0.5px solid ${theme.line}`, borderRadius: theme.radius, boxShadow: theme.shadow, padding: 16, marginBottom: 16, minWidth: 0, overflow: 'hidden' },
 };

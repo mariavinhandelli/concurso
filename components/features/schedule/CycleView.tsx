@@ -2,6 +2,7 @@
 // Visão de ciclo: donut bússola + lista de matérias. Cabeçalho adapta-se se o
 // ciclo é ativo (arquivar/excluir/novo) ou arquivado (reativar/excluir/voltar).
 // Inclui seção expansível de ciclos arquivados.
+// No mobile o card do progresso (compass) ocupa largura total e fica centralizado.
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
@@ -11,6 +12,7 @@ import {
   type CycleState,
 } from '@/services/cycleEngine.service';
 import { theme } from '@/lib/theme';
+import { useUI } from '@/components/layout/UIContext';
 
 interface Props {
   ruleId: string;
@@ -30,6 +32,7 @@ export function CycleView({
   onNovoCiclo, onArquivado, onExcluido,
   onAbrirArquivado, onReativar, onVoltar,
 }: Props) {
+  const { isMobile } = useUI();
   const [state, setState] = useState<CycleState | null>(null);
   const [loading, setLoading] = useState(true);
   const [completing, setCompleting] = useState<string | null>(null);
@@ -173,7 +176,10 @@ export function CycleView({
       </div>
 
       <div style={styles.wrap}>
-        <div style={styles.compass}>
+        <div style={{
+          ...styles.compass,
+          ...(isMobile ? { flex: '1 1 100%', maxWidth: 360, marginLeft: 'auto', marginRight: 'auto' } : {}),
+        }}>
           <svg viewBox="0 0 120 120" width="150" height="150" style={{ display: 'block', margin: '0 auto' }}>
             <circle cx="60" cy="60" r={R} fill="none" stroke={theme.muted} strokeWidth="14" />
             <circle cx="60" cy="60" r={R} fill="none" stroke={theme.teal} strokeWidth="14"
@@ -293,13 +299,13 @@ const styles: Record<string, React.CSSProperties> = {
   compassLabel: { marginTop: 12, fontSize: 13, color: theme.inkSoft },
   compassLap: { marginTop: 14, paddingTop: 14, borderTopWidth: 0.5, borderTopStyle: 'solid', borderTopColor: theme.line, fontSize: 13, color: theme.inkSoft },
   lapNum: { fontSize: 20, fontWeight: 700, color: theme.ink },
-  list: { flex: 1, minWidth: 280 },
+  list: { flex: 1, minWidth: 0 },
   suggestedTag: { display: 'inline-block', fontSize: 12, fontWeight: 600, color: theme.tealDeep, background: theme.tealBg, padding: '4px 10px', borderRadius: theme.radiusSm, marginBottom: 12 },
-  row: { display: 'flex', alignItems: 'center', gap: 12, padding: 14, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, borderRadius: theme.radius, marginBottom: 8, background: theme.card },
+  row: { display: 'flex', alignItems: 'center', gap: 12, padding: 14, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, borderRadius: theme.radius, marginBottom: 8, background: theme.card, minWidth: 0 },
   rowSuggested: { borderWidth: 2, borderColor: theme.teal },
   dot: { width: 12, height: 12, borderRadius: 3, flexShrink: 0, alignSelf: 'flex-start', marginTop: 3 },
   rowInfo: { flex: 1, minWidth: 0 },
-  rowName: { fontSize: 15, color: theme.ink, display: 'flex', alignItems: 'center', gap: 8 },
+  rowName: { fontSize: 15, color: theme.ink, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' },
   lapBadge: { fontSize: 11, fontWeight: 600, color: theme.tealDeep, background: theme.tealBg, padding: '2px 7px', borderRadius: 6 },
   progressLine: { display: 'flex', alignItems: 'center', gap: 8, marginTop: 6 },
   progressTrack: { flex: 1, height: 5, background: theme.muted, borderRadius: 999, overflow: 'hidden', maxWidth: 160 },

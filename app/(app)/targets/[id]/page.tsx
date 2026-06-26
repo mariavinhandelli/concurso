@@ -18,6 +18,7 @@ import { getSaudeMap } from '@/services/metrics.service';
 import { HealthBar } from '@/components/features/topics/HealthBar';
 import { GeneratorModal } from '@/components/features/schedule/GeneratorModal';
 import { theme } from '@/lib/theme';
+import { useUI } from '@/components/layout/UIContext';
 
 interface SubjectTree {
   subject: Subject;
@@ -39,6 +40,7 @@ function Chevron({ open }: { open: boolean }) {
 export default function TargetDetailPage() {
   const params = useParams();
   const router = useRouter();
+  const { isMobile } = useUI();
   const targetId = params.id as string;
 
   const [target, setTarget] = useState<TargetExam | null>(null);
@@ -174,18 +176,18 @@ export default function TargetDetailPage() {
     return [bancaVis, t.orgao, t.cargo, t.ano_alvo].filter(Boolean).join(' · ');
   }
 
-  if (loading) return <div style={styles.container}><p style={styles.muted}>Carregando…</p></div>;
-  if (!target) return <div style={styles.container}><p style={styles.muted}>Concurso não encontrado.</p></div>;
+  if (loading) return <div style={{ ...styles.container, padding: isMobile ? '20px 16px' : '34px 40px' }}><p style={styles.muted}>Carregando…</p></div>;
+  if (!target) return <div style={{ ...styles.container, padding: isMobile ? '20px 16px' : '34px 40px' }}><p style={styles.muted}>Concurso não encontrado.</p></div>;
 
   const totalLinked = linked.size;
 
   return (
-    <div style={styles.container}>
+    <div style={{ ...styles.container, padding: isMobile ? '20px 16px' : '34px 40px' }}>
       <button onClick={() => router.push('/targets')} style={styles.back}>← Concursos</button>
 
       <div style={styles.headerRow}>
-        <div>
-          <h1 style={styles.h1}>{rotulo(target)}</h1>
+        <div style={{ minWidth: 0, flex: '1 1 240px' }}>
+          <h1 style={{ ...styles.h1, fontSize: isMobile ? 23 : 28 }}>{rotulo(target)}</h1>
           <p style={styles.sub}>{totalLinked} tópico(s) neste edital.</p>
         </div>
         <button onClick={() => setGeneratorOpen(true)} style={styles.genBtn}>
@@ -261,13 +263,13 @@ export default function TargetDetailPage() {
                   const weight = bp?.weight ?? 1;
                   const nQ = bp?.num_questions_expected?.toString() ?? '';
                   return (
-                    <div key={s.id} style={styles.weightRow}>
+                    <div key={s.id} style={{ ...styles.weightRow, flexDirection: isMobile ? 'column' : 'row', alignItems: isMobile ? 'stretch' : 'center', gap: isMobile ? 10 : 0 }}>
                       <span style={styles.weightSubject}>{s.name}</span>
-                      <div style={styles.weightControls}>
+                      <div style={{ ...styles.weightControls, ...(isMobile ? { width: '100%' } : {}) }}>
                         <select
                           value={weight}
                           onChange={(e) => changeSubjectWeight(s.id, Number(e.target.value), nQ)}
-                          style={styles.weightSelectInput}
+                          style={{ ...styles.weightSelectInput, flex: isMobile ? 1 : undefined }}
                         >
                           {[1, 2, 3, 4, 5].map((w) => <option key={w} value={w}>Peso {w}</option>)}
                         </select>
@@ -276,7 +278,7 @@ export default function TargetDetailPage() {
                           onBlur={(e) => changeSubjectWeight(s.id, weight, e.target.value)}
                           placeholder="nº questões"
                           type="number"
-                          style={styles.qInput}
+                          style={{ ...styles.qInput, width: isMobile ? undefined : 120, flex: isMobile ? 1 : undefined, minWidth: 0 }}
                         />
                       </div>
                     </div>
@@ -368,10 +370,10 @@ export default function TargetDetailPage() {
 }
 
 const styles: Record<string, React.CSSProperties> = {
-  container: { maxWidth: 720, margin: '0 auto', padding: '34px 40px', fontFamily: theme.font },
+  container: { maxWidth: 720, margin: '0 auto', padding: '34px 40px', fontFamily: theme.font, minWidth: 0 },
   back: { border: 'none', background: 'transparent', color: theme.teal, fontSize: 13, fontWeight: 500, cursor: 'pointer', padding: 0, marginBottom: 18, fontFamily: 'inherit' },
-  headerRow: { display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, marginBottom: 20 },
-  h1: { fontSize: 28, fontWeight: 800, color: theme.ink, letterSpacing: -0.6, margin: 0 },
+  headerRow: { display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, marginBottom: 20, flexWrap: 'wrap' },
+  h1: { fontSize: 28, fontWeight: 800, color: theme.ink, letterSpacing: -0.6, margin: 0, overflowWrap: 'break-word', wordBreak: 'normal' },
   sub: { fontSize: 14, color: theme.inkSoft, margin: '6px 0 0', fontWeight: 500 },
   genBtn: { display: 'inline-flex', alignItems: 'center', padding: '9px 16px', borderRadius: theme.radiusSm, border: 'none', background: theme.teal, color: '#fff', fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap', flexShrink: 0 },
   tabs: { display: 'flex', gap: 6, marginBottom: 22, borderBottom: `0.5px solid ${theme.line}` },
@@ -380,35 +382,35 @@ const styles: Record<string, React.CSSProperties> = {
   error: { color: theme.danger, fontSize: 13, marginBottom: 12 },
   muted: { color: theme.inkFaint, fontSize: 14 },
   section: { display: 'flex', flexDirection: 'column', gap: 12 },
-  subjectBlock: { background: theme.card, borderRadius: theme.radius, border: `0.5px solid ${theme.line}`, boxShadow: theme.shadow, padding: 16 },
-  subjectHead: { display: 'flex', alignItems: 'center', gap: 8 },
-  expandBtn: { border: 'none', background: 'transparent', color: theme.inkSoft, cursor: 'pointer', padding: 0, display: 'grid', placeItems: 'center' },
-  subjectName: { fontSize: 15.5, fontWeight: 700, color: theme.ink, flex: 1, cursor: 'pointer' },
-  subjectCount: { fontSize: 12, color: theme.inkFaint, fontVariantNumeric: 'tabular-nums' },
-  markAllBtn: { border: 'none', background: 'transparent', color: theme.teal, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
+  subjectBlock: { background: theme.card, borderRadius: theme.radius, border: `0.5px solid ${theme.line}`, boxShadow: theme.shadow, padding: 16, minWidth: 0 },
+  subjectHead: { display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' },
+  expandBtn: { border: 'none', background: 'transparent', color: theme.inkSoft, cursor: 'pointer', padding: 0, display: 'grid', placeItems: 'center', flexShrink: 0 },
+  subjectName: { fontSize: 15.5, fontWeight: 700, color: theme.ink, flex: '1 1 140px', cursor: 'pointer', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' },
+  subjectCount: { fontSize: 12, color: theme.inkFaint, fontVariantNumeric: 'tabular-nums', flexShrink: 0 },
+  markAllBtn: { border: 'none', background: 'transparent', color: theme.teal, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap', flexShrink: 0 },
   emptyTopics: { fontSize: 13, color: theme.inkFaint, margin: '12px 0 0' },
   topicList: { display: 'flex', flexDirection: 'column', gap: 6, marginTop: 12 },
-  libRow: { display: 'flex', alignItems: 'center', gap: 10, padding: '9px 12px', borderRadius: 10, border: `0.5px solid ${theme.line}`, background: theme.card, cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit', width: '100%' },
+  libRow: { display: 'flex', alignItems: 'center', gap: 10, padding: '9px 12px', borderRadius: 10, border: `0.5px solid ${theme.line}`, background: theme.card, cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit', width: '100%', minWidth: 0 },
   libRowOn: { background: theme.tealBg, border: `0.5px solid ${theme.teal}` },
   libCheck: { width: 20, height: 20, borderRadius: 6, border: `1.5px solid ${theme.line}`, background: theme.card, color: 'transparent', fontSize: 12, display: 'grid', placeItems: 'center', flexShrink: 0 },
   libCheckOn: { background: theme.teal, border: `1.5px solid ${theme.teal}`, color: '#fff' },
-  libTopicName: { flex: 1, fontSize: 14.5, color: theme.ink },
-  weightsBlock: { background: theme.card, borderRadius: theme.radius, border: `0.5px solid ${theme.line}`, boxShadow: theme.shadow, padding: 16, marginTop: 4 },
+  libTopicName: { flex: 1, fontSize: 14.5, color: theme.ink, minWidth: 0 },
+  weightsBlock: { background: theme.card, borderRadius: theme.radius, border: `0.5px solid ${theme.line}`, boxShadow: theme.shadow, padding: 16, marginTop: 4, minWidth: 0 },
   weightsTitle: { fontSize: 16, fontWeight: 700, color: theme.ink, margin: 0 },
   weightsHint: { fontSize: 12.5, color: theme.inkFaint, margin: '6px 0 14px', lineHeight: 1.5 },
   weightList: { display: 'flex', flexDirection: 'column', gap: 8 },
-  weightRow: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: theme.bg, borderRadius: 10, border: `0.5px solid ${theme.line}`, padding: '10px 14px' },
-  weightSubject: { fontSize: 14.5, color: theme.ink, flex: 1 },
+  weightRow: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: theme.bg, borderRadius: 10, border: `0.5px solid ${theme.line}`, padding: '10px 14px', minWidth: 0 },
+  weightSubject: { fontSize: 14.5, color: theme.ink, flex: 1, minWidth: 0 },
   weightControls: { display: 'flex', gap: 10 },
   weightSelectInput: { padding: '8px 12px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.card, fontSize: 14, color: theme.ink, fontFamily: 'inherit', cursor: 'pointer' },
   qInput: { width: 120, padding: '8px 12px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.card, fontSize: 14, color: theme.ink, fontFamily: 'inherit', outline: 'none' },
-  vertBlock: { background: theme.card, borderRadius: theme.radius, border: `0.5px solid ${theme.line}`, boxShadow: theme.shadow, padding: 16 },
-  vertHead: { display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 8, cursor: 'pointer' },
-  vertHeadLeft: { display: 'flex', alignItems: 'center', gap: 8 },
-  vertProgress: { display: 'flex', alignItems: 'baseline', gap: 8, fontSize: 14, fontWeight: 700 },
+  vertBlock: { background: theme.card, borderRadius: theme.radius, border: `0.5px solid ${theme.line}`, boxShadow: theme.shadow, padding: 16, minWidth: 0 },
+  vertHead: { display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 8, cursor: 'pointer', gap: 10 },
+  vertHeadLeft: { display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 },
+  vertProgress: { display: 'flex', alignItems: 'baseline', gap: 8, fontSize: 14, fontWeight: 700, flexShrink: 0 },
   vertTrack: { height: 6, background: theme.muted, borderRadius: 999, overflow: 'hidden' },
   vertFill: { height: '100%', background: theme.teal, borderRadius: 999, transition: 'width 0.4s ease' },
-  vertRow: { display: 'flex', alignItems: 'center', gap: 12, padding: '8px 12px', borderRadius: 10, border: `0.5px solid ${theme.line}`, background: theme.card },
+  vertRow: { display: 'flex', alignItems: 'center', gap: 12, padding: '8px 12px', borderRadius: 10, border: `0.5px solid ${theme.line}`, background: theme.card, minWidth: 0 },
   doneText: { color: theme.inkFaint, textDecoration: 'line-through' },
   weightBadge: { border: `0.5px solid ${theme.line}`, background: theme.muted, color: theme.inkSoft, fontSize: 12.5, fontWeight: 700, borderRadius: 8, padding: '4px 9px', cursor: 'pointer', fontFamily: 'inherit', flexShrink: 0, fontVariantNumeric: 'tabular-nums' },
   weightSelect: { padding: '5px 8px', borderRadius: 8, border: `1.5px solid ${theme.teal}`, background: theme.card, fontSize: 13, color: theme.ink, fontFamily: 'inherit', cursor: 'pointer', flexShrink: 0 },

@@ -1,15 +1,17 @@
 // app/(app)/profile/page.tsx
 // Meu perfil — nome de exibição (user_metadata) + foto (Supabase Storage 'avatar').
+// A foto passa por um passo de recorte (AvatarCropper) antes de subir.
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { theme } from '@/lib/theme';
 import { useUI } from '@/components/layout/UIContext';
+import { AvatarCropper } from '@/components/features/profile/AvatarCropper';
 
 export default function ProfilePage() {
   const supabase = createClient();
-  const { setAvatarUrl: setTopbarAvatar } = useUI();
+  const { setAvatarUrl: setTopbarAvatar, isMobile } = useUI();
   const fileInput = useRef<HTMLInputElement>(null);
 
   const [userId, setUserId] = useState<string | null>(null);
@@ -20,6 +22,9 @@ export default function ProfilePage() {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [msg, setMsg] = useState<{ type: 'ok' | 'err'; text: string } | null>(null);
+
+  // Imagem escolhida aguardando recorte (object URL local).
+  const [cropSrc, setCropSrc] = useState<string | null>(null);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -40,21 +45,34 @@ export default function ProfilePage() {
     setTimeout(() => setMsg(null), 3500);
   }
 
-  async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
+  // 1) Usuário escolhe um arquivo → validamos e abrimos o cropper (não sobe ainda).
+  function handlePick(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
-    if (!file || !userId) return;
+    if (!file) return;
 
     if (!file.type.startsWith('image/')) { flash('err', 'Selecione um arquivo de imagem.'); return; }
     if (file.size > 2 * 1024 * 1024) { flash('err', 'A imagem deve ter no máximo 2MB.'); return; }
 
+    const url = URL.createObjectURL(file);
+    setCropSrc(url);
+    // libera o input para permitir reescolher o mesmo arquivo depois
+    if (fileInput.current) fileInput.current.value = '';
+  }
+
+  // 2) Cropper confirma → sobe o Blob recortado (mesma lógica de Storage de antes).
+  async function handleCroppedUpload(blob: Blob) {
+    if (!userId) return;
+    // fecha o cropper e revoga o object URL
+    if (cropSrc) URL.revokeObjectURL(cropSrc);
+    setCropSrc(null);
+
     setUploading(true);
     try {
-      const ext = file.name.split('.').pop() || 'jpg';
-      const path = `${userId}/avatar.${ext}`;
+      const path = `${userId}/avatar.jpg`;
 
       const { error: upErr } = await supabase.storage
         .from('avatar')
-        .upload(path, file, { upsert: true, cacheControl: '0' });
+        .upload(path, blob, { upsert: true, cacheControl: '0', contentType: 'image/jpeg' });
       if (upErr) throw upErr;
 
       const { data: pub } = supabase.storage.from('avatar').getPublicUrl(path);
@@ -72,8 +90,12 @@ export default function ProfilePage() {
       flash('err', err instanceof Error ? err.message : 'Erro ao enviar a foto.');
     } finally {
       setUploading(false);
-      if (fileInput.current) fileInput.current.value = '';
     }
+  }
+
+  function handleCancelCrop() {
+    if (cropSrc) URL.revokeObjectURL(cropSrc);
+    setCropSrc(null);
   }
 
   async function handleSaveName() {
@@ -94,26 +116,26 @@ export default function ProfilePage() {
   const initial = (name?.[0] ?? email?.[0] ?? '?').toUpperCase();
 
   if (loading) {
-    return <div style={styles.wrap}><p style={styles.muted}>Carregando…</p></div>;
+    return <div style={{ ...styles.wrap, padding: isMobile ? '20px 16px' : '34px 40px' }}><p style={styles.muted}>Carregando…</p></div>;
   }
 
   return (
-    <div style={styles.wrap}>
+    <div style={{ ...styles.wrap, padding: isMobile ? '20px 16px' : '34px 40px' }}>
       <header style={styles.head}>
-        <h1 style={styles.h1}>Meu perfil</h1>
+        <h1 style={{ ...styles.h1, fontSize: isMobile ? 25 : 30 }}>Meu perfil</h1>
         <p style={styles.sub}>Sua foto e nome de exibição.</p>
       </header>
 
-      <div style={styles.card}>
+      <div style={{ ...styles.card, padding: isMobile ? 20 : 28 }}>
         {/* Foto */}
         <section style={styles.section}>
-          <div style={styles.avatarRow}>
+          <div style={{ ...styles.avatarRow, flexDirection: isMobile ? 'column' : 'row', alignItems: isMobile ? 'flex-start' : 'center' }}>
             <div style={styles.avatar}>
               {avatarUrl
                 ? <img src={avatarUrl} alt="" style={styles.avatarImg} />
                 : <span style={styles.avatarInitial}>{initial}</span>}
             </div>
-            <div style={{ flex: 1 }}>
+            <div style={{ flex: 1, minWidth: 0 }}>
               <div style={styles.label}>Foto de perfil</div>
               <div style={styles.hint}>JPG ou PNG, até 2MB.</div>
               <button
@@ -127,7 +149,7 @@ export default function ProfilePage() {
                 ref={fileInput}
                 type="file"
                 accept="image/*"
-                onChange={handleUpload}
+                onChange={handlePick}
                 style={{ display: 'none' }}
               />
             </div>
@@ -167,12 +189,20 @@ export default function ProfilePage() {
           </button>
         </div>
       </div>
+
+      {cropSrc && (
+        <AvatarCropper
+          imageSrc={cropSrc}
+          onCancel={handleCancelCrop}
+          onConfirm={handleCroppedUpload}
+        />
+      )}
     </div>
   );
 }
 
 const styles: Record<string, React.CSSProperties> = {
-  wrap: { maxWidth: 680, margin: '0 auto', padding: '34px 40px', fontFamily: theme.font },
+  wrap: { maxWidth: 680, margin: '0 auto', padding: '34px 40px', fontFamily: theme.font, minWidth: 0 },
   head: { marginBottom: 24 },
   h1: { fontSize: 30, fontWeight: 800, color: theme.ink, letterSpacing: -0.8, margin: 0 },
   sub: { fontSize: 14.5, color: theme.inkSoft, margin: '6px 0 0', fontWeight: 500 },
@@ -187,7 +217,7 @@ const styles: Record<string, React.CSSProperties> = {
   input: { width: '100%', boxSizing: 'border-box', padding: '11px 14px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.card, fontSize: 14.5, color: theme.ink, fontFamily: 'inherit', outline: 'none' },
   inputDisabled: { background: theme.bg, color: theme.inkSoft, cursor: 'not-allowed' },
   divider: { height: '0.5px', background: theme.line, margin: '22px 0' },
-  footer: { display: 'flex', alignItems: 'center', gap: 12, marginTop: 24, paddingTop: 20, borderTop: `0.5px solid ${theme.line}` },
+  footer: { display: 'flex', alignItems: 'center', gap: 12, marginTop: 24, paddingTop: 20, borderTop: `0.5px solid ${theme.line}`, flexWrap: 'wrap' },
   btnPrimary: { padding: '11px 22px', borderRadius: 12, border: 'none', background: theme.teal, color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
   btnSecondary: { padding: '9px 18px', borderRadius: 10, border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.ink, fontSize: 13.5, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' },
   muted: { color: theme.inkFaint, fontSize: 14 },

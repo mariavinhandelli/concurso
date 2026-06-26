@@ -1,5 +1,5 @@
 // components/layout/UIContext.tsx
-// Estado global do shell: sidebar colapsada + tema (paleta × modo).
+// Estado global do shell: sidebar colapsada (desktop) + drawer mobile + tema (paleta × modo).
 // Paleta e modo são persistidos no localStorage e aplicados como
 // data-palette / data-mode no <html>. O CSS (globals.css) resolve as cores.
 'use client';
@@ -18,6 +18,9 @@ export const PALETTES: { id: Palette; name: string; hint: string; swatch: string
 
 const VALID_PALETTES: Palette[] = ['petroleo', 'rose', 'menta', 'grafite'];
 
+// Breakpoint mobile único — alinhado ao que o resto da auditoria vai usar.
+const MOBILE_QUERY = '(max-width: 767px)';
+
 interface UIState {
   collapsed: boolean;
   toggleCollapsed: () => void;
@@ -29,6 +32,11 @@ interface UIState {
   setPalette: (p: Palette) => void;
   avatarUrl: string | null;
   setAvatarUrl: (url: string | null) => void;
+  // --- mobile / drawer ---
+  isMobile: boolean;
+  mobileOpen: boolean;
+  setMobileOpen: (v: boolean) => void;
+  toggleMobile: () => void;
 }
 
 const UIContext = createContext<UIState | null>(null);
@@ -44,6 +52,11 @@ export function UIProvider({ children }: { children: ReactNode }) {
   const [mode, setMode] = useState<Mode>('light');
   const [palette, setPaletteState] = useState<Palette>('petroleo');
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+
+  // Nasce `false` no servidor e no 1º render do cliente (HTML idêntico, sem mismatch).
+  // O valor real é lido no useEffect abaixo, já no navegador.
+  const [isMobile, setIsMobile] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   // restaura preferências salvas (com migração do esquema antigo ui:theme)
   useEffect(() => {
@@ -69,12 +82,38 @@ export function UIProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('ui:palette', nextPalette);
   }, []);
 
+  // detecção de mobile (SSR-safe): só roda no cliente, reage a resize/rotação.
+  useEffect(() => {
+    const mq = window.matchMedia(MOBILE_QUERY);
+    const update = () => {
+      setIsMobile(mq.matches);
+      // ao voltar pro desktop, garante que o drawer não fique preso aberto.
+      if (!mq.matches) setMobileOpen(false);
+    };
+    update();
+    mq.addEventListener('change', update);
+    return () => mq.removeEventListener('change', update);
+  }, []);
+
+  // trava o scroll do body enquanto o drawer estiver aberto no mobile.
+  useEffect(() => {
+    if (mobileOpen && isMobile) {
+      const prev = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => { document.body.style.overflow = prev; };
+    }
+  }, [mobileOpen, isMobile]);
+
   function toggleCollapsed() {
     setCollapsed((v) => {
       const next = !v;
       localStorage.setItem('ui:collapsed', next ? '1' : '0');
       return next;
     });
+  }
+
+  function toggleMobile() {
+    setMobileOpen((v) => !v);
   }
 
   function toggleTheme() {
@@ -99,6 +138,7 @@ export function UIProvider({ children }: { children: ReactNode }) {
         mode, toggleTheme, theme: mode,
         palette, setPalette,
         avatarUrl, setAvatarUrl,
+        isMobile, mobileOpen, setMobileOpen, toggleMobile,
       }}
     >
       {children}

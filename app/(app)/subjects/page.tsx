@@ -9,9 +9,11 @@ import {
   SUBJECT_COLORS, type Subject,
 } from '@/services/subjects.service';
 import { theme, pageWide } from '@/lib/theme';
+import { useUI } from '@/components/layout/UIContext';
 
 export default function SubjectsPage() {
   const router = useRouter();
+  const { isMobile } = useUI();
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [loading, setLoading] = useState(true);
   const [newName, setNewName] = useState('');
@@ -79,14 +81,14 @@ export default function SubjectsPage() {
   }
 
   return (
-    <div style={pageWide}>
+    <div style={{ ...pageWide, padding: isMobile ? '20px 16px' : '34px 40px', minWidth: 0 }}>
       <div style={styles.header}>
-        <h1 style={styles.h1}>Matérias</h1>
+        <h1 style={{ ...styles.h1, fontSize: isMobile ? 25 : 30 }}>Matérias</h1>
         <p style={styles.sub}>Suas matérias base. Clique numa matéria para ver os tópicos.</p>
       </div>
 
       <div style={styles.createBox}>
-        <div style={styles.createRow}>
+        <div style={{ ...styles.createRow, flexDirection: isMobile ? 'column' : 'row' }}>
           <input
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
@@ -94,7 +96,7 @@ export default function SubjectsPage() {
             placeholder="Nova matéria (ex: Direito Constitucional)"
             style={styles.input}
           />
-          <button onClick={handleCreate} style={styles.addBtn}>Criar</button>
+          <button onClick={handleCreate} style={{ ...styles.addBtn, width: isMobile ? '100%' : undefined }}>Criar</button>
         </div>
         <div style={styles.colors}>
           {SUBJECT_COLORS.map((c) => (
@@ -120,11 +122,11 @@ export default function SubjectsPage() {
       ) : subjects.length === 0 ? (
         <p style={styles.muted}>Nenhuma matéria ainda. Crie a primeira acima.</p>
       ) : (
-        <div style={styles.grid}>
+        <div style={{ ...styles.grid, gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, minmax(0, 1fr))' }}>
           {subjects.map((s) => (
             editingId === s.id ? (
               <div key={s.id} style={styles.editCard}>
-                <div style={styles.editRow}>
+                <div style={{ ...styles.editRow, flexWrap: isMobile ? 'wrap' : 'nowrap' }}>
                   <span style={{ ...styles.colorBar, background: editColor }} />
                   <input
                     value={editName}
@@ -197,7 +199,7 @@ const styles: Record<string, React.CSSProperties> = {
   createBox: { background: theme.card, border: `0.5px solid ${theme.line}`, borderRadius: theme.radius, boxShadow: theme.shadow, padding: 18, marginBottom: 24 },
   createRow: { display: 'flex', gap: 10, marginBottom: 14 },
   input: {
-    flex: 1, padding: '11px 14px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`,
+    flex: 1, minWidth: 0, padding: '11px 14px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`,
     background: theme.card, fontSize: 14, color: theme.ink, fontFamily: 'inherit', outline: 'none',
   },
   addBtn: {
@@ -212,7 +214,7 @@ const styles: Record<string, React.CSSProperties> = {
   card: {
     display: 'flex', alignItems: 'center', background: theme.card,
     borderRadius: 14, border: `0.5px solid ${theme.line}`, overflow: 'hidden',
-    transition: 'border-color .15s',
+    transition: 'border-color .15s', minWidth: 0,
   },
   cardMain: { flex: 1, display: 'flex', alignItems: 'center', gap: 14, padding: 16, cursor: 'pointer', minWidth: 0 },
   colorBar: { width: 5, height: 28, borderRadius: 3, flexShrink: 0 },

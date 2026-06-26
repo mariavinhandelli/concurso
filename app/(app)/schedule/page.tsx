@@ -1,6 +1,7 @@
 // app/(app)/schedule/page.tsx
 // Cronograma: Grade (7 colunas) ou Lista. Blocos manuais + recorrência (motor).
 // Recorrência tem ícone de repetição. Cor do dia = carga cumprida.
+// No mobile a Grade renderiza como Lista (7 colunas não cabem em tela estreita).
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
@@ -14,6 +15,7 @@ import { RecurrenceModal } from '@/components/features/schedule/RecurrenceModal'
 import { RecurrencePanel } from '@/components/features/schedule/RecurrencePanel';
 import { BlockMenu } from '@/components/features/schedule/BlockMenu';
 import { theme } from '@/lib/theme';
+import { useUI } from '@/components/layout/UIContext';
 import { getActiveCycleRule, archiveCycle, reactivateCycle } from '@/services/cycleEngine.service';
 import { CycleView } from '@/components/features/schedule/CycleView';
 import { GeneratorModal } from '@/components/features/schedule/GeneratorModal';
@@ -73,6 +75,7 @@ const CycleIcon = ({ size = 14, color = 'currentColor', mr = 6 }: { size?: numbe
 const DIAS = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
 
 export default function SchedulePage() {
+  const { isMobile } = useUI();
   const [weekStart, setWeekStart] = useState<Date>(() => mondayOf(new Date()));
   const [blocks, setBlocks] = useState<ScheduleBlock[]>([]);
   const [view, setView] = useState<'semana' | 'lista' | 'ciclo'>('semana');
@@ -231,10 +234,14 @@ export default function SchedulePage() {
   // Qual ciclo o CycleView mostra: o arquivado aberto (se houver) ou o ativo.
   const cycleViewId = viewingArchivedId ?? cycleRuleId;
 
+  // No mobile, a "Grade" não cabe (7 colunas) — renderiza como Lista.
+  const mostrarGrade = view === 'semana' && !isMobile;
+  const mostrarLista = view === 'lista' || (view === 'semana' && isMobile);
+
   return (
-    <div style={styles.container}>
+    <div style={{ ...styles.container, padding: isMobile ? '20px 16px' : '34px 40px' }}>
       <div style={styles.header}>
-        <h1 style={styles.h1}>Cronograma</h1>
+        <h1 style={{ ...styles.h1, fontSize: isMobile ? 25 : 28 }}>Cronograma</h1>
       </div>
 
       {/* Barra de controles — duas linhas */}
@@ -268,33 +275,43 @@ export default function SchedulePage() {
           </div>
 
           <div style={styles.viewToggle}>
-            <button onClick={() => setView('semana')} style={{ ...styles.viewBtn, ...(view === 'semana' ? styles.viewBtnOn : {}) }}>Grade</button>
-            <button onClick={() => setView('lista')} style={{ ...styles.viewBtn, ...(view === 'lista' ? styles.viewBtnOn : {}) }}>Lista</button>
+            {/* "Grade" não aparece no mobile (vira Lista de qualquer forma) */}
+            {!isMobile && (
+              <button onClick={() => setView('semana')} style={{ ...styles.viewBtn, ...(view === 'semana' ? styles.viewBtnOn : {}) }}>Grade</button>
+            )}
+            <button onClick={() => setView('lista')} style={{ ...styles.viewBtn, ...(mostrarLista ? styles.viewBtnOn : {}) }}>Lista</button>
             {cicloAtivo && (
               <button onClick={() => { setViewingArchivedId(null); setView('ciclo'); }} style={{ ...styles.viewBtn, ...(view === 'ciclo' ? styles.viewBtnOn : {}) }}>Ciclo</button>
             )}
           </div>
         </div>
 
-        {/* Linha 2: ações de montar cronograma */}
-        <div style={styles.toolbarActions}>
-          <button onClick={() => setGeneratorOpen(true)} style={styles.genBtn}>
+        {/* Linha 2: ações de montar cronograma — no mobile: primária full + 3 compactos */}
+        <div style={{ ...styles.toolbarActions, flexDirection: isMobile ? 'column' : 'row' }}>
+          <button onClick={() => setGeneratorOpen(true)} style={{ ...styles.genBtn, justifyContent: 'center', width: isMobile ? '100%' : undefined }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ verticalAlign: '-2px', marginRight: 6 }}>
               <path d="M5 3v4M3 5h4M6 17v4M4 19h4M13 3l2.5 6.5L22 12l-6.5 2.5L13 21l-2.5-6.5L4 12l6.5-2.5L13 3z" />
             </svg>
             Gerar do edital
           </button>
-          <button onClick={handleCycleButton} style={styles.cycleBtn}>
-            <CycleIcon size={14} color={theme.teal} mr={6} />
-            {cicloAtivo ? 'Ver ciclo' : 'Criar ciclo'}
-          </button>
-          <button onClick={abrirRecorrencia} style={styles.recBtn}>
-            <RepeatIcon size={14} color={theme.teal} mr={6} />
-            Recorrência
-          </button>
-          <button onClick={() => setPanelOpen(true)} style={styles.recBtnGhost}>
-            Gerenciar
-          </button>
+
+          {/* Trio compacto — no mobile divide a linha igualmente (1/3 cada) */}
+          <div style={{ display: 'flex', gap: 10, width: isMobile ? '100%' : 'auto' }}>
+            <button onClick={handleCycleButton} style={{ ...styles.cycleBtn, justifyContent: 'center', flex: isMobile ? 1 : undefined }}>
+              <CycleIcon size={14} color={theme.teal} mr={6} />
+              {cicloAtivo ? 'Ver ciclo' : 'Criar ciclo'}
+            </button>
+            <button onClick={abrirRecorrencia} style={{ ...styles.recBtn, justifyContent: 'center', flex: isMobile ? 1 : undefined }}>
+              <RepeatIcon size={14} color={theme.teal} mr={6} />
+              Recorrência
+            </button>
+            <button onClick={() => setPanelOpen(true)} style={{ ...styles.recBtnGhost, justifyContent: 'center', flex: isMobile ? 1 : undefined }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={theme.teal} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ verticalAlign: '-2px', marginRight: 6 }}>
+                <path d="M3 6h18M3 12h18M3 18h18" />
+              </svg>
+              Gerenciar
+            </button>
+          </div>
         </div>
       </div>
 
@@ -313,7 +330,7 @@ export default function SchedulePage() {
           onReativar={handleReativar}
           onVoltar={() => setViewingArchivedId(null)}
         />
-      ) : view === 'semana' ? (
+      ) : mostrarGrade ? (
         <div style={styles.weekGrid}>
           {dias.map((d, i) => {
             const bs = blocksOf(d);
@@ -516,20 +533,20 @@ function BlockCard({ block, onToggle, onDelete, onEdit, onSkip, onEditRule, list
 }
 
 const styles: Record<string, React.CSSProperties> = {
-  container: { maxWidth: 1100, margin: '0 auto', padding: '34px 40px', fontFamily: theme.font },
+  container: { maxWidth: 1100, margin: '0 auto', padding: '34px 40px', fontFamily: theme.font, minWidth: 0 },
   header: { marginBottom: 18 },
   h1: { fontSize: 28, fontWeight: 800, color: theme.ink, letterSpacing: -0.6, margin: 0 },
   toolbar: { display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 18 },
   toolbarRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap' },
   toolbarActions: { display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', paddingTop: 12, borderTopWidth: 0.5, borderTopStyle: 'solid', borderTopColor: theme.line },
   nav: { display: 'flex', alignItems: 'center', gap: 10 },
-  navBtn: { width: 32, height: 32, borderRadius: 8, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.teal, background: theme.card, color: theme.teal, display: 'grid', placeItems: 'center', cursor: 'pointer' },
+  navBtn: { width: 32, height: 32, borderRadius: 8, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.teal, background: theme.card, color: theme.teal, display: 'grid', placeItems: 'center', cursor: 'pointer', flexShrink: 0 },
   weekLabel: { position: 'relative', fontSize: 15, fontWeight: 700, color: theme.ink, minWidth: 150, textAlign: 'center', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', fontFamily: 'inherit' },
   datePicker: { position: 'absolute', opacity: 0, width: '100%', height: '100%', left: 0, top: 0, cursor: 'pointer' },
-  todayBtn: { padding: '7px 14px', borderRadius: 8, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.teal, background: theme.card, color: theme.teal, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
-  recBtn: { display: 'inline-flex', alignItems: 'center', padding: '8px 14px', borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.teal, background: theme.card, color: theme.inkSoft, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
-  recBtnGhost: { display: 'inline-flex', alignItems: 'center', padding: '8px 14px', borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.teal, background: theme.card, color: theme.inkSoft, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
-  cycleBtn: { display: 'inline-flex', alignItems: 'center', padding: '8px 14px', borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.teal,  background: theme.card, color: theme.inkSoft, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+  todayBtn: { padding: '7px 14px', borderRadius: 8, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.teal, background: theme.card, color: theme.teal, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', flexShrink: 0 },
+  recBtn: { display: 'inline-flex', alignItems: 'center', padding: '8px 12px', borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.teal, background: theme.card, color: theme.inkSoft, fontSize: 12.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
+  recBtnGhost: { display: 'inline-flex', alignItems: 'center', padding: '8px 12px', borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.teal, background: theme.card, color: theme.inkSoft, fontSize: 12.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
+  cycleBtn: { display: 'inline-flex', alignItems: 'center', padding: '8px 12px', borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.teal,  background: theme.card, color: theme.inkSoft, fontSize: 12.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
   genBtn: { display: 'inline-flex', alignItems: 'center', padding: '8px 14px', borderRadius: theme.radiusSm, border: 'none', background: theme.teal, color: '#fff', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
   viewToggle: { display: 'flex', gap: 3, background: theme.muted, borderRadius: theme.radiusSm, padding: 3 },
   viewBtn: { padding: '7px 16px', border: 'none', background: 'transparent', color: theme.inkSoft, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', borderRadius: theme.radiusSm - 2 },
@@ -553,8 +570,8 @@ const styles: Record<string, React.CSSProperties> = {
   dayBody: { flex: 1, display: 'flex', flexDirection: 'column', gap: 6, padding: 6, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, borderRadius: '0 0 10px 10px', minHeight: 180, background: theme.bg },
   addBtn: { marginTop: 'auto', padding: '7px', borderRadius: 7, borderWidth: 1, borderStyle: 'dashed', borderColor: theme.line, background: 'transparent', color: theme.inkFaint, fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
   listView: { display: 'flex', flexDirection: 'column', gap: 14 },
-  listDay: { background: theme.card, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, borderRadius: theme.radius, boxShadow: theme.shadow, padding: 16 },
-  listDayHead: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },
+  listDay: { background: theme.card, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, borderRadius: theme.radius, boxShadow: theme.shadow, padding: 16, minWidth: 0 },
+  listDayHead: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10, gap: 10, flexWrap: 'wrap' },
   listDayName: { fontSize: 15, fontWeight: 700, color: theme.ink },
   listDayRight: { display: 'flex', alignItems: 'center', gap: 12 },
   listDayLoad: { fontSize: 12, color: theme.inkFaint, fontVariantNumeric: 'tabular-nums' },
@@ -564,7 +581,7 @@ const styles: Record<string, React.CSSProperties> = {
 };
 
 const blockStyles: Record<string, React.CSSProperties> = {
-  card: { display: 'flex', alignItems: 'flex-start', gap: 8, padding: '8px 10px', borderRadius: 8 },
+  card: { display: 'flex', alignItems: 'flex-start', gap: 8, padding: '8px 10px', borderRadius: 8, minWidth: 0 },
   cardList: { padding: '10px 14px' },
   check: { width: 18, height: 18, borderRadius: 5, borderWidth: 1.5, borderStyle: 'solid', fontSize: 11, cursor: 'pointer', display: 'grid', placeItems: 'center', flexShrink: 0, marginTop: 1 },
   info: { flex: 1, minWidth: 0 },

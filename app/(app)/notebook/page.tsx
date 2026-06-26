@@ -1,5 +1,6 @@
 // app/(app)/notebook/page.tsx
 // Caderno: navegação (Matéria → Tópico → Erros) + busca + abas Recentes e Críticos.
+// No mobile, master-detail: mostra a lista OU o editor (não os dois lado a lado).
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
@@ -7,6 +8,7 @@ import { searchNotes, listNotes, deleteNote, countNotesBySubject, listNotesByBoa
 import { listSubjectOptions, listTopicOptions, type PickerOption } from '@/services/picker.service';
 import { NoteEditor } from '@/components/features/notebook/NoteEditor';
 import { theme } from '@/lib/theme';
+import { useUI } from '@/components/layout/UIContext';
 
 type Level = 'subjects' | 'topics' | 'notes';
 type ViewMode = 'navegar' | 'recentes' | 'criticos';
@@ -14,6 +16,7 @@ type ViewMode = 'navegar' | 'recentes' | 'criticos';
 const PERIODOS = [7, 15, 30];
 
 export default function NotebookPage() {
+  const { isMobile } = useUI();
   const [viewMode, setViewMode] = useState<ViewMode>('navegar');
   const [periodo, setPeriodo] = useState(7);
   const [recentNotes, setRecentNotes] = useState<ErrorNote[]>([]);
@@ -155,20 +158,25 @@ export default function NotebookPage() {
     return theme.crit;
   }
 
+  // Master-detail no mobile: mostra a sidebar OU o editor.
+  const showSidebar = !isMobile || !editing;
+  const showMain = !isMobile || editing;
+
   return (
-    <div style={styles.page}>
+    <div style={{ ...styles.page, padding: isMobile ? '20px 16px' : '34px 40px' }}>
       <div style={styles.header}>
         <div style={styles.headerRow}>
           <div>
-            <h1 style={styles.h1}>Cadernos de Erros</h1>
+            <h1 style={{ ...styles.h1, fontSize: isMobile ? 25 : 30 }}>Cadernos de Erros</h1>
             <p style={styles.sub}>Registre o erro. Revise os recentes e ataque os críticos.</p>
           </div>
-          <button onClick={handleNewGlobal} style={styles.addTopBtn}>+ Adicionar erro</button>
+          <button onClick={handleNewGlobal} style={{ ...styles.addTopBtn, width: isMobile ? '100%' : undefined }}>+ Adicionar erro</button>
         </div>
       </div>
 
-      <div style={styles.layout}>
-        <aside style={styles.sidebar}>
+      <div style={{ ...styles.layout, flexDirection: isMobile ? 'column' : 'row' }}>
+        {showSidebar && (
+        <aside style={{ ...styles.sidebar, width: isMobile ? '100%' : 300 }}>
           <div style={styles.tabs}>
             <button onClick={() => setViewMode('navegar')}
               style={{ ...styles.tab, ...(viewMode === 'navegar' ? styles.tabOn : {}) }}>Navegar</button>
@@ -303,22 +311,32 @@ export default function NotebookPage() {
             </>
           )}
         </aside>
+        )}
 
+        {showMain && (
         <section style={styles.main}>
           {editing ? (
-            <NoteEditor
-              note={selected}
-              presetSubjectId={presetSubjectId}
-              presetTopicId={presetTopicId}
-              onSaved={handleSaved}
-              onCancel={() => { setEditing(false); setSelected(null); setBlankEditor(false); }}
-            />
+            <>
+              {isMobile && (
+                <button onClick={() => { setEditing(false); setSelected(null); setBlankEditor(false); }} style={styles.backToList}>
+                  ← Voltar à lista
+                </button>
+              )}
+              <NoteEditor
+                note={selected}
+                presetSubjectId={presetSubjectId}
+                presetTopicId={presetTopicId}
+                onSaved={handleSaved}
+                onCancel={() => { setEditing(false); setSelected(null); setBlankEditor(false); }}
+              />
+            </>
           ) : (
             <div style={styles.empty}>
               <p style={styles.muted}>Navegue até um tópico e crie ou selecione um erro — ou use “Adicionar erro” no topo.</p>
             </div>
           )}
         </section>
+        )}
       </div>
     </div>
   );
@@ -345,7 +363,7 @@ const styles: Record<string, React.CSSProperties> = {
   sub: { fontSize: 14.5, color: theme.inkSoft, margin: '6px 0 0', fontWeight: 500 },
   addTopBtn: { padding: '11px 20px', borderRadius: 12, border: 'none', background: theme.teal, color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap', flexShrink: 0 },
   layout: { display: 'flex', gap: 20, alignItems: 'flex-start', width: '100%', minWidth: 0 },
-  sidebar: { width: 300, flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 10 },
+  sidebar: { width: 300, flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 10, minWidth: 0 },
   tabs: { display: 'flex', gap: 4, background: theme.muted, borderRadius: theme.radiusSm, padding: 4 },
   tab: { flex: 1, padding: '8px 0', border: 'none', background: 'transparent', color: theme.inkSoft, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', borderRadius: theme.radiusSm - 2 },
   tabOn: { background: theme.card, color: theme.teal, boxShadow: theme.shadow },
@@ -356,6 +374,7 @@ const styles: Record<string, React.CSSProperties> = {
   crumb: { fontSize: 11, color: theme.inkFaint, fontWeight: 600, margin: '4px 0', textTransform: 'uppercase', letterSpacing: 0.6 },
   crumbSubject: { fontSize: 15, color: theme.ink, fontWeight: 700, margin: '6px 0 4px', lineHeight: 1.4 },
   back: { border: 'none', background: 'transparent', color: theme.teal, fontSize: 13, fontWeight: 500, cursor: 'pointer', padding: 0, textAlign: 'left', fontFamily: 'inherit' },
+  backToList: { border: 'none', background: 'transparent', color: theme.teal, fontSize: 14, fontWeight: 600, cursor: 'pointer', padding: 0, textAlign: 'left', fontFamily: 'inherit', marginBottom: 14 },
   newBtn: { padding: '11px 0', borderRadius: 12, border: 'none', background: theme.teal, color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer', marginBottom: 4, fontFamily: 'inherit' },
   muted: { color: theme.inkFaint, fontSize: 14, lineHeight: 1.5 },
   list: { display: 'flex', flexDirection: 'column', gap: 8 },
@@ -378,6 +397,6 @@ const styles: Record<string, React.CSSProperties> = {
   itemMeta: { marginTop: 6 },
   tag: { fontSize: 11, color: theme.tealDeep, background: theme.tealBg, padding: '2px 8px', borderRadius: 6, fontWeight: 600 },
   delBtn: { position: 'absolute', top: 10, right: 10, border: 'none', background: 'transparent', color: theme.inkFaint, fontSize: 12, cursor: 'pointer', opacity: 0.6 },
-  main: { flex: '1 1 0', minWidth: 0, maxWidth: '100%', background: theme.card, borderRadius: theme.radius, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, boxShadow: theme.shadow, padding: 24, minHeight: 440, overflowX: 'hidden', boxSizing: 'border-box' },
+  main: { flex: '1 1 0', minWidth: 0, maxWidth: '100%', width: '100%', background: theme.card, borderRadius: theme.radius, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, boxShadow: theme.shadow, padding: 24, minHeight: 440, overflowX: 'hidden', boxSizing: 'border-box' },
   empty: { display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 392, textAlign: 'center' },
 };

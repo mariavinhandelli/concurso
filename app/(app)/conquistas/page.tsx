@@ -3,6 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import { theme } from '@/lib/theme';
+import { useUI } from '@/components/layout/UIContext';
 import { getBadgeState, type BadgeState, type Badge, type BadgeFamily } from '@/services/badges.service';
 
 const FAMILY_LABELS: Record<BadgeFamily, { title: string; subtitle: string }> = {
@@ -19,6 +20,7 @@ const TIER_COLORS: Record<string, string> = {
 };
 
 export default function ConquistasPage() {
+  const { isMobile } = useUI();
   const [state, setState] = useState<BadgeState | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -31,9 +33,9 @@ export default function ConquistasPage() {
 
   if (loading) {
     return (
-      <div style={styles.page}>
+      <div style={{ ...styles.page, padding: isMobile ? '20px 16px' : '34px 40px' }}>
         <div style={styles.header}>
-          <h1 style={styles.h1}>Conquistas</h1>
+          <h1 style={{ ...styles.h1, fontSize: isMobile ? 25 : 30 }}>Conquistas</h1>
           <p style={styles.sub}>Carregando suas conquistas…</p>
         </div>
       </div>
@@ -42,9 +44,9 @@ export default function ConquistasPage() {
 
   if (!state) {
     return (
-      <div style={styles.page}>
+      <div style={{ ...styles.page, padding: isMobile ? '20px 16px' : '34px 40px' }}>
         <div style={styles.header}>
-          <h1 style={styles.h1}>Conquistas</h1>
+          <h1 style={{ ...styles.h1, fontSize: isMobile ? 25 : 30 }}>Conquistas</h1>
           <p style={styles.sub}>Você precisa estar logado para ver suas conquistas.</p>
         </div>
       </div>
@@ -61,9 +63,9 @@ export default function ConquistasPage() {
   }));
 
   return (
-    <div style={styles.page}>
+    <div style={{ ...styles.page, padding: isMobile ? '20px 16px' : '34px 40px' }}>
       <div style={styles.header}>
-        <h1 style={styles.h1}>Conquistas</h1>
+        <h1 style={{ ...styles.h1, fontSize: isMobile ? 25 : 30 }}>Conquistas</h1>
         <p style={styles.sub}>Marcos da sua preparação — esforço e qualidade, lado a lado.</p>
       </div>
 
@@ -87,7 +89,7 @@ export default function ConquistasPage() {
             <h2 style={styles.sectionTitle}>{FAMILY_LABELS[family].title}</h2>
             <p style={styles.sectionSub}>{FAMILY_LABELS[family].subtitle}</p>
           </div>
-          <div style={styles.grid}>
+          <div style={{ ...styles.grid, gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)' }}>
             {badges.map((b) => (
               <BadgeCard key={b.id} badge={b} />
             ))}
@@ -185,10 +187,9 @@ function BadgeIcon({ family, color }: { family: BadgeFamily; color: string }) {
   // maestria — alvo
   return (
     <svg viewBox="0 0 24 24" {...common}>
-    <path d="M11.146 7.023C11.526 6.34 11.716 6 12 6s.474.34.854 1.023l.098.176c.108.194.162.29.246.354c.085.064.19.088.4.135l.19.044c.738.167 1.107.25 1.195.532s-.164.577-.667 1.165l-.13.152c-.143.167-.215.25-.247.354s-.021.215 0 .438l.02.203c.076.785.114 1.178-.115 1.352c-.23.174-.576.015-1.267-.303l-.178-.082c-.197-.09-.295-.135-.399-.135s-.202.045-.399.135l-.178.082c-.691.319-1.037.477-1.267.303s-.191-.567-.115-1.352l.02-.203c.021-.223.032-.334 0-.438s-.104-.187-.247-.354l-.13-.152c-.503-.588-.755-.882-.667-1.165c.088-.282.457-.365 1.195-.532l.19-.044c.21-.047.315-.07.4-.135c.084-.064.138-.16.246-.354z"></path>
-    <path d="M19 9A7 7 0 1 1 5 9a7 7 0 0 1 14 0Z"></path>
-    <path d="m12 16.068l-3.771 3.905c-.54.56-.81.839-1.04.935c-.52.22-1.099.032-1.373-.448c-.12-.21-.158-.59-.232-1.35c-.043-.43-.064-.644-.128-.824a1.43 1.43 0 0 0-.835-.864c-.173-.067-.38-.088-.795-.132c-.734-.078-1.101-.117-1.305-.241c-.463-.284-.646-.883-.433-1.422c.094-.237.364-.517.904-1.076L5.456 12M12 16.068l3.771 3.905c.54.56.81.839 1.04.935c.52.22 1.099.032 1.373-.448c.12-.21.157-.59.232-1.35c.043-.43.064-.644.128-.824c.144-.402.446-.715.835-.864c.173-.067.38-.088.795-.132c.734-.078 1.101-.117 1.305-.241c.463-.284.646-.883.433-1.422c-.094-.237-.364-.517-.904-1.076L18.544 12"></path> 
-    fill={color} stroke={color} /
+      <path d="M11.146 7.023C11.526 6.34 11.716 6 12 6s.474.34.854 1.023l.098.176c.108.194.162.29.246.354c.085.064.19.088.4.135l.19.044c.738.167 1.107.25 1.195.532s-.164.577-.667 1.165l-.13.152c-.143.167-.215.25-.247.354s-.021.215 0 .438l.02.203c.076.785.114 1.178-.115 1.352c-.23.174-.576.015-1.267-.303l-.178-.082c-.197-.09-.295-.135-.399-.135s-.202.045-.399.135l-.178.082c-.691.319-1.037.477-1.267.303s-.191-.567-.115-1.352l.02-.203c.021-.223.032-.334 0-.438s-.104-.187-.247-.354l-.13-.152c-.503-.588-.755-.882-.667-1.165c.088-.282.457-.365 1.195-.532l.19-.044c.21-.047.315-.07.4-.135c.084-.064.138-.16.246-.354z" />
+      <path d="M19 9A7 7 0 1 1 5 9a7 7 0 0 1 14 0Z" />
+      <path d="m12 16.068l-3.771 3.905c-.54.56-.81.839-1.04.935c-.52.22-1.099.032-1.373-.448c-.12-.21-.158-.59-.232-1.35c-.043-.43-.064-.644-.128-.824a1.43 1.43 0 0 0-.835-.864c-.173-.067-.38-.088-.795-.132c-.734-.078-1.101-.117-1.305-.241c-.463-.284-.646-.883-.433-1.422c.094-.237.364-.517.904-1.076L5.456 12M12 16.068l3.771 3.905c.54.56.81.839 1.04.935c.52.22 1.099.032 1.373-.448c.12-.21.157-.59.232-1.35c.043-.43.064-.644.128-.824c.144-.402.446-.715.835-.864c.173-.067.38-.088.795-.132c.734-.078 1.101-.117 1.305-.241c.463-.284.646-.883.433-1.422c-.094-.237-.364-.517-.904-1.076L18.544 12" />
     </svg>
   );
 }
@@ -202,7 +203,7 @@ function CheckIcon({ color }: { color: string }) {
 }
 
 const styles: Record<string, React.CSSProperties> = {
-  page: { maxWidth: 1080, margin: '0 auto', padding: '34px 40px', fontFamily: theme.font },
+  page: { maxWidth: 1080, margin: '0 auto', padding: '34px 40px', fontFamily: theme.font, minWidth: 0 },
   header: { marginBottom: 24 },
   h1: { fontSize: 30, fontWeight: 800, color: theme.ink, letterSpacing: -0.8, margin: 0 },
   sub: { fontSize: 14.5, color: theme.inkSoft, margin: '6px 0 0', fontWeight: 500 },
@@ -239,12 +240,14 @@ const styles: Record<string, React.CSSProperties> = {
     flexDirection: 'column',
     gap: 14,
     transition: 'opacity .2s ease',
+    minWidth: 0,
   },
   iconWrap: {
     width: 44, height: 44, borderRadius: 12,
     display: 'flex', alignItems: 'center', justifyContent: 'center',
+    flexShrink: 0,
   },
-  badgeBody: { display: 'flex', flexDirection: 'column', gap: 4 },
+  badgeBody: { display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0 },
   badgeLabel: { fontSize: 15, fontWeight: 700, color: theme.ink, letterSpacing: -0.2 },
   badgeDesc: { fontSize: 12.5, color: theme.inkSoft, lineHeight: 1.45, fontWeight: 500 },
 

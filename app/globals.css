@@ -22,6 +22,7 @@
   --teal-deep: #142E31;
   --teal-soft: #6BA89A;
   --teal-bg: #E4EDE8;
+  --on-teal: #FFFFFF;
 
   --clay: #C2613D;
   --clay-deep: #8F4226;
@@ -31,7 +32,7 @@
   --danger: #A3352B;
   --danger-bg: #F6E5E2;
   --ok: #16A34A;     --ok-bg: #E7F5EC;
-  --warn: #D97706;   --warn-bg: #FBF0E0;
+  --warn: #ecb127;   --warn-bg: #FBF0E0;
   --crit: #DC2626;   --crit-bg: #FBE9E9;
 
   --shadow: 0 1px 2px rgba(40,40,30,.04), 0 10px 30px -12px rgba(40,40,30,.16);
@@ -53,6 +54,7 @@
   --teal-deep: #8FC4B8;
   --teal-soft: #5B9B92;
   --teal-bg: #1F3330;
+  --on-teal: #FFFFFF;
 
   --clay: #F0876A;
   --clay-deep: #F0A284;
@@ -84,6 +86,7 @@
   --teal-deep: #A85F62;
   --teal-soft: #DCA8AA;
   --teal-bg: #F2E0E0;
+  --on-teal: #FFFFFF;
 
   --clay: #9B5C6E;
   --clay-deep: #7A4456;
@@ -93,7 +96,7 @@
   --danger: #A3352B;
   --danger-bg: #F6E5E2;
   --ok: #16A34A;     --ok-bg: #E7F5EC;
-  --warn: #D97706;   --warn-bg: #FBF0E0;
+  --warn: #ecb127;   --warn-bg: #FBF0E0;
   --crit: #DC2626;   --crit-bg: #FBE9E9;
 
   --shadow: 0 1px 2px rgba(50,30,30,.04), 0 10px 30px -12px rgba(50,30,30,.16);
@@ -115,6 +118,7 @@
   --teal-deep: #E6B3B6;
   --teal-soft: #C67D80;
   --teal-bg: #3A2A2B;
+  --on-teal: #FFFFFF;
 
   --clay: #C98A9C;
   --clay-deep: #DDA8B6;
@@ -146,6 +150,7 @@
   --teal-deep: #2BA180;
   --teal-soft: #8FE0C5;
   --teal-bg: #ADEBB3;
+  --on-teal: #FFFFFF;
 
   --clay: #D98C5F;
   --clay-deep: #B26A3F;
@@ -155,7 +160,7 @@
   --danger: #A3352B;
   --danger-bg: #F6E5E2;
   --ok: #16A34A;     --ok-bg: #E7F5EC;
-  --warn: #D97706;   --warn-bg: #FBF0E0;
+  --warn: #ecb127;   --warn-bg: #FBF0E0;
   --crit: #DC2626;   --crit-bg: #FBE9E9;
 
   --shadow: 0 1px 2px rgba(30,50,40,.04), 0 10px 30px -12px rgba(30,50,40,.16);
@@ -177,6 +182,7 @@
   --teal-deep: #8FE8CC;
   --teal-soft: #4FD1A8;
   --teal-bg: #1E3A30;
+  --on-teal: #FFFFFF;
 
   --clay: #E0A07A;
   --clay-deep: #ECB890;
@@ -208,6 +214,7 @@
   --teal-deep: #10140f;
   --teal-soft: #6E7A74;
   --teal-bg: #ECEAE4;
+  --on-teal: #FFFFFF;
 
   --clay: #4f645a;
   --clay-deep: #3A4A42;
@@ -217,7 +224,7 @@
   --danger: #A3352B;
   --danger-bg: #F6E5E2;
   --ok: #16A34A;     --ok-bg: #E7F5EC;
-  --warn: #D97706;   --warn-bg: #FBF0E0;
+  --warn: #ecb127;   --warn-bg: #FBF0E0;
   --crit: #DC2626;   --crit-bg: #FBE9E9;
 
   --shadow: 0 1px 2px rgba(27,34,31,.05), 0 10px 30px -12px rgba(27,34,31,.16);
@@ -231,14 +238,15 @@
   --muted: #252C28;
   --line: rgba(232,236,234,.09);
   --line-strong: rgba(232,236,234,.22);
-  --ink: #E8ECEA;
+  --ink: #ffffffd9;
   --ink-soft: #9AAAA2;
   --ink-faint: #76857D;
 
-  --teal: #E8ECEA;
+  --teal: #cacacad1;
   --teal-deep: #FFFFFF;
   --teal-soft: #7E948A;
   --teal-bg: #252C28;
+  --on-teal: #131715;
 
   --clay: #7E948A;
   --clay-deep: #9AAAA2;
@@ -288,7 +296,7 @@
 /* Rosé */
 [data-palette="rose"][data-mode="light"] {
   --sidebar-bg: #C67D80;
-  --sidebar-ink: #FFFFFF;
+  --sidebar-ink: #ffffff;
   --sidebar-ink-idle: #FFFFFF;
   --sidebar-icon: #F2E0E0;
   --sidebar-active: rgba(255,255,255,0.20);
@@ -348,14 +356,13 @@
 [data-palette="grafite"][data-mode="dark"] {
   --sidebar-bg: #1C211E;
   --sidebar-ink: #E8ECEA;
-  --sidebar-ink-idle: #C6D0CB;
+  --sidebar-ink-idle: #dddddd;
   --sidebar-icon: #7E948A;
   --sidebar-active: rgba(255,255,255,0.10);
   --sidebar-hover: rgba(255,255,255,0.05);
   --sidebar-border: rgba(255,255,255,0.08);
   --sidebar-tag: rgba(255,255,255,0.42);
   --sidebar-logo-ink: #1C211E;
-  --on-teal: #131715;
 }
 
 
@@ -373,4 +380,60 @@ body {
   color: var(--ink);
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
   transition: background .2s ease;
+}
+
+/* ===================================================================
+   REDE DE SEGURANÇA MOBILE — anti-overflow horizontal.
+   Mata o "puxar pro lado" em todas as páginas sem tocar componente.
+   Breakpoint único do app: 768px (mobile).
+   =================================================================== */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body {
+  max-width: 100%;
+  overflow-x: hidden;        /* corta-fogo: vazamento lateral não vira scroll */
+}
+
+/* Mídia nunca empurra o layout pra fora da viewport. */
+img, svg, video, canvas, iframe, table {
+  max-width: 100%;
+}
+
+img, video, canvas {
+  height: auto;
+}
+
+/* Tabelas largas rolam DENTRO do próprio container, não na página toda.
+   Aplique a classe .table-scroll no wrapper de uma <table> quando precisar. */
+.table-scroll {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ===================================================================
+   UTILITÁRIO DE GRID RESPONSIVO (Frente B).
+   Troque grids inline por esta classe para colapsar em 1 coluna no mobile.
+   Uso: <div className="grid-cards"> ...cards... </div>
+   =================================================================== */
+.grid-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+  min-width: 0;
+}
+
+@media (max-width: 768px) {
+  .grid-cards {
+    grid-template-columns: 1fr;   /* uma coluna no celular */
+    gap: 12px;
+  }
+
+  /* Reduz respiro lateral do conteúdo no mobile, dando mais largura útil. */
+  main {
+    overflow-x: hidden;
+  }
 }

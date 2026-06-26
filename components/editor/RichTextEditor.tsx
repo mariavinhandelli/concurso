@@ -43,7 +43,7 @@ const Icon = {
   image: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>,
   highlight: <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24">
   <path d="M0 0h24v24H0z" fill="none" />
-  <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
+  <g fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2">
     <path d="m9 11l-6 6v3h9l3-3" />
     <path d="m22 12l-4.6 4.6a2 2 0 0 1-2.8 0l-5.2-5.2a2 2 0 0 1 0-2.8L14 4" />
   </g>
@@ -288,7 +288,7 @@ const styles: Record<string, React.CSSProperties> = {
   colorUnderline: { position: 'absolute', bottom: 5, left: 9, right: 9, height: 3, borderRadius: 2, background: 'linear-gradient(90deg,#f70000,#00cf61,#185dcc)' },
   divider: { width: 1, height: 22, background: theme.line, margin: '0 2px' },
   paletteWrap: { position: 'relative' },
-  palette: { position: 'absolute', top: 40, left: 0, zIndex: 10, display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 6, padding: 10, background: theme.card, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, borderRadius: 12, boxShadow: theme.shadowHover, width: 200 },
+  palette: { position: 'absolute', top: 40, right: 0, zIndex: 10, display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 6, padding: 10, background: theme.card, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, borderRadius: 12, boxShadow: theme.shadowHover, width: 200, maxWidth: 'calc(100vw - 48px)' },
   swatch: { width: 22, height: 22, borderRadius: 6, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, cursor: 'pointer', padding: 0 },
   clearSwatch: { width: 22, height: 22, borderRadius: 6, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.card, cursor: 'pointer', color: theme.inkFaint, fontSize: 12, padding: 0 },
   editorArea: { padding: 16, color: theme.ink, fontSize: 15, lineHeight: 1.7, overflowX: 'hidden' },
