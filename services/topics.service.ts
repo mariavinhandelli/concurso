@@ -1,5 +1,6 @@
 // services/topics.service.ts
 // CRUD de Tópicos (assuntos de uma matéria) + toggle de "já estudei" + bancas.
+// Agora com hierarquia pai/filho via parent_id (pai = pasta; filho = folha estudável).
 
 import { createClient } from '@/lib/supabase/client';
 
@@ -9,6 +10,7 @@ export interface Topic {
   id: string;
   user_id: string;
   subject_id: string;
+  parent_id: string | null;   // null = pai/pasta OU tópico simples; preenchido = filho
   name: string;
   notes: string | null;
   confidence: Confidence;
@@ -38,15 +40,21 @@ export async function listTopics(subjectId: string): Promise<Topic[]> {
   return data ?? [];
 }
 
-// Cria um tópico dentro de uma matéria.
-export async function createTopic(subjectId: string, name: string): Promise<Topic> {
+// Cria um tópico dentro de uma matéria. parentId opcional:
+//   null/undefined → tópico solto (pai ou simples)
+//   preenchido      → filho daquele pai
+export async function createTopic(
+  subjectId: string,
+  name: string,
+  parentId: string | null = null,
+): Promise<Topic> {
   const supabase = createClient();
   const { data: { user }, error: authError } = await supabase.auth.getUser();
   if (authError || !user) throw new Error('Você precisa estar logado.');
 
   const { data, error } = await supabase
     .from('topics')
-    .insert({ user_id: user.id, subject_id: subjectId, name: name.trim() })
+    .insert({ user_id: user.id, subject_id: subjectId, name: name.trim(), parent_id: parentId })
     .select()
     .single();
 
@@ -82,7 +90,7 @@ export async function updateTopic(
   return data;
 }
 
-// Apaga um tópico.
+// Apaga um tópico. (Se for um pai, os filhos caem em cascata pelo banco — FK on delete cascade.)
 export async function deleteTopic(id: string): Promise<void> {
   const supabase = createClient();
   const { error } = await supabase.from('topics').delete().eq('id', id);
@@ -124,12 +132,15 @@ export async function unlinkTopicFromBoard(topicId: string, boardId: string): Pr
 
   if (error) throw new Error('Erro ao desvincular banca: ' + error.message);
 }
+
 // Cria vários tópicos de uma vez, a partir de um texto colado (um por linha).
 // Limpa numeração ("1.", "1.1", "a)", "-", "•"), ignora linhas vazias e
 // duplicatas, e respeita a ordem da colagem via position.
+// parentId opcional: cria todos como filhos de um pai, ou soltos.
 export async function createTopicsBulk(
   subjectId: string,
   nomes: string[],
+  parentId: string | null = null,
 ): Promise<number> {
   const supabase = createClient();
   const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -150,6 +161,7 @@ export async function createTopicsBulk(
     user_id: user.id,
     subject_id: subjectId,
     name: nome,
+    parent_id: parentId,
     position: startPos + i,
   }));
 
