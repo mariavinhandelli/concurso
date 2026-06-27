@@ -11,6 +11,7 @@ import {
 } from '@/services/picker.service';
 import { getReviewStatus } from '@/services/reviews.service';
 import { SESSION_MODES, modeUsesQuestions } from '@/lib/session-modes';
+import type { LogMode } from '@/lib/timer-storage';
 import { theme } from '@/lib/theme';
 
 interface Props {
@@ -27,7 +28,7 @@ const ERROR_CAUSES: { value: ErrorCause; label: string }[] = [
 ];
 
 export function QualitativeFeedbackForm({ session, onSubmit, onDiscard, saving }: Props) {
-  const [mode, setMode] = useState<string>(session.mode);
+  const [mode, setMode] = useState<LogMode>(session.mode);
   const [energy, setEnergy] = useState(0);
   const [feedback, setFeedback] = useState('');
   const [total, setTotal] = useState('');
@@ -73,7 +74,7 @@ export function QualitativeFeedbackForm({ session, onSubmit, onDiscard, saving }
   function handleSubmit() {
     if (energy === 0) return; // energia obrigatória
     onSubmit({
-      mode: mode as never,
+      mode,
       subjectId: subjectId || null,
       topicId: topicId || null,
       qualitativeFeedback: feedback.trim(),
@@ -95,7 +96,7 @@ export function QualitativeFeedbackForm({ session, onSubmit, onDiscard, saving }
         <div style={styles.row2}>
           <div style={styles.col}>
             <label style={styles.label}>Tipo</label>
-            <select value={mode} onChange={(e) => setMode(e.target.value)} style={styles.input}>
+            <select value={mode} onChange={(e) => setMode(e.target.value as LogMode)} style={styles.input}>
               {SESSION_MODES.map((m) => <option key={m.value} value={m.value}>{m.label}</option>)}
             </select>
           </div>

@@ -75,10 +75,11 @@ export async function getBadgeStats(): Promise<BadgeStats | null> {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
 
-  const { data: logs } = await supabase
+  const { data: logs, error } = await supabase
     .from('study_logs')
     .select('questions_total, questions_correct, duration_sec')
     .eq('user_id', user.id);
+  if (error) throw new Error('Erro ao calcular conquistas: ' + error.message);
 
   let totalQuestions = 0;
   let totalCorrect = 0;

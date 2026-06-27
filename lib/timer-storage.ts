@@ -1,7 +1,10 @@
 // lib/timer-storage.ts
-export type LogMode = 'teoria' | 'questoes' | 'revisao' | 'leitura_lei';
+import type { SessionMode } from '@/lib/session-modes';
 
-const STORAGE_KEY = 'study_timer_active_session';
+export type LogMode = SessionMode;
+
+const ACTIVE_STORAGE_KEY = 'study_timer_active_session';
+const PENDING_STORAGE_KEY = 'study_timer_pending_session';
 
 export interface PauseInterval {
   from: number;
@@ -18,10 +21,29 @@ export interface PersistedTimer {
   pauses: PauseInterval[];
 }
 
+export interface PendingSession {
+  sessionId: string;
+  startedAt: number;
+  endedAt: number;
+  durationSec: number;
+  mode: LogMode;
+  topicId: string | null;
+  subjectId: string | null;
+  boardId: string | null;
+  source?: 'timer' | 'manual';
+}
+
+export function createSessionId(): string {
+  if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
+    return `sess_${crypto.randomUUID()}`;
+  }
+  return `sess_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+}
+
 export function loadTimer(): PersistedTimer | null {
   if (typeof window === 'undefined') return null;
   try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
+    const raw = window.localStorage.getItem(ACTIVE_STORAGE_KEY);
     if (!raw) return null;
     return JSON.parse(raw) as PersistedTimer;
   } catch {
@@ -31,12 +53,39 @@ export function loadTimer(): PersistedTimer | null {
 
 export function saveTimer(state: PersistedTimer): void {
   if (typeof window === 'undefined') return;
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  window.localStorage.setItem(ACTIVE_STORAGE_KEY, JSON.stringify(state));
 }
 
 export function clearTimer(): void {
   if (typeof window === 'undefined') return;
-  window.localStorage.removeItem(STORAGE_KEY);
+  window.localStorage.removeItem(ACTIVE_STORAGE_KEY);
+}
+
+export function loadPendingSession(): PendingSession | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = window.localStorage.getItem(PENDING_STORAGE_KEY);
+    if (!raw) return null;
+    const pending = JSON.parse(raw) as PendingSession;
+    if (!pending.sessionId || pending.durationSec < 0 || pending.endedAt < pending.startedAt) {
+      clearPendingSession();
+      return null;
+    }
+    return pending;
+  } catch {
+    clearPendingSession();
+    return null;
+  }
+}
+
+export function savePendingSession(session: PendingSession): void {
+  if (typeof window === 'undefined') return;
+  window.localStorage.setItem(PENDING_STORAGE_KEY, JSON.stringify(session));
+}
+
+export function clearPendingSession(): void {
+  if (typeof window === 'undefined') return;
+  window.localStorage.removeItem(PENDING_STORAGE_KEY);
 }
 
 export function sumPauses(pauses: PauseInterval[], now: number): number {

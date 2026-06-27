@@ -21,13 +21,14 @@ export async function listEvents(startDate: string, endDate: string): Promise<Ca
   const events: CalendarEvent[] = [];
 
   // Revisões de tópicos agendadas no intervalo.
-  const { data: topics } = await supabase
+  const { data: topics, error: topicsError } = await supabase
     .from('topics')
     .select('name, next_review_date, subjects(color)')
     .eq('user_id', user.id)
     .eq('is_review_active', true)
     .gte('next_review_date', startDate)
     .lte('next_review_date', endDate);
+  if (topicsError) throw new Error('Erro ao carregar revisões do calendário: ' + topicsError.message);
 
   for (const t of topics ?? []) {
     if (!t.next_review_date) continue;
@@ -41,13 +42,14 @@ export async function listEvents(startDate: string, endDate: string): Promise<Ca
   }
 
   // Revisões de flashcards agendadas no intervalo (agrupadas por dia).
-  const { data: cards } = await supabase
+  const { data: cards, error: cardsError } = await supabase
     .from('flashcards')
     .select('next_review_date')
     .eq('user_id', user.id)
     .eq('is_review_active', true)
     .gte('next_review_date', startDate)
     .lte('next_review_date', endDate);
+  if (cardsError) throw new Error('Erro ao carregar flashcards do calendário: ' + cardsError.message);
 
   const cardsByDay: Record<string, number> = {};
   for (const c of cards ?? []) {
@@ -64,12 +66,13 @@ export async function listEvents(startDate: string, endDate: string): Promise<Ca
   }
 
   // Provas no intervalo.
-  const { data: exams } = await supabase
+  const { data: exams, error: examsError } = await supabase
     .from('exam_targets')
     .select('name, exam_date, color')
     .eq('user_id', user.id)
     .gte('exam_date', startDate)
     .lte('exam_date', endDate);
+  if (examsError) throw new Error('Erro ao carregar provas do calendário: ' + examsError.message);
 
   for (const e of exams ?? []) {
     if (!e.exam_date) continue;

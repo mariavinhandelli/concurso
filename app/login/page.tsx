@@ -43,7 +43,6 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false);
   const [feedback, setFeedback] = useState<{ kind: 'error' | 'ok'; text: string } | null>(null);
   const [loading, setLoading] = useState(false);
   const [narrow, setNarrow] = useState(false);
@@ -95,7 +94,11 @@ export default function LoginPage() {
       if (error) {
         setFeedback({ kind: 'error', text: traduzErro(error.message) });
       } else {
-        router.push('/');
+        const requested = new URLSearchParams(window.location.search).get('returnTo');
+        const returnTo = requested?.startsWith('/') && !requested.startsWith('//')
+          ? requested
+          : '/';
+        router.push(returnTo);
         router.refresh();
       }
     } else {
@@ -108,10 +111,6 @@ export default function LoginPage() {
         setMode('login');
       }
     }
-  }
-
-  function onKeyDown(e: React.KeyboardEvent) {
-    if (e.key === 'Enter') handleSubmit();
   }
 
   const titulo = mode === 'login' ? 'Que bom ter você de volta!' : mode === 'signup' ? 'Bem-vindo!' : 'Recuperar senha';
@@ -292,6 +291,7 @@ export default function LoginPage() {
                 {mode === 'login' ? 'Ainda não tem conta?  ' : 'Já tem conta?  '}
               </span>
               <button
+                type="button"
                 onClick={() => trocarModo(mode === 'login' ? 'signup' : 'login')}
                 style={{ background: 'none', border: 'none', color: B.green, fontWeight: 600, fontSize: 13.5, cursor: 'pointer', padding: 0, fontFamily: 'inherit' }}
               >
@@ -310,7 +310,13 @@ export default function LoginPage() {
           boxShadow: '0 8px 32px rgba(15,23,42,.09), 0 1px 3px rgba(15,23,42,.04)',
           padding: narrow ? '32px 24px' : '40px 48px',
         }}>
-          <div style={{ width: '100%' }}>
+          <form
+            style={{ width: '100%' }}
+            onSubmit={(event) => {
+              event.preventDefault();
+              void handleSubmit();
+            }}
+          >
 
             {/* Focali icon centered */}
             <div style={{ 
@@ -332,7 +338,7 @@ export default function LoginPage() {
             {/* Nome — apenas no cadastro */}
             {mode === 'signup' && (
               <div style={{ marginBottom: 14 }}>
-                <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: B.inkSoft, marginBottom: 6 }}>Seu nome</label>
+                <label htmlFor="signup-name" style={{ display: 'block', fontSize: 13, fontWeight: 500, color: B.inkSoft, marginBottom: 6 }}>Seu nome</label>
                 <div style={{ position: 'relative' }}>
                   <span style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', display: 'flex' }}>
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={B.inkMuted} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -340,12 +346,14 @@ export default function LoginPage() {
                     </svg>
                   </span>
                   <input
+                    id="signup-name"
+                    name="name"
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    onKeyDown={onKeyDown}
                     placeholder="Como podemos te chamar?"
                     autoComplete="name"
+                    required
                     style={inputStyle('left')}
                   />
                 </div>
@@ -354,7 +362,7 @@ export default function LoginPage() {
 
             {/* E-mail */}
             <div style={{ marginBottom: 14 }}>
-              <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: B.inkSoft, marginBottom: 6 }}>E-mail</label>
+              <label htmlFor="auth-email" style={{ display: 'block', fontSize: 13, fontWeight: 500, color: B.inkSoft, marginBottom: 6 }}>E-mail</label>
               <div style={{ position: 'relative' }}>
                 <span style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', display: 'flex' }}>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={B.inkMuted} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -362,12 +370,14 @@ export default function LoginPage() {
                   </svg>
                 </span>
                 <input
+                  id="auth-email"
+                  name="email"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  onKeyDown={onKeyDown}
                   placeholder="seu@email.com"
                   autoComplete="email"
+                  required
                   style={inputStyle('left')}
                 />
               </div>
@@ -376,7 +386,7 @@ export default function LoginPage() {
             {/* Senha */}
             {mode !== 'recover' && (
               <div style={{ marginBottom: 16 }}>
-                <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: B.inkSoft, marginBottom: 6 }}>Senha</label>
+                <label htmlFor="auth-password" style={{ display: 'block', fontSize: 13, fontWeight: 500, color: B.inkSoft, marginBottom: 6 }}>Senha</label>
                 <div style={{ position: 'relative' }}>
                   <span style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', display: 'flex' }}>
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={B.inkMuted} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -384,17 +394,21 @@ export default function LoginPage() {
                     </svg>
                   </span>
                   <input
+                    id="auth-password"
+                    name="password"
                     type={showPassword ? 'text' : 'password'}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    onKeyDown={onKeyDown}
                     placeholder="Digite sua senha"
                     autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+                    required
                     style={{ ...inputStyle('both'), paddingRight: 44 }}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(v => !v)}
+                    aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+                    aria-pressed={showPassword}
                     style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: B.inkMuted, display: 'flex' }}
                   >
                     {showPassword
@@ -406,14 +420,10 @@ export default function LoginPage() {
               </div>
             )}
 
-            {/* Lembrar + esqueci */}
+            {/* Recuperação de senha */}
             {mode === 'login' && (
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: 13.5, color: B.inkSoft, userSelect: 'none' }}>
-                  <input type="checkbox" checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} style={{ accentColor: B.green, width: 15, height: 15, cursor: 'pointer' }} />
-                  Lembrar de mim
-                </label>
-                <button onClick={() => trocarModo('recover')} style={{ background: 'none', border: 'none', color: B.green, fontSize: 13.5, fontWeight: 500, cursor: 'pointer', padding: 0, fontFamily: 'inherit' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginBottom: 24 }}>
+                <button type="button" onClick={() => trocarModo('recover')} style={{ background: 'none', border: 'none', color: B.green, fontSize: 13.5, fontWeight: 500, cursor: 'pointer', padding: 0, fontFamily: 'inherit' }}>
                   Esqueci minha senha
                 </button>
               </div>
@@ -421,7 +431,7 @@ export default function LoginPage() {
 
             {mode === 'recover' && (
               <div style={{ marginBottom: 20 }}>
-                <button onClick={() => trocarModo('login')} style={{ background: 'none', border: 'none', color: B.green, fontSize: 13.5, fontWeight: 500, cursor: 'pointer', padding: 0, fontFamily: 'inherit' }}>
+                <button type="button" onClick={() => trocarModo('login')} style={{ background: 'none', border: 'none', color: B.green, fontSize: 13.5, fontWeight: 500, cursor: 'pointer', padding: 0, fontFamily: 'inherit' }}>
                   ← Voltar para o login
                 </button>
               </div>
@@ -431,7 +441,7 @@ export default function LoginPage() {
 
             {/* Submit */}
             <button
-              onClick={handleSubmit}
+              type="submit"
               disabled={loading}
               style={{
                 width: '100%', padding: '14px 0', borderRadius: 12, border: 'none',
@@ -454,7 +464,7 @@ export default function LoginPage() {
 
             {/* Feedback */}
             {feedback && (
-              <p style={{ fontSize: 13, marginTop: 14, textAlign: 'center', padding: '10px 14px', borderRadius: 10, lineHeight: 1.5, color: feedback.kind === 'error' ? B.danger : B.ok, background: feedback.kind === 'error' ? B.dangerBg : B.okBg }}>
+              <p role={feedback.kind === 'error' ? 'alert' : 'status'} aria-live="polite" style={{ fontSize: 13, marginTop: 14, textAlign: 'center', padding: '10px 14px', borderRadius: 10, lineHeight: 1.5, color: feedback.kind === 'error' ? B.danger : B.ok, background: feedback.kind === 'error' ? B.dangerBg : B.okBg }}>
                 {feedback.text}
               </p>
             )}
@@ -475,7 +485,7 @@ export default function LoginPage() {
               </div>
             </div>
 
-          </div>
+          </form>
         </div>
       </div>
     </main>

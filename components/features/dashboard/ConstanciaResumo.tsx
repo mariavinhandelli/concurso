@@ -55,7 +55,7 @@ export function ConstanciaResumo() {
         </span>
         <span style={styles.totalSep}>·</span>
         <span style={styles.totalItem}>
-          recorde de <b style={styles.totalNum}>{data.recorde}</b> dias
+          recorde anual de <b style={styles.totalNum}>{data.recorde}</b> dias
         </span>
       </div>
     </div>

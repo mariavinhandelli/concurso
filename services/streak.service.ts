@@ -6,6 +6,7 @@
 
 import { createClient } from '@/lib/supabase/client';
 import { getDailyTarget } from '@/services/goals.service';
+import { toLocalDateString as localDateStr } from '@/lib/local-date';
 
 // Mínimo de estudo para um dia entrar na sequência (25 min = 1500 s).
 const MIN_SEGUNDOS_DIA = 25 * 60;
@@ -26,13 +27,6 @@ export interface StreakInfo {
   longest: number;          // recorde: maior sequência (janela de 365 dias)
   studiedToday: boolean;    // já estudou hoje (atingindo o mínimo)?
   lastDays: DayStudy[];     // últimos ~30 dias (para a trilha visual)
-}
-
-function localDateStr(d: Date): string {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${y}-${m}-${day}`;
 }
 
 export async function getStreak(): Promise<StreakInfo> {

@@ -25,13 +25,6 @@ export interface EnergiaPonto {
   sessoes: number;         // quantas sessões nesse nível (para peso/tooltip)
 }
 
-function localDateStr(d: Date): string {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${y}-${m}-${day}`;
-}
-
 // Resumo de constância: período (últimos `dias`) + total geral + streak.
 export async function getConstanciaResumo(dias = 30): Promise<ConstanciaResumo | null> {
   const supabase = createClient();
@@ -39,10 +32,11 @@ export async function getConstanciaResumo(dias = 30): Promise<ConstanciaResumo |
   if (!user) return null;
 
   // Todas as sessões (para o total geral).
-  const { data: todas } = await supabase
+  const { data: todas, error } = await supabase
     .from('study_logs')
     .select('duration_sec, started_at')
     .eq('user_id', user.id);
+  if (error) throw new Error('Erro ao carregar resumo de constância: ' + error.message);
 
   let segTotal = 0;
   let sessoesTotal = 0;
@@ -88,11 +82,12 @@ export async function getEnergiaDesempenho(): Promise<EnergiaPonto[]> {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return [];
 
-  const { data: logs } = await supabase
+  const { data: logs, error } = await supabase
     .from('study_logs')
     .select('energy_level, questions_total, questions_correct')
     .eq('user_id', user.id)
     .not('energy_level', 'is', null);
+  if (error) throw new Error('Erro ao analisar energia e desempenho: ' + error.message);
 
   // Acumula questões por nível de energia (só sessões com questões).
   const acc: Record<number, { total: number; correct: number; sessoes: number }> = {};

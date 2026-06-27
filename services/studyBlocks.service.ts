@@ -3,6 +3,7 @@
 // por tópico (chamado pelo timer ao encerrar) + check manual + editar.
 
 import { createClient } from '@/lib/supabase/client';
+import { toLocalDateString as localDateStr } from '@/lib/local-date';
 
 export interface StudyBlock {
   id: string;
@@ -17,13 +18,6 @@ export interface StudyBlock {
   subjectName?: string;
   subjectColor?: string;
   topicName?: string | null;
-}
-
-function localDateStr(d: Date): string {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${y}-${m}-${day}`;
 }
 
 export async function listBlocks(startDate: string, endDate: string): Promise<StudyBlock[]> {
@@ -89,9 +83,12 @@ export async function createBlock(input: {
 
 export async function toggleBlockDone(blockId: string, done: boolean): Promise<void> {
   const supabase = createClient();
+  const updates = done
+    ? { is_done: true, done_at: new Date().toISOString() }
+    : { is_done: false, done_at: null, completed_by_session_id: null };
   const { error } = await supabase
     .from('study_blocks')
-    .update({ is_done: done, done_at: done ? new Date().toISOString() : null })
+    .update(updates)
     .eq('id', blockId);
   if (error) throw new Error('Erro ao atualizar bloco: ' + error.message);
 }
@@ -117,13 +114,26 @@ export async function updateBlock(
 }
 
 // AUTO-CUMPRIR por tópico exato: chamado pelo timer ao encerrar uma sessão.
-export async function autoCompleteByTopic(topicId: string | null): Promise<void> {
+export async function autoCompleteByTopic(
+  topicId: string | null,
+  clientSessionId: string,
+): Promise<void> {
   if (!topicId) return;
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
 
   const hoje = localDateStr(new Date());
+
+  // Um reenvio da mesma sessão não pode concluir o próximo bloco da fila.
+  const { data: jaConcluido } = await supabase
+    .from('study_blocks')
+    .select('id')
+    .eq('user_id', user.id)
+    .eq('completed_by_session_id', clientSessionId)
+    .limit(1);
+
+  if (jaConcluido && jaConcluido.length > 0) return;
 
   const { data: blocos } = await supabase
     .from('study_blocks')
@@ -137,8 +147,13 @@ export async function autoCompleteByTopic(topicId: string | null): Promise<void>
 
   if (!blocos || blocos.length === 0) return;
 
-  await supabase
+  const { error } = await supabase
     .from('study_blocks')
-    .update({ is_done: true, done_at: new Date().toISOString() })
+    .update({
+      is_done: true,
+      done_at: new Date().toISOString(),
+      completed_by_session_id: clientSessionId,
+    })
     .eq('id', blocos[0].id);
+  if (error) throw new Error('Erro ao concluir bloco automaticamente: ' + error.message);
 }

@@ -9,6 +9,7 @@ import {
   createRule, editRuleVersioned, type RecurrenceItemInput, type RuleSummary, type RecurrenceMode,
 } from '@/services/recurrence.service';
 import { theme } from '@/lib/theme';
+import { toLocalDateString } from '@/lib/local-date';
 
 interface Props {
   onClose: () => void;
@@ -241,7 +242,7 @@ export function RecurrenceModal({ onClose, onCreated, editRule = null, modoInici
           <span>Indeterminado</span>
         </label>
         {!indeterminado && (
-          <input type="date" value={endDate} min={new Date().toLocaleDateString('en-CA')} onChange={(e) => setEndDate(e.target.value)} style={styles.dateInput} />
+          <input type="date" value={endDate} min={toLocalDateString()} onChange={(e) => setEndDate(e.target.value)} style={styles.dateInput} />
         )}
 
         {error && <p style={styles.error}>{error}</p>}

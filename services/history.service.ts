@@ -3,6 +3,7 @@
 // de uma janela de dias, cruza com os nomes das matérias e agrupa por dia.
 
 import { createClient } from '@/lib/supabase/client';
+import { toLocalDateString as localDateStr } from '@/lib/local-date';
 
 export interface HistorySession {
   id: string;
@@ -23,13 +24,6 @@ export interface HistoryDay {
   sessions: HistorySession[];
   totalSec: number;         // soma do dia
   totalQuestions: number;   // soma do dia
-}
-
-function localDateStr(d: Date): string {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${y}-${m}-${day}`;
 }
 
 // Busca o histórico dos últimos `dias` dias, agrupado por dia (mais recente primeiro).

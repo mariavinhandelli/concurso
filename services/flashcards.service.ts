@@ -6,6 +6,7 @@ import {
   calculateNextReview, fromDbRow, toDbRow, isDue, daysOverdue,
   type RecallGrade,
 } from '@/lib/spaced-repetition';
+import { localDateInDays, toLocalDateString } from '@/lib/local-date';
 
 export type ReviewRating = 'dificil' | 'intermediario' | 'facil';
 const RATING_TO_GRADE: Record<ReviewRating, RecallGrade> = {
@@ -46,11 +47,9 @@ export async function createFlashcard(input: FlashcardInput): Promise<void> {
 
   let reviewFields = {};
   if (input.addToReview) {
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
     reviewFields = {
       is_review_active: true,
-      next_review_date: tomorrow.toISOString().slice(0, 10),
+      next_review_date: localDateInDays(1),
       interval_days: 1,
       repetitions: 0,
       ease_factor: 2.5,
@@ -171,11 +170,9 @@ export async function submitCardReview(cardId: string, rating: ReviewRating): Pr
 // Ativa revisão de um card existente (para cards criados sem revisão).
 export async function activateCardReview(cardId: string): Promise<void> {
   const supabase = createClient();
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
   const { error } = await supabase.from('flashcards').update({
     is_review_active: true,
-    next_review_date: tomorrow.toISOString().slice(0, 10),
+    next_review_date: localDateInDays(1),
     interval_days: 1, repetitions: 0, ease_factor: 2.5,
   }).eq('id', cardId);
   if (error) throw new Error('Erro ao ativar revisão: ' + error.message);
@@ -230,13 +227,14 @@ export async function buildDailyQueue(): Promise<QueueCard[]> {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return [];
 
-  const today = new Date().toISOString().slice(0, 10);
+  const today = toLocalDateString();
 
   // Pendentes: têm data e ela já venceu.
   const { data: pendingData } = await supabase
     .from('flashcards')
     .select('id, front, back, next_review_date, subjects(name, color)')
     .eq('user_id', user.id)
+    .eq('is_review_active', true)
     .not('next_review_date', 'is', null)
     .lte('next_review_date', today)
     .order('next_review_date', { ascending: true });
@@ -263,16 +261,19 @@ export async function buildTopicQueue(
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return [];
 
+  const today = toLocalDateString();
   let query = supabase
     .from('flashcards')
     .select('id, front, back, next_review_date, created_at, subjects(name, color)')
     .eq('user_id', user.id)
-    .eq('subject_id', scope.subjectId);
+    .eq('subject_id', scope.subjectId)
+    .or(`next_review_date.is.null,next_review_date.lte.${today}`);
 
   if (scope.topicId === null) query = query.is('topic_id', null);
   else if (scope.topicId) query = query.eq('topic_id', scope.topicId);
 
-  const { data } = await query;
+  const { data, error } = await query;
+  if (error) throw new Error('Erro ao montar fila de estudo: ' + error.message);
   const cards = (data ?? []).map(toQueueCard);
 
   // Pendentes primeiro (não-novos), depois novos.

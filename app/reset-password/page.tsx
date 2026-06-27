@@ -48,6 +48,7 @@ export default function ResetPasswordPage() {
       setFeedback({ kind: 'error', text: 'Não foi possível redefinir. Tente o link de novo.' });
     } else {
       setFeedback({ kind: 'ok', text: 'Senha redefinida! Redirecionando para o login…' });
+      await supabase.auth.signOut({ scope: 'local' });
       setTimeout(() => {
         router.push('/login');
         router.refresh();
@@ -55,13 +56,15 @@ export default function ResetPasswordPage() {
     }
   }
 
-  function onKeyDown(e: React.KeyboardEvent) {
-    if (e.key === 'Enter') handleReset();
-  }
-
   return (
     <main style={styles.page}>
-      <div style={styles.card}>
+      <form
+        style={styles.card}
+        onSubmit={(event) => {
+          event.preventDefault();
+          void handleReset();
+        }}
+      >
         <div style={styles.brand}>
           <svg width="18" height="18" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
             <defs>
@@ -98,29 +101,35 @@ export default function ResetPasswordPage() {
           </p>
         ) : (
           <>
-            <label style={styles.label}>Nova senha</label>
+            <label htmlFor="new-password" style={styles.label}>Nova senha</label>
             <input
+              id="new-password"
+              name="new-password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              onKeyDown={onKeyDown}
               placeholder="mínimo 6 caracteres"
               autoComplete="new-password"
+              required
+              minLength={6}
               style={styles.input}
             />
 
-            <label style={styles.label}>Confirmar nova senha</label>
+            <label htmlFor="confirm-password" style={styles.label}>Confirmar nova senha</label>
             <input
+              id="confirm-password"
+              name="confirm-password"
               type="password"
               value={confirm}
               onChange={(e) => setConfirm(e.target.value)}
-              onKeyDown={onKeyDown}
               placeholder="repita a senha"
               autoComplete="new-password"
+              required
+              minLength={6}
               style={styles.input}
             />
 
-            <button onClick={handleReset} style={styles.primary} disabled={loading}>
+            <button type="submit" style={styles.primary} disabled={loading}>
               {loading ? 'Aguarde…' : 'Redefinir senha'}
             </button>
           </>
@@ -128,6 +137,8 @@ export default function ResetPasswordPage() {
 
         {feedback && (
           <p
+            role={feedback.kind === 'error' ? 'alert' : 'status'}
+            aria-live="polite"
             style={{
               ...styles.feedback,
               color: feedback.kind === 'error' ? 'var(--danger)' : 'var(--ok)',
@@ -137,7 +148,7 @@ export default function ResetPasswordPage() {
             {feedback.text}
           </p>
         )}
-      </div>
+      </form>
     </main>
   );
 }

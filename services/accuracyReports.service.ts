@@ -30,9 +30,11 @@ export async function getAccuracyBySubject(): Promise<AccuracyPoint[]> {
   if (!logs || logs.length === 0) return [];
 
   // Busca nomes e cores das matérias envolvidas.
-  const { data: subjects } = await supabase
+  const { data: subjects, error: subjectsError } = await supabase
     .from('subjects')
-    .select('id, name, color');
+    .select('id, name, color')
+    .eq('user_id', user.id);
+  if (subjectsError) throw new Error('Erro ao buscar matérias: ' + subjectsError.message);
 
   const subjectMap = new Map(
     (subjects ?? []).map((s) => [s.id, { name: s.name, color: s.color }]),

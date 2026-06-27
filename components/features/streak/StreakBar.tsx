@@ -9,6 +9,7 @@ import { useEffect, useState } from 'react';
 import { getStreak, type StreakInfo } from '@/services/streak.service';
 import { theme } from '@/lib/theme';
 import { useUI } from '@/components/layout/UIContext';
+import { toLocalDateString } from '@/lib/local-date';
 
 const COR = {
   meta: '#22c55e',        // bateu a meta
@@ -44,7 +45,7 @@ export function StreakBar() {
     return COR.vazio;
   }
 
-  const hojeStr = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD local
+  const hojeStr = toLocalDateString();
 
   return (
     <div style={styles.wrap}>
@@ -60,7 +61,7 @@ export function StreakBar() {
             <span style={styles.warn}> Estude hoje para manter.</span>
           )}
         </span>
-        <span style={styles.record}>recorde: <b style={{ color: theme.ink }}>{info.longest} dias</b></span>
+        <span style={styles.record}>recorde anual: <b style={{ color: theme.ink }}>{info.longest} dias</b></span>
       </div>
 
       {/* Barra de colunas finas, de ponta a ponta */}

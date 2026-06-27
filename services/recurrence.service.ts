@@ -3,6 +3,7 @@
 // NÃO gera blocos aqui — só guarda a regra. A geração virtual vem em outro service.
 
 import { createClient } from '@/lib/supabase/client';
+import { toLocalDateString as localDateStr } from '@/lib/local-date';
 
 export type RecurrenceMode = 'dia_fixo' | 'ciclo';
 
@@ -38,13 +39,6 @@ export interface RecurrenceItem {
   weekday: number | null;
   cycle_order: number | null;
   position: number;
-}
-
-function localDateStr(d: Date): string {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${y}-${m}-${day}`;
 }
 
 export async function listRules(includeInactive = false): Promise<RecurrenceRule[]> {

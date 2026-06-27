@@ -4,6 +4,7 @@
 // O ciclo NÃO entra aqui — terá motor próprio.
 
 import { createClient } from '@/lib/supabase/client';
+import { toLocalDateString as localDateStr } from '@/lib/local-date';
 
 export type BlockOrigin = 'manual' | 'recorrencia';
 
@@ -26,13 +27,6 @@ export interface ScheduleBlock {
   rule_id?: string;
   item_id?: string;
   is_virtual?: boolean;        // true = ainda não materializado (sem override)
-}
-
-function localDateStr(d: Date): string {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${y}-${m}-${day}`;
 }
 
 function eachDate(startStr: string, endStr: string): Date[] {

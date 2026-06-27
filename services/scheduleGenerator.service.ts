@@ -54,8 +54,8 @@ export async function buildPreview(
 
   // Data da prova (via exam_targets, ligado por... precisa do vínculo).
   // target_exams não tem data; a data está em exam_targets. Buscamos se houver slug/legacy.
-  let examDate: string | null = null;
-  let daysUntilExam: number | null = null;
+  const examDate: string | null = null;
+  const daysUntilExam: number | null = null;
   // (a data é resolvida na tela; aqui deixamos null por ora — ver nota)
 
   const somaPesos = rows.reduce((s, r) => s + r.weight, 0);

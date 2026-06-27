@@ -3,12 +3,18 @@
 // estudou offline. Reaproveita saveStudyLog — mesmos efeitos de uma sessão real.
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { listSubjects, type Subject } from '@/services/subjects.service';
 import { listTopics, type Topic } from '@/services/topics.service';
 import { saveStudyLog, type ErrorCause } from '@/services/studyLogs.service';
 import { SESSION_MODES, modeUsesQuestions } from '@/lib/session-modes';
+import {
+  createSessionId,
+  type LogMode,
+  type PendingSession,
+} from '@/lib/timer-storage';
 import { theme } from '@/lib/theme';
+import { toLocalDateString } from '@/lib/local-date';
 
 interface Props {
   onClose: () => void;
@@ -22,15 +28,16 @@ const ERROR_CAUSES: { value: ErrorCause; label: string }[] = [
 ];
 
 export function ManualLogModal({ onClose, onSaved }: Props) {
+  const sessionIdRef = useRef(createSessionId());
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [topics, setTopics] = useState<Topic[]>([]);
 
-  const [date, setDate] = useState(() => new Date().toLocaleDateString('en-CA'));
+  const [date, setDate] = useState(() => toLocalDateString());
   const [subjectId, setSubjectId] = useState('');
   const [topicId, setTopicId] = useState('');
   const [hours, setHours] = useState('0');
   const [minutes, setMinutes] = useState('30');
-  const [mode, setMode] = useState<string>('teoria');
+  const [mode, setMode] = useState<LogMode>('teoria');
   const [qFeedback, setQFeedback] = useState('');
   const [energy, setEnergy] = useState(0);
   const [qTotal, setQTotal] = useState('');
@@ -77,7 +84,8 @@ export function ManualLogModal({ onClose, onSaved }: Props) {
     const start = new Date(date + 'T12:00:00');
     const end = new Date(start.getTime() + totalMin * 60 * 1000);
 
-    const session = {
+    const session: PendingSession = {
+      sessionId: sessionIdRef.current,
       topicId: topicId || null,
       subjectId,
       boardId: null,
@@ -85,6 +93,7 @@ export function ManualLogModal({ onClose, onSaved }: Props) {
       startedAt: start.getTime(),
       endedAt: end.getTime(),
       durationSec: totalMin * 60,
+      source: 'manual',
     };
 
     const feedback = {
@@ -102,7 +111,7 @@ export function ManualLogModal({ onClose, onSaved }: Props) {
     };
 
     try {
-      await saveStudyLog(session as never, feedback as never);
+      await saveStudyLog(session, feedback);
       onSaved();
       onClose();
     } catch (e) {
@@ -120,11 +129,11 @@ export function ManualLogModal({ onClose, onSaved }: Props) {
         <div style={styles.row2}>
           <div style={styles.col}>
             <label style={styles.label}>Data</label>
-            <input type="date" value={date} max={new Date().toLocaleDateString('en-CA')} onChange={(e) => setDate(e.target.value)} style={styles.input} />
+            <input type="date" value={date} max={toLocalDateString()} onChange={(e) => setDate(e.target.value)} style={styles.input} />
           </div>
           <div style={styles.col}>
             <label style={styles.label}>Tipo</label>
-            <select value={mode} onChange={(e) => setMode(e.target.value)} style={styles.input}>
+            <select value={mode} onChange={(e) => setMode(e.target.value as LogMode)} style={styles.input}>
               {SESSION_MODES.map((m) => <option key={m.value} value={m.value}>{m.label}</option>)}
             </select>
           </div>

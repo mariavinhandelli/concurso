@@ -19,13 +19,7 @@ import { useUI } from '@/components/layout/UIContext';
 import { getActiveCycleRule, archiveCycle, reactivateCycle } from '@/services/cycleEngine.service';
 import { CycleView } from '@/components/features/schedule/CycleView';
 import { GeneratorModal } from '@/components/features/schedule/GeneratorModal';
-
-function localDateStr(d: Date): string {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${y}-${m}-${day}`;
-}
+import { toLocalDateString as localDateStr } from '@/lib/local-date';
 
 function mondayOf(d: Date): Date {
   const x = new Date(d);

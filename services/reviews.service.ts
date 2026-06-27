@@ -4,6 +4,7 @@ import {
   calculateNextReview, fromDbRow, toDbRow, isDue, daysOverdue,
   type RecallGrade,
 } from '@/lib/spaced-repetition';
+import { localDateInDays } from '@/lib/local-date';
 
 export type ReviewRating = 'dificil' | 'intermediario' | 'facil';
 const RATING_TO_GRADE: Record<ReviewRating, RecallGrade> = {
@@ -24,9 +25,7 @@ export interface ReviewItem {
 
 export async function activateReview(topicId: string): Promise<void> {
   const supabase = createClient();
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  const dateStr = tomorrow.toISOString().slice(0, 10);
+  const dateStr = localDateInDays(1);
 
   const { error } = await supabase
     .from('topics')
@@ -116,9 +115,7 @@ export async function rescheduleReview(topicId: string, dateStr: string): Promis
 }
 
 export function dateInDays(days: number): string {
-  const d = new Date();
-  d.setDate(d.getDate() + days);
-  return d.toISOString().slice(0, 10);
+  return localDateInDays(days);
 }
 
 export async function getReviewStatus(topicId: string): Promise<boolean> {

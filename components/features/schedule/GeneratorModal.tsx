@@ -10,6 +10,7 @@ import {
 } from '@/services/scheduleGenerator.service';
 import { createRule, type RecurrenceItemInput, type RecurrenceMode } from '@/services/recurrence.service';
 import { theme } from '@/lib/theme';
+import { toLocalDateString } from '@/lib/local-date';
 
 interface Props {
   onClose: () => void;
@@ -235,7 +236,7 @@ export function GeneratorModal({ onClose, onGenerated, presetExamId }: Props) {
         </label>
         {temData && (
           <>
-            <input type="date" value={examDate} min={new Date().toLocaleDateString('en-CA')} onChange={(e) => setExamDate(e.target.value)} style={styles.input} />
+            <input type="date" value={examDate} min={toLocalDateString()} onChange={(e) => setExamDate(e.target.value)} style={styles.input} />
             {dias !== null && <p style={styles.daysInfo}>Faltam <b>{dias} dias</b> para a prova. O cronograma terminará na véspera.</p>}
           </>
         )}

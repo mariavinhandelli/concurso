@@ -2,6 +2,7 @@
 // Evolução da taxa de acerto ao longo do tempo (semanal), geral ou por matéria.
 
 import { createClient } from '@/lib/supabase/client';
+import { toLocalDateString as localDateStr } from '@/lib/local-date';
 
 export interface EvolutionPoint {
   label: string;    // rótulo da semana (ex: "12/06")
@@ -12,13 +13,6 @@ export interface EvolutionPoint {
 export interface SubjectOption {
   id: string;
   name: string;
-}
-
-function localDateStr(d: Date): string {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${y}-${m}-${day}`;
 }
 
 // Chave da semana a que uma data pertence (segunda-feira como início).

@@ -2,26 +2,23 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   type PersistedTimer,
+  type PendingSession,
   type PauseInterval,
   type LogMode,
+  createSessionId,
   loadTimer,
   saveTimer,
   clearTimer,
+  loadPendingSession,
+  savePendingSession,
+  clearPendingSession,
   computeElapsedSec,
   isPaused as isPausedFn,
 } from '@/lib/timer-storage';
 
 export type TimerStatus = 'idle' | 'running' | 'paused' | 'awaiting_feedback';
 
-export interface PendingSession {
-  startedAt: number;
-  endedAt: number;
-  durationSec: number;
-  mode: LogMode;
-  topicId: string | null;
-  subjectId: string | null;
-  boardId: string | null;
-}
+export type { PendingSession } from '@/lib/timer-storage';
 
 export interface StartParams {
   mode: LogMode;
@@ -38,10 +35,6 @@ function formatHMS(totalSec: number): string {
   const s = totalSec % 60;
   const pad = (n: number) => String(n).padStart(2, '0');
   return `${pad(h)}:${pad(m)}:${pad(s)}`;
-}
-
-function makeSessionId(): string {
-  return `sess_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
 }
 
 export function useStudyTimer() {
@@ -71,17 +64,28 @@ export function useStudyTimer() {
   }, []);
 
   useEffect(() => {
+    const pending = loadPendingSession();
+    if (pending) {
+      queueMicrotask(() => {
+        setPendingSession(pending);
+        setElapsedSec(pending.durationSec);
+        setStatus('awaiting_feedback');
+      });
+      return () => stopTicking();
+    }
+
     const restored = loadTimer();
     if (restored) {
       timerRef.current = restored;
       const paused = isPausedFn(restored);
-      setStatus(paused ? 'paused' : 'running');
-      syncElapsed();
-      if (!paused) startTicking();
+      queueMicrotask(() => {
+        setStatus(paused ? 'paused' : 'running');
+        syncElapsed();
+        if (!paused) startTicking();
+      });
     }
     return () => stopTicking();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [startTicking, stopTicking, syncElapsed]);
 
   useEffect(() => {
     const onVisible = () => {
@@ -95,7 +99,7 @@ export function useStudyTimer() {
     ({ mode, topicId = null, subjectId = null, boardId = null }: StartParams) => {
       if (timerRef.current) return;
       const state: PersistedTimer = {
-        sessionId: makeSessionId(),
+        sessionId: createSessionId(),
         startedAt: Date.now(),
         mode, topicId, subjectId, boardId,
         pauses: [],
@@ -143,13 +147,16 @@ export function useStudyTimer() {
     const durationSec = computeElapsedSec(state, endedAt);
     stopTicking();
     const pending: PendingSession = {
+      sessionId: state.sessionId,
       startedAt: state.startedAt,
       endedAt, durationSec,
       mode: state.mode,
       topicId: state.topicId,
       subjectId: state.subjectId,
       boardId: state.boardId,
+      source: 'timer',
     };
+    savePendingSession(pending);
     clearTimer();
     timerRef.current = null;
     setElapsedSec(durationSec);
@@ -158,6 +165,7 @@ export function useStudyTimer() {
   }, [stopTicking]);
 
   const discardPending = useCallback(() => {
+    clearPendingSession();
     setPendingSession(null);
     setElapsedSec(0);
     setStatus('idle');

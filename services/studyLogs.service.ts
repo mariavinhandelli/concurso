@@ -1,11 +1,11 @@
 // services/studyLogs.service.ts
 import { createClient } from '@/lib/supabase/client';
-import type { PendingSession } from '@/hooks/useStudyTimer';
-import type { LogMode } from '@/lib/timer-storage';
+import type { LogMode, PendingSession } from '@/lib/timer-storage';
 import { activateReview, deactivateReview } from '@/services/reviews.service';
 import { recalcularSaude } from '@/services/metrics.service';
 import { autoCompleteByTopic } from '@/services/studyBlocks.service';
 import { findCycleItemForSubject, completeCycleSubject } from '@/services/cycleEngine.service';
+import { validateStudyLogInput } from '@/lib/study-log-validation';
 
 export type ErrorCause = 'teoria' | 'interpretacao' | 'tempo';
 
@@ -28,6 +28,7 @@ export async function saveStudyLog(
   session: PendingSession,
   feedback: SessionFeedback,
 ) {
+  validateStudyLogInput(session, feedback);
   const supabase = createClient();
 
   const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -37,10 +38,11 @@ export async function saveStudyLog(
 
   const topicId = feedback.topicId ?? session.topicId;
 
-  const { data, error } = await supabase
+  const { error } = await supabase
     .from('study_logs')
-    .insert({
+    .upsert({
       user_id: user.id,
+      client_session_id: session.sessionId,
       topic_id: topicId,
       subject_id: feedback.subjectId ?? session.subjectId,
       board_id: session.boardId,
@@ -54,9 +56,10 @@ export async function saveStudyLog(
       energy_level: feedback.energyLevel,
       insight: feedback.insight,
       error_cause: feedback.errorCause ?? null,
-    })
-    .select()
-    .single();
+    }, {
+      onConflict: 'user_id,client_session_id',
+      ignoreDuplicates: true,
+    });
 
   if (error) {
     throw new Error('Erro ao salvar a sessão: ' + error.message);
@@ -64,9 +67,13 @@ export async function saveStudyLog(
 
   // Aplica a intenção de revisão (só se mudou de estado).
   if (topicId && feedback.reviewIntent) {
-    const { active, was } = feedback.reviewIntent;
-    if (active && !was) await activateReview(topicId);
-    else if (!active && was) await deactivateReview(topicId);
+    try {
+      const { active, was } = feedback.reviewIntent;
+      if (active && !was) await activateReview(topicId);
+      else if (!active && was) await deactivateReview(topicId);
+    } catch (e) {
+      console.error('Intenção de revisão não aplicada (sessão salva mesmo assim):', e);
+    }
   }
 
   // Recalcula a Saúde do tópico estudado (cache topic_metrics).
@@ -83,7 +90,7 @@ export async function saveStudyLog(
   // Também não deve impedir o save — try/catch isolado.
   if (topicId) {
     try {
-      await autoCompleteByTopic(topicId);
+      await autoCompleteByTopic(topicId, session.sessionId);
     } catch (e) {
       console.error('Bloco não auto-cumprido (sessão salva mesmo assim):', e);
     }
@@ -103,7 +110,8 @@ export async function saveStudyLog(
             itemId: cycleItem.itemId,
             subjectId: subjectIdUsed,
             minutes: minutos,
-            source: 'timer',
+            source: session.source ?? 'timer',
+            clientSessionId: session.sessionId,
           });
         }
       }
@@ -112,5 +120,4 @@ export async function saveStudyLog(
     }
   }
 
-  return data;
 }

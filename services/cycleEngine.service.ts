@@ -4,6 +4,7 @@
 // sugerida é a mais atrasada (menos voltas, depois menos progresso).
 
 import { createClient } from '@/lib/supabase/client';
+import { toLocalDateString as localDateStr } from '@/lib/local-date';
 
 export interface CycleSubject {
   itemId: string;
@@ -24,13 +25,6 @@ export interface CycleState {
   todayMinutes: number;
   subjects: CycleSubject[];
   totalLaps: number;       // voltas completas do ciclo inteiro (menor entre as matérias)
-}
-
-function localDateStr(d: Date): string {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${y}-${m}-${day}`;
 }
 
 export async function getActiveCycleRule(): Promise<string | null> {
@@ -138,12 +132,13 @@ export async function completeCycleSubject(input: {
   subjectId: string;
   minutes?: number;
   source?: 'manual' | 'timer';
+  clientSessionId?: string;
 }): Promise<void> {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error('Você precisa estar logado.');
 
-  const { error } = await supabase.from('cycle_completions').insert({
+  const payload = {
     user_id: user.id,
     rule_id: input.ruleId,
     item_id: input.itemId,
@@ -151,7 +146,15 @@ export async function completeCycleSubject(input: {
     completed_date: localDateStr(new Date()),
     minutes: input.minutes ?? 0,
     source: input.source ?? 'manual',
-  });
+    client_session_id: input.clientSessionId ?? null,
+  };
+
+  const { error } = input.clientSessionId
+    ? await supabase.from('cycle_completions').upsert(payload, {
+        onConflict: 'user_id,client_session_id',
+        ignoreDuplicates: true,
+      })
+    : await supabase.from('cycle_completions').insert(payload);
   if (error) throw new Error('Erro ao registrar: ' + error.message);
 }
 

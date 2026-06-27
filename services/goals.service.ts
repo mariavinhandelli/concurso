@@ -3,6 +3,7 @@
 // O tempo estudado continua vindo de study_logs.
 
 import { createClient } from '@/lib/supabase/client';
+import { toLocalDateString as localDateStr } from '@/lib/local-date';
 
 export interface GoalsSummary {
   targetMinutesPerDay: number;
@@ -17,13 +18,6 @@ export interface QuestionsSummary {
   weekQuestions: number;
   weekTargetQuestions: number;
   todayAcerto: number | null; // % de acerto de hoje
-}
-
-function localDateStr(d: Date): string {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${y}-${m}-${day}`;
 }
 
 function startOfDayDaysAgo(days: number): string {

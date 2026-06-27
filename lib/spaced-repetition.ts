@@ -1,4 +1,6 @@
 // lib/spaced-repetition.ts
+import { startOfLocalDay, toLocalDateString } from '@/lib/local-date';
+
 export type RecallGrade = 'errou' | 'dificil' | 'bom' | 'facil';
 
 const GRADE_TO_QUALITY: Record<RecallGrade, number> = {
@@ -32,17 +34,6 @@ function addDays(from: Date, days: number): Date {
   return d;
 }
 
-// Converte 'YYYY-MM-DD' para Date no fuso LOCAL (evita o off-by-one de UTC).
-function parseLocalDate(value: Date | string): Date {
-  if (value instanceof Date) {
-    const d = new Date(value);
-    d.setHours(0, 0, 0, 0);
-    return d;
-  }
-  const [y, m, day] = value.slice(0, 10).split('-').map(Number);
-  return new Date(y, m - 1, day, 0, 0, 0, 0);
-}
-
 export function calculateNextReview(
   state: SpacedRepetitionState,
   grade: RecallGrade,
@@ -74,7 +65,7 @@ export function calculateNextReview(
 
 export function isDue(nextReviewDate: Date | string | null, now: Date = new Date()): boolean {
   if (!nextReviewDate) return false;
-  const due = parseLocalDate(nextReviewDate);
+  const due = startOfLocalDay(nextReviewDate);
   const today = new Date(now);
   today.setHours(0, 0, 0, 0);
   return due.getTime() <= today.getTime();
@@ -82,7 +73,7 @@ export function isDue(nextReviewDate: Date | string | null, now: Date = new Date
 
 export function daysOverdue(nextReviewDate: Date | string | null, now: Date = new Date()): number {
   if (!nextReviewDate) return 0;
-  const due = parseLocalDate(nextReviewDate);
+  const due = startOfLocalDay(nextReviewDate);
   const today = new Date(now);
   today.setHours(0, 0, 0, 0);
   return Math.round((today.getTime() - due.getTime()) / 86_400_000);
@@ -106,6 +97,6 @@ export function toDbRow(result: ReviewResult) {
     interval_days: result.intervalDays,
     repetitions: result.repetitions,
     last_reviewed: result.lastReviewed.toISOString(),
-    next_review_date: result.nextReviewDate.toISOString().slice(0, 10),
+    next_review_date: toLocalDateString(result.nextReviewDate),
   };
 }
