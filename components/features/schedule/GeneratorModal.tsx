@@ -305,7 +305,7 @@ const styles: Record<string, React.CSSProperties> = {
   subtitle: { fontSize: 13, color: theme.inkSoft, margin: '4px 0 16px', lineHeight: 1.5 },
   label: { display: 'block', fontSize: 12.5, fontWeight: 600, color: theme.inkSoft, margin: '14px 0 6px' },
   input: { width: '100%', boxSizing: 'border-box', padding: '10px 12px', borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.card, fontSize: 14, color: theme.ink, fontFamily: 'inherit', outline: 'none' },
-  modeToggle: { display: 'flex', gap: 4, background: theme.muted, borderRadius: theme.radiusSm, padding: 4 },
+  modeToggle: { display: 'flex', gap: 4, background: 'rgba(15,23,42,.06)', borderRadius: theme.radiusSm, padding: 4 },
   modeBtn: { flex: 1, padding: '9px 0', border: 'none', background: 'transparent', color: theme.inkSoft, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', borderRadius: theme.radiusSm - 2 },
   modeBtnOn: { background: theme.card, color: theme.teal, boxShadow: theme.shadow },
   modeHint: { fontSize: 12, color: theme.inkFaint, margin: '8px 0 0', lineHeight: 1.5 },

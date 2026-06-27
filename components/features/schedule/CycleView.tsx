@@ -292,7 +292,7 @@ const styles: Record<string, React.CSSProperties> = {
   arquivarBtn: { padding: '7px 12px', borderRadius: theme.radiusSm, border: 'none', background: 'transparent', color: theme.inkSoft, fontSize: 12.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
   reativarBtn: { padding: '7px 14px', borderRadius: theme.radiusSm, border: 'none', background: theme.teal, color: '#fff', fontSize: 12.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
   excluirBtn: { padding: '7px 12px', borderRadius: theme.radiusSm, border: 'none', background: 'transparent', color: theme.danger, fontSize: 12.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
-  archivedTag: { fontSize: 11, fontWeight: 700, color: theme.inkSoft, background: theme.muted, padding: '4px 10px', borderRadius: 999, letterSpacing: 0.3 },
+  archivedTag: { fontSize: 11, fontWeight: 700, color: theme.inkSoft, background: 'rgba(15,23,42,.05)', padding: '4px 10px', borderRadius: 999, letterSpacing: 0.3 },
   wrap: { display: 'flex', gap: 24, alignItems: 'flex-start', flexWrap: 'wrap' },
   muted: { color: theme.inkFaint, fontSize: 14 },
   compass: { flex: '0 0 200px', background: theme.card, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, borderRadius: theme.radius, boxShadow: theme.shadow, padding: 20, textAlign: 'center' },

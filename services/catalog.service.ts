@@ -138,6 +138,26 @@ export async function getCatalogSubjects(): Promise<CatalogSubject[]> {
   }));
 }
 
+// ---------- Tópicos do catálogo ----------
+
+export interface CatalogTopic {
+  id: string;
+  name: string;
+  parent_id: string | null;
+  position: number;
+}
+
+export async function getCatalogTopics(subjectCatalogId: string): Promise<CatalogTopic[]> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from('topics_catalog')
+    .select('id, name, parent_id, position')
+    .eq('subject_catalog_id', subjectCatalogId)
+    .order('position', { ascending: true });
+  if (error) throw new Error('Erro ao buscar tópicos: ' + error.message);
+  return data ?? [];
+}
+
 // ---------- Ativação ----------
 
 // Ativa uma matéria do catálogo: copia matéria + tópicos para o usuário.

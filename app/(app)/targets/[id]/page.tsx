@@ -412,6 +412,6 @@ const styles: Record<string, React.CSSProperties> = {
   vertFill: { height: '100%', background: theme.teal, borderRadius: 999, transition: 'width 0.4s ease' },
   vertRow: { display: 'flex', alignItems: 'center', gap: 12, padding: '8px 12px', borderRadius: 10, border: `0.5px solid ${theme.line}`, background: theme.card, minWidth: 0 },
   doneText: { color: theme.inkFaint, textDecoration: 'line-through' },
-  weightBadge: { border: `0.5px solid ${theme.line}`, background: theme.muted, color: theme.inkSoft, fontSize: 12.5, fontWeight: 700, borderRadius: 8, padding: '4px 9px', cursor: 'pointer', fontFamily: 'inherit', flexShrink: 0, fontVariantNumeric: 'tabular-nums' },
+  weightBadge: { border: `0.5px solid ${theme.line}`, background: 'rgba(15,23,42,.04)', color: theme.inkSoft, fontSize: 12.5, fontWeight: 700, borderRadius: 8, padding: '4px 9px', cursor: 'pointer', fontFamily: 'inherit', flexShrink: 0, fontVariantNumeric: 'tabular-nums' },
   weightSelect: { padding: '5px 8px', borderRadius: 8, border: `1.5px solid ${theme.teal}`, background: theme.card, fontSize: 13, color: theme.ink, fontFamily: 'inherit', cursor: 'pointer', flexShrink: 0 },
 };

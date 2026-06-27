@@ -1,20 +1,16 @@
 <svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <linearGradient id="g1" x1="118" y1="96" x2="319" y2="245" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#22C55E"/>
-      <stop offset="1" stop-color="#A7F5D0"/>
+      <stop offset="0" stop-color="#22C55E"/><stop offset="1" stop-color="#A7F5D0"/>
     </linearGradient>
     <linearGradient id="g2" x1="118" y1="242" x2="287" y2="303" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#A7F5D0"/>
-      <stop offset="1" stop-color="#93C5FD"/>
+      <stop offset="0" stop-color="#A7F5D0"/><stop offset="1" stop-color="#93C5FD"/>
     </linearGradient>
-    <linearGradient id="g3" x1="118" y1="290" x2="255" y2="421" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#6366F1"/>
-      <stop offset="1" stop-color="#4338CA"/>
+    <linearGradient id="g3" x1="175" y1="290" x2="312" y2="421" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#6366F1"/><stop offset="1" stop-color="#4338CA"/>
     </linearGradient>
   </defs>
-  <rect width="512" height="512" rx="112" fill="#F5F7FA"/>
   <path d="M118 151C118 120.624 142.624 96 173 96H331C359.719 96 383 119.281 383 148C383 176.719 359.719 200 331 200H222C193.281 200 170 223.281 170 252V252H118V151Z" fill="url(#g1)"/>
   <path d="M170 252C170 223.281 193.281 200 222 200H292C320.719 200 344 223.281 344 252C344 280.719 320.719 304 292 304H170V252Z" fill="url(#g2)"/>
-  <path d="M118 304H170V361C170 391.376 145.376 416 115 416C85.1766 416 61 391.823 61 362C61 330 86 304 118 304Z" fill="url(#g3)" transform="translate(57 0)"/>
+  <path d="M175 304H227V361C227 391.376 202.376 416 172 416C142.177 416 118 391.823 118 362C118 330 143 304 175 304Z" fill="url(#g3)"/>
 </svg>

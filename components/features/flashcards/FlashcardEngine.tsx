@@ -101,7 +101,7 @@ export function FlashcardEngine({ queue, onFinish }: Props) {
 const styles: Record<string, React.CSSProperties> = {
   engine: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20, width: '100%', fontFamily: theme.font },
   counters: { display: 'flex', gap: 16 },
-  counterPending: { fontSize: 13, color: theme.inkSoft, background: theme.muted, padding: '4px 12px', borderRadius: 10, fontWeight: 500 },
+  counterPending: { fontSize: 13, color: theme.inkSoft, background: 'rgba(15,23,42,.05)', padding: '4px 12px', borderRadius: 10, fontWeight: 500 },
   counterNew: { fontSize: 13, color: theme.tealDeep, background: theme.tealBg, padding: '4px 12px', borderRadius: 10, fontWeight: 500 },
   card: { width: '100%', minHeight: 260, background: theme.card, borderRadius: 20, border: `0.5px solid ${theme.line}`, padding: 32, cursor: 'pointer', display: 'flex', flexDirection: 'column', boxShadow: theme.shadow, minWidth: 0, boxSizing: 'border-box' },
   badge: { alignSelf: 'flex-start', fontSize: 12, color: '#fff', padding: '3px 10px', borderRadius: 8, fontWeight: 600 },

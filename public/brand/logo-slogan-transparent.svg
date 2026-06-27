@@ -1,0 +1,14 @@
+<svg width="1200" height="420" viewBox="0 0 1200 420" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <g transform="translate(70 70) scale(.82)">
+    <defs>
+      <linearGradient id="g1" x1="54" y1="48" x2="210" y2="163" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#22C55E"/><stop offset="1" stop-color="#A7F5D0"/></linearGradient>
+      <linearGradient id="g2" x1="54" y1="160" x2="187" y2="208" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#A7F5D0"/><stop offset="1" stop-color="#93C5FD"/></linearGradient>
+      <linearGradient id="g3" x1="98" y1="206" x2="204" y2="306" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#6366F1"/><stop offset="1" stop-color="#4338CA"/></linearGradient>
+    </defs>
+    <path d="M54 91C54 67.252 73.252 48 97 48H221C243.644 48 262 66.356 262 89C262 111.644 243.644 130 221 130H135C112.356 130 94 148.356 94 171H54V91Z" fill="url(#g1)"/>
+    <path d="M94 171C94 148.356 112.356 130 135 130H190C212.644 130 231 148.356 231 171C231 193.644 212.644 212 190 212H94V171Z" fill="url(#g2)"/>
+    <path d="M98 212H139V256C139 279.748 119.748 299 96 299C72.804 299 54 280.196 54 257C54 232.147 73.147 212 98 212Z" fill="url(#g3)"/>
+    <text x="306" y="202" font-family="Poppins, Inter, Arial, sans-serif" font-size="150" font-weight="600" letter-spacing="-7" fill="#0F172A">focali</text>
+  </g>
+  <text x="322" y="318" font-family="Poppins, Inter, Arial, sans-serif" font-size="42" font-weight="400" fill="#22C55E">Clareza para evoluir.</text>
+</svg>

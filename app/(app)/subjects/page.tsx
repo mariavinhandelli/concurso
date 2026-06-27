@@ -11,9 +11,9 @@ import {
   createSubject, updateSubject, deleteSubject, SUBJECT_COLORS,
 } from '@/services/subjects.service';
 import {
-  getCatalogAreas, getCatalogSubjects, activateSubject,
+  getCatalogAreas, getCatalogSubjects, activateSubject, getCatalogTopics,
   getMySubjects, archiveSubject, unarchiveSubject,
-  type CatalogArea, type CatalogSubject, type MySubject, type SubjectStatus,
+  type CatalogArea, type CatalogSubject, type CatalogTopic, type MySubject, type SubjectStatus,
 } from '@/services/catalog.service';
 import { theme, pageWide } from '@/lib/theme';
 import { useUI } from '@/components/layout/UIContext';
@@ -31,7 +31,7 @@ export default function SubjectsPage() {
     <div style={{ ...pageWide, padding: isMobile ? '20px 16px' : '34px 40px', minWidth: 0 }}>
       <div style={styles.header}>
         <h1 style={{ ...styles.h1, fontSize: isMobile ? 25 : 30 }}>Matérias</h1>
-        <p style={styles.sub}>Ative matérias do banco ou crie as suas. Clique numa matéria ativa para ver os tópicos.</p>
+        <p style={styles.sub}>Ative matérias do banco ou crie as suas. Clique em qualquer matéria para ver os tópicos.</p>
       </div>
 
       {/* Abas */}
@@ -75,6 +75,23 @@ function BancoTab({
   const [areaFilter, setAreaFilter] = useState<string>('todas'); // slug ou 'todas'
   const [query, setQuery] = useState('');
   const [activatingId, setActivatingId] = useState<string | null>(null);
+  const [selected, setSelected] = useState<CatalogSubject | null>(null);
+  const [modalTopics, setModalTopics] = useState<CatalogTopic[]>([]);
+  const [loadingModal, setLoadingModal] = useState(false);
+
+  async function openModal(s: CatalogSubject) {
+    setSelected(s);
+    setModalTopics([]);
+    setLoadingModal(true);
+    try {
+      const topics = await getCatalogTopics(s.id);
+      setModalTopics(topics);
+    } catch { /* silencia */ } finally {
+      setLoadingModal(false);
+    }
+  }
+
+  function closeModal() { setSelected(null); setModalTopics([]); }
 
   async function load() {
     try {
@@ -164,6 +181,18 @@ function BancoTab({
         ))}
       </div>
 
+      {/* ── Modal de tópicos ── */}
+      {selected && (
+        <SubjectTopicsModal
+          subject={selected}
+          topics={modalTopics}
+          loading={loadingModal}
+          activating={activatingId === selected.id}
+          onActivate={() => handleActivate(selected)}
+          onClose={closeModal}
+        />
+      )}
+
       {groups.length === 0 ? (
         <p style={styles.muted}>Nenhuma matéria encontrada.</p>
       ) : (
@@ -172,27 +201,33 @@ function BancoTab({
             <div style={styles.groupLabel}>{area.name}</div>
             <div style={{ ...styles.grid, gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(240px, 1fr))' }}>
               {items.map((s) => (
-                <div key={s.id} style={styles.catCard}>
-                  <div style={{ minWidth: 0 }}>
+                <div
+                  key={s.id}
+                  style={{ ...styles.catCard, cursor: 'pointer' }}
+                  onClick={() => openModal(s)}
+                >
+                  <div style={{ minWidth: 0, flex: 1 }}>
                     <div style={styles.catName}>{s.name}</div>
                     <div style={styles.catMeta}>
                       {s.parent_count} tópicos · {s.topic_count - s.parent_count} subtópicos
                     </div>
                   </div>
-                  {s.is_activated ? (
-                    <span style={styles.activeBadge}>
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
-                      Ativa
-                    </span>
-                  ) : (
-                    <button
-                      onClick={() => handleActivate(s)}
-                      disabled={activatingId === s.id}
-                      style={{ ...styles.activateBtn, opacity: activatingId === s.id ? 0.6 : 1 }}
-                    >
-                      {activatingId === s.id ? 'Ativando…' : '+ Ativar'}
-                    </button>
-                  )}
+                  <div onClick={(e) => e.stopPropagation()}>
+                    {s.is_activated ? (
+                      <span style={styles.activeBadge}>
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
+                        Ativa
+                      </span>
+                    ) : (
+                      <button
+                        onClick={() => handleActivate(s)}
+                        disabled={activatingId === s.id}
+                        style={{ ...styles.activateBtn, opacity: activatingId === s.id ? 0.6 : 1 }}
+                      >
+                        {activatingId === s.id ? 'Ativando…' : '+ Ativar'}
+                      </button>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
@@ -422,6 +457,156 @@ function MinhasTab({
   );
 }
 
+/* ============================================================
+   MODAL: tópicos de uma matéria do catálogo
+   ============================================================ */
+function SubjectTopicsModal({
+  subject, topics, loading, activating, onActivate, onClose,
+}: {
+  subject: CatalogSubject;
+  topics: CatalogTopic[];
+  loading: boolean;
+  activating: boolean;
+  onActivate: () => void;
+  onClose: () => void;
+}) {
+  // monta hierarquia
+  const parents = topics.filter((t) => t.parent_id === null);
+  const childrenMap = topics.reduce<Record<string, CatalogTopic[]>>((acc, t) => {
+    if (t.parent_id) (acc[t.parent_id] ??= []).push(t);
+    return acc;
+  }, {});
+
+  return (
+    <>
+      {/* Backdrop */}
+      <div
+        onClick={onClose}
+        style={{
+          position: 'fixed', inset: 0, background: 'rgba(15,23,42,.45)',
+          zIndex: 200, backdropFilter: 'blur(3px)',
+        }}
+      />
+
+      {/* Painel */}
+      <div style={{
+        position: 'fixed', top: '50%', left: '50%',
+        transform: 'translate(-50%, -50%)',
+        width: 'min(600px, 92vw)', maxHeight: '82vh',
+        background: theme.card, borderRadius: 20,
+        boxShadow: theme.shadowModal,
+        display: 'flex', flexDirection: 'column',
+        zIndex: 201, overflow: 'hidden',
+      }}>
+        {/* Cabeçalho */}
+        <div style={{
+          padding: '20px 24px 16px',
+          borderBottom: `0.5px solid ${theme.line}`,
+          display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12,
+        }}>
+          <div>
+            <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: theme.ink, letterSpacing: -0.4 }}>
+              {subject.name}
+            </h2>
+            <p style={{ margin: '4px 0 0', fontSize: 13, color: theme.inkSoft }}>
+              {subject.parent_count} tópicos · {subject.topic_count - subject.parent_count} subtópicos
+            </p>
+          </div>
+          <button
+            onClick={onClose}
+            style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: theme.inkFaint, fontSize: 20, lineHeight: 1, padding: 4, flexShrink: 0 }}
+            aria-label="Fechar"
+          >
+            ×
+          </button>
+        </div>
+
+        {/* Lista de tópicos (rolável) */}
+        <div style={{ flex: 1, overflowY: 'auto', padding: '16px 24px' }}>
+          {loading ? (
+            <p style={{ color: theme.inkFaint, fontSize: 14 }}>Carregando tópicos…</p>
+          ) : topics.length === 0 ? (
+            <p style={{ color: theme.inkFaint, fontSize: 14 }}>Nenhum tópico cadastrado.</p>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              {parents.map((parent) => {
+                const children = childrenMap[parent.id] ?? [];
+                return (
+                  <div key={parent.id} style={{ marginBottom: children.length ? 10 : 0 }}>
+                    {/* Tópico pai */}
+                    <div style={{
+                      fontSize: 14, fontWeight: 600, color: theme.ink,
+                      padding: '6px 10px', borderRadius: 8,
+                      background: 'rgba(15,23,42,.05)',
+                    }}>
+                      {parent.name}
+                    </div>
+                    {/* Subtópicos */}
+                    {children.length > 0 && (
+                      <div style={{
+                        marginLeft: 16, marginTop: 4,
+                        borderLeft: `2px solid ${theme.line}`,
+                        paddingLeft: 12,
+                        display: 'flex', flexDirection: 'column', gap: 1,
+                      }}>
+                        {children.map((child) => (
+                          <div key={child.id} style={{ fontSize: 13, color: theme.inkSoft, padding: '4px 0' }}>
+                            {child.name}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* Rodapé com ação */}
+        {!loading && (
+          <div style={{
+            padding: '14px 24px',
+            borderTop: `0.5px solid ${theme.line}`,
+            display: 'flex', justifyContent: 'flex-end', gap: 10,
+          }}>
+            <button onClick={onClose} style={{
+              padding: '10px 18px', borderRadius: 10, border: `0.5px solid ${theme.line}`,
+              background: 'transparent', color: theme.inkSoft, fontSize: 14, fontWeight: 500,
+              cursor: 'pointer', fontFamily: 'inherit',
+            }}>
+              Fechar
+            </button>
+            {subject.is_activated ? (
+              <span style={{
+                display: 'inline-flex', alignItems: 'center', gap: 6,
+                padding: '10px 18px', borderRadius: 10,
+                background: theme.okBg, color: theme.ok, fontSize: 14, fontWeight: 600,
+              }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
+                Matéria ativa
+              </span>
+            ) : (
+              <button
+                onClick={onActivate}
+                disabled={activating}
+                style={{
+                  padding: '10px 20px', borderRadius: 10, border: 'none',
+                  background: theme.teal, color: theme.onTeal,
+                  fontSize: 14, fontWeight: 600, cursor: activating ? 'wait' : 'pointer',
+                  fontFamily: 'inherit', opacity: activating ? 0.7 : 1,
+                }}
+              >
+                {activating ? 'Ativando…' : '+ Ativar matéria'}
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+    </>
+  );
+}
+
 const styles: Record<string, React.CSSProperties> = {
   header: { marginBottom: 20 },
   h1: { fontSize: 30, fontWeight: 800, color: theme.ink, letterSpacing: -0.8, margin: 0 },
@@ -488,7 +673,7 @@ const styles: Record<string, React.CSSProperties> = {
   colorBar: { width: 10, height: 36, borderRadius: 3, flexShrink: 0 },
   myCardTop: { display: 'flex', alignItems: 'center', gap: 8 },
   myCardName: { fontSize: 15, color: theme.ink, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
-  ownTag: { fontSize: 11, padding: '2px 7px', borderRadius: 999, background: theme.muted, color: theme.inkFaint, flexShrink: 0 },
+  ownTag: { fontSize: 11, padding: '2px 7px', borderRadius: 999, background: 'rgba(15,23,42,.05)', color: theme.inkFaint, flexShrink: 0 },
   myTrack: { height: 6, background: theme.muted, borderRadius: 999, overflow: 'hidden', marginTop: 8 },
   myFill: { height: '100%', borderRadius: 999, transition: 'width 0.4s cubic-bezier(.2,.7,.3,1)' },
   myMeta: { fontSize: 12, color: theme.inkSoft, marginTop: 4 },

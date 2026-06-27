@@ -346,10 +346,10 @@ export default function SchedulePage() {
                     <>
                       <div style={styles.progressLabels}>
                         <span style={styles.progressText}>{fmtH(done)} de {fmtH(planned)}</span>
-                        <span style={{ ...styles.progressPct, color: pct === 100 ? theme.teal : theme.inkSoft }}>{pct}%</span>
+                        <span style={{ ...styles.progressPct, color: pct === 100 ? theme.ok : theme.inkSoft }}>{pct}%</span>
                       </div>
                       <div style={styles.progressTrack}>
-                        <div style={{ ...styles.progressFill, width: `${pct}%`, background: pct === 100 ? theme.teal : theme.tealSoft }} />
+                        <div style={{ ...styles.progressFill, width: `${pct}%`, background: pct === 100 ? theme.ok : theme.tealSoft }} />
                       </div>
                     </>
                   ) : (
@@ -548,7 +548,7 @@ const styles: Record<string, React.CSSProperties> = {
   recBtnGhost: { display: 'inline-flex', alignItems: 'center', padding: '8px 12px', borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.teal, background: theme.card, color: theme.inkSoft, fontSize: 12.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
   cycleBtn: { display: 'inline-flex', alignItems: 'center', padding: '8px 12px', borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.teal,  background: theme.card, color: theme.inkSoft, fontSize: 12.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
   genBtn: { display: 'inline-flex', alignItems: 'center', padding: '8px 14px', borderRadius: theme.radiusSm, border: 'none', background: theme.teal, color: '#fff', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
-  viewToggle: { display: 'flex', gap: 3, background: theme.muted, borderRadius: theme.radiusSm, padding: 3 },
+  viewToggle: { display: 'flex', gap: 3, background: 'rgba(15,23,42,.06)', borderRadius: theme.radiusSm, padding: 3 },
   viewBtn: { padding: '7px 16px', border: 'none', background: 'transparent', color: theme.inkSoft, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', borderRadius: theme.radiusSm - 2 },
   viewBtnOn: { background: theme.card, color: theme.teal, boxShadow: theme.shadow },
   error: { color: theme.danger, fontSize: 13, marginBottom: 12 },

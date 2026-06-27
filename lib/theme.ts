@@ -13,6 +13,10 @@ export const theme = {
   inkSoft: 'var(--ink-soft)',
   inkFaint: 'var(--ink-faint)',
 
+  /* primary = botão primário (#143D45). teal = verde sucesso/progresso (#22C55E). */
+  primary: 'var(--primary)',
+  primaryHover: 'var(--primary-hover)',
+
   teal: 'var(--teal)',
   tealDeep: 'var(--teal-deep)',
   tealSoft: 'var(--teal-soft)',
@@ -30,12 +34,18 @@ export const theme = {
   warn: 'var(--warn)', warnBg: 'var(--warn-bg)',
   crit: 'var(--crit)', critBg: 'var(--crit-bg)',
 
+  info: 'var(--info)',    infoBg: 'var(--info-bg)',
+
   shadow: 'var(--shadow)',
+  shadowCard: 'var(--shadow-card)',
   shadowHover: 'var(--shadow-hover)',
+  shadowModal: 'var(--shadow-modal)',
 
   radius: 16,
-  radiusSm: 10,
-  font: "var(--font-geist-sans), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+  radiusSm: 12,
+  radiusXs: 8,
+  radiusLg: 24,
+  font: "var(--font-poppins), Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
 } as const;
 
 // Réguas de página — AMBAS alinhadas à esquerda, mesmo padding inicial.

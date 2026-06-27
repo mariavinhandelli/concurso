@@ -132,7 +132,7 @@ const styles: Record<string, React.CSSProperties> = {
   list: { display: 'flex', flexDirection: 'column', gap: 12 },
   ruleCard: { borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, borderRadius: theme.radiusSm, padding: 14 },
   ruleType: { display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 },
-  typeBadge: { fontSize: 11, fontWeight: 700, color: theme.inkSoft, background: theme.muted, padding: '3px 9px', borderRadius: 6, letterSpacing: 0.3 },
+  typeBadge: { fontSize: 11, fontWeight: 700, color: theme.inkSoft, background: 'rgba(15,23,42,.05)', padding: '3px 9px', borderRadius: 6, letterSpacing: 0.3 },
   typeBadgeCiclo: { color: theme.tealDeep, background: theme.tealBg },
   metaInfo: { fontSize: 12, color: theme.inkSoft },
   ruleMaterias: { display: 'flex', flexDirection: 'column', gap: 7, marginBottom: 12 },

@@ -11,9 +11,9 @@ import { theme } from '@/lib/theme';
 import { useUI } from '@/components/layout/UIContext';
 
 const COR = {
-  meta: '#1fb370',        // bateu a meta
-  estudou: theme.tealSoft, // estudou (sem bater meta)
-  falhou: '#9f9e9e',       // cinza — quebrou sequência
+  meta: '#22c55e',        // bateu a meta
+  estudou: '#6366F1', // estudou (sem bater meta)
+  falhou: '#e5e7e2',       // cinza — quebrou sequência
   vazio: theme.muted,      // ainda não comecei
 };
 
@@ -81,7 +81,7 @@ export function StreakBar() {
 
       {/* Legenda discreta embaixo */}
       <div style={styles.legend}>
-        <span style={styles.legendItem}><i style={{ ...styles.lDot, background: COR.meta }} /> meta</span>
+        <span style={styles.legendItem}><i style={{ ...styles.lDot, background: COR.meta }} />bateu a meta</span>
         <span style={styles.legendItem}><i style={{ ...styles.lDot, background: COR.estudou }} /> estudou</span>
         <span style={styles.legendItem}><i style={{ ...styles.lDot, background: COR.falhou }} /> falhou</span>
         <span style={styles.legendItem}><i style={{ ...styles.lDot, background: COR.vazio }} /> sem registro</span>

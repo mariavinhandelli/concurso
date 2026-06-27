@@ -221,7 +221,7 @@ const styles: Record<string, React.CSSProperties> = {
   summaryTotal: { fontSize: 20, fontWeight: 600, color: theme.inkFaint },
   summaryLabel: { fontSize: 13.5, color: theme.inkSoft, fontWeight: 500 },
   summaryTrack: { height: 8, borderRadius: 99, background: theme.muted, overflow: 'hidden' },
-  summaryFill: { height: '100%', borderRadius: 99, background: theme.teal, transition: 'width .4s ease' },
+  summaryFill: { height: '100%', borderRadius: 99, background: theme.ok, transition: 'width .4s ease' },
 
   section: { marginBottom: 32 },
   sectionHead: { marginBottom: 14 },

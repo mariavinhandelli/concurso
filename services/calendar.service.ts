@@ -36,7 +36,7 @@ export async function listEvents(startDate: string, endDate: string): Promise<Ca
       date: t.next_review_date,
       type: 'topic',
       label: t.name,
-      color: subj?.color ?? '#6BA89A',
+      color: subj?.color ?? '#22C55E',
     });
   }
 
@@ -59,7 +59,7 @@ export async function listEvents(startDate: string, endDate: string): Promise<Ca
       date,
       type: 'flashcard',
       label: `${count} flashcard${count > 1 ? 's' : ''}`,
-      color: '#7B9CC9',
+      color: '#6366F1',
     });
   }
 
@@ -88,7 +88,7 @@ export async function listEvents(startDate: string, endDate: string): Promise<Ca
       date: r.date,
       type: 'reminder',
       label: r.title,
-      color: '#22484C',
+      color: '#143D45',
       reminderId: r.id,
     });
   }

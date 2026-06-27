@@ -253,9 +253,9 @@ const styles: Record<string, React.CSSProperties> = {
   muted: { color: theme.inkFaint, fontSize: 14 },
 
   filters: { display: 'flex', gap: 12, marginBottom: 26, flexWrap: 'wrap', alignItems: 'center' },
-  segment: { display: 'flex', gap: 3, padding: 3, background: theme.muted, borderRadius: 10, flexShrink: 0 },
+  segment: { display: 'flex', gap: 3, padding: 3, background: 'rgba(15,23,42,.06)', borderRadius: 10, flexShrink: 0 },
   segmentBtn: { padding: '7px 14px', borderRadius: 7, border: 'none', background: 'transparent', color: theme.inkSoft, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
-  segmentActive: { background: theme.card, color: theme.teal, boxShadow: theme.shadow },
+  segmentActive: { background: theme.card, color: theme.ink, boxShadow: theme.shadow },
   searchWrap: { position: 'relative', flex: 1, minWidth: 200, display: 'flex', alignItems: 'center' },
   searchIcon: { position: 'absolute', left: 12, pointerEvents: 'none' },
   search: { width: '100%', boxSizing: 'border-box', padding: '10px 34px 10px 36px', borderRadius: 10, border: `0.5px solid ${theme.line}`, background: theme.card, fontSize: 14, color: theme.ink, fontFamily: 'inherit', outline: 'none' },

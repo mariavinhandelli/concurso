@@ -250,7 +250,7 @@ const styles: Record<string, React.CSSProperties> = {
   focusContainer: { width: '100%', maxWidth: 560, padding: '40px 24px', position: 'relative' },
   exitFocus: { position: 'absolute', top: 16, right: 16, border: 'none', background: 'transparent', color: theme.inkFaint, fontSize: 14, cursor: 'pointer', fontFamily: 'inherit' },
 
-  tabs: { display: 'flex', gap: 4, marginBottom: 24, padding: 3, background: theme.muted, borderRadius: 12, width: 'fit-content' },
+  tabs: { display: 'flex', gap: 4, marginBottom: 24, padding: 3, background: 'rgba(15,23,42,.06)', borderRadius: 12, width: 'fit-content' },
   tab: { padding: '8px 18px', borderRadius: 9, border: 'none', background: 'transparent', color: theme.inkSoft, fontSize: 14, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit', transition: 'all .15s' },
   tabActive: { background: theme.card, color: theme.ink, boxShadow: theme.shadow, fontWeight: 600 },
 
@@ -260,7 +260,7 @@ const styles: Record<string, React.CSSProperties> = {
   muted: { color: theme.inkFaint, fontSize: 14 },
   list: { display: 'flex', flexDirection: 'column', gap: 8 },
   navItem: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, background: theme.card, borderRadius: 12, border: `0.5px solid ${theme.line}`, padding: '13px 15px', cursor: 'pointer', fontSize: 14, color: theme.ink, fontWeight: 500, minWidth: 0 },
-  count: { fontSize: 11, color: theme.inkSoft, background: theme.muted, padding: '2px 8px', borderRadius: 10, fontWeight: 600, flexShrink: 0 },
+  count: { fontSize: 11, color: theme.inkSoft, background: 'rgba(15,23,42,.05)', padding: '2px 8px', borderRadius: 10, fontWeight: 600, flexShrink: 0 },
   studyBtn: { padding: '5px 13px', borderRadius: 8, border: 'none', background: theme.tealBg, color: theme.tealDeep, fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', flexShrink: 0 },
   cardsHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, flexWrap: 'wrap' },
   studyTopicBtn: { padding: '7px 15px', borderRadius: 10, border: 'none', background: theme.teal, color: '#fff', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', flexShrink: 0 },

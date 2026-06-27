@@ -63,8 +63,23 @@ export default function ResetPasswordPage() {
     <main style={styles.page}>
       <div style={styles.card}>
         <div style={styles.brand}>
-          <div style={styles.logoDot} />
-          <span style={styles.brandText}>Gerenciador de Estudos</span>
+          <svg width="18" height="18" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="rp-g1" x1="118" y1="96" x2="319" y2="245" gradientUnits="userSpaceOnUse">
+                <stop offset="0" stopColor="#22C55E"/><stop offset="1" stopColor="#A7F5D0"/>
+              </linearGradient>
+              <linearGradient id="rp-g2" x1="118" y1="242" x2="287" y2="303" gradientUnits="userSpaceOnUse">
+                <stop offset="0" stopColor="#A7F5D0"/><stop offset="1" stopColor="#93C5FD"/>
+              </linearGradient>
+              <linearGradient id="rp-g3" x1="175" y1="290" x2="312" y2="421" gradientUnits="userSpaceOnUse">
+                <stop offset="0" stopColor="#6366F1"/><stop offset="1" stopColor="#4338CA"/>
+              </linearGradient>
+            </defs>
+            <path d="M118 151C118 120.624 142.624 96 173 96H331C359.719 96 383 119.281 383 148C383 176.719 359.719 200 331 200H222C193.281 200 170 223.281 170 252V252H118V151Z" fill="url(#rp-g1)"/>
+            <path d="M170 252C170 223.281 193.281 200 222 200H292C320.719 200 344 223.281 344 252C344 280.719 320.719 304 292 304H170V252Z" fill="url(#rp-g2)"/>
+            <path d="M175 304H227V361C227 391.376 202.376 416 172 416C142.177 416 118 391.823 118 362C118 330 143 304 175 304Z" fill="url(#rp-g3)"/>
+          </svg>
+          <span style={styles.brandText}>focali</span>
         </div>
 
         <h1 style={styles.title}>Redefinir senha</h1>
@@ -135,7 +150,7 @@ const styles: Record<string, React.CSSProperties> = {
     alignItems: 'center',
     justifyContent: 'center',
     padding: 20,
-    fontFamily: 'var(--font-geist-sans), Arial, sans-serif',
+    fontFamily: 'var(--font-poppins), Inter, Arial, sans-serif',
   },
   card: {
     background: 'var(--card)',
@@ -158,10 +173,11 @@ const styles: Record<string, React.CSSProperties> = {
     background: 'var(--teal)',
   },
   brandText: {
-    fontSize: 13,
-    fontWeight: 600,
-    color: 'var(--ink-soft)',
-    letterSpacing: 0.2,
+    fontSize: 17,
+    fontWeight: 700,
+    color: 'var(--ink)',
+    letterSpacing: -0.4,
+    fontFamily: 'var(--font-poppins), Inter, Arial, sans-serif',
   },
   title: {
     margin: 0,

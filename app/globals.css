@@ -6,74 +6,108 @@
    :root sozinho = Petróleo claro (padrão, evita flash antes do JS).
    =================================================================== */
 
-/* ---- PADRÃO: Petróleo claro (idêntico ao atual) ---- */
+/* ---- PADRÃO: Focali claro ---- */
 :root,
 [data-palette="petroleo"][data-mode="light"] {
-  --bg: #FAF8F3;
+  --bg:  #fffffa;
   --card: #FFFFFF;
-  --muted: #F0ECE3;
-  --line: rgba(40,40,30,.10);
-  --line-strong: rgba(40,40,30,.18);
-  --ink: #16221F;
-  --ink-soft: #5C5A52;
-  --ink-faint: #AEA99D;
+  --muted: #F1F5F9;
+  --line: rgba(15,23,42,.08);
+  --line-strong: rgba(15,23,42,.16);
+  --ink: #0F172A;
+  --ink-soft: #475569;
+  --ink-faint: #94A3B8;
 
-  --teal: #22484C;
-  --teal-deep: #142E31;
-  --teal-soft: #6BA89A;
-  --teal-bg: #E4EDE8;
+  /* teal = cor primária dos botões CTA (dark petróleo, mesma do sidebar) */
+  --teal: #143D45;
+  --teal-deep: #194A53;
+  --teal-soft: #A7F5D0;
+  --teal-bg: #EEF2F3;
   --on-teal: #FFFFFF;
 
-  --clay: #C2613D;
-  --clay-deep: #8F4226;
-  --clay-soft: #E0A284;
-  --clay-bg: #F7EAE2;
+  --clay: #6366F1;
+  --clay-deep: #4338CA;
+  --clay-soft: #A5B4FC;
+  --clay-bg: #EEF2FF;
 
-  --danger: #A3352B;
-  --danger-bg: #F6E5E2;
-  --ok: #16A34A;     --ok-bg: #E7F5EC;
-  --warn: #ecb127;   --warn-bg: #FBF0E0;
-  --crit: #DC2626;   --crit-bg: #FBE9E9;
+  --danger: #EF4444;
+  --danger-bg: #FEE2E2;
+  --ok: #22C55E;     --ok-bg: #DCFCE7;
+  --warn: #F59E0B;   --warn-bg: #FEF3C7;
+  --crit: #EF4444;   --crit-bg: #FEE2E2;
 
-  --shadow: 0 1px 2px rgba(40,40,30,.04), 0 10px 30px -12px rgba(40,40,30,.16);
-  --shadow-hover: 0 2px 6px rgba(40,40,30,.06), 0 18px 44px -18px rgba(40,40,30,.22);
+  --shadow: 0 2px 8px rgba(15,23,42,.05);
+  --shadow-hover: 0 10px 32px rgba(15,23,42,.12);
+  --shadow-card: 0 8px 24px rgba(15,23,42,.08);
+  --shadow-modal: 0 18px 48px rgba(15,23,42,.10);
+
+  /* Botão primário (dark teal) — diferente de --teal (green para sucesso/progresso) */
+  --primary: #143D45;
+  --primary-hover: #194A53;
+  --primary-pressed: #0E3137;
+
+  /* Design system extras */
+  --radius-xs: 8px;
+  --radius-sm: 12px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-xl: 32px;
+  --radius-pill: 999px;
+  --anim-short: 150ms;
+  --anim-normal: 250ms;
+  --anim-long: 350ms;
+  --easing: cubic-bezier(.4,0,.2,1);
+  --info: #3B82F6;
+  --info-bg: #DBEAFE;
+  --gold: #EAB308;
+  --silver: #94A3B8;
+  --bronze: #B45309;
+  --perf-high: #22C55E;
+  --perf-medium: #F59E0B;
+  --perf-low: #EF4444;
+  --review-easy: #DCFCE7;   --review-easy-text: #166534;
+  --review-medium: #FEF3C7; --review-medium-text: #92400E;
+  --review-hard: #FEE2E2;   --review-hard-text: #991B1B;
+  --gradient-brand: linear-gradient(135deg, #22C55E 0%, #6EE7B7 45%, #6366F1 100%);
 }
 
-/* ---- Petróleo escuro (idêntico ao atual) ---- */
+/* ---- Focali escuro ---- */
 [data-palette="petroleo"][data-mode="dark"] {
-  --bg: #1A1E1C;
-  --card: #232926;
-  --muted: #2C322F;
+  --bg: #0A0F1A;
+  --card: #111827;
+  --muted: #1F2937;
   --line: rgba(255,255,255,.07);
   --line-strong: rgba(255,255,255,.14);
-  --ink: #ECEEEC;
-  --ink-soft: #9DA39E;
-  --ink-faint: #7E857F;
+  --ink: #F1F5F9;
+  --ink-soft: #94A3B8;
+  --ink-faint: #64748B;
 
-  --teal: #5B9B92;
-  --teal-deep: #8FC4B8;
-  --teal-soft: #5B9B92;
-  --teal-bg: #1F3330;
-  --on-teal: #FFFFFF;
+  --teal: #4ADE80;
+  --teal-deep: #22C55E;
+  --teal-soft: #A7F5D0;
+  --teal-bg: #052e16;
+  --on-teal: #052e16;
 
-  --clay: #F0876A;
-  --clay-deep: #F0A284;
-  --clay-soft: #C2613D;
-  --clay-bg: #3A2823;
+  --clay: #818CF8;
+  --clay-deep: #6366F1;
+  --clay-soft: #A5B4FC;
+  --clay-bg: #1e1b4b;
 
-  --danger: #F08A7E;
-  --danger-bg: #3A2422;
-  --ok: #4ADE80;     --ok-bg: #142A1C;
-  --warn: #FBBF6B;   --warn-bg: #332512;
+  --danger: #F87171;
+  --danger-bg: #3A1E1E;
+  --ok: #4ADE80;     --ok-bg: #052e16;
+  --warn: #FBBF24;   --warn-bg: #2D1B00;
   --crit: #F87171;   --crit-bg: #3A1E1E;
 
-  --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 30px -12px rgba(0,0,0,.5);
-  --shadow-hover: 0 2px 6px rgba(0,0,0,.4), 0 18px 44px -18px rgba(0,0,0,.6);
+  --shadow: 0 2px 8px rgba(0,0,0,.30);
+  --shadow-hover: 0 10px 32px rgba(0,0,0,.50);
+  --shadow-card: 0 8px 24px rgba(0,0,0,.35);
+  --shadow-modal: 0 18px 48px rgba(0,0,0,.50);
 }
 
 /* ---- Rosé claro ---- */
 [data-palette="rose"][data-mode="light"] {
-  --bg: #FAF8F3;
+  --bg: #fffffa;
   --card: #FFFFFF;
   --muted: #F3ECE9;
   --line: rgba(60,40,40,.10);
@@ -137,7 +171,7 @@
 
 /* ---- Menta claro ---- */
 [data-palette="menta"][data-mode="light"] {
-  --bg: #FAF8F3;
+  --bg: #fffffa;
   --card: #FFFFFF;
   --muted: #ECF3EF;
   --line: rgba(30,55,45,.10);
@@ -201,7 +235,7 @@
 
 /* ---- Grafite claro (mono sóbrio) ---- */
 [data-palette="grafite"][data-mode="light"] {
-  --bg: #FAF8F3;
+  --bg: #fffffa;
   --card: #FFFFFF;
   --muted: #ECEAE4;
   --line: rgba(27,34,31,.12);
@@ -267,30 +301,29 @@
    Mantém contraste correto independentemente da primária.
    =================================================================== */
 
-/* Petróleo */
-/* Petróleo */
+/* Focali */
 :root,
 [data-palette="petroleo"][data-mode="light"] {
-  --sidebar-bg: #22484C;
+  --sidebar-bg: linear-gradient(180deg, #143D45 0%, #10363D 100%);
   --sidebar-ink: #FFFFFF;
-  --sidebar-ink-idle: #FFFFFF;
-  --sidebar-icon: #D2DAE7;
-  --sidebar-active: rgba(255,255,255,0.16);
-  --sidebar-hover: rgba(255,255,255,0.08);
-  --sidebar-border: rgba(255,255,255,0.10);
-  --sidebar-tag: rgba(255,255,255,0.55);
-  --sidebar-logo-ink: #22484C;
-}
-[data-palette="petroleo"][data-mode="dark"] {
-  --sidebar-bg: #1E2C2A;
-  --sidebar-ink: #ECEEEC;
-  --sidebar-ink-idle: #C8D0CC;
-  --sidebar-icon: #8FA39C;
+  --sidebar-ink-idle: rgba(255,255,255,0.78);
+  --sidebar-icon: rgba(255,255,255,0.50);
   --sidebar-active: rgba(255,255,255,0.12);
-  --sidebar-hover: rgba(255,255,255,0.06);
+  --sidebar-hover: rgba(255,255,255,0.08);
   --sidebar-border: rgba(255,255,255,0.08);
   --sidebar-tag: rgba(255,255,255,0.45);
-  --sidebar-logo-ink: #1E2C2A;
+  --sidebar-logo-ink: #22C55E;
+}
+[data-palette="petroleo"][data-mode="dark"] {
+  --sidebar-bg: linear-gradient(180deg, #0D2D34 0%, #091F25 100%);
+  --sidebar-ink: #F1F5F9;
+  --sidebar-ink-idle: rgba(241,245,249,0.68);
+  --sidebar-icon: rgba(241,245,249,0.40);
+  --sidebar-active: rgba(255,255,255,0.12);
+  --sidebar-hover: rgba(255,255,255,0.06);
+  --sidebar-border: rgba(255,255,255,0.07);
+  --sidebar-tag: rgba(255,255,255,0.40);
+  --sidebar-logo-ink: #4ADE80;
 }
 
 /* Rosé */
@@ -367,8 +400,7 @@
 
 
 @theme inline {
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-poppins);
 }
 
 html {
@@ -378,7 +410,7 @@ html {
 body {
   background: var(--bg);
   color: var(--ink);
-  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  font-family: var(--font-poppins), 'Inter', Arial, Helvetica, sans-serif;
   transition: background .2s ease;
 }
 

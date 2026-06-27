@@ -112,14 +112,44 @@ export function Sidebar() {
         {!isCollapsed && (
           <div style={styles.brandInner}>
             <div style={styles.logo}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={SB.logoInk} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M4 19V5M4 19h16M8 15l3-4 3 2 4-6" />
+              <svg width="22" height="22" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <linearGradient id="sb-g1" x1="118" y1="96" x2="319" y2="245" gradientUnits="userSpaceOnUse">
+                    <stop offset="0" stopColor="#22C55E"/><stop offset="1" stopColor="#A7F5D0"/>
+                  </linearGradient>
+                  <linearGradient id="sb-g2" x1="118" y1="242" x2="287" y2="303" gradientUnits="userSpaceOnUse">
+                    <stop offset="0" stopColor="#A7F5D0"/><stop offset="1" stopColor="#93C5FD"/>
+                  </linearGradient>
+                  <linearGradient id="sb-g3" x1="175" y1="290" x2="312" y2="421" gradientUnits="userSpaceOnUse">
+                    <stop offset="0" stopColor="#6366F1"/><stop offset="1" stopColor="#4338CA"/>
+                  </linearGradient>
+                </defs>
+                <path d="M118 151C118 120.624 142.624 96 173 96H331C359.719 96 383 119.281 383 148C383 176.719 359.719 200 331 200H222C193.281 200 170 223.281 170 252V252H118V151Z" fill="url(#sb-g1)"/>
+                <path d="M170 252C170 223.281 193.281 200 222 200H292C320.719 200 344 223.281 344 252C344 280.719 320.719 304 292 304H170V252Z" fill="url(#sb-g2)"/>
+                <path d="M175 304H227V361C227 391.376 202.376 416 172 416C142.177 416 118 391.823 118 362C118 330 143 304 175 304Z" fill="url(#sb-g3)"/>
               </svg>
             </div>
-            <div>
-              <div style={styles.brandName}>Gerenciador</div>
-              <div style={styles.brandTag}>DE ESTUDOS</div>
-            </div>
+            <div style={styles.brandName}>focali</div>
+          </div>
+        )}
+        {isCollapsed && (
+          <div style={styles.logo}>
+            <svg width="22" height="22" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="sb-g1c" x1="118" y1="96" x2="319" y2="245" gradientUnits="userSpaceOnUse">
+                  <stop offset="0" stopColor="#22C55E"/><stop offset="1" stopColor="#A7F5D0"/>
+                </linearGradient>
+                <linearGradient id="sb-g2c" x1="118" y1="242" x2="287" y2="303" gradientUnits="userSpaceOnUse">
+                  <stop offset="0" stopColor="#A7F5D0"/><stop offset="1" stopColor="#93C5FD"/>
+                </linearGradient>
+                <linearGradient id="sb-g3c" x1="175" y1="290" x2="312" y2="421" gradientUnits="userSpaceOnUse">
+                  <stop offset="0" stopColor="#6366F1"/><stop offset="1" stopColor="#4338CA"/>
+                </linearGradient>
+              </defs>
+              <path d="M118 151C118 120.624 142.624 96 173 96H331C359.719 96 383 119.281 383 148C383 176.719 359.719 200 331 200H222C193.281 200 170 223.281 170 252V252H118V151Z" fill="url(#sb-g1c)"/>
+              <path d="M170 252C170 223.281 193.281 200 222 200H292C320.719 200 344 223.281 344 252C344 280.719 320.719 304 292 304H170V252Z" fill="url(#sb-g2c)"/>
+              <path d="M175 304H227V361C227 391.376 202.376 416 172 416C142.177 416 118 391.823 118 362C118 330 143 304 175 304Z" fill="url(#sb-g3c)"/>
+            </svg>
           </div>
         )}
         {isMobile ? (
@@ -169,12 +199,11 @@ export function Sidebar() {
 }
 
 const styles: Record<string, CSSProperties> = {
-  aside: { flexShrink: 0, height: '100vh', position: 'fixed', top: 0, left: 0, zIndex: 30, background: SB.bg, borderRight: `0.5px solid ${SB.border}`, padding: '20px 14px', display: 'flex', flexDirection: 'column', gap: 4, fontFamily: 'var(--font-geist-sans), sans-serif', overflow: 'hidden' },
+  aside: { flexShrink: 0, height: '100vh', position: 'fixed', top: 0, left: 0, zIndex: 30, background: SB.bg, borderRight: `0.5px solid ${SB.border}`, padding: '20px 14px', display: 'flex', flexDirection: 'column', gap: 4, fontFamily: 'var(--font-poppins), sans-serif', overflow: 'hidden' },
   brand: { display: 'flex', alignItems: 'center', height: 40, marginBottom: 18, padding: '0 4px' },
   brandInner: { display: 'flex', alignItems: 'center', gap: 10 },
-  logo: { width: 32, height: 32, borderRadius: 9, background: '#fff', display: 'grid', placeItems: 'center', flexShrink: 0 },
-  brandName: { fontWeight: 800, fontSize: 15, color: '#fff', letterSpacing: -0.3, whiteSpace: 'nowrap' },
-  brandTag: { fontSize: 9.5, color: SB.tagText, fontWeight: 600, letterSpacing: 0.6, whiteSpace: 'nowrap' },
+  logo: { width: 32, height: 32, borderRadius: 9, background: 'rgba(255,255,255,0.06)', display: 'grid', placeItems: 'center', flexShrink: 0 },
+  brandName: { fontWeight: 700, fontSize: 20, color: '#fff', letterSpacing: -0.5, whiteSpace: 'nowrap', fontFamily: 'var(--font-poppins), sans-serif' },
   collapseBtn: { width: 30, height: 30, borderRadius: 8, border: 'none', background: 'transparent', display: 'grid', placeItems: 'center', cursor: 'pointer', flexShrink: 0 },
   nav: { display: 'flex', flexDirection: 'column', gap: 4 },
   item: { display: 'flex', alignItems: 'center', gap: 12, padding: '10px 12px', height: 40, borderRadius: 10, border: 'none', textAlign: 'left', cursor: 'pointer', fontSize: 14, transition: 'background .15s, color .15s', fontFamily: 'inherit', whiteSpace: 'nowrap' },

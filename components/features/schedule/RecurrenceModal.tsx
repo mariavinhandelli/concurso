@@ -262,7 +262,7 @@ const styles: Record<string, React.CSSProperties> = {
   modal: { background: theme.card, borderRadius: theme.radius, boxShadow: '0 20px 60px rgba(0,0,0,0.18)', padding: 24, width: '100%', maxWidth: 480, maxHeight: '88vh', overflowY: 'auto', fontFamily: theme.font },
   h2: { fontSize: 18, fontWeight: 700, color: theme.ink, margin: 0 },
   subtitle: { fontSize: 13, color: theme.inkSoft, margin: '4px 0 16px', lineHeight: 1.5 },
-  modeToggle: { display: 'flex', gap: 4, background: theme.muted, borderRadius: theme.radiusSm, padding: 4, marginBottom: 8 },
+  modeToggle: { display: 'flex', gap: 4, background: 'rgba(15,23,42,.06)', borderRadius: theme.radiusSm, padding: 4, marginBottom: 8 },
   modeBtn: { flex: 1, padding: '9px 0', border: 'none', background: 'transparent', color: theme.inkSoft, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', borderRadius: theme.radiusSm - 2 },
   modeBtnOn: { background: theme.card, color: theme.teal, boxShadow: theme.shadow },
   modeHint: { fontSize: 12, color: theme.inkFaint, margin: '0 0 8px', lineHeight: 1.5 },

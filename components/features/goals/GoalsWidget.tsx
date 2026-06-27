@@ -86,7 +86,7 @@ export function GoalsWidget() {
               </span>
             </div>
             <div style={styles.track}>
-              <div style={{ ...styles.fill, width: `${todayPct}%`, background: theme.teal }} />
+              <div style={{ ...styles.fill, width: `${todayPct}%`, background: theme.ok }} />
             </div>
           </div>
 

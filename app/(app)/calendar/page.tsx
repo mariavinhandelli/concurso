@@ -23,23 +23,54 @@ function toLocalISO(d: Date): string {
   return `${y}-${m}-${day}`;
 }
 
+/* Retorna fundo sutil por tipo para os chips nas células */
+function chipBg(type: CalendarEvent['type'], color: string): string {
+  const hex = color.replace('#', '');
+  const r = parseInt(hex.slice(0, 2), 16);
+  const g = parseInt(hex.slice(2, 4), 16);
+  const b = parseInt(hex.slice(4, 6), 16);
+  return `rgba(${r},${g},${b},0.10)`;
+}
+
 function EventIcon({ type, color, size = 11 }: { type: CalendarEvent['type']; color: string; size?: number }) {
+  const sw = size >= 16 ? 1.8 : 2;
   const common = {
     width: size, height: size, viewBox: '0 0 24 24', fill: 'none',
-    stroke: color, strokeWidth: 2.2, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const,
+    stroke: color, strokeWidth: sw, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const,
     style: { flexShrink: 0 },
   };
   if (type === 'exam') {
-    return (<svg {...common}><path d="M4 21.4V2.6a.6.6 0 0 1 .6-.6h11.652a.6.6 0 0 1 .424.176l3.148 3.148A.6.6 0 0 1 20 5.75V21.4a.6.6 0 0 1-.6.6H4.6a.6.6 0 0 1-.6-.6"></path>
-    <path d="M16 2v3.4a.6.6 0 0 0 .6.6H20"></path></svg>);
+    return (
+      <svg {...common}>
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+        <path d="M14 2v6h6M9 13h6M9 17h4" />
+      </svg>
+    );
   }
   if (type === 'flashcard') {
-    return (<svg {...common}><rect x="3" y="7" width="14" height="13" rx="2" /><path d="m21 12l-9 4l-9-4m18 4l-9 4l-9-4m18-8l-9 4l-9-4l9-4z" /></svg>);
+    return (
+      <svg {...common}>
+        <rect x="2" y="7" width="20" height="14" rx="2" />
+        <path d="M16 3H8a2 2 0 0 0-2 2v2h12V5a2 2 0 0 0-2-2z" />
+      </svg>
+    );
   }
   if (type === 'reminder') {
-    return (<svg {...common}><path d="M18 8a6 6 0 00-12 0c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.7 21a2 2 0 01-3.4 0" /></svg>);
+    return (
+      <svg {...common}>
+        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+        <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+      </svg>
+    );
   }
-  return (<svg {...common}><path d="M4 12a8 8 0 0113-6.2L20 8M20 4v4h-4M20 12a8 8 0 01-13 6.2L4 16M4 20v-4h4" /><path d="M4 5v14" /></svg>);
+  // topic (revisão)
+  return (
+    <svg {...common}>
+      <path d="M1 4v6h6" />
+      <path d="M23 20v-6h-6" />
+      <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4-4.64 4.36A9 9 0 0 1 3.51 15" />
+    </svg>
+  );
 }
 
 function tipoLabel(type: CalendarEvent['type']): string {
@@ -178,17 +209,18 @@ export default function CalendarPage() {
                     key={j}
                     style={{
                       ...styles.event,
-                      borderLeftColor: e.color,
-                      padding: isMobile ? '2px 3px' : '2px 5px',
-                      justifyContent: isMobile ? 'center' : 'flex-start',
+                      background: chipBg(e.type, e.color),
                     }}
                     title={e.label}
                   >
-                    <EventIcon type={e.type} color={e.color} />
+                    {/* Dot colorido por tipo */}
+                    <span style={{ width: 6, height: 6, borderRadius: '50%', background: e.color, flexShrink: 0, display: 'inline-block' }} />
                     {!isMobile && <span style={styles.eventLabel}>{e.label}</span>}
                   </div>
                 ))}
-                {dayEvents.length > maxEventsShown && <span style={styles.more}>+{dayEvents.length - maxEventsShown}</span>}
+                {dayEvents.length > maxEventsShown && (
+                  <span style={styles.more}>+{dayEvents.length - maxEventsShown} mais</span>
+                )}
               </div>
             </div>
           );
@@ -197,10 +229,17 @@ export default function CalendarPage() {
 
       {/* Legenda */}
       <div style={styles.legend}>
-        <span style={styles.legendItem}><EventIcon type="topic" color={theme.inkFaint} /> Revisão de tópico</span>
-        <span style={styles.legendItem}><EventIcon type="flashcard" color={theme.inkFaint} /> Flashcards</span>
-        <span style={styles.legendItem}><EventIcon type="exam" color={theme.inkFaint} /> Prova</span>
-        <span style={styles.legendItem}><EventIcon type="reminder" color={theme.inkFaint} /> Lembrete</span>
+        {([
+          { color: '#22C55E', label: 'Revisão de tópico' },
+          { color: '#6366F1', label: 'Flashcards' },
+          { color: '#EF4444', label: 'Prova' },
+          { color: '#143D45', label: 'Lembrete' },
+        ] as { color: string; label: string }[]).map((item) => (
+          <span key={item.label} style={styles.legendItem}>
+            <span style={{ width: 8, height: 8, borderRadius: '50%', background: item.color, display: 'inline-block', flexShrink: 0 }} />
+            {item.label}
+          </span>
+        ))}
       </div>
 
       {/* Painel de detalhes do dia — bottom sheet no mobile, modal no desktop */}
@@ -241,8 +280,15 @@ export default function CalendarPage() {
                 selectedEvents.map((e, j) => {
                   const isReminder = e.type === 'reminder';
                   return (
-                    <div key={j} style={{ ...styles.sheetItem, borderLeftColor: e.color }}>
-                      <EventIcon type={e.type} color={e.color} size={16} />
+                    <div key={j} style={{ ...styles.sheetItem }}>
+                      {/* Ícone do tipo com fundo colorido sutil */}
+                      <div style={{
+                        width: 36, height: 36, borderRadius: 10, flexShrink: 0,
+                        background: chipBg(e.type, e.color),
+                        display: 'grid', placeItems: 'center',
+                      }}>
+                        <EventIcon type={e.type} color={e.color} size={16} />
+                      </div>
                       <div style={styles.sheetItemInfo}>
                         <span style={styles.sheetItemLabel}>{e.label}</span>
                         <span style={styles.sheetItemType}>{tipoLabel(e.type)}</span>
@@ -328,7 +374,7 @@ const styles: Record<string, React.CSSProperties> = {
   sub: { fontSize: 14.5, color: theme.inkSoft, margin: '6px 0 0', fontWeight: 500, textTransform: 'capitalize' },
   controls: { display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' },
   addReminderBtn: { padding: '8px 14px', borderRadius: 10, border: 'none', background: theme.teal, color: '#fff', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
-  modeToggle: { display: 'flex', gap: 4, padding: 3, background: theme.muted, borderRadius: 12, marginRight: 4 },
+  modeToggle: { display: 'flex', gap: 4, padding: 3, background: 'rgba(15,23,42,.06)', borderRadius: 12, marginRight: 4 },
   modeBtn: { padding: '6px 14px', borderRadius: 9, border: 'none', background: 'transparent', color: theme.inkSoft, fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit', transition: 'all .15s' },
   modeBtnActive: { background: theme.card, color: theme.ink, boxShadow: theme.shadow, fontWeight: 600 },
   navBtn: { width: 36, height: 36, borderRadius: 10, border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.inkSoft, fontSize: 18, cursor: 'pointer', display: 'grid', placeItems: 'center' },
@@ -336,17 +382,32 @@ const styles: Record<string, React.CSSProperties> = {
   weekHeader: { display: 'grid', gridTemplateColumns: 'repeat(7, minmax(0, 1fr))', gap: 8, marginBottom: 8 },
   weekDay: { textAlign: 'center', fontSize: 11.5, color: theme.inkFaint, fontWeight: 600, letterSpacing: 0.5, textTransform: 'uppercase' },
   grid: { display: 'grid', gridTemplateColumns: 'repeat(7, minmax(0, 1fr))', gap: 8 },
-  cell: { minWidth: 0, minHeight: 96, background: theme.card, borderRadius: 12, border: `0.5px solid ${theme.line}`, padding: 8, display: 'flex', flexDirection: 'column', gap: 4, overflow: 'hidden', cursor: 'pointer' },
-  cellOther: { background: 'transparent', opacity: 0.45 },
-  cellSelected: { border: `1.5px solid ${theme.teal}` },
-  dayNum: { fontSize: 13, color: theme.inkSoft, fontWeight: 500 },
-  dayNumToday: { background: theme.teal, color: '#fff', borderRadius: '50%', width: 24, height: 24, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700 },
-  events: { display: 'flex', flexDirection: 'column', gap: 3, minWidth: 0 },
-  event: { display: 'flex', alignItems: 'center', gap: 5, fontSize: 10.5, color: theme.ink, background: theme.bg, borderRadius: 5, padding: '2px 5px', borderLeftWidth: 3, borderLeftStyle: 'solid', minWidth: 0, overflow: 'hidden' },
-  eventLabel: { whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 0 },
-  more: { fontSize: 10, color: theme.inkFaint, fontWeight: 500 },
-  legend: { display: 'flex', gap: 20, marginTop: 22, flexWrap: 'wrap' },
-  legendItem: { display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: theme.inkFaint },
+  cell: {
+    minWidth: 0, minHeight: 96, background: theme.card,
+    borderRadius: 12, border: `0.5px solid ${theme.line}`,
+    padding: 8, display: 'flex', flexDirection: 'column', gap: 4,
+    overflow: 'hidden', cursor: 'pointer',
+    transition: 'box-shadow .15s, border-color .15s',
+  },
+  cellOther: { background: 'transparent', opacity: 0.38 },
+  cellSelected: { border: `1.5px solid ${theme.teal}`, boxShadow: `0 0 0 3px ${theme.tealBg}` },
+  dayNum: { fontSize: 13, color: theme.inkSoft, fontWeight: 500, lineHeight: 1 },
+  dayNumToday: {
+    background: theme.teal, color: '#fff', borderRadius: '50%',
+    width: 24, height: 24, display: 'inline-flex', alignItems: 'center',
+    justifyContent: 'center', fontWeight: 700, fontSize: 13,
+  },
+  events: { display: 'flex', flexDirection: 'column', gap: 2, minWidth: 0 },
+  event: {
+    display: 'flex', alignItems: 'center', gap: 5,
+    fontSize: 11.5, fontWeight: 500, color: theme.ink,
+    borderRadius: 6, padding: '3px 7px',
+    minWidth: 0, overflow: 'hidden',
+  },
+  eventLabel: { whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 0, flex: 1 },
+  more: { fontSize: 11, color: theme.inkFaint, fontWeight: 500, paddingLeft: 2 },
+  legend: { display: 'flex', gap: 18, marginTop: 20, flexWrap: 'wrap', padding: '10px 0 0', borderTop: `0.5px solid ${theme.line}` },
+  legendItem: { display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: theme.inkSoft, fontWeight: 500 },
 
   // --- Painel de detalhes (sheet/modal) ---
   overlay: { position: 'fixed', inset: 0, zIndex: 60, background: 'rgba(20,28,30,.46)', display: 'flex', justifyContent: 'center', padding: 0 },
@@ -360,10 +421,15 @@ const styles: Record<string, React.CSSProperties> = {
   sheetClose: { width: 32, height: 32, borderRadius: 8, border: 'none', background: theme.muted, display: 'grid', placeItems: 'center', cursor: 'pointer', flexShrink: 0 },
   sheetList: { display: 'flex', flexDirection: 'column', gap: 8, overflowY: 'auto', flex: 1 },
   sheetEmpty: { fontSize: 14, color: theme.inkFaint, textAlign: 'center', padding: '20px 0', margin: 0 },
-  sheetItem: { display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px', background: theme.bg, borderRadius: 10, borderLeftWidth: 3, borderLeftStyle: 'solid', minWidth: 0 },
-  sheetItemInfo: { flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 1 },
-  sheetItemLabel: { fontSize: 14.5, color: theme.ink, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
-  sheetItemType: { fontSize: 12, color: theme.inkFaint },
+  sheetItem: {
+    display: 'flex', alignItems: 'center', gap: 12,
+    padding: '12px 14px', background: theme.bg,
+    borderRadius: 12, borderLeft: 'none', minWidth: 0,
+    border: `0.5px solid ${theme.line}`,
+  },
+  sheetItemInfo: { flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 2 },
+  sheetItemLabel: { fontSize: 14.5, color: theme.ink, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
+  sheetItemType: { fontSize: 12, color: theme.inkSoft, fontWeight: 400 },
   sheetItemDel: { width: 30, height: 30, borderRadius: 8, border: 'none', background: 'transparent', display: 'grid', placeItems: 'center', cursor: 'pointer', flexShrink: 0 },
   addForm: { display: 'flex', gap: 8, marginTop: 14, flexWrap: 'wrap' },
   addInput: { flex: 1, minWidth: 140, padding: '11px 14px', borderRadius: 10, border: `0.5px solid ${theme.line}`, background: theme.bg, fontSize: 14, color: theme.ink, fontFamily: 'inherit', outline: 'none' },
