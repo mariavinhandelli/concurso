@@ -205,25 +205,6 @@ export default function LoginPage() {
             }} />
 
 
-            {/* Dots — canto inferior-esquerdo, sangra -6px pela margem */}
-            <div style={{
-              position: 'absolute',
-              bottom: 24,
-              left: 0,
-              transform: 'translateX(-6px)',
-              display: 'grid',
-              gridTemplateColumns: 'repeat(5, 16px)',
-              gridTemplateRows: 'repeat(3, 16px)',
-              zIndex: 1,
-            }}>
-              {Array.from({ length: 15 }).map((_, i) => (
-                <div key={i} style={{
-                  width: 5, height: 5, borderRadius: '50%',
-                  background: i % 5 < 2 ? '#22C55E' : i % 5 === 2 ? '#199446' : '#075825',
-                  opacity: 0.65,
-                }} />
-              ))}
-            </div>
           </div>
 
           {/* CONTEÚDO — z-index: 1, sempre acima dos blobs */}

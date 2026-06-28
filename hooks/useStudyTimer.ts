@@ -67,7 +67,7 @@ export function useStudyTimer() {
     }
   }, []);
 
-  // Força o timer para idle e limpa storage do usuário dado
+  // Para e limpa o timer de um usuário específico
   const resetForUser = useCallback((uid: string) => {
     stopTicking();
     timerRef.current = null;
@@ -78,68 +78,44 @@ export function useStudyTimer() {
     setStatus('idle');
   }, [stopTicking]);
 
-  // Inicializa e restaura o timer do usuário correto
+  // Centralizado no onAuthStateChange — o Supabase dispara INITIAL_SESSION
+  // imediatamente ao subscrever, antes de qualquer interação do usuário.
+  // Isso garante que userIdRef.current esteja sempre preenchido antes do
+  // primeiro clique, sem depender de getUser() assíncrono.
   useEffect(() => {
     const supabase = createClient();
 
-    async function init() {
-      const { data: { user } } = await supabase.auth.getUser();
-      const uid = user?.id ?? null;
-      userIdRef.current = uid;
+    // Limpa chaves legadas (formato antigo sem userId)
+    clearLegacyTimerData();
 
-      // Remove dados legados (chaves sem userId) de sessões antigas
-      clearLegacyTimerData();
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      const newUid = session?.user?.id ?? null;
+      const prevUid = userIdRef.current;
 
-      if (!uid) return;
+      // Sem mudança de usuário — ignora (evita loop no INITIAL_SESSION)
+      if (newUid === prevUid) return;
 
-      const pending = loadPendingSession(uid);
+      // Limpa timer do usuário anterior
+      if (prevUid) resetForUser(prevUid);
+      userIdRef.current = newUid;
+
+      if (!newUid) return;
+
+      // Restaura estado do novo usuário (timer ou pending session)
+      const pending = loadPendingSession(newUid);
       if (pending) {
         setPendingSession(pending);
         setElapsedSec(pending.durationSec);
         setStatus('awaiting_feedback');
         return;
       }
-
-      const restored = loadTimer(uid);
+      const restored = loadTimer(newUid);
       if (restored) {
         timerRef.current = restored;
         const paused = isPausedFn(restored);
         setStatus(paused ? 'paused' : 'running');
         syncElapsed();
         if (!paused) startTicking();
-      }
-    }
-
-    init();
-
-    // Escuta mudanças de autenticação — ao trocar de usuário, zera o timer
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      const newUid = session?.user?.id ?? null;
-      const prevUid = userIdRef.current;
-
-      if (newUid !== prevUid) {
-        // Limpa timer do usuário anterior (se havia)
-        if (prevUid) resetForUser(prevUid);
-        userIdRef.current = newUid;
-
-        if (newUid) {
-          // Restaura timer do novo usuário (se existir)
-          const pending = loadPendingSession(newUid);
-          if (pending) {
-            setPendingSession(pending);
-            setElapsedSec(pending.durationSec);
-            setStatus('awaiting_feedback');
-            return;
-          }
-          const restored = loadTimer(newUid);
-          if (restored) {
-            timerRef.current = restored;
-            const paused = isPausedFn(restored);
-            setStatus(paused ? 'paused' : 'running');
-            syncElapsed();
-            if (!paused) startTicking();
-          }
-        }
       }
     });
 
