@@ -7,6 +7,7 @@ import {
   type RecallGrade,
 } from '@/lib/spaced-repetition';
 import { localDateInDays, toLocalDateString } from '@/lib/local-date';
+import { getArchivedSubjectIds } from '@/services/catalog.service';
 
 export type ReviewRating = 'dificil' | 'intermediario' | 'facil';
 const RATING_TO_GRADE: Record<ReviewRating, RecallGrade> = {
@@ -119,13 +120,20 @@ export async function listDueCards(): Promise<DueCard[]> {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return [];
 
-  const { data, error } = await supabase
+  const archivedIds = await getArchivedSubjectIds();
+
+  let query = supabase
     .from('flashcards')
     .select('id, front, back, topic_id, subject_id, source_error_id, is_review_active, next_review_date, created_at, subjects(name, color)')
     .eq('user_id', user.id)
     .eq('is_review_active', true)
     .order('next_review_date', { ascending: true });
 
+  if (archivedIds.length > 0) {
+    query = query.not('subject_id', 'in', `(${archivedIds.join(',')})`);
+  }
+
+  const { data, error } = await query;
   if (error) throw new Error('Erro ao listar revisões: ' + error.message);
 
   return (data ?? [])
@@ -228,9 +236,10 @@ export async function buildDailyQueue(): Promise<QueueCard[]> {
   if (!user) return [];
 
   const today = toLocalDateString();
+  const archivedIds = await getArchivedSubjectIds();
 
   // Pendentes: têm data e ela já venceu.
-  const { data: pendingData } = await supabase
+  let pendingQ = supabase
     .from('flashcards')
     .select('id, front, back, next_review_date, subjects(name, color)')
     .eq('user_id', user.id)
@@ -238,15 +247,19 @@ export async function buildDailyQueue(): Promise<QueueCard[]> {
     .not('next_review_date', 'is', null)
     .lte('next_review_date', today)
     .order('next_review_date', { ascending: true });
+  if (archivedIds.length > 0) pendingQ = pendingQ.not('subject_id', 'in', `(${archivedIds.join(',')})`);
 
   // Novos: nunca revisados (sem data).
-  const { data: newData } = await supabase
+  let newQ = supabase
     .from('flashcards')
     .select('id, front, back, next_review_date, subjects(name, color)')
     .eq('user_id', user.id)
     .is('next_review_date', null)
     .order('created_at', { ascending: true })
     .limit(DAILY_NEW_LIMIT);
+  if (archivedIds.length > 0) newQ = newQ.not('subject_id', 'in', `(${archivedIds.join(',')})`);
+
+  const [{ data: pendingData }, { data: newData }] = await Promise.all([pendingQ, newQ]);
 
   const pending = (pendingData ?? []).map(toQueueCard);
   const news = (newData ?? []).map(toQueueCard);

@@ -158,6 +158,25 @@ export async function getCatalogTopics(subjectCatalogId: string): Promise<Catalo
   return data ?? [];
 }
 
+// ---------- Utilitário de isolamento: matérias arquivadas ----------
+
+/**
+ * Retorna os IDs das matérias arquivadas do usuário atual.
+ * Usado para excluir flashcards, revisões e tópicos de matérias arquivadas
+ * de qualquer query — garantindo que o arquivamento seja respeitado em toda a app.
+ */
+export async function getArchivedSubjectIds(): Promise<string[]> {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return [];
+  const { data } = await supabase
+    .from('subjects')
+    .select('id')
+    .eq('user_id', user.id)
+    .eq('status', 'arquivado');
+  return (data ?? []).map((s) => s.id);
+}
+
 // ---------- Ativação ----------
 
 // Ativa uma matéria do catálogo: copia matéria + tópicos para o usuário.

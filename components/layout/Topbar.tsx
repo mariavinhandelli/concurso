@@ -9,12 +9,14 @@ import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { theme } from '@/lib/theme';
 import { useUI } from './UIContext';
+import { useTimer } from '@/components/features/timer/TimerContext';
 import { ManualLogModal } from '@/components/features/timer/ManualLogModal';
 import { NotificationBell } from './NotificationBell';
 
 export function Topbar() {
   const router = useRouter();
   const { theme: mode, toggleTheme, avatarUrl, setAvatarUrl, isMobile, toggleMobile } = useUI();
+  const timer = useTimer();
   const [email, setEmail] = useState<string | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [logOpen, setLogOpen] = useState(false);
@@ -37,6 +39,9 @@ export function Topbar() {
   }, []);
 
   async function handleLogout() {
+    // Limpa o timer ANTES de navegar — o router.push desmonta o componente
+    // antes do onAuthStateChange disparar, então o abandon() precisa ser síncrono aqui.
+    timer.abandon();
     const supabase = createClient();
     await supabase.auth.signOut();
     router.push('/login');

@@ -5,6 +5,7 @@ import {
   type RecallGrade,
 } from '@/lib/spaced-repetition';
 import { localDateInDays } from '@/lib/local-date';
+import { getArchivedSubjectIds } from '@/services/catalog.service';
 
 export type ReviewRating = 'dificil' | 'intermediario' | 'facil';
 const RATING_TO_GRADE: Record<ReviewRating, RecallGrade> = {
@@ -55,13 +56,20 @@ export async function listDueReviews(): Promise<ReviewItem[]> {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return [];
 
-  const { data, error } = await supabase
+  const archivedIds = await getArchivedSubjectIds();
+
+  let query = supabase
     .from('topics')
     .select('id, name, subject_id, next_review_date, subjects(name, color)')
     .eq('user_id', user.id)
     .eq('is_review_active', true)
     .order('next_review_date', { ascending: true });
 
+  if (archivedIds.length > 0) {
+    query = query.not('subject_id', 'in', `(${archivedIds.join(',')})`);
+  }
+
+  const { data, error } = await query;
   if (error) throw new Error('Erro ao listar revisões: ' + error.message);
 
   return (data ?? [])

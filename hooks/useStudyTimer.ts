@@ -1,5 +1,6 @@
 // hooks/useStudyTimer.ts
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { createClient } from '@/lib/supabase/client';
 import {
   type PersistedTimer,
   type PendingSession,
@@ -12,6 +13,7 @@ import {
   loadPendingSession,
   savePendingSession,
   clearPendingSession,
+  clearLegacyTimerData,
   computeElapsedSec,
   isPaused as isPausedFn,
 } from '@/lib/timer-storage';
@@ -44,6 +46,8 @@ export function useStudyTimer() {
 
   const timerRef = useRef<PersistedTimer | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  // userId da sessão atual — null enquanto carrega
+  const userIdRef = useRef<string | null>(null);
 
   const syncElapsed = useCallback(() => {
     const state = timerRef.current;
@@ -63,29 +67,88 @@ export function useStudyTimer() {
     }
   }, []);
 
+  // Força o timer para idle e limpa storage do usuário dado
+  const resetForUser = useCallback((uid: string) => {
+    stopTicking();
+    timerRef.current = null;
+    clearTimer(uid);
+    clearPendingSession(uid);
+    setPendingSession(null);
+    setElapsedSec(0);
+    setStatus('idle');
+  }, [stopTicking]);
+
+  // Inicializa e restaura o timer do usuário correto
   useEffect(() => {
-    const pending = loadPendingSession();
-    if (pending) {
-      queueMicrotask(() => {
+    const supabase = createClient();
+
+    async function init() {
+      const { data: { user } } = await supabase.auth.getUser();
+      const uid = user?.id ?? null;
+      userIdRef.current = uid;
+
+      // Remove dados legados (chaves sem userId) de sessões antigas
+      clearLegacyTimerData();
+
+      if (!uid) return;
+
+      const pending = loadPendingSession(uid);
+      if (pending) {
         setPendingSession(pending);
         setElapsedSec(pending.durationSec);
         setStatus('awaiting_feedback');
-      });
-      return () => stopTicking();
-    }
+        return;
+      }
 
-    const restored = loadTimer();
-    if (restored) {
-      timerRef.current = restored;
-      const paused = isPausedFn(restored);
-      queueMicrotask(() => {
+      const restored = loadTimer(uid);
+      if (restored) {
+        timerRef.current = restored;
+        const paused = isPausedFn(restored);
         setStatus(paused ? 'paused' : 'running');
         syncElapsed();
         if (!paused) startTicking();
-      });
+      }
     }
-    return () => stopTicking();
-  }, [startTicking, stopTicking, syncElapsed]);
+
+    init();
+
+    // Escuta mudanças de autenticação — ao trocar de usuário, zera o timer
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      const newUid = session?.user?.id ?? null;
+      const prevUid = userIdRef.current;
+
+      if (newUid !== prevUid) {
+        // Limpa timer do usuário anterior (se havia)
+        if (prevUid) resetForUser(prevUid);
+        userIdRef.current = newUid;
+
+        if (newUid) {
+          // Restaura timer do novo usuário (se existir)
+          const pending = loadPendingSession(newUid);
+          if (pending) {
+            setPendingSession(pending);
+            setElapsedSec(pending.durationSec);
+            setStatus('awaiting_feedback');
+            return;
+          }
+          const restored = loadTimer(newUid);
+          if (restored) {
+            timerRef.current = restored;
+            const paused = isPausedFn(restored);
+            setStatus(paused ? 'paused' : 'running');
+            syncElapsed();
+            if (!paused) startTicking();
+          }
+        }
+      }
+    });
+
+    return () => {
+      stopTicking();
+      subscription.unsubscribe();
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     const onVisible = () => {
@@ -97,8 +160,10 @@ export function useStudyTimer() {
 
   const start = useCallback(
     ({ mode, topicId = null, subjectId = null, boardId = null }: StartParams) => {
-      if (timerRef.current) return;
+      const uid = userIdRef.current;
+      if (!uid || timerRef.current) return;
       const state: PersistedTimer = {
+        userId: uid,
         sessionId: createSessionId(),
         startedAt: Date.now(),
         mode, topicId, subjectId, boardId,
@@ -143,10 +208,12 @@ export function useStudyTimer() {
   const stop = useCallback(() => {
     const state = timerRef.current;
     if (!state) return;
+    const uid = state.userId;
     const endedAt = Date.now();
     const durationSec = computeElapsedSec(state, endedAt);
     stopTicking();
     const pending: PendingSession = {
+      userId: uid,
       sessionId: state.sessionId,
       startedAt: state.startedAt,
       endedAt, durationSec,
@@ -157,7 +224,7 @@ export function useStudyTimer() {
       source: 'timer',
     };
     savePendingSession(pending);
-    clearTimer();
+    clearTimer(uid);
     timerRef.current = null;
     setElapsedSec(durationSec);
     setPendingSession(pending);
@@ -165,11 +232,30 @@ export function useStudyTimer() {
   }, [stopTicking]);
 
   const discardPending = useCallback(() => {
-    clearPendingSession();
+    const uid = userIdRef.current;
+    if (uid) clearPendingSession(uid);
     setPendingSession(null);
     setElapsedSec(0);
     setStatus('idle');
   }, []);
+
+  /**
+   * Para e descarta o timer imediatamente, sem salvar log.
+   * Deve ser chamado ANTES de fazer logout para garantir que o
+   * localStorage seja limpo antes da navegação desmontar o componente.
+   */
+  const abandon = useCallback(() => {
+    const uid = userIdRef.current;
+    stopTicking();
+    timerRef.current = null;
+    if (uid) {
+      clearTimer(uid);
+      clearPendingSession(uid);
+    }
+    setPendingSession(null);
+    setElapsedSec(0);
+    setStatus('idle');
+  }, [stopTicking]);
 
   return {
     status,
@@ -178,6 +264,6 @@ export function useStudyTimer() {
     isRunning: status === 'running',
     isPaused: status === 'paused',
     pendingSession,
-    start, pause, resume, stop, discardPending,
+    start, pause, resume, stop, discardPending, abandon,
   };
 }

@@ -3,8 +3,21 @@ import type { SessionMode } from '@/lib/session-modes';
 
 export type LogMode = SessionMode;
 
-const ACTIVE_STORAGE_KEY = 'study_timer_active_session';
-const PENDING_STORAGE_KEY = 'study_timer_pending_session';
+// Chaves escopadas por userId — impede que um usuário herde o timer de outro
+// no mesmo browser. Nunca use chaves globais para estado de sessão do usuário.
+function activeKey(userId: string) { return `study_timer_active_${userId}`; }
+function pendingKey(userId: string) { return `study_timer_pending_${userId}`; }
+
+// Chaves legadas (sem userId) — usadas apenas para migração/limpeza.
+const LEGACY_ACTIVE_KEY = 'study_timer_active_session';
+const LEGACY_PENDING_KEY = 'study_timer_pending_session';
+
+/** Remove qualquer dado de timer legado (sem userId) do localStorage. */
+export function clearLegacyTimerData(): void {
+  if (typeof window === 'undefined') return;
+  window.localStorage.removeItem(LEGACY_ACTIVE_KEY);
+  window.localStorage.removeItem(LEGACY_PENDING_KEY);
+}
 
 export interface PauseInterval {
   from: number;
@@ -12,6 +25,7 @@ export interface PauseInterval {
 }
 
 export interface PersistedTimer {
+  userId: string;       // obrigatório — chave de isolamento por usuário
   sessionId: string;
   startedAt: number;
   mode: LogMode;
@@ -22,6 +36,7 @@ export interface PersistedTimer {
 }
 
 export interface PendingSession {
+  userId: string;       // obrigatório — chave de isolamento por usuário
   sessionId: string;
   startedAt: number;
   endedAt: number;
@@ -40,12 +55,15 @@ export function createSessionId(): string {
   return `sess_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
 }
 
-export function loadTimer(): PersistedTimer | null {
+export function loadTimer(userId: string): PersistedTimer | null {
   if (typeof window === 'undefined') return null;
   try {
-    const raw = window.localStorage.getItem(ACTIVE_STORAGE_KEY);
+    const raw = window.localStorage.getItem(activeKey(userId));
     if (!raw) return null;
-    return JSON.parse(raw) as PersistedTimer;
+    const parsed = JSON.parse(raw) as PersistedTimer;
+    // Dupla verificação: rejeita sessões de outro userId
+    if (parsed.userId && parsed.userId !== userId) { clearTimer(userId); return null; }
+    return parsed;
   } catch {
     return null;
   }
@@ -53,39 +71,41 @@ export function loadTimer(): PersistedTimer | null {
 
 export function saveTimer(state: PersistedTimer): void {
   if (typeof window === 'undefined') return;
-  window.localStorage.setItem(ACTIVE_STORAGE_KEY, JSON.stringify(state));
+  window.localStorage.setItem(activeKey(state.userId), JSON.stringify(state));
 }
 
-export function clearTimer(): void {
+export function clearTimer(userId: string): void {
   if (typeof window === 'undefined') return;
-  window.localStorage.removeItem(ACTIVE_STORAGE_KEY);
+  window.localStorage.removeItem(activeKey(userId));
 }
 
-export function loadPendingSession(): PendingSession | null {
+export function loadPendingSession(userId: string): PendingSession | null {
   if (typeof window === 'undefined') return null;
   try {
-    const raw = window.localStorage.getItem(PENDING_STORAGE_KEY);
+    const raw = window.localStorage.getItem(pendingKey(userId));
     if (!raw) return null;
     const pending = JSON.parse(raw) as PendingSession;
     if (!pending.sessionId || pending.durationSec < 0 || pending.endedAt < pending.startedAt) {
-      clearPendingSession();
+      clearPendingSession(userId);
       return null;
     }
+    // Rejeita sessão de outro usuário
+    if (pending.userId && pending.userId !== userId) { clearPendingSession(userId); return null; }
     return pending;
   } catch {
-    clearPendingSession();
+    clearPendingSession(userId);
     return null;
   }
 }
 
 export function savePendingSession(session: PendingSession): void {
   if (typeof window === 'undefined') return;
-  window.localStorage.setItem(PENDING_STORAGE_KEY, JSON.stringify(session));
+  window.localStorage.setItem(pendingKey(session.userId), JSON.stringify(session));
 }
 
-export function clearPendingSession(): void {
+export function clearPendingSession(userId: string): void {
   if (typeof window === 'undefined') return;
-  window.localStorage.removeItem(PENDING_STORAGE_KEY);
+  window.localStorage.removeItem(pendingKey(userId));
 }
 
 export function sumPauses(pauses: PauseInterval[], now: number): number {

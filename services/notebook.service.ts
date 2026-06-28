@@ -1,5 +1,6 @@
 // services/notebook.service.ts
 import { createClient } from '@/lib/supabase/client';
+import { getArchivedSubjectIds } from '@/services/catalog.service';
 
 export const ERROR_TYPES = [
   'Pegadinha',
@@ -155,11 +156,12 @@ export async function countNotesBySubject(): Promise<Record<string, number>> {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return {};
 
-  const { data, error } = await supabase
-    .from('error_notebooks')
-    .select('subject_id')
-    .eq('user_id', user.id);
+  const archivedIds = await getArchivedSubjectIds();
 
+  let query = supabase.from('error_notebooks').select('subject_id').eq('user_id', user.id);
+  if (archivedIds.length > 0) query = query.not('subject_id', 'in', `(${archivedIds.join(',')})`);
+
+  const { data, error } = await query;
   if (error) throw new Error('Erro ao contar: ' + error.message);
   const counts: Record<string, number> = {};
   for (const row of data ?? []) {
@@ -186,22 +188,27 @@ export async function listNotesByBoard(boardId: string): Promise<ErrorNote[]> {
   return data ?? [];
 }
 
-// Lista erros criados nos últimos N dias (atravessa toda a hierarquia).
+// Lista erros criados nos últimos N dias — exclui matérias arquivadas.
 export async function listRecentNotes(days: number): Promise<ErrorNote[]> {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return [];
 
+  const archivedIds = await getArchivedSubjectIds();
+
   const desde = new Date();
   desde.setDate(desde.getDate() - days);
 
-  const { data, error } = await supabase
+  let query = supabase
     .from('error_notebooks')
     .select('*')
     .eq('user_id', user.id)
     .gte('created_at', desde.toISOString())
     .order('created_at', { ascending: false });
 
+  if (archivedIds.length > 0) query = query.not('subject_id', 'in', `(${archivedIds.join(',')})`);
+
+  const { data, error } = await query;
   if (error) throw new Error('Erro ao listar recentes: ' + error.message);
   return data ?? [];
 }
@@ -220,12 +227,21 @@ export async function listCriticalTopics(): Promise<CriticalTopic[]> {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return [];
 
+  const archivedIds = await getArchivedSubjectIds();
+
   // 1) Todos os erros que têm tópico, com nome do tópico e da matéria.
-  const { data: notes, error } = await supabase
+  let notesQ = supabase
     .from('error_notebooks')
-    .select('topic_id, topics(name, subjects(name))')
+    .select('topic_id, topics(name, subject_id, subjects(name))')
     .eq('user_id', user.id)
     .not('topic_id', 'is', null);
+
+  // Exclui tópicos de matérias arquivadas
+  if (archivedIds.length > 0) {
+    notesQ = notesQ.not('topics.subject_id', 'in', `(${archivedIds.join(',')})`);
+  }
+
+  const { data: notes, error } = await notesQ;
 
   if (error) throw new Error('Erro ao agrupar críticos: ' + error.message);
 

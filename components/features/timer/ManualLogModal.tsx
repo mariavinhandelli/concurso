@@ -8,6 +8,7 @@ import { listSubjects, type Subject } from '@/services/subjects.service';
 import { listTopics, type Topic } from '@/services/topics.service';
 import { saveStudyLog, type ErrorCause } from '@/services/studyLogs.service';
 import { SESSION_MODES, modeUsesQuestions } from '@/lib/session-modes';
+import { createClient } from '@/lib/supabase/client';
 import {
   createSessionId,
   type LogMode,
@@ -84,7 +85,12 @@ export function ManualLogModal({ onClose, onSaved }: Props) {
     const start = new Date(date + 'T12:00:00');
     const end = new Date(start.getTime() + totalMin * 60 * 1000);
 
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) { setError('Você precisa estar logado.'); setSaving(false); return; }
+
     const session: PendingSession = {
+      userId: user.id,
       sessionId: sessionIdRef.current,
       topicId: topicId || null,
       subjectId,
