@@ -3,7 +3,6 @@
 // construção, rosa-poeira = frágil. Sem dado = barra neutra "não medido".
 'use client';
 
-import { theme } from '@/lib/theme';
 
 interface Props {
   saude?: number; // undefined = nunca medido (sem sessão de questões)

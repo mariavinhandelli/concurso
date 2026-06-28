@@ -151,7 +151,7 @@ export function GeneratorModal({ onClose, onGenerated, presetExamId }: Props) {
   function toggleDia(weekday: number) {
     setDiasSemana((prev) => {
       const next = new Set(prev);
-      next.has(weekday) ? next.delete(weekday) : next.add(weekday);
+      if (next.has(weekday)) next.delete(weekday); else next.add(weekday);
       return next;
     });
   }

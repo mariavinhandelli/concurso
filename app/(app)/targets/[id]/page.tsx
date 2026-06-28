@@ -3,8 +3,9 @@
 // "Verticalizado" (vinculados, com saúde, progresso e ajuste de peso por tópico).
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { useToast } from '@/components/ui/ToastProvider';
 import { listSubjects, type Subject } from '@/services/subjects.service';
 import { listTopics, type Topic } from '@/services/topics.service';
 import { listTargetExams, type TargetExam } from '@/services/targetExams.service';
@@ -56,8 +57,9 @@ export default function TargetDetailPage() {
   const [generatorOpen, setGeneratorOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const toast = useToast();
 
-  async function load() {
+  const load = useCallback(async () => {
     try {
       const [targets, subjects] = await Promise.all([listTargetExams(), listSubjects()]);
       const alvo = targets.find((t) => t.id === targetId) ?? null;
@@ -67,8 +69,11 @@ export default function TargetDetailPage() {
       const todosTopicos: Topic[] = [];
       for (const s of subjects) {
         const tops = await listTopics(s.id);
-        arvore.push({ subject: s, topics: tops });
-        todosTopicos.push(...tops);
+        // Exclui tópicos-pasta (pai de outros): só mostra folhas estudáveis.
+        const parentIds = new Set(tops.filter((t) => t.parent_id !== null).map((t) => t.parent_id!));
+        const leafTopics = tops.filter((t) => !parentIds.has(t.id));
+        arvore.push({ subject: s, topics: leafTopics });
+        todosTopicos.push(...leafTopics);
       }
       setTree(arvore);
 
@@ -81,7 +86,6 @@ export default function TargetDetailPage() {
       setLinked(linkedIds);
       setSaudeMap(saude);
       setTopicWeights(tWeights);
-      // Mapa subject_id -> peso da disciplina (pra mostrar o valor herdado) + blueprint completo.
       const sw: Record<string, number> = {};
       const bpMap: Record<string, Blueprint> = {};
       for (const b of blueprintsList) { sw[b.subject_id] = b.weight; bpMap[b.subject_id] = b; }
@@ -92,14 +96,14 @@ export default function TargetDetailPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [targetId]);
 
-  useEffect(() => { load(); }, [targetId]);
+  useEffect(() => { load(); }, [load]);
 
   function toggleExpand(subjectId: string) {
     setExpanded((prev) => {
       const novo = new Set(prev);
-      novo.has(subjectId) ? novo.delete(subjectId) : novo.add(subjectId);
+      if (novo.has(subjectId)) novo.delete(subjectId); else novo.add(subjectId);
       return novo;
     });
   }
@@ -108,7 +112,7 @@ export default function TargetDetailPage() {
     const estava = linked.has(topicId);
     setLinked((prev) => {
       const novo = new Set(prev);
-      estava ? novo.delete(topicId) : novo.add(topicId);
+      if (estava) novo.delete(topicId); else novo.add(topicId);
       return novo;
     });
     try {
@@ -116,7 +120,7 @@ export default function TargetDetailPage() {
       else await linkTopic(topicId, targetId);
     } catch (e) {
       load();
-      setError(e instanceof Error ? e.message : 'Erro ao vincular.');
+      toast.error(e instanceof Error ? e.message : 'Erro ao vincular tópico.');
     }
   }
 
@@ -132,7 +136,7 @@ export default function TargetDetailPage() {
       else await unlinkTopicsBulk(ids, targetId);
     } catch (e) {
       load();
-      setError(e instanceof Error ? e.message : 'Erro em lote.');
+      toast.error(e instanceof Error ? e.message : 'Erro ao vincular em lote.');
     }
   }
 
@@ -143,7 +147,7 @@ export default function TargetDetailPage() {
       await setTopicWeight(topicId, targetId, weight);
     } catch (e) {
       load();
-      setError(e instanceof Error ? e.message : 'Erro ao definir peso.');
+      toast.error(e instanceof Error ? e.message : 'Erro ao definir peso do tópico.');
     }
   }
 
@@ -161,7 +165,7 @@ export default function TargetDetailPage() {
         numQuestionsExpected: nQ ? Number(nQ) : null,
       });
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Erro ao salvar peso.');
+      toast.error(e instanceof Error ? e.message : 'Erro ao salvar peso da disciplina.');
     }
   }
 

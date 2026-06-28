@@ -15,9 +15,13 @@ export const DEFAULT_BOARD_COLOR = '#6BA89A'; // teal-soft do sistema
 
 export async function listAllBoards(): Promise<Board[]> {
   const supabase = createClient();
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  if (authError || !user) throw new Error('Você precisa estar logado.');
+
   const { data, error } = await supabase
     .from('exam_boards')
     .select('id, name, color')
+    .eq('user_id', user.id)
     .order('name', { ascending: true });
   if (error) throw new Error('Erro ao listar bancas: ' + error.message);
   return data ?? [];
@@ -25,8 +29,8 @@ export async function listAllBoards(): Promise<Board[]> {
 
 export async function createBoard(name: string): Promise<void> {
   const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error('Você precisa estar logado.');
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  if (authError || !user) throw new Error('Você precisa estar logado.');
 
   const { error } = await supabase.from('exam_boards').insert({
     user_id: user.id,
@@ -38,15 +42,26 @@ export async function createBoard(name: string): Promise<void> {
 
 export async function updateBoard(id: string, name: string): Promise<void> {
   const supabase = createClient();
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  if (authError || !user) throw new Error('Você precisa estar logado.');
+
   const { error } = await supabase
     .from('exam_boards')
     .update({ name: name.trim() })
-    .eq('id', id);
+    .eq('id', id)
+    .eq('user_id', user.id);
   if (error) throw new Error('Erro ao renomear banca: ' + error.message);
 }
 
 export async function deleteBoard(id: string): Promise<void> {
   const supabase = createClient();
-  const { error } = await supabase.from('exam_boards').delete().eq('id', id);
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  if (authError || !user) throw new Error('Você precisa estar logado.');
+
+  const { error } = await supabase
+    .from('exam_boards')
+    .delete()
+    .eq('id', id)
+    .eq('user_id', user.id);
   if (error) throw new Error('Erro ao apagar banca: ' + error.message);
 }

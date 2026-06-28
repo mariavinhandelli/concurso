@@ -5,6 +5,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
+import { useConfirm } from '@/hooks/useConfirm';
 import { listEvents, type CalendarEvent } from '@/services/calendar.service';
 import { createReminder, deleteReminder } from '@/services/reminders.service';
 import { theme } from '@/lib/theme';
@@ -82,6 +83,7 @@ function tipoLabel(type: CalendarEvent['type']): string {
 
 export default function CalendarPage() {
   const { isMobile } = useUI();
+  const { confirm, dialog } = useConfirm();
   const [mode, setMode] = useState<Mode>('month');
   const [anchor, setAnchor] = useState(new Date());
   const [events, setEvents] = useState<CalendarEvent[]>([]);
@@ -137,7 +139,7 @@ export default function CalendarPage() {
 
   async function apagarLembrete(ev: CalendarEvent) {
     if (!ev.reminderId) return;
-    if (!window.confirm(`Apagar o lembrete "${ev.label}"?`)) return;
+    if (!await confirm({ title: `Apagar o lembrete "${ev.label}"?`, confirmLabel: 'Apagar', danger: true })) return;
     try {
       await deleteReminder(ev.reminderId);
       await load();
@@ -154,6 +156,8 @@ export default function CalendarPage() {
   const selectedEvents = selectedDay ? eventsForDay(selectedDay) : [];
 
   return (
+    <>
+    {dialog}
     <div style={{ ...styles.container, padding: isMobile ? '20px 12px' : '34px 40px' }}>
       <div style={styles.header}>
         <div>
@@ -335,6 +339,7 @@ export default function CalendarPage() {
         </div>
       )}
     </div>
+    </>
   );
 }
 

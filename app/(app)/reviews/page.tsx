@@ -4,6 +4,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useConfirm } from '@/hooks/useConfirm';
 import { useRouter } from 'next/navigation';
 import {
   listDueReviews, submitReview, deactivateReview, rescheduleReview, dateInDays,
@@ -27,6 +28,7 @@ const QUICK = [
 
 export default function ReviewsPage() {
   const router = useRouter();
+  const { confirm, dialog } = useConfirm();
   const [items, setItems] = useState<ReviewItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -62,7 +64,7 @@ export default function ReviewsPage() {
   }
 
   async function handleRemove(topicId: string) {
-    if (!confirm('Tirar este tópico do ciclo de revisão?')) return;
+    if (!await confirm({ title: 'Tirar este tópico do ciclo de revisão?', description: 'Ele saíra das revisões agendadas.' })) return;
     setItems((prev) => prev.filter((i) => i.id !== topicId));
     try { await deactivateReview(topicId); }
     catch (e) { load(); setError(e instanceof Error ? e.message : 'Erro ao remover.'); }
@@ -71,6 +73,8 @@ export default function ReviewsPage() {
   const cardTotal = cardCounts ? cardCounts.pending + cardCounts.news : 0;
 
   return (
+    <>
+    {dialog}
     <div style={styles.container}>
       <div style={styles.header}>
         <h1 style={styles.h1}>Revisões de hoje</h1>
@@ -151,6 +155,7 @@ export default function ReviewsPage() {
         </div>
       )}
     </div>
+    </>
   );
 }
 

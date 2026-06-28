@@ -4,6 +4,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useConfirm } from '@/hooks/useConfirm';
 import type { PendingSession } from '@/hooks/useStudyTimer';
 import type { SessionFeedback, ErrorCause } from '@/services/studyLogs.service';
 import {
@@ -42,6 +43,20 @@ export function QualitativeFeedbackForm({ session, onSubmit, onDiscard, saving }
 
   const [reviewActive, setReviewActive] = useState(false);
   const [wantReview, setWantReview] = useState(false);
+  const { confirm: confirmDiscard, dialog: discardDialog } = useConfirm();
+
+  async function handleDiscard() {
+    const min = Math.floor(session.durationSec / 60);
+    if (!await confirmDiscard({ title: `Descartar sessão de ${min} min?`, description: 'O tempo estudado não será registrado.', confirmLabel: 'Descartar', danger: true })) return;
+    onDiscard();
+  }
+
+  useEffect(() => {
+    const h = (e: KeyboardEvent) => { if (e.key === 'Escape') handleDiscard(); };
+    document.addEventListener('keydown', h);
+    return () => document.removeEventListener('keydown', h);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     listSubjectOptions().then(setSubjects).catch(() => {});
@@ -88,6 +103,8 @@ export function QualitativeFeedbackForm({ session, onSubmit, onDiscard, saving }
   }
 
   return (
+    <>
+    {discardDialog}
     <div style={styles.overlay}>
       <div style={styles.modal}>
         <h2 style={styles.h2}>Sessão concluída</h2>
@@ -162,16 +179,23 @@ export function QualitativeFeedbackForm({ session, onSubmit, onDiscard, saving }
         <label style={styles.label}>Como foi a sessão? <span style={styles.opt}>(opcional)</span></label>
         <textarea value={feedback} onChange={(e) => setFeedback(e.target.value)} rows={2} style={styles.textarea} placeholder="O que rendeu, o que travou…" />
 
-        {energy === 0 && <p style={styles.hint}>Marque sua energia para salvar.</p>}
-
         <div style={styles.actions}>
-          <button onClick={onDiscard} style={styles.cancel} disabled={saving}>Descartar</button>
-          <button onClick={handleSubmit} style={styles.save} disabled={saving}>
-            {saving ? 'Salvando…' : 'Salvar sessão'}
-          </button>
+          <button onClick={handleDiscard} style={styles.cancel} disabled={saving}>Descartar</button>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4 }}>
+            {energy === 0 && <p style={styles.hint}>Marque sua energia para salvar.</p>}
+            <button
+              onClick={handleSubmit}
+              style={{ ...styles.save, opacity: energy === 0 || saving ? 0.5 : 1, cursor: energy === 0 || saving ? 'not-allowed' : 'pointer' }}
+              disabled={saving || energy === 0}
+              title={energy === 0 ? 'Marque seu nível de energia antes de salvar' : undefined}
+            >
+              {saving ? 'Salvando…' : 'Salvar sessão'}
+            </button>
+          </div>
         </div>
       </div>
     </div>
+    </>
   );
 }
 

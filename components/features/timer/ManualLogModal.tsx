@@ -9,6 +9,7 @@ import { listTopics, type Topic } from '@/services/topics.service';
 import { saveStudyLog, type ErrorCause } from '@/services/studyLogs.service';
 import { SESSION_MODES, modeUsesQuestions } from '@/lib/session-modes';
 import { createClient } from '@/lib/supabase/client';
+import { useConfirm } from '@/hooks/useConfirm';
 import {
   createSessionId,
   type LogMode,
@@ -48,9 +49,26 @@ export function ManualLogModal({ onClose, onSaved }: Props) {
 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const { confirm: confirmDiscard, dialog: discardDialog } = useConfirm();
+
+  const isDirty = subjectId !== '' || energy > 0 || qFeedback.trim() !== '';
+
+  async function handleOverlayClick() {
+    if (isDirty) {
+      if (!await confirmDiscard({ title: 'Descartar o registro?', description: 'As informações preenchidas serão perdidas.', confirmLabel: 'Descartar' })) return;
+    }
+    onClose();
+  }
 
   useEffect(() => {
-    listSubjects().then(setSubjects).catch(() => {});
+    const h = (e: KeyboardEvent) => { if (e.key === 'Escape') handleOverlayClick(); };
+    document.addEventListener('keydown', h);
+    return () => document.removeEventListener('keydown', h);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isDirty]);
+
+  useEffect(() => {
+    listSubjects().then(setSubjects).catch(() => setError('Erro ao carregar matérias. Recarregue a página.'));
   }, []);
 
   useEffect(() => {
@@ -82,7 +100,9 @@ export function ManualLogModal({ onClose, onSaved }: Props) {
     setSaving(true);
     setError('');
 
+    if (!date) { setError('Informe a data.'); setSaving(false); return; }
     const start = new Date(date + 'T12:00:00');
+    if (isNaN(start.getTime())) { setError('Data inválida. Verifique o campo de data.'); setSaving(false); return; }
     const end = new Date(start.getTime() + totalMin * 60 * 1000);
 
     const supabase = createClient();
@@ -127,7 +147,9 @@ export function ManualLogModal({ onClose, onSaved }: Props) {
   }
 
   return (
-    <div style={styles.overlay} onClick={onClose}>
+    <>
+    {discardDialog}
+    <div style={styles.overlay} onClick={handleOverlayClick}>
       <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
         <h2 style={styles.h2}>Registrar estudo</h2>
         <p style={styles.subtitle}>Pra quando você estudou sem o cronômetro.</p>
@@ -213,7 +235,7 @@ export function ManualLogModal({ onClose, onSaved }: Props) {
         <label style={styles.label}>Energia: {energy === 0 ? '—' : `${energy}/5`}</label>
         <input type="range" min="0" max="5" value={energy} onChange={(e) => setEnergy(Number(e.target.value))} style={styles.range} />
 
-        {error && <p style={styles.error}>{error}</p>}
+        {error && <p role="alert" aria-live="polite" style={styles.error}>{error}</p>}
 
         <div style={styles.actions}>
           <button onClick={onClose} style={styles.cancel}>Cancelar</button>
@@ -223,6 +245,7 @@ export function ManualLogModal({ onClose, onSaved }: Props) {
         </div>
       </div>
     </div>
+    </>
   );
 }
 

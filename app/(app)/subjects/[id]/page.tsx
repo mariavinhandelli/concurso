@@ -6,7 +6,8 @@
 //     estudar, editar, apagar, HealthBar. É onde toda ação acontece.
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useConfirm } from '@/hooks/useConfirm';
 import { useParams, useRouter } from 'next/navigation';
 import {
   listTopics, createTopic, createTopicsBulk, updateTopic, toggleCompleted, deleteTopic, type Topic,
@@ -24,6 +25,7 @@ export default function TopicsPage() {
   const { isMobile } = useUI();
   const subjectId = params.id as string;
 
+  const { confirm, dialog } = useConfirm();
   const [topics, setTopics] = useState<Topic[]>([]);
   const [saudeMap, setSaudeMap] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
@@ -41,7 +43,7 @@ export default function TopicsPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editText, setEditText] = useState('');
 
-  async function load() {
+  const load = useCallback(async () => {
     try {
       const lista = await listTopics(subjectId);
       setTopics(lista);
@@ -52,8 +54,8 @@ export default function TopicsPage() {
     } finally {
       setLoading(false);
     }
-  }
-  useEffect(() => { load(); }, [subjectId]);
+  }, [subjectId]);
+  useEffect(() => { load(); }, [load]);
 
   // ---------- montagem da árvore ----------
   // pais (parent_id null) na ordem; filhos agrupados por parent_id.
@@ -129,7 +131,7 @@ export default function TopicsPage() {
     const msg = isParentFolder
       ? 'Apagar este tópico e TODOS os seus subtópicos?'
       : 'Apagar este tópico?';
-    if (!confirm(msg)) return;
+    if (!await confirm({ title: msg, confirmLabel: 'Apagar', danger: true })) return;
     try { await deleteTopic(id); load(); }
     catch (e) { setError(e instanceof Error ? e.message : 'Erro ao apagar.'); }
   }
@@ -148,7 +150,7 @@ export default function TopicsPage() {
   function toggleCollapse(id: string) {
     setCollapsed((prev) => {
       const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
+      if (next.has(id)) next.delete(id); else next.add(id);
       return next;
     });
   }
@@ -285,6 +287,8 @@ export default function TopicsPage() {
   }
 
   return (
+    <>
+    {dialog}
     <div style={{ ...styles.container, padding: isMobile ? '20px 16px' : '34px 48px' }}>
       <button onClick={() => router.push('/subjects')} style={styles.back}>← Matérias</button>
 
@@ -345,6 +349,7 @@ export default function TopicsPage() {
         </div>
       )}
     </div>
+    </>
   );
 }
 

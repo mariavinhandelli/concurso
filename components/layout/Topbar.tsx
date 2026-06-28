@@ -13,6 +13,11 @@ import { useTimer } from '@/components/features/timer/TimerContext';
 import { ManualLogModal } from '@/components/features/timer/ManualLogModal';
 import { NotificationBell } from './NotificationBell';
 
+function isHttpsUrl(url: unknown): url is string {
+  if (typeof url !== 'string') return false;
+  try { return new URL(url).protocol === 'https:'; } catch { return false; }
+}
+
 export function Topbar() {
   const router = useRouter();
   const { theme: mode, toggleTheme, avatarUrl, setAvatarUrl, isMobile, toggleMobile } = useUI();
@@ -24,11 +29,14 @@ export function Topbar() {
 
   useEffect(() => {
     const supabase = createClient();
-    supabase.auth.getUser().then(({ data }) => {
-      setEmail(data.user?.email ?? null);
-      setAvatarUrl(data.user?.user_metadata?.avatar_url ?? null);
-    });
-  }, []);
+    supabase.auth.getUser()
+      .then(({ data }) => {
+        setEmail(data.user?.email ?? null);
+        const rawUrl = data.user?.user_metadata?.avatar_url;
+        setAvatarUrl(isHttpsUrl(rawUrl) ? rawUrl : null);
+      })
+      .catch(() => {});
+  }, [setAvatarUrl]);
 
   useEffect(() => {
     function onClick(e: MouseEvent) {
@@ -102,7 +110,7 @@ export function Topbar() {
         <div ref={menuRef} style={{ position: 'relative' }}>
           <button onClick={() => setMenuOpen((v) => !v)} style={styles.avatarBtn} aria-label="Menu da conta">
             {avatarUrl ? (
-              <img src={avatarUrl} alt="" style={styles.avatarImg} />
+              <img src={avatarUrl} alt="" loading="lazy" decoding="async" style={styles.avatarImg} />
             ) : (
               <span style={styles.avatarFallback}>{initial}</span>
             )}

@@ -13,6 +13,7 @@ export interface TargetExam {
   orgao: string | null;
   cargo: string | null;
   ano_alvo: number | null;
+  exam_date: string | null; // 'YYYY-MM-DD' — alimenta a contagem regressiva no home
   slug: string;
   is_primary: boolean;
   phase: 'pre' | 'pos';
@@ -41,10 +42,13 @@ async function getBoardName(boardId: string): Promise<string | null> {
 
 export async function listTargetExams(): Promise<TargetExam[]> {
   const supabase = createClient();
+  const { data: { user }, error: authErr } = await supabase.auth.getUser();
+  if (authErr || !user) throw new Error('Você precisa estar logado.');
 
   const { data, error } = await supabase
     .from('target_exams')
-    .select('id, user_id, board_id, orgao, cargo, ano_alvo, slug, is_primary, phase, created_at')
+    .select('id, user_id, board_id, orgao, cargo, ano_alvo, exam_date, slug, is_primary, phase, created_at')
+    .eq('user_id', user.id)
     .order('is_primary', { ascending: false })
     .order('created_at', { ascending: true });
 
@@ -61,11 +65,25 @@ export async function listTargetExams(): Promise<TargetExam[]> {
   })) as TargetExam[];
 }
 
+export async function updateTargetExamDate(id: string, examDate: string | null): Promise<void> {
+  const supabase = createClient();
+  const { data: { user }, error: authErr } = await supabase.auth.getUser();
+  if (authErr || !user) throw new Error('Você precisa estar logado.');
+
+  const { error } = await supabase
+    .from('target_exams')
+    .update({ exam_date: examDate })
+    .eq('id', id)
+    .eq('user_id', user.id);
+  if (error) throw new Error('Erro ao atualizar data da prova: ' + error.message);
+}
+
 export async function createTargetExam(input: {
   board_id?: string | null;
   orgao?: string | null;
   cargo?: string | null;
   ano_alvo?: number | null;
+  exam_date?: string | null;
   phase?: 'pre' | 'pos';
 }): Promise<TargetExam> {
   const supabase = createClient();
@@ -90,10 +108,11 @@ export async function createTargetExam(input: {
       orgao: input.orgao?.trim() || null,
       cargo: input.cargo?.trim() || null,
       ano_alvo: input.ano_alvo ?? null,
+      exam_date: input.exam_date ?? null,
       phase,
       slug,
     })
-    .select('id, user_id, board_id, orgao, cargo, ano_alvo, slug, is_primary, phase, created_at')
+    .select('id, user_id, board_id, orgao, cargo, ano_alvo, exam_date, slug, is_primary, phase, created_at')
     .single();
 
   if (error) {
@@ -107,13 +126,17 @@ export async function createTargetExam(input: {
 
 export async function promoteToPos(targetExamId: string, boardId?: string): Promise<void> {
   const supabase = createClient();
+  const { data: { user }, error: authErr } = await supabase.auth.getUser();
+  if (authErr || !user) throw new Error('Você precisa estar logado.');
+
   const updates: { phase: 'pos'; board_id?: string } = { phase: 'pos' };
   if (boardId) updates.board_id = boardId;
 
   const { error } = await supabase
     .from('target_exams')
     .update(updates)
-    .eq('id', targetExamId);
+    .eq('id', targetExamId)
+    .eq('user_id', user.id);
   if (error) throw new Error('Erro ao promover concurso: ' + error.message);
 }
 
@@ -132,13 +155,21 @@ export async function setPrimaryTargetExam(targetExamId: string): Promise<void> 
   const { error: setError } = await supabase
     .from('target_exams')
     .update({ is_primary: true })
-    .eq('id', targetExamId);
+    .eq('id', targetExamId)
+    .eq('user_id', user.id);
   if (setError) throw new Error('Erro ao definir primário: ' + setError.message);
 }
 
 export async function deleteTargetExam(targetExamId: string): Promise<void> {
   const supabase = createClient();
-  const { error } = await supabase.from('target_exams').delete().eq('id', targetExamId);
+  const { data: { user }, error: authErr } = await supabase.auth.getUser();
+  if (authErr || !user) throw new Error('Você precisa estar logado.');
+
+  const { error } = await supabase
+    .from('target_exams')
+    .delete()
+    .eq('id', targetExamId)
+    .eq('user_id', user.id);
   if (error) throw new Error('Erro ao excluir concurso-alvo: ' + error.message);
 }
 

@@ -7,14 +7,21 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { getSuggestions, type SuggestedTopic } from '@/services/suggestion.service';
 import { theme } from '@/lib/theme';
+import { Skeleton } from '@/components/ui/Skeleton';
 
 export function NextTopicCard() {
   const router = useRouter();
   const [sugestoes, setSugestoes] = useState<SuggestedTopic[] | null>(null);
+  const [hasError, setHasError] = useState(false);
   const [aberto, setAberto] = useState(false);
 
   useEffect(() => {
-    getSuggestions().then(setSugestoes).catch(() => setSugestoes([]));
+    getSuggestions()
+      .then(setSugestoes)
+      .catch(() => {
+        setHasError(true);
+        setSugestoes([]);
+      });
   }, []);
 
   function estudar(s: SuggestedTopic) {
@@ -22,7 +29,29 @@ export function NextTopicCard() {
   }
 
   if (sugestoes === null) {
-    return <div style={styles.card}><p style={styles.muted}>Carregando sugestão…</p></div>;
+    return (
+      <div style={styles.card}>
+        {/* eyebrow */}
+        <Skeleton width={170} height={11} borderRadius={4} style={{ marginBottom: 14 }} />
+        {/* main row: info + botão */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 14 }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <Skeleton height={20} borderRadius={6} style={{ marginBottom: 7 }} />
+            <Skeleton width="55%" height={13} borderRadius={4} />
+          </div>
+          <Skeleton width={118} height={40} borderRadius={10} style={{ flexShrink: 0 }} />
+        </div>
+      </div>
+    );
+  }
+
+  if (hasError) {
+    return (
+      <div style={styles.card}>
+        <span style={styles.eyebrow}>Próximo tópico</span>
+        <p style={styles.emptyMsg}>Não foi possível carregar as sugestões. Recarregue a página.</p>
+      </div>
+    );
   }
 
   // Nada pendente → mensagem de "em dia".

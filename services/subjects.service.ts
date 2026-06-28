@@ -11,6 +11,7 @@ export interface Subject {
   color: string;
   icon: string | null;
   position: number;
+  status: 'ativo' | 'arquivado';
   created_at: string;
 }
 
@@ -34,14 +35,20 @@ export const SUBJECT_COLORS = [
   '#fff9a0',
 ];
 
-// Lista todas as matérias do usuário logado, ordenadas.
+// Lista matérias ATIVAS do usuário logado — não inclui arquivadas.
 export async function listSubjects(): Promise<Subject[]> {
   const supabase = createClient();
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  if (authError || !user) throw new Error('Você precisa estar logado.');
+
   const { data, error } = await supabase
     .from('subjects')
     .select('*')
+    .eq('user_id', user.id)
+    .eq('status', 'ativo')
     .order('position', { ascending: true })
-    .order('created_at', { ascending: true });
+    .order('created_at', { ascending: true })
+    .limit(200);
 
   if (error) throw new Error('Erro ao listar matérias: ' + error.message);
   return data ?? [];
@@ -69,6 +76,9 @@ export async function updateSubject(
   updates: { name?: string; color?: string },
 ): Promise<Subject> {
   const supabase = createClient();
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  if (authError || !user) throw new Error('Você precisa estar logado.');
+
   const payload: { name?: string; color?: string } = {};
   if (updates.name !== undefined) payload.name = updates.name.trim();
   if (updates.color !== undefined) payload.color = updates.color;
@@ -77,6 +87,7 @@ export async function updateSubject(
     .from('subjects')
     .update(payload)
     .eq('id', id)
+    .eq('user_id', user.id)
     .select()
     .single();
 
@@ -87,6 +98,13 @@ export async function updateSubject(
 // Apaga uma matéria. (Os tópicos dela são apagados em cascata pelo banco.)
 export async function deleteSubject(id: string): Promise<void> {
   const supabase = createClient();
-  const { error } = await supabase.from('subjects').delete().eq('id', id);
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  if (authError || !user) throw new Error('Você precisa estar logado.');
+
+  const { error } = await supabase
+    .from('subjects')
+    .delete()
+    .eq('id', id)
+    .eq('user_id', user.id);
   if (error) throw new Error('Erro ao apagar matéria: ' + error.message);
 }

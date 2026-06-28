@@ -3,7 +3,7 @@
 // e compartilha o estado, pra termos UMA fonte de verdade (flutuante, Home, etc.).
 'use client';
 
-import { createContext, useContext, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, type ReactNode } from 'react';
 import { useStudyTimer } from '@/hooks/useStudyTimer';
 
 type TimerValue = ReturnType<typeof useStudyTimer>;
@@ -12,6 +12,15 @@ const TimerContext = createContext<TimerValue | null>(null);
 
 export function TimerProvider({ children }: { children: ReactNode }) {
   const timer = useStudyTimer();
+
+  useEffect(() => {
+    if (timer.status === 'running') {
+      document.title = `⏱ ${timer.formatted} · Focali`;
+    } else {
+      document.title = 'Focali';
+    }
+  }, [timer.status, timer.formatted]);
+
   return <TimerContext.Provider value={timer}>{children}</TimerContext.Provider>;
 }
 

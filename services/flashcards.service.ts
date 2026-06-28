@@ -159,45 +159,65 @@ export async function countDueCards(): Promise<number> {
 // Avalia uma revisão de flashcard (mesmo SM-2 dos tópicos).
 export async function submitCardReview(cardId: string, rating: ReviewRating): Promise<void> {
   const supabase = createClient();
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  if (authError || !user) throw new Error('Você precisa estar logado.');
 
   const { data: card, error: readError } = await supabase
     .from('flashcards')
     .select('ease_factor, interval_days, repetitions')
     .eq('id', cardId)
+    .eq('user_id', user.id)
     .single();
 
   if (readError || !card) throw new Error('Erro ao ler card: ' + readError?.message);
 
   const result = calculateNextReview(fromDbRow(card), RATING_TO_GRADE[rating]);
   const updates = { ...toDbRow(result), is_review_active: true };
-  const { error } = await supabase.from('flashcards').update(updates).eq('id', cardId);
+  const { error } = await supabase
+    .from('flashcards')
+    .update(updates)
+    .eq('id', cardId)
+    .eq('user_id', user.id);
   if (error) throw new Error('Erro ao salvar revisão: ' + error.message);
-
 }
 
 // Ativa revisão de um card existente (para cards criados sem revisão).
 export async function activateCardReview(cardId: string): Promise<void> {
   const supabase = createClient();
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  if (authError || !user) throw new Error('Você precisa estar logado.');
+
   const { error } = await supabase.from('flashcards').update({
     is_review_active: true,
     next_review_date: localDateInDays(1),
     interval_days: 1, repetitions: 0, ease_factor: 2.5,
-  }).eq('id', cardId);
+  }).eq('id', cardId).eq('user_id', user.id);
   if (error) throw new Error('Erro ao ativar revisão: ' + error.message);
 }
 
 export async function deleteFlashcard(id: string): Promise<void> {
   const supabase = createClient();
-  const { error } = await supabase.from('flashcards').delete().eq('id', id);
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  if (authError || !user) throw new Error('Você precisa estar logado.');
+
+  const { error } = await supabase
+    .from('flashcards')
+    .delete()
+    .eq('id', id)
+    .eq('user_id', user.id);
   if (error) throw new Error('Erro ao apagar flashcard: ' + error.message);
 }
 
 export async function countFlashcardsByError(errorId: string): Promise<number> {
   const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return 0;
+
   const { count, error } = await supabase
     .from('flashcards')
     .select('id', { count: 'exact', head: true })
-    .eq('source_error_id', errorId);
+    .eq('source_error_id', errorId)
+    .eq('user_id', user.id);
   if (error) return 0;
   return count ?? 0;
 }

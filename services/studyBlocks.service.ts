@@ -23,7 +23,7 @@ export interface StudyBlock {
 export async function listBlocks(startDate: string, endDate: string): Promise<StudyBlock[]> {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return [];
+  if (!user) throw new Error('Usuário não autenticado.');
 
   const { data, error } = await supabase
     .from('study_blocks')

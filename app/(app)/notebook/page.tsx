@@ -4,6 +4,8 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
+import { useConfirm } from '@/hooks/useConfirm';
+import { useToast } from '@/components/ui/ToastProvider';
 import { searchNotes, listNotes, deleteNote, countNotesBySubject, listNotesByBoard, listRecentNotes, listCriticalTopics, listBoards, type ErrorNote, type CriticalTopic } from '@/services/notebook.service';
 import { listSubjectOptions, listTopicOptions, type PickerOption } from '@/services/picker.service';
 import { NoteEditor } from '@/components/features/notebook/NoteEditor';
@@ -39,10 +41,19 @@ export default function NotebookPage() {
   const [selected, setSelected] = useState<ErrorNote | null>(null);
   const [editing, setEditing] = useState(false);
   const [blankEditor, setBlankEditor] = useState(false);
+  const { confirm, dialog } = useConfirm();
+  const toast = useToast();
+  const [loadingSubjects, setLoadingSubjects] = useState(true);
+  const [loadingNotes, setLoadingNotes] = useState(false);
+  const [pageError, setPageError] = useState<string | null>(null);
 
   useEffect(() => {
-    listSubjectOptions().then(setSubjects).catch(() => {});
-    countNotesBySubject().then(setCounts).catch(() => {});
+    Promise.all([
+      listSubjectOptions().then(setSubjects),
+      countNotesBySubject().then(setCounts),
+    ])
+      .catch(() => setPageError('Erro ao carregar matérias. Recarregue a página.'))
+      .finally(() => setLoadingSubjects(false));
   }, []);
   useEffect(() => {
     listBoards().then(setBoards).catch(() => {});
@@ -72,8 +83,15 @@ export default function NotebookPage() {
   }, [term]);
 
   const loadNotes = useCallback(async (subjectId: string, topicId: string | null) => {
-    const data = await listNotes({ subjectId, topicId });
-    setNotes(data);
+    setLoadingNotes(true);
+    try {
+      const data = await listNotes({ subjectId, topicId });
+      setNotes(data);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'Erro ao carregar anotações. Tente novamente.');
+    } finally {
+      setLoadingNotes(false);
+    }
   }, []);
 
   function openSubject(s: PickerOption) {
@@ -119,11 +137,12 @@ export default function NotebookPage() {
   }
 
   function refreshAux() {
-    if (viewMode === 'recentes') listRecentNotes(periodo).then(setRecentNotes).catch(() => {});
-    if (viewMode === 'criticos') listCriticalTopics().then(setCriticals).catch(() => {});
+    if (viewMode === 'recentes') listRecentNotes(periodo).then(setRecentNotes).catch((e) => toast.error(e instanceof Error ? e.message : 'Erro ao atualizar recentes.'));
+    if (viewMode === 'criticos') listCriticalTopics().then(setCriticals).catch((e) => toast.error(e instanceof Error ? e.message : 'Erro ao atualizar críticos.'));
   }
 
   async function handleSaved() {
+    toast.success('Erro salvo no caderno.');
     setEditing(false);
     setSelected(null);
     setBlankEditor(false);
@@ -137,15 +156,20 @@ export default function NotebookPage() {
 
   async function handleDelete(id: string, e: React.MouseEvent) {
     e.stopPropagation();
-    if (!confirm('Apagar este erro?')) return;
-    await deleteNote(id);
-    if (selected?.id === id) { setSelected(null); setEditing(false); }
-    if (curSubject) {
-      const topicId = curTopic === 'none' ? null : (curTopic?.id ?? null);
-      loadNotes(curSubject.id, topicId);
+    if (!await confirm({ title: 'Apagar este erro?', confirmLabel: 'Apagar', danger: true })) return;
+    try {
+      await deleteNote(id);
+      toast.success('Erro apagado.');
+      if (selected?.id === id) { setSelected(null); setEditing(false); }
+      if (curSubject) {
+        const topicId = curTopic === 'none' ? null : (curTopic?.id ?? null);
+        loadNotes(curSubject.id, topicId);
+      }
+      if (searchResults) setSearchResults(searchResults.filter((n) => n.id !== id));
+      setRecentNotes((prev) => prev.filter((n) => n.id !== id));
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Erro ao apagar a anotação. Tente novamente.');
     }
-    if (searchResults) setSearchResults(searchResults.filter((n) => n.id !== id));
-    setRecentNotes((prev) => prev.filter((n) => n.id !== id));
   }
 
   const presetSubjectId = blankEditor ? null : (curSubject?.id || null);
@@ -173,6 +197,11 @@ export default function NotebookPage() {
           <button onClick={handleNewGlobal} style={{ ...styles.addTopBtn, width: isMobile ? '100%' : undefined }}>+ Adicionar erro</button>
         </div>
       </div>
+
+      {dialog}
+      {pageError && (
+        <p role="alert" aria-live="polite" style={styles.pageError}>{pageError}</p>
+      )}
 
       <div style={{ ...styles.layout, flexDirection: isMobile ? 'column' : 'row' }}>
         {showSidebar && (
@@ -265,8 +294,13 @@ export default function NotebookPage() {
                   {level === 'subjects' && (
                     <div style={styles.list}>
                       <p style={styles.crumb}>Matérias</p>
-                      {subjects.length === 0 ? (
-                        <p style={styles.muted}>Crie matérias primeiro na aba Matérias.</p>
+                      {loadingSubjects ? (
+                        <p style={styles.muted}>Carregando…</p>
+                      ) : subjects.length === 0 ? (
+                        <div>
+                          <p style={styles.muted}>Nenhuma matéria cadastrada ainda.</p>
+                          <a href="/subjects" style={{ display: 'inline-block', marginTop: 10, fontSize: 13.5, color: theme.teal, fontWeight: 600, textDecoration: 'none' }}>Adicionar matéria →</a>
+                        </div>
                       ) : subjects.map((s) => (
                         <div key={s.id} onClick={() => openSubject(s)} style={styles.navItem}>
                           <span style={styles.navItemName}>{s.name}</span>
@@ -298,7 +332,9 @@ export default function NotebookPage() {
                         {curTopic === 'none' ? 'Sem tópico' : (curTopic as PickerOption)?.name}
                       </p>
                       <button onClick={handleNew} style={styles.newBtn}>+ Novo erro</button>
-                      {notes.length === 0 ? (
+                      {loadingNotes ? (
+                        <p style={styles.muted}>Carregando…</p>
+                      ) : notes.length === 0 ? (
                         <p style={styles.muted}>Nenhum erro aqui ainda.</p>
                       ) : notes.map((n) => (
                         <NoteItem key={n.id} note={n} active={selected?.id === n.id}
@@ -377,6 +413,7 @@ const styles: Record<string, React.CSSProperties> = {
   backToList: { border: 'none', background: 'transparent', color: theme.teal, fontSize: 14, fontWeight: 600, cursor: 'pointer', padding: 0, textAlign: 'left', fontFamily: 'inherit', marginBottom: 14 },
   newBtn: { padding: '11px 0', borderRadius: 12, border: 'none', background: theme.teal, color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer', marginBottom: 4, fontFamily: 'inherit' },
   muted: { color: theme.inkFaint, fontSize: 14, lineHeight: 1.5 },
+  pageError: { fontSize: 13, color: theme.danger, background: 'rgba(239,68,68,0.08)', borderRadius: 8, padding: '8px 14px', marginBottom: 12 },
   list: { display: 'flex', flexDirection: 'column', gap: 8 },
   navItem: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, background: theme.card, borderRadius: 12, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, padding: '13px 15px', cursor: 'pointer' },
   navItemName: { fontSize: 14, color: theme.ink, fontWeight: 500, lineHeight: 1.45 },

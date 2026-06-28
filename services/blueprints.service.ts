@@ -16,10 +16,14 @@ export interface Blueprint {
 // Lista os pesos já definidos para um alvo (mapa subject_id -> blueprint).
 export async function listBlueprints(targetExamId: string): Promise<Blueprint[]> {
   const supabase = createClient();
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  if (authError || !user) throw new Error('Você precisa estar logado.');
+
   const { data, error } = await supabase
     .from('exam_blueprints')
     .select('*')
-    .eq('target_exam_id', targetExamId);
+    .eq('target_exam_id', targetExamId)
+    .eq('user_id', user.id);
 
   if (error) throw new Error('Erro ao listar pesos: ' + error.message);
   return data ?? [];
@@ -53,11 +57,15 @@ export async function upsertBlueprint(input: {
 // Remove o peso de uma disciplina num alvo (volta ao default implícito).
 export async function deleteBlueprint(targetExamId: string, subjectId: string): Promise<void> {
   const supabase = createClient();
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  if (authError || !user) throw new Error('Você precisa estar logado.');
+
   const { error } = await supabase
     .from('exam_blueprints')
     .delete()
     .eq('target_exam_id', targetExamId)
-    .eq('subject_id', subjectId);
+    .eq('subject_id', subjectId)
+    .eq('user_id', user.id);
 
   if (error) throw new Error('Erro ao remover peso: ' + error.message);
 }

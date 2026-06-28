@@ -1,7 +1,7 @@
 // app/reset-password/page.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 
@@ -12,6 +12,13 @@ export default function ResetPasswordPage() {
   const [feedback, setFeedback] = useState<{ kind: 'error' | 'ok'; text: string } | null>(null);
   const [loading, setLoading] = useState(false);
   const [sessaoValida, setSessaoValida] = useState<boolean | null>(null);
+  const redirectTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (redirectTimeout.current) clearTimeout(redirectTimeout.current);
+    };
+  }, []);
 
   // Ao chegar pelo link do e-mail, o Supabase cria a sessão de recuperação.
   // Confirmamos que ela existe antes de deixar redefinir.
@@ -49,7 +56,7 @@ export default function ResetPasswordPage() {
     } else {
       setFeedback({ kind: 'ok', text: 'Senha redefinida! Redirecionando para o login…' });
       await supabase.auth.signOut({ scope: 'local' });
-      setTimeout(() => {
+      redirectTimeout.current = setTimeout(() => {
         router.push('/login');
         router.refresh();
       }, 1500);

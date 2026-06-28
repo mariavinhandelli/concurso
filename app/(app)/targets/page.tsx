@@ -5,10 +5,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useConfirm } from '@/hooks/useConfirm';
+import { useToast } from '@/components/ui/ToastProvider';
 import { useRouter } from 'next/navigation';
 import {
   listTargetExams, createTargetExam, setPrimaryTargetExam,
-  deleteTargetExam, promoteToPos, type TargetExam,
+  deleteTargetExam, promoteToPos, updateTargetExamDate, type TargetExam,
 } from '@/services/targetExams.service';
 import { listAllBoards, createBoard, type Board } from '@/services/boards.service';
 import { theme } from '@/lib/theme';
@@ -17,17 +19,27 @@ import { useUI } from '@/components/layout/UIContext';
 export default function TargetsPage() {
   const router = useRouter();
   const { isMobile } = useUI();
+  const { confirm, dialog } = useConfirm();
+  const toast = useToast();
   const [targets, setTargets] = useState<TargetExam[]>([]);
   const [boards, setBoards] = useState<Board[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
 
   // Form de novo alvo
   const [boardId, setBoardId] = useState('');
   const [orgao, setOrgao] = useState('');
   const [cargo, setCargo] = useState('');
   const [ano, setAno] = useState('');
+  const [examDate, setExamDate] = useState('');
   const [phase, setPhase] = useState<'pre' | 'pos'>('pre');
+
+  // Edição inline de data
+  const [editingDateId, setEditingDateId] = useState<string | null>(null);
+  const [editingDateValue, setEditingDateValue] = useState('');
+
+  // Modal de promoção pré→pós
+  const [promotingTarget, setPromotingTarget] = useState<TargetExam | null>(null);
+  const [promoteBoardId, setPromoteBoardId] = useState('');
 
   // Cadastro inline de nova banca
   const [addingBoard, setAddingBoard] = useState(false);
@@ -39,7 +51,7 @@ export default function TargetsPage() {
       setTargets(t);
       setBoards(b);
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Erro ao carregar.');
+      toast.error(e instanceof Error ? e.message : 'Erro ao carregar concursos.');
     } finally {
       setLoading(false);
     }
@@ -57,15 +69,14 @@ export default function TargetsPage() {
       if (nova) setBoardId(nova.id);
       setNewBoardName('');
       setAddingBoard(false);
-      setError('');
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Erro ao criar banca.');
+      toast.error(e instanceof Error ? e.message : 'Erro ao criar banca.');
     }
   }
 
   async function handleCreate() {
     if (phase === 'pos' && !boardId) {
-      setError('No pós-edital a banca é obrigatória.');
+      toast.error('Na fase pós-edital, a banca é obrigatória.');
       return;
     }
     try {
@@ -74,63 +85,79 @@ export default function TargetsPage() {
         orgao: orgao || null,
         cargo: cargo || null,
         ano_alvo: ano ? Number(ano) : null,
+        exam_date: examDate || null,
         phase,
       });
-      setBoardId(''); setOrgao(''); setCargo(''); setAno(''); setPhase('pre');
-      setError('');
+      setBoardId(''); setOrgao(''); setCargo(''); setAno(''); setExamDate(''); setPhase('pre');
       await load();
       router.push(`/targets/${novo.id}`);
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Erro ao criar.');
+      toast.error(e instanceof Error ? e.message : 'Erro ao criar concurso.');
     }
   }
 
   async function handleSetPrimary(id: string, jaEhFoco: boolean) {
-    if (jaEhFoco) return; // já é o foco; clicar de novo não faz nada
+    if (jaEhFoco) return;
     try {
       await setPrimaryTargetExam(id);
+      toast.success('Concurso definido como foco.');
       await load();
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Erro ao definir foco.');
+      toast.error(e instanceof Error ? e.message : 'Erro ao definir foco.');
     }
   }
 
   async function handlePromote(t: TargetExam) {
-    let novoBoardId: string | undefined;
     if (!t.board_id) {
       if (boards.length === 0) {
-        setError('Cadastre uma banca antes de promover (no formulário acima).');
+        toast.error('Cadastre uma banca antes de promover.');
         return;
       }
-      const nome = window.prompt(
-        `O edital saiu! Digite o nome exato da banca definida.\nBancas disponíveis: ${boards.map((b) => b.name).join(', ')}`
-      );
-      if (!nome || !nome.trim()) {
-        setError('Para virar pós-edital, é preciso informar a banca.');
-        return;
-      }
-      const achada = boards.find((b) => b.name.toLowerCase() === nome.trim().toLowerCase());
-      if (!achada) {
-        setError(`Banca "${nome}" não encontrada. Cadastre-a primeiro em Configurações.`);
-        return;
-      }
-      novoBoardId = achada.id;
+      setPromotingTarget(t);
+      setPromoteBoardId(boards[0]?.id ?? '');
+      return;
     }
     try {
-      await promoteToPos(t.id, novoBoardId);
+      await promoteToPos(t.id);
+      toast.success('Concurso promovido para pós-edital.');
       await load();
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Erro ao promover.');
+      toast.error(e instanceof Error ? e.message : 'Erro ao promover.');
+    }
+  }
+
+  async function handleConfirmPromote() {
+    if (!promotingTarget || !promoteBoardId) return;
+    try {
+      await promoteToPos(promotingTarget.id, promoteBoardId);
+      setPromotingTarget(null);
+      setPromoteBoardId('');
+      toast.success('Concurso promovido para pós-edital.');
+      await load();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'Erro ao promover.');
     }
   }
 
   async function handleDelete(id: string) {
-    if (!confirm('Apagar este concurso-alvo? Os pesos definidos nele também somem.')) return;
+    if (!await confirm({ title: 'Apagar este concurso-alvo?', description: 'Os pesos e configurações definidos nele também serão apagados.', confirmLabel: 'Apagar', danger: true })) return;
     try {
       await deleteTargetExam(id);
+      toast.success('Concurso apagado.');
       await load();
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Erro ao apagar.');
+      toast.error(e instanceof Error ? e.message : 'Erro ao apagar.');
+    }
+  }
+
+  async function handleSaveDate(id: string) {
+    try {
+      await updateTargetExamDate(id, editingDateValue || null);
+      setEditingDateId(null);
+      toast.success(editingDateValue ? 'Data da prova salva.' : 'Data removida.');
+      await load();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'Erro ao salvar data.');
     }
   }
 
@@ -142,6 +169,8 @@ export default function TargetsPage() {
   const bancaObrigatoria = phase === 'pos';
 
   return (
+    <>
+    {dialog}
     <div style={{ ...styles.container, padding: isMobile ? '20px 16px' : '34px 40px' }}>
       <div style={styles.header}>
         <h1 style={{ ...styles.h1, fontSize: isMobile ? 25 : 30 }}>Concursos-alvo</h1>
@@ -200,11 +229,13 @@ export default function TargetsPage() {
           <input value={orgao} onChange={(e) => setOrgao(e.target.value)} placeholder="Órgão (ex: TCE-GO)" style={{ ...styles.input, flexBasis: isMobile ? '100%' : undefined }} />
           <input value={cargo} onChange={(e) => setCargo(e.target.value)} placeholder="Cargo (ex: Auditor)" style={{ ...styles.input, flexBasis: isMobile ? '100%' : undefined }} />
           <input value={ano} onChange={(e) => setAno(e.target.value)} placeholder="Ano" type="number" style={{ ...styles.input, maxWidth: isMobile ? '100%' : 90, flexBasis: isMobile ? '100%' : undefined }} />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4, flexBasis: isMobile ? '100%' : undefined }}>
+            <label style={styles.dateLabel}>Data da prova (opcional)</label>
+            <input value={examDate} onChange={(e) => setExamDate(e.target.value)} type="date" style={{ ...styles.input }} />
+          </div>
         </div>
         <button onClick={handleCreate} style={{ ...styles.addBtn, width: isMobile ? '100%' : undefined }}>Adicionar concurso</button>
       </div>
-
-      {error && <p style={styles.error}>{error}</p>}
 
       {loading ? (
         <p style={styles.muted}>Carregando…</p>
@@ -234,9 +265,35 @@ export default function TargetsPage() {
               {/* Conteúdo clicável → abre o edital */}
               <div style={styles.targetMain} onClick={() => router.push(`/targets/${t.id}`)}>
                 <span style={styles.targetLabel}>{rotulo(t)}</span>
-                <span style={{ ...styles.phaseTag, ...(t.phase === 'pos' ? styles.phaseTagPos : styles.phaseTagPre) }}>
-                  {t.phase === 'pos' ? 'Pós-edital' : 'Pré-edital'}
-                </span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                  <span style={{ ...styles.phaseTag, ...(t.phase === 'pos' ? styles.phaseTagPos : styles.phaseTagPre) }}>
+                    {t.phase === 'pos' ? 'Pós-edital' : 'Pré-edital'}
+                  </span>
+                  {editingDateId === t.id ? (
+                    <div style={{ display: 'flex', gap: 6, alignItems: 'center' }} onClick={(e) => e.stopPropagation()}>
+                      <input
+                        type="date"
+                        value={editingDateValue}
+                        onChange={(e) => setEditingDateValue(e.target.value)}
+                        autoFocus
+                        style={styles.dateInput}
+                        onKeyDown={(e) => { if (e.key === 'Enter') handleSaveDate(t.id); if (e.key === 'Escape') setEditingDateId(null); }}
+                      />
+                      <button onClick={() => handleSaveDate(t.id)} style={styles.dateSaveBtn}>✓</button>
+                      <button onClick={() => setEditingDateId(null)} style={styles.dateCancelBtn}>✕</button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setEditingDateId(t.id); setEditingDateValue(t.exam_date ?? ''); }}
+                      style={styles.dateBtn}
+                      title="Definir data da prova"
+                    >
+                      {t.exam_date
+                        ? `📅 ${new Date(t.exam_date + 'T00:00:00').toLocaleDateString('pt-BR')}`
+                        : '+ data da prova'}
+                    </button>
+                  )}
+                </div>
               </div>
 
               {/* Ações à direita — quebram pra 2ª linha no mobile */}
@@ -264,6 +321,31 @@ export default function TargetsPage() {
         </div>
       )}
     </div>
+
+    {/* Modal de promoção pré → pós */}
+    {promotingTarget && (
+      <div style={styles.promoteOverlay} onClick={() => setPromotingTarget(null)}>
+        <div style={styles.promoteModal} onClick={(e) => e.stopPropagation()}>
+          <h3 style={styles.promoteTitle}>Edital saiu! Qual é a banca?</h3>
+          <p style={styles.promoteSub}>Selecione a banca definida para <strong>{rotulo(promotingTarget)}</strong>.</p>
+          <select
+            value={promoteBoardId}
+            onChange={(e) => setPromoteBoardId(e.target.value)}
+            style={styles.input}
+            autoFocus
+          >
+            {boards.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
+          </select>
+          <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 16 }}>
+            <button onClick={() => setPromotingTarget(null)} style={styles.miniBtnGhost}>Cancelar</button>
+            <button onClick={handleConfirmPromote} disabled={!promoteBoardId} style={styles.addBtn}>
+              Promover para pós-edital
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
+    </>
   );
 }
 
@@ -298,4 +380,13 @@ const styles: Record<string, React.CSSProperties> = {
   targetActions: { display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 },
   promoteBtn: { border: `0.5px solid ${theme.teal}`, background: theme.tealBg, color: theme.teal, fontSize: 12.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', borderRadius: 999, padding: '5px 12px', whiteSpace: 'nowrap' },
   iconBtn: { border: 'none', background: 'transparent', cursor: 'pointer', padding: 5, display: 'flex', alignItems: 'center', borderRadius: 8, opacity: 0.75 },
+  dateLabel: { fontSize: 11.5, color: theme.inkFaint, fontWeight: 500 },
+  dateBtn: { fontSize: 12, color: theme.teal, border: `0.5px dashed ${theme.teal}`, background: 'transparent', borderRadius: 999, padding: '2px 9px', cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap', opacity: 0.8 },
+  dateInput: { padding: '4px 8px', borderRadius: 8, border: `0.5px solid ${theme.line}`, background: theme.card, fontSize: 13, color: theme.ink, fontFamily: 'inherit', outline: 'none' },
+  dateSaveBtn: { border: 'none', background: theme.teal, color: '#fff', borderRadius: 6, padding: '4px 8px', cursor: 'pointer', fontSize: 12, fontFamily: 'inherit' },
+  dateCancelBtn: { border: 'none', background: 'transparent', color: theme.inkFaint, borderRadius: 6, padding: '4px 6px', cursor: 'pointer', fontSize: 12, fontFamily: 'inherit' },
+  promoteOverlay: { position: 'fixed', inset: 0, background: 'rgba(15,23,42,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9000, padding: 16 },
+  promoteModal: { background: theme.card, borderRadius: 16, padding: '24px', width: 'min(400px, 94vw)', boxShadow: '0 20px 60px rgba(0,0,0,0.2)', fontFamily: theme.font },
+  promoteTitle: { fontSize: 16, fontWeight: 700, color: theme.ink, margin: '0 0 6px' },
+  promoteSub: { fontSize: 13.5, color: theme.inkSoft, margin: '0 0 16px', lineHeight: 1.5 },
 };

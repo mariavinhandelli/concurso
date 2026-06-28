@@ -123,8 +123,7 @@ export function useStudyTimer() {
       stopTicking();
       subscription.unsubscribe();
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [resetForUser, syncElapsed, startTicking, stopTicking]);
 
   useEffect(() => {
     const onVisible = () => {

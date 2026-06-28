@@ -81,7 +81,7 @@ export function RecurrenceModal({ onClose, onCreated, editRule = null, modoInici
     setDiaItems((p) => p.map((it) => {
       if (it.uid !== uid) return it;
       const next = new Set(it.weekdays);
-      next.has(weekday) ? next.delete(weekday) : next.add(weekday);
+      if (next.has(weekday)) next.delete(weekday); else next.add(weekday);
       return { ...it, weekdays: next };
     }));
   }

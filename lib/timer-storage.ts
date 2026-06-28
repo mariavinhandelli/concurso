@@ -55,14 +55,26 @@ export function createSessionId(): string {
   return `sess_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
 }
 
+function isValidPersistedTimer(obj: unknown): obj is PersistedTimer {
+  if (!obj || typeof obj !== 'object') return false;
+  const o = obj as Record<string, unknown>;
+  return (
+    typeof o.userId === 'string' &&
+    typeof o.sessionId === 'string' &&
+    typeof o.startedAt === 'number' &&
+    typeof o.mode === 'string' &&
+    Array.isArray(o.pauses)
+  );
+}
+
 export function loadTimer(userId: string): PersistedTimer | null {
   if (typeof window === 'undefined') return null;
   try {
     const raw = window.localStorage.getItem(activeKey(userId));
     if (!raw) return null;
-    const parsed = JSON.parse(raw) as PersistedTimer;
-    // Dupla verificação: rejeita sessões de outro userId
-    if (parsed.userId && parsed.userId !== userId) { clearTimer(userId); return null; }
+    const parsed: unknown = JSON.parse(raw);
+    if (!isValidPersistedTimer(parsed)) { clearTimer(userId); return null; }
+    if (parsed.userId !== userId) { clearTimer(userId); return null; }
     return parsed;
   } catch {
     return null;
@@ -79,18 +91,29 @@ export function clearTimer(userId: string): void {
   window.localStorage.removeItem(activeKey(userId));
 }
 
+function isValidPendingSession(obj: unknown): obj is PendingSession {
+  if (!obj || typeof obj !== 'object') return false;
+  const o = obj as Record<string, unknown>;
+  return (
+    typeof o.userId === 'string' &&
+    typeof o.sessionId === 'string' &&
+    typeof o.startedAt === 'number' &&
+    typeof o.endedAt === 'number' &&
+    typeof o.durationSec === 'number' &&
+    typeof o.mode === 'string' &&
+    o.durationSec >= 0 &&
+    (o.endedAt as number) >= (o.startedAt as number)
+  );
+}
+
 export function loadPendingSession(userId: string): PendingSession | null {
   if (typeof window === 'undefined') return null;
   try {
     const raw = window.localStorage.getItem(pendingKey(userId));
     if (!raw) return null;
-    const pending = JSON.parse(raw) as PendingSession;
-    if (!pending.sessionId || pending.durationSec < 0 || pending.endedAt < pending.startedAt) {
-      clearPendingSession(userId);
-      return null;
-    }
-    // Rejeita sessão de outro usuário
-    if (pending.userId && pending.userId !== userId) { clearPendingSession(userId); return null; }
+    const pending: unknown = JSON.parse(raw);
+    if (!isValidPendingSession(pending)) { clearPendingSession(userId); return null; }
+    if (pending.userId !== userId) { clearPendingSession(userId); return null; }
     return pending;
   } catch {
     clearPendingSession(userId);

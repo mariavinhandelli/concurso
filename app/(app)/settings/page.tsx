@@ -3,6 +3,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useConfirm } from '@/hooks/useConfirm';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { theme } from '@/lib/theme';
@@ -13,6 +14,7 @@ export default function SettingsPage() {
   const supabase = createClient();
   const router = useRouter();
   const { theme: mode, toggleTheme, palette, setPalette } = useUI();
+  const { confirm: showConfirm, dialog } = useConfirm();
 
   // --- bancas ---
   const [boards, setBoards] = useState<Board[]>([]);
@@ -82,7 +84,7 @@ export default function SettingsPage() {
   }
 
   async function handleDeleteBoard(id: string, name: string) {
-    if (!window.confirm(`Apagar a banca "${name}"? Isso pode afetar erros e sessões vinculados a ela.`)) return;
+    if (!await showConfirm({ title: `Apagar a banca "${name}"?`, description: 'Isso pode afetar erros e sessões vinculados a ela.', confirmLabel: 'Apagar', danger: true })) return;
     try {
       await deleteBoard(id);
       await loadBoards();
@@ -124,7 +126,7 @@ export default function SettingsPage() {
   }
 
   async function handleSignOutAll() {
-    if (!window.confirm('Encerrar a sessão em todos os dispositivos?')) return;
+    if (!await showConfirm({ title: 'Encerrar a sessão em todos os dispositivos?', description: 'Você será desconectado em todos os lugares.', confirmLabel: 'Encerrar', danger: true })) return;
     setSigningOut(true);
     try {
       await supabase.auth.signOut({ scope: 'global' });
@@ -136,6 +138,8 @@ export default function SettingsPage() {
   }
 
   return (
+    <>
+    {dialog}
     <div style={styles.wrap}>
       <header style={styles.head}>
         <h1 style={styles.h1}>Configurações</h1>
@@ -320,6 +324,7 @@ export default function SettingsPage() {
         </div>
       </section>
     </div>
+    </>
   );
 }
 

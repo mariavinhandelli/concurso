@@ -27,11 +27,13 @@ function HomeContent() {
   const [nome, setNome] = useState<string>('');
   useEffect(() => {
     const supabase = createClient();
-    supabase.auth.getUser().then(({ data }) => {
-      const meta = data.user?.user_metadata;
-      const display = meta?.display_name || meta?.full_name || meta?.name || '';
-      setNome(display ? String(display).split(' ')[0] : '');
-    });
+    supabase.auth.getUser()
+      .then(({ data }) => {
+        const meta = data.user?.user_metadata;
+        const display = meta?.display_name || meta?.full_name || meta?.name || '';
+        setNome(display ? String(display).split(' ')[0].slice(0, 40) : '');
+      })
+      .catch(() => {});
   }, []);
 
   // Auto-iniciar o timer global quando vier com ?topicId= (ex: "Estudar este tópico").

@@ -12,6 +12,7 @@ export interface TargetTopicLink {
 }
 
 // IDs dos tópicos já vinculados a um edital (pra marcar os checkboxes).
+// A RLS em topic_target_exams garante isolamento via topics.user_id.
 export async function listLinkedTopicIds(targetExamId: string): Promise<Set<string>> {
   const supabase = createClient();
   const { data, error } = await supabase
@@ -40,16 +41,22 @@ export async function listTopicWeights(targetExamId: string): Promise<Record<str
 // Vincula um tópico ao edital (idempotente — ignora se já existe).
 export async function linkTopic(topicId: string, targetExamId: string): Promise<void> {
   const supabase = createClient();
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  if (authError || !user) throw new Error('Você precisa estar logado.');
+
   const { error } = await supabase
     .from('topic_target_exams')
     .insert({ topic_id: topicId, target_exam_id: targetExamId });
-  if (error && error.code !== '23505') // 23505 = já vinculado, tudo bem
+  if (error && error.code !== '23505')
     throw new Error('Erro ao vincular: ' + error.message);
 }
 
 // Desvincula um tópico do edital.
 export async function unlinkTopic(topicId: string, targetExamId: string): Promise<void> {
   const supabase = createClient();
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  if (authError || !user) throw new Error('Você precisa estar logado.');
+
   const { error } = await supabase
     .from('topic_target_exams')
     .delete()
@@ -59,10 +66,12 @@ export async function unlinkTopic(topicId: string, targetExamId: string): Promis
 }
 
 // Vincula VÁRIOS tópicos de uma vez ("marcar tudo" de uma matéria).
-// Usa upsert pra não duplicar os que já estavam vinculados.
 export async function linkTopicsBulk(topicIds: string[], targetExamId: string): Promise<void> {
   if (topicIds.length === 0) return;
   const supabase = createClient();
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  if (authError || !user) throw new Error('Você precisa estar logado.');
+
   const linhas = topicIds.map((id) => ({ topic_id: id, target_exam_id: targetExamId }));
   const { error } = await supabase
     .from('topic_target_exams')
@@ -74,6 +83,9 @@ export async function linkTopicsBulk(topicIds: string[], targetExamId: string): 
 export async function unlinkTopicsBulk(topicIds: string[], targetExamId: string): Promise<void> {
   if (topicIds.length === 0) return;
   const supabase = createClient();
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  if (authError || !user) throw new Error('Você precisa estar logado.');
+
   const { error } = await supabase
     .from('topic_target_exams')
     .delete()
@@ -83,11 +95,13 @@ export async function unlinkTopicsBulk(topicIds: string[], targetExamId: string)
 }
 
 // Define (ou limpa) o ajuste fino de peso de um tópico no edital.
-// Passar null volta a herdar o peso da disciplina.
 export async function setTopicWeight(
   topicId: string, targetExamId: string, weight: number | null,
 ): Promise<void> {
   const supabase = createClient();
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  if (authError || !user) throw new Error('Você precisa estar logado.');
+
   const { error } = await supabase
     .from('topic_target_exams')
     .update({ topic_weight: weight })

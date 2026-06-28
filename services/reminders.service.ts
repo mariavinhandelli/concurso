@@ -42,6 +42,13 @@ export async function createReminder(title: string, date: string): Promise<void>
 
 export async function deleteReminder(id: string): Promise<void> {
   const supabase = createClient();
-  const { error } = await supabase.from('reminders').delete().eq('id', id);
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  if (authError || !user) throw new Error('Você precisa estar logado.');
+
+  const { error } = await supabase
+    .from('reminders')
+    .delete()
+    .eq('id', id)
+    .eq('user_id', user.id);
   if (error) throw new Error('Erro ao apagar lembrete: ' + error.message);
 }

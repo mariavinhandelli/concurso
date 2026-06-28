@@ -9,6 +9,11 @@ import { theme } from '@/lib/theme';
 import { useUI } from '@/components/layout/UIContext';
 import { AvatarCropper } from '@/components/features/profile/AvatarCropper';
 
+function isHttpsUrl(url: unknown): url is string {
+  if (typeof url !== 'string') return false;
+  try { return new URL(url).protocol === 'https:'; } catch { return false; }
+}
+
 export default function ProfilePage() {
   const supabase = createClient();
   const { setAvatarUrl: setTopbarAvatar, isMobile } = useUI();
@@ -26,17 +31,31 @@ export default function ProfilePage() {
   // Imagem escolhida aguardando recorte (object URL local).
   const [cropSrc, setCropSrc] = useState<string | null>(null);
 
+  // Garante que o object URL seja revogado quando o componente desmontar
+  // ou quando o cropSrc mudar (ex: usuário escolhe outro arquivo).
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      const u = data.user;
-      if (u) {
-        setUserId(u.id);
-        setEmail(u.email ?? '');
-        setName(u.user_metadata?.display_name ?? '');
-        setAvatarUrl(u.user_metadata?.avatar_url ?? '');
-      }
-      setLoading(false);
-    });
+    return () => {
+      if (cropSrc) URL.revokeObjectURL(cropSrc);
+    };
+  }, [cropSrc]);
+
+  useEffect(() => {
+    supabase.auth.getUser()
+      .then(({ data }) => {
+        const u = data.user;
+        if (u) {
+          setUserId(u.id);
+          setEmail(u.email ?? '');
+          setName(u.user_metadata?.display_name ?? '');
+          const rawUrl = u.user_metadata?.avatar_url;
+          setAvatarUrl(isHttpsUrl(rawUrl) ? rawUrl : '');
+        }
+        setLoading(false);
+      })
+      .catch(() => {
+        setLoading(false);
+        setMsg({ type: 'err', text: 'Erro ao carregar perfil. Recarregue a página.' });
+      });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -98,6 +117,24 @@ export default function ProfilePage() {
     setCropSrc(null);
   }
 
+  async function handleRemoveAvatar() {
+    setUploading(true);
+    try {
+      if (userId) {
+        await supabase.storage.from('avatar').remove([`${userId}/avatar.jpg`]).catch(() => {});
+      }
+      const { error } = await supabase.auth.updateUser({ data: { avatar_url: null } });
+      if (error) throw error;
+      setAvatarUrl('');
+      setTopbarAvatar(null);
+      flash('ok', 'Foto removida.');
+    } catch (err) {
+      flash('err', err instanceof Error ? err.message : 'Erro ao remover foto.');
+    } finally {
+      setUploading(false);
+    }
+  }
+
   async function handleSaveName() {
     setSaving(true);
     try {
@@ -132,19 +169,30 @@ export default function ProfilePage() {
           <div style={{ ...styles.avatarRow, flexDirection: isMobile ? 'column' : 'row', alignItems: isMobile ? 'flex-start' : 'center' }}>
             <div style={styles.avatar}>
               {avatarUrl
-                ? <img src={avatarUrl} alt="" style={styles.avatarImg} />
+                ? <img src={avatarUrl} alt="" loading="lazy" decoding="async" style={styles.avatarImg} />
                 : <span style={styles.avatarInitial}>{initial}</span>}
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={styles.label}>Foto de perfil</div>
               <div style={styles.hint}>JPG ou PNG, até 2MB.</div>
-              <button
-                onClick={() => fileInput.current?.click()}
-                disabled={uploading}
-                style={{ ...styles.btnSecondary, marginTop: 10, opacity: uploading ? 0.6 : 1 }}
-              >
-                {uploading ? 'Enviando…' : 'Trocar foto'}
-              </button>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 10 }}>
+                <button
+                  onClick={() => fileInput.current?.click()}
+                  disabled={uploading}
+                  style={{ ...styles.btnSecondary, opacity: uploading ? 0.6 : 1 }}
+                >
+                  {uploading ? 'Enviando…' : 'Trocar foto'}
+                </button>
+                {avatarUrl && (
+                  <button
+                    onClick={handleRemoveAvatar}
+                    disabled={uploading}
+                    style={{ ...styles.btnSecondary, color: 'var(--danger)', borderColor: 'var(--danger)', opacity: uploading ? 0.6 : 1 }}
+                  >
+                    Remover foto
+                  </button>
+                )}
+              </div>
               <input
                 ref={fileInput}
                 type="file"
@@ -180,7 +228,11 @@ export default function ProfilePage() {
 
         <div style={styles.footer}>
           {msg && (
-            <span style={{ fontSize: 13, fontWeight: 500, color: msg.type === 'ok' ? theme.ok : theme.danger }}>
+            <span
+              role={msg.type === 'err' ? 'alert' : 'status'}
+              aria-live="polite"
+              style={{ fontSize: 13, fontWeight: 500, color: msg.type === 'ok' ? theme.ok : theme.danger }}
+            >
               {msg.text}
             </span>
           )}

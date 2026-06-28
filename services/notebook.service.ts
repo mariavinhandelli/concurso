@@ -79,10 +79,14 @@ export async function searchNotes(term: string): Promise<ErrorNote[]> {
 
 export async function getNote(id: string): Promise<ErrorNote | null> {
   const supabase = createClient();
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  if (authError || !user) throw new Error('Você precisa estar logado.');
+
   const { data, error } = await supabase
     .from('error_notebooks')
     .select('*')
     .eq('id', id)
+    .eq('user_id', user.id)
     .maybeSingle();
   if (error) throw new Error('Erro ao buscar nota: ' + error.message);
   return data;
@@ -114,6 +118,9 @@ export async function createNote(input: NoteInput): Promise<ErrorNote> {
 
 export async function updateNote(id: string, input: NoteInput): Promise<ErrorNote> {
   const supabase = createClient();
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  if (authError || !user) throw new Error('Você precisa estar logado.');
+
   const { data, error } = await supabase
     .from('error_notebooks')
     .update({
@@ -127,6 +134,7 @@ export async function updateNote(id: string, input: NoteInput): Promise<ErrorNot
       updated_at: new Date().toISOString(),
     })
     .eq('id', id)
+    .eq('user_id', user.id)
     .select()
     .single();
 
@@ -136,7 +144,14 @@ export async function updateNote(id: string, input: NoteInput): Promise<ErrorNot
 
 export async function deleteNote(id: string): Promise<void> {
   const supabase = createClient();
-  const { error } = await supabase.from('error_notebooks').delete().eq('id', id);
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  if (authError || !user) throw new Error('Você precisa estar logado.');
+
+  const { error } = await supabase
+    .from('error_notebooks')
+    .delete()
+    .eq('id', id)
+    .eq('user_id', user.id);
   if (error) throw new Error('Erro ao apagar nota: ' + error.message);
 }
 

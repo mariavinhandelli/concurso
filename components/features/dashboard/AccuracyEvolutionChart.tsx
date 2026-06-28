@@ -4,7 +4,7 @@
 
 import { useEffect, useState } from 'react';
 import {
-  LineChart, Line, Area, ComposedChart, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+  Line, Area, ComposedChart, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from 'recharts';
 import {
   getAccuracyEvolution, listSubjectsWithQuestions,

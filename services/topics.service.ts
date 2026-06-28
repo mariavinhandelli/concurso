@@ -34,7 +34,8 @@ export async function listTopics(subjectId: string): Promise<Topic[]> {
     .select('*')
     .eq('subject_id', subjectId)
     .order('position', { ascending: true })
-    .order('created_at', { ascending: true });
+    .order('created_at', { ascending: true })
+    .limit(500);
 
   if (error) throw new Error('Erro ao listar tópicos: ' + error.message);
   return data ?? [];
@@ -65,10 +66,14 @@ export async function createTopic(
 // Liga/desliga o "já estudei" — é o que o checkbox chama.
 export async function toggleCompleted(id: string, value: boolean): Promise<void> {
   const supabase = createClient();
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  if (authError || !user) throw new Error('Você precisa estar logado.');
+
   const { error } = await supabase
     .from('topics')
     .update({ is_completed: value })
-    .eq('id', id);
+    .eq('id', id)
+    .eq('user_id', user.id);
 
   if (error) throw new Error('Erro ao atualizar tópico: ' + error.message);
 }
@@ -79,10 +84,14 @@ export async function updateTopic(
   updates: { name?: string; notes?: string; confidence?: Confidence },
 ): Promise<Topic> {
   const supabase = createClient();
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  if (authError || !user) throw new Error('Você precisa estar logado.');
+
   const { data, error } = await supabase
     .from('topics')
     .update(updates)
     .eq('id', id)
+    .eq('user_id', user.id)
     .select()
     .single();
 
@@ -93,7 +102,14 @@ export async function updateTopic(
 // Apaga um tópico. (Se for um pai, os filhos caem em cascata pelo banco — FK on delete cascade.)
 export async function deleteTopic(id: string): Promise<void> {
   const supabase = createClient();
-  const { error } = await supabase.from('topics').delete().eq('id', id);
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  if (authError || !user) throw new Error('Você precisa estar logado.');
+
+  const { error } = await supabase
+    .from('topics')
+    .delete()
+    .eq('id', id)
+    .eq('user_id', user.id);
   if (error) throw new Error('Erro ao apagar tópico: ' + error.message);
 }
 

@@ -13,6 +13,7 @@ import {
 } from '@/services/cycleEngine.service';
 import { theme } from '@/lib/theme';
 import { useUI } from '@/components/layout/UIContext';
+import { useConfirm } from '@/hooks/useConfirm';
 
 interface Props {
   ruleId: string;
@@ -33,6 +34,7 @@ export function CycleView({
   onAbrirArquivado, onReativar, onVoltar,
 }: Props) {
   const { isMobile } = useUI();
+  const { confirm, dialog } = useConfirm();
   const [state, setState] = useState<CycleState | null>(null);
   const [loading, setLoading] = useState(true);
   const [completing, setCompleting] = useState<string | null>(null);
@@ -101,7 +103,7 @@ export function CycleView({
   }
 
   async function handleArquivar() {
-    if (!window.confirm('Arquivar este ciclo? Ele sai do ativo, mas o histórico fica guardado.')) return;
+    if (!await confirm({ title: 'Arquivar este ciclo?', description: 'Ele sai do ativo, mas o histórico fica guardado.' })) return;
     try {
       await archiveCycle(ruleId);
       onArquivado();
@@ -111,7 +113,7 @@ export function CycleView({
   }
 
   async function handleExcluir() {
-    if (!window.confirm('Excluir este ciclo de vez? O histórico de registros dele será apagado. Esta ação não pode ser desfeita.')) return;
+    if (!await confirm({ title: 'Excluir este ciclo de vez?', description: 'O histórico de registros será apagado. Esta ação não pode ser desfeita.', confirmLabel: 'Excluir', danger: true })) return;
     try {
       await deleteCycle(ruleId);
       onExcluido();
@@ -126,7 +128,7 @@ export function CycleView({
   }
 
   async function handleExcluirArquivado(id: string) {
-    if (!window.confirm('Excluir este ciclo arquivado de vez? Esta ação não pode ser desfeita.')) return;
+    if (!await confirm({ title: 'Excluir este ciclo arquivado de vez?', description: 'Esta ação não pode ser desfeita.', confirmLabel: 'Excluir', danger: true })) return;
     try {
       await deleteCycle(id);
       await loadArchived();
@@ -152,6 +154,8 @@ export function CycleView({
   };
 
   return (
+    <>
+    {dialog}
     <div>
       {/* Cabeçalho de ações — adapta-se a ativo vs arquivado */}
       <div style={styles.cycleHeader}>
@@ -282,6 +286,7 @@ export function CycleView({
         </div>
       )}
     </div>
+    </>
   );
 }
 

@@ -28,7 +28,8 @@ async function getCroppedBlob(imageSrc: string, area: Area): Promise<Blob> {
   const canvas = document.createElement('canvas');
   canvas.width = OUT;
   canvas.height = OUT;
-  const ctx = canvas.getContext('2d')!;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) throw new Error('Não foi possível inicializar o canvas. Verifique as configurações do navegador.');
 
   // Desenha apenas a área recortada, esticada para o quadro de saída.
   ctx.drawImage(
@@ -51,6 +52,7 @@ export function AvatarCropper({ imageSrc, onCancel, onConfirm }: Props) {
   const [zoom, setZoom] = useState(1);
   const [areaPixels, setAreaPixels] = useState<Area | null>(null);
   const [processing, setProcessing] = useState(false);
+  const [cropError, setCropError] = useState<string | null>(null);
 
   const onCropComplete = useCallback((_: Area, pixels: Area) => {
     setAreaPixels(pixels);
@@ -59,10 +61,12 @@ export function AvatarCropper({ imageSrc, onCancel, onConfirm }: Props) {
   async function handleConfirm() {
     if (!areaPixels) return;
     setProcessing(true);
+    setCropError(null);
     try {
       const blob = await getCroppedBlob(imageSrc, areaPixels);
       onConfirm(blob);
-    } catch {
+    } catch (err) {
+      setCropError(err instanceof Error ? err.message : 'Erro ao recortar a imagem. Tente novamente.');
       setProcessing(false);
     }
   }
@@ -102,6 +106,10 @@ export function AvatarCropper({ imageSrc, onCancel, onConfirm }: Props) {
           <span style={styles.zoomIcon}>+</span>
         </div>
 
+        {cropError && (
+          <p role="alert" style={styles.errorMsg}>{cropError}</p>
+        )}
+
         <div style={styles.actions}>
           <button onClick={onCancel} disabled={processing} style={styles.cancelBtn}>Cancelar</button>
           <button onClick={handleConfirm} disabled={processing || !areaPixels}
@@ -126,4 +134,5 @@ const styles: Record<string, React.CSSProperties> = {
   actions: { display: 'flex', gap: 12, justifyContent: 'flex-end', marginTop: 18 },
   cancelBtn: { padding: '11px 20px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.inkSoft, fontSize: 14, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' },
   confirmBtn: { padding: '11px 24px', borderRadius: theme.radiusSm, border: 'none', background: theme.teal, color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+  errorMsg: { fontSize: 13, color: theme.danger, background: 'rgba(239,68,68,0.08)', borderRadius: 8, padding: '8px 12px', margin: '12px 0 0' },
 };

@@ -44,10 +44,14 @@ export async function activateReview(topicId: string): Promise<void> {
 
 export async function deactivateReview(topicId: string): Promise<void> {
   const supabase = createClient();
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  if (authError || !user) throw new Error('Você precisa estar logado.');
+
   const { error } = await supabase
     .from('topics')
     .update({ is_review_active: false, next_review_date: null })
-    .eq('id', topicId);
+    .eq('id', topicId)
+    .eq('user_id', user.id);
   if (error) throw new Error('Erro ao desativar revisão: ' + error.message);
 }
 
@@ -95,11 +99,14 @@ export async function countDueReviews(): Promise<number> {
 
 export async function submitReview(topicId: string, rating: ReviewRating): Promise<void> {
   const supabase = createClient();
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  if (authError || !user) throw new Error('Você precisa estar logado.');
 
   const { data: topic, error: readError } = await supabase
     .from('topics')
     .select('ease_factor, interval_days, repetitions')
     .eq('id', topicId)
+    .eq('user_id', user.id)
     .single();
 
   if (readError || !topic) throw new Error('Erro ao ler tópico: ' + readError?.message);
@@ -109,16 +116,24 @@ export async function submitReview(topicId: string, rating: ReviewRating): Promi
   const result = calculateNextReview(current, grade);
   const updates = toDbRow(result);
 
-  const { error } = await supabase.from('topics').update(updates).eq('id', topicId);
+  const { error } = await supabase
+    .from('topics')
+    .update(updates)
+    .eq('id', topicId)
+    .eq('user_id', user.id);
   if (error) throw new Error('Erro ao salvar revisão: ' + error.message);
 }
 
 export async function rescheduleReview(topicId: string, dateStr: string): Promise<void> {
   const supabase = createClient();
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  if (authError || !user) throw new Error('Você precisa estar logado.');
+
   const { error } = await supabase
     .from('topics')
     .update({ next_review_date: dateStr, is_review_active: true })
-    .eq('id', topicId);
+    .eq('id', topicId)
+    .eq('user_id', user.id);
   if (error) throw new Error('Erro ao reagendar: ' + error.message);
 }
 

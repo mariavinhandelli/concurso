@@ -3,6 +3,8 @@
 'use client';
 
 import { useEffect, useState, useCallback, Suspense } from 'react';
+import { useConfirm } from '@/hooks/useConfirm';
+import { useToast } from '@/components/ui/ToastProvider';
 import { useSearchParams } from 'next/navigation';
 import {
   listFlashcards, deleteFlashcard, countFlashcardsBySubject,
@@ -30,6 +32,7 @@ function FlashcardsContent() {
   const { isMobile } = useUI();
   const [tab, setTab] = useState<Tab>('cards');
   const [session, setSession] = useState<QueueCard[] | null>(null);
+  const [reviewKey, setReviewKey] = useState(0);
 
   const startDaily = useCallback(async () => {
     const queue = await buildDailyQueue();
@@ -53,7 +56,7 @@ function FlashcardsContent() {
               <button onClick={() => setSession(null)} style={styles.finishBtn}>Voltar</button>
             </div>
           ) : (
-            <FlashcardEngine queue={session} onFinish={() => setSession(null)} />
+            <FlashcardEngine queue={session} onFinish={() => { setSession(null); setTab('review'); setReviewKey((k) => k + 1); }} />
           )}
         </div>
       </div>
@@ -76,7 +79,7 @@ function FlashcardsContent() {
 
       {tab === 'cards'
         ? <CardsTab onStudy={(q) => setSession(q)} />
-        : <ReviewTab onStart={startDaily} />}
+        : <ReviewTab key={reviewKey} onStart={startDaily} />}
     </div>
   );
 }
@@ -84,14 +87,20 @@ function FlashcardsContent() {
 // ---------- ABA REVISAR ----------
 function ReviewTab({ onStart }: { onStart: () => void }) {
   const [counts, setCounts] = useState<{ pending: number; news: number } | null>(null);
+  const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
-    buildDailyQueue().then((q) => {
-      setCounts({
-        pending: q.filter((c) => !c.isNew).length,
-        news: q.filter((c) => c.isNew).length,
+    buildDailyQueue()
+      .then((q) => {
+        setCounts({
+          pending: q.filter((c) => !c.isNew).length,
+          news: q.filter((c) => c.isNew).length,
+        });
+      })
+      .catch(() => {
+        setHasError(true);
+        setCounts({ pending: 0, news: 0 });
       });
-    }).catch(() => setCounts({ pending: 0, news: 0 }));
   }, []);
 
   const total = counts ? counts.pending + counts.news : 0;
@@ -100,6 +109,10 @@ function ReviewTab({ onStart }: { onStart: () => void }) {
     <div style={styles.reviewStart}>
       {counts === null ? (
         <p style={styles.muted}>Carregando…</p>
+      ) : hasError ? (
+        <div style={styles.empty}>
+          <p style={{ ...styles.muted, color: theme.danger }}>Erro ao carregar flashcards. Recarregue a página.</p>
+        </div>
       ) : total === 0 ? (
         <div style={styles.empty}>
           <span style={styles.emptyIcon}>✓</span>
@@ -135,19 +148,36 @@ function CardsTab({ onStudy }: { onStudy: (queue: QueueCard[]) => void }) {
   const [curSubject, setCurSubject] = useState<PickerOption | null>(null);
   const [curTopic, setCurTopic] = useState<PickerOption | null | 'none'>(null);
   const [creating, setCreating] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const { confirm, dialog } = useConfirm();
+  const toast = useToast();
 
   useEffect(() => {
-    listSubjectOptions().then(setSubjects).catch(() => {});
-    countFlashcardsBySubject().then(setCounts).catch(() => {});
+    Promise.all([
+      listSubjectOptions().then(setSubjects),
+      countFlashcardsBySubject().then(setCounts),
+    ]).catch((e) => {
+      const msg = e instanceof Error ? e.message : 'Erro ao carregar matérias. Recarregue a página.';
+      setLoadError(msg);
+      toast.error(msg);
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadCards = useCallback(async (subjectId: string, topicId: string | null) => {
-    setCards(await listFlashcards({ subjectId, topicId }));
+    try {
+      setCards(await listFlashcards({ subjectId, topicId }));
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'Erro ao carregar os cards. Tente novamente.');
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   function openSubject(s: PickerOption) {
     setCurSubject(s);
-    listTopicOptions(s.id).then(setTopics).catch(() => {});
+    listTopicOptions(s.id).then(setTopics).catch((e) =>
+      toast.error(e instanceof Error ? e.message : 'Erro ao carregar tópicos.')
+    );
     setLevel('topics');
   }
   function openTopic(t: PickerOption | 'none') {
@@ -160,9 +190,14 @@ function CardsTab({ onStudy }: { onStudy: (queue: QueueCard[]) => void }) {
     countFlashcardsBySubject().then(setCounts).catch(() => {});
   }
   async function handleDelete(id: string) {
-    if (!confirm('Apagar este card?')) return;
-    await deleteFlashcard(id);
-    reloadCards();
+    if (!await confirm({ title: 'Apagar este card?', confirmLabel: 'Apagar', danger: true })) return;
+    try {
+      await deleteFlashcard(id);
+      toast.success('Card apagado.');
+      reloadCards();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'Erro ao apagar o card. Tente novamente.');
+    }
   }
 
   async function studySubject(s: PickerOption) {
@@ -180,10 +215,21 @@ function CardsTab({ onStudy }: { onStudy: (queue: QueueCard[]) => void }) {
   const presetTopicId = curTopic === 'none' ? null : (curTopic?.id ?? null);
 
   return (
+    <>
+    {dialog}
     <div>
+      {loadError && (
+        <p role="alert" style={{ color: theme.danger, fontSize: 13, marginBottom: 12 }}>{loadError}</p>
+      )}
       {level === 'subjects' && (
         <div style={styles.list}>
           <p style={styles.crumb}>Escolha a matéria</p>
+          {subjects.length === 0 && (
+            <div style={styles.emptyState}>
+              <p style={styles.muted}>Nenhuma matéria cadastrada ainda.</p>
+              <a href="/subjects" style={styles.emptyAction}>Adicionar matéria →</a>
+            </div>
+          )}
           {subjects.map((s) => (
             <div key={s.id} style={styles.navItem}>
               <span onClick={() => openSubject(s)} style={{ flex: 1, cursor: 'pointer', minWidth: 0 }}>{s.name}</span>
@@ -219,7 +265,7 @@ function CardsTab({ onStudy }: { onStudy: (queue: QueueCard[]) => void }) {
 
           {creating ? (
             <CardForm subjectId={presetSubjectId} topicId={presetTopicId}
-              onCreated={() => { setCreating(false); reloadCards(); }}
+              onCreated={() => { setCreating(false); toast.success('Card criado!'); reloadCards(); }}
               onCancel={() => setCreating(false)} />
           ) : (
             <button onClick={() => setCreating(true)} style={styles.newBtn}>+ Criar card</button>
@@ -237,6 +283,7 @@ function CardsTab({ onStudy }: { onStudy: (queue: QueueCard[]) => void }) {
         </div>
       )}
     </div>
+    </>
   );
 }
 
@@ -268,6 +315,8 @@ const styles: Record<string, React.CSSProperties> = {
   cardFront: { fontSize: 14, color: theme.ink, fontWeight: 600, paddingRight: 20 },
   cardBack: { fontSize: 13, color: theme.inkSoft, marginTop: 4 },
   delBtn: { position: 'absolute', top: 10, right: 10, border: 'none', background: 'transparent', color: theme.inkFaint, fontSize: 12, cursor: 'pointer', opacity: 0.6 },
+  emptyState: { padding: '16px 0', display: 'flex', flexDirection: 'column', gap: 10 },
+  emptyAction: { fontSize: 13.5, color: theme.teal, fontWeight: 600, textDecoration: 'none' },
   empty: { textAlign: 'center', padding: '40px 0' },
   emptyIcon: { fontSize: 36, color: theme.ok, display: 'block', marginBottom: 12 },
   finishBtn: { marginTop: 8, padding: '12px 28px', borderRadius: 12, border: 'none', background: theme.teal, color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },

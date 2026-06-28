@@ -5,7 +5,9 @@
 //                           criar livre, editar nome/cor, arquivar)
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useConfirm } from '@/hooks/useConfirm';
+import { useToast } from '@/components/ui/ToastProvider';
 import { useRouter } from 'next/navigation';
 import {
   createSubject, updateSubject, deleteSubject, SUBJECT_COLORS,
@@ -23,9 +25,9 @@ type Tab = 'banco' | 'minhas';
 export default function SubjectsPage() {
   const router = useRouter();
   const { isMobile } = useUI();
+  const toast = useToast();
 
   const [tab, setTab] = useState<Tab>('banco');
-  const [error, setError] = useState('');
 
   return (
     <div style={{ ...pageWide, padding: isMobile ? '20px 16px' : '34px 40px', minWidth: 0 }}>
@@ -50,11 +52,9 @@ export default function SubjectsPage() {
         </button>
       </div>
 
-      {error && <p style={styles.error}>{error}</p>}
-
       {tab === 'banco'
-        ? <BancoTab isMobile={isMobile} onError={setError} onActivated={() => setTab('minhas')} />
-        : <MinhasTab isMobile={isMobile} onError={setError} router={router} />}
+        ? <BancoTab isMobile={isMobile} onError={toast.error} onActivated={() => { toast.success('Matéria ativada com sucesso!'); setTab('minhas'); }} />
+        : <MinhasTab isMobile={isMobile} onError={toast.error} router={router} />}
     </div>
   );
 }
@@ -86,14 +86,16 @@ function BancoTab({
     try {
       const topics = await getCatalogTopics(s.id);
       setModalTopics(topics);
-    } catch { /* silencia */ } finally {
+    } catch (e) {
+      onError(e instanceof Error ? e.message : 'Erro ao carregar tópicos da matéria.');
+    } finally {
       setLoadingModal(false);
     }
   }
 
   function closeModal() { setSelected(null); setModalTopics([]); }
 
-  async function load() {
+  const load = useCallback(async () => {
     try {
       const [a, s] = await Promise.all([getCatalogAreas(), getCatalogSubjects()]);
       setAreas(a);
@@ -103,8 +105,8 @@ function BancoTab({
     } finally {
       setLoading(false);
     }
-  }
-  useEffect(() => { load(); }, []);
+  }, [onError]);
+  useEffect(() => { load(); }, [load]);
 
   async function handleActivate(cat: CatalogSubject) {
     setActivatingId(cat.id);
@@ -248,10 +250,12 @@ function MinhasTab({
   onError: (m: string) => void;
   router: ReturnType<typeof useRouter>;
 }) {
+  const { confirm, dialog } = useConfirm();
   const [status, setStatus] = useState<SubjectStatus>('ativo');
   const [ativas, setAtivas] = useState<MySubject[]>([]);
   const [arquivadas, setArquivadas] = useState<MySubject[]>([]);
   const [loading, setLoading] = useState(true);
+  const [processingId, setProcessingId] = useState<string | null>(null);
 
   // criar matéria livre
   const [newName, setNewName] = useState('');
@@ -262,7 +266,7 @@ function MinhasTab({
   const [editName, setEditName] = useState('');
   const [editColor, setEditColor] = useState('');
 
-  async function load() {
+  const load = useCallback(async () => {
     try {
       const [a, arq] = await Promise.all([
         getMySubjects('ativo'),
@@ -275,8 +279,8 @@ function MinhasTab({
     } finally {
       setLoading(false);
     }
-  }
-  useEffect(() => { load(); }, []);
+  }, [onError]);
+  useEffect(() => { load(); }, [load]);
 
   async function handleCreate() {
     if (!newName.trim()) return;
@@ -309,23 +313,30 @@ function MinhasTab({
   }
 
   async function handleArchive(id: string) {
+    setProcessingId(id);
     try { await archiveSubject(id); await load(); }
     catch (e) { onError(e instanceof Error ? e.message : 'Erro ao arquivar.'); }
+    finally { setProcessingId(null); }
   }
   async function handleUnarchive(id: string) {
+    setProcessingId(id);
     try { await unarchiveSubject(id); await load(); }
     catch (e) { onError(e instanceof Error ? e.message : 'Erro ao reativar.'); }
+    finally { setProcessingId(null); }
   }
   async function handleDelete(id: string, name: string) {
-    if (!confirm(`Apagar "${name}" e todos os seus tópicos? Esta ação não pode ser desfeita.`)) return;
+    if (!await confirm({ title: `Apagar "${name}"?`, description: 'Todos os seus tópicos serão apagados. Esta ação não pode ser desfeita.', confirmLabel: 'Apagar', danger: true })) return;
+    setProcessingId(id);
     try { await deleteSubject(id); await load(); }
     catch (e) { onError(e instanceof Error ? e.message : 'Erro ao apagar.'); }
+    finally { setProcessingId(null); }
   }
 
   const lista = status === 'ativo' ? ativas : arquivadas;
 
   return (
     <>
+      {dialog}
       {/* Criar matéria própria */}
       <div style={styles.createBox}>
         <div style={{ ...styles.createRow, flexDirection: isMobile ? 'column' : 'row' }}>
@@ -435,7 +446,7 @@ function MinhasTab({
                           <path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z" />
                         </svg>
                       </button>
-                      <button onClick={() => handleArchive(s.id)} style={styles.iconBtn} aria-label={`Arquivar ${s.name}`} title="Arquivar">
+                      <button onClick={() => handleArchive(s.id)} disabled={processingId === s.id} style={{ ...styles.iconBtn, opacity: processingId === s.id ? 0.4 : 1 }} aria-label={`Arquivar ${s.name}`} title="Arquivar">
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={theme.inkSoft} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                           <rect x="3" y="4" width="18" height="4" rx="1" /><path d="M5 8v11a1 1 0 001 1h12a1 1 0 001-1V8" /><path d="M10 12h4" />
                         </svg>
@@ -443,8 +454,8 @@ function MinhasTab({
                     </>
                   ) : (
                     <>
-                      <button onClick={() => handleUnarchive(s.id)} style={styles.unarchiveBtn} title="Reativar">Reativar</button>
-                      <button onClick={() => handleDelete(s.id, s.name)} style={styles.deleteBtn} aria-label={`Apagar ${s.name}`} title="Apagar">✕</button>
+                      <button onClick={() => handleUnarchive(s.id)} disabled={processingId === s.id} style={{ ...styles.unarchiveBtn, opacity: processingId === s.id ? 0.4 : 1 }} title="Reativar">{processingId === s.id ? '…' : 'Reativar'}</button>
+                      <button onClick={() => handleDelete(s.id, s.name)} disabled={processingId === s.id} style={{ ...styles.deleteBtn, opacity: processingId === s.id ? 0.4 : 1 }} aria-label={`Apagar ${s.name}`} title="Apagar">✕</button>
                     </>
                   )}
                 </div>

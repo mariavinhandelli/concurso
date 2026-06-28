@@ -3,9 +3,10 @@
 // (mostrar → virar → avaliar → SM-2 → próximo) sem recarregar a página.
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { submitCardReview, type ReviewRating } from '@/services/flashcards.service';
 import { theme } from '@/lib/theme';
+import { useToast } from '@/components/ui/ToastProvider';
 
 export interface QueueCard {
   id: string;
@@ -31,25 +32,47 @@ export function FlashcardEngine({ queue, onFinish }: Props) {
   const [index, setIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
   const [saving, setSaving] = useState(false);
+  const toast = useToast();
 
+  const total = queue.length;
   const current = queue[index];
-  const remaining = queue.length - index;
+  const remaining = total - index;
+  const progress = total > 0 ? Math.round((index / total) * 100) : 0;
   const pendingCount = queue.slice(index).filter((c) => !c.isNew).length;
   const newCount = queue.slice(index).filter((c) => c.isNew).length;
 
-  async function rate(rating: ReviewRating) {
+  const rate = useCallback(async (rating: ReviewRating) => {
     if (!current || saving) return;
     setSaving(true);
     try {
       await submitCardReview(current.id, rating);
       setFlipped(false);
       setIndex((i) => i + 1);
-    } catch {
-      // se falhar, mantém o card para tentar de novo
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'Erro ao salvar avaliação. Tente novamente.');
     } finally {
       setSaving(false);
     }
-  }
+  }, [current, saving]);
+
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      if (!current) return;
+      if (e.key === ' ' || e.code === 'Space') {
+        e.preventDefault();
+        setFlipped((v) => !v);
+      }
+      if (flipped) {
+        if (e.key === '1') rate('dificil');
+        if (e.key === '2') rate('intermediario');
+        if (e.key === '3') rate('facil');
+      }
+    }
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [current, flipped, rate]);
+
 
   if (!current) {
     return (
@@ -63,6 +86,11 @@ export function FlashcardEngine({ queue, onFinish }: Props) {
 
   return (
     <div style={styles.engine}>
+      {/* Barra de progresso */}
+      <div style={styles.progressTrack}>
+        <div style={{ ...styles.progressBar, width: `${progress}%` }} />
+      </div>
+
       {/* Contadores */}
       <div style={styles.counters}>
         <span style={styles.counterPending}>Revisões: {pendingCount}</span>
@@ -80,15 +108,17 @@ export function FlashcardEngine({ queue, onFinish }: Props) {
           <p style={styles.face}>{current.front}</p>
           {flipped && <><div style={styles.sep} /><p style={styles.faceBack}>{current.back}</p></>}
         </div>
-        {!flipped && <p style={styles.flipHint}>clique para ver a resposta</p>}
+        {!flipped && <p style={styles.flipHint}>clique ou pressione Espaço para ver a resposta</p>}
       </div>
 
       {/* Avaliação */}
       {flipped ? (
         <div style={styles.ratings}>
-          {RATINGS.map((r) => (
+          {RATINGS.map((r, i) => (
             <button key={r.key} onClick={() => rate(r.key)} disabled={saving}
-              style={{ ...styles.ratingBtn, color: r.fg, background: r.bg }}>{r.label}</button>
+              style={{ ...styles.ratingBtn, color: r.fg, background: r.bg }}>
+              <span style={styles.ratingKey}>{i + 1}</span> {r.label}
+            </button>
           ))}
         </div>
       ) : (
@@ -100,6 +130,9 @@ export function FlashcardEngine({ queue, onFinish }: Props) {
 
 const styles: Record<string, React.CSSProperties> = {
   engine: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20, width: '100%', fontFamily: theme.font },
+  progressTrack: { width: '100%', height: 4, background: theme.line, borderRadius: 2, overflow: 'hidden' },
+  progressBar: { height: '100%', background: theme.teal, borderRadius: 2, transition: 'width 0.3s ease' },
+  ratingKey: { fontSize: 11, opacity: 0.6, marginRight: 3 },
   counters: { display: 'flex', gap: 16 },
   counterPending: { fontSize: 13, color: theme.inkSoft, background: 'rgba(15,23,42,.05)', padding: '4px 12px', borderRadius: 10, fontWeight: 500 },
   counterNew: { fontSize: 13, color: theme.tealDeep, background: theme.tealBg, padding: '4px 12px', borderRadius: 10, fontWeight: 500 },
