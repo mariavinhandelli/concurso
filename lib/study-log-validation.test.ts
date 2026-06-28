@@ -3,6 +3,7 @@ import { validateStudyLogInput } from '@/lib/study-log-validation';
 import type { PendingSession } from '@/lib/timer-storage';
 
 const validSession: PendingSession = {
+  userId: 'user_test',
   sessionId: 'sess_test',
   startedAt: 1_000,
   endedAt: 61_000,

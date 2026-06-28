@@ -58,18 +58,18 @@ export async function listDueReviews(): Promise<ReviewItem[]> {
 
   const archivedIds = await getArchivedSubjectIds();
 
-  let query = supabase
+  const { data: allTopics, error } = await supabase
     .from('topics')
     .select('id, name, subject_id, next_review_date, subjects(name, color)')
     .eq('user_id', user.id)
     .eq('is_review_active', true)
     .order('next_review_date', { ascending: true });
 
-  if (archivedIds.length > 0) {
-    query = query.not('subject_id', 'in', `(${archivedIds.join(',')})`);
-  }
-
-  const { data, error } = await query;
+  // Filtra matérias arquivadas em JS (evita type-depth errors do Supabase builder)
+  const archivedSet = new Set(archivedIds);
+  const data = archivedIds.length > 0
+    ? (allTopics ?? []).filter(t => !archivedSet.has(t.subject_id))
+    : (allTopics ?? []);
   if (error) throw new Error('Erro ao listar revisões: ' + error.message);
 
   return (data ?? [])

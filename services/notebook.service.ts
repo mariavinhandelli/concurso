@@ -230,18 +230,20 @@ export async function listCriticalTopics(): Promise<CriticalTopic[]> {
   const archivedIds = await getArchivedSubjectIds();
 
   // 1) Todos os erros que têm tópico, com nome do tópico e da matéria.
-  let notesQ = supabase
+  const { data: allNotes, error } = await supabase
     .from('error_notebooks')
     .select('topic_id, topics(name, subject_id, subjects(name))')
     .eq('user_id', user.id)
     .not('topic_id', 'is', null);
 
-  // Exclui tópicos de matérias arquivadas
-  if (archivedIds.length > 0) {
-    notesQ = notesQ.not('topics.subject_id', 'in', `(${archivedIds.join(',')})`);
-  }
-
-  const { data: notes, error } = await notesQ;
+  // Filtra matérias arquivadas em JS (evita type-depth errors do Supabase builder)
+  const archivedSet = new Set(archivedIds);
+  const notes = archivedIds.length > 0
+    ? (allNotes ?? []).filter(n => {
+        const topic = Array.isArray(n.topics) ? n.topics[0] : n.topics;
+        return !topic?.subject_id || !archivedSet.has(topic.subject_id);
+      })
+    : (allNotes ?? []);
 
   if (error) throw new Error('Erro ao agrupar críticos: ' + error.message);
 

@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { computeElapsedSec, sumPauses, type PersistedTimer } from '@/lib/timer-storage';
 
 const timer: PersistedTimer = {
+  userId: 'user_test',
   sessionId: 'sess_test',
   startedAt: 1_000,
   mode: 'teoria',
