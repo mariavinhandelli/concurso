@@ -6,6 +6,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useToast } from '@/components/ui/ToastProvider';
 import { countDueReviews } from '@/services/reviews.service';
 import { buildDailyQueue } from '@/services/flashcards.service';
 import {
@@ -18,6 +19,7 @@ import { useUI } from '@/components/layout/UIContext';
 export function TodayBlock() {
   const router = useRouter();
   const { isMobile } = useUI();
+  const toast = useToast();
   const [revisoes, setRevisoes] = useState<number | null>(null);
   const [flashcards, setFlashcards] = useState<number | null>(null);
   const [goals, setGoals] = useState<GoalsSummary | null>(null);
@@ -56,14 +58,16 @@ export function TodayBlock() {
     const total = (Number(hours) || 0) * 60 + (Number(mins) || 0);
     setSavingHours(true);
     try { await setDailyTarget(total); setEditingHours(false); loadGoals(); }
-    catch { /* silencia */ } finally { setSavingHours(false); }
+    catch (e) { toast.error(e instanceof Error ? e.message : 'Erro ao salvar meta de horas.'); }
+    finally { setSavingHours(false); }
   }
 
   async function saveQGoal() {
     const count = Number(qTarget) || 0;
     setSavingQ(true);
     try { await setDailyTargetQuestions(count); setEditingQ(false); loadGoals(); }
-    catch { /* silencia */ } finally { setSavingQ(false); }
+    catch (e) { toast.error(e instanceof Error ? e.message : 'Erro ao salvar meta de questões.'); }
+    finally { setSavingQ(false); }
   }
 
   const metaHoursPct = goals && goals.targetMinutesPerDay > 0

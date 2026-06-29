@@ -21,10 +21,15 @@ const COR = {
 export function StreakBar() {
   const { isMobile } = useUI();
   const [info, setInfo] = useState<StreakInfo | null>(null);
+  const [loadError, setLoadError] = useState(false);
 
   useEffect(() => {
-    getStreak().then(setInfo).catch(() => {});
+    getStreak().then(setInfo).catch(() => setLoadError(true));
   }, []);
+
+  if (loadError) {
+    return <p style={styles.muted}>Não foi possível carregar a constância.</p>;
+  }
 
   if (!info) {
     return <p style={styles.muted}>Carregando…</p>;

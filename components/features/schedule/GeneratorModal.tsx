@@ -5,6 +5,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
+import { useToast } from '@/components/ui/ToastProvider';
 import {
   buildPreview, listTargetExams, type GeneratorPreview, type GeneratorSubject,
 } from '@/services/scheduleGenerator.service';
@@ -111,6 +112,7 @@ function distribuirDiaFixo(
 }
 
 export function GeneratorModal({ onClose, onGenerated, presetExamId }: Props) {
+  const toast = useToast();
   const [exams, setExams] = useState<{ id: string; label: string }[]>([]);
   const [examId, setExamId] = useState(presetExamId ?? '');
   const [mode, setMode] = useState<RecurrenceMode>('ciclo');
@@ -126,10 +128,17 @@ export function GeneratorModal({ onClose, onGenerated, presetExamId }: Props) {
   const [error, setError] = useState('');
 
   useEffect(() => {
+    const h = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', h);
+    return () => document.removeEventListener('keydown', h);
+  }, [onClose]);
+
+  useEffect(() => {
     listTargetExams().then((list) => {
       setExams(list);
       if (!presetExamId && list[0]) setExamId(list[0].id);
-    }).catch(() => {});
+    }).catch((e) => toast.error(e instanceof Error ? e.message : 'Erro ao carregar concursos.'));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [presetExamId]);
 
   const cargaMinutos = (Number(horasDia) || 0) * 60;

@@ -2,6 +2,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useToast } from '@/components/ui/ToastProvider';
 import { RichTextEditor } from '@/components/editor/RichTextEditor';
 import { ERROR_TYPES, createNote, updateNote, listBoards, type ErrorNote, type NoteInput } from '@/services/notebook.service';
 import { listSubjectOptions, listTopicOptions, type PickerOption } from '@/services/picker.service';
@@ -19,6 +20,7 @@ interface Props {
 }
 
 export function NoteEditor({ note, presetSubjectId = null, presetTopicId = null, onSaved, onCancel }: Props) {
+  const toast = useToast();
   const [title, setTitle] = useState('');
   const [content, setContent] = useState<object>({});
   const [contentText, setContentText] = useState('');
@@ -44,14 +46,15 @@ export function NoteEditor({ note, presetSubjectId = null, presetTopicId = null,
   const [scheduling, setScheduling] = useState(false);
 
   useEffect(() => {
-    listSubjectOptions().then(setSubjects).catch(() => {});
-    listBoards().then(setBoards).catch(() => {});
+    listSubjectOptions().then(setSubjects).catch((e) => toast.error(e instanceof Error ? e.message : 'Erro ao carregar matérias.'));
+    listBoards().then(setBoards).catch((e) => toast.error(e instanceof Error ? e.message : 'Erro ao carregar bancas.'));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     if (!subjectId) { setTopics([]); return; }
-    listTopicOptions(subjectId).then(setTopics).catch(() => {});
-  }, [subjectId]);
+    listTopicOptions(subjectId).then(setTopics).catch((e) => toast.error(e instanceof Error ? e.message : 'Erro ao carregar tópicos.'));
+  }, [subjectId, toast]);
 
   useEffect(() => {
     if (!topicId) { setAcerto(null); return; }

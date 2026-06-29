@@ -5,6 +5,7 @@
 
 import { useEffect, useState } from 'react';
 import { useConfirm } from '@/hooks/useConfirm';
+import { useToast } from '@/components/ui/ToastProvider';
 import type { PendingSession } from '@/hooks/useStudyTimer';
 import type { SessionFeedback, ErrorCause } from '@/services/studyLogs.service';
 import {
@@ -29,6 +30,7 @@ const ERROR_CAUSES: { value: ErrorCause; label: string }[] = [
 ];
 
 export function QualitativeFeedbackForm({ session, onSubmit, onDiscard, saving }: Props) {
+  const toast = useToast();
   const [mode, setMode] = useState<LogMode>(session.mode);
   const [energy, setEnergy] = useState(0);
   const [feedback, setFeedback] = useState('');
@@ -59,13 +61,14 @@ export function QualitativeFeedbackForm({ session, onSubmit, onDiscard, saving }
   }, []);
 
   useEffect(() => {
-    listSubjectOptions().then(setSubjects).catch(() => {});
+    listSubjectOptions().then(setSubjects).catch((e) => toast.error(e instanceof Error ? e.message : 'Erro ao carregar matérias.'));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     if (!subjectId) { setTopics([]); return; }
-    listTopicOptions(subjectId).then(setTopics).catch(() => {});
-  }, [subjectId]);
+    listTopicOptions(subjectId).then(setTopics).catch((e) => toast.error(e instanceof Error ? e.message : 'Erro ao carregar tópicos.'));
+  }, [subjectId, toast]);
 
   useEffect(() => {
     if (!topicId) { setReviewActive(false); setWantReview(false); return; }

@@ -187,7 +187,7 @@ function CardsTab({ onStudy }: { onStudy: (queue: QueueCard[]) => void }) {
   }
   function reloadCards() {
     if (curSubject) loadCards(curSubject.id, curTopic === 'none' ? null : (curTopic?.id ?? null));
-    countFlashcardsBySubject().then(setCounts).catch(() => {});
+    countFlashcardsBySubject().then(setCounts).catch((e) => toast.error(e instanceof Error ? e.message : 'Erro ao atualizar contagem de cards.'));
   }
   async function handleDelete(id: string) {
     if (!await confirm({ title: 'Apagar este card?', confirmLabel: 'Apagar', danger: true })) return;

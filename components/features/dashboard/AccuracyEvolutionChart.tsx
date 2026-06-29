@@ -3,6 +3,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useToast } from '@/components/ui/ToastProvider';
 import {
   Line, Area, ComposedChart, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from 'recharts';
@@ -13,13 +14,15 @@ import {
 import { theme } from '@/lib/theme';
 
 export function AccuracyEvolutionChart() {
+  const toast = useToast();
   const [subjects, setSubjects] = useState<SubjectOption[]>([]);
   const [selected, setSelected] = useState<string>('');
   const [data, setData] = useState<EvolutionPoint[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    listSubjectsWithQuestions().then(setSubjects).catch(() => {});
+    listSubjectsWithQuestions().then(setSubjects).catch((e) => toast.error(e instanceof Error ? e.message : 'Erro ao carregar filtro de matérias.'));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {

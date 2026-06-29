@@ -5,6 +5,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
+import { useConfirm } from '@/hooks/useConfirm';
 import { toggleBlockDone, deleteBlock } from '@/services/studyBlocks.service';
 import {
   getScheduleBlocks, toggleRecurrenceDone, skipOccurrence, type ScheduleBlock,
@@ -70,6 +71,7 @@ const DIAS = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
 
 export default function SchedulePage() {
   const { isMobile } = useUI();
+  const { confirm, dialog } = useConfirm();
   const [weekStart, setWeekStart] = useState<Date>(() => mondayOf(new Date()));
   const [blocks, setBlocks] = useState<ScheduleBlock[]>([]);
   const [view, setView] = useState<'semana' | 'lista' | 'ciclo'>('semana');
@@ -137,7 +139,7 @@ export default function SchedulePage() {
     const msg = temAtivo
       ? 'Reativar este ciclo? O ciclo ativo atual será arquivado no lugar.'
       : 'Reativar este ciclo? Ele voltará a ser o ciclo ativo.';
-    if (!window.confirm(msg)) return;
+    if (!await confirm({ title: msg })) return;
     try {
       await reactivateCycle(id);
       setViewingArchivedId(null);
@@ -233,6 +235,8 @@ export default function SchedulePage() {
   const mostrarLista = view === 'lista' || (view === 'semana' && isMobile);
 
   return (
+    <>
+    {dialog}
     <div style={{ ...styles.container, padding: isMobile ? '20px 16px' : '34px 40px' }}>
       <div style={styles.header}>
         <h1 style={{ ...styles.h1, fontSize: isMobile ? 25 : 28 }}>Cronograma</h1>
@@ -475,6 +479,7 @@ export default function SchedulePage() {
         />
       )}
     </div>
+    </>
   );
 }
 

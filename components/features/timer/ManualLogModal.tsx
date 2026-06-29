@@ -10,6 +10,7 @@ import { saveStudyLog, type ErrorCause } from '@/services/studyLogs.service';
 import { SESSION_MODES, modeUsesQuestions } from '@/lib/session-modes';
 import { createClient } from '@/lib/supabase/client';
 import { useConfirm } from '@/hooks/useConfirm';
+import { useToast } from '@/components/ui/ToastProvider';
 import {
   createSessionId,
   type LogMode,
@@ -50,6 +51,7 @@ export function ManualLogModal({ onClose, onSaved }: Props) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const { confirm: confirmDiscard, dialog: discardDialog } = useConfirm();
+  const toast = useToast();
 
   const isDirty = subjectId !== '' || energy > 0 || qFeedback.trim() !== '';
 
@@ -73,7 +75,7 @@ export function ManualLogModal({ onClose, onSaved }: Props) {
 
   useEffect(() => {
     if (!subjectId) { setTopics([]); setTopicId(''); return; }
-    listTopics(subjectId).then(setTopics).catch(() => setTopics([]));
+    listTopics(subjectId).then(setTopics).catch((e) => { toast.error(e instanceof Error ? e.message : 'Erro ao carregar tópicos.'); setTopics([]); });
     setTopicId('');
   }, [subjectId]);
 

@@ -8,6 +8,7 @@ import { listSubjects, type Subject } from '@/services/subjects.service';
 import { listTopics, type Topic } from '@/services/topics.service';
 import { createBlock, updateBlock } from '@/services/studyBlocks.service';
 import { theme } from '@/lib/theme';
+import { useToast } from '@/components/ui/ToastProvider';
 
 interface EditTarget {
   id: string;
@@ -26,6 +27,7 @@ interface Props {
 
 export function BlockModal({ blockDate, dateLabel, onClose, onCreated, editBlock = null }: Props) {
   const isEdit = !!editBlock;
+  const toast = useToast();
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [topics, setTopics] = useState<Topic[]>([]);
   const [subjectId, setSubjectId] = useState(editBlock?.subjectId ?? '');
@@ -35,13 +37,20 @@ export function BlockModal({ blockDate, dateLabel, onClose, onCreated, editBlock
   const [error, setError] = useState('');
 
   useEffect(() => {
-    listSubjects().then(setSubjects).catch(() => {});
+    const h = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', h);
+    return () => document.removeEventListener('keydown', h);
+  }, [onClose]);
+
+  useEffect(() => {
+    listSubjects().then(setSubjects).catch((e) => toast.error(e instanceof Error ? e.message : 'Erro ao carregar matérias.'));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Carrega tópicos da matéria. No modo edição, preserva o tópico inicial.
   useEffect(() => {
     if (!subjectId) { setTopics([]); setTopicId(''); return; }
-    listTopics(subjectId).then(setTopics).catch(() => setTopics([]));
+    listTopics(subjectId).then(setTopics).catch((e) => { toast.error(e instanceof Error ? e.message : 'Erro ao carregar tópicos.'); setTopics([]); });
     // só limpa o tópico se a matéria mudou em relação à original (modo edição)
     if (!isEdit || subjectId !== editBlock?.subjectId) setTopicId('');
     // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -5,6 +5,7 @@
 
 import { useEffect, useState } from 'react';
 import { listSubjects, type Subject } from '@/services/subjects.service';
+import { useToast } from '@/components/ui/ToastProvider';
 import {
   createRule, editRuleVersioned, type RecurrenceItemInput, type RuleSummary, type RecurrenceMode,
 } from '@/services/recurrence.service';
@@ -40,6 +41,7 @@ let uidSeq = 1;
 
 export function RecurrenceModal({ onClose, onCreated, editRule = null, modoInicial = 'dia_fixo' }: Props) {
   const isEdit = !!editRule;
+  const toast = useToast();
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [mode, setMode] = useState<RecurrenceMode>(editRule?.mode ?? modoInicial);
 
@@ -67,7 +69,16 @@ export function RecurrenceModal({ onClose, onCreated, editRule = null, modoInici
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
-  useEffect(() => { listSubjects().then(setSubjects).catch(() => {}); }, []);
+  useEffect(() => {
+    const h = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', h);
+    return () => document.removeEventListener('keydown', h);
+  }, [onClose]);
+
+  useEffect(() => {
+    listSubjects().then(setSubjects).catch((e) => toast.error(e instanceof Error ? e.message : 'Erro ao carregar matérias.'));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   function colorOf(subjectId: string): string {
     return subjects.find((s) => s.id === subjectId)?.color ?? theme.line;

@@ -56,31 +56,32 @@ export default function NotebookPage() {
       .finally(() => setLoadingSubjects(false));
   }, []);
   useEffect(() => {
-    listBoards().then(setBoards).catch(() => {});
+    listBoards().then(setBoards).catch((e) => toast.error(e instanceof Error ? e.message : 'Erro ao carregar bancas.'));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     if (viewMode !== 'recentes') return;
-    listRecentNotes(periodo).then(setRecentNotes).catch(() => setRecentNotes([]));
-  }, [viewMode, periodo]);
+    listRecentNotes(periodo).then(setRecentNotes).catch((e) => { toast.error(e instanceof Error ? e.message : 'Erro ao carregar notas recentes.'); setRecentNotes([]); });
+  }, [viewMode, periodo, toast]);
 
   useEffect(() => {
     if (viewMode !== 'criticos') return;
-    listCriticalTopics().then(setCriticals).catch(() => setCriticals([]));
-  }, [viewMode]);
+    listCriticalTopics().then(setCriticals).catch((e) => { toast.error(e instanceof Error ? e.message : 'Erro ao carregar tópicos críticos.'); setCriticals([]); });
+  }, [viewMode, toast]);
 
   useEffect(() => {
     if (!boardFilter) { setBoardResults(null); return; }
-    listNotesByBoard(boardFilter).then(setBoardResults).catch(() => setBoardResults([]));
-  }, [boardFilter]);
+    listNotesByBoard(boardFilter).then(setBoardResults).catch((e) => { toast.error(e instanceof Error ? e.message : 'Erro ao filtrar por banca.'); setBoardResults([]); });
+  }, [boardFilter, toast]);
 
   useEffect(() => {
     if (!term.trim()) { setSearchResults(null); return; }
     const t = setTimeout(() => {
-      searchNotes(term).then(setSearchResults).catch(() => setSearchResults([]));
+      searchNotes(term).then(setSearchResults).catch((e) => { toast.error(e instanceof Error ? e.message : 'Erro na busca.'); setSearchResults([]); });
     }, 300);
     return () => clearTimeout(t);
-  }, [term]);
+  }, [term, toast]);
 
   const loadNotes = useCallback(async (subjectId: string, topicId: string | null) => {
     setLoadingNotes(true);
@@ -96,7 +97,7 @@ export default function NotebookPage() {
 
   function openSubject(s: PickerOption) {
     setCurSubject(s);
-    listTopicOptions(s.id).then(setTopics).catch(() => {});
+    listTopicOptions(s.id).then(setTopics).catch((e) => toast.error(e instanceof Error ? e.message : 'Erro ao carregar tópicos.'));
     setLevel('topics');
   }
 
@@ -150,7 +151,7 @@ export default function NotebookPage() {
       const topicId = curTopic === 'none' ? null : (curTopic?.id ?? null);
       loadNotes(curSubject.id, topicId);
     }
-    countNotesBySubject().then(setCounts).catch(() => {});
+    countNotesBySubject().then(setCounts).catch(() => {/* não exibe toast: contagem é dado auxiliar */});
     refreshAux();
   }
 
