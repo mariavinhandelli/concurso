@@ -110,7 +110,7 @@ export function Topbar() {
         <div ref={menuRef} style={{ position: 'relative' }}>
           <button onClick={() => setMenuOpen((v) => !v)} style={styles.avatarBtn} aria-label="Menu da conta">
             {avatarUrl ? (
-              <img src={avatarUrl} alt="" loading="lazy" decoding="async" style={styles.avatarImg} />
+              <img src={avatarUrl} alt="Avatar do usuário" loading="lazy" decoding="async" style={styles.avatarImg} />
             ) : (
               <span style={styles.avatarFallback}>{initial}</span>
             )}
@@ -179,7 +179,7 @@ const styles: Record<string, React.CSSProperties> = {
   avatarImg: { width: '100%', height: '100%', objectFit: 'cover' },
   avatarFallback: { color: '#fff', fontWeight: 600, fontSize: 15 },
   menu: {
-    position: 'absolute', top: 46, right: 0, width: 240, background: theme.card,
+    position: 'absolute', top: 46, right: 0, width: 'min(240px, calc(100vw - 32px))', background: theme.card,
     border: `0.5px solid ${theme.line}`, borderRadius: 14, boxShadow: theme.shadowHover,
     padding: 6, zIndex: 40,
   },

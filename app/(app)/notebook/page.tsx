@@ -57,8 +57,7 @@ export default function NotebookPage() {
   }, []);
   useEffect(() => {
     listBoards().then(setBoards).catch((e) => toast.error(e instanceof Error ? e.message : 'Erro ao carregar bancas.'));
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [toast]);
 
   useEffect(() => {
     if (viewMode !== 'recentes') return;
@@ -93,7 +92,7 @@ export default function NotebookPage() {
     } finally {
       setLoadingNotes(false);
     }
-  }, []);
+  }, [toast]);
 
   function openSubject(s: PickerOption) {
     setCurSubject(s);

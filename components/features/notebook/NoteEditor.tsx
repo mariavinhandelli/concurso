@@ -48,8 +48,7 @@ export function NoteEditor({ note, presetSubjectId = null, presetTopicId = null,
   useEffect(() => {
     listSubjectOptions().then(setSubjects).catch((e) => toast.error(e instanceof Error ? e.message : 'Erro ao carregar matérias.'));
     listBoards().then(setBoards).catch((e) => toast.error(e instanceof Error ? e.message : 'Erro ao carregar bancas.'));
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [toast]);
 
   useEffect(() => {
     if (!subjectId) { setTopics([]); return; }

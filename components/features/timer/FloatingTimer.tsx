@@ -9,51 +9,50 @@ import { useTimer } from './TimerContext';
 import { saveStudyLog, type SessionFeedback } from '@/services/studyLogs.service';
 import { QualitativeFeedbackForm } from './QualitativeFeedbackForm';
 import { theme } from '@/lib/theme';
+import { useUI } from '@/components/layout/UIContext';
+import { useToast } from '@/components/ui/ToastProvider';
 
 export function FloatingTimer() {
   const timer = useTimer();
+  const { isMobile } = useUI();
+  const toast = useToast();
   const [expanded, setExpanded] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [errorMsg, setErrorMsg] = useState('');
 
   async function handleSubmitFeedback(feedback: SessionFeedback) {
     if (!timer.pendingSession) return;
     setSaving(true);
-    setErrorMsg('');
     try {
       await saveStudyLog(timer.pendingSession, feedback);
       timer.discardPending();
       setExpanded(false);
     } catch (err) {
-      setErrorMsg(err instanceof Error ? err.message : 'Erro ao salvar.');
+      toast.error(err instanceof Error ? err.message : 'Erro ao salvar.');
     } finally {
       setSaving(false);
     }
   }
 
-  // Encerrando: a tela de feedback aparece centralizada, por cima de tudo.
+  // Encerrando: QualitativeFeedbackForm já tem overlay próprio — não duplicar.
   if (timer.status === 'awaiting_feedback' && timer.pendingSession) {
     return (
-      <div style={styles.overlay}>
-        <div style={styles.feedbackCard}>
-          {errorMsg && <p style={styles.error}>{errorMsg}</p>}
-          <QualitativeFeedbackForm
-            session={timer.pendingSession}
-            onSubmit={handleSubmitFeedback}
-            onDiscard={() => { timer.discardPending(); setExpanded(false); }}
-            saving={saving}
-          />
-        </div>
-      </div>
+      <QualitativeFeedbackForm
+        session={timer.pendingSession}
+        onSubmit={handleSubmitFeedback}
+        onDiscard={() => { timer.discardPending(); setExpanded(false); }}
+        saving={saving}
+      />
     );
   }
+
+  const pos = { bottom: isMobile ? 16 : 24, right: isMobile ? 16 : 24 };
 
   // PARADO: botão redondo discreto.
   if (timer.status === 'idle') {
     return (
       <button
         onClick={() => timer.start({ mode: 'teoria' })}
-        style={styles.fab}
+        style={{ ...styles.fab, ...pos }}
         aria-label="Iniciar sessão de estudo"
         title="Iniciar sessão de estudo"
       >
@@ -68,7 +67,7 @@ export function FloatingTimer() {
   // RODANDO ou PAUSADO, recolhido: pílula com tempo.
   if (!expanded) {
     return (
-      <button onClick={() => setExpanded(true)} style={styles.pill} aria-label="Abrir cronômetro">
+      <button onClick={() => setExpanded(true)} style={{ ...styles.pill, ...pos }} aria-label="Abrir cronômetro">
         <span style={{ ...styles.pillDot, background: timer.isRunning ? theme.tealSoft : theme.clay }} />
         <span style={styles.pillTime}>{timer.formatted}</span>
       </button>
@@ -77,7 +76,7 @@ export function FloatingTimer() {
 
   // EXPANDIDO: cartão com controles.
   return (
-    <div style={styles.card}>
+    <div style={{ ...styles.card, ...pos, width: isMobile ? 'calc(100vw - 32px)' : 220, maxWidth: 340 }}>
       <div style={styles.cardHead}>
         <span style={styles.eyebrow}>Sessão de estudo</span>
         <button onClick={() => setExpanded(false)} style={styles.collapseBtn} aria-label="Recolher">
@@ -134,7 +133,4 @@ const styles: Record<string, React.CSSProperties> = {
   cardActions: { display: 'flex', gap: 8 },
   secondary: { flex: 1, padding: '9px 0', borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.card, color: theme.inkSoft, fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' },
   primary: { flex: 1, padding: '9px 0', borderRadius: theme.radiusSm, border: 'none', background: theme.teal, color: theme.onTeal, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
-  overlay: { position: 'fixed', inset: 0, zIndex: 70, background: 'rgba(30,28,24,0.4)', display: 'grid', placeItems: 'center', padding: 20 },
-  feedbackCard: { background: theme.card, borderRadius: theme.radius, padding: 24, width: '100%', maxWidth: 420, maxHeight: '88vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,0.18)' },
-  error: { color: theme.danger, fontSize: 13, margin: '0 0 12px' },
 };

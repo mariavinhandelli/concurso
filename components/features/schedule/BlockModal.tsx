@@ -7,7 +7,7 @@ import { useEffect, useState } from 'react';
 import { listSubjects, type Subject } from '@/services/subjects.service';
 import { listTopics, type Topic } from '@/services/topics.service';
 import { createBlock, updateBlock } from '@/services/studyBlocks.service';
-import { theme } from '@/lib/theme';
+import { theme, zIndex } from '@/lib/theme';
 import { useToast } from '@/components/ui/ToastProvider';
 
 interface EditTarget {
@@ -44,8 +44,7 @@ export function BlockModal({ blockDate, dateLabel, onClose, onCreated, editBlock
 
   useEffect(() => {
     listSubjects().then(setSubjects).catch((e) => toast.error(e instanceof Error ? e.message : 'Erro ao carregar matérias.'));
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [toast]);
 
   // Carrega tópicos da matéria. No modo edição, preserva o tópico inicial.
   useEffect(() => {
@@ -122,7 +121,7 @@ export function BlockModal({ blockDate, dateLabel, onClose, onCreated, editBlock
 }
 
 const styles: Record<string, React.CSSProperties> = {
-  overlay: { position: 'fixed', inset: 0, background: 'rgba(30,28,24,0.4)', display: 'grid', placeItems: 'center', zIndex: 50, padding: 20 },
+  overlay: { position: 'fixed', inset: 0, background: 'rgba(30,28,24,0.4)', display: 'grid', placeItems: 'center', zIndex: zIndex.overlay, padding: 20 },
   modal: { background: theme.card, borderRadius: theme.radius, boxShadow: '0 20px 60px rgba(0,0,0,0.18)', padding: 24, width: '100%', maxWidth: 380, fontFamily: theme.font },
   h2: { fontSize: 18, fontWeight: 700, color: theme.ink, margin: '0 0 18px' },
   label: { display: 'block', fontSize: 12.5, fontWeight: 600, color: theme.inkSoft, margin: '14px 0 6px' },

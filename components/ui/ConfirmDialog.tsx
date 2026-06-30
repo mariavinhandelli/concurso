@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { theme } from '@/lib/theme';
+import { theme, zIndex } from '@/lib/theme';
 
 interface Props {
   title: string;
@@ -57,7 +57,7 @@ const styles: Record<string, React.CSSProperties> = {
   overlay: {
     position: 'fixed', inset: 0, background: 'rgba(15,23,42,0.45)',
     display: 'flex', alignItems: 'center', justifyContent: 'center',
-    zIndex: 9000, padding: 16,
+    zIndex: zIndex.dialog, padding: 16,
   },
   modal: {
     background: theme.card, borderRadius: 16, padding: '24px 24px 20px',

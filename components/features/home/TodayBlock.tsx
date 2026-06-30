@@ -48,14 +48,23 @@ export function TodayBlock() {
     }).catch(() => {});
   }
 
-  useEffect(() => {
+  function loadAll() {
     countDueReviews().then(setRevisoes).catch(() => setRevisoes(0));
     buildDailyQueue().then((q) => setFlashcards(q.length)).catch(() => setFlashcards(0));
     loadGoals();
+  }
+
+  useEffect(() => {
+    loadAll();
+    function onVisible() { if (document.visibilityState === 'visible') loadAll(); }
+    document.addEventListener('visibilitychange', onVisible);
+    return () => document.removeEventListener('visibilitychange', onVisible);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function saveHoursGoal() {
     const total = (Number(hours) || 0) * 60 + (Number(mins) || 0);
+    if (total <= 0) { toast.error('Defina uma meta maior que 0 minutos.'); return; }
     setSavingHours(true);
     try { await setDailyTarget(total); setEditingHours(false); loadGoals(); }
     catch (e) { toast.error(e instanceof Error ? e.message : 'Erro ao salvar meta de horas.'); }
@@ -64,6 +73,7 @@ export function TodayBlock() {
 
   async function saveQGoal() {
     const count = Number(qTarget) || 0;
+    if (count <= 0) { toast.error('Defina uma meta maior que 0 questões.'); return; }
     setSavingQ(true);
     try { await setDailyTargetQuestions(count); setEditingQ(false); loadGoals(); }
     catch (e) { toast.error(e instanceof Error ? e.message : 'Erro ao salvar meta de questões.'); }
@@ -128,7 +138,7 @@ export function TodayBlock() {
         <div style={styles.metaWrap}>
           <button style={styles.stripBtn} onClick={() => { setEditingHours((v) => !v); setEditingQ(false); }} title="Ajustar meta de horas">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={theme.inkSoft} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>
-            Meta <b style={styles.stripVal}>{goals ? `${fmtMin(goals.todayMinutes)} / ${fmtMin(goals.targetMinutesPerDay)}` : '…'}</b>
+            H. Estudo <b style={styles.stripVal}>{goals ? `${fmtMin(goals.todayMinutes)} / ${fmtMin(goals.targetMinutesPerDay)}` : '…'}</b>
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={theme.inkFaint} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ transform: editingHours ? 'rotate(180deg)' : 'none', transition: 'transform .15s' }}><path d="M6 9l6 6 6-6" /></svg>
           </button>
           {editingHours && (
@@ -146,8 +156,8 @@ export function TodayBlock() {
                 </div>
               ) : null}
               <div style={styles.popActions}>
-                <button style={styles.popCancel} onClick={() => setEditingHours(false)}>Cancelar</button>
-                <button style={styles.popSave} onClick={saveHoursGoal} disabled={savingHours}>{savingHours ? '…' : 'Salvar'}</button>
+                <button style={styles.popCancel} onClick={() => setEditingHours(false)} aria-label="Cancelar">Cancelar</button>
+                <button style={{ ...styles.popSave, cursor: savingHours ? 'not-allowed' : 'pointer' }} onClick={saveHoursGoal} disabled={savingHours} aria-label="Salvar meta de horas">{savingHours ? '…' : 'Salvar'}</button>
               </div>
             </div>
           )}
@@ -186,8 +196,8 @@ export function TodayBlock() {
                 </div>
               ) : null}
               <div style={styles.popActions}>
-                <button style={styles.popCancel} onClick={() => setEditingQ(false)}>Cancelar</button>
-                <button style={styles.popSave} onClick={saveQGoal} disabled={savingQ}>{savingQ ? '…' : 'Salvar'}</button>
+                <button style={styles.popCancel} onClick={() => setEditingQ(false)} aria-label="Cancelar">Cancelar</button>
+                <button style={{ ...styles.popSave, cursor: savingQ ? 'not-allowed' : 'pointer' }} onClick={saveQGoal} disabled={savingQ} aria-label="Salvar meta de questões">{savingQ ? '…' : 'Salvar'}</button>
               </div>
             </div>
           )}

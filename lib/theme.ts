@@ -66,6 +66,17 @@ export const pageWide: React.CSSProperties = {
   fontFamily: theme.font,
 };
 
+// Escala de z-index — use sempre estes valores para empilhamento previsível.
+export const zIndex = {
+  topbar:   20,   // header sticky
+  fab:      50,   // FloatingTimer
+  overlay:  60,   // fundos de modal (backdrop)
+  modal:    70,   // modais comuns
+  drawer:   30,   // sidebar / nav lateral
+  dialog:  200,   // ConfirmDialog (acima de qualquer modal)
+  toast:   300,   // ToastProvider (sempre visível)
+} as const;
+
 // Cor de desempenho por taxa de acerto (0–1). Status universal.
 // Régua de alta performance: ≥80% bom, 65–79% médio, <65% precisa de atenção.
 export function perfColor(rate: number) {

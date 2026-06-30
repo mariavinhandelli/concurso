@@ -200,7 +200,8 @@ export async function toggleRecurrenceDone(block: ScheduleBlock, done: boolean):
     const { error } = await supabase
       .from('recurrence_overrides')
       .update({ is_done: done, done_at: done ? new Date().toISOString() : null })
-      .eq('id', block.id);
+      .eq('id', block.id)
+      .eq('user_id', user.id);
     if (error) throw new Error('Erro ao atualizar: ' + error.message);
   }
 
@@ -225,7 +226,8 @@ export async function skipOccurrence(block: ScheduleBlock): Promise<void> {
     const { error } = await supabase
       .from('recurrence_overrides')
       .update({ is_skipped: true })
-      .eq('id', block.id);
+      .eq('id', block.id)
+      .eq('user_id', user.id);
     if (error) throw new Error('Erro ao pular: ' + error.message);
   }
 }

@@ -1,7 +1,7 @@
 'use client';
 
-import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
-import { theme } from '@/lib/theme';
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { theme, zIndex } from '@/lib/theme';
 
 type ToastKind = 'success' | 'error' | 'info';
 
@@ -43,11 +43,11 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     return () => { map.forEach(clearTimeout); map.clear(); };
   }, []);
 
-  const value: ToastContextValue = {
+  const value = useMemo<ToastContextValue>(() => ({
     success: (msg) => push(msg, 'success'),
     error: (msg) => push(msg, 'error'),
     info: (msg) => push(msg, 'info'),
-  };
+  }), [push]);
 
   return (
     <ToastContext.Provider value={value}>
@@ -81,7 +81,7 @@ export function useToast(): ToastContextValue {
 
 const styles: Record<string, React.CSSProperties> = {
   container: {
-    position: 'fixed', bottom: 24, right: 24, zIndex: 9999,
+    position: 'fixed', bottom: 24, right: 24, zIndex: zIndex.toast,
     display: 'flex', flexDirection: 'column', gap: 8,
     maxWidth: 'min(360px, calc(100vw - 32px))',
   },

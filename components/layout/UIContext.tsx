@@ -10,10 +10,10 @@ export type Palette = 'petroleo' | 'rose' | 'menta' | 'grafite';
 export type Mode = 'light' | 'dark';
 
 export const PALETTES: { id: Palette; name: string; hint: string; swatch: string }[] = [
-  { id: 'petroleo', name: 'Focali', hint: 'padrão', swatch: '#22C55E' },
-  { id: 'rose',     name: 'Rosé',     hint: 'rosa terroso', swatch: '#C67D80' },
-  { id: 'menta',    name: 'Menta',    hint: 'verde esmeralda', swatch: '#4FD1A8' },
-  { id: 'grafite',  name: 'Grafite',  hint: 'mono sóbrio', swatch: '#1b221f' },
+  { id: 'petroleo', name: 'Focali',  hint: 'padrão',             swatch: 'linear-gradient(135deg, #143D45 50%, #22C55E 50%)' },
+  { id: 'rose',     name: 'Rosé',    hint: 'rosa terroso',       swatch: 'linear-gradient(135deg, #cf8588 50%, #9B5C6E 50%)' },
+  { id: 'menta',    name: 'Violeta',  hint: 'índigo & menta',     swatch: 'linear-gradient(135deg, #6366F1 50%, #C5EEDD 50%)' },
+  { id: 'grafite',  name: 'Grafite', hint: 'mono sóbrio',        swatch: 'linear-gradient(135deg, #1b221f 50%, #97A39D 50%)' },
 ];
 
 const VALID_PALETTES: Palette[] = ['petroleo', 'rose', 'menta', 'grafite'];

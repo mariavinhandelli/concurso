@@ -22,8 +22,7 @@ export function AccuracyEvolutionChart() {
 
   useEffect(() => {
     listSubjectsWithQuestions().then(setSubjects).catch((e) => toast.error(e instanceof Error ? e.message : 'Erro ao carregar filtro de matérias.'));
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [toast]);
 
   useEffect(() => {
     setLoading(true);

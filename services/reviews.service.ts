@@ -26,6 +26,9 @@ export interface ReviewItem {
 
 export async function activateReview(topicId: string): Promise<void> {
   const supabase = createClient();
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  if (authError || !user) throw new Error('Você precisa estar logado.');
+
   const dateStr = localDateInDays(1);
 
   const { error } = await supabase
@@ -37,7 +40,8 @@ export async function activateReview(topicId: string): Promise<void> {
       repetitions: 0,
       ease_factor: 2.5,
     })
-    .eq('id', topicId);
+    .eq('id', topicId)
+    .eq('user_id', user.id);
 
   if (error) throw new Error('Erro ao ativar revisão: ' + error.message);
 }
@@ -143,10 +147,14 @@ export function dateInDays(days: number): string {
 
 export async function getReviewStatus(topicId: string): Promise<boolean> {
   const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return false;
+
   const { data, error } = await supabase
     .from('topics')
     .select('is_review_active')
     .eq('id', topicId)
+    .eq('user_id', user.id)
     .maybeSingle();
   if (error) return false;
   return data?.is_review_active ?? false;
@@ -156,12 +164,15 @@ export async function getReviewStatus(topicId: string): Promise<boolean> {
 // entre a já agendada e a nova (hoje + days).
 export async function scheduleReviewFromError(topicId: string, days: number): Promise<void> {
   const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
 
   // Lê o estado atual da revisão do tópico.
   const { data: topic } = await supabase
     .from('topics')
     .select('next_review_date, is_review_active')
     .eq('id', topicId)
+    .eq('user_id', user.id)
     .maybeSingle();
 
   const novaData = dateInDays(days); // 'YYYY-MM-DD'

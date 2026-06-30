@@ -83,19 +83,26 @@ export async function createBlock(input: {
 
 export async function toggleBlockDone(blockId: string, done: boolean): Promise<void> {
   const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('Você precisa estar logado.');
+
   const updates = done
     ? { is_done: true, done_at: new Date().toISOString() }
     : { is_done: false, done_at: null, completed_by_session_id: null };
   const { error } = await supabase
     .from('study_blocks')
     .update(updates)
-    .eq('id', blockId);
+    .eq('id', blockId)
+    .eq('user_id', user.id);
   if (error) throw new Error('Erro ao atualizar bloco: ' + error.message);
 }
 
 export async function deleteBlock(blockId: string): Promise<void> {
   const supabase = createClient();
-  const { error } = await supabase.from('study_blocks').delete().eq('id', blockId);
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('Você precisa estar logado.');
+
+  const { error } = await supabase.from('study_blocks').delete().eq('id', blockId).eq('user_id', user.id);
   if (error) throw new Error('Erro ao excluir bloco: ' + error.message);
 }
 
@@ -105,11 +112,14 @@ export async function updateBlock(
   updates: { plannedMinutes?: number; topicId?: string | null },
 ): Promise<void> {
   const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('Você precisa estar logado.');
+
   const payload: { planned_minutes?: number; topic_id?: string | null } = {};
   if (updates.plannedMinutes !== undefined) payload.planned_minutes = updates.plannedMinutes;
   if (updates.topicId !== undefined) payload.topic_id = updates.topicId;
 
-  const { error } = await supabase.from('study_blocks').update(payload).eq('id', blockId);
+  const { error } = await supabase.from('study_blocks').update(payload).eq('id', blockId).eq('user_id', user.id);
   if (error) throw new Error('Erro ao editar bloco: ' + error.message);
 }
 

@@ -3,6 +3,7 @@
 import { usePathname, useRouter } from 'next/navigation';
 import { useState, type CSSProperties } from 'react';
 import { useUI } from './UIContext';
+import { zIndex } from '@/lib/theme';
 
 // Cores da sidebar — agora resolvem via CSS variables (acompanham a paleta ativa).
 const SB = {
@@ -55,6 +56,7 @@ const NAV = [
   },
   { href: '/targets', label: 'Edital Verticalizado', icon: <path d="M8 6.5h12M8 12h12M8 17.5h12M4 6.5h1M4 12h1m-1 5.5h1" /> },
   { href: '/notebook', label: 'Cadernos de Erros', icon: <path d="M5 20.25c0 .414.336.75.75.75h10.652C17.565 21 18 20.635 18 19.4v-1.445M5 20.25A2.25 2.25 0 0 1 7.25 18h10.152q.339 0 .598-.045M5 20.25V6.2c0-1.136-.072-2.389 1.092-2.982C6.52 3 7.08 3 8.2 3h9.2c1.236 0 1.6.437 1.6 1.6v11.8c0 .995-.282 1.425-1 1.555M10 8l4 4m0-4l-4 4" /> },
+  { href: '/jurisprudencias', label: 'Jurisprudências', icon: <><path d="M3 6h18M3 12h18M3 18h12" /><circle cx="19" cy="18" r="3" /><path d="M21 20.5L22.5 22" /></> },
   { href: '/flashcards', label: 'Flashcards', icon: <path d="m21 12l-9 4l-9-4m18 4l-9 4l-9-4m18-8l-9 4l-9-4l9-4z" /> },
   { href: '/reviews', label: 'Revisões', icon: <path d="M4 12a8 8 0 0113-6.2L20 8M20 4v4h-4M20 12a8 8 0 01-13 6.2L4 16M4 20v-4h4" /> },
   { href: '/performance', label: 'Performance', icon: <path d="M15 9.429V5a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v8.286m6-3.857V21m0-11.571h4a2 2 0 0 1 2 2V19a2 2 0 0 1-2 2h-4m0 0H9m0 0v-7.714M9 21H5a2 2 0 0 1-2-2v-3.714a2 2 0 0 1 2-2h4" /> },
@@ -199,10 +201,10 @@ export function Sidebar() {
 }
 
 const styles: Record<string, CSSProperties> = {
-  aside: { flexShrink: 0, height: '100vh', position: 'fixed', top: 0, left: 0, zIndex: 30, background: SB.bg, borderRight: `0.5px solid ${SB.border}`, padding: '20px 14px', display: 'flex', flexDirection: 'column', gap: 4, fontFamily: 'var(--font-poppins), sans-serif', overflow: 'hidden' },
+  aside: { flexShrink: 0, height: '100vh', position: 'fixed', top: 0, left: 0, zIndex: zIndex.drawer, background: SB.bg, borderRight: `0.5px solid ${SB.border}`, padding: '20px 14px', display: 'flex', flexDirection: 'column', gap: 4, fontFamily: 'var(--font-poppins), sans-serif', overflow: 'hidden' },
   brand: { display: 'flex', alignItems: 'center', height: 40, marginBottom: 18, padding: '0 4px' },
   brandInner: { display: 'flex', alignItems: 'center', gap: 10 },
-  logo: { width: 32, height: 32, borderRadius: 9, background: 'rgba(255,255,255,0.06)', display: 'grid', placeItems: 'center', flexShrink: 0 },
+  logo: { width: 32, height: 32, borderRadius: 9, background: '#fff', display: 'grid', placeItems: 'center', flexShrink: 0, boxShadow: '0 1px 6px rgba(0,0,0,0.18)' },
   brandName: { fontWeight: 700, fontSize: 20, color: '#fff', letterSpacing: -0.5, whiteSpace: 'nowrap', fontFamily: 'var(--font-poppins), sans-serif' },
   collapseBtn: { width: 30, height: 30, borderRadius: 8, border: 'none', background: 'transparent', display: 'grid', placeItems: 'center', cursor: 'pointer', flexShrink: 0 },
   nav: { display: 'flex', flexDirection: 'column', gap: 4 },

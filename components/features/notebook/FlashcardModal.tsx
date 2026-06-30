@@ -83,7 +83,7 @@ export function FlashcardModal({ frontText, sourceErrorId, subjectId, topicId, o
 }
 
 const styles: Record<string, React.CSSProperties> = {
-  overlay: { position: 'fixed', inset: 0, background: 'rgba(30,28,24,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000, padding: 16 },
+  overlay: { position: 'fixed', inset: 0, background: 'rgba(30,28,24,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 60, padding: 16 },
   modal: { background: theme.card, borderRadius: theme.radius, padding: 28, width: 'min(480px, 95vw)', boxShadow: '0 20px 60px rgba(0,0,0,0.18)', fontFamily: theme.font },
   title: { margin: '0 0 20px', fontSize: 19, color: theme.ink, fontWeight: 700 },
   label: { display: 'block', fontSize: 12.5, color: theme.inkSoft, fontWeight: 600, marginBottom: 6, marginTop: 10 },

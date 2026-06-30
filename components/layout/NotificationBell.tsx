@@ -146,7 +146,7 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'grid', placeItems: 'center', lineHeight: 1, fontFamily: theme.font,
   },
   menu: {
-    position: 'absolute', top: 46, right: 0, width: 300, background: theme.card,
+    position: 'absolute', top: 46, right: 0, width: 'min(300px, calc(100vw - 32px))', background: theme.card,
     border: `0.5px solid ${theme.line}`, borderRadius: 14, boxShadow: theme.shadowHover,
     padding: 6, zIndex: 40, fontFamily: theme.font,
   },
@@ -154,7 +154,7 @@ const styles: Record<string, React.CSSProperties> = {
   menuName: { fontSize: 13, fontWeight: 700, color: theme.ink },
   menuSub: { fontSize: 12, color: theme.inkFaint, marginTop: 2 },
   empty: { padding: '18px 12px', fontSize: 13, color: theme.inkFaint, textAlign: 'center' },
-  list: { display: 'flex', flexDirection: 'column', maxHeight: 320, overflowY: 'auto' },
+  list: { display: 'flex', flexDirection: 'column', maxHeight: 'min(320px, calc(100vh - 200px))', overflowY: 'auto' },
   item: {
     display: 'flex', alignItems: 'flex-start', gap: 10, width: '100%', padding: '10px 12px',
     borderRadius: 9, border: 'none', background: 'transparent', cursor: 'pointer',

@@ -6,6 +6,7 @@
 import { useEffect, useState } from 'react';
 import { useConfirm } from '@/hooks/useConfirm';
 import { useRouter } from 'next/navigation';
+import { useUI } from '@/components/layout/UIContext';
 import {
   listDueReviews, submitReview, deactivateReview, rescheduleReview, dateInDays,
   type ReviewItem, type ReviewRating,
@@ -28,6 +29,7 @@ const QUICK = [
 
 export default function ReviewsPage() {
   const router = useRouter();
+  const { isMobile } = useUI();
   const { confirm, dialog } = useConfirm();
   const [items, setItems] = useState<ReviewItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -75,7 +77,7 @@ export default function ReviewsPage() {
   return (
     <>
     {dialog}
-    <div style={styles.container}>
+    <div style={{ ...styles.container, padding: isMobile ? '20px 16px' : '34px 40px' }}>
       <div style={styles.header}>
         <h1 style={styles.h1}>Revisões de hoje</h1>
         <p style={styles.sub}>Repetição espaçada — avalie cada tópico e o sistema reagenda.</p>
@@ -118,7 +120,7 @@ export default function ReviewsPage() {
                 {it.overdueDays > 0 && (
                   <span style={styles.overdue}>atrasada {it.overdueDays} {it.overdueDays === 1 ? 'dia' : 'dias'}</span>
                 )}
-                <button onClick={() => handleRemove(it.id)} style={styles.removeBtn} title="Tirar da revisão" aria-label="Tirar da revisão">✕</button>
+                <button onClick={() => handleRemove(it.id)} style={styles.removeBtn} title="Remover da revisão" aria-label="Remover da revisão">✕</button>
               </div>
               <p style={styles.topicName}>{it.name}</p>
 

@@ -180,10 +180,10 @@
   --ink-soft: #5E7268;
   --ink-faint: #A6B5AC;
 
-  --teal: #4FD1A8;
-  --teal-deep: #2BA180;
-  --teal-soft: #8FE0C5;
-  --teal-bg: #ADEBB3;
+  --teal: #6366F1;
+  --teal-deep: #b3a7f5;
+  --teal-soft: #6366F1;
+  --teal-bg: #cac3f4;
   --on-teal: #FFFFFF;
 
   --clay: #D98C5F;
@@ -203,19 +203,19 @@
 
 /* ---- Menta escuro ---- */
 [data-palette="menta"][data-mode="dark"] {
-  --bg: #15201C;
-  --card: #1D2A25;
-  --muted: #26352F;
-  --line: rgba(220,255,240,.08);
+  --bg: #25353a;
+  --card: #2D4148;
+  --muted: #364D54;
+  --line: rgba(200,220,240,.08);
   --line-strong: rgba(220,255,240,.15);
   --ink: #E4F2EC;
   --ink-soft: #8FA89D;
   --ink-faint: #6F857B;
 
-  --teal: #5DD9B0;
+  --teal: #6366F1;
   --teal-deep: #8FE8CC;
-  --teal-soft: #4FD1A8;
-  --teal-bg: #1E3A30;
+  --teal-soft: #6366F1;
+  --teal-bg: #1e323a;
   --on-teal: #FFFFFF;
 
   --clay: #E0A07A;
@@ -328,7 +328,7 @@
 
 /* Rosé */
 [data-palette="rose"][data-mode="light"] {
-  --sidebar-bg: #C67D80;
+  --sidebar-bg: #cf8588;
   --sidebar-ink: #ffffff;
   --sidebar-ink-idle: #FFFFFF;
   --sidebar-icon: #F2E0E0;
@@ -352,7 +352,7 @@
 
 /* Menta — primária clara: usa o tom -deep como fundo p/ texto branco legível */
 [data-palette="menta"][data-mode="light"] {
-  --sidebar-bg: #2BA180;
+  --sidebar-bg: #6366F1;
   --sidebar-ink: #FFFFFF;
   --sidebar-ink-idle: #FFFFFF;
   --sidebar-icon: #C5EEDD;
@@ -363,7 +363,7 @@
   --sidebar-logo-ink: #2BA180;
 }
 [data-palette="menta"][data-mode="dark"] {
-  --sidebar-bg: #1E3A30;
+  --sidebar-bg: #121638;
   --sidebar-ink: #E4F2EC;
   --sidebar-ink-idle: #C3D8CE;
   --sidebar-icon: #8FA89D;

@@ -25,6 +25,11 @@ export function StreakBar() {
 
   useEffect(() => {
     getStreak().then(setInfo).catch(() => setLoadError(true));
+    function onVisible() {
+      if (document.visibilityState === 'visible') getStreak().then(setInfo).catch(() => {});
+    }
+    document.addEventListener('visibilitychange', onVisible);
+    return () => document.removeEventListener('visibilitychange', onVisible);
   }, []);
 
   if (loadError) {
@@ -66,7 +71,7 @@ export function StreakBar() {
             <span style={styles.warn}> Estude hoje para manter.</span>
           )}
         </span>
-        <span style={styles.record}>recorde anual: <b style={{ color: theme.ink }}>{info.longest} dias</b></span>
+        <span style={styles.record}>recorde: <b style={{ color: theme.ink }}>{info.longest} dias</b></span>
       </div>
 
       {/* Barra de colunas finas, de ponta a ponta */}

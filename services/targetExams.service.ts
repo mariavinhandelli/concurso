@@ -175,6 +175,17 @@ export async function deleteTargetExam(targetExamId: string): Promise<void> {
 
 export async function linkTopicToTarget(topicId: string, targetExamId: string): Promise<void> {
   const supabase = createClient();
+  const { data: { user }, error: authErr } = await supabase.auth.getUser();
+  if (authErr || !user) throw new Error('Você precisa estar logado.');
+
+  const { data: exam } = await supabase
+    .from('target_exams').select('id').eq('id', targetExamId).eq('user_id', user.id).single();
+  if (!exam) throw new Error('Concurso-alvo não encontrado.');
+
+  const { data: topic } = await supabase
+    .from('topics').select('id').eq('id', topicId).eq('user_id', user.id).single();
+  if (!topic) throw new Error('Tópico não encontrado.');
+
   const { error } = await supabase
     .from('topic_target_exams')
     .insert({ topic_id: topicId, target_exam_id: targetExamId });
@@ -184,6 +195,17 @@ export async function linkTopicToTarget(topicId: string, targetExamId: string): 
 
 export async function unlinkTopicFromTarget(topicId: string, targetExamId: string): Promise<void> {
   const supabase = createClient();
+  const { data: { user }, error: authErr } = await supabase.auth.getUser();
+  if (authErr || !user) throw new Error('Você precisa estar logado.');
+
+  const { data: exam } = await supabase
+    .from('target_exams').select('id').eq('id', targetExamId).eq('user_id', user.id).single();
+  if (!exam) throw new Error('Concurso-alvo não encontrado.');
+
+  const { data: topic } = await supabase
+    .from('topics').select('id').eq('id', topicId).eq('user_id', user.id).single();
+  if (!topic) throw new Error('Tópico não encontrado.');
+
   const { error } = await supabase
     .from('topic_target_exams')
     .delete()

@@ -166,7 +166,10 @@ export async function stopRule(ruleId: string): Promise<void> {
 
 export async function deleteRule(ruleId: string): Promise<void> {
   const supabase = createClient();
-  const { error } = await supabase.from('recurrence_rules').delete().eq('id', ruleId);
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('Você precisa estar logado.');
+
+  const { error } = await supabase.from('recurrence_rules').delete().eq('id', ruleId).eq('user_id', user.id);
   if (error) throw new Error('Erro ao apagar regra: ' + error.message);
 }
 

@@ -385,7 +385,7 @@ const styles: Record<string, React.CSSProperties> = {
   dateInput: { padding: '4px 8px', borderRadius: 8, border: `0.5px solid ${theme.line}`, background: theme.card, fontSize: 13, color: theme.ink, fontFamily: 'inherit', outline: 'none' },
   dateSaveBtn: { border: 'none', background: theme.teal, color: '#fff', borderRadius: 6, padding: '4px 8px', cursor: 'pointer', fontSize: 12, fontFamily: 'inherit' },
   dateCancelBtn: { border: 'none', background: 'transparent', color: theme.inkFaint, borderRadius: 6, padding: '4px 6px', cursor: 'pointer', fontSize: 12, fontFamily: 'inherit' },
-  promoteOverlay: { position: 'fixed', inset: 0, background: 'rgba(15,23,42,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9000, padding: 16 },
+  promoteOverlay: { position: 'fixed', inset: 0, background: 'rgba(15,23,42,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 60, padding: 16 },
   promoteModal: { background: theme.card, borderRadius: 16, padding: '24px', width: 'min(400px, 94vw)', boxShadow: '0 20px 60px rgba(0,0,0,0.2)', fontFamily: theme.font },
   promoteTitle: { fontSize: 16, fontWeight: 700, color: theme.ink, margin: '0 0 6px' },
   promoteSub: { fontSize: 13.5, color: theme.inkSoft, margin: '0 0 16px', lineHeight: 1.5 },

@@ -53,6 +53,7 @@ export async function getCycleState(ruleId: string): Promise<CycleState | null> 
     .from('recurrence_rules')
     .select('*, recurrence_items(*)')
     .eq('id', ruleId)
+    .eq('user_id', user.id)
     .single();
   if (!rule) return null;
 
@@ -174,7 +175,7 @@ export async function undoLastCompletion(ruleId: string, subjectId: string): Pro
     .limit(1);
 
   if (data?.[0]) {
-    await supabase.from('cycle_completions').delete().eq('id', data[0].id);
+    await supabase.from('cycle_completions').delete().eq('id', data[0].id).eq('user_id', user.id);
   }
 }
 

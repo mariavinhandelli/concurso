@@ -495,7 +495,7 @@ function SubjectTopicsModal({
         onClick={onClose}
         style={{
           position: 'fixed', inset: 0, background: 'rgba(15,23,42,.45)',
-          zIndex: 200, backdropFilter: 'blur(3px)',
+          zIndex: 60, backdropFilter: 'blur(3px)',
         }}
       />
 
@@ -503,11 +503,11 @@ function SubjectTopicsModal({
       <div style={{
         position: 'fixed', top: '50%', left: '50%',
         transform: 'translate(-50%, -50%)',
-        width: 'min(600px, 92vw)', maxHeight: '82vh',
+        width: 'min(600px, 92vw)', maxHeight: 'min(82vh, calc(100dvh - 80px))',
         background: theme.card, borderRadius: 20,
         boxShadow: theme.shadowModal,
         display: 'flex', flexDirection: 'column',
-        zIndex: 201, overflow: 'hidden',
+        zIndex: 70, overflow: 'hidden',
       }}>
         {/* Cabeçalho */}
         <div style={{
