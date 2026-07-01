@@ -2,6 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { theme, zIndex } from '@/lib/theme';
+import { useUI } from '@/components/layout/UIContext';
 
 type ToastKind = 'success' | 'error' | 'info';
 
@@ -22,6 +23,7 @@ const ToastContext = createContext<ToastContextValue | null>(null);
 let idSeq = 0;
 
 export function ToastProvider({ children }: { children: ReactNode }) {
+  const { isMobile } = useUI();
   const [toasts, setToasts] = useState<Toast[]>([]);
   const timers = useRef<Map<number, ReturnType<typeof setTimeout>>>(new Map());
 
@@ -53,7 +55,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     <ToastContext.Provider value={value}>
       {children}
       {toasts.length > 0 && (
-        <div style={styles.container} aria-live="polite" aria-atomic="false">
+        <div style={{ ...styles.container, bottom: isMobile ? 84 : 24 }} aria-live="polite" aria-atomic="false">
           {toasts.map((t) => (
             <div
               key={t.id}

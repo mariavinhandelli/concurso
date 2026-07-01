@@ -4,12 +4,15 @@ import { Suspense, useCallback, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
   listJurisprudencias, deleteJurisprudencia, listDistinct,
+  JURIS_PAGE_LIMIT,
   type Jurisprudencia, type JurisFilters,
 } from '@/services/jurisprudencias.service';
 import { listFavoritas } from '@/services/jurisInteracoes.service';
 import { JurisprudenciaCard } from '@/components/features/jurisprudencias/JurisprudenciaCard';
 import { JurisFilterBar, EMPTY_FILTERS, type JurisFilterValues } from '@/components/features/jurisprudencias/JurisFilterBar';
 import { JurisSidebarWidgets } from '@/components/features/jurisprudencias/JurisSidebarWidgets';
+import { JurisFlashcardPlayer } from '@/components/features/jurisprudencias/JurisFlashcardPlayer';
+import { JurisSimulado } from '@/components/features/jurisprudencias/JurisSimulado';
 import { useToast } from '@/components/ui/ToastProvider';
 import { useConfirm } from '@/hooks/useConfirm';
 import { useUI } from '@/components/layout/UIContext';
@@ -42,6 +45,8 @@ function ListaContent() {
   });
   const [disciplinas, setDisciplinas] = useState<string[]>([]);
   const [userId, setUserId] = useState<string | null>(null);
+  const [showFlashcards, setShowFlashcards] = useState(false);
+  const [showSimulado, setShowSimulado] = useState(false);
 
   useEffect(() => {
     createClient().auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null)).catch(() => {});
@@ -62,6 +67,8 @@ function ListaContent() {
         if (filters.estrelas) f.estrelas = Number(filters.estrelas);
         if (filters.incidencia) f.incidencia = filters.incidencia as JurisFilters['incidencia'];
         if (filters.ano) f.ano = Number(filters.ano);
+        if (filters.sortBy) f.sortBy = filters.sortBy as JurisFilters['sortBy'];
+        if (filters.completude) f.completude = filters.completude as JurisFilters['completude'];
         setItems(await listJurisprudencias(f));
       }
     } catch (e) {
@@ -90,9 +97,20 @@ function ListaContent() {
 
   const hasFilters = !!(search || Object.values(filters).some(Boolean));
 
+  // Métricas de cobertura da seleção atual
+  const countFlash = items.filter((i) => i.flashcard_frente && i.flashcard_verso).length;
+  const countQuestao = items.filter((i) => i.questao_enunciado && i.questao_gabarito !== null).length;
+
   return (
     <>
       {dialog}
+      {showFlashcards && (
+        <JurisFlashcardPlayer items={items} onClose={() => setShowFlashcards(false)} />
+      )}
+      {showSimulado && (
+        <JurisSimulado items={items} onClose={() => setShowSimulado(false)} />
+      )}
+
       <div style={{ maxWidth: 1180, margin: '0 auto', padding: isMobile ? '20px 16px' : '34px 40px', fontFamily: theme.font, minWidth: 0 }}>
 
         {/* Cabeçalho */}
@@ -152,9 +170,48 @@ function ListaContent() {
               </div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                <p style={{ fontSize: 13, color: theme.inkFaint, margin: 0 }}>
-                  {items.length} {items.length === 1 ? 'resultado' : 'resultados'}
-                </p>
+
+                {/* Barra de resultado + cobertura + ações de estudo */}
+                <div style={{
+                  background: theme.card, border: `0.5px solid ${theme.line}`,
+                  borderRadius: theme.radiusSm, padding: '12px 16px',
+                  display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap',
+                }}>
+                  {/* Contadores */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 2, marginRight: 4 }}>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: theme.ink }}>
+                      {items.length} {items.length === 1 ? 'resultado' : 'resultados'}
+                      {items.length >= JURIS_PAGE_LIMIT && (
+                        <span style={{ marginLeft: 8, fontWeight: 400, color: theme.warn }}>(limite — refine)</span>
+                      )}
+                    </span>
+                    <div style={{ display: 'flex', gap: 10 }}>
+                      <CoverageChip active={countFlash} total={items.length} label="flashcards" color={theme.teal} bg={theme.tealBg} />
+                      <CoverageChip active={countQuestao} total={items.length} label="questões" color={theme.clay} bg={theme.clayBg} />
+                    </div>
+                  </div>
+
+                  <div style={{ flex: 1 }} />
+
+                  {/* Botões de modo de estudo */}
+                  {countFlash > 0 && (
+                    <button onClick={() => setShowFlashcards(true)} style={styles.studyBtn}>
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: 6 }}>
+                        <path d="m21 12l-9 4l-9-4m18 4l-9 4l-9-4m18-8l-9 4l-9-4l9-4z" />
+                      </svg>
+                      Flashcards ({countFlash})
+                    </button>
+                  )}
+                  {countQuestao > 0 && (
+                    <button onClick={() => setShowSimulado(true)} style={styles.simuladoBtn}>
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: 6 }}>
+                        <circle cx="12" cy="12" r="10" /><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01" />
+                      </svg>
+                      Simular ({countQuestao})
+                    </button>
+                  )}
+                </div>
+
                 {items.map((item) => (
                   <JurisprudenciaCard
                     key={item.id}
@@ -186,8 +243,38 @@ function ListaContent() {
   );
 }
 
+function CoverageChip({ active, total, label, color, bg }: {
+  active: number; total: number; label: string; color: string; bg: string;
+}) {
+  const pct = total > 0 ? Math.round((active / total) * 100) : 0;
+  return (
+    <span style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 11.5 }}>
+      <span style={{
+        display: 'inline-block', width: 28, height: 5, borderRadius: 3,
+        background: `linear-gradient(to right, ${color} ${pct}%, ${bg} ${pct}%)`,
+      }} />
+      <span style={{ color, fontWeight: 700 }}>{active}</span>
+      <span style={{ color: '#9ca3af' }}>/ {total} {label}</span>
+    </span>
+  );
+}
+
 const styles: Record<string, React.CSSProperties> = {
   backBtn: { border: 'none', background: 'transparent', color: theme.teal, fontSize: 13, fontWeight: 500, cursor: 'pointer', padding: 0, fontFamily: 'inherit' },
   addBtn: { padding: '11px 22px', borderRadius: theme.radiusSm, border: 'none', background: theme.teal, color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
   searchInput: { width: '100%', boxSizing: 'border-box', padding: '12px 16px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.card, fontSize: 14, color: theme.ink, fontFamily: 'inherit', outline: 'none', boxShadow: theme.shadow },
+  studyBtn: {
+    display: 'flex', alignItems: 'center',
+    padding: '8px 14px', borderRadius: theme.radiusSm,
+    border: `0.5px solid ${theme.teal}`, background: theme.tealBg,
+    color: theme.tealDeep, fontSize: 13, fontWeight: 600,
+    cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap',
+  },
+  simuladoBtn: {
+    display: 'flex', alignItems: 'center',
+    padding: '8px 14px', borderRadius: theme.radiusSm,
+    border: `0.5px solid ${theme.clay}`, background: theme.clayBg,
+    color: theme.clayDeep, fontSize: 13, fontWeight: 600,
+    cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap',
+  },
 };

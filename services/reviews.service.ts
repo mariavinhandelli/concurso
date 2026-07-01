@@ -73,12 +73,13 @@ export async function listDueReviews(): Promise<ReviewItem[]> {
     .eq('is_review_active', true)
     .order('next_review_date', { ascending: true });
 
+  if (error) throw new Error('Erro ao listar revisões: ' + error.message);
+
   // Filtra matérias arquivadas em JS (evita type-depth errors do Supabase builder)
   const archivedSet = new Set(archivedIds);
   const data = archivedIds.length > 0
     ? (allTopics ?? []).filter(t => !archivedSet.has(t.subject_id))
     : (allTopics ?? []);
-  if (error) throw new Error('Erro ao listar revisões: ' + error.message);
 
   return (data ?? [])
     .filter((t) => isDue(t.next_review_date))

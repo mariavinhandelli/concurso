@@ -4,10 +4,10 @@ import { useEffect } from 'react';
 
 export default function AppError({
   error,
-  unstable_retry,
+  reset,
 }: {
   error: Error & { digest?: string };
-  unstable_retry: () => void;
+  reset: () => void;
 }) {
   useEffect(() => {
     console.error('Erro não tratado na área autenticada:', error);
@@ -19,7 +19,7 @@ export default function AppError({
         <span style={styles.code}>Algo saiu do trilho</span>
         <h1 style={styles.title}>Não foi possível abrir esta tela.</h1>
         <p style={styles.text}>Seus dados continuam seguros. Tente carregar novamente.</p>
-        <button type="button" onClick={unstable_retry} style={styles.button}>
+        <button type="button" onClick={reset} style={styles.button}>
           Tentar novamente
         </button>
       </div>

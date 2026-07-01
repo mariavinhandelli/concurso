@@ -108,6 +108,7 @@ export default function LoginPage() {
         setFeedback({ kind: 'error', text: traduzErro(error.message) });
       } else {
         setFeedback({ kind: 'ok', text: 'Conta criada! Já pode entrar.' });
+        setPassword('');
         setMode('login');
       }
     }

@@ -42,8 +42,21 @@ export default function RootLayout({
     <html
       lang="pt-BR"
       className={`${poppins.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        {/*
+          Script síncrono — roda ANTES do primeiro paint e aplica data-mode /
+          data-palette ao <html>, eliminando o flash de tema errado (FOUC).
+          Não pode ser async/defer; precisa bloquear o parser intencionalmente.
+        */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var m=localStorage.getItem('ui:mode')||localStorage.getItem('ui:theme')||'light';var p=localStorage.getItem('ui:palette')||'petroleo';var vp=['petroleo','rose','menta','grafite'];if(!vp.includes(p))p='petroleo';if(m!=='dark')m='light';var r=document.documentElement;r.setAttribute('data-mode',m);r.setAttribute('data-palette',p);}catch(e){}})();`,
+          }}
+        />
+        {children}
+      </body>
     </html>
   );
 }

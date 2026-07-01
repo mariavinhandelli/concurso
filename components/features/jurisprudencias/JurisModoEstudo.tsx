@@ -51,8 +51,8 @@ function FlashcardMode({ item }: { item: Jurisprudencia }) {
     }}>
       <div style={{ display: 'flex', alignItems: 'center' }}>
         <span style={{ fontSize: 12.5, fontWeight: 700, color: theme.inkSoft, display: 'flex', alignItems: 'center', gap: 6 }}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <rect x="2" y="5" width="20" height="14" rx="2" /><path d="M2 10h20" />
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+            <path d="m21 12l-9 4l-9-4m18 4l-9 4l-9-4m18-8l-9 4l-9-4l9-4z" />
           </svg>
           Flashcard
         </span>

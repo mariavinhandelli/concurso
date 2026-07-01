@@ -87,6 +87,9 @@ export interface Jurisprudencia {
 
 export type JurisprudenciaInput = Omit<Jurisprudencia, 'id' | 'created_by' | 'created_at' | 'updated_at'>;
 
+export type JurisSortBy = 'relevancia' | 'recentes' | 'antigas' | 'estrelas';
+export type JurisCompletude = 'com_flashcard' | 'sem_flashcard' | 'com_questao' | 'sem_questao';
+
 export interface JurisFilters {
   search?: string;
   tribunal?: string;
@@ -97,6 +100,8 @@ export interface JurisFilters {
   estrelas?: number;
   incidencia?: JurisIncidencia;
   ano?: number;
+  sortBy?: JurisSortBy;
+  completude?: JurisCompletude;
 }
 
 export const TRIBUNAIS = [
@@ -170,6 +175,10 @@ function applyFilters(items: Jurisprudencia[], filters: JurisFilters): Jurisprud
       j.palavras_chave.some((k) => k.toLowerCase().includes(s))
     );
   }
+  if (filters.completude === 'com_flashcard') result = result.filter((j) => !!(j.flashcard_frente && j.flashcard_verso));
+  if (filters.completude === 'sem_flashcard') result = result.filter((j) => !(j.flashcard_frente && j.flashcard_verso));
+  if (filters.completude === 'com_questao') result = result.filter((j) => !!(j.questao_enunciado && j.questao_gabarito !== null));
+  if (filters.completude === 'sem_questao') result = result.filter((j) => !(j.questao_enunciado && j.questao_gabarito !== null));
   return result;
 }
 
@@ -186,15 +195,32 @@ async function fetchUserCreated(supabase: ReturnType<typeof createClient>): Prom
   return ((data ?? []) as Jurisprudencia[]).filter((item) => !staticIds.has(item.id));
 }
 
+export const JURIS_PAGE_LIMIT = 5000;
+
+function sortRelevancia(a: Jurisprudencia, b: Jurisprudencia): number {
+  const incDiff = INCIDENCIA_ORDER[b.incidencia_concursos] - INCIDENCIA_ORDER[a.incidencia_concursos];
+  if (incDiff !== 0) return incDiff;
+  const starDiff = b.estrelas - a.estrelas;
+  if (starDiff !== 0) return starDiff;
+  return b.created_at.localeCompare(a.created_at);
+}
+
 export async function listJurisprudencias(filters: JurisFilters = {}): Promise<Jurisprudencia[]> {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error('Você precisa estar logado.');
   const userItems = await fetchUserCreated(supabase);
   const merged = [...userItems, ...(ALL as Jurisprudencia[])];
-  return applyFilters(merged, filters)
-    .sort((a, b) => b.created_at.localeCompare(a.created_at))
-    .slice(0, 200);
+  const filtered = applyFilters(merged, filters);
+  const sortBy = filters.sortBy ?? 'relevancia';
+  return filtered
+    .sort((a, b) => {
+      if (sortBy === 'recentes') return b.created_at.localeCompare(a.created_at);
+      if (sortBy === 'antigas') return a.created_at.localeCompare(b.created_at);
+      if (sortBy === 'estrelas') return (b.estrelas - a.estrelas) || sortRelevancia(a, b);
+      return sortRelevancia(a, b);
+    })
+    .slice(0, JURIS_PAGE_LIMIT);
 }
 
 export async function listUltimasAdicionadas(limit = 5): Promise<Jurisprudencia[]> {

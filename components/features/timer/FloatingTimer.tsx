@@ -4,13 +4,15 @@
 // Consome o timer único do TimerContext; encerra abrindo o feedback existente.
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTimer } from './TimerContext';
 import { saveStudyLog, type SessionFeedback } from '@/services/studyLogs.service';
 import { QualitativeFeedbackForm } from './QualitativeFeedbackForm';
 import { theme } from '@/lib/theme';
 import { useUI } from '@/components/layout/UIContext';
 import { useToast } from '@/components/ui/ToastProvider';
+import { SESSION_MODES } from '@/lib/session-modes';
+import type { LogMode } from '@/lib/timer-storage';
 
 export function FloatingTimer() {
   const timer = useTimer();
@@ -18,6 +20,33 @@ export function FloatingTimer() {
   const toast = useToast();
   const [expanded, setExpanded] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [showPicker, setShowPicker] = useState(false);
+  const pickerRef = useRef<HTMLDivElement>(null);
+
+  // Fecha o picker ao clicar fora dele.
+  useEffect(() => {
+    if (!showPicker) return;
+    function onDown(e: MouseEvent) {
+      if (pickerRef.current && !pickerRef.current.contains(e.target as Node)) {
+        setShowPicker(false);
+      }
+    }
+    document.addEventListener('mousedown', onDown);
+    return () => document.removeEventListener('mousedown', onDown);
+  }, [showPicker]);
+
+  // Fecha o picker com Escape.
+  useEffect(() => {
+    if (!showPicker) return;
+    function onKey(e: KeyboardEvent) { if (e.key === 'Escape') setShowPicker(false); }
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [showPicker]);
+
+  function startWithMode(mode: LogMode) {
+    timer.start({ mode });
+    setShowPicker(false);
+  }
 
   async function handleSubmitFeedback(feedback: SessionFeedback) {
     if (!timer.pendingSession) return;
@@ -47,11 +76,37 @@ export function FloatingTimer() {
 
   const pos = { bottom: isMobile ? 16 : 24, right: isMobile ? 16 : 24 };
 
-  // PARADO: botão redondo discreto.
+  // PARADO: FAB que abre o picker de modo.
   if (timer.status === 'idle') {
+    if (showPicker) {
+      return (
+        <div ref={pickerRef} style={{ ...styles.card, ...pos, width: isMobile ? 'calc(100vw - 32px)' : 236, maxWidth: 340 }}>
+          <div style={styles.cardHead}>
+            <span style={styles.eyebrow}>Iniciar sessão</span>
+            <button onClick={() => setShowPicker(false)} style={styles.collapseBtn} aria-label="Fechar">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M18 6L6 18M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          <div style={styles.modeGrid}>
+            {SESSION_MODES.map((m) => (
+              <button
+                key={m.value}
+                onClick={() => startWithMode(m.value as LogMode)}
+                style={styles.modeBtn}
+              >
+                {m.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
     return (
       <button
-        onClick={() => timer.start({ mode: 'teoria' })}
+        onClick={() => setShowPicker(true)}
         style={{ ...styles.fab, ...pos }}
         aria-label="Iniciar sessão de estudo"
         title="Iniciar sessão de estudo"
@@ -125,7 +180,14 @@ const styles: Record<string, React.CSSProperties> = {
     borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line,
     padding: 16, boxShadow: '0 12px 40px rgba(0,0,0,0.16)', fontFamily: theme.font,
   },
-  cardHead: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },
+  cardHead: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
+  modeGrid: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 7 },
+  modeBtn: {
+    padding: '9px 6px', borderRadius: theme.radiusXs, borderWidth: 0.5, borderStyle: 'solid',
+    borderColor: theme.line, background: theme.card, color: theme.inkSoft,
+    fontSize: 12.5, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit',
+    transition: 'background .12s, color .12s',
+  },
   eyebrow: { fontSize: 10, fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase', color: theme.inkFaint },
   collapseBtn: { border: 'none', background: 'transparent', color: theme.inkFaint, cursor: 'pointer', padding: 0, display: 'grid', placeItems: 'center' },
   cardTime: { fontSize: 34, fontWeight: 500, color: theme.ink, fontVariantNumeric: 'tabular-nums', letterSpacing: -1, lineHeight: 1 },

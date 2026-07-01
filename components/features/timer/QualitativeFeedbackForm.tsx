@@ -90,7 +90,10 @@ export function QualitativeFeedbackForm({ session, onSubmit, onDiscard, saving }
   }, [houveErro, errorCause]);
 
   function handleSubmit() {
-    if (energy === 0) return; // energia obrigatória
+    if (energy === 0) {
+      toast.error('Marque seu nível de energia antes de salvar.');
+      return;
+    }
     onSubmit({
       mode,
       subjectId: subjectId || null,

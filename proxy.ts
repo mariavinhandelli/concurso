@@ -37,9 +37,14 @@ export async function proxy(request: NextRequest) {
     },
   );
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // Fail open: se o Supabase estiver inacessível não bloqueia a navegação.
+  let user = null;
+  try {
+    const { data } = await supabase.auth.getUser();
+    user = data.user;
+  } catch {
+    return response;
+  }
 
   const { pathname } = request.nextUrl;
 
