@@ -19,7 +19,7 @@ export function JurisModoEstudo({ item }: Props) {
         background: theme.card, border: `0.5px solid ${theme.line}`,
         borderRadius: theme.radius, boxShadow: theme.shadow,
       }}>
-        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke={theme.inkFaint} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginBottom: 12 }}>
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke={theme.inkFaint} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" style={{ marginBottom: 12 }}>
           <rect x="2" y="5" width="20" height="14" rx="2" /><path d="M2 10h20" />
         </svg>
         <p style={{ fontSize: 14, color: theme.inkSoft, margin: '0 0 4px', fontWeight: 600 }}>
@@ -104,7 +104,7 @@ function QuestaoMode({ item }: { item: Jurisprudencia }) {
     }}>
       <div style={{ display: 'flex', alignItems: 'center' }}>
         <span style={{ fontSize: 12.5, fontWeight: 700, color: theme.inkSoft, display: 'flex', alignItems: 'center', gap: 6 }}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
             <circle cx="12" cy="12" r="10" /><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01" />
           </svg>
           Questão Certo/Errado

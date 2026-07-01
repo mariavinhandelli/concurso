@@ -114,7 +114,7 @@ export function JurisInteracoesPanel({ jurisId }: Props) {
           <svg width="20" height="20" viewBox="0 0 24 24"
             fill={favorito ? '#f59e0b' : 'none'}
             stroke={favorito ? '#f59e0b' : theme.inkFaint}
-            strokeWidth="1.8"
+            strokeWidth="1.7"
           >
             <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z" />
           </svg>
@@ -172,7 +172,12 @@ export function JurisInteracoesPanel({ jurisId }: Props) {
       {/* ── AGENDAMENTO DE REVISÃO ── */}
       <div style={styles.panel}>
         <div style={styles.panelHead}>
-          <span style={styles.panelTitle}>Revisão espaçada</span>
+          <span style={styles.panelTitle}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M4 12a8 8 0 0113-6.2L20 8M20 4v4h-4M20 12a8 8 0 01-13 6.2L4 16M4 20v-4h4" />
+            </svg>
+            Revisão espaçada
+          </span>
           {interacao?.is_review_active && (
             <span style={styles.activeBadge}>Ativa</span>
           )}
@@ -238,7 +243,7 @@ const styles: Record<string, React.CSSProperties> = {
     boxShadow: theme.shadow,
   },
   panelHead: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 },
-  panelTitle: { fontSize: 13, fontWeight: 700, color: theme.ink },
+  panelTitle: { fontSize: 13, fontWeight: 700, color: theme.ink, display: 'flex', alignItems: 'center', gap: 6 },
   subLabel: { fontSize: 11.5, fontWeight: 600, color: theme.inkFaint, margin: '0 0 6px', textTransform: 'uppercase', letterSpacing: 0.4 },
   textarea: {
     width: '100%', boxSizing: 'border-box', padding: '12px 14px',

@@ -70,7 +70,7 @@ export function JurisFilterBar({ values, onChange, disciplinas }: Props) {
           onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setOpen((v) => !v); }}
           style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '12px 16px', cursor: 'pointer', userSelect: 'none' }}
         >
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={theme.inkSoft} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={theme.inkSoft} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
             <path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z" />
           </svg>
           <span style={{ fontSize: 13.5, fontWeight: 600, color: theme.ink }}>Filtros</span>
@@ -83,7 +83,7 @@ export function JurisFilterBar({ values, onChange, disciplinas }: Props) {
               style={styles.clearBtn}
             >Limpar</button>
           )}
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={theme.inkFaint} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={theme.inkFaint} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"
             style={{ marginLeft: 'auto', transform: open ? 'rotate(180deg)' : 'none', transition: 'transform .15s' }}>
             <path d="M6 9l6 6 6-6" />
           </svg>

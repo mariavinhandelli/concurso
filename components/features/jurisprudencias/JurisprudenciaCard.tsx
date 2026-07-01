@@ -78,7 +78,7 @@ export function JurisprudenciaCard({ item, onClick, onDelete, canDelete }: Props
           aria-label={favorito ? 'Remover dos favoritos' : 'Marcar como favorito'}
           style={{ marginLeft: 'auto', border: 'none', background: 'transparent', cursor: 'pointer', padding: 4, display: 'flex', flexShrink: 0 }}
         >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill={favorito ? '#f59e0b' : 'none'} stroke={favorito ? '#f59e0b' : theme.inkFaint} strokeWidth="1.8">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill={favorito ? '#f59e0b' : 'none'} stroke={favorito ? '#f59e0b' : theme.inkFaint} strokeWidth="1.7">
             <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z" />
           </svg>
         </button>

@@ -142,7 +142,7 @@ export default function JurisprudenciasHubPage() {
       {/* Busca */}
       <form onSubmit={handleSearch} style={{ maxWidth: 560, margin: '0 auto 28px' }}>
         <div style={{ position: 'relative' }}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={theme.inkFaint} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={theme.inkFaint} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"
             style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)' }}>
             <circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" />
           </svg>
@@ -162,11 +162,17 @@ export default function JurisprudenciasHubPage() {
 
       {/* Ações rápidas */}
       <div style={{ display: 'flex', gap: 10, justifyContent: 'center', marginBottom: 32, flexWrap: 'wrap' }}>
-        <button onClick={() => router.push('/jurisprudencias/lista?favoritas=1')} style={styles.quickBtn}>
-          ★ Favoritas
+        <button onClick={() => router.push('/jurisprudencias/lista?favoritas=1')} style={{ ...styles.quickBtn, display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b" strokeWidth="1.7">
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z" />
+          </svg>
+          Favoritas
         </button>
-        <button onClick={() => router.push('/jurisprudencias/revisar')} style={{ ...styles.quickBtn, ...(revisoesHoje ? styles.quickBtnAlert : {}) }}>
-          ⏱ Revisões de hoje{revisoesHoje ? ` (${revisoesHoje})` : ''}
+        <button onClick={() => router.push('/jurisprudencias/revisar')} style={{ ...styles.quickBtn, ...(revisoesHoje ? styles.quickBtnAlert : {}), display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M4 12a8 8 0 0113-6.2L20 8M20 4v4h-4M20 12a8 8 0 01-13 6.2L4 16M4 20v-4h4" />
+          </svg>
+          Revisões de hoje{revisoesHoje ? ` (${revisoesHoje})` : ''}
         </button>
         <button onClick={() => router.push('/jurisprudencias/nova')} style={styles.quickBtnPrimary}>
           + Nova jurisprudência
