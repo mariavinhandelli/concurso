@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { DISCIPLINAS_HUB, countByDisciplina } from '@/services/jurisprudencias.service';
-import { countRevisoesHoje } from '@/services/jurisInteracoes.service';
+import { countRevisoesHoje, getSimuladoInsights, type SimuladoInsights } from '@/services/jurisInteracoes.service';
 import { useUI } from '@/components/layout/UIContext';
 import { theme } from '@/lib/theme';
 
@@ -111,10 +111,12 @@ export default function JurisprudenciasHubPage() {
   const [search, setSearch] = useState('');
   const [counts, setCounts] = useState<Record<string, number>>({});
   const [revisoesHoje, setRevisoesHoje] = useState<number | null>(null);
+  const [insights, setInsights] = useState<SimuladoInsights | null>(null);
 
   useEffect(() => {
     countByDisciplina().then(setCounts).catch(() => {});
     countRevisoesHoje().then(setRevisoesHoje).catch(() => setRevisoesHoje(0));
+    getSimuladoInsights().then(setInsights).catch(() => {});
   }, []);
 
   function handleSearch(e: React.FormEvent) {
@@ -142,10 +144,15 @@ export default function JurisprudenciasHubPage() {
       {/* Busca */}
       <form onSubmit={handleSearch} style={{ maxWidth: 560, margin: '0 auto 28px' }}>
         <div style={{ position: 'relative' }}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={theme.inkFaint} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"
-            style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)' }}>
-            <circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" />
-          </svg>
+          <button
+            type="submit"
+            style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', border: 'none', background: 'transparent', cursor: 'pointer', padding: 2, display: 'flex', alignItems: 'center' }}
+            aria-label="Buscar"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={theme.inkFaint} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" />
+            </svg>
+          </button>
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -174,10 +181,64 @@ export default function JurisprudenciasHubPage() {
           </svg>
           Revisões de hoje{revisoesHoje ? ` (${revisoesHoje})` : ''}
         </button>
+        <button onClick={() => router.push('/jurisprudencias/simulados')} style={{ ...styles.quickBtn, display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="10" /><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01" />
+          </svg>
+          Simulados
+        </button>
         <button onClick={() => router.push('/jurisprudencias/nova')} style={styles.quickBtnPrimary}>
           + Nova jurisprudência
         </button>
       </div>
+
+      {/* Painel de insights — só aparece quando há dados de simulado */}
+      {insights && (insights.ultimoScore !== null || (revisoesHoje !== null && revisoesHoje > 0)) && (
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 28 }}>
+          {revisoesHoje !== null && revisoesHoje > 0 && (
+            <button
+              onClick={() => router.push('/jurisprudencias/revisar')}
+              style={{ ...styles.insightCard, borderColor: theme.warn, background: theme.warnTint }}
+            >
+              <span style={{ fontSize: 18 }}>📅</span>
+              <div style={{ textAlign: 'left', minWidth: 0 }}>
+                <p style={{ fontSize: 13, fontWeight: 700, color: theme.warnDeep, margin: 0 }}>
+                  {revisoesHoje} revisão{revisoesHoje > 1 ? 'ões' : ''} pendente{revisoesHoje > 1 ? 's' : ''}
+                </p>
+                <p style={{ fontSize: 11, color: theme.warnDeep, margin: 0, opacity: 0.75 }}>Revisar agora →</p>
+              </div>
+            </button>
+          )}
+          {insights.ultimoScore !== null && (
+            <button
+              onClick={() => router.push('/jurisprudencias/simulados')}
+              style={{ ...styles.insightCard, borderColor: insights.ultimoScore >= 70 ? theme.ok : insights.ultimoScore >= 50 ? theme.warn : theme.danger }}
+            >
+              <span style={{ fontSize: 18 }}>📊</span>
+              <div style={{ textAlign: 'left', minWidth: 0 }}>
+                <p style={{ fontSize: 13, fontWeight: 700, color: theme.ink, margin: 0 }}>
+                  Último simulado: <span style={{ color: insights.ultimoScore >= 70 ? theme.okDeep : insights.ultimoScore >= 50 ? theme.warnDeep : theme.danger }}>{insights.ultimoScore}%</span>
+                </p>
+                <p style={{ fontSize: 11, color: theme.inkFaint, margin: 0 }}>Ver histórico →</p>
+              </div>
+            </button>
+          )}
+          {insights.disciplinaMaisFraga && insights.taxaDisciplinaMaisFraga !== null && (
+            <button
+              onClick={() => router.push(`/jurisprudencias/lista?disciplina=${encodeURIComponent(insights.disciplinaMaisFraga!)}`)}
+              style={{ ...styles.insightCard, borderColor: theme.danger }}
+            >
+              <span style={{ fontSize: 18 }}>⚠️</span>
+              <div style={{ textAlign: 'left', minWidth: 0 }}>
+                <p style={{ fontSize: 13, fontWeight: 700, color: theme.ink, margin: 0 }}>
+                  Ponto fraco: <span style={{ color: theme.danger }}>{insights.disciplinaMaisFraga}</span>
+                </p>
+                <p style={{ fontSize: 11, color: theme.inkFaint, margin: 0 }}>{insights.taxaDisciplinaMaisFraga}% de acerto · Estudar →</p>
+              </div>
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Grid de disciplinas */}
       <div style={{
@@ -215,8 +276,14 @@ export default function JurisprudenciasHubPage() {
 }
 
 const styles: Record<string, React.CSSProperties> = {
+  insightCard: {
+    display: 'flex', alignItems: 'center', gap: 10,
+    padding: '12px 16px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`,
+    background: theme.card, boxShadow: theme.shadow, cursor: 'pointer',
+    fontFamily: 'inherit', textAlign: 'left' as const, flex: '1 1 200px', minWidth: 0,
+  },
   quickBtn: { padding: '9px 18px', borderRadius: 999, border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.inkSoft, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
-  quickBtnAlert: { border: `0.5px solid ${theme.warn}`, background: 'rgba(245,158,11,.08)', color: '#b45309' },
+  quickBtnAlert: { border: `0.5px solid ${theme.warn}`, background: theme.warnTint, color: theme.warnDeep },
   quickBtnPrimary: { padding: '9px 18px', borderRadius: 999, border: 'none', background: theme.teal, color: '#fff', fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
   discCard: {
     display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8,

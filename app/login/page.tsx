@@ -46,6 +46,7 @@ export default function LoginPage() {
   const [feedback, setFeedback] = useState<{ kind: 'error' | 'ok'; text: string } | null>(null);
   const [loading, setLoading] = useState(false);
   const [narrow, setNarrow] = useState(false);
+  const [btnHover, setBtnHover] = useState(false);
 
   useEffect(() => {
     const check = () => setNarrow(window.innerWidth < 900);
@@ -425,13 +426,18 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
+              onMouseEnter={() => setBtnHover(true)}
+              onMouseLeave={() => setBtnHover(false)}
               style={{
                 width: '100%', padding: '14px 0', borderRadius: 12, border: 'none',
-                background: loading ? B.border : B.navy,
+                background: loading
+                  ? B.border
+                  : `linear-gradient(135deg, #22C55E 0%, #6366F1 100%)`,
+                filter: !loading && btnHover ? 'brightness(0.88)' : undefined,
                 color: '#FFFFFF', fontSize: 15, fontWeight: 600,
                 cursor: loading ? 'wait' : 'pointer', fontFamily: 'inherit',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-                transition: 'background 150ms cubic-bezier(.4,0,.2,1)',
+                transition: 'filter 150ms cubic-bezier(.4,0,.2,1)',
               }}
             >
               {loading ? 'Aguarde…' : (

@@ -1,11 +1,16 @@
 // services/reviews.service.ts
-import { createClient } from '@/lib/supabase/client';
+// Camada de aplicação: orquestra requireUser, repositório e algoritmo SM-2.
+// Sem acesso direto ao Supabase. Sem duplicação de auth.
+
+import { requireUser, tryGetUser } from '@/lib/supabase/requireUser';
 import {
-  calculateNextReview, fromDbRow, toDbRow, isDue, daysOverdue,
+  calculateNextReview, daysOverdue,
   type RecallGrade,
 } from '@/lib/spaced-repetition';
-import { localDateInDays } from '@/lib/local-date';
+import { fromDbRow, toDbRow } from '@/lib/spaced-repetition.mapper';
+import { localDateInDays, toLocalDateString, parseLocalDate } from '@/lib/local-date';
 import { getArchivedSubjectIds } from '@/services/catalog.service';
+import * as repo from '@/services/reviews.repository';
 
 export type ReviewRating = 'dificil' | 'intermediario' | 'facil';
 const RATING_TO_GRADE: Record<ReviewRating, RecallGrade> = {
@@ -22,167 +27,130 @@ export interface ReviewItem {
   subjectColor: string;
   nextReviewDate: string | null;
   overdueDays: number;
+  // Próximos intervalos pré-computados — exibidos nos botões de avaliação (inspiração Anki).
+  nextIntervals: { dificil: number; intermediario: number; facil: number };
 }
 
-export async function activateReview(topicId: string): Promise<void> {
-  const supabase = createClient();
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
-  if (authError || !user) throw new Error('Você precisa estar logado.');
-
-  const dateStr = localDateInDays(1);
-
-  const { error } = await supabase
-    .from('topics')
-    .update({
-      is_review_active: true,
-      next_review_date: dateStr,
-      interval_days: 1,
-      repetitions: 0,
-      ease_factor: 2.5,
-    })
-    .eq('id', topicId)
-    .eq('user_id', user.id);
-
-  if (error) throw new Error('Erro ao ativar revisão: ' + error.message);
-}
-
-export async function deactivateReview(topicId: string): Promise<void> {
-  const supabase = createClient();
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
-  if (authError || !user) throw new Error('Você precisa estar logado.');
-
-  const { error } = await supabase
-    .from('topics')
-    .update({ is_review_active: false, next_review_date: null })
-    .eq('id', topicId)
-    .eq('user_id', user.id);
-  if (error) throw new Error('Erro ao desativar revisão: ' + error.message);
-}
+// ---------- Queries ----------
 
 export async function listDueReviews(): Promise<ReviewItem[]> {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return [];
+  const auth = await tryGetUser();
+  if (!auth) return [];
 
-  const archivedIds = await getArchivedSubjectIds();
+  // Paralelo: não espera getArchivedSubjectIds() para iniciar fetchDueTopicReviews.
+  const [archivedIds, rows] = await Promise.all([
+    getArchivedSubjectIds(),
+    repo.fetchDueTopicReviews(auth.supabase, auth.userId),
+  ]);
 
-  const { data: allTopics, error } = await supabase
+  const excludeSet = new Set(archivedIds);
+  const filtered = excludeSet.size > 0 ? rows.filter(t => !excludeSet.has(t.subject_id)) : rows;
+
+  return filtered.map(t => {
+    const subj = Array.isArray(t.subjects) ? t.subjects[0] : t.subjects;
+    const srState = fromDbRow({ ease_factor: t.ease_factor, interval_days: t.interval_days, repetitions: t.repetitions });
+    return {
+      id: t.id,
+      name: t.name,
+      subjectId: t.subject_id,
+      subjectName: subj?.name ?? 'Matéria',
+      subjectColor: subj?.color ?? '#C9B8DD',
+      nextReviewDate: t.next_review_date,
+      overdueDays: daysOverdue(t.next_review_date),
+      nextIntervals: {
+        dificil:      calculateNextReview(srState, RATING_TO_GRADE.dificil).intervalDays,
+        intermediario: calculateNextReview(srState, RATING_TO_GRADE.intermediario).intervalDays,
+        facil:        calculateNextReview(srState, RATING_TO_GRADE.facil).intervalDays,
+      },
+    };
+  });
+}
+
+// Retorna a data da próxima revisão agendada (para o empty state após a sessão).
+export async function getNextScheduledDate(): Promise<string | null> {
+  const auth = await tryGetUser();
+  if (!auth) return null;
+  const { data } = await auth.supabase
     .from('topics')
-    .select('id, name, subject_id, next_review_date, subjects(name, color)')
-    .eq('user_id', user.id)
+    .select('next_review_date')
+    .eq('user_id', auth.userId)
     .eq('is_review_active', true)
-    .order('next_review_date', { ascending: true });
-
-  if (error) throw new Error('Erro ao listar revisões: ' + error.message);
-
-  // Filtra matérias arquivadas em JS (evita type-depth errors do Supabase builder)
-  const archivedSet = new Set(archivedIds);
-  const data = archivedIds.length > 0
-    ? (allTopics ?? []).filter(t => !archivedSet.has(t.subject_id))
-    : (allTopics ?? []);
-
-  return (data ?? [])
-    .filter((t) => isDue(t.next_review_date))
-    .map((t) => {
-      const subj = Array.isArray(t.subjects) ? t.subjects[0] : t.subjects;
-      return {
-        id: t.id,
-        name: t.name,
-        subjectId: t.subject_id,
-        subjectName: subj?.name ?? 'Matéria',
-        subjectColor: subj?.color ?? '#C9B8DD',
-        nextReviewDate: t.next_review_date,
-        overdueDays: daysOverdue(t.next_review_date),
-      };
-    });
+    .not('next_review_date', 'is', null)
+    .order('next_review_date', { ascending: true })
+    .limit(1)
+    .maybeSingle();
+  return data?.next_review_date ?? null;
 }
 
 export async function countDueReviews(): Promise<number> {
-  const items = await listDueReviews();
-  return items.length;
-}
-
-export async function submitReview(topicId: string, rating: ReviewRating): Promise<void> {
-  const supabase = createClient();
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
-  if (authError || !user) throw new Error('Você precisa estar logado.');
-
-  const { data: topic, error: readError } = await supabase
-    .from('topics')
-    .select('ease_factor, interval_days, repetitions')
-    .eq('id', topicId)
-    .eq('user_id', user.id)
-    .single();
-
-  if (readError || !topic) throw new Error('Erro ao ler tópico: ' + readError?.message);
-
-  const grade = RATING_TO_GRADE[rating];
-  const current = fromDbRow(topic);
-  const result = calculateNextReview(current, grade);
-  const updates = toDbRow(result);
-
-  const { error } = await supabase
-    .from('topics')
-    .update(updates)
-    .eq('id', topicId)
-    .eq('user_id', user.id);
-  if (error) throw new Error('Erro ao salvar revisão: ' + error.message);
-}
-
-export async function rescheduleReview(topicId: string, dateStr: string): Promise<void> {
-  const supabase = createClient();
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
-  if (authError || !user) throw new Error('Você precisa estar logado.');
-
-  const { error } = await supabase
-    .from('topics')
-    .update({ next_review_date: dateStr, is_review_active: true })
-    .eq('id', topicId)
-    .eq('user_id', user.id);
-  if (error) throw new Error('Erro ao reagendar: ' + error.message);
-}
-
-export function dateInDays(days: number): string {
-  return localDateInDays(days);
+  const auth = await tryGetUser();
+  if (!auth) return 0;
+  const archivedIds = await getArchivedSubjectIds();
+  return repo.countDueTopicReviews(auth.supabase, auth.userId, archivedIds);
 }
 
 export async function getReviewStatus(topicId: string): Promise<boolean> {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return false;
-
-  const { data, error } = await supabase
-    .from('topics')
-    .select('is_review_active')
-    .eq('id', topicId)
-    .eq('user_id', user.id)
-    .maybeSingle();
-  if (error) return false;
-  return data?.is_review_active ?? false;
+  const auth = await tryGetUser();
+  if (!auth) return false;
+  return repo.fetchTopicReviewActive(auth.supabase, auth.userId, topicId);
 }
+
+// ---------- Mutations ----------
+
+export async function activateReview(topicId: string): Promise<void> {
+  const { supabase, userId } = await requireUser();
+  await repo.updateTopicReview(supabase, userId, topicId, {
+    is_review_active: true,
+    next_review_date: localDateInDays(1),
+    interval_days: 1,
+    repetitions: 0,
+    ease_factor: 2.5,
+  });
+}
+
+export async function deactivateReview(topicId: string): Promise<void> {
+  const { supabase, userId } = await requireUser();
+  await repo.updateTopicReview(supabase, userId, topicId, {
+    is_review_active: false,
+    next_review_date: null,
+  });
+}
+
+export async function submitReview(topicId: string, rating: ReviewRating): Promise<void> {
+  const { supabase, userId } = await requireUser();
+  const topic = await repo.fetchTopicSRState(supabase, userId, topicId);
+  const result = calculateNextReview(fromDbRow(topic), RATING_TO_GRADE[rating]);
+  await repo.updateTopicReview(supabase, userId, topicId, toDbRow(result));
+}
+
+export async function rescheduleReview(topicId: string, dateStr: string): Promise<void> {
+  const { supabase, userId } = await requireUser();
+  const todayMs = parseLocalDate(toLocalDateString()).getTime();
+  const targetMs = parseLocalDate(dateStr).getTime();
+  const intervalDays = Math.max(1, Math.round((targetMs - todayMs) / 86_400_000));
+  await repo.updateTopicReview(supabase, userId, topicId, {
+    next_review_date: dateStr,
+    is_review_active: true,
+    interval_days: intervalDays,
+  });
+}
+
 // Agenda (ou antecipa) a revisão de um tópico a partir de um erro registrado.
-// Regra de antecipação limpa: nunca atrasa — fica com a data mais próxima
-// entre a já agendada e a nova (hoje + days).
+// Regra: nunca atrasa — fica com a data mais próxima entre a agendada e a nova.
 export async function scheduleReviewFromError(topicId: string, days: number): Promise<void> {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return;
+  const { supabase, userId } = await requireUser();
+  const current = await repo.fetchTopicSchedule(supabase, userId, topicId);
+  const novaData = localDateInDays(days);
+  const dataFinal = (current?.is_review_active && current.next_review_date && current.next_review_date < novaData)
+    ? current.next_review_date
+    : novaData;
 
-  // Lê o estado atual da revisão do tópico.
-  const { data: topic } = await supabase
-    .from('topics')
-    .select('next_review_date, is_review_active')
-    .eq('id', topicId)
-    .eq('user_id', user.id)
-    .maybeSingle();
-
-  const novaData = dateInDays(days); // 'YYYY-MM-DD'
-
-  // Se já há uma data agendada, fica com a MAIS PRÓXIMA (string ISO compara direto).
-  let dataFinal = novaData;
-  if (topic?.is_review_active && topic?.next_review_date) {
-    dataFinal = topic.next_review_date < novaData ? topic.next_review_date : novaData;
-  }
-
-  await rescheduleReview(topicId, dataFinal);
+  const todayMs = parseLocalDate(toLocalDateString()).getTime();
+  const targetMs = parseLocalDate(dataFinal).getTime();
+  const intervalDays = Math.max(1, Math.round((targetMs - todayMs) / 86_400_000));
+  await repo.updateTopicReview(supabase, userId, topicId, {
+    next_review_date: dataFinal,
+    is_review_active: true,
+    interval_days: intervalDays,
+  });
 }

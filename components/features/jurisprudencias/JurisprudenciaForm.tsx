@@ -267,7 +267,7 @@ export function JurisprudenciaForm({ initial = {}, saving, onSave, onCancel }: P
 
       {/* ── 12. COMO A BANCA COBRA ── */}
       <section>
-        <SectionTitle title="14. Como a banca cobra" />
+        <SectionTitle title="12. Como a banca cobra" />
         <div style={{ borderLeft: `3px solid ${theme.clay}`, paddingLeft: 12 }}>
           <textarea value={comoBancaCobra} onChange={(e) => setComoBancaCobra(e.target.value)} rows={3}
             placeholder="Descreva o padrão de cobrança: assertiva V/F, lacuna, caso concreto…" style={ta} />
@@ -278,7 +278,7 @@ export function JurisprudenciaForm({ initial = {}, saving, onSave, onCancel }: P
       <section>
         <SectionTitle title="Modo flashcard (opcional)" />
         <p style={{ fontSize: 12.5, color: theme.inkFaint, margin: '0 0 10px' }}>
-          Se preenchido, esta jurisprudência poderá ser revisada como flashcard. Se deixar vazio, usamos a tese como verso automaticamente.
+          Se preenchido, esta jurisprudência aparecerá no modo flashcard e nas sessões de revisão espaçada.
         </p>
         <div style={styles.grid2}>
           <Field label="Frente (pergunta)">
@@ -352,7 +352,7 @@ export function JurisprudenciaForm({ initial = {}, saving, onSave, onCancel }: P
 
       {/* ── 12. PALAVRAS-CHAVE ── */}
       <section>
-        <SectionTitle title="12. Palavras-chave / tags" />
+        <SectionTitle title="13. Palavras-chave / tags" />
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 8 }}>
           {tags.map((t) => (
             <span key={t} style={styles.tagChip}>
@@ -375,7 +375,7 @@ export function JurisprudenciaForm({ initial = {}, saving, onSave, onCancel }: P
 
       {/* ── 13. IMPORTÂNCIA ── */}
       <section>
-        <SectionTitle title="13. Importância" />
+        <SectionTitle title="14. Importância" />
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
             <span style={{ fontSize: 13, color: theme.inkSoft, minWidth: 130 }}>Relevância (estrelas)</span>
@@ -415,6 +415,6 @@ const styles: Record<string, React.CSSProperties> = {
   cancelBtn: { padding: '11px 20px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.inkSoft, fontSize: 14, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' },
   saveBtn: { padding: '11px 24px', borderRadius: theme.radiusSm, border: 'none', background: theme.teal, color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
   gabaritoBtn: { padding: '9px 22px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.inkSoft, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
-  gabaritoBtnCerto: { border: `1.5px solid ${theme.ok}`, background: 'rgba(34,197,94,.1)', color: theme.ok },
-  gabaritoBtnErrado: { border: `1.5px solid ${theme.danger}`, background: 'rgba(239,68,68,.1)', color: theme.danger },
+  gabaritoBtnCerto: { border: `1.5px solid ${theme.ok}`, background: theme.okTint, color: theme.ok },
+  gabaritoBtnErrado: { border: `1.5px solid ${theme.danger}`, background: theme.dangerTint, color: theme.danger },
 };

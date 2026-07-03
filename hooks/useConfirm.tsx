@@ -20,7 +20,10 @@ export function useConfirm(): {
 
   const confirm = useCallback((options: ConfirmOptions): Promise<boolean> => {
     return new Promise((resolve) => {
-      setPending({ ...options, resolve });
+      setPending(prev => {
+        prev?.resolve(false);
+        return { ...options, resolve };
+      });
     });
   }, []);
 

@@ -1,65 +1,91 @@
-// components/features/streak/StreakBar.tsx
-// Constância: barra horizontal de dias, colunas finas de ponta a ponta.
-// Verde-escuro = bateu meta · verde-claro = estudou · cinza = falhou (quebrou
-// sequência) · muted = ainda não comecei. Frase + recorde em cima, legenda embaixo.
-// No mobile mostra 30 dias (em vez de 60) para manter as células legíveis.
 'use client';
 
-import { useEffect, useState } from 'react';
+import { memo } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { getStreak, type StreakInfo } from '@/services/streak.service';
 import { theme } from '@/lib/theme';
 import { useUI } from '@/components/layout/UIContext';
 import { toLocalDateString } from '@/lib/local-date';
+import { Skeleton } from '@/components/ui/Skeleton';
 
+// "falhou" é vermelho translúcido para distinguir claramente de "vazio" (cinza)
 const COR = {
-  meta: '#22c55e',        // bateu a meta
-  estudou: '#6366F1', // estudou (sem bater meta)
-  falhou: '#e5e7e2',       // cinza — quebrou sequência
-  vazio: theme.muted,      // ainda não comecei
+  meta: '#22c55e',
+  estudou: '#6366F1',
+  falhou: 'rgba(0, 0, 0, 0.22)',
+  vazio: theme.muted,
 };
 
-export function StreakBar() {
+export const StreakBar = memo(function StreakBar() {
   const { isMobile } = useUI();
-  const [info, setInfo] = useState<StreakInfo | null>(null);
-  const [loadError, setLoadError] = useState(false);
 
-  useEffect(() => {
-    getStreak().then(setInfo).catch(() => setLoadError(true));
-    function onVisible() {
-      if (document.visibilityState === 'visible') getStreak().then(setInfo).catch(() => {});
-    }
-    document.addEventListener('visibilitychange', onVisible);
-    return () => document.removeEventListener('visibilitychange', onVisible);
-  }, []);
+  const { data: info, isError: loadError } = useQuery<StreakInfo>({
+    queryKey: ['streak'],
+    queryFn: getStreak,
+  });
 
   if (loadError) {
     return <p style={styles.muted}>Não foi possível carregar a constância.</p>;
   }
 
+  // Skeleton com dimensões corretas enquanto carrega (P10)
   if (!info) {
-    return <p style={styles.muted}>Carregando…</p>;
+    const totalDias = isMobile ? 30 : 60;
+    return (
+      <div style={styles.wrap}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
+          <Skeleton width={200} height={14} borderRadius={4} />
+          <Skeleton width={90} height={14} borderRadius={4} />
+        </div>
+        <div style={{ display: 'flex', gap: 3, width: '100%' }}>
+          {Array.from({ length: totalDias }).map((_, i) => (
+            <Skeleton key={i} height={isMobile ? 30 : 26} borderRadius={3} style={{ flex: 1, minWidth: 0 }} />
+          ))}
+        </div>
+      </div>
+    );
   }
 
-  // Mostra menos dias no mobile pra cada célula não virar um fio de 2px.
   const totalDias = isMobile ? 30 : 60;
   const dias = info.lastDays.slice(-totalDias);
 
-  // Descobre o primeiro dia com estudo: antes dele, vazio = "não comecei" (cinza);
-  // depois dele, vazio = "falhou" (cinza-escuro).
   const primeiroEstudo = dias.findIndex((d) => d.minutes > 0);
+
+  // Sem nenhum estudo ainda (P3): mostrar estado inspiracional em vez de 60 barras cinzas
+  if (primeiroEstudo === -1) {
+    const semana = dias.slice(-7);
+    return (
+      <div style={styles.wrap}>
+        <div style={styles.header}>
+          <span style={styles.phrase}>Comece hoje a construir sua sequência de estudos! 🔥</span>
+        </div>
+        <div style={styles.bar}>
+          {semana.map((d) => (
+            <div
+              key={d.date}
+              style={{ ...styles.cell, height: isMobile ? 30 : 26, background: COR.vazio, flex: 1 }}
+            />
+          ))}
+        </div>
+        <div style={styles.legend}>
+          <span style={styles.legendItem}><i style={{ ...styles.lDot, background: COR.meta }} />bateu a meta</span>
+          <span style={styles.legendItem}><i style={{ ...styles.lDot, background: COR.estudou }} />estudou</span>
+        </div>
+      </div>
+    );
+  }
 
   function corDoDia(d: { minutes: number; metGoal: boolean }, idx: number): string {
     if (d.minutes > 0) return d.metGoal ? COR.meta : COR.estudou;
-    // dia vazio: falha só se já tinha começado antes
-    if (primeiroEstudo !== -1 && idx > primeiroEstudo) return COR.falhou;
+    if (idx > primeiroEstudo) return COR.falhou;
     return COR.vazio;
   }
 
   const hojeStr = toLocalDateString();
+  const novoRecorde = info.current > 0 && info.current >= info.longest;
 
   return (
     <div style={styles.wrap}>
-      {/* Linha de cima: frase + recorde */}
       <div style={styles.header}>
         <span style={styles.phrase}>
           {info.current > 0 ? (
@@ -71,10 +97,13 @@ export function StreakBar() {
             <span style={styles.warn}> Estude hoje para manter.</span>
           )}
         </span>
-        <span style={styles.record}>recorde: <b style={{ color: theme.ink }}>{info.longest} dias</b></span>
+        {novoRecorde ? (
+          <span style={styles.recordDestaque}>🏆 {info.current === info.longest ? 'recorde pessoal!' : `recorde: ${info.longest} dias`}</span>
+        ) : (
+          <span style={styles.record}>recorde: <b style={{ color: theme.ink }}>{info.longest} {info.longest === 1 ? 'dia' : 'dias'}</b></span>
+        )}
       </div>
 
-      {/* Barra de colunas finas, de ponta a ponta */}
       <div style={styles.bar}>
         {dias.map((d, idx) => (
           <div
@@ -90,16 +119,15 @@ export function StreakBar() {
         ))}
       </div>
 
-      {/* Legenda discreta embaixo */}
       <div style={styles.legend}>
         <span style={styles.legendItem}><i style={{ ...styles.lDot, background: COR.meta }} />bateu a meta</span>
         <span style={styles.legendItem}><i style={{ ...styles.lDot, background: COR.estudou }} /> estudou</span>
-        <span style={styles.legendItem}><i style={{ ...styles.lDot, background: COR.falhou }} /> falhou</span>
+        <span style={styles.legendItem}><i style={{ ...styles.lDot, background: COR.falhou }} /> não estudou</span>
         <span style={styles.legendItem}><i style={{ ...styles.lDot, background: COR.vazio }} /> sem registro</span>
       </div>
     </div>
   );
-}
+});
 
 const styles: Record<string, React.CSSProperties> = {
   wrap: { fontFamily: theme.font, width: '100%', minWidth: 0 },
@@ -108,10 +136,12 @@ const styles: Record<string, React.CSSProperties> = {
   hi: { color: theme.teal, fontWeight: 700 },
   warn: { color: theme.clay, fontWeight: 500 },
   record: { fontSize: 13, color: theme.inkSoft },
+  recordDestaque: { fontSize: 13, color: theme.warn, fontWeight: 700 },
   bar: { display: 'flex', gap: 3, width: '100%', minWidth: 0 },
   cell: { flex: 1, minWidth: 0, height: 26, borderRadius: 3, transition: 'opacity .1s' },
   cellToday: { boxShadow: `inset 0 0 0 2px ${theme.card}, 0 0 0 1.5px ${theme.ink}` },
   legend: { display: 'flex', gap: 14, marginTop: 10, flexWrap: 'wrap' },
   legendItem: { display: 'flex', alignItems: 'center', gap: 5, fontSize: 11, color: theme.inkFaint },
   lDot: { width: 9, height: 9, borderRadius: 2, display: 'inline-block' },
+  muted: { color: theme.inkFaint, fontSize: 14, margin: 0 },
 };

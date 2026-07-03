@@ -1,0 +1,16 @@
+{
+  "name": "Focali — Estudos para Concursos",
+  "short_name": "Focali",
+  "description": "Plataforma de estudos de alta performance para concursos.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#0bd8b6",
+  "orientation": "portrait-primary",
+  "lang": "pt-BR",
+  "icons": [
+    { "src": "/brand/symbol.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ],
+  "categories": ["education", "productivity"],
+  "screenshots": []
+}

@@ -6,37 +6,23 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { createClient } from '@/lib/supabase/client';
 import { theme } from '@/lib/theme';
 import { useUI } from './UIContext';
+import { useUser } from './UserContext';
 import { useTimer } from '@/components/features/timer/TimerContext';
 import { ManualLogModal } from '@/components/features/timer/ManualLogModal';
 import { NotificationBell } from './NotificationBell';
 
-function isHttpsUrl(url: unknown): url is string {
-  if (typeof url !== 'string') return false;
-  try { return new URL(url).protocol === 'https:'; } catch { return false; }
-}
-
 export function Topbar() {
   const router = useRouter();
-  const { theme: mode, toggleTheme, avatarUrl, setAvatarUrl, isMobile, toggleMobile } = useUI();
+  const { theme: mode, toggleTheme, toggleMobile } = useUI();
+  const { email, avatarUrl } = useUser();
   const timer = useTimer();
-  const [email, setEmail] = useState<string | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [logOpen, setLogOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const supabase = createClient();
-    supabase.auth.getUser()
-      .then(({ data }) => {
-        setEmail(data.user?.email ?? null);
-        const rawUrl = data.user?.user_metadata?.avatar_url;
-        setAvatarUrl(isHttpsUrl(rawUrl) ? rawUrl : null);
-      })
-      .catch(() => {});
-  }, [setAvatarUrl]);
 
   useEffect(() => {
     function onClick(e: MouseEvent) {
@@ -59,30 +45,29 @@ export function Topbar() {
   const initial = (email?.[0] ?? '?').toUpperCase();
 
   return (
-    <header style={{ ...styles.bar, padding: isMobile ? '0 16px' : '0 28px' }}>
-      {/* Esquerda: hambúrguer (só mobile). No desktop fica vazio e o space-between empurra tudo pra direita. */}
+    <header className="topbar-bar" style={styles.bar}>
+      {/* Esquerda: hambúrguer renderizado sempre; CSS oculta em desktop (topbar-hamburger). */}
       <div style={styles.left}>
-        {isMobile && (
-          <button onClick={toggleMobile} style={styles.iconBtn} title="Abrir menu" aria-label="Abrir menu">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={theme.inkSoft} strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M3 12h18M3 6h18M3 18h18" />
-            </svg>
-          </button>
-        )}
+        <button className="topbar-hamburger" onClick={toggleMobile} style={styles.iconBtn} title="Abrir menu" aria-label="Abrir menu">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={theme.inkSoft} strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M3 12h18M3 6h18M3 18h18" />
+          </svg>
+        </button>
       </div>
 
       <div style={styles.right}>
-        {/* Registrar estudo manual (+) — no mobile colapsa pra só o ícone */}
+        {/* Registrar estudo manual — label oculto em mobile via CSS (topbar-add-label / topbar-add-btn). */}
         <button
+          className="topbar-add-btn"
           onClick={() => setLogOpen(true)}
-          style={{ ...styles.addBtn, padding: isMobile ? 0 : '0 16px 0 13px', width: isMobile ? 38 : undefined, justifyContent: 'center' }}
+          style={{ ...styles.addBtn, justifyContent: 'center' }}
           title="Registrar estudo"
           aria-label="Registrar estudo"
         >
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M12 5v14M5 12h14" />
           </svg>
-          {!isMobile && <span style={styles.addLabel}>Registrar</span>}
+          <span className="topbar-add-label" style={styles.addLabel}>Registrar estudo</span>
         </button>
 
         {/* Notificações */}
@@ -110,7 +95,7 @@ export function Topbar() {
         <div ref={menuRef} style={{ position: 'relative' }}>
           <button onClick={() => setMenuOpen((v) => !v)} style={styles.avatarBtn} aria-label="Menu da conta">
             {avatarUrl ? (
-              <img src={avatarUrl} alt="Avatar do usuário" loading="lazy" decoding="async" style={styles.avatarImg} />
+              <Image src={avatarUrl} alt="Avatar do usuário" width={36} height={36} style={styles.avatarImg} />
             ) : (
               <span style={styles.avatarFallback}>{initial}</span>
             )}
@@ -162,7 +147,7 @@ const styles: Record<string, React.CSSProperties> = {
   addBtn: {
     display: 'flex', alignItems: 'center', gap: 7, height: 38,
     borderRadius: 10, border: 'none', background: theme.teal, cursor: 'pointer',
-    marginRight: 4, fontFamily: 'inherit',
+    marginRight: 4, fontFamily: 'inherit', padding: '0 16px 0 13px',
   },
   addLabel: { color: '#fff', fontSize: 13.5, fontWeight: 600 },
   iconBtn: {

@@ -3,11 +3,13 @@
 // de ciclo (sequência + meta/dia). Ações: editar, parar, apagar.
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useState } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   listRuleSummaries, stopRule, deleteRule, type RuleSummary,
 } from '@/services/recurrence.service';
 import { theme } from '@/lib/theme';
+import { useConfirm } from '@/hooks/useConfirm';
 
 interface Props {
   onClose: () => void;
@@ -18,23 +20,53 @@ interface Props {
 const DIA_NOME = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'];
 
 export function RecurrencePanel({ onClose, onChanged, onEdit }: Props) {
-  const [rules, setRules] = useState<RuleSummary[] | null>(null);
+  const { confirm, dialog } = useConfirm();
+  const queryClient = useQueryClient();
   const [busy, setBusy] = useState<string | null>(null);
+  const [error, setError] = useState('');
 
-  const load = useCallback(() => {
-    listRuleSummaries().then(setRules).catch(() => setRules([]));
-  }, []);
-
-  useEffect(() => { load(); }, [load]);
+  // Compartilha o mesmo cache de 'schedule-rules' do useSchedulePage — zero fetch duplicado.
+  const { data: rules, isPending } = useQuery({
+    queryKey: ['schedule-rules'],
+    queryFn: listRuleSummaries,
+    staleTime: 5 * 60_000,
+  });
 
   async function handleStop(id: string) {
+    if (!await confirm({
+      title: 'Parar esta recorrência?',
+      description: 'Blocos futuros serão removidos a partir de hoje. O histórico passado é mantido.',
+      confirmLabel: 'Parar',
+    })) return;
     setBusy(id);
-    try { await stopRule(id); load(); onChanged(); } finally { setBusy(null); }
+    try {
+      await stopRule(id);
+      queryClient.invalidateQueries({ queryKey: ['schedule-rules'] });
+      onChanged();
+    } catch {
+      setError('Erro ao parar a regra. Tente novamente.');
+    } finally {
+      setBusy(null);
+    }
   }
 
   async function handleDelete(id: string) {
+    if (!await confirm({
+      title: 'Apagar esta recorrência?',
+      description: 'O histórico passado também será removido. Esta ação não pode ser desfeita.',
+      confirmLabel: 'Apagar',
+      danger: true,
+    })) return;
     setBusy(id);
-    try { await deleteRule(id); load(); onChanged(); } finally { setBusy(null); }
+    try {
+      await deleteRule(id);
+      queryClient.invalidateQueries({ queryKey: ['schedule-rules'] });
+      onChanged();
+    } catch {
+      setError('Erro ao apagar a regra. Tente novamente.');
+    } finally {
+      setBusy(null);
+    }
   }
 
   function diasLabel(weekdays: number[]): string {
@@ -51,16 +83,19 @@ export function RecurrencePanel({ onClose, onChanged, onEdit }: Props) {
   }
 
   return (
+    <>
+    {dialog}
     <div style={styles.overlay} onClick={onClose}>
       <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
         <div style={styles.head}>
           <h2 style={styles.h2}>Minhas recorrências</h2>
           <button onClick={onClose} style={styles.closeBtn} aria-label="Fechar">✕</button>
         </div>
+        {error && <p style={styles.errorMsg}>{error}</p>}
 
-        {rules === null ? (
+        {isPending ? (
           <p style={styles.muted}>Carregando…</p>
-        ) : rules.length === 0 ? (
+        ) : !rules || rules.length === 0 ? (
           <p style={styles.empty}>Nenhuma recorrência ativa. Crie uma para automatizar seu cronograma.</p>
         ) : (
           <div style={styles.list}>
@@ -115,13 +150,15 @@ export function RecurrencePanel({ onClose, onChanged, onEdit }: Props) {
           </div>
         )}
 
-        <p style={styles.hint}>“Parar” encerra a recorrência a partir de hoje (o histórico fica). “Apagar” remove tudo, inclusive o passado.</p>
+        <p style={styles.hint}>”Parar” encerra a recorrência a partir de hoje (o histórico fica). “Apagar” remove tudo, inclusive o passado.</p>
       </div>
     </div>
+    </>
   );
 }
 
 const styles: Record<string, React.CSSProperties> = {
+  errorMsg: { color: theme.danger, fontSize: 13, margin: '0 0 12px' },
   overlay: { position: 'fixed', inset: 0, background: 'rgba(30,28,24,0.4)', display: 'grid', placeItems: 'center', zIndex: 60, padding: 20 },
   modal: { background: theme.card, borderRadius: theme.radius, boxShadow: '0 20px 60px rgba(0,0,0,0.18)', padding: 24, width: '100%', maxWidth: 460, maxHeight: '88vh', overflowY: 'auto', fontFamily: theme.font },
   head: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },

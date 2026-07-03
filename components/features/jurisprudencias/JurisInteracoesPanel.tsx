@@ -1,12 +1,13 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { theme } from '@/lib/theme';
 import {
   getInteracao, toggleFavorito, saveAnotacao, activateRevisao, desativarRevisao,
   type JurisInteracao,
 } from '@/services/jurisInteracoes.service';
 import { INTERVALOS_RAPIDOS } from '@/lib/juris-review';
+import { useToast } from '@/components/ui/ToastProvider';
 
 interface Props {
   jurisId: string;
@@ -18,6 +19,9 @@ function fmtDate(d: string | null): string {
 }
 
 export function JurisInteracoesPanel({ jurisId }: Props) {
+  const toast = useToast();
+  const toastRef = useRef(toast);
+  useEffect(() => { toastRef.current = toast; });
   const [interacao, setInteracao] = useState<JurisInteracao | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -36,24 +40,66 @@ export function JurisInteracoesPanel({ jurisId }: Props) {
   const [intervalCustom, setIntervalCustom] = useState('');
   const [savingRev, setSavingRev] = useState(false);
 
+  // Refs para auto-save na desmontagem sem precisar de deps extras no cleanup.
+  const anotacoesRef = useRef(anotacoes);
+  const tagsRef = useRef(tags);
+  useEffect(() => { anotacoesRef.current = anotacoes; }, [anotacoes]);
+  useEffect(() => { tagsRef.current = tags; }, [tags]);
+
+  // Rastreia o último valor realmente persistido no banco (load ou save manual).
+  // Evita upsert redundante no cleanup quando o usuário já salvou manualmente.
+  const lastSavedAnotacoesRef = useRef('');
+  const lastSavedTagsRef = useRef<string[]>([]);
+  const savedAnotTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => () => { if (savedAnotTimeout.current) clearTimeout(savedAnotTimeout.current); }, []);
+
+  // Salva automaticamente anotações ao trocar de aba ou de jurisprudência.
   useEffect(() => {
+    return () => {
+      const isDirty =
+        anotacoesRef.current !== lastSavedAnotacoesRef.current ||
+        JSON.stringify(tagsRef.current) !== JSON.stringify(lastSavedTagsRef.current);
+      if (isDirty) {
+        saveAnotacao(jurisId, anotacoesRef.current, tagsRef.current)
+          .then(() => toastRef.current.success('Anotações salvas automaticamente.'))
+          .catch(() => toastRef.current.error('Erro ao salvar anotações automaticamente.'));
+      }
+    };
+  }, [jurisId]);
+
+  useEffect(() => {
+    // Reset de estado antes de buscar para evitar que dados da juris anterior
+    // fiquem visíveis (e salvos acidentalmente) enquanto a nova carrega.
+    setLoading(true);
+    setInteracao(null);
+    setFavorito(false);
+    setAnotacoes('');
+    setTags([]);
+    setTagInput('');
+    setSavedAnot(false);
+
     getInteracao(jurisId)
       .then((i) => {
         setInteracao(i);
         setFavorito(i?.favorito ?? false);
         setAnotacoes(i?.anotacoes ?? '');
         setTags(i?.tags_pessoais ?? []);
+        // Marca o baseline para o isDirty do cleanup.
+        lastSavedAnotacoesRef.current = i?.anotacoes ?? '';
+        lastSavedTagsRef.current = i?.tags_pessoais ?? [];
       })
-      .catch(() => {})
+      .catch((e) => toast.error(e instanceof Error ? e.message : 'Erro ao carregar interações.'))
       .finally(() => setLoading(false));
-  }, [jurisId]);
+  }, [jurisId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function handleFavorito() {
     if (loadingFav) return;
     setLoadingFav(true);
     const novo = !favorito;
     setFavorito(novo);
-    try { await toggleFavorito(jurisId); }
+    // Passa o novo valor diretamente para evitar race condition de read-then-write.
+    try { await toggleFavorito(jurisId, novo); }
     catch { setFavorito(!novo); }
     finally { setLoadingFav(false); }
   }
@@ -62,10 +108,15 @@ export function JurisInteracoesPanel({ jurisId }: Props) {
     setSavingAnot(true);
     try {
       await saveAnotacao(jurisId, anotacoes, tags);
+      // Avança o baseline para que o cleanup não dispare upsert redundante.
+      lastSavedAnotacoesRef.current = anotacoes.trim();
+      lastSavedTagsRef.current = tags;
       setSavedAnot(true);
-      setTimeout(() => setSavedAnot(false), 2000);
-    } catch { /* silent */ }
-    finally { setSavingAnot(false); }
+      if (savedAnotTimeout.current) clearTimeout(savedAnotTimeout.current);
+      savedAnotTimeout.current = setTimeout(() => setSavedAnot(false), 2000);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'Erro ao salvar anotação. Tente novamente.');
+    } finally { setSavingAnot(false); }
   }
 
   function addTag() {
@@ -82,8 +133,9 @@ export function JurisInteracoesPanel({ jurisId }: Props) {
       await activateRevisao(jurisId, days);
       const updated = await getInteracao(jurisId);
       setInteracao(updated);
-    } catch { /* silent */ }
-    finally { setSavingRev(false); }
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'Erro ao ativar revisão. Tente novamente.');
+    } finally { setSavingRev(false); }
   }
 
   async function handleDesativar() {
@@ -91,11 +143,18 @@ export function JurisInteracoesPanel({ jurisId }: Props) {
     try {
       await desativarRevisao(jurisId);
       setInteracao((v) => v ? { ...v, is_review_active: false, next_review_date: null } : v);
-    } catch { /* silent */ }
-    finally { setSavingRev(false); }
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'Erro ao desativar revisão. Tente novamente.');
+    } finally { setSavingRev(false); }
   }
 
-  if (loading) return null;
+  if (loading) return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+      {[60, 120, 140].map((h, i) => (
+        <div key={i} style={{ height: h, background: theme.card, borderRadius: theme.radius, border: `0.5px solid ${theme.line}`, animation: 'skeleton-pulse 1.4s ease-in-out infinite', animationDelay: `${i * 0.12}s` }} />
+      ))}
+    </div>
+  );
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14, fontFamily: theme.font }}>
@@ -118,7 +177,7 @@ export function JurisInteracoesPanel({ jurisId }: Props) {
           >
             <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z" />
           </svg>
-          <span style={{ fontSize: 13.5, fontWeight: 600, color: favorito ? '#b45309' : theme.ink }}>
+          <span style={{ fontSize: 13.5, fontWeight: 600, color: favorito ? theme.warnDeep : theme.ink }}>
             {favorito ? 'Nos favoritos' : 'Adicionar aos favoritos'}
           </span>
         </button>
@@ -256,7 +315,7 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: 12, color: theme.tealDeep, background: theme.tealBg,
     borderRadius: 999, padding: '3px 10px', fontWeight: 500,
   },
-  tagRemove: { border: 'none', background: 'transparent', cursor: 'pointer', color: theme.tealDeep, fontSize: 14, lineHeight: 1, padding: 0 },
+  tagRemove: { border: 'none', background: 'transparent', cursor: 'pointer', color: theme.tealDeep, fontSize: 14, lineHeight: 1, padding: 0, minWidth: 32, minHeight: 32, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' },
   tagInput: {
     padding: '8px 12px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`,
     background: theme.bg, fontSize: 13, color: theme.ink, fontFamily: theme.font, outline: 'none',

@@ -20,11 +20,16 @@ export function BlockMenu({ block, onEditManual, onDeleteManual, onSkipRecurrenc
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    function onKey(e: KeyboardEvent) { if (e.key === 'Escape') setOpen(false); }
     function onClick(e: MouseEvent) {
       if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
     }
     document.addEventListener('mousedown', onClick);
-    return () => document.removeEventListener('mousedown', onClick);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onClick);
+      document.removeEventListener('keydown', onKey);
+    };
   }, []);
 
   const isRec = block.origin === 'recorrencia';

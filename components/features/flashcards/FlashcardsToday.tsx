@@ -1,12 +1,19 @@
-// components/features/flashcards/FlashcardsToday.tsx
-// Card "Flashcards de Hoje" para a tela inicial: mostra pendências e leva
-// direto para a sessão de estudo.
 'use client';
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { countDailyQueue } from '@/services/flashcards.service';
 import { theme } from '@/lib/theme';
+
+const SKEL: React.CSSProperties = {
+  background: 'rgba(15,23,42,.07)',
+  borderRadius: 8,
+  animationName: 'skeleton-pulse',
+  animationDuration: '1.5s',
+  animationTimingFunction: 'ease-in-out',
+  animationIterationCount: 'infinite',
+};
 
 export function FlashcardsToday() {
   const router = useRouter();
@@ -22,11 +29,18 @@ export function FlashcardsToday() {
     <div style={styles.wrap}>
       <div style={styles.header}>
         <span style={styles.eyebrow}>Flashcards de hoje</span>
-        <a href="/flashcards" style={styles.manage}>Gerenciar</a>
+        <Link href="/flashcards" style={styles.manage}>Gerenciar</Link>
       </div>
 
       {counts === null ? (
-        <p style={styles.muted}>Carregando…</p>
+        <div style={styles.skeletonBody}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
+            <div style={{ ...SKEL, width: 64, height: 38 }} />
+            <div style={{ ...SKEL, width: 1, height: 28, borderRadius: 1 }} />
+            <div style={{ ...SKEL, width: 64, height: 38 }} />
+          </div>
+          <div style={{ ...SKEL, width: '100%', height: 44, borderRadius: 12, marginTop: 'auto' }} />
+        </div>
       ) : total === 0 ? (
         <div style={styles.allDone}>
           <span style={styles.checkDot}>✓</span> Nenhum card pendente hoje
@@ -58,7 +72,7 @@ const styles: Record<string, React.CSSProperties> = {
   header: { display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 16 },
   eyebrow: { fontSize: 11, fontWeight: 500, color: theme.inkFaint, letterSpacing: 1, textTransform: 'uppercase' },
   manage: { fontSize: 13, color: theme.teal, fontWeight: 500, textDecoration: 'none' },
-  muted: { color: theme.inkFaint, fontSize: 14, margin: 0 },
+  skeletonBody: { display: 'flex', flexDirection: 'column', flex: 1, gap: 12 },
   allDone: { color: theme.ok, fontSize: 14, margin: 0, display: 'flex', alignItems: 'center', gap: 8, fontWeight: 500 },
   checkDot: {
     width: 20, height: 20, borderRadius: '50%', background: theme.okBg, color: theme.ok,

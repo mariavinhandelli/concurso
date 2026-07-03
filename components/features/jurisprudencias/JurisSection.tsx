@@ -28,7 +28,7 @@ export function JurisSection({
   const labelColor =
     highlight === 'danger' ? theme.danger :
     highlight === 'purple' ? theme.clay :
-    highlight === 'warn' ? '#b45309' :
+    highlight === 'warn' ? theme.warnDeep :
     highlight === 'teal' ? theme.teal :
     theme.inkSoft;
 

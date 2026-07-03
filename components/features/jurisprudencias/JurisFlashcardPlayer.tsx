@@ -1,31 +1,71 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { theme, zIndex } from '@/lib/theme';
+import { memo, useEffect, useMemo, useState } from 'react';
+import { theme, btnOutline, kbd } from '@/lib/theme';
 import type { Jurisprudencia } from '@/services/jurisprudencias.service';
+import { submitRevisao } from '@/services/jurisInteracoes.service';
+import { RATING_LABEL, type JurisRating } from '@/lib/juris-review';
+import { useConfirm } from '@/hooks/useConfirm';
+import { Overlay } from '@/components/ui/Overlay';
+import { useToast } from '@/components/ui/ToastProvider';
 
 interface Props {
   items: Jurisprudencia[];
   onClose: () => void;
 }
 
-export function JurisFlashcardPlayer({ items, onClose }: Props) {
-  const cards = items.filter((i) => i.flashcard_frente && i.flashcard_verso);
+const RATINGS: { key: JurisRating; color: string; bg: string }[] = [
+  { key: 'errei',   color: theme.danger,   bg: theme.dangerTint },
+  { key: 'dificil', color: theme.warnDeep, bg: theme.warnTint },
+  { key: 'ok',      color: theme.tealDeep, bg: theme.tealBg },
+  { key: 'dominei', color: theme.okDeep,   bg: theme.okTint },
+];
+
+export const JurisFlashcardPlayer = memo(function JurisFlashcardPlayer({ items, onClose }: Props) {
+  const cards = useMemo(() => items.filter((i) => i.flashcard_frente && i.flashcard_verso), [items]);
   const [idx, setIdx] = useState(0);
   const [flipped, setFlipped] = useState(false);
   const [done, setDone] = useState(false);
+  // cardId → última avaliação dada nesta sessão (re-avaliações sobrescrevem)
+  const [ratings, setRatings] = useState<Map<string, JurisRating>>(new Map());
+  const { confirm, dialog } = useConfirm();
+  const toast = useToast();
 
-  // Fecha com Escape
+  async function safeClose() {
+    if (!done && idx > 0) {
+      const ok = await confirm({
+        title: 'Encerrar a sessão de flashcards?',
+        description: 'O progresso não será salvo.',
+        confirmLabel: 'Encerrar',
+        danger: true,
+      });
+      if (!ok) return;
+    }
+    onClose();
+  }
+
+  // Atalhos de teclado
   useEffect(() => {
-    function onKey(e: KeyboardEvent) {
-      if (e.key === 'Escape') { onClose(); return; }
+    async function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') { await safeClose(); return; }
+      // Espaço/Enter: vira o card (frente ↔ verso)
       if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); setFlipped((v) => !v); }
-      if (e.key === 'ArrowRight' && flipped) next();
+      // Anterior sempre disponível
       if (e.key === 'ArrowLeft') prev();
+      // Quando revelado: 1-4 para avaliar e avançar
+      if (flipped) {
+        const currentId = cards[idx]?.id;
+        if (!currentId) return;
+        if (e.key === '1') rateAndAdvance(currentId, 'errei');
+        if (e.key === '2') rateAndAdvance(currentId, 'dificil');
+        if (e.key === '3') rateAndAdvance(currentId, 'ok');
+        if (e.key === '4') rateAndAdvance(currentId, 'dominei');
+      }
     }
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  });
+  // flipped, idx e done nas deps para closure ler valores frescos.
+  }, [flipped, idx, done, onClose]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (cards.length === 0) {
     return (
@@ -46,17 +86,73 @@ export function JurisFlashcardPlayer({ items, onClose }: Props) {
     else setDone(true);
   }
   function prev() { if (idx > 0) { setIdx((i) => i - 1); setFlipped(false); } }
-  function restart() { setIdx(0); setFlipped(false); setDone(false); }
+  function restart() { setIdx(0); setFlipped(false); setDone(false); setRatings(new Map()); }
+
+  function rateAndAdvance(cardId: string, rating: JurisRating) {
+    submitRevisao(cardId, rating).catch(() => toast.error('Erro ao salvar revisão.')); // fire-and-forget; não bloqueia o UI
+    setRatings((prev) => { const m = new Map(prev); m.set(cardId, rating); return m; });
+    next();
+  }
 
   if (done) {
+    const ratingsList = [...ratings.values()];
+    const countByRating: Record<JurisRating, number> = { dominei: 0, ok: 0, dificil: 0, errei: 0 };
+    for (const r of ratingsList) countByRating[r]++;
+    const totalAvaliados = ratingsList.length;
+
+    const RATING_META: { key: JurisRating; label: string; color: string; bg: string }[] = [
+      { key: 'dominei', label: 'Dominei',  color: theme.okDeep,   bg: theme.okTint },
+      { key: 'ok',      label: 'Ok',       color: theme.tealDeep, bg: theme.tealBg },
+      { key: 'dificil', label: 'Difícil',  color: theme.warnDeep, bg: theme.warnTint },
+      { key: 'errei',   label: 'Errei',    color: theme.danger,   bg: theme.dangerTint },
+    ];
+
     return (
-      <Overlay onClose={onClose}>
-        <div style={{ textAlign: 'center', padding: '32px 24px' }}>
-          <div style={{ fontSize: 48, marginBottom: 12 }}>🎉</div>
-          <h2 style={{ fontSize: 20, fontWeight: 800, color: theme.ink, margin: '0 0 8px' }}>Sessão concluída!</h2>
-          <p style={{ fontSize: 14, color: theme.inkSoft, margin: '0 0 28px' }}>
-            Você revisou <strong style={{ color: theme.ink }}>{cards.length}</strong> {cards.length === 1 ? 'flashcard' : 'flashcards'}.
-          </p>
+      <Overlay onClose={onClose} labelledBy="flashcard-done-title">
+        <div style={{ padding: '8px 0' }}>
+          <div style={{ textAlign: 'center', marginBottom: 20 }}>
+            <div style={{ fontSize: 44, marginBottom: 10 }}>🎉</div>
+            <h2 id="flashcard-done-title" style={{ fontSize: 20, fontWeight: 800, color: theme.ink, margin: '0 0 6px' }}>Sessão concluída!</h2>
+            <p style={{ fontSize: 14, color: theme.inkSoft, margin: 0 }}>
+              {cards.length} {cards.length === 1 ? 'flashcard' : 'flashcards'} revisados
+              {totalAvaliados > 0 && ` · ${totalAvaliados} avaliados`}
+            </p>
+          </div>
+
+          {totalAvaliados > 0 && (
+            <div style={{ marginBottom: 20 }}>
+              <p style={{ fontSize: 11, fontWeight: 700, color: theme.inkFaint, textTransform: 'uppercase', letterSpacing: 0.4, margin: '0 0 10px', textAlign: 'center' }}>
+                Sua performance nesta sessão
+              </p>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                {RATING_META.map(({ key, label, color, bg }) => {
+                  const n = countByRating[key];
+                  if (n === 0) return null;
+                  return (
+                    <div key={key} style={{
+                      padding: '10px 14px', borderRadius: theme.radiusSm,
+                      background: bg, border: `0.5px solid ${color}40`,
+                      display: 'flex', alignItems: 'center', gap: 10,
+                    }}>
+                      <span style={{ fontSize: 22, fontWeight: 900, color, minWidth: 28, textAlign: 'center' }}>{n}</span>
+                      <span style={{ fontSize: 13, fontWeight: 600, color }}>{label}</span>
+                    </div>
+                  );
+                }).filter(Boolean)}
+              </div>
+              {countByRating.errei > 0 && (
+                <p style={{ fontSize: 12, color: theme.danger, marginTop: 10, textAlign: 'center' }}>
+                  {countByRating.errei} {countByRating.errei === 1 ? 'card agendado' : 'cards agendados'} para revisão em breve
+                </p>
+              )}
+              {countByRating.dominei > 0 && countByRating.errei === 0 && (
+                <p style={{ fontSize: 12, color: theme.okDeep, marginTop: 10, textAlign: 'center' }}>
+                  Ótimo! Todos os cards bem avaliados.
+                </p>
+              )}
+            </div>
+          )}
+
           <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
             <button onClick={restart} style={btnPrimary}>Recomeçar</button>
             <button onClick={onClose} style={btnOutline}>Fechar</button>
@@ -67,10 +163,12 @@ export function JurisFlashcardPlayer({ items, onClose }: Props) {
   }
 
   return (
-    <Overlay onClose={onClose}>
+    <>
+    {dialog}
+    <Overlay onClose={safeClose} labelledBy="flashcard-modal-title">
       {/* Cabeçalho */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
-        <span style={{ fontSize: 13, fontWeight: 700, color: theme.teal, display: 'flex', alignItems: 'center', gap: 6 }}>
+        <span id="flashcard-modal-title" style={{ fontSize: 13, fontWeight: 700, color: theme.teal, display: 'flex', alignItems: 'center', gap: 6 }}>
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
             <path d="m21 12l-9 4l-9-4m18 4l-9 4l-9-4m18-8l-9 4l-9-4l9-4z" />
           </svg>
@@ -79,7 +177,7 @@ export function JurisFlashcardPlayer({ items, onClose }: Props) {
         <span style={{ fontSize: 12.5, color: theme.inkFaint }}>
           {idx + 1} / {cards.length}
         </span>
-        <button onClick={onClose} style={{ marginLeft: 'auto', border: 'none', background: 'transparent', color: theme.inkFaint, fontSize: 18, cursor: 'pointer', lineHeight: 1 }}>✕</button>
+        <button onClick={safeClose} style={{ marginLeft: 'auto', border: 'none', background: 'transparent', color: theme.inkFaint, fontSize: 18, cursor: 'pointer', lineHeight: 1 }} aria-label="Fechar">✕</button>
       </div>
 
       {/* Barra de progresso */}
@@ -93,9 +191,14 @@ export function JurisFlashcardPlayer({ items, onClose }: Props) {
         <span>{card.disciplina}{card.materia ? ` · ${card.materia}` : ''}</span>
       </div>
 
-      {/* Card principal — clicável */}
+      {/* Card principal — clicável e focável via teclado */}
       <div
+        role="button"
+        tabIndex={0}
+        aria-label={flipped ? 'Verso — Resposta. Pressione Espaço para virar de volta.' : 'Frente — Pergunta. Pressione Espaço para revelar a resposta.'}
+        aria-keyshortcuts="Space"
         onClick={() => setFlipped((v) => !v)}
+        onKeyDown={(e) => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); setFlipped((v) => !v); } }}
         style={{
           minHeight: 180, borderRadius: theme.radiusSm,
           border: `1.5px solid ${flipped ? theme.teal : theme.line}`,
@@ -103,7 +206,7 @@ export function JurisFlashcardPlayer({ items, onClose }: Props) {
           padding: '22px 24px', cursor: 'pointer',
           transition: 'background .2s, border-color .2s',
           display: 'flex', flexDirection: 'column', gap: 10,
-          marginBottom: 18,
+          marginBottom: 18, outline: 'none',
         }}
       >
         <span style={{ fontSize: 10.5, fontWeight: 700, color: flipped ? theme.teal : theme.inkFaint, textTransform: 'uppercase', letterSpacing: 0.6 }}>
@@ -118,78 +221,59 @@ export function JurisFlashcardPlayer({ items, onClose }: Props) {
       </div>
 
       {/* Navegação */}
-      <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+      <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
         <button
           onClick={prev}
           disabled={idx === 0}
-          style={{ ...btnOutline, opacity: idx === 0 ? 0.35 : 1 }}
+          aria-keyshortcuts="ArrowLeft"
+          style={{ ...btnOutline, opacity: idx === 0 ? 0.35 : 1, flexShrink: 0 }}
         >
           ← Anterior
         </button>
-        <span style={{ flex: 1 }} />
+
         {!flipped ? (
-          <button onClick={() => setFlipped(true)} style={btnPrimary}>
-            Revelar resposta
-          </button>
+          <>
+            <span style={{ flex: 1 }} />
+            <button onClick={() => setFlipped(true)} aria-keyshortcuts="Space Enter" style={btnPrimary}>
+              Revelar resposta
+            </button>
+          </>
         ) : (
-          <button onClick={next} style={btnPrimary}>
-            {idx < cards.length - 1 ? 'Próximo →' : 'Concluir sessão'}
-          </button>
+          // Botões de avaliação — substituem "Próximo" e alimentam a revisão espaçada
+          <>
+            {RATINGS.map(({ key, color, bg }, i) => (
+              <button
+                key={key}
+                onClick={() => rateAndAdvance(card.id, key)}
+                aria-keyshortcuts={String(i + 1)}
+                style={{
+                  flex: 1, padding: '9px 6px', borderRadius: theme.radiusSm,
+                  border: `1.5px solid ${color}`, background: bg,
+                  color, fontSize: 13, fontWeight: 700,
+                  cursor: 'pointer', fontFamily: theme.font,
+                  whiteSpace: 'nowrap', minWidth: 60,
+                }}
+              >
+                {RATING_LABEL[key]}
+              </button>
+            ))}
+          </>
         )}
       </div>
 
       <p style={{ fontSize: 11.5, color: theme.inkFaint, textAlign: 'center', margin: '14px 0 0' }}>
-        Atalhos: <kbd style={kbd}>Espaço</kbd> revelar · <kbd style={kbd}>→</kbd> próximo · <kbd style={kbd}>←</kbd> anterior · <kbd style={kbd}>Esc</kbd> fechar
+        {flipped
+          ? <>Atalhos: <kbd style={kbd}>1</kbd> Errei · <kbd style={kbd}>2</kbd> Difícil · <kbd style={kbd}>3</kbd> Ok · <kbd style={kbd}>4</kbd> Dominei · <kbd style={kbd}>←</kbd> anterior · <kbd style={kbd}>Esc</kbd> fechar</>
+          : <>Atalhos: <kbd style={kbd}>Espaço</kbd> revelar · <kbd style={kbd}>←</kbd> anterior · <kbd style={kbd}>Esc</kbd> fechar</>
+        }
       </p>
     </Overlay>
+    </>
   );
-}
-
-function Overlay({ children, onClose }: { children: React.ReactNode; onClose: () => void }) {
-  return (
-    <div
-      style={{
-        position: 'fixed', inset: 0,
-        background: 'rgba(0,0,0,0.55)',
-        zIndex: zIndex.overlay,
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        padding: 20,
-      }}
-      onClick={onClose}
-    >
-      <div
-        onClick={(e) => e.stopPropagation()}
-        style={{
-          background: theme.card,
-          border: `0.5px solid ${theme.line}`,
-          borderRadius: theme.radius,
-          boxShadow: theme.shadowModal,
-          width: '100%', maxWidth: 680,
-          maxHeight: '90vh',
-          overflowY: 'auto',
-          padding: '24px 28px',
-          fontFamily: theme.font,
-          zIndex: zIndex.modal,
-        }}
-      >
-        {children}
-      </div>
-    </div>
-  );
-}
+});
 
 const btnPrimary: React.CSSProperties = {
   padding: '10px 22px', borderRadius: theme.radiusSm, border: 'none',
   background: theme.teal, color: '#fff', fontSize: 14, fontWeight: 600,
   cursor: 'pointer', fontFamily: theme.font,
-};
-const btnOutline: React.CSSProperties = {
-  padding: '10px 20px', borderRadius: theme.radiusSm,
-  border: `0.5px solid ${theme.line}`, background: theme.card,
-  color: theme.inkSoft, fontSize: 14, fontWeight: 500,
-  cursor: 'pointer', fontFamily: theme.font,
-};
-const kbd: React.CSSProperties = {
-  background: theme.muted, border: `0.5px solid ${theme.line}`,
-  borderRadius: 4, padding: '0px 5px', fontSize: 10.5, fontFamily: 'monospace',
 };

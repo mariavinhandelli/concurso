@@ -1,5 +1,6 @@
 // lib/spaced-repetition.ts
 import { startOfLocalDay, toLocalDateString } from '@/lib/local-date';
+import type { BaseReviewState, BaseScheduleResult } from '@/lib/spaced-repetition-algorithm';
 
 export type RecallGrade = 'errou' | 'dificil' | 'bom' | 'facil';
 
@@ -7,19 +8,18 @@ const GRADE_TO_QUALITY: Record<RecallGrade, number> = {
   errou: 0, dificil: 3, bom: 4, facil: 5,
 };
 
-export interface SpacedRepetitionState {
+export interface SpacedRepetitionState extends BaseReviewState {
   easeFactor: number;
-  intervalDays: number;
-  repetitions: number;
+  // intervalDays, repetitions herdados de BaseReviewState
 }
 
-export interface ReviewResult extends SpacedRepetitionState {
-  nextReviewDate: Date;
-  lastReviewed: Date;
+export interface ReviewResult extends BaseScheduleResult, SpacedRepetitionState {
+  // nextReviewDate, lastReviewed de BaseScheduleResult
+  // easeFactor, intervalDays, repetitions de SpacedRepetitionState
 }
 
 const MIN_EASE_FACTOR = 1.3;
-const DEFAULT_EASE_FACTOR = 2.5;
+export const DEFAULT_EASE_FACTOR = 2.5;
 const FIRST_INTERVAL = 1;
 const SECOND_INTERVAL = 6;
 
@@ -79,24 +79,3 @@ export function daysOverdue(nextReviewDate: Date | string | null, now: Date = ne
   return Math.round((today.getTime() - due.getTime()) / 86_400_000);
 }
 
-export function fromDbRow(row: {
-  ease_factor: number | null;
-  interval_days: number | null;
-  repetitions: number | null;
-}): SpacedRepetitionState {
-  return {
-    easeFactor: row.ease_factor ?? DEFAULT_EASE_FACTOR,
-    intervalDays: row.interval_days ?? 0,
-    repetitions: row.repetitions ?? 0,
-  };
-}
-
-export function toDbRow(result: ReviewResult) {
-  return {
-    ease_factor: result.easeFactor,
-    interval_days: result.intervalDays,
-    repetitions: result.repetitions,
-    last_reviewed: result.lastReviewed.toISOString(),
-    next_review_date: toLocalDateString(result.nextReviewDate),
-  };
-}

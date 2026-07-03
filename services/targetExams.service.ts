@@ -120,8 +120,7 @@ export async function createTargetExam(input: {
     throw new Error('Erro ao criar concurso-alvo: ' + error.message);
   }
 
-  const boardName = boardId ? await getBoardName(boardId) : null;
-  return { ...data, boardName } as TargetExam;
+  return { ...data, boardName: bancaNome } as TargetExam;
 }
 
 export async function promoteToPos(targetExamId: string, boardId?: string): Promise<void> {
@@ -145,19 +144,9 @@ export async function setPrimaryTargetExam(targetExamId: string): Promise<void> 
   const { data: { user }, error: authError } = await supabase.auth.getUser();
   if (authError || !user) throw new Error('Você precisa estar logado.');
 
-  const { error: clearError } = await supabase
-    .from('target_exams')
-    .update({ is_primary: false })
-    .eq('user_id', user.id)
-    .eq('is_primary', true);
-  if (clearError) throw new Error('Erro ao limpar primário: ' + clearError.message);
-
-  const { error: setError } = await supabase
-    .from('target_exams')
-    .update({ is_primary: true })
-    .eq('id', targetExamId)
-    .eq('user_id', user.id);
-  if (setError) throw new Error('Erro ao definir primário: ' + setError.message);
+  // RPC atômica: troca o primário em um único UPDATE, sem janela de estado inconsistente.
+  const { error } = await supabase.rpc('set_primary_target_exam', { p_target_id: targetExamId });
+  if (error) throw new Error(error.message);
 }
 
 export async function deleteTargetExam(targetExamId: string): Promise<void> {

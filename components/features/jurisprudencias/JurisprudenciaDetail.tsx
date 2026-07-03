@@ -53,7 +53,7 @@ function IconTag() {
 }
 
 const TIPO_LABEL: Record<string, string> = {
-  sumula: 'Súmula', acordao: 'Acórdão', decisao_monocratica: 'Decisão Monocrática',
+  sumula: 'Súmula', sumula_vinculante: 'Súmula Vinculante', acordao: 'Acórdão', decisao_monocratica: 'Decisão Monocrática',
   informativo: 'Informativo', outro: 'Outro',
 };
 const STATUS_LABEL: Record<string, string> = {
@@ -101,7 +101,7 @@ export function JurisprudenciaDetail({ item, isMobile }: Props) {
           <InfoRow label="Status" value={
             <span style={{
               fontSize: 12, fontWeight: 600, borderRadius: 6, padding: '2px 8px',
-              background: item.status === 'vigente' ? 'rgba(34,197,94,.12)' : 'rgba(239,68,68,.1)',
+              background: item.status === 'vigente' ? theme.okTint : theme.dangerTint,
               color: item.status === 'vigente' ? theme.ok : theme.danger,
             }}>
               {STATUS_LABEL[item.status] ?? item.status}
@@ -195,7 +195,7 @@ export function JurisprudenciaDetail({ item, isMobile }: Props) {
       >
         {item.pegadinhas && (
           <div style={{
-            background: 'rgba(239,68,68,.06)',
+            background: theme.dangerTint,
             borderRadius: 10,
             padding: 14,
           }}>
@@ -214,7 +214,7 @@ export function JurisprudenciaDetail({ item, isMobile }: Props) {
       >
         {item.supera_entendimento_anterior && item.observacao_evolucao && (
           <div style={{
-            background: 'rgba(245,158,11,.08)',
+            background: theme.warnTint,
             borderRadius: 10,
             padding: 14,
           }}>
@@ -263,7 +263,7 @@ export function JurisprudenciaDetail({ item, isMobile }: Props) {
             <span style={{ fontSize: 13, color: theme.inkSoft, width: 120 }}>Incidência</span>
             <span style={{
               fontSize: 12, fontWeight: 600, borderRadius: 6, padding: '3px 10px',
-              background: 'rgba(245,158,11,.1)', color: '#b45309',
+              background: theme.warnTint, color: theme.warnDeep,
             }}>
               {INCIDENCIA_LABEL[item.incidencia_concursos] ?? item.incidencia_concursos}
             </span>

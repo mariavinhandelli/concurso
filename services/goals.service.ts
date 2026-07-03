@@ -17,7 +17,8 @@ export interface QuestionsSummary {
   todayQuestions: number;
   weekQuestions: number;
   weekTargetQuestions: number;
-  todayAcerto: number | null; // % de acerto de hoje
+  todayAcerto: number | null;     // % de acerto de hoje
+  yesterdayAcerto: number | null; // % de acerto de ontem — para o delta ↑↓
 }
 
 function startOfDayDaysAgo(days: number): string {
@@ -44,25 +45,16 @@ export async function getDailyTarget(): Promise<number> {
 }
 
 // Define a meta diária (em minutos), gravando no settings do perfil.
+// Usa jsonb_set atômico para não sobrescrever outras chaves em cenário multi-aba.
 export async function setDailyTarget(minutes: number): Promise<void> {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error('Você precisa estar logado.');
 
-  // Lê o settings atual para não sobrescrever outras preferências.
-  const { data: current } = await supabase
-    .from('profiles')
-    .select('settings')
-    .eq('id', user.id)
-    .maybeSingle();
-
-  const settings = (current?.settings ?? {}) as Record<string, unknown>;
-  settings.dailyTargetMinutes = minutes;
-
-  const { error } = await supabase
-    .from('profiles')
-    .update({ settings })
-    .eq('id', user.id);
+  const { error } = await supabase.rpc('merge_profile_settings', {
+    p_user_id: user.id,
+    p_patch: { dailyTargetMinutes: minutes },
+  });
 
   if (error) throw new Error('Erro ao salvar meta: ' + error.message);
 }
@@ -81,38 +73,48 @@ export async function setDailyTargetQuestions(count: number): Promise<void> {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error('Você precisa estar logado.');
-  const { data: current } = await supabase.from('profiles').select('settings').eq('id', user.id).maybeSingle();
-  const settings = (current?.settings ?? {}) as Record<string, unknown>;
-  settings.dailyTargetQuestions = count;
-  const { error } = await supabase.from('profiles').update({ settings }).eq('id', user.id);
+
+  const { error } = await supabase.rpc('merge_profile_settings', {
+    p_user_id: user.id,
+    p_patch: { dailyTargetQuestions: count },
+  });
+
   if (error) throw new Error('Erro ao salvar meta de questões: ' + error.message);
 }
 
 export async function getQuestionsSummary(): Promise<QuestionsSummary> {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { targetQuestionsPerDay: 0, todayQuestions: 0, weekQuestions: 0, weekTargetQuestions: 0, todayAcerto: null };
+  if (!user) return { targetQuestionsPerDay: 0, todayQuestions: 0, weekQuestions: 0, weekTargetQuestions: 0, todayAcerto: null, yesterdayAcerto: null };
 
-  const target = await getDailyTargetQuestions();
-
-  const { data: logs } = await supabase
-    .from('study_logs')
-    .select('questions_total, questions_correct, started_at')
-    .eq('user_id', user.id)
-    .not('questions_total', 'is', null)
-    .gt('questions_total', 0)
-    .gte('started_at', startOfDayDaysAgo(6));
+  const [target, { data: logs }] = await Promise.all([
+    getDailyTargetQuestions(),
+    supabase
+      .from('study_logs')
+      .select('questions_total, questions_correct, started_at')
+      .eq('user_id', user.id)
+      .not('questions_total', 'is', null)
+      .gt('questions_total', 0)
+      .gte('started_at', startOfDayDaysAgo(6)),
+  ]);
 
   const todayStr = localDateStr(new Date());
+  const yesterdayStr = localDateStr(new Date(Date.now() - 86_400_000));
   let todayQ = 0, weekQ = 0, todayCorrect = 0, todayTotal = 0;
+  let yesterdayCorrect = 0, yesterdayTotal = 0;
 
   for (const log of logs ?? []) {
     const q = log.questions_total ?? 0;
+    const logDate = localDateStr(new Date(log.started_at));
     weekQ += q;
-    if (localDateStr(new Date(log.started_at)) === todayStr) {
+    if (logDate === todayStr) {
       todayQ += q;
       todayCorrect += log.questions_correct ?? 0;
       todayTotal += q;
+    }
+    if (logDate === yesterdayStr) {
+      yesterdayCorrect += log.questions_correct ?? 0;
+      yesterdayTotal += log.questions_total ?? 0;
     }
   }
 
@@ -122,6 +124,7 @@ export async function getQuestionsSummary(): Promise<QuestionsSummary> {
     weekQuestions: weekQ,
     weekTargetQuestions: target * 7,
     todayAcerto: todayTotal > 0 ? Math.round((todayCorrect / todayTotal) * 100) : null,
+    yesterdayAcerto: yesterdayTotal > 0 ? Math.round((yesterdayCorrect / yesterdayTotal) * 100) : null,
   };
 }
 
@@ -132,13 +135,14 @@ export async function getGoalsSummary(): Promise<GoalsSummary> {
     return { targetMinutesPerDay: 0, todayMinutes: 0, weekMinutes: 0, weekTargetMinutes: 0 };
   }
 
-  const target = await getDailyTarget();
-
-  const { data: logs, error } = await supabase
-    .from('study_logs')
-    .select('duration_sec, started_at')
-    .eq('user_id', user.id)
-    .gte('started_at', startOfDayDaysAgo(6));
+  const [target, { data: logs, error }] = await Promise.all([
+    getDailyTarget(),
+    supabase
+      .from('study_logs')
+      .select('duration_sec, started_at')
+      .eq('user_id', user.id)
+      .gte('started_at', startOfDayDaysAgo(6)),
+  ]);
 
   if (error) throw new Error('Erro ao calcular metas: ' + error.message);
 

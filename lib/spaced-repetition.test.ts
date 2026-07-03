@@ -4,8 +4,8 @@ import {
   calculateNextReview,
   daysOverdue,
   isDue,
-  toDbRow,
 } from '@/lib/spaced-repetition';
+import { toDbRow } from '@/lib/spaced-repetition.mapper';
 
 describe('spaced repetition', () => {
   it('agenda a primeira revisão para o próximo dia local', () => {

@@ -2,7 +2,7 @@
 // Blocos de estudo planejados (cronograma). CRUD + busca semanal + auto-cumprir
 // por tópico (chamado pelo timer ao encerrar) + check manual + editar.
 
-import { createClient } from '@/lib/supabase/client';
+import { requireUser, tryGetUser } from '@/lib/supabase/requireUser';
 import { toLocalDateString as localDateStr } from '@/lib/local-date';
 
 export interface StudyBlock {
@@ -21,14 +21,12 @@ export interface StudyBlock {
 }
 
 export async function listBlocks(startDate: string, endDate: string): Promise<StudyBlock[]> {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error('Usuário não autenticado.');
+  const { supabase, userId } = await requireUser();
 
   const { data, error } = await supabase
     .from('study_blocks')
     .select('*, subjects(name, color), topics(name)')
-    .eq('user_id', user.id)
+    .eq('user_id', userId)
     .gte('block_date', startDate)
     .lte('block_date', endDate)
     .order('block_date', { ascending: true })
@@ -57,34 +55,19 @@ export async function createBlock(input: {
   topicId?: string | null;
   plannedMinutes?: number;
 }): Promise<void> {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error('Você precisa estar logado.');
+  const { supabase } = await requireUser();
 
-  const { data: existentes } = await supabase
-    .from('study_blocks')
-    .select('position')
-    .eq('user_id', user.id)
-    .eq('block_date', input.blockDate)
-    .order('position', { ascending: false })
-    .limit(1);
-  const nextPos = (existentes?.[0]?.position ?? -1) + 1;
-
-  const { error } = await supabase.from('study_blocks').insert({
-    user_id: user.id,
-    block_date: input.blockDate,
-    subject_id: input.subjectId,
-    topic_id: input.topicId ?? null,
-    planned_minutes: input.plannedMinutes ?? 60,
-    position: nextPos,
+  const { error } = await supabase.rpc('create_study_block', {
+    p_block_date:      input.blockDate,
+    p_subject_id:      input.subjectId,
+    p_topic_id:        input.topicId ?? null,
+    p_planned_minutes: input.plannedMinutes ?? 60,
   });
   if (error) throw new Error('Erro ao criar bloco: ' + error.message);
 }
 
 export async function toggleBlockDone(blockId: string, done: boolean): Promise<void> {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error('Você precisa estar logado.');
+  const { supabase, userId } = await requireUser();
 
   const updates = done
     ? { is_done: true, done_at: new Date().toISOString() }
@@ -93,33 +76,36 @@ export async function toggleBlockDone(blockId: string, done: boolean): Promise<v
     .from('study_blocks')
     .update(updates)
     .eq('id', blockId)
-    .eq('user_id', user.id);
+    .eq('user_id', userId);
   if (error) throw new Error('Erro ao atualizar bloco: ' + error.message);
 }
 
 export async function deleteBlock(blockId: string): Promise<void> {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error('Você precisa estar logado.');
+  const { supabase, userId } = await requireUser();
 
-  const { error } = await supabase.from('study_blocks').delete().eq('id', blockId).eq('user_id', user.id);
+  const { error } = await supabase
+    .from('study_blocks')
+    .delete()
+    .eq('id', blockId)
+    .eq('user_id', userId);
   if (error) throw new Error('Erro ao excluir bloco: ' + error.message);
 }
 
-// Edita um bloco manual: minutos e/ou tópico.
 export async function updateBlock(
   blockId: string,
   updates: { plannedMinutes?: number; topicId?: string | null },
 ): Promise<void> {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error('Você precisa estar logado.');
+  const { supabase, userId } = await requireUser();
 
   const payload: { planned_minutes?: number; topic_id?: string | null } = {};
   if (updates.plannedMinutes !== undefined) payload.planned_minutes = updates.plannedMinutes;
   if (updates.topicId !== undefined) payload.topic_id = updates.topicId;
 
-  const { error } = await supabase.from('study_blocks').update(payload).eq('id', blockId).eq('user_id', user.id);
+  const { error } = await supabase
+    .from('study_blocks')
+    .update(payload)
+    .eq('id', blockId)
+    .eq('user_id', userId);
   if (error) throw new Error('Erro ao editar bloco: ' + error.message);
 }
 
@@ -129,17 +115,16 @@ export async function autoCompleteByTopic(
   clientSessionId: string,
 ): Promise<void> {
   if (!topicId) return;
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return;
+  const ctx = await tryGetUser();
+  if (!ctx) return;
+  const { supabase, userId } = ctx;
 
   const hoje = localDateStr(new Date());
 
-  // Um reenvio da mesma sessão não pode concluir o próximo bloco da fila.
   const { data: jaConcluido } = await supabase
     .from('study_blocks')
     .select('id')
-    .eq('user_id', user.id)
+    .eq('user_id', userId)
     .eq('completed_by_session_id', clientSessionId)
     .limit(1);
 
@@ -148,7 +133,7 @@ export async function autoCompleteByTopic(
   const { data: blocos } = await supabase
     .from('study_blocks')
     .select('id')
-    .eq('user_id', user.id)
+    .eq('user_id', userId)
     .eq('block_date', hoje)
     .eq('topic_id', topicId)
     .eq('is_done', false)
@@ -164,6 +149,9 @@ export async function autoCompleteByTopic(
       done_at: new Date().toISOString(),
       completed_by_session_id: clientSessionId,
     })
-    .eq('id', blocos[0].id);
+    .eq('id', blocos[0].id)
+    .eq('user_id', userId)
+    .eq('is_done', false)
+    .is('completed_by_session_id', null);
   if (error) throw new Error('Erro ao concluir bloco automaticamente: ' + error.message);
 }

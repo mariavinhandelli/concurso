@@ -34,18 +34,19 @@ export async function getStreak(): Promise<StreakInfo> {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { current: 0, longest: 0, studiedToday: false, lastDays: [] };
 
-  const dailyTarget = await getDailyTarget();
-
   // Busca logs dos últimos 365 dias — janela ampla para o recorde anual.
   const since = new Date();
   since.setDate(since.getDate() - 365);
   since.setHours(0, 0, 0, 0);
 
-  const { data: logs, error } = await supabase
-    .from('study_logs')
-    .select('duration_sec, started_at')
-    .eq('user_id', user.id)
-    .gte('started_at', since.toISOString());
+  const [dailyTarget, { data: logs, error }] = await Promise.all([
+    getDailyTarget(),
+    supabase
+      .from('study_logs')
+      .select('duration_sec, started_at')
+      .eq('user_id', user.id)
+      .gte('started_at', since.toISOString()),
+  ]);
 
   if (error) throw new Error('Erro ao calcular constância: ' + error.message);
 
@@ -66,14 +67,15 @@ export async function getStreak(): Promise<StreakInfo> {
 
   // Conta o streak atual: começa de hoje (se já bateu o mínimo) ou de ontem
   // (se ainda não bateu hoje, mas a sequência até ontem está viva).
+  // Se ontem não conta, o streak está quebrado — cursor fica em "hoje" sem estudo
+  // e o while não executa, garantindo current = 0.
   let current = 0;
   const cursor = new Date();
   if (!studiedToday) {
     if (diaConta(byDay.get(yesterdayStr) ?? 0)) {
       cursor.setDate(cursor.getDate() - 1);
-    } else {
-      cursor.setDate(cursor.getDate() - 2); // streak já quebrou
     }
+    // else: streak quebrado — cursor permanece em hoje (sem estudo), while não conta
   }
   while (diaConta(byDay.get(localDateStr(cursor)) ?? 0)) {
     current++;
@@ -101,12 +103,13 @@ export async function getStreak(): Promise<StreakInfo> {
   }
   longest = Math.max(longest, current); // recorde nunca é menor que o atual
 
-  // Trilha dos últimos 30 dias (do mais antigo ao mais recente).
+  // Trilha dos últimos 60 dias (do mais antigo ao mais recente).
+  // StreakBar mostra 30 no mobile e 60 no desktop; fornecemos 60 para cobrir ambos.
   // A trilha visual continua mostrando os minutos reais — quem decide a cor é o
   // componente. (O mínimo de 25 min vale para a CONTAGEM da sequência, não para
   // exibir o histórico.)
   const lastDays: DayStudy[] = [];
-  for (let i = 29; i >= 0; i--) {
+  for (let i = 59; i >= 0; i--) {
     const d = new Date();
     d.setDate(d.getDate() - i);
     const key = localDateStr(d);

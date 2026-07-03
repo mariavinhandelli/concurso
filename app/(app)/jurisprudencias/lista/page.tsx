@@ -7,7 +7,7 @@ import {
   JURIS_PAGE_LIMIT,
   type Jurisprudencia, type JurisFilters,
 } from '@/services/jurisprudencias.service';
-import { listFavoritas } from '@/services/jurisInteracoes.service';
+import { listFavoritas, listInteracoesSummaryByIds } from '@/services/jurisInteracoes.service';
 import { JurisprudenciaCard } from '@/components/features/jurisprudencias/JurisprudenciaCard';
 import { JurisFilterBar, EMPTY_FILTERS, type JurisFilterValues } from '@/components/features/jurisprudencias/JurisFilterBar';
 import { JurisSidebarWidgets } from '@/components/features/jurisprudencias/JurisSidebarWidgets';
@@ -19,9 +19,19 @@ import { useUI } from '@/components/layout/UIContext';
 import { createClient } from '@/lib/supabase/client';
 import { theme } from '@/lib/theme';
 
+function ListaSkeleton() {
+  return (
+    <div style={{ maxWidth: 1180, margin: '0 auto', padding: '34px 40px' }}>
+      {[1, 2, 3, 4].map((i) => (
+        <div key={i} style={{ height: 150, background: theme.card, borderRadius: theme.radius, border: `0.5px solid ${theme.line}`, animation: 'skeleton-pulse 1.4s ease-in-out infinite', animationDelay: `${(i - 1) * 0.1}s`, marginBottom: 12 }} />
+      ))}
+    </div>
+  );
+}
+
 export default function JurisprudenciasListaPage() {
   return (
-    <Suspense fallback={null}>
+    <Suspense fallback={<ListaSkeleton />}>
       <ListaContent />
     </Suspense>
   );
@@ -37,8 +47,11 @@ function ListaContent() {
   const isFavoritasView = searchParams.get('favoritas') === '1';
 
   const [items, setItems] = useState<Jurisprudencia[]>([]);
+  const [favoritosMap, setFavoritosMap] = useState<Record<string, boolean>>({});
+  const [overdueMap, setOverdueMap] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState(searchParams.get('busca') ?? '');
+  const [debouncedSearch, setDebouncedSearch] = useState(searchParams.get('busca') ?? '');
   const [filters, setFilters] = useState<JurisFilterValues>({
     ...EMPTY_FILTERS,
     disciplina: searchParams.get('disciplina') ?? '',
@@ -52,14 +65,24 @@ function ListaContent() {
     createClient().auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null)).catch(() => {});
   }, []);
 
+  useEffect(() => {
+    const id = setTimeout(() => setDebouncedSearch(search), 350);
+    return () => clearTimeout(id);
+  }, [search]);
+
   const load = useCallback(async () => {
     setLoading(true);
     try {
       if (isFavoritasView) {
-        setItems(await listFavoritas());
+        const loaded = await listFavoritas();
+        setItems(loaded);
+        // Todos os itens de favoritas têm favorito=true por definição
+        const favMap: Record<string, boolean> = {};
+        for (const item of loaded) favMap[item.id] = true;
+        setFavoritosMap(favMap);
       } else {
         const f: JurisFilters = {};
-        if (search.trim()) f.search = search.trim();
+        if (debouncedSearch.trim()) f.search = debouncedSearch.trim();
         if (filters.tribunal) f.tribunal = filters.tribunal;
         if (filters.tipo) f.tipo = filters.tipo as JurisFilters['tipo'];
         if (filters.disciplina) f.disciplina = filters.disciplina;
@@ -69,14 +92,25 @@ function ListaContent() {
         if (filters.ano) f.ano = Number(filters.ano);
         if (filters.sortBy) f.sortBy = filters.sortBy as JurisFilters['sortBy'];
         if (filters.completude) f.completude = filters.completude as JurisFilters['completude'];
-        setItems(await listJurisprudencias(f));
+        const loaded = await listJurisprudencias(f);
+        setItems(loaded);
+        // Busca favoritos + status de revisão em lote (1 query) em vez de 1 por card
+        const summary = await listInteracoesSummaryByIds(loaded.map((i) => i.id));
+        const favMap: Record<string, boolean> = {};
+        const ovMap: Record<string, number> = {};
+        for (const [id, s] of Object.entries(summary)) {
+          favMap[id] = s.favorito;
+          ovMap[id] = s.overdueDays;
+        }
+        setFavoritosMap(favMap);
+        setOverdueMap(ovMap);
       }
     } catch (e) {
       toast.error(e instanceof Error ? e.message : 'Erro ao carregar jurisprudências.');
     } finally {
       setLoading(false);
     }
-  }, [isFavoritasView, search, filters, toast]);
+  }, [isFavoritasView, debouncedSearch, filters, toast]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -129,13 +163,21 @@ function ListaContent() {
         {!isFavoritasView && (
           <>
             {/* Busca */}
-            <div style={{ marginBottom: 12 }}>
+            <div style={{ marginBottom: 12, position: 'relative' }}>
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Buscar na tese, tribunal, disciplina…"
-                style={styles.searchInput}
+                style={{ ...styles.searchInput, paddingRight: loading ? 44 : 16 }}
               />
+              {loading && (
+                <span aria-hidden="true" style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', display: 'flex', alignItems: 'center' }}>
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" strokeWidth="2.5" strokeLinecap="round" style={{ animation: 'focali-spin 0.7s linear infinite' }}>
+                    <circle cx="12" cy="12" r="9" stroke={theme.line} />
+                    <path d="M12 3a9 9 0 0 1 9 9" stroke={theme.inkFaint} />
+                  </svg>
+                </span>
+              )}
             </div>
 
             {/* Filtros expansíveis */}
@@ -143,6 +185,12 @@ function ListaContent() {
               <JurisFilterBar values={filters} onChange={setFilters} disciplinas={disciplinas} />
             </div>
           </>
+        )}
+
+        {isMobile && (
+          <div style={{ marginBottom: 20 }}>
+            <JurisSidebarWidgets />
+          </div>
         )}
 
         <div style={{ display: 'flex', gap: 20, alignItems: 'flex-start', flexDirection: isMobile ? 'column' : 'row' }}>
@@ -157,15 +205,28 @@ function ListaContent() {
               </div>
             ) : items.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '60px 20px', background: theme.card, borderRadius: theme.radius, border: `0.5px solid ${theme.line}` }}>
-                <p style={{ fontSize: 15, color: theme.inkSoft, margin: '0 0 16px' }}>
-                  {isFavoritasView
-                    ? 'Você ainda não favoritou nenhuma jurisprudência.'
-                    : hasFilters ? 'Nenhuma jurisprudência encontrada com esses filtros.' : 'Nenhuma jurisprudência cadastrada ainda.'}
-                </p>
-                {!isFavoritasView && !hasFilters && (
-                  <button onClick={() => router.push('/jurisprudencias/nova')} style={styles.addBtn}>
-                    Cadastrar primeira jurisprudência
-                  </button>
+                {isFavoritasView ? (
+                  <>
+                    <div style={{ fontSize: 38, marginBottom: 12, color: theme.inkFaint }}>★</div>
+                    <p style={{ fontSize: 15, fontWeight: 600, color: theme.ink, margin: '0 0 8px' }}>Nenhum favorito ainda</p>
+                    <p style={{ fontSize: 13, color: theme.inkFaint, margin: '0 0 20px', maxWidth: 340, marginLeft: 'auto', marginRight: 'auto' }}>
+                      Clique na ★ em qualquer card para guardar as jurisprudências mais importantes.
+                    </p>
+                    <button onClick={() => router.push('/jurisprudencias/lista')} style={styles.addBtn}>
+                      Explorar jurisprudências
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <p style={{ fontSize: 15, color: theme.inkSoft, margin: '0 0 16px' }}>
+                      {hasFilters ? 'Nenhuma jurisprudência encontrada com esses filtros.' : 'Nenhuma jurisprudência cadastrada ainda.'}
+                    </p>
+                    {!hasFilters && (
+                      <button onClick={() => router.push('/jurisprudencias/nova')} style={styles.addBtn}>
+                        Cadastrar primeira jurisprudência
+                      </button>
+                    )}
+                  </>
                 )}
               </div>
             ) : (
@@ -181,9 +242,6 @@ function ListaContent() {
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 2, marginRight: 4 }}>
                     <span style={{ fontSize: 13, fontWeight: 700, color: theme.ink }}>
                       {items.length} {items.length === 1 ? 'resultado' : 'resultados'}
-                      {items.length >= JURIS_PAGE_LIMIT && (
-                        <span style={{ marginLeft: 8, fontWeight: 400, color: theme.warn }}>(limite — refine)</span>
-                      )}
                     </span>
                     <div style={{ display: 'flex', gap: 10 }}>
                       <CoverageChip active={countFlash} total={items.length} label="flashcards" color={theme.teal} bg={theme.tealBg} />
@@ -219,8 +277,25 @@ function ListaContent() {
                     onClick={() => router.push(`/jurisprudencias/${item.id}`)}
                     onDelete={() => handleDelete(item.id)}
                     canDelete={userId === item.created_by}
+                    initialFavorito={favoritosMap[item.id] ?? false}
+                    reviewOverdueDays={overdueMap[item.id] ?? 0}
                   />
                 ))}
+
+                {items.length >= JURIS_PAGE_LIMIT && (
+                  <div style={{
+                    padding: '14px 18px', borderRadius: theme.radiusSm,
+                    background: theme.warnBg, border: `1px solid ${theme.warn}`,
+                    display: 'flex', alignItems: 'center', gap: 10,
+                  }}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={theme.warn} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+                      <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" /><line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" />
+                    </svg>
+                    <span style={{ fontSize: 13, color: theme.warn, fontWeight: 500 }}>
+                      Mostrando apenas os primeiros {JURIS_PAGE_LIMIT} resultados. Use filtros para refinar a busca e ver mais itens.
+                    </span>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -233,11 +308,6 @@ function ListaContent() {
           )}
         </div>
 
-        {isMobile && (
-          <div style={{ marginTop: 24 }}>
-            <JurisSidebarWidgets />
-          </div>
-        )}
       </div>
     </>
   );

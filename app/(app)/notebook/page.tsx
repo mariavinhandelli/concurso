@@ -413,7 +413,7 @@ const styles: Record<string, React.CSSProperties> = {
   backToList: { border: 'none', background: 'transparent', color: theme.teal, fontSize: 14, fontWeight: 600, cursor: 'pointer', padding: 0, textAlign: 'left', fontFamily: 'inherit', marginBottom: 14 },
   newBtn: { padding: '11px 0', borderRadius: 12, border: 'none', background: theme.teal, color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer', marginBottom: 4, fontFamily: 'inherit' },
   muted: { color: theme.inkFaint, fontSize: 14, lineHeight: 1.5 },
-  pageError: { fontSize: 13, color: theme.danger, background: 'rgba(239,68,68,0.08)', borderRadius: 8, padding: '8px 14px', marginBottom: 12 },
+  pageError: { fontSize: 13, color: theme.danger, background: theme.dangerTint, borderRadius: 8, padding: '8px 14px', marginBottom: 12 },
   list: { display: 'flex', flexDirection: 'column', gap: 8 },
   navItem: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, background: theme.card, borderRadius: 12, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, padding: '13px 15px', cursor: 'pointer' },
   navItemName: { fontSize: 14, color: theme.ink, fontWeight: 500, lineHeight: 1.45 },

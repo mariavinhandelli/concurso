@@ -21,11 +21,11 @@ export default function ResetPasswordPage() {
   }, []);
 
   // Ao chegar pelo link do e-mail, o Supabase cria a sessão de recuperação.
-  // Confirmamos que ela existe antes de deixar redefinir.
+  // getUser() verifica o token no servidor — mais seguro que getSession().
   useEffect(() => {
     const supabase = createClient();
-    supabase.auth.getSession().then(({ data }) => {
-      setSessaoValida(!!data.session);
+    supabase.auth.getUser().then(({ data }) => {
+      setSessaoValida(!!data.user);
     });
   }, []);
 

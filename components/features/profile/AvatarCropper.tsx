@@ -134,5 +134,5 @@ const styles: Record<string, React.CSSProperties> = {
   actions: { display: 'flex', gap: 12, justifyContent: 'flex-end', marginTop: 18 },
   cancelBtn: { padding: '11px 20px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.inkSoft, fontSize: 14, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' },
   confirmBtn: { padding: '11px 24px', borderRadius: theme.radiusSm, border: 'none', background: theme.teal, color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
-  errorMsg: { fontSize: 13, color: theme.danger, background: 'rgba(239,68,68,0.08)', borderRadius: 8, padding: '8px 12px', margin: '12px 0 0' },
+  errorMsg: { fontSize: 13, color: theme.danger, background: theme.dangerTint, borderRadius: 8, padding: '8px 12px', margin: '12px 0 0' },
 };

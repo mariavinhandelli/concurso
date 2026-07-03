@@ -3,7 +3,7 @@
 // voltas = floor(minutos / planejado); progresso da volta = resto. A próxima
 // sugerida é a mais atrasada (menos voltas, depois menos progresso).
 
-import { createClient } from '@/lib/supabase/client';
+import { requireUser, tryGetUser } from '@/lib/supabase/requireUser';
 import { toLocalDateString as localDateStr } from '@/lib/local-date';
 
 export interface CycleSubject {
@@ -13,9 +13,9 @@ export interface CycleSubject {
   subjectColor: string;
   plannedMinutes: number;
   cycleOrder: number;
-  totalMinutes: number;    // minutos acumulados no total
-  laps: number;            // voltas completas = floor(total / planejado)
-  lapProgress: number;     // minutos na volta atual (resto)
+  totalMinutes: number;
+  laps: number;
+  lapProgress: number;
   isSuggested: boolean;
 }
 
@@ -24,18 +24,18 @@ export interface CycleState {
   dailyMinutes: number;
   todayMinutes: number;
   subjects: CycleSubject[];
-  totalLaps: number;       // voltas completas do ciclo inteiro (menor entre as matérias)
+  totalLaps: number;
 }
 
 export async function getActiveCycleRule(): Promise<string | null> {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return null;
+  const ctx = await tryGetUser();
+  if (!ctx) return null;
+  const { supabase, userId } = ctx;
 
   const { data } = await supabase
     .from('recurrence_rules')
     .select('id')
-    .eq('user_id', user.id)
+    .eq('user_id', userId)
     .eq('mode', 'ciclo')
     .eq('is_active', true)
     .order('created_at', { ascending: false })
@@ -45,36 +45,38 @@ export async function getActiveCycleRule(): Promise<string | null> {
 }
 
 export async function getCycleState(ruleId: string): Promise<CycleState | null> {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return null;
+  const ctx = await tryGetUser();
+  if (!ctx) return null;
+  const { supabase, userId } = ctx;
 
   const { data: rule } = await supabase
     .from('recurrence_rules')
     .select('*, recurrence_items(*)')
     .eq('id', ruleId)
-    .eq('user_id', user.id)
+    .eq('user_id', userId)
     .single();
   if (!rule) return null;
 
   const { data: subjects } = await supabase
-    .from('subjects').select('id, name, color').eq('user_id', user.id);
+    .from('subjects').select('id, name, color').eq('user_id', userId);
   const subjMap: Record<string, { name: string; color: string }> = {};
   for (const s of subjects ?? []) subjMap[s.id] = { name: s.name, color: s.color ?? '#C9B8DD' };
 
-  // Todas as conclusões dessa regra (cada uma com minutos).
+  // Limita pelo created_at da regra: completions anteriores à criação do ciclo
+  // não são possíveis; o filtro evita payload ilimitado com o uso prolongado.
+  const cycleStart = rule.created_at ? (rule.created_at as string).split('T')[0] : '2000-01-01';
+
   const { data: completions } = await supabase
     .from('cycle_completions')
     .select('subject_id, completed_date, minutes')
-    .eq('rule_id', ruleId);
+    .eq('rule_id', ruleId)
+    .gte('completed_date', cycleStart);
 
-  // Soma minutos por matéria.
   const minutesBySubject: Record<string, number> = {};
   for (const c of completions ?? []) {
     minutesBySubject[c.subject_id] = (minutesBySubject[c.subject_id] ?? 0) + (c.minutes ?? 0);
   }
 
-  // Minutos girados hoje.
   const hoje = localDateStr(new Date());
   const todayMinutes = (completions ?? [])
     .filter((c) => c.completed_date === hoje)
@@ -103,30 +105,21 @@ export async function getCycleState(ruleId: string): Promise<CycleState | null> 
     };
   });
 
-  // Próxima sugerida: menos voltas; empate → menos progresso; empate → menor ordem.
+  // Próxima sugerida: menos voltas; empate → menos progresso.
   if (subjectsOut.length > 0) {
     let best = 0;
     for (let i = 1; i < subjectsOut.length; i++) {
       const a = subjectsOut[i], b = subjectsOut[best];
-      if (a.laps < b.laps || (a.laps === b.laps && a.lapProgress < b.lapProgress)) {
-        best = i;
-      }
+      if (a.laps < b.laps || (a.laps === b.laps && a.lapProgress < b.lapProgress)) best = i;
     }
     subjectsOut[best].isSuggested = true;
   }
 
   const totalLaps = subjectsOut.length > 0 ? Math.min(...subjectsOut.map((s) => s.laps)) : 0;
 
-  return {
-    ruleId,
-    dailyMinutes: rule.cycle_daily_minutes ?? 180,
-    todayMinutes,
-    subjects: subjectsOut,
-    totalLaps,
-  };
+  return { ruleId, dailyMinutes: rule.cycle_daily_minutes ?? 180, todayMinutes, subjects: subjectsOut, totalLaps };
 }
 
-// Registra minutos estudados de uma matéria do ciclo (manual ou timer).
 export async function completeCycleSubject(input: {
   ruleId: string;
   itemId: string;
@@ -135,12 +128,10 @@ export async function completeCycleSubject(input: {
   source?: 'manual' | 'timer';
   clientSessionId?: string;
 }): Promise<void> {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error('Você precisa estar logado.');
+  const { supabase, userId } = await requireUser();
 
   const payload = {
-    user_id: user.id,
+    user_id: userId,
     rule_id: input.ruleId,
     item_id: input.itemId,
     subject_id: input.subjectId,
@@ -159,32 +150,24 @@ export async function completeCycleSubject(input: {
   if (error) throw new Error('Erro ao registrar: ' + error.message);
 }
 
-// Desfaz o último registro de minutos de uma matéria.
+// Usa RPC para fazer SELECT + DELETE atomicamente (evita race TOCTOU).
 export async function undoLastCompletion(ruleId: string, subjectId: string): Promise<void> {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return;
+  const ctx = await tryGetUser();
+  if (!ctx) return;
+  const { supabase } = ctx;
 
-  const { data } = await supabase
-    .from('cycle_completions')
-    .select('id')
-    .eq('user_id', user.id)
-    .eq('rule_id', ruleId)
-    .eq('subject_id', subjectId)
-    .order('created_at', { ascending: false })
-    .limit(1);
-
-  if (data?.[0]) {
-    await supabase.from('cycle_completions').delete().eq('id', data[0].id).eq('user_id', user.id);
-  }
+  const { error } = await supabase.rpc('undo_last_cycle_completion', {
+    p_rule_id: ruleId,
+    p_subject_id: subjectId,
+  });
+  if (error) throw new Error('Erro ao desfazer: ' + error.message);
 }
 
-// Dado o id de uma matéria, retorna o item do ciclo ativo dela (pra o gancho do timer).
-// Retorna null se a matéria não está num ciclo ativo.
+// Gancho do timer: retorna o item do ciclo ativo para uma matéria, se existir.
 export async function findCycleItemForSubject(subjectId: string): Promise<{ ruleId: string; itemId: string; plannedMinutes: number } | null> {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return null;
+  const ctx = await tryGetUser();
+  if (!ctx) return null;
+  const { supabase } = ctx;
 
   const ruleId = await getActiveCycleRule();
   if (!ruleId) return null;
@@ -199,72 +182,61 @@ export async function findCycleItemForSubject(subjectId: string): Promise<{ rule
   if (!items || items.length === 0) return null;
   return { ruleId, itemId: items[0].id, plannedMinutes: items[0].planned_minutes || 60 };
 }
-// Arquiva o ciclo ativo: sai do "ativo" mas guarda todo o histórico.
+
 export async function archiveCycle(ruleId: string): Promise<void> {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error('Você precisa estar logado.');
+  const { supabase, userId } = await requireUser();
 
   const { error } = await supabase
     .from('recurrence_rules')
     .update({ is_active: false })
     .eq('id', ruleId)
-    .eq('user_id', user.id);
+    .eq('user_id', userId);
   if (error) throw new Error('Erro ao arquivar ciclo: ' + error.message);
 }
 
-// Exclui um ciclo de vez (regra + itens + conclusões em cascata pelo banco).
 export async function deleteCycle(ruleId: string): Promise<void> {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error('Você precisa estar logado.');
+  const { supabase, userId } = await requireUser();
 
   const { error } = await supabase
     .from('recurrence_rules')
     .delete()
     .eq('id', ruleId)
-    .eq('user_id', user.id);
+    .eq('user_id', userId);
   if (error) throw new Error('Erro ao excluir ciclo: ' + error.message);
 }
 
-// Lista ciclos arquivados (is_active = false), do mais recente ao mais antigo.
 export async function listArchivedCycles(): Promise<{ id: string; createdAt: string }[]> {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return [];
+  const ctx = await tryGetUser();
+  if (!ctx) return [];
+  const { supabase, userId } = ctx;
 
   const { data } = await supabase
     .from('recurrence_rules')
     .select('id, created_at')
-    .eq('user_id', user.id)
+    .eq('user_id', userId)
     .eq('mode', 'ciclo')
     .eq('is_active', false)
     .order('created_at', { ascending: false });
 
   return (data ?? []).map((r) => ({ id: r.id, createdAt: r.created_at }));
 }
-// Reativa um ciclo arquivado: ele volta a ser o ativo. Se já houver um ciclo
-// ativo, ele é arquivado antes (troca — mantém o "1 ativo por vez").
-export async function reactivateCycle(ruleId: string): Promise<void> {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error('Você precisa estar logado.');
 
-  // Arquiva qualquer ciclo ativo atual (exceto o próprio, por segurança).
+export async function reactivateCycle(ruleId: string): Promise<void> {
+  const { supabase, userId } = await requireUser();
+
   const { error: archErr } = await supabase
     .from('recurrence_rules')
     .update({ is_active: false })
-    .eq('user_id', user.id)
+    .eq('user_id', userId)
     .eq('mode', 'ciclo')
     .eq('is_active', true)
     .neq('id', ruleId);
   if (archErr) throw new Error('Erro ao arquivar o ciclo atual: ' + archErr.message);
 
-  // Ativa o escolhido.
   const { error } = await supabase
     .from('recurrence_rules')
     .update({ is_active: true })
     .eq('id', ruleId)
-    .eq('user_id', user.id);
+    .eq('user_id', userId);
   if (error) throw new Error('Erro ao reativar ciclo: ' + error.message);
 }

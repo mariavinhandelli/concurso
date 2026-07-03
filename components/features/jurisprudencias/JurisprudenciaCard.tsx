@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { theme } from '@/lib/theme';
 import { EstrelasBadge } from './EstrelasBadge';
 import { getInteracao, toggleFavorito } from '@/services/jurisInteracoes.service';
@@ -13,7 +13,7 @@ const INCIDENCIA_COLOR: Record<JurisIncidencia, string> = {
   baixa: theme.inkFaint, media: theme.warn, alta: '#f97316', muito_alta: theme.danger,
 };
 const TIPO_LABEL: Record<string, string> = {
-  sumula: 'Súmula', acordao: 'Acórdão', decisao_monocratica: 'Dec. Monocrática',
+  sumula: 'Súmula', sumula_vinculante: 'Súm. Vinculante', acordao: 'Acórdão', decisao_monocratica: 'Dec. Monocrática',
   informativo: 'Informativo', outro: 'Outro',
 };
 const STATUS_LABEL: Record<string, string> = {
@@ -25,25 +25,29 @@ interface Props {
   onClick: () => void;
   onDelete?: () => void;
   canDelete?: boolean;
+  initialFavorito?: boolean;
+  reviewOverdueDays?: number;
 }
 
-export function JurisprudenciaCard({ item, onClick, onDelete, canDelete }: Props) {
-  const [favorito, setFavorito] = useState(false);
+export const JurisprudenciaCard = memo(function JurisprudenciaCard({ item, onClick, onDelete, canDelete, initialFavorito, reviewOverdueDays = 0 }: Props) {
+  const [favorito, setFavorito] = useState(initialFavorito ?? false);
   const [loadingFav, setLoadingFav] = useState(false);
 
   useEffect(() => {
+    if (initialFavorito !== undefined) return;
     getInteracao(item.id).then((i) => setFavorito(i?.favorito ?? false)).catch(() => {});
-  }, [item.id]);
+  }, [item.id, initialFavorito]);
 
   async function handleFavorito(e: React.MouseEvent) {
     e.stopPropagation();
     if (loadingFav) return;
     setLoadingFav(true);
-    setFavorito((v) => !v); // otimista
+    const novo = !favorito;
+    setFavorito(novo); // otimista
     try {
-      await toggleFavorito(item.id);
+      await toggleFavorito(item.id, novo);
     } catch {
-      setFavorito((v) => !v); // desfaz se falhar
+      setFavorito(!novo); // desfaz se falhar
     } finally {
       setLoadingFav(false);
     }
@@ -69,14 +73,19 @@ export function JurisprudenciaCard({ item, onClick, onDelete, canDelete }: Props
         <span style={styles.tribunalBadge}>{item.tribunal}</span>
         <span style={styles.tipoBadge}>{TIPO_LABEL[item.tipo] ?? item.tipo}</span>
         {item.status !== 'vigente' && (
-          <span style={{ ...styles.tipoBadge, background: 'rgba(239,68,68,.1)', color: theme.danger }}>
+          <span style={{ ...styles.tipoBadge, background: theme.dangerTint, color: theme.danger }}>
             {STATUS_LABEL[item.status]}
+          </span>
+        )}
+        {reviewOverdueDays > 0 && (
+          <span style={{ fontSize: 11, fontWeight: 700, color: theme.danger, background: theme.dangerTint, borderRadius: 6, padding: '2px 8px' }}>
+            ↻ {reviewOverdueDays}d atrasada
           </span>
         )}
         <button
           onClick={handleFavorito}
           aria-label={favorito ? 'Remover dos favoritos' : 'Marcar como favorito'}
-          style={{ marginLeft: 'auto', border: 'none', background: 'transparent', cursor: 'pointer', padding: 4, display: 'flex', flexShrink: 0 }}
+          style={{ marginLeft: 'auto', border: 'none', background: 'transparent', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, minWidth: 44, minHeight: 44 }}
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill={favorito ? '#f59e0b' : 'none'} stroke={favorito ? '#f59e0b' : theme.inkFaint} strokeWidth="1.7">
             <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z" />
@@ -128,7 +137,7 @@ export function JurisprudenciaCard({ item, onClick, onDelete, canDelete }: Props
       </div>
     </div>
   );
-}
+});
 
 const styles: Record<string, React.CSSProperties> = {
   card: {
@@ -155,5 +164,5 @@ const styles: Record<string, React.CSSProperties> = {
   },
   tag: { fontSize: 11, color: theme.tealDeep, background: theme.tealBg, borderRadius: 6, padding: '2px 7px', fontWeight: 500 },
   tagMore: { fontSize: 11, color: theme.inkFaint, fontWeight: 500 },
-  deleteBtn: { marginLeft: 'auto', border: 'none', background: 'transparent', color: theme.inkFaint, fontSize: 12, cursor: 'pointer', opacity: 0.6, padding: 4 },
+  deleteBtn: { marginLeft: 'auto', border: 'none', background: 'transparent', color: theme.inkFaint, fontSize: 12, cursor: 'pointer', opacity: 0.6, padding: 0, minWidth: 44, minHeight: 44, display: 'flex', alignItems: 'center', justifyContent: 'center' },
 };

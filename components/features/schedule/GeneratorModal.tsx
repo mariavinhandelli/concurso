@@ -4,12 +4,11 @@
 // No dia-fixo, distribui as matérias pelos dias por peso, intercalando.
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useToast } from '@/components/ui/ToastProvider';
-import {
-  buildPreview, listTargetExams, type GeneratorPreview, type GeneratorSubject,
-} from '@/services/scheduleGenerator.service';
-import { createRule, type RecurrenceItemInput, type RecurrenceMode } from '@/services/recurrence.service';
+import { buildPreview, listTargetExams, type GeneratorPreview } from '@/services/scheduleGenerator.service';
+import { createRule, type RecurrenceMode, type RecurrenceItemInput } from '@/services/recurrence.service';
+import { distribuirDiaFixo } from '@/lib/schedule/distributor';
 import { theme } from '@/lib/theme';
 import { toLocalDateString } from '@/lib/local-date';
 
@@ -23,93 +22,6 @@ const DIAS_FULL = [
   { label: 'S', weekday: 1 }, { label: 'T', weekday: 2 }, { label: 'Q', weekday: 3 },
   { label: 'Q', weekday: 4 }, { label: 'S', weekday: 5 }, { label: 'S', weekday: 6 }, { label: 'D', weekday: 0 },
 ];
-
-// Distribui as matérias pelos dias escolhidos, proporcional ao peso, intercalando.
-// Retorna os itens da regra (cada um = matéria num dia, com seu tempo).
-function distribuirDiaFixo(
-  subjects: GeneratorSubject[],
-  diasSemana: number[],
-  materiasPorDia: number,
-): RecurrenceItemInput[] {
-  if (subjects.length === 0 || diasSemana.length === 0) return [];
-
-  const totalSlots = diasSemana.length * materiasPorDia;
-  const somaPeso = subjects.reduce((s, x) => s + x.weight, 0);
-
-  // 1) Quantos slots cada matéria ganha (proporcional ao peso, piso 1).
-  const slotsPorMateria = subjects.map((s) => ({
-    subject: s,
-    slots: Math.max(1, Math.round((s.weight / somaPeso) * totalSlots)),
-  }));
-
-  // 2) Tempo por aparição: o tempo proporcional da matéria dividido pelos slots dela.
-  // Garante que pesada tenha sessão >= leve (o minutesPerCycle já é proporcional ao peso).
-  const tempoPorSlot = (sm: { subject: GeneratorSubject; slots: number }) => {
-    const base = Math.round((sm.subject.minutesPerCycle / sm.slots) / 5) * 5;
-    return Math.max(30, base); // piso 30min por sessão
-  };
-
-  // 3) Monta uma fila de aparições (cada matéria repetida 'slots' vezes).
-  // Ordena por slots desc pra distribuir as mais frequentes primeiro.
-  const fila: { subjectId: string; minutes: number }[] = [];
-  const expandidas = slotsPorMateria
-    .map((sm) => ({ id: sm.subject.subjectId, slots: sm.slots, minutes: tempoPorSlot(sm) }))
-    .sort((a, b) => b.slots - a.slots);
-
-  // round-robin: vai pegando uma de cada matéria por rodada até esgotar os slots
-  const restante = expandidas.map((e) => ({ ...e }));
-  let total = restante.reduce((s, e) => s + e.slots, 0);
-  while (total > 0) {
-    for (const e of restante) {
-      if (e.slots > 0) {
-        fila.push({ subjectId: e.id, minutes: e.minutes });
-        e.slots--;
-        total--;
-      }
-    }
-  }
-
-  // 4) Distribui a fila pelos dias, intercalando (evita mesma matéria em dia seguido).
-  // Estratégia: preenche dia a dia; em cada slot, pega da fila a próxima matéria que
-  // não seja igual à última colocada no dia anterior, quando possível.
-  const items: RecurrenceItemInput[] = [];
-  const porDia: { subjectId: string; minutes: number }[][] = diasSemana.map(() => []);
-
-  let ultimaDoDiaAnterior: string | null = null;
-  for (let d = 0; d < diasSemana.length; d++) {
-    for (let k = 0; k < materiasPorDia && fila.length > 0; k++) {
-      // procura na fila a primeira que difere da última do dia anterior (e da já posta hoje)
-      const jaHoje = new Set(porDia[d].map((x) => x.subjectId));
-      let idx = fila.findIndex((f) => f.subjectId !== ultimaDoDiaAnterior && !jaHoje.has(f.subjectId));
-      if (idx === -1) idx = fila.findIndex((f) => !jaHoje.has(f.subjectId));
-      if (idx === -1) idx = 0;
-      const escolhido = fila.splice(idx, 1)[0];
-      porDia[d].push(escolhido);
-    }
-    if (porDia[d].length > 0) ultimaDoDiaAnterior = porDia[d][porDia[d].length - 1].subjectId;
-  }
-
-  // Sobras (se a fila ainda tem itens) entram nos dias com menos carga.
-  while (fila.length > 0) {
-    let menorDia = 0;
-    for (let d = 1; d < porDia.length; d++) if (porDia[d].length < porDia[menorDia].length) menorDia = d;
-    porDia[menorDia].push(fila.shift()!);
-  }
-
-  // Converte em itens da regra.
-  for (let d = 0; d < diasSemana.length; d++) {
-    porDia[d].forEach((slot, pos) => {
-      items.push({
-        subjectId: slot.subjectId,
-        plannedMinutes: slot.minutes,
-        weekday: diasSemana[d],
-        position: pos,
-      });
-    });
-  }
-
-  return items;
-}
 
 export function GeneratorModal({ onClose, onGenerated, presetExamId }: Props) {
   const toast = useToast();
@@ -143,15 +55,21 @@ export function GeneratorModal({ onClose, onGenerated, presetExamId }: Props) {
 
   const cargaMinutos = (Number(horasDia) || 0) * 60;
 
+  const recalcGenRef = useRef(0);
+
   const recalc = useCallback(async () => {
     if (!examId || cargaMinutos <= 0) { setPreview(null); return; }
+    const gen = ++recalcGenRef.current;
     setLoading(true);
     try {
-      setPreview(await buildPreview(examId, cargaMinutos));
+      const result = await buildPreview(examId, cargaMinutos);
+      if (gen !== recalcGenRef.current) return;
+      setPreview(result);
     } catch (e) {
+      if (gen !== recalcGenRef.current) return;
       setError(e instanceof Error ? e.message : 'Erro ao calcular.');
     } finally {
-      setLoading(false);
+      if (gen === recalcGenRef.current) setLoading(false);
     }
   }, [examId, cargaMinutos]);
 
@@ -167,9 +85,12 @@ export function GeneratorModal({ onClose, onGenerated, presetExamId }: Props) {
 
   function diasUntil(): number | null {
     if (!temData || !examDate) return null;
-    const hoje = new Date(); hoje.setHours(0, 0, 0, 0);
-    const prova = new Date(examDate + 'T12:00:00');
-    const diff = Math.ceil((prova.getTime() - hoje.getTime()) / (1000 * 60 * 60 * 24));
+    const [y, m, d] = examDate.split('-').map(Number);
+    const prova = new Date(y, m - 1, d);
+    prova.setHours(0, 0, 0, 0);
+    const hoje = new Date();
+    hoje.setHours(0, 0, 0, 0);
+    const diff = Math.round((prova.getTime() - hoje.getTime()) / (1000 * 60 * 60 * 24));
     return diff > 0 ? diff : null;
   }
 

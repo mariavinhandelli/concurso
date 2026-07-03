@@ -41,7 +41,7 @@ export function EstrelasBadge({ value, onChange, size = 16, showLabel = false }:
         ))}
       </div>
       {showLabel && (
-        <span style={{ fontSize: size * 0.8, fontWeight: 600, color: '#b45309' }}>
+        <span style={{ fontSize: size * 0.8, fontWeight: 600, color: theme.warnDeep }}>
           {ESTRELAS_LABEL[value]}
         </span>
       )}

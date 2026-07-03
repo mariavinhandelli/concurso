@@ -1,66 +1,64 @@
-// app/(app)/page.tsx
 'use client';
 
-import { Suspense, useEffect, useRef, useState } from 'react';
+import { Suspense, useEffect, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { createClient } from '@/lib/supabase/client';
+import { useRouter } from 'next/navigation';
 import { theme } from '@/lib/theme';
 import { useUI } from '@/components/layout/UIContext';
-
+import { useUser } from '@/components/layout/UserContext';
 import { useTimer } from '@/components/features/timer/TimerContext';
 import { StreakBar } from '@/components/features/streak/StreakBar';
 import { NextTopicCard } from '@/components/features/home/NextTopicCard';
 import { TodayBlock } from '@/components/features/home/TodayBlock';
 import { TimePieCard } from '@/components/features/home/TimePieCard';
+import { JourneyStats } from '@/components/features/home/JourneyStats';
 import { ExamCountdown } from '@/components/features/dashboard/ExamCountdown';
 
-function HomeContent() {
+// Componente mínimo isolado no Suspense — usa useSearchParams apenas para
+// o auto-start do timer via ?topicId=, sem bloquear a renderização da Home.
+function TimerAutoStart() {
   const params = useSearchParams();
-  const timer = useTimer();
-  const { isMobile } = useUI();
-
-  const topicId = params.get('topicId');
-  const subjectId = params.get('subjectId');
+  const { status, start } = useTimer();
   const didAutoStart = useRef(false);
 
-  // Saudação com nome do perfil.
-  const [nome, setNome] = useState<string>('');
   useEffect(() => {
-    const supabase = createClient();
-    supabase.auth.getUser()
-      .then(({ data }) => {
-        const meta = data.user?.user_metadata;
-        const display = meta?.display_name || meta?.full_name || meta?.name || '';
-        setNome(display ? String(display).split(' ')[0].slice(0, 40) : '');
-      })
-      .catch(() => {});
-  }, []);
-
-  // Auto-iniciar o timer global quando vier com ?topicId= (ex: "Estudar este tópico").
-  // Só dispara se não houver sessão em andamento, e limpa a URL pra um F5 não repetir.
-  useEffect(() => {
-    if (topicId && !didAutoStart.current && timer.status === 'idle') {
+    const topicId = params.get('topicId');
+    if (topicId && !didAutoStart.current && status === 'idle') {
       didAutoStart.current = true;
-      timer.start({ mode: 'teoria', topicId, subjectId });
+      start({ mode: 'teoria', topicId, subjectId: params.get('subjectId') });
       window.history.replaceState(null, '', '/');
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [topicId, timer.status]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [params, status]);
 
-  // Data de hoje por extenso (pt-BR).
+  return null;
+}
+
+function HomeContent() {
+  const router = useRouter();
+  const { name: nome } = useUser();
+  const { isMobile } = useUI();
+
+  // Pré-carrega as rotas mais acessadas a partir da Home para navegação instantânea.
+  useEffect(() => {
+    router.prefetch('/reviews');
+    router.prefetch('/flashcards');
+  }, [router]);
+
   const hoje = new Date().toLocaleDateString('pt-BR', {
     weekday: 'long', day: 'numeric', month: 'long',
   });
 
   return (
     <div style={{ ...styles.wrap, padding: isMobile ? '20px 16px' : '34px 40px' }}>
-      {/* cabeçalho: saudação + data da prova no topo */}
+      {/* Auto-start isolado — não bloqueia o restante da página */}
+      <Suspense fallback={null}><TimerAutoStart /></Suspense>
+
       <div style={styles.topbar}>
         <div style={{ minWidth: 0 }}>
           <h1 style={{ ...styles.h1, fontSize: isMobile ? 24 : 28 }}>{nome ? `Olá, ${nome}` : 'Olá'}</h1>
           <p style={styles.sub}>{hoje.charAt(0).toUpperCase() + hoje.slice(1)}</p>
         </div>
-        {/* No mobile o countdown vira uma linha própria, ocupando 100% e podendo encolher. */}
         <div style={{
           ...styles.countdownSlot,
           flexShrink: isMobile ? 1 : 0,
@@ -71,33 +69,27 @@ function HomeContent() {
         </div>
       </div>
 
-      {/* Próximo tópico sugerido */}
-      <div style={{ marginBottom: 16 }}>
+      <TodayBlock />
+
+      <div style={{ margin: '16px 0' }}>
         <NextTopicCard />
       </div>
 
-      {/* Constância — faixa contínua de ponta a ponta, sozinha */}
-      <div style={styles.streakStrip}>
+      <div style={{ ...styles.streakStrip, marginBottom: 16 }}>
         <StreakBar />
       </div>
 
-      {/* Bloco de hoje: pendentes (revisões + flashcards) + meta e acerto */}
-      <TodayBlock />
+      <TimePieCard />
 
-      {/* Tempo de estudo por disciplina — pizza + navegação de período */}
       <div style={{ marginTop: 16 }}>
-        <TimePieCard />
+        <JourneyStats />
       </div>
     </div>
   );
 }
 
 export default function Home() {
-  return (
-    <Suspense fallback={null}>
-      <HomeContent />
-    </Suspense>
-  );
+  return <HomeContent />;
 }
 
 const styles: Record<string, React.CSSProperties> = {

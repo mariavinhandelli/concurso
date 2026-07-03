@@ -16,27 +16,38 @@ export interface SuggestedTopic {
   saude?: number;          // saúde atual, se houver
 }
 
+export interface SuggestionsResult {
+  items: SuggestedTopic[];
+  reason: 'has_suggestions' | 'no_topics' | 'all_caught_up';
+}
+
 const SAUDE_BAIXA = 50; // abaixo disso, conta como "precisa reforçar"
 
-export async function getSuggestions(): Promise<SuggestedTopic[]> {
+export async function getSuggestions(): Promise<SuggestionsResult> {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return [];
+  if (!user) return { items: [], reason: 'no_topics' };
 
-  // 1. Revisões vencidas (já vêm com overdueDays).
-  const vencidas = await listDueReviews();
+  // Fase 1 (paralela): revisões vencidas + todos os tópicos do usuário ao mesmo tempo.
+  const [vencidas, { data: topicos }] = await Promise.all([
+    listDueReviews(),
+    supabase
+      .from('topics')
+      .select('id, name, subject_id, subjects(name)')
+      .eq('user_id', user.id),
+  ]);
 
-  // 2. Saúde dos tópicos vencidos (pra enriquecer o motivo).
-  const idsVencidos = vencidas.map((v) => v.id);
-  const saudeVencidos = await getSaudeMap(idsVencidos);
+  // Fase 2 (paralela): saúde de TODOS os ids em uma única query.
+  const idsVencidos = new Set(vencidas.map((v) => v.id));
+  const idsTopicos = (topicos ?? []).map((t) => t.id).filter((id) => !idsVencidos.has(id));
+  const todosIds = [...idsVencidos, ...idsTopicos];
+  const saudeMap = todosIds.length > 0 ? await getSaudeMap(todosIds) : {};
 
   const sugestoes: SuggestedTopic[] = [];
-  const jaIncluidos = new Set<string>();
 
   // --- Bloco A: revisões vencidas (prioridade máxima) ---
   for (const v of vencidas) {
-    const saude = saudeVencidos[v.id];
-    // Urgência: dias de atraso pesam forte; saúde baixa soma um empurrão.
+    const saude = saudeMap[v.id];
     let urgencia = 1000 + v.overdueDays * 10;
     if (saude !== undefined && saude < SAUDE_BAIXA) urgencia += (SAUDE_BAIXA - saude);
 
@@ -48,37 +59,29 @@ export async function getSuggestions(): Promise<SuggestedTopic[]> {
       id: v.id, name: v.name, subjectId: v.subjectId,
       subjectName: v.subjectName, motivo, urgencia, saude,
     });
-    jaIncluidos.add(v.id);
   }
 
   // --- Bloco B: tópicos de saúde baixa SEM revisão vencida ---
-  // Busca tópicos do usuário que tenham métrica de saúde baixa.
-  const { data: topicos } = await supabase
-    .from('topics')
-    .select('id, name, subject_id, subjects(name)')
-    .eq('user_id', user.id);
+  for (const t of topicos ?? []) {
+    if (idsVencidos.has(t.id)) continue;
+    const saude = saudeMap[t.id];
+    if (saude === undefined || saude >= SAUDE_BAIXA) continue;
 
-  if (topicos && topicos.length > 0) {
-    const idsTopicos = topicos.map((t) => t.id).filter((id) => !jaIncluidos.has(id));
-    const saudeMap = await getSaudeMap(idsTopicos);
-
-    for (const t of topicos) {
-      if (jaIncluidos.has(t.id)) continue;
-      const saude = saudeMap[t.id];
-      // Só entra se tem saúde medida E está baixa.
-      if (saude === undefined || saude >= SAUDE_BAIXA) continue;
-
-      const subj = Array.isArray(t.subjects) ? t.subjects[0] : t.subjects;
-      sugestoes.push({
-        id: t.id, name: t.name, subjectId: t.subject_id,
-        subjectName: subj?.name ?? 'Matéria',
-        motivo: `saúde ${saude}, precisa reforçar`,
-        urgencia: 500 + (SAUDE_BAIXA - saude), // menor que qualquer vencida
-        saude,
-      });
-    }
+    const subj = Array.isArray(t.subjects) ? t.subjects[0] : t.subjects;
+    sugestoes.push({
+      id: t.id, name: t.name, subjectId: t.subject_id,
+      subjectName: subj?.name ?? 'Matéria',
+      motivo: (saude ?? 0) < 30 ? 'muito frágil, vale priorizar' : 'precisa de reforço',
+      urgencia: 500 + (SAUDE_BAIXA - saude),
+      saude,
+    });
   }
 
-  // Ordena por urgência (maior primeiro) e devolve no máximo 6 (1 principal + 5).
-  return sugestoes.sort((a, b) => b.urgencia - a.urgencia).slice(0, 6);
+  const hasTopics = (topicos ?? []).length > 0;
+  const sorted = sugestoes.sort((a, b) => b.urgencia - a.urgencia).slice(0, 6);
+
+  return {
+    items: sorted,
+    reason: sorted.length > 0 ? 'has_suggestions' : hasTopics ? 'all_caught_up' : 'no_topics',
+  };
 }

@@ -93,7 +93,7 @@ function FlashcardMode({ item }: { item: Jurisprudencia }) {
 
 function QuestaoMode({ item }: { item: Jurisprudencia }) {
   const [resposta, setResposta] = useState<boolean | null>(null);
-  const gabarito = item.questao_gabarito!;
+  const gabarito = item.questao_gabarito ?? false;
   const acertou = resposta !== null && resposta === gabarito;
 
   return (
@@ -126,8 +126,8 @@ function QuestaoMode({ item }: { item: Jurisprudencia }) {
             onClick={() => setResposta(true)}
             style={{
               flex: 1, padding: '12px', borderRadius: theme.radiusSm,
-              border: '0.5px solid #22c55e', background: 'rgba(34,197,94,.1)',
-              color: '#16a34a', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: theme.font,
+              border: `0.5px solid ${theme.ok}`, background: theme.okTint,
+              color: theme.okDeep, fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: theme.font,
             }}
           >
             Certo
@@ -136,7 +136,7 @@ function QuestaoMode({ item }: { item: Jurisprudencia }) {
             onClick={() => setResposta(false)}
             style={{
               flex: 1, padding: '12px', borderRadius: theme.radiusSm,
-              border: `0.5px solid ${theme.danger}`, background: 'rgba(239,68,68,.08)',
+              border: `0.5px solid ${theme.danger}`, background: theme.dangerTint,
               color: theme.danger, fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: theme.font,
             }}
           >
@@ -147,10 +147,10 @@ function QuestaoMode({ item }: { item: Jurisprudencia }) {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           <div style={{
             borderRadius: theme.radiusSm, padding: '12px 16px',
-            background: acertou ? 'rgba(34,197,94,.1)' : 'rgba(239,68,68,.08)',
-            border: `0.5px solid ${acertou ? '#22c55e' : theme.danger}`,
+            background: acertou ? theme.okTint : theme.dangerTint,
+            border: `0.5px solid ${acertou ? theme.ok : theme.danger}`,
           }}>
-            <p style={{ fontSize: 13.5, fontWeight: 700, color: acertou ? '#16a34a' : theme.danger, margin: '0 0 4px' }}>
+            <p style={{ fontSize: 13.5, fontWeight: 700, color: acertou ? theme.okDeep : theme.danger, margin: '0 0 4px' }}>
               {acertou ? '✓ Correto!' : '✗ Errado!'}
             </p>
             <p style={{ fontSize: 13, color: theme.inkSoft, margin: '0 0 4px' }}>

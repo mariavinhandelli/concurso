@@ -113,6 +113,7 @@ export const TRIBUNAIS = [
 
 export const TIPOS: { value: JurisTipo; label: string }[] = [
   { value: 'sumula', label: 'Súmula' },
+  { value: 'sumula_vinculante', label: 'Súmula Vinculante' },
   { value: 'acordao', label: 'Acórdão' },
   { value: 'decisao_monocratica', label: 'Decisão Monocrática' },
   { value: 'informativo', label: 'Informativo' },
@@ -189,9 +190,15 @@ async function requireUser() {
   return user;
 }
 
-async function fetchUserCreated(supabase: ReturnType<typeof createClient>): Promise<Jurisprudencia[]> {
+async function fetchUserCreated(supabase: ReturnType<typeof createClient>, userId: string): Promise<Jurisprudencia[]> {
   const staticIds = new Set((ALL as Jurisprudencia[]).map((j) => j.id));
-  const { data } = await supabase.from('jurisprudencias').select('*').order('created_at', { ascending: false });
+  const { data } = await supabase
+    .from('jurisprudencias')
+    .select('*')
+    .is('deleted_at', null)
+    .eq('created_by', userId)
+    .order('created_at', { ascending: false })
+    .limit(500);
   return ((data ?? []) as Jurisprudencia[]).filter((item) => !staticIds.has(item.id));
 }
 
@@ -209,7 +216,7 @@ export async function listJurisprudencias(filters: JurisFilters = {}): Promise<J
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error('Você precisa estar logado.');
-  const userItems = await fetchUserCreated(supabase);
+  const userItems = await fetchUserCreated(supabase, user.id);
   const merged = [...userItems, ...(ALL as Jurisprudencia[])];
   const filtered = applyFilters(merged, filters);
   const sortBy = filters.sortBy ?? 'relevancia';
@@ -227,7 +234,7 @@ export async function listUltimasAdicionadas(limit = 5): Promise<Jurisprudencia[
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return [];
-  const userItems = await fetchUserCreated(supabase);
+  const userItems = await fetchUserCreated(supabase, user.id);
   return [...userItems, ...(ALL as Jurisprudencia[])]
     .sort((a, b) => b.created_at.localeCompare(a.created_at))
     .slice(0, limit);
@@ -237,7 +244,7 @@ export async function listMaisCobradas(limit = 5): Promise<Jurisprudencia[]> {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return [];
-  const userItems = await fetchUserCreated(supabase);
+  const userItems = await fetchUserCreated(supabase, user.id);
   return [...userItems, ...(ALL as Jurisprudencia[])]
     .filter((j) => j.incidencia_concursos === 'alta' || j.incidencia_concursos === 'muito_alta')
     .sort((a, b) => {
@@ -253,7 +260,7 @@ export async function getJurisprudencia(id: string): Promise<Jurisprudencia | nu
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
-  const { data } = await supabase.from('jurisprudencias').select('*').eq('id', id).maybeSingle();
+  const { data } = await supabase.from('jurisprudencias').select('*').eq('id', id).is('deleted_at', null).maybeSingle();
   return (data as Jurisprudencia | null) ?? null;
 }
 
@@ -296,9 +303,10 @@ export async function deleteJurisprudencia(id: string): Promise<void> {
 
   const { error } = await supabase
     .from('jurisprudencias')
-    .delete()
+    .update({ deleted_at: new Date().toISOString() })
     .eq('id', id)
-    .eq('created_by', user.id);
+    .eq('created_by', user.id)
+    .is('deleted_at', null);
 
   if (error) throw new Error('Erro ao apagar jurisprudência: ' + error.message);
 }
@@ -307,7 +315,7 @@ export async function listDistinct(field: 'tribunal' | 'disciplina' | 'materia')
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return [];
-  const userItems = await fetchUserCreated(supabase);
+  const userItems = await fetchUserCreated(supabase, user.id);
   const values = [...userItems, ...(ALL as Jurisprudencia[])]
     .map((j) => j[field])
     .filter((v): v is string => v != null && v !== '');
@@ -350,7 +358,7 @@ export async function countByDisciplina(): Promise<Record<string, number>> {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return {};
-  const userItems = await fetchUserCreated(supabase);
+  const userItems = await fetchUserCreated(supabase, user.id);
   const counts: Record<string, number> = {};
   for (const j of [...userItems, ...(ALL as Jurisprudencia[])]) {
     const key = normalizeDisciplina(j.disciplina);

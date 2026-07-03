@@ -20,7 +20,7 @@ const INCIDENCIA_LABEL: Record<string, string> = {
   baixa: 'Baixa', media: 'Média', alta: 'Alta', muito_alta: 'Muito Alta',
 };
 const TIPO_LABEL: Record<string, string> = {
-  sumula: 'Súmula', acordao: 'Acórdão', decisao_monocratica: 'Decisão Monocrática',
+  sumula: 'Súmula', sumula_vinculante: 'Súmula Vinculante', acordao: 'Acórdão', decisao_monocratica: 'Decisão Monocrática',
   informativo: 'Informativo', outro: 'Outro',
 };
 
@@ -124,7 +124,7 @@ export default function JurisprudenciaPage() {
                 </button>
                 <button
                   onClick={handleDelete}
-                  style={{ ...styles.actionBtn, color: theme.danger }}
+                  style={styles.actionBtnDanger}
                 >
                   Apagar
                 </button>
@@ -149,7 +149,7 @@ export default function JurisprudenciaPage() {
               <span style={{ marginLeft: 'auto' }}>
                 <EstrelasBadge value={item.estrelas} size={15} showLabel />
               </span>
-              <span style={{ fontSize: 12, fontWeight: 600, color: '#b45309' }}>
+              <span style={{ fontSize: 12, fontWeight: 600, color: theme.warnDeep }}>
                 ↑ {INCIDENCIA_LABEL[item.incidencia_concursos]}
               </span>
             </div>
@@ -251,5 +251,10 @@ const styles: Record<string, React.CSSProperties> = {
     padding: '8px 16px', borderRadius: theme.radiusSm,
     border: `0.5px solid ${theme.line}`, background: theme.card,
     color: theme.inkSoft, fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit',
+  },
+  actionBtnDanger: {
+    padding: '8px 16px', borderRadius: theme.radiusSm,
+    border: `1px solid ${theme.danger}`, background: theme.dangerBg,
+    color: theme.danger, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
   },
 };

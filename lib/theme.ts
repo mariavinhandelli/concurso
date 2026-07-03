@@ -36,6 +36,12 @@ export const theme = {
 
   info: 'var(--info)',    infoBg: 'var(--info-bg)',
 
+  okDeep: 'var(--ok-deep)',
+  warnDeep: 'var(--warn-deep)',
+  dangerTint: 'var(--danger-tint)',
+  okTint: 'var(--ok-tint)',
+  warnTint: 'var(--warn-tint)',
+
   shadow: 'var(--shadow)',
   shadowCard: 'var(--shadow-card)',
   shadowHover: 'var(--shadow-hover)',
@@ -90,4 +96,16 @@ export const cardBase: React.CSSProperties = {
   border: `0.5px solid ${theme.line}`,
   borderRadius: theme.radius,
   boxShadow: theme.shadow,
+};
+
+export const btnOutline: React.CSSProperties = {
+  padding: '10px 20px', borderRadius: theme.radiusSm,
+  border: `0.5px solid ${theme.line}`, background: theme.card,
+  color: theme.inkSoft, fontSize: 14, fontWeight: 500,
+  cursor: 'pointer', fontFamily: theme.font,
+};
+
+export const kbd: React.CSSProperties = {
+  background: theme.muted, border: `0.5px solid ${theme.line}`,
+  borderRadius: 4, padding: '0px 5px', fontSize: 10.5, fontFamily: 'monospace',
 };

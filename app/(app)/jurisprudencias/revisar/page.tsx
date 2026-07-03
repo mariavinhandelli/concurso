@@ -7,23 +7,17 @@ import {
   listRevisoesHoje, submitRevisao,
   type JurisComInteracao,
 } from '@/services/jurisInteracoes.service';
-import { RATING_LABEL, type JurisRating, jurisDaysOverdue } from '@/lib/juris-review';
+import { RATING_LABEL, type JurisRating, jurisDaysOverdue, calculateNextJurisReview, fromJurisDbRow, INITIAL_JURIS_STATE } from '@/lib/juris-review';
 import { useUI } from '@/components/layout/UIContext';
 import { theme } from '@/lib/theme';
 
 const RATINGS: { key: JurisRating; color: string; bg: string }[] = [
-  { key: 'errei',   color: theme.danger,   bg: 'rgba(239,68,68,.08)' },
-  { key: 'dificil', color: '#b45309',       bg: 'rgba(245,158,11,.1)' },
-  { key: 'ok',      color: theme.tealDeep,  bg: theme.tealBg },
-  { key: 'dominei', color: '#16a34a',       bg: 'rgba(34,197,94,.1)' },
+  { key: 'errei',   color: theme.danger,   bg: theme.dangerTint },
+  { key: 'dificil', color: theme.warnDeep, bg: theme.warnTint },
+  { key: 'ok',      color: theme.tealDeep, bg: theme.tealBg },
+  { key: 'dominei', color: theme.okDeep,   bg: theme.okTint },
 ];
 
-const NEXT_INTERVAL: Record<JurisRating, string> = {
-  errei: '→ volta em 1 dia',
-  dificil: '→ volta em 3 dias',
-  ok: '→ volta em 15 dias',
-  dominei: '→ volta em ~45 dias',
-};
 
 export default function RevisarPage() {
   const router = useRouter();
@@ -49,11 +43,16 @@ export default function RevisarPage() {
   const current = items?.[idx] ?? null;
   const overdue = current ? jurisDaysOverdue(current.interacao?.next_review_date ?? null) : 0;
 
+  function handleSkip() {
+    if (idx + 1 >= total) setDone(true);
+    else { setIdx((v) => v + 1); setRevealed(false); }
+  }
+
   async function handleRate(rating: JurisRating) {
     if (!current || submitting) return;
     setSubmitting(true);
     try {
-      await submitRevisao(current.id, rating);
+      await submitRevisao(current.id, rating, current.interacao);
       if (idx + 1 >= total) {
         setDone(true);
       } else {
@@ -62,6 +61,8 @@ export default function RevisarPage() {
       }
     } catch (e) {
       toast.error(e instanceof Error ? e.message : 'Erro ao salvar avaliação. Tente novamente.');
+      // Reseta para o estado "não revelado" para que o retry preserve a etapa de memória ativa.
+      setRevealed(false);
     } finally { setSubmitting(false); }
   }
 
@@ -115,7 +116,7 @@ export default function RevisarPage() {
 
       {/* Barra de progresso */}
       <div style={{ height: 4, background: theme.line, borderRadius: 99, marginBottom: 28, overflow: 'hidden' }}>
-        <div style={{ height: '100%', background: theme.teal, borderRadius: 99, width: `${((idx) / total) * 100}%`, transition: 'width .3s' }} />
+        <div style={{ height: '100%', background: theme.teal, borderRadius: 99, width: `${((idx + 1) / total) * 100}%`, transition: 'width .3s' }} />
       </div>
 
       {current && (
@@ -125,7 +126,7 @@ export default function RevisarPage() {
             <span style={styles.badge(theme.teal, '#fff')}>{current.tribunal}</span>
             <span style={styles.badge('rgba(15,23,42,.08)', theme.inkSoft)}>{current.disciplina}</span>
             {overdue > 0 && (
-              <span style={styles.badge('rgba(239,68,68,.1)', theme.danger)}>
+              <span style={styles.badge(theme.dangerTint, theme.danger)}>
                 {overdue}d atrasada
               </span>
             )}
@@ -159,7 +160,7 @@ export default function RevisarPage() {
                   </div>
                 )}
                 {current.pegadinhas && (
-                  <div style={{ background: 'rgba(239,68,68,.06)', borderRadius: 10, padding: '12px 14px' }}>
+                  <div style={{ background: theme.dangerTint, borderRadius: 10, padding: '12px 14px' }}>
                     <p style={{ ...styles.sectionLabel, color: theme.danger }}>Pegadinha</p>
                     <p style={styles.sectionText}>{current.pegadinhas}</p>
                   </div>
@@ -177,6 +178,12 @@ export default function RevisarPage() {
               <p style={{ fontSize: 12, color: theme.inkFaint, marginTop: 12 }}>
                 Clique para revelar o conteúdo completo antes de avaliar
               </p>
+              <button
+                onClick={handleSkip}
+                style={{ marginTop: 8, border: 'none', background: 'transparent', color: theme.inkFaint, fontSize: 12.5, cursor: 'pointer', fontFamily: 'inherit' }}
+              >
+                Pular por agora →
+              </button>
             </div>
           ) : (
             <div style={{ marginTop: 20 }}>
@@ -184,7 +191,12 @@ export default function RevisarPage() {
                 Como foi?
               </p>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
-                {RATINGS.map(({ key, color, bg }) => (
+                {RATINGS.map(({ key, color, bg }) => {
+                  const state = current?.interacao
+                    ? fromJurisDbRow(current.interacao)
+                    : INITIAL_JURIS_STATE;
+                  const nextDays = calculateNextJurisReview(state, key).intervalDays;
+                  return (
                   <button
                     key={key}
                     onClick={() => handleRate(key)}
@@ -198,10 +210,11 @@ export default function RevisarPage() {
                   >
                     {RATING_LABEL[key]}
                     <span style={{ fontSize: 10.5, fontWeight: 400, opacity: 0.75 }}>
-                      {NEXT_INTERVAL[key]}
+                      → volta em {nextDays} {nextDays === 1 ? 'dia' : 'dias'}
                     </span>
                   </button>
-                ))}
+                  );
+                })}
               </div>
               <div style={{ textAlign: 'center', marginTop: 14 }}>
                 <button

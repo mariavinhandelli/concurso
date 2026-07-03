@@ -69,6 +69,11 @@
   --review-medium: #FEF3C7; --review-medium-text: #92400E;
   --review-hard: #FEE2E2;   --review-hard-text: #991B1B;
   --gradient-brand: linear-gradient(135deg, #22C55E 0%, #6EE7B7 45%, #6366F1 100%);
+  --ok-deep: #16a34a;
+  --warn-deep: #b45309;
+  --danger-tint: rgba(239,68,68,.08);
+  --ok-tint: rgba(34,197,94,.08);
+  --warn-tint: rgba(245,158,11,.08);
 }
 
 /* ---- Focali escuro ---- */
@@ -103,6 +108,11 @@
   --shadow-hover: 0 10px 32px rgba(0,0,0,.50);
   --shadow-card: 0 8px 24px rgba(0,0,0,.35);
   --shadow-modal: 0 18px 48px rgba(0,0,0,.50);
+  --ok-deep: #86efac;
+  --warn-deep: #fcd34d;
+  --danger-tint: rgba(248,113,113,.12);
+  --ok-tint: rgba(74,222,128,.12);
+  --warn-tint: rgba(251,191,36,.12);
 }
 
 /* ---- Rosé claro ---- */
@@ -167,6 +177,11 @@
 
   --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 30px -12px rgba(0,0,0,.5);
   --shadow-hover: 0 2px 6px rgba(0,0,0,.4), 0 18px 44px -18px rgba(0,0,0,.6);
+  --ok-deep: #86efac;
+  --warn-deep: #fde68a;
+  --danger-tint: rgba(240,138,126,.12);
+  --ok-tint: rgba(74,222,128,.12);
+  --warn-tint: rgba(251,191,107,.12);
 }
 
 /* ---- Menta claro ---- */
@@ -231,6 +246,11 @@
 
   --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 30px -12px rgba(0,0,0,.5);
   --shadow-hover: 0 2px 6px rgba(0,0,0,.4), 0 18px 44px -18px rgba(0,0,0,.6);
+  --ok-deep: #86efac;
+  --warn-deep: #fde68a;
+  --danger-tint: rgba(240,138,126,.12);
+  --ok-tint: rgba(74,222,128,.12);
+  --warn-tint: rgba(251,191,107,.12);
 }
 
 /* ---- Grafite claro (mono sóbrio) ---- */
@@ -295,6 +315,11 @@
 
   --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 30px -12px rgba(0,0,0,.5);
   --shadow-hover: 0 2px 6px rgba(0,0,0,.4), 0 18px 44px -18px rgba(0,0,0,.6);
+  --ok-deep: #86efac;
+  --warn-deep: #fde68a;
+  --danger-tint: rgba(240,138,126,.12);
+  --ok-tint: rgba(74,222,128,.12);
+  --warn-tint: rgba(251,191,107,.12);
 }
 /* ===================================================================
    SIDEBAR — variáveis dedicadas por paleta × modo.
@@ -474,6 +499,11 @@ img, video, canvas {
   to { transform: rotate(360deg); }
 }
 
+@keyframes skeleton-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.45; }
+}
+
 :where(a, button, input, select, textarea, [tabindex]):focus-visible {
   outline: 3px solid var(--teal-soft) !important;
   outline-offset: 2px;
@@ -489,11 +519,75 @@ img, video, canvas {
   50% { opacity: 0.4; }
 }
 
+@keyframes review-card-in {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.review-card-enter {
+  animation: review-card-in 0.18s ease forwards;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     scroll-behavior: auto !important;
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+/* ===================================================================
+   SHELL RESPONSIVO — media queries eliminam FOIC de layout.
+   Mobile  < 768px  → sidebar vira drawer off-screen; conteúdo full-width.
+   Tablet 768–899px → sidebar colapsa para 72 px (ícones) automaticamente.
+   Desktop ≥ 900px  → sidebar com largura controlada pelo estado JS.
+   =================================================================== */
+
+/* ── Hambúrguer oculto por padrão (aparece só em mobile via media query) ── */
+@media (min-width: 768px) {
+  .topbar-hamburger { display: none !important; }
+}
+
+/* ── Mobile (< 768px) ── */
+@media (max-width: 767px) {
+  /* Sidebar: drawer off-screen por padrão — sem flash no SSR */
+  .app-sidebar         { transform: translateX(-100%); }
+  .app-sidebar.mobile-open { transform: translateX(0); }
+
+  /* Conteúdo ocupa 100 % da largura — sem margem lateral do drawer */
+  .shell-main { margin-left: 0 !important; }
+
+  /* Topbar: hambúrguer visível, "Registrar" vira só ícone */
+  .topbar-hamburger { display: grid !important; }
+  .topbar-add-label { display: none; }
+  .topbar-add-btn   { padding: 0 !important; width: 38px !important; }
+  .topbar-bar       { padding-left: 16px !important; padding-right: 16px !important; }
+
+  /* Cronograma: grade semanal oculta desde o SSR; lista sempre visível */
+  .schedule-week-grid { display: none !important; }
+  .schedule-list-view { display: flex !important; flex-direction: column; }
+
+  /* Botão "Grade" não existe em mobile */
+  .schedule-grade-btn { display: none !important; }
+}
+
+/* ── Tablet (768–899px): sidebar icon-only automático ── */
+@media (min-width: 768px) and (max-width: 899px) {
+  /* Sidebar reduzida a 72 px (ícones); labels e seta de colapso ocultos */
+  .app-sidebar          { width: 72px !important; overflow: hidden; }
+  .sidebar-label        { display: none; }
+  .sidebar-item         { justify-content: center !important; }
+  .sidebar-brand        { justify-content: center !important; }
+  .sidebar-brand-name   { display: none; }
+  .sidebar-collapse-btn { display: none; }
+
+  /* Conteúdo empurrado para depois dos 72 px */
+  .shell-main { margin-left: 72px !important; }
+
+  /* Grade semanal: scroll horizontal em vez de quebrar layout */
+  .schedule-week-grid {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
 }

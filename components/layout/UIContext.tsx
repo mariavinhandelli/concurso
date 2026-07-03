@@ -30,8 +30,6 @@ interface UIState {
   theme: Mode;
   palette: Palette;
   setPalette: (p: Palette) => void;
-  avatarUrl: string | null;
-  setAvatarUrl: (url: string | null) => void;
   // --- mobile / drawer ---
   isMobile: boolean;
   mobileOpen: boolean;
@@ -51,7 +49,6 @@ export function UIProvider({ children }: { children: ReactNode }) {
   const [collapsed, setCollapsed] = useState(false);
   const [mode, setMode] = useState<Mode>('light');
   const [palette, setPaletteState] = useState<Palette>('petroleo');
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 
   // Nasce `false` no servidor e no 1º render do cliente (HTML idêntico, sem mismatch).
   // O valor real é lido no useEffect abaixo, já no navegador.
@@ -137,7 +134,6 @@ export function UIProvider({ children }: { children: ReactNode }) {
         collapsed, toggleCollapsed,
         mode, toggleTheme, theme: mode,
         palette, setPalette,
-        avatarUrl, setAvatarUrl,
         isMobile, mobileOpen, setMobileOpen, toggleMobile,
       }}
     >

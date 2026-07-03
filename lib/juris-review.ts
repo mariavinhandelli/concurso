@@ -3,17 +3,18 @@
 // crescendo em repetições consecutivas. Mais simples que o SM-2 (lib/spaced-repetition.ts)
 // porque o usuário pediu marcos explícitos (1 / 3 / 15 / 45 dias).
 import { startOfLocalDay, toLocalDateString } from '@/lib/local-date';
+import type { BaseReviewState, BaseScheduleResult } from '@/lib/spaced-repetition-algorithm';
 
 export type JurisRating = 'errei' | 'dificil' | 'ok' | 'dominei';
 
-export interface JurisReviewState {
-  intervalDays: number;
-  repetitions: number; // repetições consecutivas sem "errei"
+// JurisReviewState já satisfaz BaseReviewState (mesma forma: intervalDays + repetitions).
+export interface JurisReviewState extends BaseReviewState {
+  // intervalDays, repetitions herdados de BaseReviewState
 }
 
-export interface JurisReviewResult extends JurisReviewState {
-  nextReviewDate: Date;
-  lastReviewed: Date;
+export interface JurisReviewResult extends BaseScheduleResult, JurisReviewState {
+  // nextReviewDate, lastReviewed de BaseScheduleResult
+  // intervalDays, repetitions de JurisReviewState
 }
 
 export const INITIAL_JURIS_STATE: JurisReviewState = { intervalDays: 0, repetitions: 0 };
@@ -54,7 +55,7 @@ export function calculateNextJurisReview(
     repetitions += 1;
     intervalDays = repetitions <= 1
       ? BASE_INTERVAL[rating]
-      : Math.min(MAX_INTERVAL_DAYS, Math.round(state.intervalDays * GROWTH_FACTOR[rating]));
+      : Math.min(MAX_INTERVAL_DAYS, Math.max(1, Math.round(state.intervalDays * GROWTH_FACTOR[rating])));
   }
 
   return {

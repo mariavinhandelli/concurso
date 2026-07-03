@@ -1,15 +1,27 @@
-// components/features/home/TimePieCard.tsx
-// Tempo de estudo por disciplina: pizza + lista, com abas (dia/semana/mês/total)
-// e navegação < > entre períodos (livre pro passado, bloqueando o futuro).
 'use client';
 
-import { useEffect, useState } from 'react';
-import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
+import { memo, useState } from 'react';
+import dynamic from 'next/dynamic';
+import { useQuery } from '@tanstack/react-query';
 import {
   getTimeByCategory, type PeriodView, type TimeByCategoryResult,
 } from '@/services/timeByCategory.service';
 import { theme } from '@/lib/theme';
 import { useUI } from '@/components/layout/UIContext';
+import { ManualLogModal } from '@/components/features/timer/ManualLogModal';
+
+// Recharts (~200 KB) carregado sob demanda — fora do bundle inicial da Home.
+const PieChartSection = dynamic(
+  () => import('./PieChartSection').then((m) => ({ default: m.PieChartSection })),
+  {
+    ssr: false,
+    loading: () => (
+      <div style={{ height: 230, display: 'grid', placeItems: 'center' }}>
+        <p style={{ fontSize: 14, color: theme.inkFaint, margin: 0 }}>Carregando gráfico…</p>
+      </div>
+    ),
+  },
+);
 
 const ABAS: { key: PeriodView; label: string }[] = [
   { key: 'dia', label: 'Diário' },
@@ -18,30 +30,31 @@ const ABAS: { key: PeriodView; label: string }[] = [
   { key: 'total', label: 'Total' },
 ];
 
-function fmtMin(min: number): string {
-  const h = Math.floor(min / 60);
-  const m = min % 60;
-  if (h === 0) return `${m}min`;
-  return m > 0 ? `${h}h${String(m).padStart(2, '0')}min` : `${h}h`;
-}
+const VALID_VIEWS: PeriodView[] = ['dia', 'semana', 'mes', 'total'];
 
-export function TimePieCard() {
+export const TimePieCard = memo(function TimePieCard() {
   const { isMobile } = useUI();
-  const [view, setView] = useState<PeriodView>('dia');
+  // P20 — persistir última aba selecionada; default "semana" (mais informativo que "dia")
+  const [view, setView] = useState<PeriodView>(() => {
+    if (typeof window === 'undefined') return 'semana';
+    const saved = localStorage.getItem('pie:view') as PeriodView | null;
+    return VALID_VIEWS.includes(saved!) ? saved! : 'semana';
+  });
   const [offset, setOffset] = useState(0);
-  const [data, setData] = useState<TimeByCategoryResult | null>(null);
+  const [logOpen, setLogOpen] = useState(false);
 
-  useEffect(() => {
-    getTimeByCategory(view, offset).then(setData).catch(() => setData(null));
-  }, [view, offset]);
+  const { data, isError: loadError } = useQuery<TimeByCategoryResult>({
+    queryKey: ['time-by-category', view, offset],
+    queryFn: () => getTimeByCategory(view, offset),
+  });
 
-  // Ao trocar de aba, volta pro período atual.
   function trocarView(v: PeriodView) {
     setView(v);
     setOffset(0);
+    localStorage.setItem('pie:view', v);
   }
 
-  const temDados = data && data.slices.length > 0;
+  const temDados = !loadError && data && data.slices.length > 0;
 
   return (
     <div style={styles.card}>
@@ -49,7 +62,6 @@ export function TimePieCard() {
         <span style={styles.eyebrow}>Tempo de estudo</span>
       </div>
 
-      {/* Abas de visualização */}
       <div style={styles.tabs}>
         {ABAS.map((a) => (
           <button
@@ -67,7 +79,6 @@ export function TimePieCard() {
         ))}
       </div>
 
-      {/* Navegação de período (some no Total) */}
       {view !== 'total' && (
         <div style={styles.nav}>
           <button style={styles.navBtn} onClick={() => setOffset((o) => o - 1)} aria-label="Período anterior">
@@ -85,50 +96,26 @@ export function TimePieCard() {
         </div>
       )}
 
-      {!temDados ? (
-        <p style={styles.empty}>Nenhum estudo registrado neste período.</p>
+      {loadError ? (
+        <p style={{ ...styles.empty, color: theme.danger }}>Não foi possível carregar os dados. Tente novamente.</p>
+      ) : !temDados ? (
+        /* P11 — estado vazio com CTA */
+        <div style={styles.emptyWrap}>
+          <p style={styles.empty}>Nenhum estudo registrado neste período.</p>
+          <button style={styles.emptyBtn} onClick={() => setLogOpen(true)}>
+            Registrar estudo →
+          </button>
+        </div>
       ) : (
-        <>
-          {/* Pizza com total no centro */}
-          <div style={styles.pieWrap}>
-            <ResponsiveContainer width="100%" height={200}>
-              <PieChart>
-                <Pie
-                  data={data!.slices}
-                  dataKey="minutes"
-                  nameKey="subjectName"
-                  cx="50%" cy="50%"
-                  innerRadius={58} outerRadius={88}
-                  paddingAngle={2}
-                  stroke="none"
-                >
-                  {data!.slices.map((s) => <Cell key={s.subjectId} fill={s.color} />)}
-                </Pie>
-              </PieChart>
-            </ResponsiveContainer>
-            <div style={styles.centerLabel}>
-              <div style={styles.centerValue}>{fmtMin(data!.totalMinutes)}</div>
-              <div style={styles.centerSub}>total</div>
-            </div>
-          </div>
+        <PieChartSection slices={data!.slices} totalMinutes={data!.totalMinutes} />
+      )}
 
-          {/* Lista de disciplinas */}
-          <div style={styles.list}>
-            {data!.slices.map((s) => (
-              <div key={s.subjectId} style={styles.listRow}>
-                <span style={styles.listLeft}>
-                  <span style={{ ...styles.dot, background: s.color }} />
-                  {s.subjectName}
-                </span>
-                <span style={styles.listTime}>{fmtMin(s.minutes)}</span>
-              </div>
-            ))}
-          </div>
-        </>
+      {logOpen && (
+        <ManualLogModal onClose={() => setLogOpen(false)} onSaved={() => setLogOpen(false)} />
       )}
     </div>
   );
-}
+});
 
 const styles: Record<string, React.CSSProperties> = {
   card: { background: theme.card, border: `0.5px solid ${theme.line}`, borderRadius: theme.radius, boxShadow: theme.shadow, padding: 18, fontFamily: theme.font, minWidth: 0 },
@@ -141,14 +128,7 @@ const styles: Record<string, React.CSSProperties> = {
   navBtn: { width: 30, height: 30, borderRadius: 8, border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.inkSoft, display: 'grid', placeItems: 'center', cursor: 'pointer', flexShrink: 0 },
   navBtnOff: { opacity: 0.3, cursor: 'not-allowed' },
   navLabel: { fontSize: 14, fontWeight: 600, color: theme.ink, minWidth: 120, textAlign: 'center', textTransform: 'capitalize' },
-  empty: { fontSize: 14, color: theme.inkFaint, textAlign: 'center', padding: '30px 0' },
-  pieWrap: { position: 'relative', margin: '8px 0 16px' },
-  centerLabel: { position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center', pointerEvents: 'none' },
-  centerValue: { fontSize: 22, fontWeight: 700, color: theme.ink, letterSpacing: -0.5 },
-  centerSub: { fontSize: 12, color: theme.inkFaint },
-  list: { display: 'flex', flexDirection: 'column', gap: 8, borderTop: `0.5px solid ${theme.line}`, paddingTop: 14 },
-  listRow: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 14, gap: 12 },
-  listLeft: { display: 'flex', alignItems: 'center', gap: 9, color: theme.ink, minWidth: 0 },
-  dot: { width: 11, height: 11, borderRadius: 3, flexShrink: 0 },
-  listTime: { color: theme.inkSoft, fontWeight: 600, fontVariantNumeric: 'tabular-nums', flexShrink: 0 },
+  emptyWrap: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, padding: '30px 0' },
+  empty: { fontSize: 14, color: theme.inkFaint, textAlign: 'center', margin: 0 },
+  emptyBtn: { border: 'none', background: 'transparent', color: theme.teal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', padding: 0 },
 };

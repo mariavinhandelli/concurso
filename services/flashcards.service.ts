@@ -1,18 +1,22 @@
 // services/flashcards.service.ts
-// CRUD + revisão SM-2 de flashcards. Reusa o motor de spaced-repetition.
+// Camada de aplicação: orquestra auth, repositório e algoritmo SM-2.
+// Sem acesso direto ao Supabase. Sem duplicação de auth.
 
-import { createClient } from '@/lib/supabase/client';
-import {
-  calculateNextReview, fromDbRow, toDbRow, isDue, daysOverdue,
-  type RecallGrade,
-} from '@/lib/spaced-repetition';
+import { requireUser, tryGetUser } from '@/lib/supabase/requireUser';
+import { calculateNextReview, daysOverdue, type RecallGrade } from '@/lib/spaced-repetition';
+import { fromDbRow, toDbRow } from '@/lib/spaced-repetition.mapper';
 import { localDateInDays, toLocalDateString } from '@/lib/local-date';
 import { getArchivedSubjectIds } from '@/services/catalog.service';
+import * as repo from '@/services/flashcards.repository';
 
 export type ReviewRating = 'dificil' | 'intermediario' | 'facil';
 const RATING_TO_GRADE: Record<ReviewRating, RecallGrade> = {
   dificil: 'dificil', intermediario: 'bom', facil: 'facil',
 };
+
+const DAILY_NEW_LIMIT = 20;
+
+// ---------- Tipos de domínio ----------
 
 export interface Flashcard {
   id: string;
@@ -41,24 +45,47 @@ export interface DueCard extends Flashcard {
   overdueDays: number;
 }
 
+export interface QueueCard {
+  id: string;
+  front: string;
+  back: string;
+  subjectName?: string;
+  subjectColor?: string;
+  isNew?: boolean;
+  easeFactor?: number;
+  intervalDays?: number;
+  repetitions?: number;
+}
+
+// ---------- Helpers privados ----------
+
+function toQueueCard(c: repo.FlashcardQueueRow): QueueCard {
+  const subj = Array.isArray(c.subjects) ? c.subjects[0] : c.subjects;
+  return {
+    id: c.id, front: c.front, back: c.back,
+    subjectName: subj?.name ?? 'Sem matéria',
+    subjectColor: subj?.color ?? '#C9B8DD',
+    isNew: c.next_review_date === null,
+    easeFactor: c.ease_factor ?? undefined,
+    intervalDays: c.interval_days ?? undefined,
+    repetitions: c.repetitions ?? undefined,
+  };
+}
+
+// ---------- Mutations ----------
+
 export async function createFlashcard(input: FlashcardInput): Promise<void> {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error('Você precisa estar logado.');
+  const { supabase, userId } = await requireUser();
 
-  let reviewFields = {};
-  if (input.addToReview) {
-    reviewFields = {
-      is_review_active: true,
-      next_review_date: localDateInDays(1),
-      interval_days: 1,
-      repetitions: 0,
-      ease_factor: 2.5,
-    };
-  }
+  const reviewFields = input.addToReview ? {
+    is_review_active: true,
+    next_review_date: localDateInDays(1),
+    interval_days: 1,
+    repetitions: 0,
+    ease_factor: 2.5,
+  } : {};
 
-  const { error } = await supabase.from('flashcards').insert({
-    user_id: user.id,
+  await repo.insertFlashcard(supabase, userId, {
     front: input.front,
     back: input.back,
     topic_id: input.topicId,
@@ -66,84 +93,81 @@ export async function createFlashcard(input: FlashcardInput): Promise<void> {
     source_error_id: input.sourceErrorId,
     ...reviewFields,
   });
-
-  if (error) throw new Error('Erro ao criar flashcard: ' + error.message);
 }
 
-// Lista cards, com filtros opcionais (para a aba "Meus Cards").
+export async function submitCardReview(cardId: string, rating: ReviewRating): Promise<void> {
+  const { supabase, userId } = await requireUser();
+  const row = await repo.fetchCardSRState(supabase, userId, cardId);
+  const result = calculateNextReview(fromDbRow(row), RATING_TO_GRADE[rating]);
+  await repo.updateFlashcard(supabase, userId, cardId, { ...toDbRow(result), is_review_active: true });
+}
+
+export async function activateCardReview(cardId: string): Promise<void> {
+  const { supabase, userId } = await requireUser();
+  await repo.updateFlashcard(supabase, userId, cardId, {
+    is_review_active: true,
+    next_review_date: localDateInDays(1),
+    interval_days: 1,
+    repetitions: 0,
+    ease_factor: 2.5,
+  });
+}
+
+export async function updateFlashcardContent(id: string, front: string, back: string): Promise<void> {
+  const { supabase, userId } = await requireUser();
+  await repo.updateFlashcard(supabase, userId, id, { front: front.trim(), back: back.trim() });
+}
+
+export async function deleteFlashcard(id: string): Promise<void> {
+  const { supabase, userId } = await requireUser();
+  await repo.deleteFlashcard(supabase, userId, id);
+}
+
+// ---------- Queries ----------
+
 export async function listFlashcards(filters?: {
   subjectId?: string | null;
   topicId?: string | null;
 }): Promise<Flashcard[]> {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return [];
-
-  let query = supabase
-    .from('flashcards')
-    .select('id, front, back, topic_id, subject_id, source_error_id, is_review_active, next_review_date, created_at')
-    .eq('user_id', user.id)
-    .order('created_at', { ascending: false });
-
-  if (filters?.subjectId) query = query.eq('subject_id', filters.subjectId);
-  if (filters?.topicId === null) query = query.is('topic_id', null);
-  else if (filters?.topicId) query = query.eq('topic_id', filters.topicId);
-
-  const { data, error } = await query;
-  if (error) throw new Error('Erro ao listar flashcards: ' + error.message);
-  return data ?? [];
+  const auth = await tryGetUser();
+  if (!auth) return [];
+  return repo.fetchFlashcards(auth.supabase, auth.userId, filters);
 }
 
-// Conta flashcards por matéria (para navegação nível 1).
 export async function countFlashcardsBySubject(): Promise<Record<string, number>> {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return {};
-
-  const { data, error } = await supabase
-    .from('flashcards')
-    .select('subject_id')
-    .eq('user_id', user.id);
-
-  if (error) throw new Error('Erro ao contar: ' + error.message);
+  const auth = await tryGetUser();
+  if (!auth) return {};
+  const rows = await repo.fetchSubjectIds(auth.supabase, auth.userId);
   const counts: Record<string, number> = {};
-  for (const row of data ?? []) {
+  for (const row of rows) {
     const key = row.subject_id ?? 'none';
     counts[key] = (counts[key] ?? 0) + 1;
   }
   return counts;
 }
 
-// Cards que vencem hoje (modo revisar + hub).
 export async function listDueCards(): Promise<DueCard[]> {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return [];
+  const auth = await tryGetUser();
+  if (!auth) return [];
+  const today = toLocalDateString();
+  const [archivedIds, rows] = await Promise.all([
+    getArchivedSubjectIds(),
+    repo.fetchDueCardsWithSubject(auth.supabase, auth.userId, today),
+  ]);
+  const excluded = new Set(archivedIds);
+  const filtered = excluded.size > 0
+    ? rows.filter(c => !c.subject_id || !excluded.has(c.subject_id))
+    : rows;
 
-  const archivedIds = await getArchivedSubjectIds();
-
-  const { data: allCards, error } = await supabase
-    .from('flashcards')
-    .select('id, front, back, topic_id, subject_id, source_error_id, is_review_active, next_review_date, created_at, subjects(name, color)')
-    .eq('user_id', user.id)
-    .eq('is_review_active', true)
-    .order('next_review_date', { ascending: true });
-
-  // Filtra matérias arquivadas em JS — evita type-depth errors do Supabase builder
-  const archivedSet = new Set(archivedIds);
-  const data = archivedIds.length > 0
-    ? (allCards ?? []).filter(c => !c.subject_id || !archivedSet.has(c.subject_id))
-    : (allCards ?? []);
-  if (error) throw new Error('Erro ao listar revisões: ' + error.message);
-
-  return (data ?? [])
-    .filter((c) => isDue(c.next_review_date))
-    .map((c) => {
+  return filtered.map(c => {
       const subj = Array.isArray(c.subjects) ? c.subjects[0] : c.subjects;
       return {
         id: c.id, front: c.front, back: c.back,
-        topic_id: c.topic_id, subject_id: c.subject_id, source_error_id: c.source_error_id,
-        is_review_active: c.is_review_active, next_review_date: c.next_review_date, created_at: c.created_at,
+        topic_id: c.topic_id, subject_id: c.subject_id,
+        source_error_id: c.source_error_id,
+        is_review_active: c.is_review_active,
+        next_review_date: c.next_review_date,
+        created_at: c.created_at,
         subjectName: subj?.name ?? 'Sem matéria',
         subjectColor: subj?.color ?? '#C9B8DD',
         overdueDays: daysOverdue(c.next_review_date),
@@ -152,176 +176,70 @@ export async function listDueCards(): Promise<DueCard[]> {
 }
 
 export async function countDueCards(): Promise<number> {
-  const items = await listDueCards();
-  return items.length;
-}
-
-// Avalia uma revisão de flashcard (mesmo SM-2 dos tópicos).
-export async function submitCardReview(cardId: string, rating: ReviewRating): Promise<void> {
-  const supabase = createClient();
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
-  if (authError || !user) throw new Error('Você precisa estar logado.');
-
-  const { data: card, error: readError } = await supabase
-    .from('flashcards')
-    .select('ease_factor, interval_days, repetitions')
-    .eq('id', cardId)
-    .eq('user_id', user.id)
-    .single();
-
-  if (readError || !card) throw new Error('Erro ao ler card: ' + readError?.message);
-
-  const result = calculateNextReview(fromDbRow(card), RATING_TO_GRADE[rating]);
-  const updates = { ...toDbRow(result), is_review_active: true };
-  const { error } = await supabase
-    .from('flashcards')
-    .update(updates)
-    .eq('id', cardId)
-    .eq('user_id', user.id);
-  if (error) throw new Error('Erro ao salvar revisão: ' + error.message);
-}
-
-// Ativa revisão de um card existente (para cards criados sem revisão).
-export async function activateCardReview(cardId: string): Promise<void> {
-  const supabase = createClient();
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
-  if (authError || !user) throw new Error('Você precisa estar logado.');
-
-  const { error } = await supabase.from('flashcards').update({
-    is_review_active: true,
-    next_review_date: localDateInDays(1),
-    interval_days: 1, repetitions: 0, ease_factor: 2.5,
-  }).eq('id', cardId).eq('user_id', user.id);
-  if (error) throw new Error('Erro ao ativar revisão: ' + error.message);
-}
-
-export async function deleteFlashcard(id: string): Promise<void> {
-  const supabase = createClient();
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
-  if (authError || !user) throw new Error('Você precisa estar logado.');
-
-  const { error } = await supabase
-    .from('flashcards')
-    .delete()
-    .eq('id', id)
-    .eq('user_id', user.id);
-  if (error) throw new Error('Erro ao apagar flashcard: ' + error.message);
+  const auth = await tryGetUser();
+  if (!auth) return 0;
+  const archivedIds = await getArchivedSubjectIds();
+  return repo.countDueFlashcards(auth.supabase, auth.userId, toLocalDateString(), archivedIds);
 }
 
 export async function countFlashcardsByError(errorId: string): Promise<number> {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return 0;
-
-  const { count, error } = await supabase
-    .from('flashcards')
-    .select('id', { count: 'exact', head: true })
-    .eq('source_error_id', errorId)
-    .eq('user_id', user.id);
-  if (error) return 0;
-  return count ?? 0;
-}
-// ---------- MONTAGEM DA FILA DE ESTUDO (estilo Anki) ----------
-
-const DAILY_NEW_LIMIT = 20;
-
-export interface QueueCard {
-  id: string;
-  front: string;
-  back: string;
-  subjectName?: string;
-  subjectColor?: string;
-  isNew?: boolean;
+  const auth = await tryGetUser();
+  if (!auth) return 0;
+  return repo.countFlashcardsByError(auth.supabase, auth.userId, errorId);
 }
 
-// Converte uma linha do banco em QueueCard.
-function toQueueCard(c: {
-  id: string; front: string; back: string;
-  next_review_date: string | null;
-  subjects?: { name: string; color: string } | { name: string; color: string }[] | null;
-}): QueueCard {
-  const subj = Array.isArray(c.subjects) ? c.subjects[0] : c.subjects;
-  return {
-    id: c.id, front: c.front, back: c.back,
-    subjectName: subj?.name ?? 'Sem matéria',
-    subjectColor: subj?.color ?? '#C9B8DD',
-    isNew: c.next_review_date === null,
-  };
-}
+// ---------- Queue building ----------
 
-// Fila do dia: todos os pendentes + novos (até o limite diário).
 export async function buildDailyQueue(): Promise<QueueCard[]> {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return [];
+  const auth = await tryGetUser();
+  if (!auth) return [];
+  const today = toLocalDateString();
+  // Paralelo: archived IDs + fetches simultâneos; filtra archived em JS depois
+  const [archivedIds, pendingRaw, newsRaw] = await Promise.all([
+    getArchivedSubjectIds(),
+    repo.fetchPendingCards(auth.supabase, auth.userId, today, []),
+    repo.fetchNewCards(auth.supabase, auth.userId, DAILY_NEW_LIMIT, []),
+  ]);
+
+  if (archivedIds.length === 0) {
+    return [...pendingRaw.map(toQueueCard), ...newsRaw.map(toQueueCard)];
+  }
+  const excluded = new Set(archivedIds);
+  const filterCard = (c: repo.FlashcardQueueRow) => !c.subject_id || !excluded.has(c.subject_id);
+  return [
+    ...pendingRaw.filter(filterCard).map(toQueueCard),
+    ...newsRaw.filter(filterCard).map(toQueueCard),
+  ];
+}
+
+export async function buildTopicQueue(
+  scope: { subjectId: string; topicId?: string | null },
+): Promise<QueueCard[]> {
+  const auth = await tryGetUser();
+  if (!auth) return [];
+
+  const archivedIds = await getArchivedSubjectIds();
+  if (archivedIds.includes(scope.subjectId)) return [];
+
+  const today = toLocalDateString();
+  const rows = await repo.fetchTopicCards(
+    auth.supabase, auth.userId, scope.subjectId, scope.topicId, today,
+  );
+  const cards = rows.map(toQueueCard);
+  return [...cards.filter(c => !c.isNew), ...cards.filter(c => c.isNew)];
+}
+
+export async function countDailyQueue(): Promise<{ pending: number; news: number }> {
+  const auth = await tryGetUser();
+  if (!auth) return { pending: 0, news: 0 };
 
   const today = toLocalDateString();
   const archivedIds = await getArchivedSubjectIds();
 
-  const archivedSet = new Set(archivedIds);
-  function excludeArchived<T extends { subject_id?: string | null }>(cards: T[] | null): T[] {
-    if (archivedIds.length === 0) return cards ?? [];
-    return (cards ?? []).filter(c => !c.subject_id || !archivedSet.has(c.subject_id));
-  }
+  const [pendingCount, newCount] = await Promise.all([
+    repo.countDueFlashcards(auth.supabase, auth.userId, today, archivedIds),
+    repo.countNewFlashcards(auth.supabase, auth.userId, archivedIds),
+  ]);
 
-  const { data: pendingRaw } = await supabase
-    .from('flashcards')
-    .select('id, front, back, subject_id, next_review_date, subjects(name, color)')
-    .eq('user_id', user.id)
-    .eq('is_review_active', true)
-    .not('next_review_date', 'is', null)
-    .lte('next_review_date', today)
-    .order('next_review_date', { ascending: true });
-  const pendingData = excludeArchived(pendingRaw);
-
-  const { data: newRaw } = await supabase
-    .from('flashcards')
-    .select('id, front, back, subject_id, next_review_date, subjects(name, color)')
-    .eq('user_id', user.id)
-    .is('next_review_date', null)
-    .order('created_at', { ascending: true })
-    .limit(DAILY_NEW_LIMIT);
-  const newData = excludeArchived(newRaw);
-
-  const pending = (pendingData ?? []).map(toQueueCard);
-  const news = (newData ?? []).map(toQueueCard);
-  return [...pending, ...news];
-}
-
-// Fila de um tópico (ou matéria): pendentes + novos daquele recorte, sem limite.
-export async function buildTopicQueue(
-  scope: { subjectId: string; topicId?: string | null },
-): Promise<QueueCard[]> {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return [];
-
-  const today = toLocalDateString();
-  let query = supabase
-    .from('flashcards')
-    .select('id, front, back, next_review_date, created_at, subjects(name, color)')
-    .eq('user_id', user.id)
-    .eq('subject_id', scope.subjectId)
-    .or(`next_review_date.is.null,next_review_date.lte.${today}`);
-
-  if (scope.topicId === null) query = query.is('topic_id', null);
-  else if (scope.topicId) query = query.eq('topic_id', scope.topicId);
-
-  const { data, error } = await query;
-  if (error) throw new Error('Erro ao montar fila de estudo: ' + error.message);
-  const cards = (data ?? []).map(toQueueCard);
-
-  // Pendentes primeiro (não-novos), depois novos.
-  const pending = cards.filter((c) => !c.isNew);
-  const news = cards.filter((c) => c.isNew);
-  return [...pending, ...news];
-}
-
-// Contagem para o Dashboard (Quick Start).
-export async function countDailyQueue(): Promise<{ pending: number; news: number }> {
-  const queue = await buildDailyQueue();
-  return {
-    pending: queue.filter((c) => !c.isNew).length,
-    news: queue.filter((c) => c.isNew).length,
-  };
+  return { pending: pendingCount, news: Math.min(newCount, DAILY_NEW_LIMIT) };
 }

@@ -164,17 +164,33 @@ export async function getCatalogTopics(subjectCatalogId: string): Promise<Catalo
  * Retorna os IDs das matérias arquivadas do usuário atual.
  * Usado para excluir flashcards, revisões e tópicos de matérias arquivadas
  * de qualquer query — garantindo que o arquivamento seja respeitado em toda a app.
+ *
+ * Promise coalescing com TTL de 5s: chamadas paralelas na mesma renderização
+ * compartilham a mesma promise e fazem apenas 1 round-trip ao banco.
  */
+let _archivedCache: Promise<string[]> | null = null;
+let _archivedCacheExpiry = 0;
+
 export async function getArchivedSubjectIds(): Promise<string[]> {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return [];
-  const { data } = await supabase
-    .from('subjects')
-    .select('id')
-    .eq('user_id', user.id)
-    .eq('status', 'arquivado');
-  return (data ?? []).map((s) => s.id);
+  const now = Date.now();
+  if (_archivedCache && now < _archivedCacheExpiry) return _archivedCache;
+  _archivedCacheExpiry = now + 5_000;
+  const fetchPromise = (async () => {
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return [];
+    const { data } = await supabase
+      .from('subjects')
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('status', 'arquivado');
+    return (data ?? []).map((s) => s.id);
+  })();
+  _archivedCache = fetchPromise;
+  fetchPromise.catch(() => {
+    if (_archivedCache === fetchPromise) _archivedCache = null;
+  });
+  return fetchPromise;
 }
 
 // ---------- Ativação ----------

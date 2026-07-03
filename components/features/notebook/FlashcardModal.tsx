@@ -25,6 +25,7 @@ export function FlashcardModal({ frontText, sourceErrorId, subjectId, topicId, o
   const backRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => { backRef.current?.focus(); }, []);
+  useEffect(() => { setFront(frontText); }, [frontText]);
 
   const canSave = front.trim().length > 0 && back.trim().length > 0;
 

@@ -7,6 +7,7 @@ import { useEffect, useRef, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { theme } from '@/lib/theme';
 import { useUI } from '@/components/layout/UIContext';
+import { useUser } from '@/components/layout/UserContext';
 import { AvatarCropper } from '@/components/features/profile/AvatarCropper';
 
 function isHttpsUrl(url: unknown): url is string {
@@ -16,7 +17,8 @@ function isHttpsUrl(url: unknown): url is string {
 
 export default function ProfilePage() {
   const supabase = createClient();
-  const { setAvatarUrl: setTopbarAvatar, isMobile } = useUI();
+  const { isMobile } = useUI();
+  const { refreshUser } = useUser();
   const fileInput = useRef<HTMLInputElement>(null);
 
   const [userId, setUserId] = useState<string | null>(null);
@@ -103,7 +105,7 @@ export default function ProfilePage() {
       if (metaErr) throw metaErr;
 
       setAvatarUrl(url);
-      setTopbarAvatar(url); // reflete na topbar na hora
+      await refreshUser();
       flash('ok', 'Foto atualizada.');
     } catch (err) {
       flash('err', err instanceof Error ? err.message : 'Erro ao enviar a foto.');
@@ -126,7 +128,7 @@ export default function ProfilePage() {
       const { error } = await supabase.auth.updateUser({ data: { avatar_url: null } });
       if (error) throw error;
       setAvatarUrl('');
-      setTopbarAvatar(null);
+      await refreshUser();
       flash('ok', 'Foto removida.');
     } catch (err) {
       flash('err', err instanceof Error ? err.message : 'Erro ao remover foto.');
@@ -142,6 +144,7 @@ export default function ProfilePage() {
         data: { display_name: name.trim() },
       });
       if (error) throw error;
+      await refreshUser();
       flash('ok', 'Perfil salvo.');
     } catch (err) {
       flash('err', err instanceof Error ? err.message : 'Erro ao salvar.');

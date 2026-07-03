@@ -1,8 +1,12 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { theme, zIndex, perfColor } from '@/lib/theme';
+import { theme, perfColor, btnOutline, kbd } from '@/lib/theme';
+import { Overlay } from '@/components/ui/Overlay';
 import type { Jurisprudencia } from '@/services/jurisprudencias.service';
+import { useConfirm } from '@/hooks/useConfirm';
+import { saveSimuladoSession, type SimuladoResposta } from '@/services/jurisInteracoes.service';
+import { useToast } from '@/components/ui/ToastProvider';
 
 interface Props {
   items: Jurisprudencia[];
@@ -17,6 +21,9 @@ export function JurisSimulado({ items, onClose }: Props) {
   const [done, setDone] = useState(false);
   const [elapsed, setElapsed] = useState(0);
   const startedAt = useRef(Date.now());
+  const { confirm, dialog } = useConfirm();
+  const toast = useToast();
+  const savedRef = useRef(false);
 
   // Timer
   useEffect(() => {
@@ -25,17 +32,31 @@ export function JurisSimulado({ items, onClose }: Props) {
     return () => clearInterval(id);
   }, [done]);
 
+  async function safeClose() {
+    if (!done && (idx > 0 || resposta !== null)) {
+      const ok = await confirm({
+        title: 'Encerrar o simulado?',
+        description: 'O progresso não será salvo.',
+        confirmLabel: 'Encerrar',
+        danger: true,
+      });
+      if (!ok) return;
+    }
+    onClose();
+  }
+
   // Fecha com Escape; C/E para responder
   useEffect(() => {
-    function onKey(e: KeyboardEvent) {
-      if (e.key === 'Escape') { onClose(); return; }
+    async function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') { await safeClose(); return; }
       if (resposta !== null) { if (e.key === 'Enter') avancar(); return; }
       if (e.key === 'c' || e.key === 'C') responder(true);
       if (e.key === 'e' || e.key === 'E') responder(false);
     }
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  });
+  // resposta, idx e done nas deps para safeClose e avancar() lerem valores frescos.
+  }, [resposta, idx, done, onClose]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (questoes.length === 0) {
     return (
@@ -49,17 +70,46 @@ export function JurisSimulado({ items, onClose }: Props) {
   }
 
   const q = questoes[idx];
-  const gabarito = q.questao_gabarito!;
+  const gabarito = q.questao_gabarito ?? false;
   const acertou = resposta !== null && resposta === gabarito;
   const pct = Math.round(((idx + (resposta !== null ? 1 : 0)) / questoes.length) * 100);
 
   function responder(r: boolean) { if (resposta === null) setResposta(r); }
 
   function avancar() {
-    const novos = [...acertos, resposta === gabarito];
+    const acertouAtual = resposta === gabarito;
+    const novos = [...acertos, acertouAtual];
     setAcertos(novos);
-    if (idx < questoes.length - 1) { setIdx((i) => i + 1); setResposta(null); }
-    else setDone(true);
+    if (idx < questoes.length - 1) {
+      setIdx((i) => i + 1);
+      setResposta(null);
+    } else {
+      setDone(true);
+      // Salva resultados apenas na primeira conclusão (não no refazer)
+      if (!savedRef.current) {
+        const respostas: SimuladoResposta[] = questoes.map((q, i) => {
+          const acertouQ = i < acertos.length ? acertos[i] : acertouAtual;
+          const gab = q.questao_gabarito ?? false;
+          return {
+            jurisId:    q.id,
+            tribunal:   q.tribunal,
+            disciplina: q.disciplina,
+            enunciado:  q.questao_enunciado!,
+            gabarito:   gab,
+            resposta:   acertouQ ? gab : !gab, // inverso do gabarito quando errou
+            acertou:    acertouQ,
+          };
+        });
+        saveSimuladoSession({
+          total:       questoes.length,
+          certas:      novos.filter(Boolean).length,
+          elapsedSecs: elapsed,
+          respostas,
+        })
+          .then(() => { savedRef.current = true; })
+          .catch(() => toast.error('Não foi possível salvar o resultado.'));
+      }
+    }
   }
 
   function reiniciar() { setIdx(0); setResposta(null); setAcertos([]); setDone(false); setElapsed(0); startedAt.current = Date.now(); }
@@ -77,23 +127,37 @@ export function JurisSimulado({ items, onClose }: Props) {
     const perf = perfColor(taxa);
     const taxaPct = Math.round(taxa * 100);
 
+    // Análise por disciplina
+    const discMap = new Map<string, { total: number; erros: number }>();
+    questoes.forEach((q, i) => {
+      const s = discMap.get(q.disciplina) ?? { total: 0, erros: 0 };
+      s.total++;
+      if (!acertos[i]) s.erros++;
+      discMap.set(q.disciplina, s);
+    });
+    const disciplinas = [...discMap.entries()]
+      .sort((a, b) => b[1].erros / b[1].total - a[1].erros / a[1].total);
+    const disciplinaMaisFraga = disciplinas.find(([, s]) => s.erros > 0);
+
+    // Top 5 questões erradas
+    const topErros = questoes.filter((_, i) => !acertos[i]).slice(0, 5);
+
     return (
       <Overlay onClose={onClose}>
         <div style={{ padding: '8px 0' }}>
           <h2 style={{ fontSize: 20, fontWeight: 800, color: theme.ink, margin: '0 0 6px' }}>Resultado do Simulado</h2>
-          <p style={{ fontSize: 13, color: theme.inkFaint, margin: '0 0 28px' }}>
+          <p style={{ fontSize: 13, color: theme.inkFaint, margin: '0 0 20px' }}>
             {total} {total === 1 ? 'questão' : 'questões'} · Tempo: {formatTime(elapsed)}
           </p>
 
           {/* Score grande */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 24, marginBottom: 24 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 24, marginBottom: 20 }}>
             <div style={{
-              width: 100, height: 100, borderRadius: '50%',
-              background: perf.bg,
-              border: `3px solid ${perf.fg}`,
+              width: 90, height: 90, borderRadius: '50%', flexShrink: 0,
+              background: perf.bg, border: `3px solid ${perf.fg}`,
               display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
             }}>
-              <span style={{ fontSize: 28, fontWeight: 900, color: perf.fg, lineHeight: 1 }}>{taxaPct}%</span>
+              <span style={{ fontSize: 26, fontWeight: 900, color: perf.fg, lineHeight: 1 }}>{taxaPct}%</span>
             </div>
             <div>
               <p style={{ fontSize: 16, fontWeight: 700, color: theme.ink, margin: '0 0 4px' }}>
@@ -102,34 +166,107 @@ export function JurisSimulado({ items, onClose }: Props) {
               <p style={{ fontSize: 13, color: perf.fg, fontWeight: 600, margin: 0 }}>
                 {taxa >= 0.8 ? 'Excelente! Aprovado no padrão elite.' : taxa >= 0.65 ? 'Bom desempenho. Continue revisando.' : 'Abaixo da média. Revise o conteúdo.'}
               </p>
+              {disciplinaMaisFraga && (
+                <p style={{ fontSize: 12, color: theme.inkFaint, margin: '4px 0 0' }}>
+                  Ponto fraco: <strong style={{ color: theme.danger }}>{disciplinaMaisFraga[0]}</strong>
+                  {' '}({disciplinaMaisFraga[1].erros}/{disciplinaMaisFraga[1].total} erros)
+                </p>
+              )}
             </div>
           </div>
 
-          {/* Detalhe por questão */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 24, maxHeight: 260, overflowY: 'auto' }}>
-            {questoes.map((q, i) => (
-              <div key={q.id} style={{
-                display: 'flex', alignItems: 'flex-start', gap: 10,
-                padding: '8px 12px', borderRadius: theme.radiusXs,
-                background: acertos[i] ? 'rgba(34,197,94,.07)' : 'rgba(239,68,68,.06)',
-                border: `0.5px solid ${acertos[i] ? '#22c55e40' : '#ef444440'}`,
-              }}>
-                <span style={{ fontSize: 13, fontWeight: 800, color: acertos[i] ? '#16a34a' : theme.danger, flexShrink: 0, marginTop: 1 }}>
-                  {acertos[i] ? '✓' : '✗'}
-                </span>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <p style={{ fontSize: 12.5, color: theme.ink, margin: '0 0 2px', lineHeight: 1.45,
-                    overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
-                    {q.questao_enunciado}
-                  </p>
-                  <span style={{ fontSize: 11, color: theme.inkFaint }}>
-                    Gabarito: <strong style={{ color: theme.ink }}>{q.questao_gabarito ? 'Certo' : 'Errado'}</strong>
-                    {' · '}{q.tribunal} · {q.disciplina}
-                  </span>
-                </div>
+          {/* Análise por disciplina (só se tiver mais de 1) */}
+          {disciplinas.length > 1 && (
+            <div style={{ marginBottom: 20 }}>
+              <p style={{ fontSize: 11, fontWeight: 700, color: theme.inkFaint, textTransform: 'uppercase', letterSpacing: 0.4, margin: '0 0 10px' }}>
+                Desempenho por disciplina
+              </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
+                {disciplinas.map(([disc, s]) => {
+                  const pct = Math.round((s.erros / s.total) * 100);
+                  const taxaAcerto = Math.round(((s.total - s.erros) / s.total) * 100);
+                  const cor = taxaAcerto >= 70 ? theme.okDeep : taxaAcerto >= 50 ? theme.warnDeep : theme.danger;
+                  const bg = taxaAcerto >= 70 ? theme.okTint : taxaAcerto >= 50 ? theme.warnTint : theme.dangerTint;
+                  return (
+                    <div key={disc} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <span style={{ fontSize: 12, color: theme.ink, minWidth: 120, fontWeight: 500 }}>{disc}</span>
+                      <div style={{ flex: 1, height: 5, background: theme.line, borderRadius: 99, overflow: 'hidden' }}>
+                        <div style={{ height: '100%', width: `${taxaAcerto}%`, background: cor, borderRadius: 99 }} />
+                      </div>
+                      <span style={{ fontSize: 11, fontWeight: 700, color: cor, background: bg, borderRadius: 5, padding: '1px 7px', whiteSpace: 'nowrap', minWidth: 48, textAlign: 'center' }}>
+                        {taxaAcerto}%
+                      </span>
+                      {pct > 0 && (
+                        <span style={{ fontSize: 11, color: theme.danger, whiteSpace: 'nowrap' }}>
+                          {s.erros} erro{s.erros > 1 ? 's' : ''}
+                        </span>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
-            ))}
-          </div>
+            </div>
+          )}
+
+          {/* Top 5 questões mais erradas */}
+          {topErros.length > 0 && (
+            <div style={{ marginBottom: 20 }}>
+              <p style={{ fontSize: 11, fontWeight: 700, color: theme.inkFaint, textTransform: 'uppercase', letterSpacing: 0.4, margin: '0 0 10px' }}>
+                {topErros.length === 1 ? 'Jurisprudência errada' : `${topErros.length} jurisprudências que você errou`}
+              </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                {topErros.map((q) => (
+                  <div key={q.id} style={{
+                    padding: '8px 12px', borderRadius: theme.radiusXs,
+                    background: theme.dangerTint, border: `0.5px solid rgba(239,68,68,.2)`,
+                    display: 'flex', alignItems: 'flex-start', gap: 8,
+                  }}>
+                    <span style={{ fontSize: 13, fontWeight: 800, color: theme.danger, flexShrink: 0, marginTop: 1 }}>✗</span>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <p style={{ fontSize: 12, color: theme.ink, margin: '0 0 3px', lineHeight: 1.4,
+                        overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
+                        {q.questao_enunciado}
+                      </p>
+                      <span style={{ fontSize: 10.5, color: theme.inkFaint }}>
+                        {q.tribunal} · {q.disciplina} · Gabarito: <strong>{q.questao_gabarito ? 'Certo' : 'Errado'}</strong>
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Detalhe por questão (expansível) */}
+          <details style={{ marginBottom: 20 }}>
+            <summary style={{ fontSize: 12, fontWeight: 600, color: theme.inkSoft, cursor: 'pointer', userSelect: 'none', marginBottom: 8 }}>
+              Ver todas as questões ({questoes.length})
+            </summary>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxHeight: 220, overflowY: 'auto' }}>
+              {questoes.map((q, i) => (
+                <div key={q.id} style={{
+                  display: 'flex', alignItems: 'flex-start', gap: 10,
+                  padding: '8px 12px', borderRadius: theme.radiusXs,
+                  background: acertos[i] ? theme.okTint : theme.dangerTint,
+                  border: `0.5px solid ${acertos[i] ? '#22c55e40' : '#ef444440'}`,
+                }}>
+                  <span style={{ fontSize: 13, fontWeight: 800, color: acertos[i] ? theme.okDeep : theme.danger, flexShrink: 0, marginTop: 1 }}>
+                    {acertos[i] ? '✓' : '✗'}
+                  </span>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p style={{ fontSize: 12.5, color: theme.ink, margin: '0 0 2px', lineHeight: 1.45,
+                      overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
+                      {q.questao_enunciado}
+                    </p>
+                    <span style={{ fontSize: 11, color: theme.inkFaint }}>
+                      Gabarito: <strong style={{ color: theme.ink }}>{q.questao_gabarito ? 'Certo' : 'Errado'}</strong>
+                      {' · '}{q.tribunal} · {q.disciplina}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </details>
 
           <div style={{ display: 'flex', gap: 10 }}>
             <button onClick={reiniciar} style={btnPrimary}>Refazer simulado</button>
@@ -141,10 +278,12 @@ export function JurisSimulado({ items, onClose }: Props) {
   }
 
   return (
-    <Overlay onClose={onClose}>
+    <>
+    {dialog}
+    <Overlay onClose={safeClose} labelledBy="simulado-modal-title">
       {/* Cabeçalho */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
-        <span style={{ fontSize: 13, fontWeight: 700, color: theme.clay, display: 'flex', alignItems: 'center', gap: 6 }}>
+        <span id="simulado-modal-title" style={{ fontSize: 13, fontWeight: 700, color: theme.clay, display: 'flex', alignItems: 'center', gap: 6 }}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
             <circle cx="12" cy="12" r="10" /><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01" />
           </svg>
@@ -155,7 +294,7 @@ export function JurisSimulado({ items, onClose }: Props) {
         <span style={{ marginLeft: 'auto', fontSize: 13, fontWeight: 600, color: elapsed >= 3600 ? theme.danger : theme.inkSoft, fontVariantNumeric: 'tabular-nums' }}>
           ⏱ {formatTime(elapsed)}
         </span>
-        <button onClick={onClose} style={{ border: 'none', background: 'transparent', color: theme.inkFaint, fontSize: 18, cursor: 'pointer', lineHeight: 1, paddingLeft: 8 }}>✕</button>
+        <button onClick={safeClose} aria-label="Fechar" style={{ border: 'none', background: 'transparent', color: theme.inkFaint, fontSize: 18, cursor: 'pointer', lineHeight: 1, paddingLeft: 8 }}>✕</button>
       </div>
 
       {/* Barra de progresso */}
@@ -185,15 +324,17 @@ export function JurisSimulado({ items, onClose }: Props) {
           <div style={{ display: 'flex', gap: 12, marginBottom: 14 }}>
             <button
               onClick={() => responder(true)}
-              style={{ flex: 1, padding: '14px', borderRadius: theme.radiusSm, border: '1.5px solid #22c55e', background: 'rgba(34,197,94,.08)', color: '#16a34a', fontSize: 15, fontWeight: 700, cursor: 'pointer', fontFamily: theme.font }}
+              aria-keyshortcuts="c"
+              style={{ flex: 1, padding: '14px', borderRadius: theme.radiusSm, border: `1.5px solid ${theme.ok}`, background: theme.okTint, color: theme.okDeep, fontSize: 15, fontWeight: 700, cursor: 'pointer', fontFamily: theme.font, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}
             >
-              Certo
+              <span aria-hidden="true">✓</span> Certo
             </button>
             <button
               onClick={() => responder(false)}
-              style={{ flex: 1, padding: '14px', borderRadius: theme.radiusSm, border: `1.5px solid ${theme.danger}`, background: 'rgba(239,68,68,.07)', color: theme.danger, fontSize: 15, fontWeight: 700, cursor: 'pointer', fontFamily: theme.font }}
+              aria-keyshortcuts="e"
+              style={{ flex: 1, padding: '14px', borderRadius: theme.radiusSm, border: `1.5px solid ${theme.danger}`, background: theme.dangerTint, color: theme.danger, fontSize: 15, fontWeight: 700, cursor: 'pointer', fontFamily: theme.font, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}
             >
-              Errado
+              <span aria-hidden="true">✗</span> Errado
             </button>
           </div>
           <p style={{ fontSize: 11.5, color: theme.inkFaint, textAlign: 'center', margin: 0 }}>
@@ -204,10 +345,10 @@ export function JurisSimulado({ items, onClose }: Props) {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           <div style={{
             borderRadius: theme.radiusSm, padding: '14px 18px',
-            background: acertou ? 'rgba(34,197,94,.09)' : 'rgba(239,68,68,.07)',
-            border: `1.5px solid ${acertou ? '#22c55e' : theme.danger}`,
+            background: acertou ? theme.okTint : theme.dangerTint,
+            border: `1.5px solid ${acertou ? theme.ok : theme.danger}`,
           }}>
-            <p style={{ fontSize: 14, fontWeight: 800, color: acertou ? '#16a34a' : theme.danger, margin: '0 0 6px' }}>
+            <p style={{ fontSize: 14, fontWeight: 800, color: acertou ? theme.okDeep : theme.danger, margin: '0 0 6px' }}>
               {acertou ? '✓ Correto!' : '✗ Errado!'}
             </p>
             <p style={{ fontSize: 13, color: theme.inkSoft, margin: '0 0 8px' }}>
@@ -219,7 +360,7 @@ export function JurisSimulado({ items, onClose }: Props) {
               </p>
             )}
           </div>
-          <button onClick={avancar} style={btnPrimary}>
+          <button onClick={avancar} aria-keyshortcuts="Enter" style={btnPrimary}>
             {idx < questoes.length - 1 ? 'Próxima questão →' : 'Ver resultado'}
           </button>
           <p style={{ fontSize: 11.5, color: theme.inkFaint, textAlign: 'center', margin: 0 }}>
@@ -228,27 +369,7 @@ export function JurisSimulado({ items, onClose }: Props) {
         </div>
       )}
     </Overlay>
-  );
-}
-
-function Overlay({ children, onClose }: { children: React.ReactNode; onClose: () => void }) {
-  return (
-    <div
-      style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)', zIndex: zIndex.overlay, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}
-      onClick={onClose}
-    >
-      <div
-        onClick={(e) => e.stopPropagation()}
-        style={{
-          background: theme.card, border: `0.5px solid ${theme.line}`, borderRadius: theme.radius,
-          boxShadow: theme.shadowModal, width: '100%', maxWidth: 680,
-          maxHeight: '90vh', overflowY: 'auto',
-          padding: '24px 28px', fontFamily: theme.font, zIndex: zIndex.modal,
-        }}
-      >
-        {children}
-      </div>
-    </div>
+    </>
   );
 }
 
@@ -256,13 +377,4 @@ const btnPrimary: React.CSSProperties = {
   padding: '11px 24px', borderRadius: theme.radiusSm, border: 'none',
   background: theme.clay, color: '#fff', fontSize: 14, fontWeight: 600,
   cursor: 'pointer', fontFamily: theme.font,
-};
-const btnOutline: React.CSSProperties = {
-  padding: '11px 20px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`,
-  background: theme.card, color: theme.inkSoft, fontSize: 14, fontWeight: 500,
-  cursor: 'pointer', fontFamily: theme.font,
-};
-const kbd: React.CSSProperties = {
-  background: theme.muted, border: `0.5px solid ${theme.line}`, borderRadius: 4,
-  padding: '0px 5px', fontSize: 10.5, fontFamily: 'monospace',
 };
