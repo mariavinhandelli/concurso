@@ -13,6 +13,16 @@ export interface CalendarEvent {
   reminderId?: string;       // presente só quando type === 'reminder'
 }
 
+// Paleta fixa para provas sem banca definida (ou como fallback).
+const EXAM_COLORS = ['#d7b5ff', '#c6ffb6', '#ffbe93', '#a1d1ff', '#ff9ec5', '#f6ff91'];
+
+// Cor determinística por chave (banca ou id da prova), pra cada concurso manter sempre a mesma cor.
+function examColor(key: string): string {
+  let hash = 0;
+  for (let i = 0; i < key.length; i++) hash = (hash * 31 + key.charCodeAt(i)) >>> 0;
+  return EXAM_COLORS[hash % EXAM_COLORS.length];
+}
+
 export async function listEvents(startDate: string, endDate: string): Promise<CalendarEvent[]> {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -65,11 +75,12 @@ export async function listEvents(startDate: string, endDate: string): Promise<Ca
     });
   }
 
-  // Provas no intervalo.
+  // Provas dos concursos-alvo no intervalo.
   const { data: exams, error: examsError } = await supabase
-    .from('exam_targets')
-    .select('name, exam_date, color')
+    .from('target_exams')
+    .select('id, orgao, cargo, board_id, exam_date')
     .eq('user_id', user.id)
+    .not('exam_date', 'is', null)
     .gte('exam_date', startDate)
     .lte('exam_date', endDate);
   if (examsError) throw new Error('Erro ao carregar provas do calendário: ' + examsError.message);
@@ -79,8 +90,8 @@ export async function listEvents(startDate: string, endDate: string): Promise<Ca
     events.push({
       date: e.exam_date.slice(0, 10),
       type: 'exam',
-      label: e.name,
-      color: e.color ?? '#C2613D',
+      label: [e.orgao, e.cargo].filter(Boolean).join(' - ') || 'Prova',
+      color: examColor(e.board_id ?? e.id),
     });
   }
 
