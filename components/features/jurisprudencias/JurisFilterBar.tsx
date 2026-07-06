@@ -124,7 +124,7 @@ export function JurisFilterBar({ values, onChange, disciplinas }: Props) {
                 <label style={styles.label}>Estrelas</label>
                 <select value={values.estrelas} onChange={(e) => set('estrelas', e.target.value)} style={sel}>
                   <option value="">Qualquer</option>
-                  {[5, 4, 3, 2, 1].map((n) => <option key={n} value={n}>{'★'.repeat(n)}</option>)}
+                  {[5, 4, 3, 2, 1].map((n) => <option key={n} value={n}>{'★'.repeat(n)}{n < 5 ? ' ou mais' : ''}</option>)}
                 </select>
               </div>
               <div>

@@ -15,7 +15,7 @@ export default function NotFound() {
 
 const styles: Record<string, React.CSSProperties> = {
   page: { minHeight: '100vh', display: 'grid', placeItems: 'center', padding: 24, background: 'var(--bg)', fontFamily: 'var(--font-poppins), Arial, sans-serif' },
-  card: { width: 'min(440px, 100%)', boxSizing: 'border-box', padding: 32, borderRadius: 18, border: '1px solid var(--line)', background: 'var(--card)', boxShadow: 'var(--shadow)', textAlign: 'center' },
+  card: { width: 'min(440px, 100%)', boxSizing: 'border-box', padding: 32, borderRadius: 18, border: '0.5px solid var(--line)', background: 'var(--card)', boxShadow: 'var(--shadow)', textAlign: 'center' },
   code: { color: 'var(--teal)', fontSize: 13, fontWeight: 800, letterSpacing: 1 },
   title: { color: 'var(--ink)', fontSize: 24, margin: '8px 0' },
   text: { color: 'var(--ink-soft)', fontSize: 14, lineHeight: 1.6, margin: '0 0 22px' },

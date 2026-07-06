@@ -1,4 +1,4 @@
-// services/jurisprudencias.service.ts
+﻿// services/jurisprudencias.service.ts
 // Fonte de dados: data/jurisprudencias.ts (array local tipado).
 // Interações pessoais (favorito, estrelas, anotações, revisão) ficam em
 // jurisInteracoes.service.ts, isoladas por usuário no Supabase.
@@ -81,6 +81,10 @@ export interface Jurisprudencia {
   // Jurisprudências relacionadas (opcional)
   jurisprudencias_relacionadas?: JurisRelacionada[];
 
+  // Disciplinas adicionais em que o julgado também deve ser listado
+  // (ex.: SV 11 aparece em Constitucional E Processo Penal), sem duplicar o registro.
+  disciplinas_extra?: string[];
+
   created_at: string;
   updated_at: string;
 }
@@ -137,7 +141,7 @@ export const INCIDENCIA_OPTIONS: { value: JurisIncidencia; label: string }[] = [
 // Disciplinas-padrão do hub (cards principais). Mesmo que o usuário cadastre
 // outras, estas sempre aparecem como atalho de navegação.
 export const DISCIPLINAS_HUB = [
-  'Constitucional', 'Administrativo', 'Penal', 'Processo Penal',
+  'Constitucional', 'Administrativo', 'Controle Externo', 'Penal', 'Processo Penal',
   'Civil', 'Processo Civil', 'Trabalho', 'Eleitoral',
   'Tributário', 'Previdenciário', 'Penal e Proc. Penal Militar',
 ];
@@ -146,6 +150,20 @@ const INCIDENCIA_ORDER: Record<JurisIncidencia, number> = {
   muito_alta: 4, alta: 3, media: 2, baixa: 1,
 };
 
+// Busca insensível a acentos e caixa ("sumula" acha "Súmula").
+function norm(s: string): string {
+  return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+}
+
+function searchHaystack(j: Jurisprudencia): string {
+  return norm([
+    j.tese, j.tribunal, j.disciplina, j.materia, j.assunto, j.subassunto,
+    j.resumo, j.processo, j.relator, j.informativo,
+    j.numero_sumula, j.titulo, j.texto_sumula,
+    ...j.palavras_chave,
+  ].filter(Boolean).join('\n'));
+}
+
 function applyFilters(items: Jurisprudencia[], filters: JurisFilters): Jurisprudencia[] {
   let result = items;
   if (filters.tribunal) result = result.filter((j) => j.tribunal === filters.tribunal);
@@ -153,7 +171,7 @@ function applyFilters(items: Jurisprudencia[], filters: JurisFilters): Jurisprud
   if (filters.disciplina) {
     const d = filters.disciplina.toLowerCase();
     result = result.filter((j) =>
-      normalizeDisciplina(j.disciplina).toLowerCase() === d ||
+      disciplinasNormalizadas(j).some((disc) => disc.toLowerCase() === d) ||
       j.disciplina.toLowerCase() === d
     );
   }
@@ -162,32 +180,24 @@ function applyFilters(items: Jurisprudencia[], filters: JurisFilters): Jurisprud
     result = result.filter((j) => j.materia?.toLowerCase().includes(m));
   }
   if (filters.status) result = result.filter((j) => j.status === filters.status);
-  if (filters.estrelas) result = result.filter((j) => j.estrelas === filters.estrelas);
+  if (filters.estrelas) result = result.filter((j) => j.estrelas >= filters.estrelas!);
   if (filters.incidencia) result = result.filter((j) => j.incidencia_concursos === filters.incidencia);
   if (filters.ano) {
     result = result.filter((j) => j.data_julgamento?.startsWith(String(filters.ano)));
   }
   if (filters.search) {
-    const s = filters.search.toLowerCase();
-    result = result.filter((j) =>
-      j.tese.toLowerCase().includes(s) ||
-      j.tribunal.toLowerCase().includes(s) ||
-      j.disciplina.toLowerCase().includes(s) ||
-      j.palavras_chave.some((k) => k.toLowerCase().includes(s))
-    );
+    // Todos os termos precisam aparecer (busca AND), em qualquer campo.
+    const termos = norm(filters.search).split(/\s+/).filter(Boolean);
+    result = result.filter((j) => {
+      const hay = searchHaystack(j);
+      return termos.every((t) => hay.includes(t));
+    });
   }
   if (filters.completude === 'com_flashcard') result = result.filter((j) => !!(j.flashcard_frente && j.flashcard_verso));
   if (filters.completude === 'sem_flashcard') result = result.filter((j) => !(j.flashcard_frente && j.flashcard_verso));
   if (filters.completude === 'com_questao') result = result.filter((j) => !!(j.questao_enunciado && j.questao_gabarito !== null));
   if (filters.completude === 'sem_questao') result = result.filter((j) => !(j.questao_enunciado && j.questao_gabarito !== null));
   return result;
-}
-
-async function requireUser() {
-  const supabase = createClient();
-  const { data: { user }, error } = await supabase.auth.getUser();
-  if (error || !user) throw new Error('Você precisa estar logado.');
-  return user;
 }
 
 async function fetchUserCreated(supabase: ReturnType<typeof createClient>, userId: string): Promise<Jurisprudencia[]> {
@@ -316,9 +326,10 @@ export async function listDistinct(field: 'tribunal' | 'disciplina' | 'materia')
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return [];
   const userItems = await fetchUserCreated(supabase, user.id);
-  const values = [...userItems, ...(ALL as Jurisprudencia[])]
-    .map((j) => j[field])
-    .filter((v): v is string => v != null && v !== '');
+  const merged = [...userItems, ...(ALL as Jurisprudencia[])];
+  const values = field === 'disciplina'
+    ? merged.flatMap((j) => disciplinasNormalizadas(j))
+    : merged.map((j) => j[field]).filter((v): v is string => v != null && v !== '');
   return [...new Set(values)].sort();
 }
 
@@ -345,13 +356,24 @@ const DISCIPLINA_ALIAS: Record<string, string> = {
 
 // Normaliza "Direito Penal" → "Penal", "Direito Civil" → "Civil", etc.
 // para bater com as chaves do DISCIPLINAS_HUB.
-function normalizeDisciplina(disciplina: string): string {
+// Exportada: outros módulos (ex. hub de Targets) usam para saber sob qual
+// disciplina filtrar jurisprudências relacionadas a uma matéria da Focali —
+// os nomes das matérias não usam a mesma taxonomia (ver DISCIPLINA_ALIAS).
+export function normalizeDisciplina(disciplina: string): string {
   if (DISCIPLINA_ALIAS[disciplina]) return DISCIPLINA_ALIAS[disciplina];
   const stripped = disciplina.replace(/^Direito\s+/i, '');
   if (DISCIPLINA_ALIAS[stripped]) return DISCIPLINA_ALIAS[stripped];
   if (DISCIPLINAS_HUB.includes(stripped)) return stripped;
   if (DISCIPLINAS_HUB.includes(disciplina)) return disciplina;
   return disciplina;
+}
+
+// Disciplinas (normalizadas, sem repetição) sob as quais um julgado deve ser
+// listado: a primária + as extras (cross-listing, ex.: SV 11 em Constitucional
+// e Processo Penal). Não duplica o registro — só o "encontra" em mais de um card.
+function disciplinasNormalizadas(j: Jurisprudencia): string[] {
+  const todas = [j.disciplina, ...(j.disciplinas_extra ?? [])].map(normalizeDisciplina);
+  return [...new Set(todas)];
 }
 
 export async function countByDisciplina(): Promise<Record<string, number>> {
@@ -361,8 +383,10 @@ export async function countByDisciplina(): Promise<Record<string, number>> {
   const userItems = await fetchUserCreated(supabase, user.id);
   const counts: Record<string, number> = {};
   for (const j of [...userItems, ...(ALL as Jurisprudencia[])]) {
-    const key = normalizeDisciplina(j.disciplina);
-    counts[key] = (counts[key] ?? 0) + 1;
+    // Conta sob cada disciplina (primária + extras), para o hub refletir o cross-listing.
+    for (const key of disciplinasNormalizadas(j)) {
+      counts[key] = (counts[key] ?? 0) + 1;
+    }
   }
   return counts;
 }

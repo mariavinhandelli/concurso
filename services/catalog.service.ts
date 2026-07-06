@@ -1,13 +1,16 @@
+'use client';
 // services/catalog.service.ts
-// Camada de dados do "Banco de Matérias" (catálogo global) e das matérias
-// do usuário (instância). Espelha o padrão de topics.service.ts.
+// Banco de Matérias: catálogo global (read-only) e ativação por RPC.
 //
-// Conceito:
-//  - Catálogo = subjects_catalog / topics_catalog (global, read-only).
-//  - Ativar uma matéria copia tudo para subjects/topics do usuário via RPC.
-//  - O usuário edita/arquiva/cria por cima da SUA cópia, sem afetar o catálogo.
+// 'use client' é obrigatório: módulo usa estado de módulo (caches singleton).
+// Em RSC/SSR, esse estado seria compartilhado entre requests — vazamento de dados.
+//
+// Cache de áreas:    1h TTL (dados globais; mudam só com deploy de admin).
+// Cache de matérias: 60s TTL + promise coalescing (tem flag user-específica is_activated).
+// Cache de tópicos:  permanente por sessão (topics_catalog é imutável pós-deploy).
 
 import { createClient } from '@/lib/supabase/client';
+import { tryGetUser, requireUser } from '@/lib/supabase/requireUser';
 
 // ---------- Tipos ----------
 
@@ -18,56 +21,81 @@ export interface CatalogArea {
   position: number;
 }
 
-// Uma matéria do catálogo, já com a info de quantos tópicos tem,
-// a quais áreas pertence, e se o usuário logado já ativou.
 export interface CatalogSubject {
   id: string;
   name: string;
   slug: string;
   position: number;
-  area_slugs: string[];     // áreas a que pertence (para filtro)
-  topic_count: number;      // total de tópicos (pais + filhos)
-  parent_count: number;     // só os tópicos "pai/simples" (parent_id null)
-  is_activated: boolean;    // o usuário logado já ativou esta matéria?
+  area_slugs: string[];
+  topic_count: number;
+  parent_count: number;
+  is_activated: boolean;
 }
 
-export type SubjectStatus = 'ativo' | 'arquivado';
-
-// Uma matéria do usuário (instância), com progresso agregado por is_completed.
-export interface MySubject {
+export interface CatalogTopic {
   id: string;
   name: string;
-  color: string | null;
+  parent_id: string | null;
   position: number;
-  status: SubjectStatus;
-  catalog_id: string | null;   // null = matéria criada pelo próprio usuário
-  is_own: boolean;             // atalho: catalog_id === null
-  leaf_total: number;          // total de tópicos-folha (estudáveis)
-  leaf_done: number;           // folhas com is_completed = true
-  progress: number;            // 0-100, arredondado
 }
 
-// ---------- Catálogo: leitura ----------
+// ---------- Cache ----------
 
-// As 6 áreas, na ordem de exibição (position).
+let _areasCache: CatalogArea[] | null = null;
+let _areasExpiry = 0;
+
+let _subjectsCache: Promise<CatalogSubject[]> | null = null;
+let _subjectsExpiry = 0;
+let _subjectsCachedUserId: string | null = null;
+
+const _topicsCache = new Map<string, CatalogTopic[]>();
+
+// Chamada automaticamente em activateSubject() e pode ser chamada externamente.
+export function invalidateCatalogCache(): void {
+  _subjectsCache = null;
+  _subjectsExpiry = 0;
+  _subjectsCachedUserId = null;
+}
+
+// ---------- Áreas ----------
+
 export async function getCatalogAreas(): Promise<CatalogArea[]> {
+  if (_areasCache && Date.now() < _areasExpiry) return _areasCache;
   const supabase = createClient();
   const { data, error } = await supabase
     .from('catalog_areas')
     .select('id, name, slug, position')
     .order('position', { ascending: true });
-
   if (error) throw new Error('Erro ao listar áreas: ' + error.message);
-  return data ?? [];
+  _areasCache = data ?? [];
+  _areasExpiry = Date.now() + 3_600_000; // 1h — áreas quase nunca mudam
+  return _areasCache;
 }
 
-// Todas as matérias do catálogo, com contagem de tópicos, áreas e
-// flag de "já ativada" pelo usuário logado. Ordenadas por position.
-export async function getCatalogSubjects(): Promise<CatalogSubject[]> {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+// ---------- Matérias ----------
 
-  // 1) matérias do catálogo
+export async function getCatalogSubjects(): Promise<CatalogSubject[]> {
+  const now = Date.now();
+  if (_subjectsCache && now < _subjectsExpiry) return _subjectsCache;
+  _subjectsExpiry = now + 60_000;
+  _subjectsCache = _fetchSubjects();
+  _subjectsCache.catch(() => { _subjectsCache = null; _subjectsExpiry = 0; });
+  return _subjectsCache;
+}
+
+async function _fetchSubjects(): Promise<CatalogSubject[]> {
+  const auth = await tryGetUser();
+  const userId = auth?.userId ?? null;
+  // Supabase client: usa o autenticado quando disponível, senão cria um público
+  const supabase = auth?.supabase ?? createClient();
+
+  // Invalida automaticamente se o usuário mudou (logout → login de outro)
+  if (_subjectsCachedUserId !== null && _subjectsCachedUserId !== userId) {
+    _subjectsCache = null;
+    _subjectsExpiry = 0;
+  }
+  _subjectsCachedUserId = userId;
+
   const { data: subjects, error: subErr } = await supabase
     .from('subjects_catalog')
     .select('id, name, slug, position, is_active')
@@ -78,36 +106,33 @@ export async function getCatalogSubjects(): Promise<CatalogSubject[]> {
 
   const subjectIds = subjects.map((s) => s.id);
 
-  // 2) tópicos do catálogo (só id, matéria e parent) p/ contar pais e filhos
-  const { data: topics, error: topErr } = await supabase
-    .from('topics_catalog')
-    .select('id, subject_catalog_id, parent_id')
-    .in('subject_catalog_id', subjectIds);
-  if (topErr) throw new Error('Erro ao contar tópicos: ' + topErr.message);
+  // Queries 2, 3 e 4 em paralelo — antes eram sequenciais, custando 3 round-trips extras
+  const [topicsRes, linksRes, mineRes] = await Promise.all([
+    supabase
+      .from('topics_catalog')
+      .select('id, subject_catalog_id, parent_id')
+      .in('subject_catalog_id', subjectIds),
+    supabase
+      .from('subject_catalog_areas')
+      .select('subject_catalog_id, catalog_areas(slug)')
+      .in('subject_catalog_id', subjectIds),
+    userId
+      ? supabase
+          .from('subjects')
+          .select('catalog_id')
+          .eq('user_id', userId)
+          .eq('status', 'ativo')   // arquivada NÃO conta como ativada no catálogo (evita mostrar "ativa" no explorar)
+          .not('catalog_id', 'is', null)
+      : Promise.resolve({ data: [] as { catalog_id: string | null }[], error: null }),
+  ]);
 
-  // 3) vínculos área <-> matéria, com o slug da área
-  const { data: links, error: linkErr } = await supabase
-    .from('subject_catalog_areas')
-    .select('subject_catalog_id, catalog_areas(slug)')
-    .in('subject_catalog_id', subjectIds);
-  if (linkErr) throw new Error('Erro ao buscar áreas das matérias: ' + linkErr.message);
+  if (topicsRes.error) throw new Error('Erro ao contar tópicos: ' + topicsRes.error.message);
+  if (linksRes.error) throw new Error('Erro ao buscar áreas: ' + linksRes.error.message);
+  if (mineRes.error) throw new Error('Erro ao verificar ativadas: ' + mineRes.error.message);
 
-  // 4) quais o usuário já ativou (subjects com catalog_id preenchido)
-  let activatedIds = new Set<string>();
-  if (user) {
-    const { data: mine, error: mineErr } = await supabase
-      .from('subjects')
-      .select('catalog_id')
-      .eq('user_id', user.id)
-      .not('catalog_id', 'is', null);
-    if (mineErr) throw new Error('Erro ao verificar ativadas: ' + mineErr.message);
-    activatedIds = new Set((mine ?? []).map((r) => r.catalog_id as string));
-  }
-
-  // monta os mapas de contagem e áreas
   const topicCount = new Map<string, number>();
   const parentCount = new Map<string, number>();
-  for (const t of topics ?? []) {
+  for (const t of topicsRes.data ?? []) {
     topicCount.set(t.subject_catalog_id, (topicCount.get(t.subject_catalog_id) ?? 0) + 1);
     if (t.parent_id === null) {
       parentCount.set(t.subject_catalog_id, (parentCount.get(t.subject_catalog_id) ?? 0) + 1);
@@ -115,9 +140,7 @@ export async function getCatalogSubjects(): Promise<CatalogSubject[]> {
   }
 
   const areaMap = new Map<string, string[]>();
-  for (const row of links ?? []) {
-    // catalog_areas pode vir como objeto OU array, dependendo da inferência
-    // do supabase-js. Normalizamos para extrair o slug nos dois casos.
+  for (const row of linksRes.data ?? []) {
     const rel = (row as { catalog_areas: { slug: string } | { slug: string }[] | null }).catalog_areas;
     const slug = Array.isArray(rel) ? rel[0]?.slug : rel?.slug;
     if (!slug) continue;
@@ -125,6 +148,8 @@ export async function getCatalogSubjects(): Promise<CatalogSubject[]> {
     arr.push(slug);
     areaMap.set(row.subject_catalog_id, arr);
   }
+
+  const activatedIds = new Set((mineRes.data ?? []).map((r) => r.catalog_id as string));
 
   return subjects.map((s) => ({
     id: s.id,
@@ -138,16 +163,12 @@ export async function getCatalogSubjects(): Promise<CatalogSubject[]> {
   }));
 }
 
-// ---------- Tópicos do catálogo ----------
+// ---------- Tópicos de uma matéria (modal + prefetch no hover) ----------
 
-export interface CatalogTopic {
-  id: string;
-  name: string;
-  parent_id: string | null;
-  position: number;
-}
-
+// Cache permanente por sessão: topics_catalog não muda sem deploy de admin.
+// Usado também para prefetch silencioso via onMouseEnter no card.
 export async function getCatalogTopics(subjectCatalogId: string): Promise<CatalogTopic[]> {
+  if (_topicsCache.has(subjectCatalogId)) return _topicsCache.get(subjectCatalogId)!;
   const supabase = createClient();
   const { data, error } = await supabase
     .from('topics_catalog')
@@ -155,129 +176,20 @@ export async function getCatalogTopics(subjectCatalogId: string): Promise<Catalo
     .eq('subject_catalog_id', subjectCatalogId)
     .order('position', { ascending: true });
   if (error) throw new Error('Erro ao buscar tópicos: ' + error.message);
-  return data ?? [];
-}
-
-// ---------- Utilitário de isolamento: matérias arquivadas ----------
-
-/**
- * Retorna os IDs das matérias arquivadas do usuário atual.
- * Usado para excluir flashcards, revisões e tópicos de matérias arquivadas
- * de qualquer query — garantindo que o arquivamento seja respeitado em toda a app.
- *
- * Promise coalescing com TTL de 5s: chamadas paralelas na mesma renderização
- * compartilham a mesma promise e fazem apenas 1 round-trip ao banco.
- */
-let _archivedCache: Promise<string[]> | null = null;
-let _archivedCacheExpiry = 0;
-
-export async function getArchivedSubjectIds(): Promise<string[]> {
-  const now = Date.now();
-  if (_archivedCache && now < _archivedCacheExpiry) return _archivedCache;
-  _archivedCacheExpiry = now + 5_000;
-  const fetchPromise = (async () => {
-    const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return [];
-    const { data } = await supabase
-      .from('subjects')
-      .select('id')
-      .eq('user_id', user.id)
-      .eq('status', 'arquivado');
-    return (data ?? []).map((s) => s.id);
-  })();
-  _archivedCache = fetchPromise;
-  fetchPromise.catch(() => {
-    if (_archivedCache === fetchPromise) _archivedCache = null;
-  });
-  return fetchPromise;
+  const result = data ?? [];
+  _topicsCache.set(subjectCatalogId, result);
+  return result;
 }
 
 // ---------- Ativação ----------
 
-// Ativa uma matéria do catálogo: copia matéria + tópicos para o usuário.
-// Idempotente no banco (a função RPC não duplica). Retorna o id da subject.
 export async function activateSubject(catalogId: string): Promise<string> {
-  const supabase = createClient();
+  const { supabase } = await requireUser();
   const { data, error } = await supabase.rpc('activate_catalog_subject', {
     p_catalog_id: catalogId,
   });
   if (error) throw new Error('Erro ao ativar matéria: ' + error.message);
+  // Invalida o cache de matérias: is_activated mudou para esta entry
+  invalidateCatalogCache();
   return data as string;
-}
-
-// ---------- Matérias do usuário (instância) ----------
-
-// Lista as matérias do usuário por status, já com progresso (is_completed)
-// agregado nos tópicos-folha (parent_id não-nulo). Pais são pastas: não contam.
-export async function getMySubjects(status: SubjectStatus = 'ativo'): Promise<MySubject[]> {
-  const supabase = createClient();
-  const { data: { user }, error: authErr } = await supabase.auth.getUser();
-  if (authErr || !user) throw new Error('Você precisa estar logado.');
-
-  // 1) matérias do usuário no status pedido
-  const { data: subjects, error: subErr } = await supabase
-    .from('subjects')
-    .select('id, name, color, position, status, catalog_id')
-    .eq('user_id', user.id)
-    .eq('status', status)
-    .order('position', { ascending: true })
-    .order('created_at', { ascending: true });
-  if (subErr) throw new Error('Erro ao listar matérias: ' + subErr.message);
-  if (!subjects || subjects.length === 0) return [];
-
-  const subjectIds = subjects.map((s) => s.id);
-
-  // 2) tópicos dessas matérias — só o necessário p/ o progresso das folhas
-  const { data: topics, error: topErr } = await supabase
-    .from('topics')
-    .select('subject_id, parent_id, is_completed')
-    .in('subject_id', subjectIds);
-  if (topErr) throw new Error('Erro ao calcular progresso: ' + topErr.message);
-
-  const total = new Map<string, number>();
-  const done = new Map<string, number>();
-  for (const t of topics ?? []) {
-    if (t.parent_id === null) continue; // pai = pasta, não conta no progresso
-    total.set(t.subject_id, (total.get(t.subject_id) ?? 0) + 1);
-    if (t.is_completed) done.set(t.subject_id, (done.get(t.subject_id) ?? 0) + 1);
-  }
-
-  return subjects.map((s) => {
-    const leafTotal = total.get(s.id) ?? 0;
-    const leafDone = done.get(s.id) ?? 0;
-    const progress = leafTotal > 0 ? Math.round((leafDone / leafTotal) * 100) : 0;
-    return {
-      id: s.id,
-      name: s.name,
-      color: s.color,
-      position: s.position,
-      status: s.status as SubjectStatus,
-      catalog_id: s.catalog_id,
-      is_own: s.catalog_id === null,
-      leaf_total: leafTotal,
-      leaf_done: leafDone,
-      progress,
-    };
-  });
-}
-
-// Arquiva uma matéria do usuário (não apaga — preserva histórico).
-export async function archiveSubject(subjectId: string): Promise<void> {
-  const supabase = createClient();
-  const { error } = await supabase
-    .from('subjects')
-    .update({ status: 'arquivado' })
-    .eq('id', subjectId);
-  if (error) throw new Error('Erro ao arquivar matéria: ' + error.message);
-}
-
-// Desarquiva (volta para ativo).
-export async function unarchiveSubject(subjectId: string): Promise<void> {
-  const supabase = createClient();
-  const { error } = await supabase
-    .from('subjects')
-    .update({ status: 'ativo' })
-    .eq('id', subjectId);
-  if (error) throw new Error('Erro ao reativar matéria: ' + error.message);
 }

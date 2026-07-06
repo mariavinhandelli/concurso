@@ -65,6 +65,7 @@ export const TimePieCard = memo(function TimePieCard() {
       <div style={styles.tabs}>
         {ABAS.map((a) => (
           <button
+            className="touch-target"
             key={a.key}
             onClick={() => trocarView(a.key)}
             style={{
@@ -102,7 +103,7 @@ export const TimePieCard = memo(function TimePieCard() {
         /* P11 — estado vazio com CTA */
         <div style={styles.emptyWrap}>
           <p style={styles.empty}>Nenhum estudo registrado neste período.</p>
-          <button style={styles.emptyBtn} onClick={() => setLogOpen(true)}>
+          <button className="touch-target" style={styles.emptyBtn} onClick={() => setLogOpen(true)}>
             Registrar estudo →
           </button>
         </div>

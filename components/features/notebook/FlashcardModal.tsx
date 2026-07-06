@@ -9,7 +9,8 @@ import { theme } from '@/lib/theme';
 
 interface Props {
   frontText: string;
-  sourceErrorId: string;
+  // null = flashcard criado a partir de uma anotação livre (Caderno), sem erro de origem.
+  sourceErrorId: string | null;
   subjectId: string | null;
   topicId: string | null;
   onClose: () => void;
@@ -26,6 +27,12 @@ export function FlashcardModal({ frontText, sourceErrorId, subjectId, topicId, o
 
   useEffect(() => { backRef.current?.focus(); }, []);
   useEffect(() => { setFront(frontText); }, [frontText]);
+
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) { if (e.key === 'Escape' && !saving) onClose(); }
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [onClose, saving]);
 
   const canSave = front.trim().length > 0 && back.trim().length > 0;
 
@@ -85,7 +92,7 @@ export function FlashcardModal({ frontText, sourceErrorId, subjectId, topicId, o
 
 const styles: Record<string, React.CSSProperties> = {
   overlay: { position: 'fixed', inset: 0, background: 'rgba(30,28,24,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 60, padding: 16 },
-  modal: { background: theme.card, borderRadius: theme.radius, padding: 28, width: 'min(480px, 95vw)', boxShadow: '0 20px 60px rgba(0,0,0,0.18)', fontFamily: theme.font },
+  modal: { background: theme.card, borderRadius: theme.radius, padding: 28, width: 'min(480px, 95vw)', maxHeight: 'calc(100dvh - 32px)', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,0.18)', fontFamily: theme.font },
   title: { margin: '0 0 20px', fontSize: 19, color: theme.ink, fontWeight: 700 },
   label: { display: 'block', fontSize: 12.5, color: theme.inkSoft, fontWeight: 600, marginBottom: 6, marginTop: 10 },
   textarea: { width: '100%', boxSizing: 'border-box', padding: 12, borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.card, fontSize: 14, color: theme.ink, resize: 'vertical', fontFamily: 'inherit', outline: 'none' },

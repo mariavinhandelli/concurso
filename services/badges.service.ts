@@ -1,10 +1,10 @@
 // services/badges.service.ts
-// MOTOR DE CONQUISTAS (cálculo ao vivo). Lê todas as sessões de study_logs e
-// deriva o estado de cada badge na hora — nada é persistido. A "verdade" mora
-// sempre nos dados reais de estudo, então o badge nunca mente.
+// MOTOR DE CONQUISTAS. Lê study_logs (paginado), deriva badges ao vivo,
+// e calcula o ritmo dos últimos 30 dias para estimar ETA de cada conquista.
 
 import { createClient } from '@/lib/supabase/client';
 import { getStreak } from '@/services/streak.service';
+import { toLocalDateString as localDateStr } from '@/lib/local-date';
 
 export type BadgeFamily = 'volume' | 'maestria' | 'tempo' | 'consistencia';
 
@@ -20,17 +20,23 @@ export interface Badge {
   progress: number;
   hint?: string;
   tier?: 'bronze' | 'prata' | 'ouro';
+  etaDays?: number;
 }
 
 export interface BadgeStats {
-  totalQuestions: number;  // soma de questions_total em todas as sessões
-  totalCorrect: number;    // soma de questions_correct
-  accuracy: number;        // 0..100 (taxa de acerto geral)
-  totalHours: number;      // soma de duration_sec convertida em horas
-  // Volume de questões por faixa de qualidade da SESSÃO (maestria):
-  questoesBronze: number;  // sessões com acerto em [70, 80)
-  questoesPrata: number;   // sessões com acerto em [80, 90)
-  questoesOuro: number;    // sessões com acerto em [90, 100]
+  totalQuestions: number;
+  totalCorrect: number;
+  accuracy: number;
+  totalHours: number;
+  questoesBronze: number;
+  questoesPrata: number;
+  questoesOuro: number;
+}
+
+export interface RhythmStats {
+  avgQuestionsPerDay: number; // questões dos últimos 30 dias / 30
+  avgHoursPerDay: number;     // horas dos últimos 30 dias / 30
+  activeDaysLast30: number;   // dias com pelo menos 1 sessão no período
 }
 
 export interface ConsistencyStats {
@@ -41,89 +47,136 @@ export interface ConsistencyStats {
 export interface BadgeState {
   stats: BadgeStats;
   consistency: ConsistencyStats;
+  rhythm: RhythmStats;
   badges: Badge[];
   unlockedCount: number;
   totalCount: number;
 }
 
-const VOLUME_TARGETS = [100, 500, 1000, 5000];
-const TEMPO_TARGETS_HORAS = [50, 150, 300, 500];
-const CONSISTENCIA_TARGETS_DIAS = [15, 45, 100];
+// Marcos de volume: 100 (1ª semana) → 500 (1 mês) → 2k (3-6 meses) → 6k (federal)
+const VOLUME_TARGETS = [100, 500, 2000, 6000];
+// Horas: 50 (iniciante) → 200 (comprometido) → 500 (federal médio) → 1000 (fiscal federal)
+const TEMPO_TARGETS_HORAS = [50, 200, 500, 1000];
+// Dias: 7 (1ª semana) → 30 (hábito formado) → 100 (elite, referência Duolingo)
+const CONSISTENCIA_TARGETS_DIAS = [7, 30, 100];
 
-// Maestria: cada tier acumula questões de sessões na SUA faixa de acerto.
-const MAESTRIA_META_QUESTOES = 200; // questões na faixa para conquistar o tier
 const MAESTRIA_TIERS: {
   tier: 'bronze' | 'prata' | 'ouro';
-  min: number;   // acerto mínimo da faixa (inclusivo)
-  max: number;   // acerto máximo da faixa (exclusivo, exceto ouro)
   rotulo: string;
+  meta: number; // metas inversas ao nível: mais fácil manter 90%+ → exige menos volume
 }[] = [
-  { tier: 'bronze', min: 70, max: 80, rotulo: '70–80%' },
-  { tier: 'prata', min: 80, max: 90, rotulo: '80–90%' },
-  { tier: 'ouro', min: 90, max: 101, rotulo: '90%+' },
+  { tier: 'bronze', rotulo: '70–80%', meta: 300 }, // mais questões pois é a faixa mais fácil de atingir casualmente
+  { tier: 'prata',  rotulo: '80–90%', meta: 200 },
+  { tier: 'ouro',   rotulo: '90%+',   meta: 100 }, // menos volume: manter 90%+ já é a conquista
 ];
 
 function clamp01(n: number): number {
-  if (n < 0) return 0;
-  if (n > 1) return 1;
-  return n;
+  return n < 0 ? 0 : n > 1 ? 1 : n;
 }
 
-// Lê todas as sessões e agrega os totais — incluindo o volume por faixa de maestria.
-export async function getBadgeStats(): Promise<BadgeStats | null> {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return null;
+function etaDaysCalc(remaining: number, avgPerDay: number): number | undefined {
+  if (avgPerDay <= 0 || remaining <= 0) return undefined;
+  return Math.ceil(remaining / avgPerDay);
+}
 
-  const { data: logs, error } = await supabase
-    .from('study_logs')
-    .select('questions_total, questions_correct, duration_sec')
-    .eq('user_id', user.id);
-  if (error) throw new Error('Erro ao calcular conquistas: ' + error.message);
+type SupabaseClient = ReturnType<typeof createClient>;
 
-  let totalQuestions = 0;
-  let totalCorrect = 0;
-  let totalSec = 0;
-  let questoesBronze = 0;
-  let questoesPrata = 0;
-  let questoesOuro = 0;
+// ─── Query interna consolidada (QW6) ─────────────────────────────────────────
+// Uma única passagem paginada sobre study_logs calcula tanto as estatísticas
+// globais (stats) quanto o ritmo dos últimos 30 dias (rhythm).
+// Elimina a segunda query separada de _getRhythm.
 
-  for (const l of logs ?? []) {
-    const q = l.questions_total ?? 0;
+interface BadgeData {
+  stats: BadgeStats;
+  rhythm: RhythmStats;
+}
+
+async function _getBadgeData(
+  supabase: SupabaseClient,
+  userId: string,
+): Promise<BadgeData | null> {
+  const since30 = new Date();
+  since30.setDate(since30.getDate() - 30);
+  const since30Iso = since30.toISOString();
+
+  const PAGE_SIZE = 1000;
+  type LogRow = {
+    questions_total:   number | null;
+    questions_correct: number | null;
+    duration_sec:      number | null;
+    started_at:        string;
+  };
+  const logs: LogRow[] = [];
+  let from = 0;
+  while (true) {
+    const { data, error } = await supabase
+      .from('study_logs')
+      .select('questions_total, questions_correct, duration_sec, started_at')
+      .eq('user_id', userId)
+      .order('id', { ascending: true })
+      .range(from, from + PAGE_SIZE - 1);
+    if (error) throw new Error('Erro ao calcular conquistas: ' + error.message);
+    if (!data || data.length === 0) break;
+    logs.push(...data);
+    if (data.length < PAGE_SIZE) break;
+    from += PAGE_SIZE;
+  }
+
+  let totalQuestions = 0, totalCorrect = 0, totalSec = 0;
+  let questoesBronze = 0, questoesPrata = 0, questoesOuro = 0;
+  // Métricas dos últimos 30 dias (rhythm) — calculadas na mesma iteração
+  let totalQ30 = 0, totalSec30 = 0;
+  const activeDays30 = new Set<string>();
+
+  for (const l of logs) {
+    const q = l.questions_total  ?? 0;
     const c = l.questions_correct ?? 0;
     totalQuestions += q;
-    totalCorrect += c;
-    totalSec += l.duration_sec ?? 0;
-
-    // Classifica a SESSÃO pela sua própria % de acerto e soma o volume na faixa.
+    totalCorrect   += c;
+    totalSec       += l.duration_sec ?? 0;
     if (q > 0) {
-      const acertoSessao = (c / q) * 100;
-      if (acertoSessao >= 90) questoesOuro += q;
-      else if (acertoSessao >= 80) questoesPrata += q;
-      else if (acertoSessao >= 70) questoesBronze += q;
-      // abaixo de 70%: não conta para nenhuma faixa de maestria.
+      const pct = (c / q) * 100;
+      if (pct >= 90)      questoesOuro   += q;
+      else if (pct >= 80) questoesPrata  += q;
+      else if (pct >= 70) questoesBronze += q;
+    }
+    if (l.started_at >= since30Iso) {
+      totalQ30   += q;
+      totalSec30 += l.duration_sec ?? 0;
+      activeDays30.add(localDateStr(new Date(l.started_at)));
     }
   }
 
-  const accuracy = totalQuestions > 0 ? (totalCorrect / totalQuestions) * 100 : 0;
-  const totalHours = totalSec / 3600;
-
   return {
-    totalQuestions,
-    totalCorrect,
-    accuracy,
-    totalHours,
-    questoesBronze,
-    questoesPrata,
-    questoesOuro,
+    stats: {
+      totalQuestions,
+      totalCorrect,
+      accuracy: totalQuestions > 0 ? (totalCorrect / totalQuestions) * 100 : 0,
+      totalHours: totalSec / 3600,
+      questoesBronze,
+      questoesPrata,
+      questoesOuro,
+    },
+    rhythm: {
+      avgQuestionsPerDay: totalQ30 / 30,
+      avgHoursPerDay:     totalSec30 / 3600 / 30,
+      activeDaysLast30:   activeDays30.size,
+    },
   };
 }
 
-function buildBadges(stats: BadgeStats, consistency: ConsistencyStats): Badge[] {
+// ─── buildBadges ─────────────────────────────────────────────────────────────
+
+function buildBadges(
+  stats: BadgeStats,
+  consistency: ConsistencyStats,
+  rhythm: RhythmStats,
+): Badge[] {
   const badges: Badge[] = [];
 
-  // --- Volume (questões resolvidas) ---
+  // Volume
   for (const target of VOLUME_TARGETS) {
+    const remaining = Math.max(0, target - stats.totalQuestions);
     badges.push({
       id: `volume-${target}`,
       family: 'volume',
@@ -134,11 +187,13 @@ function buildBadges(stats: BadgeStats, consistency: ConsistencyStats): Badge[] 
       target,
       unit: 'questões',
       progress: clamp01(stats.totalQuestions / target),
+      etaDays: etaDaysCalc(remaining, rhythm.avgQuestionsPerDay),
     });
   }
 
-  // --- Tempo (horas de estudo) ---
+  // Tempo
   for (const target of TEMPO_TARGETS_HORAS) {
+    const remaining = Math.max(0, target - stats.totalHours);
     badges.push({
       id: `tempo-${target}`,
       family: 'tempo',
@@ -149,68 +204,90 @@ function buildBadges(stats: BadgeStats, consistency: ConsistencyStats): Badge[] 
       target,
       unit: 'horas',
       progress: clamp01(stats.totalHours / target),
+      etaDays: etaDaysCalc(remaining, rhythm.avgHoursPerDay),
     });
   }
 
-  // --- Maestria (volume por faixa de qualidade da sessão) ---
-  // Cada tier é independente: acumula só as questões de sessões na sua faixa de
-  // acerto. 200 questões na faixa = conquistado. Os cards nunca compartilham número.
+  // Maestria
   const volumePorTier: Record<string, number> = {
     bronze: stats.questoesBronze,
-    prata: stats.questoesPrata,
-    ouro: stats.questoesOuro,
+    prata:  stats.questoesPrata,
+    ouro:   stats.questoesOuro,
   };
-  for (const { tier, rotulo } of MAESTRIA_TIERS) {
-    const atual = volumePorTier[tier];
-    const unlocked = atual >= MAESTRIA_META_QUESTOES;
-    const restante = Math.max(0, MAESTRIA_META_QUESTOES - atual);
+  for (const { tier, rotulo, meta } of MAESTRIA_TIERS) {
+    const atual    = volumePorTier[tier];
+    const unlocked = atual >= meta;
+    const restante = Math.max(0, meta - atual);
     badges.push({
       id: `maestria-${tier}`,
       family: 'maestria',
-      label: `Maestria ${tier}`,
-      description: `${MAESTRIA_META_QUESTOES} questões em sessões com ${rotulo} de acerto.`,
+      label: `Maestria ${tier.charAt(0).toUpperCase() + tier.slice(1)}`,
+      description: `${meta} questões em sessões com ${rotulo} de acerto.`,
       unlocked,
       current: atual,
-      target: MAESTRIA_META_QUESTOES,
+      target: meta,
       unit: 'questões',
-      progress: clamp01(atual / MAESTRIA_META_QUESTOES),
-      hint: unlocked ? '' : `faltam ${restante.toLocaleString('pt-BR')} questões nessa faixa`,
+      progress: clamp01(atual / meta),
+      hint: unlocked ? undefined : `faltam ${restante.toLocaleString('pt-BR')} questões nessa faixa`,
       tier,
+      etaDays: unlocked ? undefined : etaDaysCalc(restante, rhythm.avgQuestionsPerDay),
     });
   }
 
-  // --- Consistência (dias seguidos) ---
+  // Consistência
   for (const target of CONSISTENCIA_TARGETS_DIAS) {
     const unlocked = consistency.longest >= target;
+    // Usar o melhor histórico (longest) para que o progresso não regride
+    const best = Math.max(consistency.current, consistency.longest);
     badges.push({
       id: `consistencia-${target}`,
       family: 'consistencia',
       label: `${target} dias seguidos`,
-      description: `Estude ${target} dias consecutivos (mínimo 25 min por dia).`,
+      description: `Estude ${target} dias consecutivos (mínimo 30 min por dia).`,
       unlocked,
-      current: unlocked ? target : consistency.current,
+      current: unlocked ? target : best,
       target,
       unit: 'dias',
-      progress: unlocked ? 1 : clamp01(consistency.current / target),
+      progress: unlocked ? 1 : clamp01(best / target),
+      // ETA de consistência não se aplica — depende de dias consecutivos
     });
   }
 
   return badges;
 }
 
+// ─── Exports públicos ─────────────────────────────────────────────────────────
+
+export async function getBadgeStats(): Promise<BadgeStats | null> {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return null;
+  const result = await _getBadgeData(supabase, user.id);
+  return result?.stats ?? null;
+}
+
 export async function getBadgeState(): Promise<BadgeState | null> {
-  const stats = await getBadgeStats();
-  if (!stats) return null;
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return null;
 
-  const streak = await getStreak();
+  // QW5+QW6: getUser() uma vez; duas queries em paralelo; streak recebe o client
+  // já autenticado para evitar um segundo getUser() interno.
+  const [badgeData, streak] = await Promise.all([
+    _getBadgeData(supabase, user.id),
+    getStreak(supabase, user.id),
+  ]);
+  if (!badgeData) return null;
+
+  const { stats, rhythm } = badgeData;
   const consistency: ConsistencyStats = { current: streak.current, longest: streak.longest };
-
-  const badges = buildBadges(stats, consistency);
-  const unlockedCount = badges.filter((b) => b.unlocked).length;
+  const badges        = buildBadges(stats, consistency, rhythm);
+  const unlockedCount = badges.filter(b => b.unlocked).length;
 
   return {
     stats,
     consistency,
+    rhythm,
     badges,
     unlockedCount,
     totalCount: badges.length,

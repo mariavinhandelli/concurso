@@ -3,11 +3,20 @@
 // Cada linha vira um tópico. Remove numeração e marcadores comuns de editais.
 
 export function parseTopics(raw: string): string[] {
-  return raw
-    .split('\n')
-    .map((linha) => limparLinha(linha))
-    .filter((linha) => linha.length > 0)
-    .filter((linha, i, arr) => arr.indexOf(linha) === i); // remove duplicatas
+  const seen = new Set<string>();
+  const result: string[] = [];
+  for (const linha of raw.split('\n')) {
+    const limpa = limparLinha(linha);
+    if (limpa.length === 0 || seen.has(limpa)) continue;
+    seen.add(limpa);
+    result.push(limpa);
+  }
+  return result;
+}
+
+// Exposto para o parser de edital reaproveitar a mesma limpeza de linha.
+export function cleanTopicLine(linha: string): string {
+  return limparLinha(linha);
 }
 
 function limparLinha(linha: string): string {

@@ -145,7 +145,7 @@ export function BlockModal({ blockDate, dateLabel, onClose, onCreated, editBlock
 
 const styles: Record<string, React.CSSProperties> = {
   overlay: { position: 'fixed', inset: 0, background: 'rgba(30,28,24,0.4)', display: 'grid', placeItems: 'center', zIndex: zIndex.overlay, padding: 20 },
-  modal: { background: theme.card, borderRadius: theme.radius, boxShadow: '0 20px 60px rgba(0,0,0,0.18)', padding: 24, width: '100%', maxWidth: 380, fontFamily: theme.font },
+  modal: { background: theme.card, borderRadius: theme.radius, boxShadow: '0 20px 60px rgba(0,0,0,0.18)', padding: 24, width: '100%', maxWidth: 380, maxHeight: 'calc(100dvh - 32px)', overflowY: 'auto', fontFamily: theme.font },
   h2: { fontSize: 18, fontWeight: 700, color: theme.ink, margin: '0 0 18px' },
   label: { display: 'block', fontSize: 12.5, fontWeight: 600, color: theme.inkSoft, margin: '14px 0 6px' },
   select: { width: '100%', padding: '10px 12px', borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.card, fontSize: 14, color: theme.ink, fontFamily: 'inherit', cursor: 'pointer', outline: 'none' },

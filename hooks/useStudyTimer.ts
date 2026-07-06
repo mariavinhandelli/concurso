@@ -67,12 +67,15 @@ export function useStudyTimer() {
     }
   }, []);
 
-  // Para e limpa o timer de um usuário específico
-  const resetForUser = useCallback((uid: string) => {
+  // Limpa apenas o estado em memória/tick — NÃO apaga o localStorage.
+  // A sessão de estudo do usuário anterior precisa sobreviver a perdas
+  // transitórias de auth (falha de refresh de token, aba dormindo) para que,
+  // ao a sessão ser restaurada, o timer volte a tickar de onde parou.
+  // A limpeza definitiva do storage é responsabilidade exclusiva de abandon()
+  // (chamado explicitamente pelo logout).
+  const resetMemoryForUser = useCallback(() => {
     stopTicking();
     timerRef.current = null;
-    clearTimer(uid);
-    clearPendingSession(uid);
     setPendingSession(null);
     setElapsedSec(0);
     setStatus('idle');
@@ -95,8 +98,9 @@ export function useStudyTimer() {
       // Sem mudança de usuário — ignora (evita loop no INITIAL_SESSION)
       if (newUid === prevUid) return;
 
-      // Limpa timer do usuário anterior
-      if (prevUid) resetForUser(prevUid);
+      // Limpa apenas o estado em memória do usuário anterior — o storage
+      // permanece intacto para o caso da sessão se recuperar (ver comentário acima).
+      if (prevUid) resetMemoryForUser();
       userIdRef.current = newUid;
 
       if (!newUid) return;
@@ -123,7 +127,7 @@ export function useStudyTimer() {
       stopTicking();
       subscription.unsubscribe();
     };
-  }, [resetForUser, syncElapsed, startTicking, stopTicking]);
+  }, [resetMemoryForUser, syncElapsed, startTicking, stopTicking]);
 
   useEffect(() => {
     const onVisible = () => {
@@ -132,6 +136,43 @@ export function useStudyTimer() {
     document.addEventListener('visibilitychange', onVisible);
     return () => document.removeEventListener('visibilitychange', onVisible);
   }, [syncElapsed]);
+
+  // Sincroniza o estado do timer quando outra aba salva no localStorage.
+  // Evita que duas abas abertas do mesmo usuário usem estados divergentes.
+  useEffect(() => {
+    const handleStorage = (e: StorageEvent) => {
+      const uid = userIdRef.current;
+      if (!uid) return;
+      const key = `study_timer_active_${uid}`;
+      if (e.key !== key) return;
+
+      if (e.newValue === null) {
+        // Outra aba limpou o timer (stop/abandon).
+        stopTicking();
+        timerRef.current = null;
+        setStatus('idle');
+        setElapsedSec(0);
+        return;
+      }
+      try {
+        const updated: unknown = JSON.parse(e.newValue);
+        if (
+          updated && typeof updated === 'object' &&
+          'sessionId' in updated && 'startedAt' in updated && 'pauses' in updated
+        ) {
+          const parsed = updated as PersistedTimer;
+          timerRef.current = parsed;
+          const paused = isPausedFn(parsed);
+          setStatus(paused ? 'paused' : 'running');
+          syncElapsed();
+          if (paused) stopTicking(); else startTicking();
+        }
+      } catch { /* formato inválido — ignora */ }
+    };
+
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
+  }, [stopTicking, syncElapsed, startTicking]);
 
   const start = useCallback(
     ({ mode, topicId = null, subjectId = null, boardId = null }: StartParams) => {

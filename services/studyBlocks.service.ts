@@ -93,13 +93,14 @@ export async function deleteBlock(blockId: string): Promise<void> {
 
 export async function updateBlock(
   blockId: string,
-  updates: { plannedMinutes?: number; topicId?: string | null },
+  updates: { plannedMinutes?: number; topicId?: string | null; blockDate?: string },
 ): Promise<void> {
   const { supabase, userId } = await requireUser();
 
-  const payload: { planned_minutes?: number; topic_id?: string | null } = {};
+  const payload: { planned_minutes?: number; topic_id?: string | null; block_date?: string } = {};
   if (updates.plannedMinutes !== undefined) payload.planned_minutes = updates.plannedMinutes;
   if (updates.topicId !== undefined) payload.topic_id = updates.topicId;
+  if (updates.blockDate !== undefined) payload.block_date = updates.blockDate;
 
   const { error } = await supabase
     .from('study_blocks')

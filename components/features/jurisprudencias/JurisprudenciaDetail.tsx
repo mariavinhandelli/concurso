@@ -87,6 +87,44 @@ export function JurisprudenciaDetail({ item, isMobile }: Props) {
         </p>
       </div>
 
+      {/* ── SÚMULA — texto oficial (oculto se idêntico à tese) ── */}
+      {item.texto_sumula && item.texto_sumula !== item.tese && (
+        <div style={{
+          background: theme.card,
+          border: `0.5px solid ${theme.line}`,
+          borderRadius: theme.radius,
+          padding: isMobile ? '16px' : '20px 24px',
+        }}>
+          <div style={{ fontSize: 11, fontWeight: 700, color: theme.inkFaint, letterSpacing: 0.8, textTransform: 'uppercase', marginBottom: 8 }}>
+            {TIPO_LABEL[item.tipo] ?? 'Súmula'}{item.numero_sumula ? ` ${item.numero_sumula}` : ''} · {item.tribunal}
+          </div>
+          {item.titulo && (
+            <p style={{ fontSize: 14, fontWeight: 700, color: theme.ink, margin: '0 0 8px' }}>{item.titulo}</p>
+          )}
+          <p style={{ fontSize: 14.5, color: theme.ink, lineHeight: 1.7, margin: 0, fontStyle: 'italic' }}>
+            “{item.texto_sumula}”
+          </p>
+          {(item.origem_publicacao || item.data_aprovacao) && (
+            <p style={{ fontSize: 12, color: theme.inkFaint, margin: '10px 0 0' }}>
+              {item.data_aprovacao ? `Aprovada em ${fmtDate(item.data_aprovacao)}` : ''}
+              {item.data_aprovacao && item.origem_publicacao ? ' · ' : ''}
+              {item.origem_publicacao ?? ''}
+            </p>
+          )}
+          {(item.cancelada || item.superada || item.superada_parcialmente) && (
+            <div style={{
+              marginTop: 12, padding: '10px 14px', borderRadius: 10,
+              background: theme.dangerTint, fontSize: 13, color: theme.danger, fontWeight: 600,
+            }}>
+              {item.cancelada ? 'Súmula cancelada.' : item.superada ? 'Entendimento superado.' : 'Entendimento parcialmente superado.'}
+              {item.superada_por && item.superada_por.length > 0 && (
+                <span style={{ fontWeight: 400 }}> Ver: {item.superada_por.join(', ')}</span>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* ── IDENTIFICAÇÃO ── */}
       <JurisSection title="Identificação" icon={<IconDoc />} defaultOpen={true}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -269,6 +307,34 @@ export function JurisprudenciaDetail({ item, isMobile }: Props) {
             </span>
           </div>
         </div>
+      </JurisSection>
+
+      {/* ── JURISPRUDÊNCIAS RELACIONADAS ── */}
+      <JurisSection
+        title="Jurisprudências relacionadas"
+        icon={<IconDoc />}
+        empty={!item.jurisprudencias_relacionadas || item.jurisprudencias_relacionadas.length === 0}
+      >
+        {item.jurisprudencias_relacionadas && item.jurisprudencias_relacionadas.length > 0 && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {item.jurisprudencias_relacionadas.map((rel, i) => (
+              <div key={`${rel.processo}-${i}`} style={{
+                display: 'flex', flexDirection: 'column', gap: 3,
+                padding: '10px 14px', borderRadius: 10, background: theme.bg,
+                borderLeft: `3px solid ${theme.teal}`,
+              }}>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: theme.ink }}>{rel.processo}</span>
+                  <span style={{
+                    fontSize: 10.5, fontWeight: 600, color: theme.tealDeep, background: theme.tealBg,
+                    borderRadius: 999, padding: '1px 8px', textTransform: 'capitalize',
+                  }}>{rel.relacao}</span>
+                </div>
+                <p style={{ fontSize: 13, color: theme.inkSoft, lineHeight: 1.55, margin: 0 }}>{rel.motivo}</p>
+              </div>
+            ))}
+          </div>
+        )}
       </JurisSection>
 
       {/* ── PALAVRAS-CHAVE ── */}

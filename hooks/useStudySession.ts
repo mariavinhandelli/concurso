@@ -2,7 +2,7 @@
 // hooks/useStudySession.ts
 // Estado e lógica de uma sessão de estudo de flashcards.
 
-import { useState, useCallback, useRef, useMemo } from 'react';
+import { useState, useCallback, useRef, useMemo, useEffect } from 'react';
 import { submitCardReview, type ReviewRating, type QueueCard } from '@/services/flashcards.service';
 
 export interface StudySessionState {
@@ -35,7 +35,7 @@ export function useStudySession(
   const [newLearned, setNewLearned] = useState(0);
   const savingRef = useRef(false);
   const onErrorRef = useRef(onError);
-  onErrorRef.current = onError;
+  useEffect(() => { onErrorRef.current = onError; }, [onError]);
 
   const total = queue.length;
   const current = queue[index];

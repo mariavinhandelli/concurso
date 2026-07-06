@@ -8,8 +8,15 @@ import { useUI } from '@/components/layout/UIContext';
 import { useUser } from '@/components/layout/UserContext';
 import { useTimer } from '@/components/features/timer/TimerContext';
 import { StreakBar } from '@/components/features/streak/StreakBar';
-import { NextTopicCard } from '@/components/features/home/NextTopicCard';
+import { OnboardingGate } from '@/components/features/home/OnboardingWizard';
+import { PlanoHoje } from '@/components/features/home/PlanoHoje';
 import { TodayBlock } from '@/components/features/home/TodayBlock';
+import { CoberturaEdital } from '@/components/features/home/CoberturaEdital';
+import { MarcoEditalCelebracao } from '@/components/features/home/MarcoEditalCelebracao';
+import { RaioXCard } from '@/components/features/home/RaioXCard';
+import { MissoesSemana } from '@/components/features/home/MissoesSemana';
+import { CoachSemanal } from '@/components/features/home/CoachSemanal';
+import { UltimaNotaCard } from '@/components/features/home/UltimaNotaCard';
 import { TimePieCard } from '@/components/features/home/TimePieCard';
 import { JourneyStats } from '@/components/features/home/JourneyStats';
 import { ExamCountdown } from '@/components/features/dashboard/ExamCountdown';
@@ -43,6 +50,7 @@ function HomeContent() {
   useEffect(() => {
     router.prefetch('/reviews');
     router.prefetch('/flashcards');
+    router.prefetch('/conquistas');
   }, [router]);
 
   const hoje = new Date().toLocaleDateString('pt-BR', {
@@ -53,6 +61,10 @@ function HomeContent() {
     <div style={{ ...styles.wrap, padding: isMobile ? '20px 16px' : '34px 40px' }}>
       {/* Auto-start isolado — não bloqueia o restante da página */}
       <Suspense fallback={null}><TimerAutoStart /></Suspense>
+
+      {/* Onboarding de primeiro uso — só aparece para usuário sem alvo e sem sessões */}
+      <OnboardingGate />
+      <MarcoEditalCelebracao />
 
       <div style={styles.topbar}>
         <div style={{ minWidth: 0 }}>
@@ -69,13 +81,31 @@ function HomeContent() {
         </div>
       </div>
 
-      <TodayBlock />
+      <CoachSemanal />
 
-      <div style={{ margin: '16px 0' }}>
-        <NextTopicCard />
+      <PlanoHoje />
+
+      <div style={{ marginTop: 16 }}>
+        <TodayBlock />
       </div>
 
-      <div style={{ ...styles.streakStrip, marginBottom: 16 }}>
+      <div style={{ marginTop: 16 }}>
+        <UltimaNotaCard />
+      </div>
+
+      <div style={{ marginTop: 16 }}>
+        <CoberturaEdital />
+      </div>
+
+      <div style={{ marginTop: 16 }}>
+        <RaioXCard />
+      </div>
+
+      <div style={{ marginTop: 16 }}>
+        <MissoesSemana />
+      </div>
+
+      <div style={{ ...styles.streakStrip, marginBottom: 16, marginTop: 16 }}>
         <StreakBar />
       </div>
 
@@ -93,10 +123,10 @@ export default function Home() {
 }
 
 const styles: Record<string, React.CSSProperties> = {
-  wrap: { maxWidth: 980, margin: '0 auto', padding: '34px 40px', fontFamily: theme.font, minWidth: 0 },
-  topbar: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 22, gap: 16, flexWrap: 'wrap' },
+  wrap: { maxWidth: 960, margin: '0 auto', padding: '34px 40px', fontFamily: theme.font, minWidth: 0 },
+  topbar: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, gap: 16, flexWrap: 'wrap' },
   h1: { fontSize: 28, fontWeight: 800, color: theme.ink, letterSpacing: -0.6, margin: 0 },
   sub: { fontSize: 14, color: theme.inkSoft, margin: '4px 0 0', fontWeight: 500 },
-  countdownSlot: { flexShrink: 0 },
+  countdownSlot: { flexShrink: 0, minWidth: 0 },
   streakStrip: { background: theme.card, border: `0.5px solid ${theme.line}`, borderRadius: theme.radius, boxShadow: theme.shadow, padding: 16, marginBottom: 16, minWidth: 0 },
 };

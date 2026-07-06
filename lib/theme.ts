@@ -51,24 +51,24 @@ export const theme = {
   radiusSm: 12,
   radiusXs: 8,
   radiusLg: 24,
+  radiusPill: 999,
   font: "var(--font-poppins), Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
 } as const;
 
-// Réguas de página — AMBAS alinhadas à esquerda, mesmo padding inicial.
-// Páginas começam no mesmo ponto junto da sidebar; a largura varia por tipo.
+// Réguas de página — centradas horizontalmente via margin auto; padding inicial padrão.
 //   pageList: listas e formulários (coluna contida, leitura confortável).
 //   pageWide: dashboards e grades (ocupa a largura com conteúdo denso).
 export const pageList: React.CSSProperties = {
   maxWidth: 760,
-  margin: '0',
-  padding: '34px 48px',
+  margin: '0 auto',
+  padding: '34px 40px',
   fontFamily: theme.font,
 };
 
 export const pageWide: React.CSSProperties = {
   maxWidth: 1280,
-  margin: '0',
-  padding: '34px 48px',
+  margin: '0 auto',
+  padding: '34px 40px',
   fontFamily: theme.font,
 };
 

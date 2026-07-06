@@ -1,13 +1,13 @@
 // components/features/notebook/NoteEditor.tsx
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useToast } from '@/components/ui/ToastProvider';
 import { RichTextEditor } from '@/components/editor/RichTextEditor';
 import { ERROR_TYPES, createNote, updateNote, listBoards, type ErrorNote, type NoteInput } from '@/services/notebook.service';
-import { listSubjectOptions, listTopicOptions, type PickerOption } from '@/services/picker.service';
+import { listActive as listSubjectOptions } from '@/services/subjects.service';
+import { listLeaves as listTopicOptions, type PickerOption } from '@/services/topics.service';
 import { getAcertoTopico } from '@/services/metrics.service';
-import { scheduleReviewFromError } from '@/services/reviews.service';
 import { FlashcardModal } from '@/components/features/notebook/FlashcardModal';
 import { theme } from '@/lib/theme';
 
@@ -17,9 +17,11 @@ interface Props {
   presetTopicId?: string | null;
   onSaved: () => void;
   onCancel: () => void;
+  /** Chamado quando o usuário confirma o agendamento de revisão pós-save. Responsabilidade do pai. */
+  onScheduleReview?: (topicId: string, days: number) => Promise<void>;
 }
 
-export function NoteEditor({ note, presetSubjectId = null, presetTopicId = null, onSaved, onCancel }: Props) {
+export function NoteEditor({ note, presetSubjectId = null, presetTopicId = null, onSaved, onCancel, onScheduleReview }: Props) {
   const toast = useToast();
   const [title, setTitle] = useState('');
   const [content, setContent] = useState<object>({});
@@ -41,23 +43,44 @@ export function NoteEditor({ note, presetSubjectId = null, presetTopicId = null,
 
   const [flashcardText, setFlashcardText] = useState<string | null>(null);
 
+  const loadingSubjectIdRef = useRef<string | null>(null);
+  const latestTopicIdRef = useRef<string | null>(null);
+
   // Sugestão de revisão pós-save: guarda o tópico/nome a sugerir.
   const [reviewSuggestion, setReviewSuggestion] = useState<{ topicId: string; topicName: string } | null>(null);
   const [scheduling, setScheduling] = useState(false);
+
+  // B-3: Escape fecha o overlay de sugestão de revisão
+  useEffect(() => {
+    if (!reviewSuggestion) return;
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape' && !scheduling) { setReviewSuggestion(null); onSaved(); }
+    }
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [reviewSuggestion, scheduling, onSaved]);
 
   useEffect(() => {
     listSubjectOptions().then(setSubjects).catch((e) => toast.error(e instanceof Error ? e.message : 'Erro ao carregar matérias.'));
     listBoards().then(setBoards).catch((e) => toast.error(e instanceof Error ? e.message : 'Erro ao carregar bancas.'));
   }, [toast]);
 
+  // A-3: guarda de ref evita que resposta de subject anterior sobrescreva topics atual
   useEffect(() => {
     if (!subjectId) { setTopics([]); return; }
-    listTopicOptions(subjectId).then(setTopics).catch((e) => toast.error(e instanceof Error ? e.message : 'Erro ao carregar tópicos.'));
+    loadingSubjectIdRef.current = subjectId;
+    listTopicOptions(subjectId)
+      .then((ts) => { if (loadingSubjectIdRef.current === subjectId) setTopics(ts); })
+      .catch((e) => toast.error(e instanceof Error ? e.message : 'Erro ao carregar tópicos.'));
   }, [subjectId, toast]);
 
+  // A-1: guarda de ref evita que resposta de tópico anterior sobrescreva acerto atual
   useEffect(() => {
     if (!topicId) { setAcerto(null); return; }
-    getAcertoTopico(topicId).then(setAcerto).catch(() => setAcerto(null));
+    latestTopicIdRef.current = topicId;
+    getAcertoTopico(topicId)
+      .then((a) => { if (latestTopicIdRef.current === topicId) setAcerto(a); })
+      .catch(() => { if (latestTopicIdRef.current === topicId) setAcerto(null); });
   }, [topicId]);
 
   useEffect(() => {
@@ -116,9 +139,9 @@ export function NoteEditor({ note, presetSubjectId = null, presetTopicId = null,
     if (!reviewSuggestion) return;
     setScheduling(true);
     try {
-      await scheduleReviewFromError(reviewSuggestion.topicId, days);
+      await onScheduleReview?.(reviewSuggestion.topicId, days);
     } catch {
-      // se falhar o agendamento, não trava o fluxo — o erro já foi salvo
+      // agendamento falhou — fluxo continua, o erro já foi salvo
     } finally {
       setScheduling(false);
       setReviewSuggestion(null);
@@ -231,7 +254,7 @@ export function NoteEditor({ note, presetSubjectId = null, presetTopicId = null,
           subjectId={subjectId || null}
           topicId={topicId || null}
           onClose={() => setFlashcardText(null)}
-          onCreated={() => { setFlashcardText(null); alert('Flashcard criado!'); }}
+          onCreated={() => { setFlashcardText(null); toast.success('Flashcard criado!'); }}
         />
       )}
     </div>

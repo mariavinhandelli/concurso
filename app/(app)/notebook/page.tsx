@@ -3,11 +3,14 @@
 // No mobile, master-detail: mostra a lista OU o editor (não os dois lado a lado).
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
+import Link from 'next/link';
 import { useConfirm } from '@/hooks/useConfirm';
 import { useToast } from '@/components/ui/ToastProvider';
 import { searchNotes, listNotes, deleteNote, countNotesBySubject, listNotesByBoard, listRecentNotes, listCriticalTopics, listBoards, type ErrorNote, type CriticalTopic } from '@/services/notebook.service';
-import { listSubjectOptions, listTopicOptions, type PickerOption } from '@/services/picker.service';
+import { listActive as listSubjectOptions } from '@/services/subjects.service';
+import { listLeaves as listTopicOptions, type PickerOption } from '@/services/topics.service';
+import { scheduleReviewFromError } from '@/services/reviews.service';
 import { NoteEditor } from '@/components/features/notebook/NoteEditor';
 import { theme } from '@/lib/theme';
 import { useUI } from '@/components/layout/UIContext';
@@ -18,7 +21,7 @@ type ViewMode = 'navegar' | 'recentes' | 'criticos';
 const PERIODOS = [7, 15, 30];
 
 export default function NotebookPage() {
-  const { isMobile } = useUI();
+  const { isMobile, isTablet } = useUI();
   const [viewMode, setViewMode] = useState<ViewMode>('navegar');
   const [periodo, setPeriodo] = useState(7);
   const [recentNotes, setRecentNotes] = useState<ErrorNote[]>([]);
@@ -38,6 +41,7 @@ export default function NotebookPage() {
   const [boards, setBoards] = useState<{ id: string; name: string; color: string }[]>([]);
   const [boardFilter, setBoardFilter] = useState('');
   const [boardResults, setBoardResults] = useState<ErrorNote[] | null>(null);
+  const [boardLoading, setBoardLoading] = useState(false);
   const [selected, setSelected] = useState<ErrorNote | null>(null);
   const [editing, setEditing] = useState(false);
   const [blankEditor, setBlankEditor] = useState(false);
@@ -46,6 +50,7 @@ export default function NotebookPage() {
   const [loadingSubjects, setLoadingSubjects] = useState(true);
   const [loadingNotes, setLoadingNotes] = useState(false);
   const [pageError, setPageError] = useState<string | null>(null);
+  const loadingSubjectIdRef = useRef<string | null>(null);
 
   useEffect(() => {
     Promise.all([
@@ -70,8 +75,12 @@ export default function NotebookPage() {
   }, [viewMode, toast]);
 
   useEffect(() => {
-    if (!boardFilter) { setBoardResults(null); return; }
-    listNotesByBoard(boardFilter).then(setBoardResults).catch((e) => { toast.error(e instanceof Error ? e.message : 'Erro ao filtrar por banca.'); setBoardResults([]); });
+    if (!boardFilter) { setBoardResults(null); setBoardLoading(false); return; }
+    setBoardLoading(true);
+    listNotesByBoard(boardFilter)
+      .then(setBoardResults)
+      .catch((e) => { toast.error(e instanceof Error ? e.message : 'Erro ao filtrar por banca.'); setBoardResults([]); })
+      .finally(() => setBoardLoading(false));
   }, [boardFilter, toast]);
 
   useEffect(() => {
@@ -96,8 +105,11 @@ export default function NotebookPage() {
 
   function openSubject(s: PickerOption) {
     setCurSubject(s);
-    listTopicOptions(s.id).then(setTopics).catch((e) => toast.error(e instanceof Error ? e.message : 'Erro ao carregar tópicos.'));
     setLevel('topics');
+    loadingSubjectIdRef.current = s.id;
+    listTopicOptions(s.id)
+      .then((ts) => { if (loadingSubjectIdRef.current === s.id) setTopics(ts); })
+      .catch((e) => toast.error(e instanceof Error ? e.message : 'Erro ao carregar tópicos.'));
   }
 
   function openTopic(t: PickerOption | 'none') {
@@ -110,12 +122,22 @@ export default function NotebookPage() {
   // Abre os erros de um tópico crítico (vai pro modo navegar, nível notes).
   async function openCriticalTopic(c: CriticalTopic) {
     setViewMode('navegar');
-    const subjOption: PickerOption = { id: '', name: c.subjectName };
-    setCurSubject(subjOption);
+    setCurSubject({ id: c.subjectId, name: c.subjectName });
     setCurTopic({ id: c.topicId, name: c.topicName });
-    const data = await listNotes({ topicId: c.topicId });
-    setNotes(data);
     setLevel('notes');
+    setLoadingNotes(true);
+    try {
+      const [data, topicList] = await Promise.all([
+        listNotes({ subjectId: c.subjectId, topicId: c.topicId }),
+        listTopicOptions(c.subjectId),
+      ]);
+      setNotes(data);
+      setTopics(topicList);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'Erro ao carregar notas.');
+    } finally {
+      setLoadingNotes(false);
+    }
   }
 
   function handleNew() {
@@ -150,23 +172,33 @@ export default function NotebookPage() {
       const topicId = curTopic === 'none' ? null : (curTopic?.id ?? null);
       loadNotes(curSubject.id, topicId);
     }
-    countNotesBySubject().then(setCounts).catch(() => {/* não exibe toast: contagem é dado auxiliar */});
+    // A-2: boardResults precisa ser atualizado para refletir nota nova/editada com a banca ativa
+    if (boardFilter) {
+      listNotesByBoard(boardFilter).then(setBoardResults).catch(() => {});
+    }
+    // B-4: atualiza contagem só em nota nova (update não altera totais por matéria)
+    if (!selected) countNotesBySubject().then(setCounts).catch(() => {});
     refreshAux();
   }
 
   async function handleDelete(id: string, e: React.MouseEvent) {
     e.stopPropagation();
+    const snapshotSubject = curSubject;
+    const snapshotTopic = curTopic;
     if (!await confirm({ title: 'Apagar este erro?', confirmLabel: 'Apagar', danger: true })) return;
     try {
       await deleteNote(id);
       toast.success('Erro apagado.');
       if (selected?.id === id) { setSelected(null); setEditing(false); }
-      if (curSubject) {
-        const topicId = curTopic === 'none' ? null : (curTopic?.id ?? null);
-        loadNotes(curSubject.id, topicId);
+      if (snapshotSubject) {
+        const topicId = snapshotTopic === 'none' ? null : (snapshotTopic?.id ?? null);
+        loadNotes(snapshotSubject.id, topicId);
       }
       if (searchResults) setSearchResults(searchResults.filter((n) => n.id !== id));
+      if (boardResults) setBoardResults(boardResults.filter((n) => n.id !== id));
       setRecentNotes((prev) => prev.filter((n) => n.id !== id));
+      countNotesBySubject().then(setCounts).catch(() => {});
+      listCriticalTopics().then(setCriticals).catch(() => {});
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Erro ao apagar a anotação. Tente novamente.');
     }
@@ -191,7 +223,7 @@ export default function NotebookPage() {
       <div style={styles.header}>
         <div style={styles.headerRow}>
           <div>
-            <h1 style={{ ...styles.h1, fontSize: isMobile ? 25 : 30 }}>Cadernos de Erros</h1>
+            <h1 style={{ ...styles.h1, fontSize: isMobile ? 24 : 28 }}>Cadernos de Erros</h1>
             <p style={styles.sub}>Registre o erro. Revise os recentes e ataque os críticos.</p>
           </div>
           <button onClick={handleNewGlobal} style={{ ...styles.addTopBtn, width: isMobile ? '100%' : undefined }}>+ Adicionar erro</button>
@@ -205,14 +237,17 @@ export default function NotebookPage() {
 
       <div style={{ ...styles.layout, flexDirection: isMobile ? 'column' : 'row' }}>
         {showSidebar && (
-        <aside style={{ ...styles.sidebar, width: isMobile ? '100%' : 300 }}>
+        <aside style={{ ...styles.sidebar, width: isMobile ? '100%' : isTablet ? 240 : 300 }}>
           <div style={styles.tabs}>
-            <button onClick={() => setViewMode('navegar')}
-              style={{ ...styles.tab, ...(viewMode === 'navegar' ? styles.tabOn : {}) }}>Navegar</button>
-            <button onClick={() => setViewMode('recentes')}
-              style={{ ...styles.tab, ...(viewMode === 'recentes' ? styles.tabOn : {}) }}>Recentes</button>
-            <button onClick={() => setViewMode('criticos')}
-              style={{ ...styles.tab, ...(viewMode === 'criticos' ? styles.tabOn : {}) }}>Críticos</button>
+            {(['navegar', 'recentes', 'criticos'] as ViewMode[]).map((m) => (
+              <button key={m} onClick={() => {
+                // B-5: limpa filtros ao trocar de aba para não manter estado stale
+                if (m !== 'navegar') { setTerm(''); setBoardFilter(''); }
+                setViewMode(m);
+              }} style={{ ...styles.tab, ...(viewMode === m ? styles.tabOn : {}) }}>
+                {m === 'navegar' ? 'Navegar' : m === 'recentes' ? 'Recentes' : 'Críticos'}
+              </button>
+            ))}
           </div>
 
           {viewMode === 'recentes' ? (
@@ -269,12 +304,14 @@ export default function NotebookPage() {
                 {boards.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
               </select>
 
-              {boardResults !== null ? (
+              {boardFilter && (boardLoading || boardResults !== null) ? (
                 <div style={styles.list}>
                   <p style={styles.crumb}>Erros da banca selecionada</p>
-                  {boardResults.length === 0 ? (
+                  {boardLoading ? (
+                    <p style={styles.muted}>Carregando…</p>
+                  ) : boardResults?.length === 0 ? (
                     <p style={styles.muted}>Nenhum erro nesta banca.</p>
-                  ) : boardResults.map((n) => (
+                  ) : boardResults?.map((n) => (
                     <NoteItem key={n.id} note={n} active={selected?.id === n.id}
                       onClick={() => handleSelectNote(n)} onDelete={(e) => handleDelete(n.id, e)} />
                   ))}
@@ -299,7 +336,7 @@ export default function NotebookPage() {
                       ) : subjects.length === 0 ? (
                         <div>
                           <p style={styles.muted}>Nenhuma matéria cadastrada ainda.</p>
-                          <a href="/subjects" style={{ display: 'inline-block', marginTop: 10, fontSize: 13.5, color: theme.teal, fontWeight: 600, textDecoration: 'none' }}>Adicionar matéria →</a>
+                          <Link href="/subjects" style={{ display: 'inline-block', marginTop: 10, fontSize: 13.5, color: theme.teal, fontWeight: 600, textDecoration: 'none' }}>Adicionar matéria →</Link>
                         </div>
                       ) : subjects.map((s) => (
                         <div key={s.id} onClick={() => openSubject(s)} style={styles.navItem}>
@@ -364,6 +401,7 @@ export default function NotebookPage() {
                 presetTopicId={presetTopicId}
                 onSaved={handleSaved}
                 onCancel={() => { setEditing(false); setSelected(null); setBlankEditor(false); }}
+                onScheduleReview={(topicId, days) => scheduleReviewFromError(topicId, days)}
               />
             </>
           ) : (
@@ -392,12 +430,12 @@ function NoteItem({ note, active, onClick, onDelete }: {
 }
 
 const styles: Record<string, React.CSSProperties> = {
-  page: { maxWidth: 1140, margin: '0 auto', padding: '34px 40px', fontFamily: theme.font, width: '100%', minWidth: 0, boxSizing: 'border-box' },
+  page: { maxWidth: 1080, margin: '0 auto', padding: '34px 40px', fontFamily: theme.font, width: '100%', minWidth: 0, boxSizing: 'border-box' },
   header: { marginBottom: 24 },
   headerRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16, flexWrap: 'wrap' },
-  h1: { fontSize: 30, fontWeight: 800, color: theme.ink, letterSpacing: -0.8, margin: 0 },
-  sub: { fontSize: 14.5, color: theme.inkSoft, margin: '6px 0 0', fontWeight: 500 },
-  addTopBtn: { padding: '11px 20px', borderRadius: 12, border: 'none', background: theme.teal, color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap', flexShrink: 0 },
+  h1: { fontSize: 28, fontWeight: 800, color: theme.ink, letterSpacing: -0.6, margin: 0 },
+  sub: { fontSize: 14, color: theme.inkSoft, margin: '6px 0 0', fontWeight: 500 },
+  addTopBtn: { padding: '11px 20px', borderRadius: 12, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap', flexShrink: 0 },
   layout: { display: 'flex', gap: 20, alignItems: 'flex-start', width: '100%', minWidth: 0 },
   sidebar: { width: 300, flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 10, minWidth: 0 },
   tabs: { display: 'flex', gap: 4, background: 'rgba(15,23,42,.06)', borderRadius: theme.radiusSm, padding: 4 },
@@ -406,12 +444,12 @@ const styles: Record<string, React.CSSProperties> = {
   periodRow: { display: 'flex', gap: 6 },
   periodBtn: { flex: 1, padding: '7px 0', borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.card, color: theme.inkSoft, fontSize: 12.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
   periodBtnOn: { background: theme.card, borderColor: theme.teal, color: theme.ink, boxShadow: theme.shadow },
-  search: { padding: '11px 14px', borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.card, fontSize: 14, color: theme.ink, fontFamily: 'inherit', outline: 'none', boxSizing: 'border-box' },
+  search: { width: '100%', padding: '11px 14px', borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.card, fontSize: 14, color: theme.ink, fontFamily: 'inherit', outline: 'none', boxSizing: 'border-box' },
   crumb: { fontSize: 11, color: theme.inkFaint, fontWeight: 600, margin: '4px 0', textTransform: 'uppercase', letterSpacing: 0.6 },
   crumbSubject: { fontSize: 15, color: theme.ink, fontWeight: 700, margin: '6px 0 4px', lineHeight: 1.4 },
   back: { border: 'none', background: 'transparent', color: theme.teal, fontSize: 13, fontWeight: 500, cursor: 'pointer', padding: 0, textAlign: 'left', fontFamily: 'inherit' },
   backToList: { border: 'none', background: 'transparent', color: theme.teal, fontSize: 14, fontWeight: 600, cursor: 'pointer', padding: 0, textAlign: 'left', fontFamily: 'inherit', marginBottom: 14 },
-  newBtn: { padding: '11px 0', borderRadius: 12, border: 'none', background: theme.teal, color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer', marginBottom: 4, fontFamily: 'inherit' },
+  newBtn: { padding: '11px 14px', width: '100%', borderRadius: 12, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', marginBottom: 4, fontFamily: 'inherit' },
   muted: { color: theme.inkFaint, fontSize: 14, lineHeight: 1.5 },
   pageError: { fontSize: 13, color: theme.danger, background: theme.dangerTint, borderRadius: 8, padding: '8px 14px', marginBottom: 12 },
   list: { display: 'flex', flexDirection: 'column', gap: 8 },

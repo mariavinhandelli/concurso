@@ -86,15 +86,21 @@ export async function fetchPendingCards(
   userId: string,
   today: string,
   excludeSubjectIds: string[] = [],
+  includeSubjectIds: string[] = [],
 ): Promise<FlashcardQueueRow[]> {
-  const { data, error } = await supabase
+  let query = supabase
     .from('flashcards')
     .select('id, front, back, subject_id, next_review_date, ease_factor, interval_days, repetitions, subjects(name, color)')
     .eq('user_id', userId)
     .eq('is_review_active', true)
     .not('next_review_date', 'is', null)
-    .lte('next_review_date', today)
-    .order('next_review_date', { ascending: true });
+    .lte('next_review_date', today);
+
+  // includeSubjectIds restringe a fila a um conjunto (ex.: matérias de um
+  // concurso-alvo) — diferente de excludeSubjectIds, que só tira as arquivadas.
+  if (includeSubjectIds.length > 0) query = query.in('subject_id', includeSubjectIds);
+
+  const { data, error } = await query.order('next_review_date', { ascending: true });
 
   if (error) throw new Error('Erro ao listar revisões: ' + error.message);
 
@@ -109,22 +115,31 @@ export async function fetchNewCards(
   userId: string,
   limit: number,
   excludeSubjectIds: string[] = [],
+  includeSubjectIds: string[] = [],
 ): Promise<FlashcardQueueRow[]> {
-  const { data, error } = await supabase
+  let base = supabase
     .from('flashcards')
     .select('id, front, back, subject_id, next_review_date, ease_factor, interval_days, repetitions, subjects(name, color)')
     .eq('user_id', userId)
     .eq('is_review_active', true)
-    .is('next_review_date', null)
+    .is('next_review_date', null);
+
+  if (includeSubjectIds.length > 0) base = base.in('subject_id', includeSubjectIds);
+
+  // NULL-safe: cards sem subject_id nunca devem ser excluídos (subject_id.not.in
+  // sozinho descartaria NULL, pois NULL NOT IN (...) é NULL/false em SQL).
+  const query = excludeSubjectIds.length > 0
+    ? base.or(`subject_id.is.null,subject_id.not.in.(${excludeSubjectIds.join(',')})`)
+    : base;
+
+  // Exclusão aplicada ANTES do limit — senão os N primeiros novos podem ser
+  // todos de matérias arquivadas e a fila retorna vazia mesmo havendo cards elegíveis.
+  const { data, error } = await query
     .order('created_at', { ascending: true })
     .limit(limit);
 
   if (error) throw new Error('Erro ao listar novos: ' + error.message);
-
-  const rows = data ?? [];
-  if (excludeSubjectIds.length === 0) return rows;
-  const excluded = new Set(excludeSubjectIds);
-  return rows.filter(c => !c.subject_id || !excluded.has(c.subject_id));
+  return data ?? [];
 }
 
 export async function fetchTopicCards(
@@ -210,16 +225,19 @@ export async function countDueFlashcards(
   today: string,
   excludeSubjectIds: string[] = [],
 ): Promise<number> {
-  let query = supabase
+  const base = supabase
     .from('flashcards')
     .select('id', { count: 'exact', head: true })
     .eq('user_id', userId)
     .eq('is_review_active', true)
     .lte('next_review_date', today);
 
-  if (excludeSubjectIds.length > 0) {
-    query = query.not('subject_id', 'in', `(${excludeSubjectIds.join(',')})`);
-  }
+  // NULL-safe: cards sem subject_id nunca devem ser excluídos da contagem
+  // (subject_id.not.in sozinho descartaria NULL, pois NULL NOT IN (...) é NULL/false em SQL) —
+  // precisa bater com o filtro em memória usado por fetchPendingCards.
+  const query = excludeSubjectIds.length > 0
+    ? base.or(`subject_id.is.null,subject_id.not.in.(${excludeSubjectIds.join(',')})`)
+    : base;
 
   const { count } = await query;
   return count ?? 0;
@@ -230,16 +248,16 @@ export async function countNewFlashcards(
   userId: string,
   excludeSubjectIds: string[] = [],
 ): Promise<number> {
-  let query = supabase
+  const base = supabase
     .from('flashcards')
     .select('id', { count: 'exact', head: true })
     .eq('user_id', userId)
     .eq('is_review_active', true)
     .is('next_review_date', null);
 
-  if (excludeSubjectIds.length > 0) {
-    query = query.not('subject_id', 'in', `(${excludeSubjectIds.join(',')})`);
-  }
+  const query = excludeSubjectIds.length > 0
+    ? base.or(`subject_id.is.null,subject_id.not.in.(${excludeSubjectIds.join(',')})`)
+    : base;
 
   const { count } = await query;
   return count ?? 0;

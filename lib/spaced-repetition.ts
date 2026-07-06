@@ -1,5 +1,5 @@
 // lib/spaced-repetition.ts
-import { startOfLocalDay, toLocalDateString } from '@/lib/local-date';
+import { startOfLocalDay } from '@/lib/local-date';
 import type { BaseReviewState, BaseScheduleResult } from '@/lib/spaced-repetition-algorithm';
 
 export type RecallGrade = 'errou' | 'dificil' | 'bom' | 'facil';

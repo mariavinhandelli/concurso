@@ -131,7 +131,7 @@ export function JurisprudenciaForm({ initial = {}, saving, onSave, onCancel }: P
   const ta = styles.textarea;
 
   return (
-    <div style={{ fontFamily: theme.font, display: 'flex', flexDirection: 'column', gap: 24 }}>
+    <div className="juris-form" style={{ fontFamily: theme.font, display: 'flex', flexDirection: 'column', gap: 20 }}>
 
       {/* ── 1. IDENTIFICAÇÃO ── */}
       <section>
@@ -377,13 +377,13 @@ export function JurisprudenciaForm({ initial = {}, saving, onSave, onCancel }: P
       <section>
         <SectionTitle title="14. Importância" />
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
             <span style={{ fontSize: 13, color: theme.inkSoft, minWidth: 130 }}>Relevância (estrelas)</span>
             <EstrelasBadge value={estrelas} onChange={setEstrelas} size={22} />
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
             <span style={{ fontSize: 13, color: theme.inkSoft, minWidth: 130 }}>Incidência</span>
-            <select value={incidencia} onChange={(e) => setIncidencia(e.target.value as Jurisprudencia['incidencia_concursos'])} style={{ ...sel, width: 160 }}>
+            <select value={incidencia} onChange={(e) => setIncidencia(e.target.value as Jurisprudencia['incidencia_concursos'])} style={{ ...sel, width: 160, maxWidth: '100%' }}>
               {INCIDENCIA_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
             </select>
           </div>
@@ -393,9 +393,9 @@ export function JurisprudenciaForm({ initial = {}, saving, onSave, onCancel }: P
       {error && <p role="alert" style={{ color: theme.danger, fontSize: 13, margin: 0 }}>{error}</p>}
 
       {/* ── AÇÕES ── */}
-      <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', paddingTop: 8, borderTop: `0.5px solid ${theme.line}` }}>
-        <button onClick={onCancel} style={styles.cancelBtn}>Cancelar</button>
-        <button onClick={handleSubmit} disabled={saving} style={{ ...styles.saveBtn, opacity: saving ? 0.6 : 1 }}>
+      <div className="juris-form-actions" style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', paddingTop: 8, borderTop: `0.5px solid ${theme.line}` }}>
+        <button className="touch-target" onClick={onCancel} style={styles.cancelBtn}>Cancelar</button>
+        <button className="touch-target" onClick={handleSubmit} disabled={saving} style={{ ...styles.saveBtn, opacity: saving ? 0.6 : 1 }}>
           {saving ? 'Salvando…' : 'Salvar jurisprudência'}
         </button>
       </div>

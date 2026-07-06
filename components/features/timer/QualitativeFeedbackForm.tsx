@@ -8,9 +8,8 @@ import { useConfirm } from '@/hooks/useConfirm';
 import { useToast } from '@/components/ui/ToastProvider';
 import type { PendingSession } from '@/hooks/useStudyTimer';
 import type { SessionFeedback, ErrorCause } from '@/services/studyLogs.service';
-import {
-  listSubjectOptions, listTopicOptions, type PickerOption,
-} from '@/services/picker.service';
+import { listActive as listSubjectOptions } from '@/services/subjects.service';
+import { listLeaves as listTopicOptions, type PickerOption } from '@/services/topics.service';
 import { getReviewStatus } from '@/services/reviews.service';
 import { SESSION_MODES, modeUsesQuestions } from '@/lib/session-modes';
 import type { LogMode } from '@/lib/timer-storage';

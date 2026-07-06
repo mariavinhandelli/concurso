@@ -71,7 +71,11 @@ export const JurisprudenciaCard = memo(function JurisprudenciaCard({ item, onCli
       {/* Topo: tribunal + tipo + status + favorito */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
         <span style={styles.tribunalBadge}>{item.tribunal}</span>
-        <span style={styles.tipoBadge}>{TIPO_LABEL[item.tipo] ?? item.tipo}</span>
+        <span style={styles.tipoBadge}>
+          {item.numero_sumula
+            ? `${item.tipo === 'sumula_vinculante' ? 'SV' : 'Súmula'} ${item.numero_sumula}`
+            : (TIPO_LABEL[item.tipo] ?? item.tipo)}
+        </span>
         {item.status !== 'vigente' && (
           <span style={{ ...styles.tipoBadge, background: theme.dangerTint, color: theme.danger }}>
             {STATUS_LABEL[item.status]}

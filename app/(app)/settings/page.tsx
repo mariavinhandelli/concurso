@@ -13,7 +13,7 @@ import { listAllBoards, createBoard, updateBoard, deleteBoard, type Board } from
 export default function SettingsPage() {
   const supabase = createClient();
   const router = useRouter();
-  const { theme: mode, toggleTheme, palette, setPalette } = useUI();
+  const { theme: mode, toggleTheme, palette, setPalette, isMobile } = useUI();
   const { confirm: showConfirm, dialog } = useConfirm();
 
   // --- bancas ---
@@ -140,9 +140,9 @@ export default function SettingsPage() {
   return (
     <>
     {dialog}
-    <div style={styles.wrap}>
+    <div style={{ ...styles.wrap, padding: isMobile ? '20px 16px' : '34px 40px' }}>
       <header style={styles.head}>
-        <h1 style={styles.h1}>Configurações</h1>
+        <h1 style={{ ...styles.h1, fontSize: isMobile ? 24 : 28 }}>Configurações</h1>
         <p style={styles.sub}>Bancas, aparência, senha e sessões.</p>
       </header>
 
@@ -254,6 +254,7 @@ export default function SettingsPage() {
                   <>
                     <span style={styles.boardName}>{b.name}</span>
                     <button
+                      className="icon-touch-target"
                       onClick={() => startEdit(b)}
                       style={styles.boardEdit}
                       aria-label={`Renomear ${b.name}`}
@@ -264,6 +265,7 @@ export default function SettingsPage() {
                       </svg>
                     </button>
                     <button
+                      className="icon-touch-target"
                       onClick={() => handleDeleteBoard(b.id, b.name)}
                       style={styles.boardDel}
                       aria-label={`Apagar ${b.name}`}
@@ -331,8 +333,8 @@ export default function SettingsPage() {
 const styles: Record<string, React.CSSProperties> = {
   wrap: { maxWidth: 680, margin: '0 auto', padding: '34px 40px', fontFamily: theme.font },
   head: { marginBottom: 24 },
-  h1: { fontSize: 30, fontWeight: 800, color: theme.ink, letterSpacing: -0.8, margin: 0 },
-  sub: { fontSize: 14.5, color: theme.inkSoft, margin: '6px 0 0', fontWeight: 500 },
+  h1: { fontSize: 28, fontWeight: 800, color: theme.ink, letterSpacing: -0.6, margin: 0 },
+  sub: { fontSize: 14, color: theme.inkSoft, margin: '6px 0 0', fontWeight: 500 },
   card: { background: theme.card, border: `0.5px solid ${theme.line}`, borderRadius: theme.radius, boxShadow: theme.shadow, padding: 24, marginBottom: 18 },
   cardTitle: { fontSize: 12, fontWeight: 600, color: theme.inkFaint, letterSpacing: 1, textTransform: 'uppercase', marginBottom: 18 },
   sectionIntro: { fontSize: 13, color: theme.inkSoft, margin: '0 0 16px', lineHeight: 1.5 },
@@ -350,7 +352,7 @@ const styles: Record<string, React.CSSProperties> = {
   label: { display: 'block', fontSize: 13, fontWeight: 600, color: theme.ink, marginBottom: 7 },
   input: { width: '100%', boxSizing: 'border-box', padding: '11px 14px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.card, fontSize: 14.5, color: theme.ink, fontFamily: 'inherit', outline: 'none' },
   actions: { display: 'flex', alignItems: 'center', gap: 12, marginTop: 20, paddingTop: 18, borderTop: `0.5px solid ${theme.line}` },
-  btnPrimary: { padding: '11px 22px', borderRadius: 12, border: 'none', background: theme.teal, color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
+  btnPrimary: { padding: '11px 22px', borderRadius: 12, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
   btnDanger: { padding: '10px 18px', borderRadius: 10, border: `0.5px solid rgba(220,38,38,.3)`, background: theme.dangerBg, color: theme.danger, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
   toggle: { position: 'relative', width: 44, height: 24, borderRadius: 999, border: 'none', background: theme.muted, cursor: 'pointer', padding: 2, flexShrink: 0 },
   toggleKnob: { display: 'block', width: 20, height: 20, borderRadius: '50%', boxShadow: theme.shadow, transition: 'transform .2s, background .2s' },
@@ -361,7 +363,7 @@ const styles: Record<string, React.CSSProperties> = {
   boardName: { flex: 1, fontSize: 14.5, color: theme.ink, fontWeight: 500 },
   boardEditInput: { flex: 1, padding: '7px 10px', borderRadius: 8, border: `0.5px solid ${theme.teal}`, background: theme.card, fontSize: 14, color: theme.ink, fontFamily: 'inherit', outline: 'none' },
   boardEdit: { border: 'none', background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: 4, opacity: 0.7 },
-  boardSave: { border: 'none', background: theme.teal, color: '#fff', fontSize: 12.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', borderRadius: 8, padding: '6px 12px' },
+  boardSave: { border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 12.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', borderRadius: 8, padding: '6px 12px' },
   boardCancel: { border: 'none', background: 'transparent', color: theme.inkFaint, fontSize: 12.5, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit', padding: '6px 8px' },
   boardDel: { border: 'none', background: 'transparent', color: theme.inkFaint, fontSize: 13, cursor: 'pointer', opacity: 0.6 },
   muted: { color: theme.inkFaint, fontSize: 14 },

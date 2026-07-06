@@ -40,7 +40,7 @@ export function AccuracyEvolutionChart() {
           <span style={styles.eyebrow}>Evolução nas questões</span>
           <span style={styles.subtitle}>Taxa de acerto semanal (últimas 12 semanas)</span>
         </div>
-        <select value={selected} onChange={(e) => setSelected(e.target.value)} style={styles.select}>
+        <select value={selected} onChange={(e) => setSelected(e.target.value)} style={styles.select} aria-label="Filtrar por matéria">
           <option value="">Geral</option>
           {subjects.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
         </select>
@@ -53,7 +53,7 @@ export function AccuracyEvolutionChart() {
           Sem questões registradas ainda neste recorte. Faça sessões de questões com acertos.
         </p>
       ) : (
-        <ResponsiveContainer width="100%" height={240}>
+        <ResponsiveContainer width="100%" height={240} minWidth={0}>
           <ComposedChart data={data} margin={{ top: 8, right: 8, bottom: 0, left: -16 }}>
             <defs>
               <linearGradient id="accEvo" x1="0" y1="0" x2="0" y2="1">
@@ -90,6 +90,6 @@ const styles: Record<string, React.CSSProperties> = {
   header: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20, gap: 12, flexWrap: 'wrap' },
   eyebrow: { display: 'block', fontSize: 11, fontWeight: 500, color: theme.inkFaint, letterSpacing: 1, textTransform: 'uppercase' },
   subtitle: { display: 'block', fontSize: 13, color: theme.inkSoft, marginTop: 6 },
-  select: { padding: '9px 12px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.card, fontSize: 13, color: theme.ink, fontFamily: 'inherit', cursor: 'pointer', outline: 'none' },
+  select: { width: 'min(220px, 100%)', maxWidth: '100%', minWidth: 0, padding: '9px 12px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.card, fontSize: 13, color: theme.ink, fontFamily: 'inherit', cursor: 'pointer', outline: 'none', textOverflow: 'ellipsis' },
   muted: { color: theme.inkFaint, fontSize: 14, padding: '30px 0', textAlign: 'center' },
 };

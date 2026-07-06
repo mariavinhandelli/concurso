@@ -4,12 +4,12 @@
 
 import { requireUser, tryGetUser } from '@/lib/supabase/requireUser';
 import {
-  calculateNextReview, daysOverdue,
+  calculateNextReview, daysOverdue, DEFAULT_EASE_FACTOR,
   type RecallGrade,
 } from '@/lib/spaced-repetition';
 import { fromDbRow, toDbRow } from '@/lib/spaced-repetition.mapper';
 import { localDateInDays, toLocalDateString, parseLocalDate } from '@/lib/local-date';
-import { getArchivedSubjectIds } from '@/services/catalog.service';
+import { getArchivedSubjectIds } from '@/services/archivedCache';
 import * as repo from '@/services/reviews.repository';
 
 export type ReviewRating = 'dificil' | 'intermediario' | 'facil';
@@ -37,16 +37,11 @@ export async function listDueReviews(): Promise<ReviewItem[]> {
   const auth = await tryGetUser();
   if (!auth) return [];
 
-  // Paralelo: não espera getArchivedSubjectIds() para iniciar fetchDueTopicReviews.
-  const [archivedIds, rows] = await Promise.all([
-    getArchivedSubjectIds(),
-    repo.fetchDueTopicReviews(auth.supabase, auth.userId),
-  ]);
+  // getArchivedSubjectIds tem cache de 5s; aguardar para repassar ao repo e filtrar no SQL.
+  const archivedIds = await getArchivedSubjectIds();
+  const rows = await repo.fetchDueTopicReviews(auth.supabase, auth.userId, archivedIds);
 
-  const excludeSet = new Set(archivedIds);
-  const filtered = excludeSet.size > 0 ? rows.filter(t => !excludeSet.has(t.subject_id)) : rows;
-
-  return filtered.map(t => {
+  return rows.map(t => {
     const subj = Array.isArray(t.subjects) ? t.subjects[0] : t.subjects;
     const srState = fromDbRow({ ease_factor: t.ease_factor, interval_days: t.interval_days, repetitions: t.repetitions });
     return {
@@ -152,5 +147,7 @@ export async function scheduleReviewFromError(topicId: string, days: number): Pr
     next_review_date: dataFinal,
     is_review_active: true,
     interval_days: intervalDays,
+    repetitions: 0,
+    ease_factor: DEFAULT_EASE_FACTOR,
   });
 }

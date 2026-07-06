@@ -33,7 +33,7 @@ export async function fetchDueTopicReviews(
   userId: string,
   excludeSubjectIds: string[] = [],
 ): Promise<TopicReviewRow[]> {
-  const { data, error } = await supabase
+  const base = supabase
     .from('topics')
     .select('id, name, subject_id, next_review_date, ease_factor, interval_days, repetitions, subjects(name, color)')
     .eq('user_id', userId)
@@ -42,11 +42,13 @@ export async function fetchDueTopicReviews(
     .lte('next_review_date', toLocalDateString())
     .order('next_review_date', { ascending: true });
 
-  if (error) throw new Error('Erro ao listar revisões: ' + error.message);
+  const query = excludeSubjectIds.length > 0
+    ? base.not('subject_id', 'in', `(${excludeSubjectIds.join(',')})`)
+    : base;
 
-  if (excludeSubjectIds.length === 0) return data ?? [];
-  const excludeSet = new Set(excludeSubjectIds);
-  return (data ?? []).filter(t => !excludeSet.has(t.subject_id));
+  const { data, error } = await query;
+  if (error) throw new Error('Erro ao listar revisões: ' + error.message);
+  return data ?? [];
 }
 
 export async function fetchTopicSRState(
@@ -117,16 +119,17 @@ export async function countDueTopicReviews(
   userId: string,
   excludeSubjectIds: string[] = [],
 ): Promise<number> {
-  let query = supabase
+  const base = supabase
     .from('topics')
     .select('id', { count: 'exact', head: true })
     .eq('user_id', userId)
     .eq('is_review_active', true)
+    .not('next_review_date', 'is', null)
     .lte('next_review_date', toLocalDateString());
 
-  if (excludeSubjectIds.length > 0) {
-    query = query.not('subject_id', 'in', `(${excludeSubjectIds.join(',')})`);
-  }
+  const query = excludeSubjectIds.length > 0
+    ? base.not('subject_id', 'in', `(${excludeSubjectIds.join(',')})`)
+    : base;
 
   const { count } = await query;
   return count ?? 0;

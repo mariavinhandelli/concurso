@@ -4,7 +4,6 @@
 import { tryGetUser } from '@/lib/supabase/requireUser';
 import { toLocalDateString } from '@/lib/local-date';
 import { calculateStreak } from '@/lib/streak-calculator';
-import type { StreakResult } from '@/lib/streak-calculator';
 import * as repo from '@/services/flashcards.repository';
 
 export interface FlashcardStreak {

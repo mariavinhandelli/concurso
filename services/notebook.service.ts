@@ -1,6 +1,13 @@
 // services/notebook.service.ts
-import { createClient } from '@/lib/supabase/client';
-import { getArchivedSubjectIds } from '@/services/catalog.service';
+// Camada de aplicação: resolve auth, delega SQL ao repositório, aplica regras de negócio.
+'use client';
+
+import { requireUser, tryGetUser } from '@/lib/supabase/requireUser';
+import { getArchivedSubjectIds } from '@/services/archivedCache';
+import { localDateInDays, parseLocalDate } from '@/lib/local-date';
+import * as repo from '@/services/notebook.repository';
+
+export type { ErrorNote, NoteInput, CriticalTopic } from '@/services/notebook.repository';
 
 export const ERROR_TYPES = [
   'Pegadinha',
@@ -9,267 +16,108 @@ export const ERROR_TYPES = [
   'Desatenção',
 ] as const;
 
-export interface ErrorNote {
-  id: string;
-  user_id: string;
-  title: string | null;
-  content: object;
-  content_text: string | null;
-  error_type: string | null;
-  subject_id: string | null;
-  topic_id: string | null;
-  board_id: string | null;
-  tags: string[];
-  created_at: string;
-  updated_at: string;
-}
-
-export interface NoteInput {
-  title: string;
-  content: object;
-  contentText: string;
-  errorType: string | null;
-  subjectId: string | null;
-  topicId: string | null;
-  boardId: string | null;
-}
-
 export async function listNotes(filters?: {
   subjectId?: string | null;
   topicId?: string | null;
   boardId?: string | null;
-}): Promise<ErrorNote[]> {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return [];
-
-  let query = supabase
-    .from('error_notebooks')
-    .select('*')
-    .eq('user_id', user.id)
-    .order('updated_at', { ascending: false });
-
-  if (filters?.subjectId) query = query.eq('subject_id', filters.subjectId);
-  if (filters?.topicId === null) query = query.is('topic_id', null);
-  else if (filters?.topicId) query = query.eq('topic_id', filters.topicId);
-  if (filters?.boardId) query = query.eq('board_id', filters.boardId);
-
-  const { data, error } = await query;
-  if (error) throw new Error('Erro ao listar notas: ' + error.message);
-  return data ?? [];
+}): Promise<repo.ErrorNote[]> {
+  const auth = await tryGetUser();
+  if (!auth) return [];
+  return repo.queryNotes(auth.supabase, auth.userId, filters);
 }
 
-export async function searchNotes(term: string): Promise<ErrorNote[]> {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return [];
-
-  if (!term.trim()) return listNotes();
-
-  const { data, error } = await supabase
-    .from('error_notebooks')
-    .select('*')
-    .eq('user_id', user.id)
-    .textSearch('content_text', term, { type: 'websearch', config: 'portuguese' })
-    .order('updated_at', { ascending: false });
-
-  if (error) throw new Error('Erro na busca: ' + error.message);
-  return data ?? [];
+export async function searchNotes(term: string): Promise<repo.ErrorNote[]> {
+  const auth = await tryGetUser();
+  if (!auth) return [];
+  return repo.querySearchNotes(auth.supabase, auth.userId, term);
 }
 
-export async function getNote(id: string): Promise<ErrorNote | null> {
-  const supabase = createClient();
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
-  if (authError || !user) throw new Error('Você precisa estar logado.');
-
-  const { data, error } = await supabase
-    .from('error_notebooks')
-    .select('*')
-    .eq('id', id)
-    .eq('user_id', user.id)
-    .maybeSingle();
-  if (error) throw new Error('Erro ao buscar nota: ' + error.message);
-  return data;
+export async function getNote(id: string): Promise<repo.ErrorNote | null> {
+  const { supabase, userId } = await requireUser();
+  return repo.queryNote(supabase, userId, id);
 }
 
-export async function createNote(input: NoteInput): Promise<ErrorNote> {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error('Você precisa estar logado.');
-
-  const { data, error } = await supabase
-    .from('error_notebooks')
-    .insert({
-      user_id: user.id,
-      title: input.title.trim() || null,
-      content: input.content,
-      content_text: input.contentText,
-      error_type: input.errorType,
-      subject_id: input.subjectId,
-      topic_id: input.topicId,
-      board_id: input.boardId,
-    })
-    .select()
-    .single();
-
-  if (error) throw new Error('Erro ao criar nota: ' + error.message);
-  return data;
+export async function createNote(input: repo.NoteInput): Promise<repo.ErrorNote> {
+  const { supabase, userId } = await requireUser();
+  return repo.insertNote(supabase, userId, input);
 }
 
-export async function updateNote(id: string, input: NoteInput): Promise<ErrorNote> {
-  const supabase = createClient();
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
-  if (authError || !user) throw new Error('Você precisa estar logado.');
-
-  const { data, error } = await supabase
-    .from('error_notebooks')
-    .update({
-      title: input.title.trim() || null,
-      content: input.content,
-      content_text: input.contentText,
-      error_type: input.errorType,
-      subject_id: input.subjectId,
-      topic_id: input.topicId,
-      board_id: input.boardId,
-      updated_at: new Date().toISOString(),
-    })
-    .eq('id', id)
-    .eq('user_id', user.id)
-    .select()
-    .single();
-
-  if (error) throw new Error('Erro ao atualizar nota: ' + error.message);
-  return data;
+export async function updateNote(id: string, input: repo.NoteInput): Promise<repo.ErrorNote> {
+  const { supabase, userId } = await requireUser();
+  return repo.patchNote(supabase, userId, id, input);
 }
 
 export async function deleteNote(id: string): Promise<void> {
-  const supabase = createClient();
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
-  if (authError || !user) throw new Error('Você precisa estar logado.');
-
-  const { error } = await supabase
-    .from('error_notebooks')
-    .delete()
-    .eq('id', id)
-    .eq('user_id', user.id);
-  if (error) throw new Error('Erro ao apagar nota: ' + error.message);
+  const { supabase, userId } = await requireUser();
+  return repo.removeNote(supabase, userId, id);
 }
 
 export async function listBoards(): Promise<{ id: string; name: string; color: string }[]> {
-  const supabase = createClient();
-  const { data, error } = await supabase
-    .from('exam_boards')
-    .select('id, name, color')
-    .order('name', { ascending: true });
-  if (error) throw new Error('Erro ao listar bancas: ' + error.message);
-  return data ?? [];
+  const auth = await tryGetUser();
+  if (!auth) return [];
+  return repo.queryBoards(auth.supabase);
 }
 
-// Conta quantos erros existem por matéria (para a navegação nível 1).
 export async function countNotesBySubject(): Promise<Record<string, number>> {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return {};
-
+  const auth = await tryGetUser();
+  if (!auth) return {};
   const archivedIds = await getArchivedSubjectIds();
-
-  let query = supabase.from('error_notebooks').select('subject_id').eq('user_id', user.id);
-  if (archivedIds.length > 0) query = query.not('subject_id', 'in', `(${archivedIds.join(',')})`);
-
-  const { data, error } = await query;
-  if (error) throw new Error('Erro ao contar: ' + error.message);
+  const rows = await repo.queryNoteSubjectIds(auth.supabase, auth.userId, archivedIds);
   const counts: Record<string, number> = {};
-  for (const row of data ?? []) {
+  for (const row of rows) {
     const key = row.subject_id ?? 'none';
     counts[key] = (counts[key] ?? 0) + 1;
   }
   return counts;
 }
 
-// Lista erros de uma banca específica (atravessa a hierarquia).
-export async function listNotesByBoard(boardId: string): Promise<ErrorNote[]> {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return [];
-
-  const { data, error } = await supabase
-    .from('error_notebooks')
-    .select('*')
-    .eq('user_id', user.id)
-    .eq('board_id', boardId)
-    .order('updated_at', { ascending: false });
-
-  if (error) throw new Error('Erro ao filtrar por banca: ' + error.message);
-  return data ?? [];
+export async function listNotesByBoard(boardId: string): Promise<repo.ErrorNote[]> {
+  const auth = await tryGetUser();
+  if (!auth) return [];
+  return repo.queryNotesByBoard(auth.supabase, auth.userId, boardId);
 }
 
-// Lista erros criados nos últimos N dias — exclui matérias arquivadas.
-export async function listRecentNotes(days: number): Promise<ErrorNote[]> {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return [];
+export async function listRecentNotes(days: number): Promise<repo.ErrorNote[]> {
+  const auth = await tryGetUser();
+  if (!auth) return [];
+  const archivedIds = await getArchivedSubjectIds();
+  // M-2: meia-noite local N dias atrás — sem drift de timezone
+  const desde = parseLocalDate(localDateInDays(-days));
+  return repo.queryRecentNotes(auth.supabase, auth.userId, desde.toISOString(), archivedIds);
+}
 
+interface CriticalNoteTopic {
+  name: string | null;
+  subject_id: string | null;
+  subjects?: { name: string | null } | { name: string | null }[] | null;
+}
+
+export async function listCriticalTopics(): Promise<repo.CriticalTopic[]> {
+  const auth = await tryGetUser();
+  if (!auth) return [];
   const archivedIds = await getArchivedSubjectIds();
 
-  const desde = new Date();
-  desde.setDate(desde.getDate() - days);
-
-  let query = supabase
-    .from('error_notebooks')
-    .select('*')
-    .eq('user_id', user.id)
-    .gte('created_at', desde.toISOString())
-    .order('created_at', { ascending: false });
-
-  if (archivedIds.length > 0) query = query.not('subject_id', 'in', `(${archivedIds.join(',')})`);
-
-  const { data, error } = await query;
-  if (error) throw new Error('Erro ao listar recentes: ' + error.message);
-  return data ?? [];
-}
-// Tópico crítico: agrupa erros por tópico, conta, e cruza com a taxa de acerto.
-export interface CriticalTopic {
-  topicId: string;
-  topicName: string;
-  subjectName: string;
-  errorCount: number;
-  acertoPct: number | null;  // null se não há questões
-  isAlert: boolean;          // muitos erros + acerto baixo
-}
-
-export async function listCriticalTopics(): Promise<CriticalTopic[]> {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return [];
-
-  const archivedIds = await getArchivedSubjectIds();
-
-  // 1) Todos os erros que têm tópico, com nome do tópico e da matéria.
-  const { data: allNotes, error } = await supabase
-    .from('error_notebooks')
-    .select('topic_id, topics(name, subject_id, subjects(name))')
-    .eq('user_id', user.id)
-    .not('topic_id', 'is', null);
+  const allNotes = await repo.queryCriticalNotes(auth.supabase, auth.userId);
 
   // Filtra matérias arquivadas em JS (evita type-depth errors do Supabase builder)
   const archivedSet = new Set(archivedIds);
   const notes = archivedIds.length > 0
-    ? (allNotes ?? []).filter(n => {
+    ? allNotes.filter((n) => {
         const topic = Array.isArray(n.topics) ? n.topics[0] : n.topics;
         return !topic?.subject_id || !archivedSet.has(topic.subject_id);
       })
-    : (allNotes ?? []);
+    : allNotes;
 
-  if (error) throw new Error('Erro ao agrupar críticos: ' + error.message);
-
-  // 2) Conta erros por tópico (e guarda os nomes).
-  const porTopico = new Map<string, { topicName: string; subjectName: string; count: number }>();
-  for (const n of notes ?? []) {
+  // Conta erros por tópico e coleta metadados
+  const porTopico = new Map<string, { topicName: string; subjectId: string; subjectName: string; count: number }>();
+  for (const n of notes) {
     if (!n.topic_id) continue;
-    const topic = Array.isArray(n.topics) ? n.topics[0] : n.topics;
+    const topicRaw = n.topics as CriticalNoteTopic | CriticalNoteTopic[] | null;
+    const topic = Array.isArray(topicRaw) ? topicRaw[0] : topicRaw;
     const subj = topic?.subjects ? (Array.isArray(topic.subjects) ? topic.subjects[0] : topic.subjects) : null;
     const cur = porTopico.get(n.topic_id) ?? {
       topicName: topic?.name ?? 'Tópico',
+      subjectId: topic?.subject_id ?? '',
       subjectName: subj?.name ?? 'Matéria',
       count: 0,
     };
@@ -280,16 +128,10 @@ export async function listCriticalTopics(): Promise<CriticalTopic[]> {
   const topicIds = Array.from(porTopico.keys());
   if (topicIds.length === 0) return [];
 
-  // 3) Taxa de acerto de cada tópico (sessões de questões).
-  const { data: logs } = await supabase
-    .from('study_logs')
-    .select('topic_id, questions_total, questions_correct')
-    .eq('user_id', user.id)
-    .eq('mode', 'questoes')
-    .in('topic_id', topicIds);
+  const logs = await repo.queryTopicStudyLogs(auth.supabase, auth.userId, topicIds);
 
   const acertoMap: Record<string, { total: number; acertos: number }> = {};
-  for (const l of logs ?? []) {
+  for (const l of logs) {
     if (!l.topic_id) continue;
     const cur = acertoMap[l.topic_id] ?? { total: 0, acertos: 0 };
     cur.total += l.questions_total ?? 0;
@@ -297,8 +139,7 @@ export async function listCriticalTopics(): Promise<CriticalTopic[]> {
     acertoMap[l.topic_id] = cur;
   }
 
-  // 4) Monta a lista.
-  const out: CriticalTopic[] = topicIds.map((id) => {
+  const out: repo.CriticalTopic[] = topicIds.map((id) => {
     const info = porTopico.get(id)!;
     const ac = acertoMap[id];
     const acertoPct = ac && ac.total > 0 ? Math.round((ac.acertos / ac.total) * 100) : null;
@@ -306,6 +147,7 @@ export async function listCriticalTopics(): Promise<CriticalTopic[]> {
     return {
       topicId: id,
       topicName: info.topicName,
+      subjectId: info.subjectId,
       subjectName: info.subjectName,
       errorCount: info.count,
       acertoPct,
@@ -313,10 +155,9 @@ export async function listCriticalTopics(): Promise<CriticalTopic[]> {
     };
   });
 
-  // 5) Ordena: mais erros primeiro; empate → menor acerto (null vai por último no empate).
   out.sort((a, b) => {
     if (b.errorCount !== a.errorCount) return b.errorCount - a.errorCount;
-    const aAc = a.acertoPct ?? 101; // sem acerto = "menos crítico" no desempate
+    const aAc = a.acertoPct ?? 101;
     const bAc = b.acertoPct ?? 101;
     return aAc - bAc;
   });

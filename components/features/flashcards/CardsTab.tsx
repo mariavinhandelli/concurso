@@ -1,6 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { ChevronLeft, Pencil, Trash2 } from 'lucide-react';
 import { useToast } from '@/components/ui/ToastProvider';
 import { useConfirm } from '@/hooks/useConfirm';
 import { useFlashcardNavigation } from '@/hooks/useFlashcardNavigation';
@@ -8,7 +10,7 @@ import {
   deleteFlashcard, buildTopicQueue, countFlashcardsBySubject,
   type QueueCard, type Flashcard,
 } from '@/services/flashcards.service';
-import { listSubjectOptions, type PickerOption } from '@/services/picker.service';
+import { listActive as listSubjectOptions, type PickerOption } from '@/services/subjects.service';
 import { CardForm } from '@/components/features/flashcards/CardForm';
 import { theme } from '@/lib/theme';
 
@@ -88,7 +90,7 @@ export function CardsTab({ onStudy }: Props) {
             {nav.subjects.length === 0 && (
               <div style={styles.emptyState}>
                 <p style={styles.muted}>Nenhuma matéria cadastrada ainda.</p>
-                <a href="/subjects" style={styles.emptyAction}>Adicionar matéria →</a>
+                <Link href="/subjects" style={styles.emptyAction}>Adicionar matéria →</Link>
               </div>
             )}
             {nav.subjects.map(s => (
@@ -110,7 +112,7 @@ export function CardsTab({ onStudy }: Props) {
 
         {nav.level === 'topics' && nav.curSubject && (
           <div style={styles.list}>
-            <button onClick={nav.goBackToSubjects} style={styles.back}>← Matérias</button>
+            <button onClick={nav.goBackToSubjects} style={styles.back}><ChevronLeft size={14} strokeWidth={2} />Matérias</button>
             <p style={styles.crumb}>{nav.curSubject.name}</p>
             {nav.topics.map(t => (
               <div
@@ -136,7 +138,7 @@ export function CardsTab({ onStudy }: Props) {
 
         {nav.level === 'cards' && nav.curSubject && (
           <div style={styles.list}>
-            <button onClick={nav.goBackToTopics} style={styles.back}>← Tópicos</button>
+            <button onClick={nav.goBackToTopics} style={styles.back}><ChevronLeft size={14} strokeWidth={2} />Tópicos</button>
             <div style={styles.cardsHeader}>
               <p style={styles.crumb}>{nav.curTopic === 'none' ? 'Sem tópico' : (nav.curTopic as PickerOption)?.name}</p>
               {nav.cards.length > 0 && (
@@ -185,13 +187,13 @@ export function CardsTab({ onStudy }: Props) {
                     style={styles.editBtn}
                     aria-label="Editar card"
                     title="Editar"
-                  >✎</button>
+                  ><Pencil size={13} strokeWidth={2} /></button>
                   <button
                     onClick={() => handleDelete(c)}
                     style={styles.delBtn}
                     aria-label="Apagar card"
                     title="Apagar"
-                  >✕</button>
+                  ><Trash2 size={12} strokeWidth={2} /></button>
                 </div>
               </div>
             ))}
@@ -205,8 +207,8 @@ export function CardsTab({ onStudy }: Props) {
 const styles: Record<string, React.CSSProperties> = {
   list: { display: 'flex', flexDirection: 'column', gap: 8 },
   crumb: { fontSize: 11, color: theme.inkFaint, fontWeight: 600, margin: '4px 0', textTransform: 'uppercase', letterSpacing: 0.6 },
-  back: { border: 'none', background: 'transparent', color: theme.teal, fontSize: 13, fontWeight: 500, cursor: 'pointer', padding: 0, textAlign: 'left', fontFamily: 'inherit' },
-  navItem: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, background: theme.card, borderRadius: 12, border: `0.5px solid ${theme.line}`, padding: '13px 15px', cursor: 'pointer', fontSize: 14, color: theme.ink, fontWeight: 500, minWidth: 0, transition: 'background .12s, transform .12s' },
+  back: { border: 'none', background: 'transparent', color: theme.teal, fontSize: 13, fontWeight: 500, cursor: 'pointer', padding: 0, textAlign: 'left', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 2 },
+  navItem: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, background: theme.card, borderRadius: 12, border: `1px solid ${theme.lineStrong}`, padding: '13px 15px', cursor: 'pointer', fontSize: 14, color: theme.ink, fontWeight: 500, minWidth: 0, transition: 'background .12s, transform .12s' },
   navItemHover: { background: 'rgba(15,23,42,.03)', transform: 'translateX(2px)' },
   count: { fontSize: 11, color: theme.inkSoft, background: 'rgba(15,23,42,.05)', padding: '2px 8px', borderRadius: 10, fontWeight: 600, flexShrink: 0 },
   studyBtn: { padding: '5px 13px', borderRadius: 8, border: 'none', background: theme.tealBg, color: theme.tealDeep, fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', flexShrink: 0 },
@@ -214,7 +216,7 @@ const styles: Record<string, React.CSSProperties> = {
   studyTopicBtn: { padding: '7px 15px', borderRadius: 10, border: 'none', background: theme.teal, color: '#fff', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', flexShrink: 0 },
   newBtn: { width: '100%', padding: '11px 0', borderRadius: 12, border: 'none', background: theme.teal, color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer', marginBottom: 4, fontFamily: 'inherit' },
   muted: { color: theme.inkFaint, fontSize: 14 },
-  cardItem: { position: 'relative', background: theme.card, borderRadius: 12, border: `0.5px solid ${theme.line}`, padding: '13px 15px', paddingRight: 72, transition: 'box-shadow .12s' },
+  cardItem: { position: 'relative', background: theme.card, borderRadius: 12, border: `1px solid ${theme.lineStrong}`, boxShadow: '0 1px 2px var(--line)', padding: '13px 15px', paddingRight: 72, transition: 'box-shadow .12s' },
   cardItemHover: { boxShadow: 'var(--shadow-hover)' },
   cardFront: { fontSize: 14, color: theme.ink, fontWeight: 600 },
   cardBack: { fontSize: 13, color: theme.inkSoft, marginTop: 4 },
@@ -222,5 +224,5 @@ const styles: Record<string, React.CSSProperties> = {
   editBtn: { border: 'none', background: 'transparent', color: theme.inkSoft, fontSize: 13, cursor: 'pointer', padding: '3px 6px', borderRadius: 6 },
   delBtn: { border: 'none', background: 'transparent', color: theme.inkFaint, fontSize: 12, cursor: 'pointer', padding: '3px 6px', borderRadius: 6 },
   emptyState: { padding: '16px 0', display: 'flex', flexDirection: 'column', gap: 10 },
-  emptyAction: { fontSize: 13.5, color: theme.teal, fontWeight: 600, textDecoration: 'none' },
+  emptyAction: { fontSize: 14, color: theme.teal, fontWeight: 600, textDecoration: 'none' },
 };

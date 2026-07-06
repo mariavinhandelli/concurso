@@ -38,6 +38,7 @@ export function StudyTimeChart() {
             const active = granularity === f.key;
             return (
               <button
+                className="touch-target"
                 key={f.key}
                 onClick={() => setGranularity(f.key)}
                 style={{ ...styles.filterBtn, ...(active ? styles.filterBtnActive : {}) }}
@@ -52,7 +53,7 @@ export function StudyTimeChart() {
       {loading ? (
         <p style={styles.muted}>Carregando…</p>
       ) : (
-        <ResponsiveContainer width="100%" height={260}>
+        <ResponsiveContainer width="100%" height={260} minWidth={0}>
           <LineChart data={data} margin={{ top: 8, right: 8, bottom: 0, left: -16 }}>
             <CartesianGrid strokeDasharray="3 3" stroke={theme.muted} vertical={false} />
             <XAxis dataKey="label" tick={{ fontSize: 11, fill: theme.inkFaint }} stroke={theme.line} tickLine={false} />

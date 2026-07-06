@@ -82,6 +82,7 @@ export function NotificationBell() {
   return (
     <div ref={ref} style={{ position: 'relative' }}>
       <button
+        className="icon-touch-target"
         onClick={() => setOpen((v) => !v)}
         style={styles.iconBtn}
         title="Notificações"
@@ -98,7 +99,7 @@ export function NotificationBell() {
       </button>
 
       {open && (
-        <div style={styles.menu}>
+        <div className="notification-menu" style={styles.menu} role="dialog" aria-label="Lembretes">
           <div style={styles.menuHead}>
             <div style={styles.menuName}>Lembretes</div>
             <div style={styles.menuSub}>
@@ -136,7 +137,7 @@ export function NotificationBell() {
 
 const styles: Record<string, React.CSSProperties> = {
   iconBtn: {
-    position: 'relative', width: 38, height: 38, borderRadius: 10, border: 'none',
+    position: 'relative', width: 44, height: 44, borderRadius: 10, border: 'none',
     background: 'transparent', display: 'grid', placeItems: 'center', cursor: 'pointer',
     transition: 'background .15s',
   },
@@ -146,7 +147,7 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'grid', placeItems: 'center', lineHeight: 1, fontFamily: theme.font,
   },
   menu: {
-    position: 'absolute', top: 46, right: 0, width: 'min(300px, calc(100vw - 32px))', background: theme.card,
+    position: 'absolute', top: 52, right: 0, width: 'min(300px, calc(100vw - 32px))', background: theme.card,
     border: `0.5px solid ${theme.line}`, borderRadius: 14, boxShadow: theme.shadowHover,
     padding: 6, zIndex: 40, fontFamily: theme.font,
   },

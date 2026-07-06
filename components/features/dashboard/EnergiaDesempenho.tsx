@@ -47,7 +47,7 @@ export function EnergiaDesempenho() {
       ) : (
         <>
           <div style={{ width: '100%', height: 220 }}>
-            <ResponsiveContainer>
+            <ResponsiveContainer width="100%" height="100%" minWidth={0}>
               <BarChart data={dados} margin={{ top: 8, right: 8, bottom: 4, left: -16 }}>
                 <XAxis
                   dataKey="nome"
@@ -96,10 +96,11 @@ export function EnergiaDesempenho() {
   );
 }
 
-// Cor por faixa de acerto: status convencional (verde bom, âmbar médio, vermelho baixo).
+// Cor por faixa de acerto alinhada a benchmarks de concurso:
+// ≥75% = zona de conforto pré-aprovação, <55% = abaixo de qualquer limiar de aprovação.
 function corPorAcerto(acerto: number): string {
-  if (acerto >= 80) return theme.ok;
-  if (acerto >= 60) return theme.warn;
+  if (acerto >= 75) return theme.ok;
+  if (acerto >= 55) return theme.warn;
   return theme.crit;
 }
 

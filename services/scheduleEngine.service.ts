@@ -5,6 +5,7 @@
 
 import { requireUser, tryGetUser } from '@/lib/supabase/requireUser';
 import { toLocalDateString as localDateStr } from '@/lib/local-date';
+import { updateBlock, createBlock } from '@/services/studyBlocks.service';
 
 export type BlockOrigin = 'manual' | 'recorrencia';
 
@@ -176,6 +177,37 @@ export async function toggleRecurrenceDone(block: ScheduleBlock, done: boolean):
       .eq('user_id', userId);
     if (error) throw new Error('Erro ao atualizar: ' + error.message);
   }
+}
+
+// Cronograma vivo: aplica a redistribuição decidida por computeReplan (lib/schedule/replan.ts).
+// Bloco manual → só move a data. Ocorrência de recorrência → pula a ocorrência
+// original (não volta a aparecer como atrasada) e materializa um bloco manual
+// equivalente no novo dia. Segue mesmo após falha individual — reorganizar 4
+// de 5 blocos é melhor que travar tudo por causa de 1 erro de rede.
+export async function applyReplanMoves(
+  moves: { block: ScheduleBlock; toDate: string }[],
+): Promise<{ ok: number; falhas: number }> {
+  let ok = 0, falhas = 0;
+  for (const { block, toDate } of moves) {
+    try {
+      if (block.origin === 'manual') {
+        await updateBlock(block.id, { blockDate: toDate });
+      } else {
+        await skipOccurrence(block);
+        await createBlock({
+          blockDate: toDate,
+          subjectId: block.subject_id,
+          topicId: block.topic_id,
+          plannedMinutes: block.planned_minutes,
+        });
+      }
+      ok++;
+    } catch (e) {
+      console.error('[applyReplanMoves] falha ao mover bloco:', block.id, e);
+      falhas++;
+    }
+  }
+  return { ok, falhas };
 }
 
 export async function skipOccurrence(block: ScheduleBlock): Promise<void> {

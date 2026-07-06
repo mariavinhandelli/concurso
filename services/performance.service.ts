@@ -31,12 +31,24 @@ export async function getConstanciaResumo(dias = 30): Promise<ConstanciaResumo |
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
 
-  // Todas as sessões (para o total geral).
-  const { data: todas, error } = await supabase
-    .from('study_logs')
-    .select('duration_sec, started_at')
-    .eq('user_id', user.id);
-  if (error) throw new Error('Erro ao carregar resumo de constância: ' + error.message);
+  // Todas as sessões (para o total geral) — paginadas para evitar truncamento silencioso do PostgREST.
+  const PAGE_SIZE = 1000;
+  type LogRow = { duration_sec: number | null; started_at: string };
+  const todas: LogRow[] = [];
+  let from = 0;
+  while (true) {
+    const { data, error } = await supabase
+      .from('study_logs')
+      .select('duration_sec, started_at')
+      .eq('user_id', user.id)
+      .order('id', { ascending: true })
+      .range(from, from + PAGE_SIZE - 1);
+    if (error) throw new Error('Erro ao carregar resumo de constância: ' + error.message);
+    if (!data || data.length === 0) break;
+    todas.push(...data);
+    if (data.length < PAGE_SIZE) break;
+    from += PAGE_SIZE;
+  }
 
   let segTotal = 0;
   let sessoesTotal = 0;
@@ -47,7 +59,7 @@ export async function getConstanciaResumo(dias = 30): Promise<ConstanciaResumo |
   corte.setDate(corte.getDate() - dias);
   corte.setHours(0, 0, 0, 0);
 
-  for (const l of todas ?? []) {
+  for (const l of todas) {
     const sec = l.duration_sec ?? 0;
     segTotal += sec;
     sessoesTotal += 1;

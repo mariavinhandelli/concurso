@@ -24,10 +24,11 @@ export function EstrelasBadge({ value, onChange, size = 16, showLabel = false }:
         {([1, 2, 3, 4, 5] as const).map((n) => (
           <button
             key={n}
+            className={onChange ? 'icon-touch-target' : undefined}
             onClick={onChange ? () => onChange(n) : undefined}
             style={{
               border: 'none', background: 'transparent', padding: 0,
-              cursor: onChange ? 'pointer' : 'default', display: 'flex',
+              cursor: onChange ? 'pointer' : 'default', display: 'grid', placeItems: 'center',
             }}
             aria-label={onChange ? `${n} estrelas` : undefined}
           >

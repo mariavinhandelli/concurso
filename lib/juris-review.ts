@@ -8,9 +8,7 @@ import type { BaseReviewState, BaseScheduleResult } from '@/lib/spaced-repetitio
 export type JurisRating = 'errei' | 'dificil' | 'ok' | 'dominei';
 
 // JurisReviewState já satisfaz BaseReviewState (mesma forma: intervalDays + repetitions).
-export interface JurisReviewState extends BaseReviewState {
-  // intervalDays, repetitions herdados de BaseReviewState
-}
+export type JurisReviewState = BaseReviewState;
 
 export interface JurisReviewResult extends BaseScheduleResult, JurisReviewState {
   // nextReviewDate, lastReviewed de BaseScheduleResult

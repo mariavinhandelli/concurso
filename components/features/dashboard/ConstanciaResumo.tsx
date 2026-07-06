@@ -5,6 +5,7 @@
 import { useEffect, useState } from 'react';
 import { getConstanciaResumo, type ConstanciaResumo as Resumo } from '@/services/performance.service';
 import { theme } from '@/lib/theme';
+import { useUI } from '@/components/layout/UIContext';
 
 function formataHoras(h: number): string {
   if (h < 1) return `${Math.round(h * 60)} min`;
@@ -12,6 +13,7 @@ function formataHoras(h: number): string {
 }
 
 export function ConstanciaResumo() {
+  const { isMobile } = useUI();
   const [data, setData] = useState<Resumo | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -36,7 +38,7 @@ export function ConstanciaResumo() {
         <span style={styles.period}>últimos 30 dias</span>
       </div>
 
-      <div style={styles.metricsGrid}>
+      <div style={{ ...styles.metricsGrid, gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)' }}>
         {metricasPeriodo.map((m) => (
           <div key={m.rotulo} style={styles.metric}>
             <span style={styles.metricValue}>{m.valor}</span>
@@ -67,7 +69,7 @@ const styles: Record<string, React.CSSProperties> = {
   head: { display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 18, gap: 8, flexWrap: 'wrap' },
   title: { fontSize: 16, fontWeight: 700, color: theme.ink, margin: 0, letterSpacing: -0.3 },
   period: { fontSize: 12.5, color: theme.inkFaint, fontWeight: 500 },
-  metricsGrid: { display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 14, marginBottom: 18 },
+  metricsGrid: { display: 'grid', gap: 14, marginBottom: 18 },
   metric: { display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0 },
   metricValue: { fontSize: 24, fontWeight: 800, color: theme.teal, letterSpacing: -0.6 },
   metricLabel: { fontSize: 12, color: theme.inkSoft, fontWeight: 500 },

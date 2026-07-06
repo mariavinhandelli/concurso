@@ -63,10 +63,12 @@ const NAV: NavItem[] = [
     label: 'Matérias',
     icon: <path d="m3.882 18.043l4.041-5.623a4 4 0 0 1 3.249-1.665h8.752M3.882 18.043a3.65 3.65 0 0 0 2.777 1.277h8.343a4 4 0 0 0 3.405-1.9l2.918-4.734a1.287 1.287 0 0 0-1.115-1.931h-.286M3.882 18.043A3.65 3.65 0 0 1 3 15.661V7.424A2.744 2.744 0 0 1 5.744 4.68h2.653c.607 0 1.189.24 1.618.67l.911.91a1.83 1.83 0 0 0 1.294.537l4.044-.001a3.66 3.66 0 0 1 3.66 3.66v.299" />
   },
-  { href: '/targets', label: 'Edital Verticalizado', icon: <path d="M8 6.5h12M8 12h12M8 17.5h12M4 6.5h1M4 12h1m-1 5.5h1" /> },
+  { href: '/targets', label: 'Editais', icon: <path d="M8 6.5h12M8 12h12M8 17.5h12M4 6.5h1M4 12h1m-1 5.5h1" /> },
 
   { type: 'sep', label: 'Conteúdo' },
   { href: '/jurisprudencias', label: 'Jurisprudências', icon: <><path d="M3 6h18M3 12h18M3 18h12" /><circle cx="19" cy="18" r="3" /><path d="M21 20.5L22.5 22" /></> },
+  { href: '/vademecum', label: 'Vade Mecum', icon: <><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" /><path d="M9 7h6M9 10.5h4" /></> },
+  { href: '/caderno', label: 'Caderno', icon: <><path d="M12 20h9" /><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" /></> },
   { href: '/notebook', label: 'Cadernos de Erros', icon: <path d="M5 20.25c0 .414.336.75.75.75h10.652C17.565 21 18 20.635 18 19.4v-1.445M5 20.25A2.25 2.25 0 0 1 7.25 18h10.152q.339 0 .598-.045M5 20.25V6.2c0-1.136-.072-2.389 1.092-2.982C6.52 3 7.08 3 8.2 3h9.2c1.236 0 1.6.437 1.6 1.6v11.8c0 .995-.282 1.425-1 1.555M10 8l4 4m0-4l-4 4" /> },
 
   { type: 'sep', label: 'Progresso' },
@@ -96,13 +98,13 @@ const NAV: NavItem[] = [
 export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
-  const { collapsed, toggleCollapsed, isMobile, mobileOpen, setMobileOpen } = useUI();
+  const { collapsed, toggleCollapsed, isMobile, isTablet, mobileOpen, setMobileOpen } = useUI();
   const [hover, setHover] = useState<string | null>(null);
 
   // No mobile o drawer é sempre largura cheia (nunca "só ícones").
   // O auto-colapso em tablet (768–899 px) é feito via CSS (.app-sidebar).
-  const isCollapsed = isMobile ? false : collapsed;
-  const W = isMobile ? 244 : (collapsed ? 72 : 244);
+  const isCollapsed = isMobile ? false : (isTablet || collapsed);
+  const W = isMobile ? 244 : (isCollapsed ? 72 : 244);
 
   function go(href: string) {
     router.push(href);
@@ -180,7 +182,7 @@ export function Sidebar() {
         )}
       </div>
 
-      <nav style={styles.nav}>
+      <nav className="sidebar-nav" style={styles.nav} aria-label="Navegação principal">
         {NAV.map((n, i) => {
           if (n.type === 'sep') {
             if (isCollapsed) {
@@ -202,6 +204,7 @@ export function Sidebar() {
               onClick={() => go(n.href)}
               onMouseEnter={() => setHover(n.href)}
               onMouseLeave={() => setHover(null)}
+              title={isCollapsed ? n.label : undefined}
               style={{
                 ...styles.item,
                 justifyContent: isCollapsed ? 'center' : 'flex-start',
@@ -223,15 +226,15 @@ export function Sidebar() {
 }
 
 const styles: Record<string, CSSProperties> = {
-  aside: { flexShrink: 0, height: '100vh', position: 'fixed', top: 0, left: 0, zIndex: zIndex.drawer, background: SB.bg, borderRight: `0.5px solid ${SB.border}`, padding: '20px 14px', display: 'flex', flexDirection: 'column', gap: 4, fontFamily: 'var(--font-poppins), sans-serif', overflow: 'hidden' },
-  brand: { display: 'flex', alignItems: 'center', height: 40, marginBottom: 18, padding: '0 4px' },
+  aside: { flexShrink: 0, height: '100dvh', position: 'fixed', top: 0, left: 0, zIndex: zIndex.drawer, background: SB.bg, borderRight: `0.5px solid ${SB.border}`, padding: '20px 14px', paddingBottom: 'max(20px, env(safe-area-inset-bottom))', display: 'flex', flexDirection: 'column', gap: 4, fontFamily: 'var(--font-poppins), sans-serif', overflow: 'hidden' },
+  brand: { display: 'flex', alignItems: 'center', height: 40, marginBottom: 18, padding: '0 4px', flexShrink: 0 },
   brandInner: { display: 'flex', alignItems: 'center', gap: 10 },
   logo: { width: 32, height: 32, borderRadius: 9, background: '#fff', display: 'grid', placeItems: 'center', flexShrink: 0, boxShadow: '0 1px 6px rgba(0,0,0,0.18)' },
   brandName: { fontWeight: 700, fontSize: 20, color: '#fff', letterSpacing: -0.5, whiteSpace: 'nowrap', fontFamily: 'var(--font-poppins), sans-serif' },
   collapseBtn: { width: 30, height: 30, borderRadius: 8, border: 'none', background: 'transparent', display: 'grid', placeItems: 'center', cursor: 'pointer', flexShrink: 0 },
-  nav: { display: 'flex', flexDirection: 'column', gap: 4 },
+  nav: { display: 'flex', flexDirection: 'column', gap: 4, flex: 1, minHeight: 0, overflowY: 'auto', overflowX: 'hidden', paddingRight: 2, overscrollBehavior: 'contain', scrollbarGutter: 'stable' },
   item: { display: 'flex', alignItems: 'center', gap: 12, padding: '10px 12px', height: 40, borderRadius: 10, border: 'none', textAlign: 'left', cursor: 'pointer', fontSize: 14, transition: 'background .15s, color .15s', fontFamily: 'inherit', whiteSpace: 'nowrap' },
   sepWrap: { padding: '10px 12px 4px', display: 'flex', alignItems: 'center', gap: 8 },
-  sepLabel: { fontSize: 10, fontWeight: 700, color: SB.tagText, letterSpacing: 0.8, textTransform: 'uppercase', whiteSpace: 'nowrap' },
+  sepLabel: { fontSize: 11, fontWeight: 700, color: SB.tagText, letterSpacing: 0.8, textTransform: 'uppercase', whiteSpace: 'nowrap' },
   sepLine: { height: '0.5px', background: SB.border, margin: '6px 8px' },
 };

@@ -29,7 +29,7 @@ const RATINGS: {
   pressedFg: string;
 }[] = [
   { key: 'dificil',       label: 'Difícil',      fg: theme.crit, pressedBg: 'var(--review-hard)',   pressedFg: 'var(--review-hard-text)'   },
-  { key: 'intermediario', label: 'Intermediário', fg: theme.warn, pressedBg: 'var(--review-medium)', pressedFg: 'var(--review-medium-text)' },
+  { key: 'intermediario', label: 'Médio',         fg: theme.warn, pressedBg: 'var(--review-medium)', pressedFg: 'var(--review-medium-text)' },
   { key: 'facil',         label: 'Fácil',         fg: theme.ok,   pressedBg: 'var(--review-easy)',   pressedFg: 'var(--review-easy-text)'   },
 ];
 

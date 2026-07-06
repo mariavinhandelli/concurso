@@ -3,12 +3,12 @@
 // Máquina de estados da navegação em 3 níveis: matérias → tópicos → cards.
 // Extraído de CardsTab para isolar a lógica de estado da renderização.
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import {
   listFlashcards, countFlashcardsBySubject,
   type Flashcard,
 } from '@/services/flashcards.service';
-import { listTopicOptions, type PickerOption } from '@/services/picker.service';
+import { listLeaves as listTopicOptions, type PickerOption } from '@/services/topics.service';
 
 export type NavLevel = 'subjects' | 'topics' | 'cards';
 
@@ -45,27 +45,42 @@ export function useFlashcardNavigation(): FlashcardNavState & FlashcardNavAction
   const [curTopic, setCurTopic] = useState<PickerOption | null | 'none'>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
 
+  // Guardas contra respostas obsoletas: navegação rápida entre matérias/tópicos
+  // não pode deixar uma resposta antiga sobrescrever o estado do destino atual.
+  const topicsRequestRef = useRef<string | null>(null);
+  const cardsRequestRef = useRef<string | null>(null);
+
   const loadCards = useCallback(async (
     subjectId: string,
     topicId: string | null,
     onError: (msg: string) => void,
   ) => {
+    const requestKey = `${subjectId}:${topicId ?? ''}`;
+    cardsRequestRef.current = requestKey;
     try {
-      setCards(await listFlashcards({ subjectId, topicId }));
+      const result = await listFlashcards({ subjectId, topicId });
+      if (cardsRequestRef.current === requestKey) setCards(result);
     } catch (e) {
-      onError(e instanceof Error ? e.message : 'Erro ao carregar os cards. Tente novamente.');
+      if (cardsRequestRef.current === requestKey) {
+        onError(e instanceof Error ? e.message : 'Erro ao carregar os cards. Tente novamente.');
+      }
     }
   }, []);
 
   const openSubject = useCallback((s: PickerOption, onError: (msg: string) => void) => {
     setCurSubject(s);
     setLevel('topics');
+    topicsRequestRef.current = s.id;
     listTopicOptions(s.id)
-      .then(setTopics)
-      .catch(e => onError(e instanceof Error ? e.message : 'Erro ao carregar tópicos.'));
+      .then((ts) => { if (topicsRequestRef.current === s.id) setTopics(ts); })
+      .catch(e => {
+        if (topicsRequestRef.current === s.id) {
+          onError(e instanceof Error ? e.message : 'Erro ao carregar tópicos.');
+        }
+      });
   }, []);
 
-  const openTopic = useCallback((t: PickerOption | 'none', onError: (msg: string) => void) => {
+  const openTopic = useCallback((t: PickerOption | 'none') => {
     setCurTopic(t);
     setLevel('cards');
   }, []);
@@ -96,7 +111,7 @@ export function useFlashcardNavigation(): FlashcardNavState & FlashcardNavAction
 
   // Exposto para que CardsTab possa acionar a carga de cards após openTopic.
   const openTopicWithLoad = useCallback((t: PickerOption | 'none', onError: (msg: string) => void) => {
-    openTopic(t, onError);
+    openTopic(t);
     if (!curSubject) return;
     loadCards(curSubject.id, t === 'none' ? null : (t as PickerOption).id, onError);
   }, [curSubject, openTopic, loadCards]);

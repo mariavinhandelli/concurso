@@ -2,14 +2,13 @@
 // Motor da "Saúde do Tópico" (0–100). Combina acerto recente + SRS, e aplica
 // o decaimento da curva de esquecimento. Grava o resultado no cache topic_metrics.
 
-import { createClient } from '@/lib/supabase/client';
+import { requireUser, tryGetUser } from '@/lib/supabase/requireUser';
 
-// --- Parâmetros ajustáveis do modelo (num só lugar, fácil de calibrar) ---
-const PESO_ACERTO = 0.50;       // peso do acerto recente em questões
-const PESO_SRS = 0.30;          // peso dos flashcards/SM-2
-const MIN_QUESTOES_CONFIAVEL = 10;  // abaixo disso, saúde tem teto
-const TETO_AMOSTRA_PEQUENA = 60;    // teto quando há poucos dados
-const N_SESSOES_RECENTES = 5;       // janela de "recente"
+const PESO_ACERTO = 0.60;           // acerto recente é o preditor mais forte de aprovação
+const PESO_SRS = 0.40;              // spaced repetition completa o score quando há flashcards
+const MIN_QUESTOES_CONFIAVEL = 30;  // <30 questões → margem de erro estatística alta (±16%)
+const TETO_AMOSTRA_PEQUENA = 55;    // abaixo de qualquer limiar de aprovação → sinal visual claro
+const N_SESSOES_RECENTES = 8;       // 8 sessões → tendência mais estável (1 ruim = 12.5%, não 20%)
 
 interface SaudeComponentes {
   acerto_recente: number | null;
@@ -18,14 +17,12 @@ interface SaudeComponentes {
   amostra_questoes: number;
 }
 
-// Normaliza um valor entre min e max para a faixa 0–1 (clamp nas bordas).
 function normalizar(v: number, min: number, max: number): number {
   if (max <= min) return 0;
   return Math.max(0, Math.min(1, (v - min) / (max - min)));
 }
 
-// Média ponderada que IGNORA componentes null e renormaliza os pesos.
-function mediaPonderadaRenormalizada(
+export function mediaPonderadaRenormalizada(
   itens: Array<{ valor: number | null; peso: number }>,
 ): number | null {
   const validos = itens.filter((i) => i.valor !== null) as Array<{ valor: number; peso: number }>;
@@ -35,50 +32,48 @@ function mediaPonderadaRenormalizada(
   return somaValores / somaPesos;
 }
 
-// Recalcula e persiste a Saúde de UM tópico para o usuário logado.
 export async function recalcularSaude(topicId: string): Promise<number> {
-  const supabase = createClient();
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
-  if (authError || !user) throw new Error('Você precisa estar logado.');
-
+  const { supabase, userId } = await requireUser();
   const hoje = new Date();
 
-  // --- Componente 1: acerto recente (últimas N sessões de questões) ---
-  const { data: logs, error: logsError } = await supabase
-    .from('study_logs')
-    .select('questions_total, questions_correct, ended_at')
-    .eq('user_id', user.id)
-    .eq('topic_id', topicId)
-    .eq('mode', 'questoes')
-    .order('ended_at', { ascending: false })
-    .limit(N_SESSOES_RECENTES);
+  const [
+    { data: logs, error: logsError },
+    { data: cards, error: cardsError },
+    { data: topic, error: topicError },
+  ] = await Promise.all([
+    supabase
+      .from('study_logs')
+      .select('questions_total, questions_correct, ended_at')
+      .eq('user_id', userId)
+      .eq('topic_id', topicId)
+      .eq('mode', 'questoes')
+      .order('ended_at', { ascending: false })
+      .limit(N_SESSOES_RECENTES),
+    supabase
+      .from('flashcards')
+      .select('ease_factor')
+      .eq('user_id', userId)
+      .eq('topic_id', topicId),
+    supabase
+      .from('topics')
+      .select('last_reviewed, interval_days')
+      .eq('id', topicId)
+      .single(),
+  ]);
+
   if (logsError) throw new Error('Erro ao ler sessões: ' + logsError.message);
+  if (cardsError) throw new Error('Erro ao ler flashcards: ' + cardsError.message);
+  if (topicError) throw new Error('Erro ao ler tópico: ' + topicError.message);
 
   const totalQ = (logs ?? []).reduce((s, l) => s + (l.questions_total ?? 0), 0);
   const acertosQ = (logs ?? []).reduce((s, l) => s + (l.questions_correct ?? 0), 0);
   const acertoRecente = totalQ > 0 ? acertosQ / totalQ : null;
-
-  // --- Componente 2: SRS / flashcards (ease_factor médio normalizado) ---
-  const { data: cards, error: cardsError } = await supabase
-    .from('flashcards')
-    .select('ease_factor, repetitions')
-    .eq('user_id', user.id)
-    .eq('topic_id', topicId);
-  if (cardsError) throw new Error('Erro ao ler flashcards: ' + cardsError.message);
 
   let srsScore: number | null = null;
   if (cards && cards.length > 0) {
     const media = cards.reduce((s, c) => s + normalizar(Number(c.ease_factor), 1.3, 2.8), 0) / cards.length;
     srsScore = media;
   }
-
-  // --- Componente 3: fator de decaimento (curva de esquecimento) ---
-  const { data: topic, error: topicError } = await supabase
-    .from('topics')
-    .select('last_reviewed, interval_days')
-    .eq('id', topicId)
-    .single();
-  if (topicError) throw new Error('Erro ao ler tópico: ' + topicError.message);
 
   const ultimaSessao = logs && logs.length > 0 ? new Date(logs[0].ended_at) : null;
   const ultimaRevisao = topic.last_reviewed ? new Date(topic.last_reviewed) : null;
@@ -87,21 +82,17 @@ export async function recalcularSaude(topicId: string): Promise<number> {
   let fatorDecaimento = 1.0;
   if (ref) {
     const diasSem = (hoje.getTime() - ref.getTime()) / (1000 * 60 * 60 * 24);
-    const meiaVida = Math.max(topic.interval_days ?? 0, 3);
+    const meiaVida = Math.max(topic.interval_days ?? 0, 7); // mínimo 7 dias (1 semana) — menos punitivo para tópicos conhecidos
     fatorDecaimento = Math.pow(0.5, diasSem / meiaVida);
   }
 
-  // --- Combinação ---
   const base = mediaPonderadaRenormalizada([
     { valor: acertoRecente, peso: PESO_ACERTO },
     { valor: srsScore, peso: PESO_SRS },
   ]);
 
   let saude = base === null ? 0 : base * fatorDecaimento * 100;
-
-  if (totalQ < MIN_QUESTOES_CONFIAVEL) {
-    saude = Math.min(saude, TETO_AMOSTRA_PEQUENA);
-  }
+  if (totalQ < MIN_QUESTOES_CONFIAVEL) saude = Math.min(saude, TETO_AMOSTRA_PEQUENA);
 
   const saudeArredondada = Math.round(saude);
   const componentes: SaudeComponentes = {
@@ -115,7 +106,7 @@ export async function recalcularSaude(topicId: string): Promise<number> {
     .from('topic_metrics')
     .upsert({
       topic_id: topicId,
-      user_id: user.id,
+      user_id: userId,
       saude_atual: saudeArredondada,
       saude_componentes: componentes,
       recalculated_at: hoje.toISOString(),
@@ -125,17 +116,15 @@ export async function recalcularSaude(topicId: string): Promise<number> {
   return saudeArredondada;
 }
 
-// Lê a saúde de VÁRIOS tópicos de uma vez. Retorna { topicId: saude }.
 export async function getSaudeMap(topicIds: string[]): Promise<Record<string, number>> {
   if (topicIds.length === 0) return {};
-  const supabase = createClient();
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
-  if (authError || !user) return {};
+  const auth = await tryGetUser();
+  if (!auth) return {};
 
-  const { data, error } = await supabase
+  const { data, error } = await auth.supabase
     .from('topic_metrics')
     .select('topic_id, saude_atual')
-    .eq('user_id', user.id)
+    .eq('user_id', auth.userId)
     .in('topic_id', topicIds);
 
   if (error) {
@@ -148,16 +137,14 @@ export async function getSaudeMap(topicIds: string[]): Promise<Record<string, nu
   return mapa;
 }
 
-// Taxa de acerto recente do usuário (últimas 10 sessões de questões, global).
 export async function getAcertoRecente(): Promise<number | null> {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return null;
+  const auth = await tryGetUser();
+  if (!auth) return null;
 
-  const { data: logs } = await supabase
+  const { data: logs } = await auth.supabase
     .from('study_logs')
     .select('questions_total, questions_correct')
-    .eq('user_id', user.id)
+    .eq('user_id', auth.userId)
     .eq('mode', 'questoes')
     .order('ended_at', { ascending: false })
     .limit(10);
@@ -168,16 +155,14 @@ export async function getAcertoRecente(): Promise<number | null> {
   return Math.round((acertos / total) * 100);
 }
 
-// Taxa de acerto de UM tópico (todas as sessões de questões dele).
 export async function getAcertoTopico(topicId: string): Promise<{ pct: number | null; total: number }> {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { pct: null, total: 0 };
+  const auth = await tryGetUser();
+  if (!auth) return { pct: null, total: 0 };
 
-  const { data: logs } = await supabase
+  const { data: logs } = await auth.supabase
     .from('study_logs')
     .select('questions_total, questions_correct')
-    .eq('user_id', user.id)
+    .eq('user_id', auth.userId)
     .eq('topic_id', topicId)
     .eq('mode', 'questoes');
 
@@ -185,6 +170,4 @@ export async function getAcertoTopico(topicId: string): Promise<{ pct: number | 
   const acertos = (logs ?? []).reduce((s, l) => s + (l.questions_correct ?? 0), 0);
   if (total === 0) return { pct: null, total: 0 };
   return { pct: Math.round((acertos / total) * 100), total };
-
-  
 }

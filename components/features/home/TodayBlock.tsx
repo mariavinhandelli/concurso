@@ -1,11 +1,8 @@
 'use client';
 
 import { memo, useEffect, useRef, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/components/ui/ToastProvider';
-import { countDueReviews } from '@/services/reviews.service';
-import { countDueCards } from '@/services/flashcards.service';
 import {
   getGoalsSummary, setDailyTarget, type GoalsSummary,
   getQuestionsSummary, setDailyTargetQuestions, type QuestionsSummary,
@@ -16,20 +13,11 @@ import { theme } from '@/lib/theme';
 import { useUI } from '@/components/layout/UIContext';
 
 export const TodayBlock = memo(function TodayBlock() {
-  const router = useRouter();
   const { isMobile } = useUI();
   const toast = useToast();
   const queryClient = useQueryClient();
 
   // ── Dados via TanStack Query — cache, deduplicação e refetch ao focar são automáticos ──
-  const { data: revisoes } = useQuery<number>({
-    queryKey: ['due-reviews-count'],
-    queryFn: countDueReviews,
-  });
-  const { data: flashcards } = useQuery<number>({
-    queryKey: ['due-cards-count'],
-    queryFn: countDueCards,
-  });
   const { data: goals } = useQuery<GoalsSummary>({
     queryKey: ['goals-summary'],
     queryFn: getGoalsSummary,
@@ -136,64 +124,8 @@ export const TodayBlock = memo(function TodayBlock() {
     : acrDelta < 0 ? theme.crit
     : theme.inkSoft;
 
-  // P11 — "tudo em dia" quando ambos carregaram e são zero
-  const tudoEmDia = revisoes === 0 && flashcards === 0;
-
   return (
     <div style={styles.wrap}>
-      {/* Dois cards de pendentes */}
-      <div style={{ ...styles.cards, gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr' }}>
-        <button style={styles.card} onClick={() => router.push('/reviews')}>
-          <div style={styles.cardLeft}>
-            <div style={styles.iconBox}>
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={theme.teal} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M4 12a8 8 0 0113-6.2L20 8M20 4v4h-4M20 12a8 8 0 01-13 6.2L4 16M4 20v-4h4" />
-              </svg>
-            </div>
-            <div style={styles.cardText}>
-              <div style={styles.cardNum}>
-                {revisoes === undefined ? <span style={styles.loadingNum}>…</span> : revisoes}{' '}
-                {revisoes === 1 ? 'revisão' : 'revisões'}
-              </div>
-              <div style={styles.cardLabel}>
-                {revisoes && revisoes > 0 ? `vencendo hoje · ~${revisoes * 3} min` : 'vencendo hoje'}
-              </div>
-            </div>
-          </div>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={theme.inkFaint} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
-        </button>
-
-        <button style={styles.card} onClick={() => router.push('/flashcards')}>
-          <div style={styles.cardLeft}>
-            <div style={styles.iconBox}>
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={theme.teal} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                <path d="m21 12l-9 4l-9-4m18 4l-9 4l-9-4m18-8l-9 4l-9-4l9-4z" />
-              </svg>
-            </div>
-            <div style={styles.cardText}>
-              <div style={styles.cardNum}>
-                {flashcards === undefined ? <span style={styles.loadingNum}>…</span> : flashcards}{' '}
-                {flashcards === 1 ? 'flashcard' : 'flashcards'}
-              </div>
-              <div style={styles.cardLabel}>
-                {flashcards && flashcards > 0 ? `na fila de revisão · ~${Math.ceil(flashcards * 1.5)} min` : 'na fila de revisão'}
-              </div>
-            </div>
-          </div>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={theme.inkFaint} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
-        </button>
-      </div>
-
-      {/* P11 — banner "tudo em dia" quando ambos carregaram e são zero */}
-      {tudoEmDia && (
-        <div style={styles.allDoneBanner}>
-          <span>Você está em dia com revisões e flashcards! 🎉</span>
-          <button style={styles.allDoneLink} onClick={() => router.push('/flashcards/create')}>
-            Criar novos flashcards →
-          </button>
-        </div>
-      )}
-
       {/* ── Linha 1: meta de horas ── */}
       <div style={{ ...styles.strip, flexWrap: isMobile ? 'wrap' : 'nowrap' }}>
         <div style={styles.metaWrap}>
@@ -288,16 +220,6 @@ export const TodayBlock = memo(function TodayBlock() {
 
 const styles: Record<string, React.CSSProperties> = {
   wrap: { fontFamily: theme.font, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 0 },
-  loadingNum: { opacity: 0.4, fontWeight: 400 },
-  allDoneBanner: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, padding: '12px 16px', borderRadius: theme.radiusSm, background: 'var(--ok-bg)', border: '0.5px solid var(--ok)', marginBottom: 14, fontSize: 14, color: 'var(--ok-deep)', fontWeight: 500 },
-  allDoneLink: { border: 'none', background: 'transparent', color: theme.ok, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', padding: 0, whiteSpace: 'nowrap' },
-  cards: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 14, minWidth: 0 },
-  card: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, background: theme.card, border: `0.5px solid ${theme.line}`, borderRadius: theme.radius, boxShadow: theme.shadow, padding: '18px 20px', cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit', width: '100%', minWidth: 0 },
-  cardLeft: { display: 'flex', alignItems: 'center', gap: 14, minWidth: 0 },
-  iconBox: { width: 44, height: 44, borderRadius: 11, background: theme.tealBg, display: 'grid', placeItems: 'center', flexShrink: 0 },
-  cardText: { minWidth: 0 },
-  cardNum: { fontSize: 22, fontWeight: 700, color: theme.ink, lineHeight: 1.1 },
-  cardLabel: { fontSize: 13, color: theme.inkSoft, marginTop: 2 },
   strip: { display: 'flex', alignItems: 'center', gap: 16, padding: '4px 4px' },
   metaWrap: { position: 'relative', flexShrink: 0 },
   stripBtn: { display: 'flex', alignItems: 'center', gap: 7, fontSize: 13.5, color: theme.inkSoft, whiteSpace: 'nowrap', background: 'transparent', border: 'none', cursor: 'pointer', fontFamily: 'inherit', padding: 0 },

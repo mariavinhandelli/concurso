@@ -14,14 +14,18 @@ interface Props {
 export function BulkImportModal({ onConfirm, onClose }: Props) {
   const [raw, setRaw] = useState('');
   const [saving, setSaving] = useState(false);
+  const [importError, setImportError] = useState('');
   const nomes = parseTopics(raw);
 
   async function handleConfirm() {
     if (nomes.length === 0) return;
     setSaving(true);
+    setImportError('');
     try {
       await onConfirm(nomes);
       onClose();
+    } catch (e) {
+      setImportError(e instanceof Error ? e.message : 'Erro ao importar tópicos.');
     } finally {
       setSaving(false);
     }
@@ -61,6 +65,7 @@ export function BulkImportModal({ onConfirm, onClose }: Props) {
           </div>
         </div>
 
+        {importError && <p style={{ color: '#ef4444', fontSize: 13, margin: '0 0 10px', textAlign: 'right' }}>{importError}</p>}
         <div style={styles.actions}>
           <button onClick={onClose} style={styles.cancelBtn}>Cancelar</button>
           <button
@@ -78,7 +83,7 @@ export function BulkImportModal({ onConfirm, onClose }: Props) {
 
 const styles: Record<string, React.CSSProperties> = {
   overlay: { position: 'fixed', inset: 0, background: 'rgba(30,28,24,0.4)', display: 'grid', placeItems: 'center', zIndex: 50, padding: 20 },
-  modal: { background: theme.card, borderRadius: theme.radius, boxShadow: '0 20px 60px rgba(0,0,0,0.18)', padding: 26, width: '100%', maxWidth: 680, fontFamily: theme.font },
+  modal: { background: theme.card, borderRadius: theme.radius, boxShadow: '0 20px 60px rgba(0,0,0,0.18)', padding: 26, width: '100%', maxWidth: 680, maxHeight: 'calc(100dvh - 32px)', overflowY: 'auto', fontFamily: theme.font },
   h2: { fontSize: 20, fontWeight: 700, color: theme.ink, margin: 0 },
   hint: { fontSize: 13.5, color: theme.inkSoft, margin: '8px 0 18px', lineHeight: 1.5 },
   split: { display: 'flex', gap: 14, marginBottom: 20 },

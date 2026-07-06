@@ -104,6 +104,7 @@ export default function RevisarPage() {
       {/* Cabeçalho */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
         <button
+          className="touch-target"
           onClick={() => router.push('/jurisprudencias')}
           style={{ border: 'none', background: 'transparent', color: theme.teal, fontSize: 13, fontWeight: 500, cursor: 'pointer', padding: 0, fontFamily: 'inherit' }}
         >
@@ -132,22 +133,45 @@ export default function RevisarPage() {
             )}
           </div>
 
-          {/* Card principal */}
+          {/* Card principal — quando há flashcard, revisa em modo pergunta→resposta
+              (memória ativa); sem flashcard, cai no modo releitura da tese. */}
           <div style={styles.card}>
-            {/* Tese — sempre visível */}
-            <div style={styles.teseBox}>
-              <p style={{ fontSize: 11, fontWeight: 700, color: theme.teal, textTransform: 'uppercase', letterSpacing: 0.8, margin: '0 0 10px' }}>
-                Tese Principal
-              </p>
-              <p style={{ fontSize: isMobile ? 16 : 17, color: theme.ink, lineHeight: 1.65, margin: 0, fontWeight: 500 }}>
-                {current.tese}
-              </p>
-            </div>
+            {current.flashcard_frente && current.flashcard_verso ? (
+              <div style={styles.teseBox}>
+                <p style={{ fontSize: 11, fontWeight: 700, color: theme.teal, textTransform: 'uppercase', letterSpacing: 0.8, margin: '0 0 10px' }}>
+                  Pergunta
+                </p>
+                <p style={{ fontSize: isMobile ? 16 : 17, color: theme.ink, lineHeight: 1.65, margin: 0, fontWeight: 500 }}>
+                  {current.flashcard_frente}
+                </p>
+              </div>
+            ) : (
+              <div style={styles.teseBox}>
+                <p style={{ fontSize: 11, fontWeight: 700, color: theme.teal, textTransform: 'uppercase', letterSpacing: 0.8, margin: '0 0 10px' }}>
+                  Tese Principal
+                </p>
+                <p style={{ fontSize: isMobile ? 16 : 17, color: theme.ink, lineHeight: 1.65, margin: 0, fontWeight: 500 }}>
+                  {current.tese}
+                </p>
+              </div>
+            )}
 
             {/* Conteúdo revelado */}
             {revealed && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12, paddingTop: 4 }}>
-                {current.resumo && (
+                {current.flashcard_frente && current.flashcard_verso && (
+                  <>
+                    <div style={{ background: theme.okTint, borderRadius: 10, padding: '12px 14px' }}>
+                      <p style={{ ...styles.sectionLabel, color: theme.okDeep }}>Resposta</p>
+                      <p style={styles.sectionText}>{current.flashcard_verso}</p>
+                    </div>
+                    <div>
+                      <p style={styles.sectionLabel}>Tese completa</p>
+                      <p style={styles.sectionText}>{current.tese}</p>
+                    </div>
+                  </>
+                )}
+                {!current.flashcard_frente && current.resumo && (
                   <div>
                     <p style={styles.sectionLabel}>Resumo</p>
                     <p style={styles.sectionText}>{current.resumo}</p>
@@ -173,10 +197,12 @@ export default function RevisarPage() {
           {!revealed ? (
             <div style={{ textAlign: 'center', marginTop: 20 }}>
               <button onClick={() => setRevealed(true)} style={styles.revealBtn}>
-                Ver tudo e avaliar
+                {current.flashcard_frente && current.flashcard_verso ? 'Ver resposta e avaliar' : 'Ver tudo e avaliar'}
               </button>
               <p style={{ fontSize: 12, color: theme.inkFaint, marginTop: 12 }}>
-                Clique para revelar o conteúdo completo antes de avaliar
+                {current.flashcard_frente && current.flashcard_verso
+                  ? 'Tente responder de cabeça antes de revelar'
+                  : 'Clique para revelar o conteúdo completo antes de avaliar'}
               </p>
               <button
                 onClick={handleSkip}

@@ -2,8 +2,11 @@
 // CRUD do concurso-alvo (banca estruturada + órgão + cargo + ano).
 // A banca referencia exam_boards via board_id (null = a definir).
 // O nome da banca é resolvido por mapa (sem join, evita ambiguidade de FK).
+'use client';
 
-import { createClient } from '@/lib/supabase/client';
+import { requireUser } from '@/lib/supabase/requireUser';
+import { buildTargetSlug } from '@/lib/targets';
+import type { SupabaseClient } from '@supabase/supabase-js';
 
 export interface TargetExam {
   id: string;
@@ -13,25 +16,15 @@ export interface TargetExam {
   orgao: string | null;
   cargo: string | null;
   ano_alvo: number | null;
-  exam_date: string | null; // 'YYYY-MM-DD' — alimenta a contagem regressiva no home
+  exam_date: string | null;
   slug: string;
   is_primary: boolean;
   phase: 'pre' | 'pos';
+  catalog_edital_id: string | null;
   created_at: string;
 }
 
-function buildSlug(banca: string | null, orgao?: string | null, cargo?: string | null, ano?: number | null): string {
-  const norm = (s: string) =>
-    s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-     .replace(/[^a-z0-9]+/g, '').slice(0, 20);
-  return [banca, orgao, cargo, ano]
-    .filter(Boolean)
-    .map((p) => (typeof p === 'number' ? String(p) : norm(p as string)))
-    .join('-') || 'concurso';
-}
-
-async function getBoardName(boardId: string): Promise<string | null> {
-  const supabase = createClient();
+async function getBoardName(supabase: SupabaseClient, boardId: string): Promise<string | null> {
   const { data } = await supabase
     .from('exam_boards')
     .select('name')
@@ -40,22 +33,31 @@ async function getBoardName(boardId: string): Promise<string | null> {
   return data?.name ?? null;
 }
 
-export async function listTargetExams(): Promise<TargetExam[]> {
-  const supabase = createClient();
-  const { data: { user }, error: authErr } = await supabase.auth.getUser();
-  if (authErr || !user) throw new Error('Você precisa estar logado.');
-
+export async function getTargetExam(id: string): Promise<TargetExam | null> {
+  const { supabase, userId } = await requireUser();
   const { data, error } = await supabase
     .from('target_exams')
-    .select('id, user_id, board_id, orgao, cargo, ano_alvo, exam_date, slug, is_primary, phase, created_at')
-    .eq('user_id', user.id)
+    .select('id, user_id, board_id, orgao, cargo, ano_alvo, exam_date, slug, is_primary, phase, catalog_edital_id, created_at')
+    .eq('id', id)
+    .eq('user_id', userId)
+    .maybeSingle();
+  if (error) throw new Error('Erro ao buscar concurso-alvo: ' + error.message);
+  if (!data) return null;
+  const boardName = data.board_id ? await getBoardName(supabase, data.board_id) : null;
+  return { ...data, boardName } as TargetExam;
+}
+
+export async function listTargetExams(): Promise<TargetExam[]> {
+  const { supabase, userId } = await requireUser();
+  const { data, error } = await supabase
+    .from('target_exams')
+    .select('id, user_id, board_id, orgao, cargo, ano_alvo, exam_date, slug, is_primary, phase, catalog_edital_id, created_at')
+    .eq('user_id', userId)
     .order('is_primary', { ascending: false })
     .order('created_at', { ascending: true });
-
   if (error) throw new Error('Erro ao listar concursos-alvo: ' + error.message);
 
-  // Resolve o nome da banca via mapa (sem join).
-  const { data: boards } = await supabase.from('exam_boards').select('id, name');
+  const { data: boards } = await supabase.from('exam_boards').select('id, name').eq('user_id', userId);
   const boardMap: Record<string, string> = {};
   for (const b of boards ?? []) boardMap[b.id] = b.name;
 
@@ -66,15 +68,12 @@ export async function listTargetExams(): Promise<TargetExam[]> {
 }
 
 export async function updateTargetExamDate(id: string, examDate: string | null): Promise<void> {
-  const supabase = createClient();
-  const { data: { user }, error: authErr } = await supabase.auth.getUser();
-  if (authErr || !user) throw new Error('Você precisa estar logado.');
-
+  const { supabase, userId } = await requireUser();
   const { error } = await supabase
     .from('target_exams')
     .update({ exam_date: examDate })
     .eq('id', id)
-    .eq('user_id', user.id);
+    .eq('user_id', userId);
   if (error) throw new Error('Erro ao atualizar data da prova: ' + error.message);
 }
 
@@ -86,24 +85,19 @@ export async function createTargetExam(input: {
   exam_date?: string | null;
   phase?: 'pre' | 'pos';
 }): Promise<TargetExam> {
-  const supabase = createClient();
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
-  if (authError || !user) throw new Error('Você precisa estar logado.');
-
+  const { supabase, userId } = await requireUser();
   const phase = input.phase ?? 'pre';
   const boardId = input.board_id ?? null;
 
-  if (phase === 'pos' && !boardId) {
-    throw new Error('No pós-edital a banca é obrigatória.');
-  }
+  if (phase === 'pos' && !boardId) throw new Error('No pós-edital a banca é obrigatória.');
 
-  const bancaNome = boardId ? await getBoardName(boardId) : null;
-  const slug = buildSlug(bancaNome, input.orgao, input.cargo, input.ano_alvo);
+  const bancaNome = boardId ? await getBoardName(supabase, boardId) : null;
+  const slug = buildTargetSlug(bancaNome, input.orgao, input.cargo, input.ano_alvo);
 
   const { data, error } = await supabase
     .from('target_exams')
     .insert({
-      user_id: user.id,
+      user_id: userId,
       board_id: boardId,
       orgao: input.orgao?.trim() || null,
       cargo: input.cargo?.trim() || null,
@@ -112,7 +106,7 @@ export async function createTargetExam(input: {
       phase,
       slug,
     })
-    .select('id, user_id, board_id, orgao, cargo, ano_alvo, exam_date, slug, is_primary, phase, created_at')
+    .select('id, user_id, board_id, orgao, cargo, ano_alvo, exam_date, slug, is_primary, phase, catalog_edital_id, created_at')
     .single();
 
   if (error) {
@@ -124,81 +118,39 @@ export async function createTargetExam(input: {
 }
 
 export async function promoteToPos(targetExamId: string, boardId?: string): Promise<void> {
-  const supabase = createClient();
-  const { data: { user }, error: authErr } = await supabase.auth.getUser();
-  if (authErr || !user) throw new Error('Você precisa estar logado.');
-
-  const updates: { phase: 'pos'; board_id?: string } = { phase: 'pos' };
-  if (boardId) updates.board_id = boardId;
-
+  const { supabase, userId } = await requireUser();
+  const updates: { phase: 'pos'; board_id?: string; slug?: string } = { phase: 'pos' };
+  if (boardId) {
+    updates.board_id = boardId;
+    const bancaNome = await getBoardName(supabase, boardId);
+    const { data: exam } = await supabase
+      .from('target_exams')
+      .select('orgao, cargo, ano_alvo')
+      .eq('id', targetExamId)
+      .eq('user_id', userId)
+      .single();
+    if (exam) updates.slug = buildTargetSlug(bancaNome, exam.orgao, exam.cargo, exam.ano_alvo);
+  }
   const { error } = await supabase
     .from('target_exams')
     .update(updates)
     .eq('id', targetExamId)
-    .eq('user_id', user.id);
+    .eq('user_id', userId);
   if (error) throw new Error('Erro ao promover concurso: ' + error.message);
 }
 
 export async function setPrimaryTargetExam(targetExamId: string): Promise<void> {
-  const supabase = createClient();
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
-  if (authError || !user) throw new Error('Você precisa estar logado.');
-
-  // RPC atômica: troca o primário em um único UPDATE, sem janela de estado inconsistente.
+  const { supabase } = await requireUser();
   const { error } = await supabase.rpc('set_primary_target_exam', { p_target_id: targetExamId });
   if (error) throw new Error(error.message);
 }
 
 export async function deleteTargetExam(targetExamId: string): Promise<void> {
-  const supabase = createClient();
-  const { data: { user }, error: authErr } = await supabase.auth.getUser();
-  if (authErr || !user) throw new Error('Você precisa estar logado.');
-
+  const { supabase, userId } = await requireUser();
   const { error } = await supabase
     .from('target_exams')
     .delete()
     .eq('id', targetExamId)
-    .eq('user_id', user.id);
+    .eq('user_id', userId);
   if (error) throw new Error('Erro ao excluir concurso-alvo: ' + error.message);
-}
-
-export async function linkTopicToTarget(topicId: string, targetExamId: string): Promise<void> {
-  const supabase = createClient();
-  const { data: { user }, error: authErr } = await supabase.auth.getUser();
-  if (authErr || !user) throw new Error('Você precisa estar logado.');
-
-  const { data: exam } = await supabase
-    .from('target_exams').select('id').eq('id', targetExamId).eq('user_id', user.id).single();
-  if (!exam) throw new Error('Concurso-alvo não encontrado.');
-
-  const { data: topic } = await supabase
-    .from('topics').select('id').eq('id', topicId).eq('user_id', user.id).single();
-  if (!topic) throw new Error('Tópico não encontrado.');
-
-  const { error } = await supabase
-    .from('topic_target_exams')
-    .insert({ topic_id: topicId, target_exam_id: targetExamId });
-  if (error && error.code !== '23505')
-    throw new Error('Erro ao vincular tópico: ' + error.message);
-}
-
-export async function unlinkTopicFromTarget(topicId: string, targetExamId: string): Promise<void> {
-  const supabase = createClient();
-  const { data: { user }, error: authErr } = await supabase.auth.getUser();
-  if (authErr || !user) throw new Error('Você precisa estar logado.');
-
-  const { data: exam } = await supabase
-    .from('target_exams').select('id').eq('id', targetExamId).eq('user_id', user.id).single();
-  if (!exam) throw new Error('Concurso-alvo não encontrado.');
-
-  const { data: topic } = await supabase
-    .from('topics').select('id').eq('id', topicId).eq('user_id', user.id).single();
-  if (!topic) throw new Error('Tópico não encontrado.');
-
-  const { error } = await supabase
-    .from('topic_target_exams')
-    .delete()
-    .eq('topic_id', topicId)
-    .eq('target_exam_id', targetExamId);
-  if (error) throw new Error('Erro ao desvincular tópico: ' + error.message);
 }

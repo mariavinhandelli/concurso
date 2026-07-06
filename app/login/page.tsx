@@ -49,7 +49,7 @@ export default function LoginPage() {
   const [btnHover, setBtnHover] = useState(false);
 
   useEffect(() => {
-    const check = () => setNarrow(window.innerWidth < 900);
+    const check = () => setNarrow(window.innerWidth < 1024);
     check();
     window.addEventListener('resize', check);
     return () => window.removeEventListener('resize', check);
@@ -127,9 +127,10 @@ export default function LoginPage() {
      */
     <main style={{
       position: 'relative',
-      width: '100vw',
-      height: '100vh',
-      overflow: 'hidden',
+      width: '100%',
+      minHeight: '100vh',
+      overflowX: 'hidden',
+      overflowY: 'auto',
       display: 'flex',
       fontFamily: 'var(--font-poppins), Inter, Arial, sans-serif',
       background: B.bg,
@@ -256,14 +257,13 @@ export default function LoginPage() {
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
-  justifyContent: 'space-between', 
-  padding: '24px 40px 32px',
+  justifyContent: 'flex-start',
+  padding: narrow ? '20px 16px 24px' : '24px 40px 32px',
   minWidth: 0,
   overflowY: 'auto',
-  // ADICIONE ESTAS LINHAS PARA A DIVISÃO:
-  background: '#fffffff0', // Ou B.surface se for diferente de branco
-  borderLeft: '1px solid rgba(0,0,0,0.05)', // Linha divisória sutil
-  boxShadow: '-10px 0 30px rgba(0,0,0,0.03)', // Sombra leve à esquerda
+  background: '#fffffff0',
+  borderLeft: '1px solid rgba(0,0,0,0.05)',
+  boxShadow: '-10px 0 30px rgba(0,0,0,0.03)',
 }}>
 
         {/* Topo: toggle de modo */}
@@ -292,6 +292,7 @@ export default function LoginPage() {
           borderRadius: 24,
           boxShadow: '0 8px 32px rgba(15,23,42,.09), 0 1px 3px rgba(15,23,42,.04)',
           padding: narrow ? '32px 24px' : '40px 48px',
+          margin: 'auto 0',
         }}>
           <form
             style={{ width: '100%' }}

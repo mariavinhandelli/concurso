@@ -3,7 +3,7 @@
 import { Suspense, useCallback, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
-  listJurisprudencias, deleteJurisprudencia, listDistinct,
+  listJurisprudencias, deleteJurisprudencia, listDistinct, getJurisprudenciaById,
   JURIS_PAGE_LIMIT,
   type Jurisprudencia, type JurisFilters,
 } from '@/services/jurisprudencias.service';
@@ -52,10 +52,19 @@ function ListaContent() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState(searchParams.get('busca') ?? '');
   const [debouncedSearch, setDebouncedSearch] = useState(searchParams.get('busca') ?? '');
-  const [filters, setFilters] = useState<JurisFilterValues>({
+  // Filtros hidratados da URL — F5 e link compartilhado preservam a seleção.
+  const [filters, setFilters] = useState<JurisFilterValues>(() => ({
     ...EMPTY_FILTERS,
+    tribunal: searchParams.get('tribunal') ?? '',
+    tipo: searchParams.get('tipo') ?? '',
     disciplina: searchParams.get('disciplina') ?? '',
-  });
+    status: searchParams.get('status') ?? '',
+    estrelas: searchParams.get('estrelas') ?? '',
+    incidencia: searchParams.get('incidencia') ?? '',
+    ano: searchParams.get('ano') ?? '',
+    sortBy: (searchParams.get('sort') ?? '') as JurisFilterValues['sortBy'],
+    completude: (searchParams.get('completude') ?? '') as JurisFilterValues['completude'],
+  }));
   const [disciplinas, setDisciplinas] = useState<string[]>([]);
   const [userId, setUserId] = useState<string | null>(null);
   const [showFlashcards, setShowFlashcards] = useState(false);
@@ -114,6 +123,26 @@ function ListaContent() {
 
   useEffect(() => { load(); }, [load]);
 
+  // Espelha busca + filtros na URL (replaceState: sem re-render nem entrada no histórico).
+  useEffect(() => {
+    const p = new URLSearchParams();
+    if (isFavoritasView) p.set('favoritas', '1');
+    if (debouncedSearch.trim()) p.set('busca', debouncedSearch.trim());
+    const map: Record<string, string> = {
+      tribunal: filters.tribunal, tipo: filters.tipo, disciplina: filters.disciplina,
+      status: filters.status, estrelas: filters.estrelas, incidencia: filters.incidencia,
+      ano: filters.ano, sort: filters.sortBy, completude: filters.completude,
+    };
+    for (const [k, v] of Object.entries(map)) if (v) p.set(k, v);
+    const qs = p.toString();
+    window.history.replaceState(null, '', qs ? `?${qs}` : window.location.pathname);
+  }, [debouncedSearch, filters, isFavoritasView]);
+
+  // Guarda a ordem da seleção atual para a navegação anterior/próxima no detalhe.
+  useEffect(() => {
+    try { sessionStorage.setItem('juris:navIds', JSON.stringify(items.map((i) => i.id))); } catch { /* storage cheio/indisponível */ }
+  }, [items]);
+
   useEffect(() => {
     listDistinct('disciplina').then(setDisciplinas).catch(() => {});
   }, []);
@@ -150,7 +179,7 @@ function ListaContent() {
         {/* Cabeçalho */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16, flexWrap: 'wrap', marginBottom: 20 }}>
           <div>
-            <button onClick={() => router.push('/jurisprudencias')} style={styles.backBtn}>← Jurisprudências</button>
+            <button className="touch-target" onClick={() => router.push('/jurisprudencias')} style={styles.backBtn}>← Jurisprudências</button>
             <h1 style={{ fontSize: isMobile ? 22 : 26, fontWeight: 800, color: theme.ink, letterSpacing: -0.6, margin: '8px 0 0' }}>
               {isFavoritasView ? '★ Favoritas' : (filters.disciplina || 'Todas as jurisprudências')}
             </h1>
@@ -185,12 +214,6 @@ function ListaContent() {
               <JurisFilterBar values={filters} onChange={setFilters} disciplinas={disciplinas} />
             </div>
           </>
-        )}
-
-        {isMobile && (
-          <div style={{ marginBottom: 20 }}>
-            <JurisSidebarWidgets />
-          </div>
         )}
 
         <div style={{ display: 'flex', gap: 20, alignItems: 'flex-start', flexDirection: isMobile ? 'column' : 'row' }}>
@@ -276,7 +299,7 @@ function ListaContent() {
                     item={item}
                     onClick={() => router.push(`/jurisprudencias/${item.id}`)}
                     onDelete={() => handleDelete(item.id)}
-                    canDelete={userId === item.created_by}
+                    canDelete={userId === item.created_by && !getJurisprudenciaById(item.id)}
                     initialFavorito={favoritosMap[item.id] ?? false}
                     reviewOverdueDays={overdueMap[item.id] ?? 0}
                   />
@@ -300,12 +323,10 @@ function ListaContent() {
             )}
           </div>
 
-          {/* Sidebar de widgets */}
-          {!isMobile && (
-            <div style={{ width: 260, flexShrink: 0 }}>
-              <JurisSidebarWidgets />
-            </div>
-          )}
+          {/* Sidebar de widgets — no mobile vem DEPOIS da lista (resultado primeiro) */}
+          <div style={{ width: isMobile ? '100%' : 260, flexShrink: 0 }}>
+            <JurisSidebarWidgets />
+          </div>
         </div>
 
       </div>

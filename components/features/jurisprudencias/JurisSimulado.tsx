@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { theme, perfColor, btnOutline, kbd } from '@/lib/theme';
 import { Overlay } from '@/components/ui/Overlay';
 import type { Jurisprudencia } from '@/services/jurisprudencias.service';
@@ -13,8 +13,23 @@ interface Props {
   onClose: () => void;
 }
 
+// Fisher-Yates — ordem aleatória para não viciar o simulado na ordem da lista.
+function shuffle<T>(arr: T[]): T[] {
+  const out = [...arr];
+  for (let i = out.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [out[i], out[j]] = [out[j], out[i]];
+  }
+  return out;
+}
+
 export function JurisSimulado({ items, onClose }: Props) {
-  const questoes = items.filter((i) => i.questao_enunciado && i.questao_gabarito !== null);
+  const disponiveis = useMemo(
+    () => items.filter((i) => i.questao_enunciado && i.questao_gabarito !== null),
+    [items],
+  );
+  // Vazio = tela de configuração (escolher a quantidade) ainda não confirmada.
+  const [questoes, setQuestoes] = useState<Jurisprudencia[]>([]);
   const [idx, setIdx] = useState(0);
   const [resposta, setResposta] = useState<boolean | null>(null);
   const [acertos, setAcertos] = useState<boolean[]>([]);
@@ -25,15 +40,22 @@ export function JurisSimulado({ items, onClose }: Props) {
   const toast = useToast();
   const savedRef = useRef(false);
 
-  // Timer
+  function iniciar(n: number | null) {
+    const embaralhadas = shuffle(disponiveis);
+    setQuestoes(n ? embaralhadas.slice(0, n) : embaralhadas);
+    setElapsed(0);
+    startedAt.current = Date.now();
+  }
+
+  // Timer — só roda com o simulado em andamento
   useEffect(() => {
-    if (done) return;
+    if (done || questoes.length === 0) return;
     const id = setInterval(() => setElapsed((s) => s + 1), 1000);
     return () => clearInterval(id);
-  }, [done]);
+  }, [done, questoes]);
 
   async function safeClose() {
-    if (!done && (idx > 0 || resposta !== null)) {
+    if (questoes.length > 0 && !done && (idx > 0 || resposta !== null)) {
       const ok = await confirm({
         title: 'Encerrar o simulado?',
         description: 'O progresso não será salvo.',
@@ -49,21 +71,52 @@ export function JurisSimulado({ items, onClose }: Props) {
   useEffect(() => {
     async function onKey(e: KeyboardEvent) {
       if (e.key === 'Escape') { await safeClose(); return; }
+      if (questoes.length === 0) return; // tela de configuração: só Esc
       if (resposta !== null) { if (e.key === 'Enter') avancar(); return; }
       if (e.key === 'c' || e.key === 'C') responder(true);
       if (e.key === 'e' || e.key === 'E') responder(false);
     }
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  // resposta, idx e done nas deps para safeClose e avancar() lerem valores frescos.
-  }, [resposta, idx, done, onClose]); // eslint-disable-line react-hooks/exhaustive-deps
+  // resposta, idx, done e questoes nas deps para safeClose e avancar() lerem valores frescos.
+  }, [resposta, idx, done, questoes, onClose]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (questoes.length === 0) {
+  if (disponiveis.length === 0) {
     return (
       <Overlay onClose={onClose}>
         <div style={{ textAlign: 'center', padding: '40px 24px' }}>
           <p style={{ fontSize: 15, color: theme.inkSoft, marginBottom: 20 }}>Nenhuma questão C/E disponível nesta seleção.</p>
           <button onClick={onClose} style={btnOutline}>Fechar</button>
+        </div>
+      </Overlay>
+    );
+  }
+
+  // ── Tela de configuração: escolher a quantidade já inicia o simulado ──
+  if (questoes.length === 0) {
+    const opcoes = [10, 20, 50].filter((n) => n < disponiveis.length);
+    return (
+      <Overlay onClose={onClose} labelledBy="simulado-config-title">
+        <div style={{ padding: '8px 0' }}>
+          <h2 id="simulado-config-title" style={{ fontSize: 20, fontWeight: 800, color: theme.ink, margin: '0 0 6px' }}>
+            Simulado C/E
+          </h2>
+          <p style={{ fontSize: 13.5, color: theme.inkSoft, margin: '0 0 20px' }}>
+            {disponiveis.length} {disponiveis.length === 1 ? 'questão disponível' : 'questões disponíveis'} nesta seleção. Quantas quer responder?
+          </p>
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 16 }}>
+            {opcoes.map((n) => (
+              <button key={n} onClick={() => iniciar(n)} style={configChip}>
+                {n} questões
+              </button>
+            ))}
+            <button onClick={() => iniciar(null)} style={{ ...configChip, background: theme.clay, border: 'none', color: '#fff' }}>
+              Todas ({disponiveis.length})
+            </button>
+          </div>
+          <p style={{ fontSize: 11.5, color: theme.inkFaint, margin: 0 }}>
+            As questões vêm em ordem aleatória a cada simulado.
+          </p>
         </div>
       </Overlay>
     );
@@ -112,7 +165,7 @@ export function JurisSimulado({ items, onClose }: Props) {
     }
   }
 
-  function reiniciar() { setIdx(0); setResposta(null); setAcertos([]); setDone(false); setElapsed(0); startedAt.current = Date.now(); }
+  function reiniciar() { setQuestoes((prev) => shuffle(prev)); setIdx(0); setResposta(null); setAcertos([]); setDone(false); setElapsed(0); startedAt.current = Date.now(); }
 
   function formatTime(s: number) {
     const m = Math.floor(s / 60);
@@ -376,5 +429,12 @@ export function JurisSimulado({ items, onClose }: Props) {
 const btnPrimary: React.CSSProperties = {
   padding: '11px 24px', borderRadius: theme.radiusSm, border: 'none',
   background: theme.clay, color: '#fff', fontSize: 14, fontWeight: 600,
+  cursor: 'pointer', fontFamily: theme.font,
+};
+
+const configChip: React.CSSProperties = {
+  padding: '12px 20px', borderRadius: theme.radiusSm,
+  border: `0.5px solid ${theme.clay}`, background: theme.clayBg,
+  color: theme.clayDeep, fontSize: 14, fontWeight: 700,
   cursor: 'pointer', fontFamily: theme.font,
 };

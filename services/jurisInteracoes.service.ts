@@ -8,7 +8,7 @@ import {
   calculateNextJurisReview, fromJurisDbRow, toJurisDbRow, isJurisDue, jurisDaysOverdue,
   type JurisRating,
 } from '@/lib/juris-review';
-import { localDateInDays } from '@/lib/local-date';
+import { localDateInDays, toLocalDateString } from '@/lib/local-date';
 import type { Jurisprudencia } from '@/services/jurisprudencias.service';
 import { getJurisprudenciaById } from '@/services/jurisprudencias.service';
 
@@ -192,7 +192,7 @@ export async function listRevisoesHoje(): Promise<JurisComInteracao[]> {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return [];
 
-  const hoje = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+  const hoje = toLocalDateString(); // YYYY-MM-DD no fuso local
 
   const { data, error } = await supabase
     .from('juris_interacoes')
@@ -211,7 +211,7 @@ export async function countRevisoesHoje(): Promise<number> {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return 0;
 
-  const hoje = new Date().toISOString().slice(0, 10);
+  const hoje = toLocalDateString();
 
   const { count, error } = await supabase
     .from('juris_interacoes')
@@ -269,7 +269,7 @@ export async function listInteracoesSummaryByIds(
     )
   ).flat();
 
-  const today = new Date().toISOString().slice(0, 10);
+  const today = toLocalDateString();
   const todayMs = new Date(today + 'T00:00:00Z').getTime();
   const map: Record<string, { favorito: boolean; overdueDays: number }> = {};
   for (const row of rows) {
@@ -288,13 +288,14 @@ export interface SimuladoInsights {
   ultimaData: string | null;        // ISO da última sessão
   disciplinaMaisFraga: string | null; // disciplina com menor taxa de acerto (>= 5 questões)
   taxaDisciplinaMaisFraga: number | null;
-  totalSessoes: number;
+  /** Contagem das sessões usadas nesta amostra — limitada a 20, NÃO é o total histórico. */
+  totalSessoesRecentes: number;
 }
 
 export async function getSimuladoInsights(): Promise<SimuladoInsights> {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { ultimoScore: null, ultimaData: null, disciplinaMaisFraga: null, taxaDisciplinaMaisFraga: null, totalSessoes: 0 };
+  if (!user) return { ultimoScore: null, ultimaData: null, disciplinaMaisFraga: null, taxaDisciplinaMaisFraga: null, totalSessoesRecentes: 0 };
 
   const { data, error } = await supabase
     .from('juris_simulado_sessions')
@@ -304,7 +305,7 @@ export async function getSimuladoInsights(): Promise<SimuladoInsights> {
     .limit(20);
 
   if (error || !data || data.length === 0) {
-    return { ultimoScore: null, ultimaData: null, disciplinaMaisFraga: null, taxaDisciplinaMaisFraga: null, totalSessoes: 0 };
+    return { ultimoScore: null, ultimaData: null, disciplinaMaisFraga: null, taxaDisciplinaMaisFraga: null, totalSessoesRecentes: 0 };
   }
 
   const ultima = data[0];
@@ -333,7 +334,7 @@ export async function getSimuladoInsights(): Promise<SimuladoInsights> {
     ultimaData: ultima.created_at,
     disciplinaMaisFraga: piorDisc,
     taxaDisciplinaMaisFraga: piorTaxa !== null ? Math.round(piorTaxa * 100) : null,
-    totalSessoes: data.length,
+    totalSessoesRecentes: data.length,
   };
 }
 
@@ -401,7 +402,7 @@ export async function saveSimuladoSession(input: {
 }): Promise<void> {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return;
+  if (!user) throw new Error('Você precisa estar logado para salvar o resultado.');
 
   const { error } = await supabase.from('juris_simulado_sessions').insert({
     user_id:      user.id,

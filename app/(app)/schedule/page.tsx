@@ -7,6 +7,7 @@ import { memo, useState, useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import { useSchedulePage } from '@/hooks/useSchedulePage';
 import { BlockMenu } from '@/components/features/schedule/BlockMenu';
+import { EmptyState } from '@/components/ui/EmptyState';
 import { theme } from '@/lib/theme';
 import { toLocalDateString as localDateStr } from '@/lib/local-date';
 import {
@@ -33,6 +34,10 @@ const GeneratorModal = dynamic(
 );
 const CycleView = dynamic(
   () => import('@/components/features/schedule/CycleView').then((m) => m.CycleView),
+  { ssr: false },
+);
+const ReplanModal = dynamic(
+  () => import('@/components/features/schedule/ReplanModal').then((m) => m.ReplanModal),
   { ssr: false },
 );
 
@@ -65,6 +70,7 @@ export default function SchedulePage() {
     handleToggle, handleDelete, handleSkip, handleEditRule,
     handleCycleButton, iniciarNovoCiclo, abrirRecorrencia,
     handleReativar, handleRecurrenceCreated, handlePanelEdit,
+    replanMoves, replanModalOpen, setReplanModalOpen, replanning, handleApplyReplan,
   } = useSchedulePage();
 
   const mostrarLista = view === 'lista' || (view === 'semana' && isMobile);
@@ -77,42 +83,23 @@ export default function SchedulePage() {
   return (
     <>
       {dialog}
-      {/* Keyframes de animação — injetados uma vez no <head> via streaming */}
-      <style>{`
-        @keyframes checkPop {
-          0%   { transform: scale(1); }
-          40%  { transform: scale(1.4); }
-          75%  { transform: scale(.9); }
-          100% { transform: scale(1); }
-        }
-        .check-pop { animation: checkPop .35s cubic-bezier(.34,1.56,.64,1); }
-        @keyframes skelPulse {
-          0%,100% { opacity: .45; }
-          50%     { opacity: .85; }
-        }
-        .skel { animation: skelPulse 1.4s ease-in-out infinite; }
-        .add-block-btn { border: none !important; transition: background .15s ease, color .15s ease !important; }
-        .add-block-btn:hover { background: var(--teal-bg) !important; color: var(--teal) !important; }
-        .block-check { transition: border-color .15s ease, background .15s ease, transform .1s ease !important; }
-        .block-check:hover { transform: scale(1.1) !important; opacity: 1 !important; }
-      `}</style>
-
       <div style={{ ...styles.container, padding: isMobile ? '20px 16px' : '34px 40px' }}>
         <div style={styles.header}>
-          <h1 style={{ ...styles.h1, fontSize: isMobile ? 25 : 28 }}>Cronograma</h1>
+          <h1 style={{ ...styles.h1, fontSize: isMobile ? 24 : 28 }}>Cronograma</h1>
         </div>
 
         {/* ── Toolbar ── */}
         <div style={styles.toolbar}>
           {/* Linha 1: navegação + seletor de view */}
           <div style={styles.toolbarRow}>
-            <div style={styles.nav}>
-              <button style={styles.navBtn} onClick={() => navWeek(-1)} aria-label="Semana anterior">
+            <div style={{ ...styles.nav, width: isMobile ? '100%' : undefined, gap: isMobile ? 6 : 10 }}>
+              <button className="icon-touch-target" style={styles.navBtn} onClick={() => navWeek(-1)} aria-label="Semana anterior">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
               </button>
               <button
                 type="button"
-                style={styles.weekLabel}
+                className="touch-target"
+                style={{ ...styles.weekLabel, minWidth: isMobile ? 0 : 150, flex: isMobile ? 1 : undefined }}
                 title="Ir para uma data"
                 onClick={(e) => {
                   const inp = e.currentTarget.querySelector('input[type=date]') as HTMLInputElement | null;
@@ -126,11 +113,12 @@ export default function SchedulePage() {
                   style={styles.datePicker}
                 />
               </button>
-              <button style={styles.navBtn} onClick={() => navWeek(1)} aria-label="Próxima semana">
+              <button className="icon-touch-target" style={styles.navBtn} onClick={() => navWeek(1)} aria-label="Próxima semana">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
               </button>
               <button
-                style={styles.todayBtn}
+                className="touch-target"
+                style={{ ...styles.todayBtn, padding: isMobile ? '8px 10px' : '8px 16px' }}
                 onClick={() => setWeekStart(mondayOf(new Date()))}
               >
                 Hoje
@@ -139,20 +127,20 @@ export default function SchedulePage() {
 
             <div style={styles.viewToggle}>
               <button
-                className="schedule-grade-btn"
+                className="schedule-grade-btn touch-target"
                 onClick={() => setView('semana')}
                 style={{ ...styles.viewBtn, ...(view === 'semana' ? styles.viewBtnOn : {}) }}
               >
                 Grade
               </button>
-              <button
+              <button className="touch-target"
                 onClick={() => setView('lista')}
                 style={{ ...styles.viewBtn, ...(mostrarLista ? styles.viewBtnOn : {}) }}
               >
                 Lista
               </button>
               {/* Ciclo: sempre visível — se não houver ciclo, abre o modal de criação */}
-              <button
+              <button className="touch-target"
                 onClick={handleCycleButton}
                 style={{ ...styles.viewBtn, ...(view === 'ciclo' ? styles.viewBtnOn : {}) }}
               >
@@ -163,7 +151,7 @@ export default function SchedulePage() {
 
           {/* Linha 2: ações */}
           <div style={{ ...styles.toolbarActions, flexDirection: isMobile ? 'column' : 'row' }}>
-            <button
+            <button className="touch-target"
               onClick={() => setGeneratorOpen(true)}
               style={{ ...styles.genBtn, justifyContent: 'center', width: isMobile ? '100%' : undefined }}
               title="Gera blocos automáticos a partir das matérias do seu edital"
@@ -174,16 +162,16 @@ export default function SchedulePage() {
               Gerar do edital
             </button>
 
-            <div style={{ display: 'flex', gap: 10, width: isMobile ? '100%' : 'auto' }}>
-              <button onClick={handleCycleButton} style={{ ...styles.cycleBtn, justifyContent: 'center', flex: isMobile ? 1 : undefined }}>
+            <div style={{ display: isMobile ? 'grid' : 'flex', gridTemplateColumns: isMobile ? 'repeat(3, minmax(0, 1fr))' : undefined, gap: isMobile ? 6 : 10, width: isMobile ? '100%' : 'auto' }}>
+              <button className="touch-target" onClick={handleCycleButton} style={{ ...styles.cycleBtn, justifyContent: 'center', minWidth: 0, padding: isMobile ? '8px 6px' : '8px 12px' }}>
                 <CycleIcon size={14} color={theme.teal} mr={6} />
                 {cicloAtivo ? 'Ver ciclo' : 'Criar ciclo'}
               </button>
-              <button onClick={abrirRecorrencia} style={{ ...styles.recBtn, justifyContent: 'center', flex: isMobile ? 1 : undefined }}>
+              <button className="touch-target" onClick={abrirRecorrencia} style={{ ...styles.recBtn, justifyContent: 'center', minWidth: 0, padding: isMobile ? '8px 6px' : '8px 12px' }}>
                 <RepeatIcon size={14} color={theme.teal} mr={6} />
                 Recorrência
               </button>
-              <button onClick={() => setPanelOpen(true)} style={{ ...styles.recBtnGhost, justifyContent: 'center', flex: isMobile ? 1 : undefined }}>
+              <button className="touch-target" onClick={() => setPanelOpen(true)} style={{ ...styles.recBtnGhost, justifyContent: 'center', minWidth: 0, padding: isMobile ? '8px 6px' : '8px 12px' }}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={theme.teal} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ verticalAlign: '-2px', marginRight: 6 }}>
                   <path d="M3 6h18M3 12h18M3 18h18" />
                 </svg>
@@ -198,7 +186,7 @@ export default function SchedulePage() {
         {/* ── Conteúdo principal ── */}
         {loading ? (
           /* Skeleton da grade (7 colunas) */
-          <div style={{ ...styles.weekGrid, display: 'grid' }}>
+          <div className="schedule-week-grid" style={{ ...styles.weekGrid, display: 'grid' }}>
             {Array.from({ length: 7 }).map((_, i) => (
               <div key={i} style={styles.dayCol}>
                 <div style={{ ...styles.dayHead, opacity: 0.5 }}>
@@ -231,19 +219,12 @@ export default function SchedulePage() {
             />
           ) : (
             /* Estado vazio do Ciclo */
-            <div style={styles.cicloEmpty}>
-              <div style={styles.cicloEmptyIcon}>
-                <CycleIcon size={32} color={theme.teal} mr={0} />
-              </div>
-              <h3 style={styles.cicloEmptyTitle}>Você ainda não tem um ciclo de estudos</h3>
-              <p style={styles.cicloEmptyText}>
-                O ciclo rotaciona suas matérias automaticamente e sugere sempre a mais atrasada em relação à sua meta diária.
-              </p>
-              <button onClick={handleCycleButton} style={styles.genBtn}>
-                <CycleIcon size={13} color="#fff" mr={6} />
-                Criar meu ciclo
-              </button>
-            </div>
+            <EmptyState
+              icon={<CycleIcon size={32} color={theme.teal} mr={0} />}
+              title="Você ainda não tem um ciclo de estudos"
+              body="O ciclo rotaciona suas matérias automaticamente e sugere sempre a mais atrasada em relação à sua meta diária."
+              action={{ label: 'Criar meu ciclo', onClick: handleCycleButton }}
+            />
           )
         ) : (
           <>
@@ -263,6 +244,18 @@ export default function SchedulePage() {
                 <span style={{ ...styles.weekSummaryPct, color: totalPct === 100 ? theme.ok : theme.inkSoft }}>
                   {totalPct}%
                 </span>
+              </div>
+            )}
+
+            {/* — Cronograma vivo: blocos atrasados esta semana — */}
+            {replanMoves.length > 0 && (
+              <div style={styles.replanBanner}>
+                <span style={styles.replanMsg}>
+                  <b>{replanMoves.length}</b> {replanMoves.length === 1 ? 'bloco ficou' : 'blocos ficaram'} para trás esta semana.
+                </span>
+                <button onClick={() => setReplanModalOpen(true)} style={styles.replanBtn}>
+                  Reorganizar semana →
+                </button>
               </div>
             )}
 
@@ -429,6 +422,15 @@ export default function SchedulePage() {
             onGenerated={() => { load(); checkCycle(); }}
           />
         )}
+
+        {replanModalOpen && (
+          <ReplanModal
+            moves={replanMoves}
+            applying={replanning}
+            onConfirm={handleApplyReplan}
+            onClose={() => setReplanModalOpen(false)}
+          />
+        )}
       </div>
     </>
   );
@@ -510,21 +512,21 @@ const BlockCard = memo(function BlockCard({ block, onToggle, onDelete, onEdit, o
 
 // ── Styles ────────────────────────────────────────────────────────────────────
 const styles: Record<string, React.CSSProperties> = {
-  container: { maxWidth: 1100, margin: '0 auto', fontFamily: theme.font, minWidth: 0 },
-  header: { marginBottom: 18 },
+  container: { maxWidth: 1080, margin: '0 auto', fontFamily: theme.font, minWidth: 0 },
+  header: { marginBottom: 24 },
   h1: { fontWeight: 800, color: theme.ink, letterSpacing: -0.6, margin: 0 },
   toolbar: { display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 18 },
-  toolbarRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap' },
+  toolbarRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap', rowGap: 10 },
   toolbarActions: { display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', paddingTop: 12, borderTopWidth: 0.5, borderTopStyle: 'solid', borderTopColor: theme.line },
   nav: { display: 'flex', alignItems: 'center', gap: 10 },
-  navBtn: { width: 32, height: 32, borderRadius: 8, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.teal, background: theme.card, color: theme.teal, display: 'grid', placeItems: 'center', cursor: 'pointer', flexShrink: 0 },
+  navBtn: { width: 44, height: 44, borderRadius: 10, border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.inkSoft, display: 'grid', placeItems: 'center', cursor: 'pointer', flexShrink: 0 },
   weekLabel: { position: 'relative', fontSize: 15, fontWeight: 700, color: theme.ink, minWidth: 150, textAlign: 'center', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', fontFamily: 'inherit' },
   datePicker: { position: 'absolute', opacity: 0, width: '100%', height: '100%', left: 0, top: 0, cursor: 'pointer' },
-  todayBtn: { padding: '7px 14px', borderRadius: 8, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.teal, background: theme.card, color: theme.teal, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', flexShrink: 0 },
+  todayBtn: { padding: '8px 16px', borderRadius: 10, border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.ink, fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit', flexShrink: 0 },
   recBtn: { display: 'inline-flex', alignItems: 'center', padding: '8px 12px', borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.teal, background: theme.card, color: theme.inkSoft, fontSize: 12.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
   recBtnGhost: { display: 'inline-flex', alignItems: 'center', padding: '8px 12px', borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.teal, background: theme.card, color: theme.inkSoft, fontSize: 12.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
   cycleBtn: { display: 'inline-flex', alignItems: 'center', padding: '8px 12px', borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.teal, background: theme.card, color: theme.inkSoft, fontSize: 12.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
-  genBtn: { display: 'inline-flex', alignItems: 'center', padding: '8px 14px', borderRadius: theme.radiusSm, border: 'none', background: theme.teal, color: '#fff', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+  genBtn: { display: 'inline-flex', alignItems: 'center', padding: '8px 14px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
   viewToggle: { display: 'flex', gap: 3, background: 'rgba(15,23,42,.06)', borderRadius: theme.radiusSm, padding: 3 },
   viewBtn: { padding: '7px 14px', border: 'none', background: 'transparent', color: theme.inkSoft, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', borderRadius: theme.radiusSm - 2 },
   viewBtnOn: { background: theme.card, color: theme.teal, boxShadow: theme.shadow },
@@ -543,19 +545,18 @@ const styles: Record<string, React.CSSProperties> = {
   weekSummaryFill: { height: '100%', borderRadius: 999, transition: 'width .5s ease' },
   weekSummaryPct: { fontSize: 13, fontWeight: 700, whiteSpace: 'nowrap', minWidth: 36, textAlign: 'right' },
 
+  // Cronograma vivo — banner de replanejamento
+  replanBanner: { display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', background: theme.warnBg, borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.warn, marginBottom: 14 },
+  replanMsg: { fontSize: 13.5, color: theme.ink },
+  replanBtn: { padding: '8px 14px', borderRadius: theme.radiusSm, border: 'none', background: theme.warn, color: '#fff', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
+
   // Callout semana vazia
   emptyCallout: { display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', background: theme.card, borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, marginBottom: 14 },
   emptyCalloutMsg: { fontSize: 13.5, color: theme.ink, margin: 0, lineHeight: 1.5, flex: 1, minWidth: 200 },
   emptyCalloutActions: { display: 'flex', gap: 8, flexShrink: 0 },
 
-  // Ciclo empty state
-  cicloEmpty: { display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', padding: '48px 24px', gap: 14 },
-  cicloEmptyIcon: { width: 64, height: 64, borderRadius: '50%', background: theme.tealBg, display: 'grid', placeItems: 'center' },
-  cicloEmptyTitle: { fontSize: 18, fontWeight: 700, color: theme.ink, margin: 0 },
-  cicloEmptyText: { fontSize: 14, color: theme.inkSoft, margin: 0, maxWidth: 380, lineHeight: 1.6 },
-
   // Grade
-  weekGrid: { gridTemplateColumns: 'repeat(7, 1fr)', gap: 8 },
+  weekGrid: { gridTemplateColumns: 'repeat(7, minmax(120px, 1fr))', gap: 8 },
   dayCol: { display: 'flex', flexDirection: 'column', minWidth: 0 },
   dayHead: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1, padding: '8px 4px', borderRadius: '10px 10px 0 0', borderTopWidth: 0.5, borderTopStyle: 'solid', borderTopColor: theme.line, borderLeftWidth: 0.5, borderLeftStyle: 'solid', borderLeftColor: theme.line, borderRightWidth: 0.5, borderRightStyle: 'solid', borderRightColor: theme.line, background: theme.card },
   dayHeadToday: { borderTopWidth: 2, borderTopStyle: 'solid', borderTopColor: theme.teal },

@@ -16,7 +16,7 @@ function fmtHours(minutes: number): string {
 }
 
 export const JourneyStats = memo(function JourneyStats() {
-  const { isMobile } = useUI();
+  const { isMobile, isTablet } = useUI();
   const { data: j, isLoading } = useQuery<TJourneyStats>({
     queryKey: ['journey-stats'],
     queryFn: getJourneyStats,
@@ -27,7 +27,7 @@ export const JourneyStats = memo(function JourneyStats() {
     return (
       <div style={styles.wrap}>
         <span style={styles.eyebrow}>Sua jornada</span>
-        <div style={{ ...styles.grid, gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(4, 1fr)' }}>
+        <div style={{ ...styles.grid, gridTemplateColumns: isMobile || isTablet ? '1fr 1fr' : 'repeat(4, 1fr)' }}>
           {[0, 1, 2, 3].map((i) => (
             <div key={i} style={styles.chip}>
               <Skeleton height={20} width={52} borderRadius={4} />
@@ -53,7 +53,7 @@ export const JourneyStats = memo(function JourneyStats() {
   return (
     <div style={styles.wrap}>
       <span style={styles.eyebrow}>Sua jornada</span>
-      <div style={{ ...styles.grid, gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(4, 1fr)' }}>
+      <div style={{ ...styles.grid, gridTemplateColumns: isMobile || isTablet ? '1fr 1fr' : 'repeat(4, 1fr)' }}>
         {stats.map((s) => (
           <div key={s.label} style={styles.chip}>
             <span style={styles.val}>{s.value}</span>

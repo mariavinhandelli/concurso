@@ -1,21 +1,31 @@
 'use client';
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { theme, zIndex } from '@/lib/theme';
 import { useUI } from '@/components/layout/UIContext';
 
 type ToastKind = 'success' | 'error' | 'info';
 
+interface ToastAction {
+  label: string;
+  onClick: () => void;
+}
+
 interface Toast {
   id: number;
   message: string;
   kind: ToastKind;
+  action?: ToastAction;
+}
+
+export interface ToastOptions {
+  action?: ToastAction;
 }
 
 interface ToastContextValue {
-  success: (msg: string) => void;
-  error: (msg: string) => void;
-  info: (msg: string) => void;
+  success: (msg: string, opts?: ToastOptions) => void;
+  error: (msg: string, opts?: ToastOptions) => void;
+  info: (msg: string, opts?: ToastOptions) => void;
 }
 
 const ToastContext = createContext<ToastContextValue | null>(null);
@@ -33,10 +43,12 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     if (t) { clearTimeout(t); timers.current.delete(id); }
   }, []);
 
-  const push = useCallback((message: string, kind: ToastKind) => {
+  const push = useCallback((message: string, kind: ToastKind, opts?: ToastOptions) => {
     const id = ++idSeq;
-    setToasts((prev) => [...prev.slice(-4), { id, message, kind }]);
-    const t = setTimeout(() => dismiss(id), 4000);
+    setToasts((prev) => [...prev.slice(-4), { id, message, kind, action: opts?.action }]);
+    // Toasts com action ficam abertos 6s para dar tempo de clicar "Desfazer"
+    const duration = opts?.action ? 6000 : 4000;
+    const t = setTimeout(() => dismiss(id), duration);
     timers.current.set(id, t);
   }, [dismiss]);
 
@@ -46,27 +58,35 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const value = useMemo<ToastContextValue>(() => ({
-    success: (msg) => push(msg, 'success'),
-    error: (msg) => push(msg, 'error'),
-    info: (msg) => push(msg, 'info'),
+    success: (msg, opts) => push(msg, 'success', opts),
+    error: (msg, opts) => push(msg, 'error', opts),
+    info: (msg, opts) => push(msg, 'info', opts),
   }), [push]);
 
   return (
     <ToastContext.Provider value={value}>
       {children}
       {toasts.length > 0 && (
-        <div style={{ ...styles.container, bottom: isMobile ? 84 : 24 }} aria-live="polite" aria-atomic="false">
+        <div style={{ ...s.container, bottom: isMobile ? 84 : 24 }} aria-live="polite" aria-atomic="false">
           {toasts.map((t) => (
             <div
               key={t.id}
               role="status"
               style={{
-                ...styles.toast,
+                ...s.toast,
                 background: t.kind === 'error' ? theme.danger : t.kind === 'success' ? theme.ok : theme.teal,
               }}
             >
-              <span style={styles.msg}>{t.message}</span>
-              <button onClick={() => dismiss(t.id)} style={styles.close} aria-label="Fechar">✕</button>
+              <span style={s.msg}>{t.message}</span>
+              {t.action && (
+                <button
+                  onClick={() => { t.action!.onClick(); dismiss(t.id); }}
+                  style={s.actionBtn}
+                >
+                  {t.action.label}
+                </button>
+              )}
+              <button onClick={() => dismiss(t.id)} style={s.close} aria-label="Fechar">✕</button>
             </div>
           ))}
         </div>
@@ -81,7 +101,7 @@ export function useToast(): ToastContextValue {
   return ctx;
 }
 
-const styles: Record<string, React.CSSProperties> = {
+const s: Record<string, CSSProperties> = {
   container: {
     position: 'fixed', bottom: 24, right: 24, zIndex: zIndex.toast,
     display: 'flex', flexDirection: 'column', gap: 8,
@@ -94,6 +114,11 @@ const styles: Record<string, React.CSSProperties> = {
     fontFamily: theme.font, animation: 'toast-in 0.2s ease',
   },
   msg: { flex: 1, fontSize: 13.5, fontWeight: 500, color: '#fff', lineHeight: 1.4 },
+  actionBtn: {
+    background: 'rgba(255,255,255,0.22)', border: 'none', color: '#fff',
+    cursor: 'pointer', fontSize: 12.5, fontWeight: 700, fontFamily: 'inherit',
+    borderRadius: 6, padding: '4px 10px', whiteSpace: 'nowrap', flexShrink: 0,
+  },
   close: {
     background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.7)',
     cursor: 'pointer', fontSize: 13, padding: 0, flexShrink: 0,

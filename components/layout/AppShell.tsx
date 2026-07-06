@@ -10,11 +10,11 @@ import { useUI } from './UIContext';
 import { theme } from '@/lib/theme';
 
 export function AppShell({ children }: { children: ReactNode }) {
-  const { collapsed, isMobile, mobileOpen, setMobileOpen } = useUI();
+  const { collapsed, isMobile, isTablet, mobileOpen, setMobileOpen } = useUI();
 
   // marginLeft controlado por JS apenas para desktop (colapsado vs expandido).
   // O reset para 0 no mobile é feito via CSS (.shell-main) para evitar FOIC.
-  const marginLeft = collapsed ? 72 : 244;
+  const marginLeft = isMobile ? 0 : (isTablet || collapsed ? 72 : 244);
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: theme.bg }}>

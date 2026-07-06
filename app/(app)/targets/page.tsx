@@ -1,76 +1,78 @@
 // app/(app)/targets/page.tsx
-// Concursos-alvo: cadastrar (com fase pré/pós-edital), marcar foco, promover
-// pré→pós. A banca é selecionada da lista estruturada (exam_boards), com opção
-// de cadastrar uma nova na hora.
+// Central de concursos: "Meus concursos" (alvos ativos, com countdown e
+// progresso de montagem) e "Banco de editais" (catálogo navegável com
+// detalhes antes de ativar). Criação manual fica recolhida atrás de um botão.
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useConfirm } from '@/hooks/useConfirm';
-import { useToast } from '@/components/ui/ToastProvider';
+import { memo, useCallback, useEffect, useRef, useState, type CSSProperties } from 'react';
 import { useRouter } from 'next/navigation';
-import {
-  listTargetExams, createTargetExam, setPrimaryTargetExam,
-  deleteTargetExam, promoteToPos, updateTargetExamDate, type TargetExam,
-} from '@/services/targetExams.service';
-import { listAllBoards, createBoard, type Board } from '@/services/boards.service';
+import { useTargetList } from '@/hooks/useTargetList';
+import { formatTargetLabel, daysUntilExam, countdownInfo } from '@/lib/targets';
+import { type TargetExam } from '@/services/targetExams.service';
+import { BancoEditaisTab } from '@/components/features/targets/BancoEditaisTab';
+import { ImportarEditalModal } from '@/components/features/targets/ImportarEditalModal';
+import { useToast } from '@/components/ui/ToastProvider';
 import { theme } from '@/lib/theme';
 import { useUI } from '@/components/layout/UIContext';
 
+type Tab = 'meus' | 'banco';
+
+function savedTab(): Tab {
+  if (typeof window === 'undefined') return 'meus';
+  return localStorage.getItem('targets_tab') === 'banco' ? 'banco' : 'meus';
+}
+
+function ChevronSmall({ open }: { open: boolean }) {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+      style={{ transform: open ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform .2s', flexShrink: 0 }}>
+      <path d="M6 9l6 6 6-6" />
+    </svg>
+  );
+}
+
 export default function TargetsPage() {
   const router = useRouter();
-  const { isMobile } = useUI();
-  const { confirm, dialog } = useConfirm();
   const toast = useToast();
-  const [targets, setTargets] = useState<TargetExam[]>([]);
-  const [boards, setBoards] = useState<Board[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { isMobile } = useUI();
+  const {
+    targets, boards, topicCounts, loading, promoting,
+    dialog, load,
+    createTarget, setPrimary, promote, deleteTarget, saveDate, addBoard,
+  } = useTargetList();
 
-  // Form de novo alvo
+  const [tab, setTab] = useState<Tab>(savedTab);
+  const [showCreate, setShowCreate] = useState(false);
+  const [importarOpen, setImportarOpen] = useState(false);
+
   const [boardId, setBoardId] = useState('');
   const [orgao, setOrgao] = useState('');
   const [cargo, setCargo] = useState('');
   const [ano, setAno] = useState('');
-  const [examDate, setExamDate] = useState('');
   const [phase, setPhase] = useState<'pre' | 'pos'>('pre');
-
-  // Edição inline de data
-  const [editingDateId, setEditingDateId] = useState<string | null>(null);
-  const [editingDateValue, setEditingDateValue] = useState('');
-
-  // Modal de promoção pré→pós
-  const [promotingTarget, setPromotingTarget] = useState<TargetExam | null>(null);
-  const [promoteBoardId, setPromoteBoardId] = useState('');
-
-  // Cadastro inline de nova banca
+  const [showAdvanced, setShowAdvanced] = useState(false);
   const [addingBoard, setAddingBoard] = useState(false);
   const [newBoardName, setNewBoardName] = useState('');
 
-  async function load() {
-    try {
-      const [t, b] = await Promise.all([listTargetExams(), listAllBoards()]);
-      setTargets(t);
-      setBoards(b);
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : 'Erro ao carregar concursos.');
-    } finally {
-      setLoading(false);
-    }
-  }
+  const [promotingTarget, setPromotingTarget] = useState<TargetExam | null>(null);
+  const [promoteBoardId, setPromoteBoardId] = useState('');
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => { load(); }, [load]);
 
-  async function handleCreateBoardInline() {
+  const handleTabChange = useCallback((t: Tab) => {
+    setTab(t);
+    localStorage.setItem('targets_tab', t);
+  }, []);
+
+  async function handleCreateBoard() {
     if (!newBoardName.trim()) return;
     try {
-      await createBoard(newBoardName);
-      const updated = await listAllBoards();
-      setBoards(updated);
-      const nova = updated.find((b) => b.name === newBoardName.trim());
-      if (nova) setBoardId(nova.id);
+      const nova = await addBoard(newBoardName.trim());
+      setBoardId(nova.id);
       setNewBoardName('');
       setAddingBoard(false);
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : 'Erro ao criar banca.');
+    } catch {
+      // addBoard shows toast
     }
   }
 
@@ -79,314 +81,467 @@ export default function TargetsPage() {
       toast.error('Na fase pós-edital, a banca é obrigatória.');
       return;
     }
+    if (!boardId && !orgao.trim() && !cargo.trim() && !ano.trim()) {
+      toast.error('Informe ao menos um campo para identificar o concurso.');
+      return;
+    }
     try {
-      const novo = await createTargetExam({
+      const novo = await createTarget({
         board_id: boardId || null,
         orgao: orgao || null,
         cargo: cargo || null,
-        ano_alvo: ano ? Number(ano) : null,
-        exam_date: examDate || null,
+        ano_alvo: ano && Number.isFinite(Number(ano)) ? Number(ano) : null,
+        exam_date: null,
         phase,
       });
-      setBoardId(''); setOrgao(''); setCargo(''); setAno(''); setExamDate(''); setPhase('pre');
-      await load();
+      setBoardId(''); setOrgao(''); setCargo(''); setAno(''); setPhase('pre'); setShowAdvanced(false);
+      setShowCreate(false);
       router.push(`/targets/${novo.id}`);
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : 'Erro ao criar concurso.');
-    }
-  }
-
-  async function handleSetPrimary(id: string, jaEhFoco: boolean) {
-    if (jaEhFoco) return;
-    try {
-      await setPrimaryTargetExam(id);
-      toast.success('Concurso definido como foco.');
-      await load();
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : 'Erro ao definir foco.');
+    } catch {
+      // createTarget shows toast
     }
   }
 
   async function handlePromote(t: TargetExam) {
     if (!t.board_id) {
       if (boards.length === 0) {
-        toast.error('Cadastre uma banca antes de promover.');
+        toast.error('Cadastre uma banca antes de promover para pós-edital.');
         return;
       }
       setPromotingTarget(t);
-      setPromoteBoardId(boards[0]?.id ?? '');
+      setPromoteBoardId(boards[0].id);
       return;
     }
     try {
-      await promoteToPos(t.id);
-      toast.success('Concurso promovido para pós-edital.');
-      await load();
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : 'Erro ao promover.');
+      await promote(t.id);
+    } catch {
+      // promote shows toast
     }
   }
 
   async function handleConfirmPromote() {
     if (!promotingTarget || !promoteBoardId) return;
     try {
-      await promoteToPos(promotingTarget.id, promoteBoardId);
+      await promote(promotingTarget.id, promoteBoardId);
       setPromotingTarget(null);
       setPromoteBoardId('');
-      toast.success('Concurso promovido para pós-edital.');
-      await load();
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : 'Erro ao promover.');
+    } catch {
+      // promote shows toast
     }
-  }
-
-  async function handleDelete(id: string) {
-    if (!await confirm({ title: 'Apagar este concurso-alvo?', description: 'Os pesos e configurações definidos nele também serão apagados.', confirmLabel: 'Apagar', danger: true })) return;
-    try {
-      await deleteTargetExam(id);
-      toast.success('Concurso apagado.');
-      await load();
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : 'Erro ao apagar.');
-    }
-  }
-
-  async function handleSaveDate(id: string) {
-    try {
-      await updateTargetExamDate(id, editingDateValue || null);
-      setEditingDateId(null);
-      toast.success(editingDateValue ? 'Data da prova salva.' : 'Data removida.');
-      await load();
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : 'Erro ao salvar data.');
-    }
-  }
-
-  function rotulo(t: TargetExam): string {
-    const bancaVis = t.boardName ?? 'Banca a definir';
-    return [bancaVis, t.orgao, t.cargo, t.ano_alvo].filter(Boolean).join(' · ');
   }
 
   const bancaObrigatoria = phase === 'pos';
 
   return (
     <>
-    {dialog}
-    <div style={{ ...styles.container, padding: isMobile ? '20px 16px' : '34px 40px' }}>
-      <div style={styles.header}>
-        <h1 style={{ ...styles.h1, fontSize: isMobile ? 25 : 30 }}>Concursos-alvo</h1>
-        <p style={styles.sub}>Cadastre o concurso e abra para montar o edital e definir os pesos.</p>
-      </div>
+      {dialog}
+      <div style={{ ...s.container, padding: isMobile ? '20px 16px' : '34px 40px' }}>
+        <div style={s.header}>
+          <h1 style={{ ...s.h1, fontSize: isMobile ? 22 : 28 }}>Concursos</h1>
+          <p style={s.sub}>Acompanhe seus concursos e explore editais prontos para começar em um clique.</p>
+        </div>
 
-      {/* Form de novo alvo */}
-      <div style={styles.createCard}>
-        <div style={styles.phaseToggle}>
-          <button onClick={() => setPhase('pre')} style={{ ...styles.phaseBtn, ...(phase === 'pre' ? styles.phaseBtnOn : {}) }}>
-            Pré-edital
+        {/* Abas */}
+        <div style={s.tabs}>
+          <button onClick={() => handleTabChange('meus')} style={{ ...s.tab, ...(tab === 'meus' ? s.tabOn : {}) }}>
+            Meus concursos{targets.length > 0 ? ` (${targets.length})` : ''}
           </button>
-          <button onClick={() => setPhase('pos')} style={{ ...styles.phaseBtn, ...(phase === 'pos' ? styles.phaseBtnOn : {}) }}>
-            Pós-edital
+          <button onClick={() => handleTabChange('banco')} style={{ ...s.tab, ...(tab === 'banco' ? s.tabOn : {}) }}>
+            Banco de editais
           </button>
         </div>
-        <p style={styles.phaseHint}>
-          {phase === 'pre'
-            ? 'Edital ainda não saiu — a banca é opcional, você define depois.'
-            : 'Edital publicado — informe a banca definida.'}
-        </p>
 
-        <div style={styles.formGrid}>
-          {addingBoard ? (
-            <div style={styles.inlineBoard}>
-              <input
-                value={newBoardName}
-                onChange={(e) => setNewBoardName(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleCreateBoardInline()}
-                placeholder="Nome da nova banca"
-                autoFocus
-                style={styles.input}
-              />
-              <button onClick={handleCreateBoardInline} style={styles.miniBtn}>Salvar</button>
-              <button onClick={() => { setAddingBoard(false); setNewBoardName(''); }} style={styles.miniBtnGhost}>Cancelar</button>
-            </div>
-          ) : (
-            <div style={{ ...styles.selectWrap, flexBasis: isMobile ? '100%' : undefined }}>
-              <select
-                value={boardId}
-                onChange={(e) => {
-                  if (e.target.value === '__new__') { setAddingBoard(true); return; }
-                  setBoardId(e.target.value);
-                }}
-                style={{ ...styles.input, ...(bancaObrigatoria && !boardId ? styles.inputAlert : {}) }}
-              >
-                <option value="">{bancaObrigatoria ? 'Banca (obrigatória)' : 'Banca (opcional)'}</option>
-                {boards.map((b) => (
-                  <option key={b.id} value={b.id}>{b.name}</option>
-                ))}
-                <option value="__new__">+ Nova banca…</option>
-              </select>
-            </div>
-          )}
+        {tab === 'banco' && (
+          <BancoEditaisTab
+            isMobile={isMobile}
+            onActivated={(targetId) => router.push(`/targets/${targetId}`)}
+            onImportar={() => setImportarOpen(true)}
+          />
+        )}
 
-          <input value={orgao} onChange={(e) => setOrgao(e.target.value)} placeholder="Órgão (ex: TCE-GO)" style={{ ...styles.input, flexBasis: isMobile ? '100%' : undefined }} />
-          <input value={cargo} onChange={(e) => setCargo(e.target.value)} placeholder="Cargo (ex: Auditor)" style={{ ...styles.input, flexBasis: isMobile ? '100%' : undefined }} />
-          <input value={ano} onChange={(e) => setAno(e.target.value)} placeholder="Ano" type="number" style={{ ...styles.input, maxWidth: isMobile ? '100%' : 90, flexBasis: isMobile ? '100%' : undefined }} />
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 4, flexBasis: isMobile ? '100%' : undefined }}>
-            <label style={styles.dateLabel}>Data da prova (opcional)</label>
-            <input value={examDate} onChange={(e) => setExamDate(e.target.value)} type="date" style={{ ...styles.input }} />
-          </div>
-        </div>
-        <button onClick={handleCreate} style={{ ...styles.addBtn, width: isMobile ? '100%' : undefined }}>Adicionar concurso</button>
-      </div>
-
-      {loading ? (
-        <p style={styles.muted}>Carregando…</p>
-      ) : targets.length === 0 ? (
-        <p style={styles.muted}>Nenhum concurso-alvo ainda. Cadastre o primeiro acima.</p>
-      ) : (
-        <div style={styles.list}>
-          {targets.map((t) => (
-            <div key={t.id} style={{ ...styles.targetRow, flexWrap: isMobile ? 'wrap' : 'nowrap' }}>
-              {/* Estrela de foco */}
-              <button
-                onClick={() => handleSetPrimary(t.id, t.is_primary)}
-                style={styles.starBtn}
-                title={t.is_primary ? 'Este é o concurso em foco' : 'Definir como foco'}
-                aria-label={t.is_primary ? 'Concurso em foco' : 'Definir como foco'}
-              >
-                <svg
-                  width="19" height="19" viewBox="0 0 24 24"
-                  fill={t.is_primary ? theme.teal : 'none'}
-                  stroke={t.is_primary ? theme.teal : theme.inkFaint}
-                  strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"
-                >
-                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z" />
-                </svg>
+        {tab === 'meus' && (
+          <>
+            {/* Ações da aba */}
+            <div style={s.actionsRow}>
+              <button onClick={() => setShowCreate((v) => !v)} style={s.newBtn}>
+                {showCreate ? '– Fechar' : '+ Novo concurso'}
               </button>
+              <button onClick={() => setImportarOpen(true)} style={s.importarLink}>
+                importar edital colado →
+              </button>
+            </div>
 
-              {/* Conteúdo clicável → abre o edital */}
-              <div style={styles.targetMain} onClick={() => router.push(`/targets/${t.id}`)}>
-                <span style={styles.targetLabel}>{rotulo(t)}</span>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                  <span style={{ ...styles.phaseTag, ...(t.phase === 'pos' ? styles.phaseTagPos : styles.phaseTagPre) }}>
-                    {t.phase === 'pos' ? 'Pós-edital' : 'Pré-edital'}
-                  </span>
-                  {editingDateId === t.id ? (
-                    <div style={{ display: 'flex', gap: 6, alignItems: 'center' }} onClick={(e) => e.stopPropagation()}>
+            {/* Formulário de criação — recolhido por padrão */}
+            {showCreate && (
+              <div style={{ ...s.createCard, animation: 'focali-slide-down 0.18s ease' }}>
+                <div style={s.phaseToggle}>
+                  <button onClick={() => setPhase('pre')} style={{ ...s.phaseBtn, ...(phase === 'pre' ? s.phaseBtnOn : {}) }}>Pré-edital</button>
+                  <button onClick={() => setPhase('pos')} style={{ ...s.phaseBtn, ...(phase === 'pos' ? s.phaseBtnOn : {}) }}>Pós-edital</button>
+                </div>
+                <p style={s.phaseHint}>
+                  {phase === 'pre'
+                    ? 'Edital ainda não saiu — a banca é opcional, você define depois.'
+                    : 'Edital publicado — informe a banca definida.'}
+                </p>
+
+                <div style={s.formGrid}>
+                  <input
+                    value={cargo}
+                    onChange={(e) => setCargo(e.target.value)}
+                    placeholder="Cargo (ex: Auditor Fiscal)"
+                    style={{ ...s.input, flexBasis: isMobile ? '100%' : undefined }}
+                    onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
+                  />
+
+                  {addingBoard ? (
+                    <div style={{ ...s.inlineBoard, flexBasis: '100%' }}>
                       <input
-                        type="date"
-                        value={editingDateValue}
-                        onChange={(e) => setEditingDateValue(e.target.value)}
+                        value={newBoardName}
+                        onChange={(e) => setNewBoardName(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && handleCreateBoard()}
+                        placeholder="Nome da nova banca"
                         autoFocus
-                        style={styles.dateInput}
-                        onKeyDown={(e) => { if (e.key === 'Enter') handleSaveDate(t.id); if (e.key === 'Escape') setEditingDateId(null); }}
+                        style={s.input}
                       />
-                      <button onClick={() => handleSaveDate(t.id)} style={styles.dateSaveBtn}>✓</button>
-                      <button onClick={() => setEditingDateId(null)} style={styles.dateCancelBtn}>✕</button>
+                      <button onClick={handleCreateBoard} style={s.btnPrimary}>Salvar</button>
+                      <button onClick={() => { setAddingBoard(false); setNewBoardName(''); }} style={s.btnGhost}>Cancelar</button>
                     </div>
                   ) : (
-                    <button
-                      onClick={(e) => { e.stopPropagation(); setEditingDateId(t.id); setEditingDateValue(t.exam_date ?? ''); }}
-                      style={styles.dateBtn}
-                      title="Definir data da prova"
-                    >
-                      {t.exam_date
-                        ? `📅 ${new Date(t.exam_date + 'T00:00:00').toLocaleDateString('pt-BR')}`
-                        : '+ data da prova'}
-                    </button>
+                    <div style={{ ...s.selectWrap, flexBasis: isMobile ? '100%' : undefined }}>
+                      <select
+                        value={boardId}
+                        onChange={(e) => {
+                          if (e.target.value === '__new__') { setAddingBoard(true); return; }
+                          setBoardId(e.target.value);
+                        }}
+                        style={{ ...s.input, ...(bancaObrigatoria && !boardId ? s.inputAlert : {}) }}
+                      >
+                        <option value="">{bancaObrigatoria ? 'Banca (obrigatória)' : 'Banca (opcional)'}</option>
+                        {boards.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
+                        <option value="__new__">+ Nova banca…</option>
+                      </select>
+                    </div>
                   )}
                 </div>
-              </div>
 
-              {/* Ações à direita — quebram pra 2ª linha no mobile */}
-              <div style={{ ...styles.targetActions, ...(isMobile ? { width: '100%', justifyContent: 'flex-end', marginTop: 4 } : {}) }}>
-                {t.phase === 'pre' && (
-                  <button onClick={() => handlePromote(t)} style={styles.promoteBtn}>
-                    Edital saiu →
-                  </button>
+                {showAdvanced && (
+                  <div style={{ ...s.formGrid, marginTop: 0, animation: 'focali-slide-down 0.18s ease' }}>
+                    <input
+                      value={orgao}
+                      onChange={(e) => setOrgao(e.target.value)}
+                      placeholder="Órgão (ex: TCE-GO)"
+                      style={{ ...s.input, flexBasis: isMobile ? '100%' : undefined }}
+                    />
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 4, flexBasis: isMobile ? '100%' : 'auto' }}>
+                      <label style={s.fieldLabel}>Ano previsto</label>
+                      <input
+                        value={ano}
+                        onChange={(e) => setAno(e.target.value)}
+                        placeholder="ex: 2026"
+                        type="number"
+                        min="2000"
+                        max="2100"
+                        style={{ ...s.input, maxWidth: isMobile ? '100%' : 110 }}
+                      />
+                    </div>
+                  </div>
                 )}
-                <button onClick={() => router.push(`/targets/${t.id}`)} style={styles.iconBtn} title="Abrir edital" aria-label="Abrir edital">
-                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke={theme.inkSoft} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" />
-                    <path d="M15 3h6v6M10 14L21 3" />
-                  </svg>
-                </button>
-                <button onClick={() => handleDelete(t.id)} style={styles.iconBtn} title="Apagar" aria-label="Apagar concurso">
-                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke={theme.inkFaint} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M3 6h18M8 6V4a1 1 0 011-1h6a1 1 0 011 1v2m2 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6" />
-                    <path d="M10 11v6M14 11v6" />
-                  </svg>
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
 
-    {/* Modal de promoção pré → pós */}
-    {promotingTarget && (
-      <div style={styles.promoteOverlay} onClick={() => setPromotingTarget(null)}>
-        <div style={styles.promoteModal} onClick={(e) => e.stopPropagation()}>
-          <h3 style={styles.promoteTitle}>Edital saiu! Qual é a banca?</h3>
-          <p style={styles.promoteSub}>Selecione a banca definida para <strong>{rotulo(promotingTarget)}</strong>.</p>
-          <select
-            value={promoteBoardId}
-            onChange={(e) => setPromoteBoardId(e.target.value)}
-            style={styles.input}
-            autoFocus
-          >
-            {boards.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
-          </select>
-          <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 16 }}>
-            <button onClick={() => setPromotingTarget(null)} style={styles.miniBtnGhost}>Cancelar</button>
-            <button onClick={handleConfirmPromote} disabled={!promoteBoardId} style={styles.addBtn}>
-              Promover para pós-edital
-            </button>
+                <div style={s.formFooter}>
+                  <button onClick={() => setShowAdvanced((v) => !v)} style={s.btnAdvanced}>
+                    <ChevronSmall open={showAdvanced} />
+                    {showAdvanced ? 'Menos detalhes' : 'Mais detalhes'}
+                  </button>
+                  <button onClick={handleCreate} style={{ ...s.btnPrimary, padding: '11px 24px', fontSize: 14, width: isMobile ? '100%' : undefined }}>
+                    Adicionar concurso
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {loading ? (
+              <div style={s.skeletonList}>
+                {[1, 2, 3].map((i) => <div key={i} style={{ ...s.skeletonRow, animationDelay: `${i * 0.1}s` }} />)}
+              </div>
+            ) : targets.length === 0 ? (
+              <div style={s.emptyState}>
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke={theme.inkFaint} strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" style={{ marginBottom: 12 }}>
+                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z" />
+                </svg>
+                <p style={s.emptyTitle}>Ainda sem concursos</p>
+                <p style={s.emptyHint}>Explore o banco de editais para ativar um concurso pronto em um clique — ou crie o seu manualmente.</p>
+                <button onClick={() => handleTabChange('banco')} style={s.emptyCta}>Explorar banco de editais →</button>
+              </div>
+            ) : (
+              <div style={s.list}>
+                {targets.map((t) => (
+                  <TargetRow
+                    key={t.id}
+                    target={t}
+                    topicCount={topicCounts[t.id] ?? 0}
+                    isMobile={isMobile}
+                    onSetPrimary={() => setPrimary(t.id, t.is_primary)}
+                    onOpen={() => router.push(`/targets/${t.id}`)}
+                    onPromote={() => handlePromote(t)}
+                    onDelete={() => deleteTarget(t.id)}
+                    onSaveDate={(date) => saveDate(t.id, date)}
+                  />
+                ))}
+              </div>
+            )}
+          </>
+        )}
+      </div>
+
+      {importarOpen && (
+        <ImportarEditalModal
+          onClose={() => setImportarOpen(false)}
+          onImported={(targetId) => { setImportarOpen(false); router.push(`/targets/${targetId}`); }}
+        />
+      )}
+
+      {promotingTarget && (
+        <div style={s.promoteOverlay} onClick={() => setPromotingTarget(null)}>
+          <div style={s.promoteModal} onClick={(e) => e.stopPropagation()}>
+            <h3 style={s.promoteTitle}>Edital publicado! Qual é a banca?</h3>
+            <p style={s.promoteSub}>Selecione a banca definida para <strong>{formatTargetLabel(promotingTarget)}</strong>.</p>
+            <select value={promoteBoardId} onChange={(e) => setPromoteBoardId(e.target.value)} style={s.input} autoFocus>
+              {boards.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
+            </select>
+            <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 16 }}>
+              <button onClick={() => setPromotingTarget(null)} style={s.btnGhost}>Cancelar</button>
+              <button onClick={handleConfirmPromote} disabled={!promoteBoardId || promoting} style={s.btnPrimary}>
+                {promoting ? 'Promovendo…' : 'Promover para pós-edital'}
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-    )}
+      )}
     </>
   );
 }
 
-const styles: Record<string, React.CSSProperties> = {
-  container: { maxWidth: 720, margin: '0 auto', padding: '34px 40px', fontFamily: theme.font, minWidth: 0 },
-  header: { marginBottom: 22 },
-  h1: { fontSize: 30, fontWeight: 800, color: theme.ink, letterSpacing: -0.8, margin: 0 },
-  sub: { fontSize: 14.5, color: theme.inkSoft, margin: '6px 0 0', fontWeight: 500 },
-  createCard: { background: theme.card, border: `0.5px solid ${theme.line}`, borderRadius: theme.radius, boxShadow: theme.shadow, padding: 18, marginBottom: 20 },
+interface TargetRowProps {
+  target: TargetExam;
+  topicCount: number;
+  isMobile: boolean;
+  onSetPrimary: () => void;
+  onOpen: () => void;
+  onPromote: () => void;
+  onDelete: () => void;
+  onSaveDate: (date: string | null) => Promise<void>;
+}
+
+const TargetRow = memo(function TargetRow({
+  target: t, topicCount, isMobile, onSetPrimary, onOpen, onPromote, onDelete, onSaveDate,
+}: TargetRowProps) {
+  const days = t.exam_date ? daysUntilExam(t.exam_date) : null;
+  const cd = days !== null ? countdownInfo(days) : null;
+  const cdStyle = cd ? {
+    danger: { color: theme.danger, background: theme.dangerBg },
+    warn: { color: theme.warn, background: theme.warnBg },
+    ok: { color: theme.teal, background: theme.tealBg },
+    past: { color: theme.inkFaint, background: theme.muted },
+  }[cd.tone] : null;
+  const [editing, setEditing] = useState(false);
+  const [dateValue, setDateValue] = useState('');
+  const [hovered, setHovered] = useState(false);
+  const [iconHover, setIconHover] = useState<string | null>(null);
+  const [starBounce, setStarBounce] = useState(false);
+  const starBounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => () => { if (starBounceTimer.current) clearTimeout(starBounceTimer.current); }, []);
+
+  function handleEditDate() { setDateValue(t.exam_date ?? ''); setEditing(true); }
+
+  async function handleSaveDate() {
+    try { await onSaveDate(dateValue || null); setEditing(false); }
+    catch { /* hook shows toast; keep editor open */ }
+  }
+
+  function handleSetPrimary() {
+    if (!t.is_primary) {
+      if (starBounceTimer.current) clearTimeout(starBounceTimer.current);
+      setStarBounce(true);
+      starBounceTimer.current = setTimeout(() => setStarBounce(false), 500);
+    }
+    onSetPrimary();
+  }
+
+  return (
+    <div
+      style={{
+        ...s.targetRow,
+        flexWrap: isMobile ? 'wrap' : 'nowrap',
+        borderColor: hovered ? theme.teal : theme.line,
+        boxShadow: hovered ? theme.shadowHover : theme.shadow,
+      }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
+      <button
+        onClick={handleSetPrimary}
+        style={{ ...s.starBtn, animation: starBounce ? 'focali-star-pop 0.45s ease' : undefined }}
+        title={t.is_primary ? 'Este é o concurso em foco' : 'Definir como foco'}
+        aria-label={t.is_primary ? 'Concurso em foco' : 'Definir como foco'}
+      >
+        <svg width="19" height="19" viewBox="0 0 24 24"
+          fill={t.is_primary ? theme.teal : 'none'}
+          stroke={t.is_primary ? theme.teal : theme.inkFaint}
+          strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z" />
+        </svg>
+      </button>
+
+      <div style={s.targetMain} onClick={onOpen}>
+        <span style={s.targetLabel}>
+          {formatTargetLabel(t)}
+          {!t.board_id && (
+            <span title="Banca não definida" style={{ marginLeft: 6, verticalAlign: 'middle' }}>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={theme.warn} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                <line x1="12" y1="9" x2="12" y2="13" />
+                <line x1="12" y1="17" x2="12.01" y2="17" />
+              </svg>
+            </span>
+          )}
+        </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+          <span style={{ ...s.phaseTag, ...(t.phase === 'pos' ? s.phaseTagPos : s.phaseTagPre) }}>
+            {t.phase === 'pos' ? 'Pós-edital' : 'Pré-edital'}
+          </span>
+          {cd && cdStyle && (
+            <span style={{ ...s.countdownTag, ...cdStyle }}>{cd.label}</span>
+          )}
+          <span style={s.topicCountTag}>
+            {topicCount > 0 ? `${topicCount} tópico${topicCount === 1 ? '' : 's'}` : 'edital vazio'}
+          </span>
+          {editing ? (
+            <div style={{ display: 'flex', gap: 6, alignItems: 'center' }} onClick={(e) => e.stopPropagation()}>
+              <input
+                type="date"
+                value={dateValue}
+                onChange={(e) => setDateValue(e.target.value)}
+                autoFocus
+                style={s.dateInput}
+                onKeyDown={(e) => { if (e.key === 'Enter') handleSaveDate(); if (e.key === 'Escape') setEditing(false); }}
+              />
+              <button onClick={handleSaveDate} style={s.dateSaveBtn}>✓</button>
+              <button onClick={() => setEditing(false)} style={s.dateCancelBtn}>✕</button>
+            </div>
+          ) : (
+            <button
+              onClick={(e) => { e.stopPropagation(); handleEditDate(); }}
+              style={s.dateBtn}
+              title="Definir data da prova"
+            >
+              {t.exam_date
+                ? `📅 ${new Date(t.exam_date + 'T00:00:00').toLocaleDateString('pt-BR')}`
+                : '+ data da prova'}
+            </button>
+          )}
+        </div>
+      </div>
+
+      <div style={{ ...s.targetActions, ...(isMobile ? { width: '100%', justifyContent: 'flex-end', marginTop: 4 } : {}) }}>
+        {t.phase === 'pre' && (
+          <button onClick={onPromote} style={s.btnSecondary}>Edital publicado?</button>
+        )}
+        <button
+          onClick={onOpen}
+          style={{ ...s.iconBtn, background: iconHover === 'open' ? theme.muted : 'transparent' }}
+          onMouseEnter={() => setIconHover('open')}
+          onMouseLeave={() => setIconHover(null)}
+          title="Abrir concurso"
+          aria-label="Abrir concurso"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={theme.inkSoft} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" />
+            <path d="M15 3h6v6M10 14L21 3" />
+          </svg>
+        </button>
+        <button
+          onClick={onDelete}
+          style={{ ...s.iconBtn, background: iconHover === 'del' ? theme.dangerBg : 'transparent' }}
+          onMouseEnter={() => setIconHover('del')}
+          onMouseLeave={() => setIconHover(null)}
+          title="Apagar"
+          aria-label="Apagar concurso"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={iconHover === 'del' ? theme.danger : theme.inkFaint} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M3 6h18M8 6V4a1 1 0 011-1h6a1 1 0 011 1v2m2 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6" />
+            <path d="M10 11v6M14 11v6" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  );
+});
+
+const s: Record<string, CSSProperties> = {
+  container: { maxWidth: 720, margin: '0 auto', fontFamily: theme.font, minWidth: 0 },
+  header: { marginBottom: 20 },
+  h1: { fontWeight: 700, color: theme.ink, letterSpacing: -0.4, margin: 0 },
+  sub: { fontSize: 14, color: theme.inkSoft, margin: '6px 0 0', fontWeight: 400 },
+
+  // Abas — mesmo padrão da página de Matérias
+  tabs: { display: 'flex', gap: 4, marginBottom: 20, padding: 3, background: 'rgba(15,23,42,.06)', borderRadius: theme.radiusSm, width: 'fit-content' },
+  tab: { padding: '8px 18px', borderRadius: theme.radiusXs, border: 'none', background: 'transparent', color: theme.inkSoft, fontSize: 14, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit', transition: 'all .15s', whiteSpace: 'nowrap' },
+  tabOn: { background: theme.card, color: theme.ink, boxShadow: theme.shadow, fontWeight: 600 },
+
+  actionsRow: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 14, flexWrap: 'wrap' },
+  newBtn: { padding: '9px 18px', borderRadius: theme.radiusSm, border: `1px solid ${theme.teal}`, background: theme.tealBg, color: theme.teal, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+  importarLink: { background: 'transparent', border: 'none', color: theme.inkSoft, fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit', padding: 0, whiteSpace: 'nowrap' },
+
+  // Card de criação
+  createCard: { background: theme.card, border: `0.5px solid ${theme.line}`, borderRadius: theme.radius, boxShadow: theme.shadow, padding: 20, marginBottom: 20 },
+
   phaseToggle: { display: 'inline-flex', gap: 0, background: 'rgba(15,23,42,.06)', borderRadius: theme.radiusSm, padding: 3, marginBottom: 8 },
-  phaseBtn: { padding: '7px 16px', border: 'none', background: 'transparent', color: theme.inkSoft, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', borderRadius: theme.radiusSm - 2 },
+  phaseBtn: { padding: '7px 18px', border: 'none', background: 'transparent', color: theme.inkSoft, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', borderRadius: theme.radiusXs },
   phaseBtnOn: { background: theme.card, color: theme.teal, boxShadow: theme.shadow },
-  phaseHint: { fontSize: 12.5, color: theme.inkFaint, margin: '0 0 14px' },
-  formGrid: { display: 'flex', gap: 10, marginBottom: 12, flexWrap: 'wrap' },
+  phaseHint: { fontSize: 12, color: theme.inkFaint, margin: '0 0 16px' },
+
+  formGrid: { display: 'flex', gap: 12, marginBottom: 12, flexWrap: 'wrap' },
   selectWrap: { flex: 1, minWidth: 160 },
-  inlineBoard: { display: 'flex', gap: 8, flexBasis: '100%', alignItems: 'center', flexWrap: 'wrap' },
-  input: { flex: 1, minWidth: 120, padding: '11px 14px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.card, fontSize: 14, color: theme.ink, fontFamily: 'inherit', outline: 'none' },
+  inlineBoard: { display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' },
+  input: { flex: 1, minWidth: 120, padding: '10px 14px', borderRadius: theme.radiusSm, border: `1px solid ${theme.lineStrong}`, background: theme.card, fontSize: 14, color: theme.ink, fontFamily: 'inherit', outline: 'none' },
+  // border completo (não borderColor/borderWidth): misturar shorthand com
+  // propriedades individuais dispara warning do React ao alternar Pré/Pós.
   inputAlert: { border: `1.5px solid ${theme.danger}` },
-  miniBtn: { padding: '9px 14px', borderRadius: theme.radiusSm, border: 'none', background: theme.teal, color: '#fff', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
-  miniBtnGhost: { padding: '9px 10px', borderRadius: theme.radiusSm, border: 'none', background: 'transparent', color: theme.inkFaint, fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
-  addBtn: { padding: '11px 22px', borderRadius: theme.radiusSm, border: 'none', background: theme.teal, color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
-  error: { color: theme.danger, fontSize: 13, marginBottom: 12 },
-  muted: { color: theme.inkFaint, fontSize: 14 },
+  fieldLabel: { fontSize: 12, color: theme.inkFaint, fontWeight: 500 },
+  formFooter: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10, marginTop: 4 },
+
+  btnPrimary: { padding: '10px 20px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: '#fff', fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
+  btnSecondary: { padding: '6px 14px', borderRadius: theme.radiusSm, border: `1px solid ${theme.teal}`, background: theme.tealBg, color: theme.teal, fontSize: 12.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
+  btnGhost: { padding: '10px 12px', borderRadius: theme.radiusSm, border: 'none', background: 'transparent', color: theme.inkFaint, fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
+  btnAdvanced: { display: 'inline-flex', alignItems: 'center', gap: 5, background: 'transparent', border: 'none', color: theme.teal, fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit', padding: '4px 2px' },
+  iconBtn: { border: 'none', cursor: 'pointer', padding: 8, display: 'flex', alignItems: 'center', borderRadius: theme.radiusSm, transition: 'background .12s', flexShrink: 0 },
+
+  skeletonList: { display: 'flex', flexDirection: 'column', gap: 8 },
+  skeletonRow: { height: 68, borderRadius: theme.radiusSm, background: theme.muted, animation: 'focali-pulse 1.4s ease infinite' },
+  emptyState: { display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '48px 20px', color: theme.inkFaint, textAlign: 'center' },
+  emptyTitle: { fontSize: 15, fontWeight: 600, color: theme.inkSoft, margin: '0 0 6px' },
+  emptyHint: { fontSize: 13, color: theme.inkFaint, maxWidth: 340, lineHeight: 1.6, margin: '0 0 16px' },
+  emptyCta: { padding: '10px 20px', borderRadius: theme.radiusSm, border: `1px solid ${theme.teal}`, background: theme.tealBg, color: theme.teal, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+
   list: { display: 'flex', flexDirection: 'column', gap: 8 },
-  targetRow: { display: 'flex', alignItems: 'center', gap: 12, background: theme.card, borderRadius: 12, border: `0.5px solid ${theme.line}`, padding: '12px 14px', transition: 'border-color .15s', minWidth: 0 },
+  targetRow: { display: 'flex', alignItems: 'center', gap: 12, background: theme.card, borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, padding: '12px 14px', transition: 'border-color .15s, box-shadow .15s', minWidth: 0 },
   starBtn: { border: 'none', background: 'transparent', cursor: 'pointer', padding: 4, display: 'flex', alignItems: 'center', flexShrink: 0 },
   targetMain: { flex: 1, display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', cursor: 'pointer', minWidth: 0 },
-  targetLabel: { fontSize: 15, color: theme.ink, fontWeight: 500 },
-  phaseTag: { fontSize: 11, fontWeight: 600, borderRadius: 999, padding: '2px 8px', flexShrink: 0 },
-  phaseTagPre: { color: theme.inkSoft, background: 'rgba(15,23,42,.06)' },
+  targetLabel: { fontSize: 15, color: theme.ink, fontWeight: 600 },
+  phaseTag: { fontSize: 11, fontWeight: 600, borderRadius: theme.radiusXs, padding: '3px 8px', flexShrink: 0 },
+  phaseTagPre: { color: theme.inkSoft, background: theme.muted },
   phaseTagPos: { color: '#fff', background: theme.teal },
-  targetActions: { display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 },
-  promoteBtn: { border: `0.5px solid ${theme.teal}`, background: theme.tealBg, color: theme.teal, fontSize: 12.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', borderRadius: 999, padding: '5px 12px', whiteSpace: 'nowrap' },
-  iconBtn: { border: 'none', background: 'transparent', cursor: 'pointer', padding: 5, display: 'flex', alignItems: 'center', borderRadius: 8, opacity: 0.75 },
-  dateLabel: { fontSize: 11.5, color: theme.inkFaint, fontWeight: 500 },
-  dateBtn: { fontSize: 12, color: theme.teal, border: `0.5px dashed ${theme.teal}`, background: 'transparent', borderRadius: 999, padding: '2px 9px', cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap', opacity: 0.8 },
-  dateInput: { padding: '4px 8px', borderRadius: 8, border: `0.5px solid ${theme.line}`, background: theme.card, fontSize: 13, color: theme.ink, fontFamily: 'inherit', outline: 'none' },
-  dateSaveBtn: { border: 'none', background: theme.teal, color: '#fff', borderRadius: 6, padding: '4px 8px', cursor: 'pointer', fontSize: 12, fontFamily: 'inherit' },
-  dateCancelBtn: { border: 'none', background: 'transparent', color: theme.inkFaint, borderRadius: 6, padding: '4px 6px', cursor: 'pointer', fontSize: 12, fontFamily: 'inherit' },
+  countdownTag: { fontSize: 11, fontWeight: 600, borderRadius: theme.radiusXs, padding: '3px 8px', flexShrink: 0 },
+  topicCountTag: { fontSize: 11.5, color: theme.inkFaint, fontVariantNumeric: 'tabular-nums', flexShrink: 0 },
+  targetActions: { display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0 },
+  dateBtn: { fontSize: 12, color: theme.teal, border: `1px dashed ${theme.teal}`, background: 'transparent', borderRadius: theme.radiusXs, padding: '3px 10px', cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
+  dateInput: { padding: '4px 8px', borderRadius: theme.radiusXs, border: `1px solid ${theme.lineStrong}`, background: theme.card, fontSize: 13, color: theme.ink, fontFamily: 'inherit', outline: 'none' },
+  dateSaveBtn: { border: 'none', background: theme.primary, color: '#fff', borderRadius: theme.radiusXs, padding: '4px 8px', cursor: 'pointer', fontSize: 12, fontFamily: 'inherit' },
+  dateCancelBtn: { border: 'none', background: 'transparent', color: theme.inkFaint, borderRadius: theme.radiusXs, padding: '4px 6px', cursor: 'pointer', fontSize: 12, fontFamily: 'inherit' },
+
   promoteOverlay: { position: 'fixed', inset: 0, background: 'rgba(15,23,42,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 60, padding: 16 },
-  promoteModal: { background: theme.card, borderRadius: 16, padding: '24px', width: 'min(400px, 94vw)', boxShadow: '0 20px 60px rgba(0,0,0,0.2)', fontFamily: theme.font },
+  promoteModal: { background: theme.card, borderRadius: theme.radius, padding: '24px', width: 'min(400px, 94vw)', boxShadow: theme.shadowModal, fontFamily: theme.font },
   promoteTitle: { fontSize: 16, fontWeight: 700, color: theme.ink, margin: '0 0 6px' },
-  promoteSub: { fontSize: 13.5, color: theme.inkSoft, margin: '0 0 16px', lineHeight: 1.5 },
+  promoteSub: { fontSize: 13, color: theme.inkSoft, margin: '0 0 16px', lineHeight: 1.5 },
 };

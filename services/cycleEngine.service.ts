@@ -32,7 +32,7 @@ export async function getActiveCycleRule(): Promise<string | null> {
   if (!ctx) return null;
   const { supabase, userId } = ctx;
 
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('recurrence_rules')
     .select('id')
     .eq('user_id', userId)
@@ -40,6 +40,7 @@ export async function getActiveCycleRule(): Promise<string | null> {
     .eq('is_active', true)
     .order('created_at', { ascending: false })
     .limit(1);
+  if (error) throw new Error('Erro ao buscar ciclo ativo: ' + error.message);
 
   return data?.[0]?.id ?? null;
 }
@@ -49,16 +50,22 @@ export async function getCycleState(ruleId: string): Promise<CycleState | null> 
   if (!ctx) return null;
   const { supabase, userId } = ctx;
 
-  const { data: rule } = await supabase
+  const { data: rule, error: ruleError } = await supabase
     .from('recurrence_rules')
     .select('*, recurrence_items(*)')
     .eq('id', ruleId)
     .eq('user_id', userId)
     .single();
+  // PGRST116 = nenhuma linha encontrada (.single() sem match) — caso legítimo
+  // (ex: ciclo arquivado/excluído em outra aba), não é uma falha real.
+  if (ruleError && ruleError.code !== 'PGRST116') {
+    throw new Error('Erro ao buscar ciclo: ' + ruleError.message);
+  }
   if (!rule) return null;
 
-  const { data: subjects } = await supabase
+  const { data: subjects, error: subjectsError } = await supabase
     .from('subjects').select('id, name, color').eq('user_id', userId);
+  if (subjectsError) throw new Error('Erro ao buscar matérias: ' + subjectsError.message);
   const subjMap: Record<string, { name: string; color: string }> = {};
   for (const s of subjects ?? []) subjMap[s.id] = { name: s.name, color: s.color ?? '#C9B8DD' };
 
@@ -66,11 +73,12 @@ export async function getCycleState(ruleId: string): Promise<CycleState | null> 
   // não são possíveis; o filtro evita payload ilimitado com o uso prolongado.
   const cycleStart = rule.created_at ? (rule.created_at as string).split('T')[0] : '2000-01-01';
 
-  const { data: completions } = await supabase
+  const { data: completions, error: completionsError } = await supabase
     .from('cycle_completions')
     .select('subject_id, completed_date, minutes')
     .eq('rule_id', ruleId)
     .gte('completed_date', cycleStart);
+  if (completionsError) throw new Error('Erro ao buscar progresso do ciclo: ' + completionsError.message);
 
   const minutesBySubject: Record<string, number> = {};
   for (const c of completions ?? []) {

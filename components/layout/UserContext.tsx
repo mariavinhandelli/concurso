@@ -25,13 +25,12 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const [email, setEmail] = useState<string | null>(null);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 
-  // Leitura inicial via getSession() — lê o localStorage sem round-trip de rede,
-  // eliminando o flash de "Olá" → "Olá, Maria" que getUser() causava.
-  const loadUser = useCallback(async () => {
+  // Busca o usuário via getUser() — valida o token com o servidor. Usado tanto
+  // na leitura inicial quanto em refreshUser (chamado explicitamente após mutations).
+  const refreshUser = useCallback(async () => {
     try {
       const supabase = createClient();
-      const { data: { session } } = await supabase.auth.getSession();
-      const u = session?.user;
+      const { data: { user: u } } = await supabase.auth.getUser();
       if (!u) return;
       const meta = u.user_metadata ?? {};
       const display = meta.display_name || meta.full_name || meta.name || '';
@@ -41,22 +40,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
     } catch { /* silencioso — contexto de usuário é best-effort */ }
   }, []);
 
-  // refreshUser valida o token com o servidor antes de atualizar (chamado após mutations).
-  const refreshUser = useCallback(async () => {
-    try {
-      const supabase = createClient();
-      const { data } = await supabase.auth.getUser();
-      const u = data.user;
-      if (!u) return;
-      const meta = u.user_metadata ?? {};
-      const display = meta.display_name || meta.full_name || meta.name || '';
-      setName(display ? String(display).split(' ')[0].slice(0, 40) : '');
-      setEmail(u.email ?? null);
-      setAvatarUrl(isHttpsUrl(meta.avatar_url) ? meta.avatar_url : null);
-    } catch { }
-  }, []);
-
-  useEffect(() => { loadUser(); }, [loadUser]);
+  useEffect(() => { refreshUser(); }, [refreshUser]);
 
   return (
     <UserContext.Provider value={{ name, email, avatarUrl, refreshUser }}>

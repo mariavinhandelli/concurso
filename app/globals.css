@@ -9,6 +9,7 @@
 /* ---- PADRÃO: Focali claro ---- */
 :root,
 [data-palette="petroleo"][data-mode="light"] {
+  --topbar-h: 60px;
   --bg:  #fffffa;
   --card: #FFFFFF;
   --muted: #F1F5F9;
@@ -36,10 +37,10 @@
   --warn: #F59E0B;   --warn-bg: #FEF3C7;
   --crit: #EF4444;   --crit-bg: #FEE2E2;
 
-  --shadow: 0 2px 8px rgba(15,23,42,.05);
-  --shadow-hover: 0 10px 32px rgba(15,23,42,.12);
-  --shadow-card: 0 8px 24px rgba(15,23,42,.08);
-  --shadow-modal: 0 18px 48px rgba(15,23,42,.10);
+  --shadow: 0 1px 3px rgba(15,23,42,.06), 0 4px 12px rgba(15,23,42,.05);
+  --shadow-hover: 0 4px 16px rgba(15,23,42,.10), 0 12px 36px rgba(15,23,42,.08);
+  --shadow-card: 0 4px 16px rgba(15,23,42,.08), 0 1px 4px rgba(15,23,42,.06);
+  --shadow-modal: 0 20px 60px rgba(15,23,42,.14), 0 4px 16px rgba(15,23,42,.08);
 
   /* Botão primário (dark teal) — diferente de --teal (green para sucesso/progresso) */
   --primary: #143D45;
@@ -93,6 +94,10 @@
   --teal-bg: #052e16;
   --on-teal: #052e16;
 
+  --primary: #4ADE80;
+  --primary-hover: #22C55E;
+  --primary-pressed: #16a34a;
+
   --clay: #818CF8;
   --clay-deep: #6366F1;
   --clay-soft: #A5B4FC;
@@ -103,6 +108,7 @@
   --ok: #4ADE80;     --ok-bg: #052e16;
   --warn: #FBBF24;   --warn-bg: #2D1B00;
   --crit: #F87171;   --crit-bg: #3A1E1E;
+  --info: #60A5FA;   --info-bg: rgba(59,130,246,.12);
 
   --shadow: 0 2px 8px rgba(0,0,0,.30);
   --shadow-hover: 0 10px 32px rgba(0,0,0,.50);
@@ -132,6 +138,10 @@
   --teal-bg: #F2E0E0;
   --on-teal: #FFFFFF;
 
+  --primary: #C67D80;
+  --primary-hover: #A85F62;
+  --primary-pressed: #8A4850;
+
   --clay: #9B5C6E;
   --clay-deep: #7A4456;
   --clay-soft: #C691A1;
@@ -142,6 +152,7 @@
   --ok: #16A34A;     --ok-bg: #E7F5EC;
   --warn: #ecb127;   --warn-bg: #FBF0E0;
   --crit: #DC2626;   --crit-bg: #FBE9E9;
+  --info: #3B82F6;   --info-bg: #DBEAFE;
 
   --shadow: 0 1px 2px rgba(50,30,30,.04), 0 10px 30px -12px rgba(50,30,30,.16);
   --shadow-hover: 0 2px 6px rgba(50,30,30,.06), 0 18px 44px -18px rgba(50,30,30,.22);
@@ -164,6 +175,10 @@
   --teal-bg: #3A2A2B;
   --on-teal: #FFFFFF;
 
+  --primary: #D7969A;
+  --primary-hover: #C67D80;
+  --primary-pressed: #B06065;
+
   --clay: #C98A9C;
   --clay-deep: #DDA8B6;
   --clay-soft: #9B5C6E;
@@ -174,6 +189,7 @@
   --ok: #4ADE80;     --ok-bg: #142A1C;
   --warn: #FBBF6B;   --warn-bg: #332512;
   --crit: #F87171;   --crit-bg: #3A1E1E;
+  --info: #60A5FA;   --info-bg: rgba(59,130,246,.12);
 
   --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 30px -12px rgba(0,0,0,.5);
   --shadow-hover: 0 2px 6px rgba(0,0,0,.4), 0 18px 44px -18px rgba(0,0,0,.6);
@@ -201,6 +217,10 @@
   --teal-bg: #cac3f4;
   --on-teal: #FFFFFF;
 
+  --primary: #6366F1;
+  --primary-hover: #4338CA;
+  --primary-pressed: #3730A3;
+
   --clay: #D98C5F;
   --clay-deep: #B26A3F;
   --clay-soft: #ECB48F;
@@ -211,6 +231,7 @@
   --ok: #16A34A;     --ok-bg: #E7F5EC;
   --warn: #ecb127;   --warn-bg: #FBF0E0;
   --crit: #DC2626;   --crit-bg: #FBE9E9;
+  --info: #3B82F6;   --info-bg: #DBEAFE;
 
   --shadow: 0 1px 2px rgba(30,50,40,.04), 0 10px 30px -12px rgba(30,50,40,.16);
   --shadow-hover: 0 2px 6px rgba(30,50,40,.06), 0 18px 44px -18px rgba(30,50,40,.22);
@@ -233,6 +254,10 @@
   --teal-bg: #1e323a;
   --on-teal: #FFFFFF;
 
+  --primary: #7577F3;
+  --primary-hover: #6366F1;
+  --primary-pressed: #4338CA;
+
   --clay: #E0A07A;
   --clay-deep: #ECB890;
   --clay-soft: #D98C5F;
@@ -243,6 +268,7 @@
   --ok: #4ADE80;     --ok-bg: #142A1C;
   --warn: #FBBF6B;   --warn-bg: #332512;
   --crit: #F87171;   --crit-bg: #3A1E1E;
+  --info: #60A5FA;   --info-bg: rgba(59,130,246,.12);
 
   --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 30px -12px rgba(0,0,0,.5);
   --shadow-hover: 0 2px 6px rgba(0,0,0,.4), 0 18px 44px -18px rgba(0,0,0,.6);
@@ -270,6 +296,10 @@
   --teal-bg: #ECEAE4;
   --on-teal: #FFFFFF;
 
+  --primary: #1b221f;
+  --primary-hover: #10140f;
+  --primary-pressed: #080b0a;
+
   --clay: #4f645a;
   --clay-deep: #3A4A42;
   --clay-soft: #8C9A93;
@@ -280,6 +310,7 @@
   --ok: #16A34A;     --ok-bg: #E7F5EC;
   --warn: #ecb127;   --warn-bg: #FBF0E0;
   --crit: #DC2626;   --crit-bg: #FBE9E9;
+  --info: #3B82F6;   --info-bg: #DBEAFE;
 
   --shadow: 0 1px 2px rgba(27,34,31,.05), 0 10px 30px -12px rgba(27,34,31,.16);
   --shadow-hover: 0 2px 6px rgba(27,34,31,.07), 0 18px 44px -18px rgba(27,34,31,.22);
@@ -302,6 +333,10 @@
   --teal-bg: #252C28;
   --on-teal: #131715;
 
+  --primary: #C8C8C8;
+  --primary-hover: #E0E0E0;
+  --primary-pressed: #B0B0B0;
+
   --clay: #7E948A;
   --clay-deep: #9AAAA2;
   --clay-soft: #4f645a;
@@ -312,6 +347,7 @@
   --ok: #4ADE80;     --ok-bg: #142A1C;
   --warn: #FBBF6B;   --warn-bg: #332512;
   --crit: #F87171;   --crit-bg: #3A1E1E;
+  --info: #60A5FA;   --info-bg: rgba(59,130,246,.12);
 
   --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 30px -12px rgba(0,0,0,.5);
   --shadow-hover: 0 2px 6px rgba(0,0,0,.4), 0 18px 44px -18px rgba(0,0,0,.6);
@@ -451,7 +487,6 @@ body {
 
 html, body {
   max-width: 100%;
-  overflow-x: hidden;        /* corta-fogo: vazamento lateral não vira scroll */
 }
 
 /* Mídia nunca empurra o layout pra fora da viewport. */
@@ -490,8 +525,10 @@ img, video, canvas {
   }
 
   /* Reduz respiro lateral do conteúdo no mobile, dando mais largura útil. */
-  main {
-    overflow-x: hidden;
+  /* Touch targets: botões de ação (não ícones) devem ter pelo menos 44px.
+     Aplicar classe .touch-target nos botões de texto/CTA que estejam abaixo do mínimo. */
+  .touch-target {
+    min-height: 44px;
   }
 }
 
@@ -514,9 +551,14 @@ img, video, canvas {
   to   { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes skeleton-pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
+@keyframes done-pop {
+  from { opacity: 0; transform: scale(0.5); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes fade-up-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes review-card-in {
@@ -527,6 +569,59 @@ img, video, canvas {
 .review-card-enter {
   animation: review-card-in 0.18s ease forwards;
 }
+
+/* ===================================================================
+   MÓDULO MATÉRIAS — hover-reveal, animações, skeleton
+   =================================================================== */
+
+/* Ações dos tópicos ficam ocultas por padrão; aparecem no hover/focus.
+   Em mobile as classes não são aplicadas — ações sempre visíveis. */
+.topic-row .topic-actions { opacity: 0; transition: opacity .12s ease; }
+.topic-row:hover .topic-actions,
+.topic-row:focus-within .topic-actions { opacity: 1; }
+.topic-row { transition: border-color .12s ease; }
+.topic-row:hover { border-color: var(--line-strong) !important; }
+
+/* Animação de conclusão do checkbox */
+@keyframes checkPop {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.35); }
+  100% { transform: scale(1); }
+}
+.checkbox-pop { animation: checkPop .2s ease; }
+.check-pop    { animation: checkPop .35s cubic-bezier(.34,1.56,.64,1); }
+.skel         { animation: skeleton-pulse 1.4s ease infinite; }
+.add-block-btn { border: none !important; transition: background .15s ease, color .15s ease !important; }
+.add-block-btn:hover { background: var(--teal-bg) !important; color: var(--teal) !important; }
+.block-check { transition: border-color .15s ease, background .15s ease, transform .1s ease !important; }
+.block-check:hover { transform: scale(1.1) !important; opacity: 1 !important; }
+
+/* Fade de entrada ao trocar abas */
+@keyframes tabEnter {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.tab-enter { animation: tabEnter .15s ease both; }
+
+/* Entrada do modal */
+@keyframes modalEnter {
+  from { opacity: 0; transform: translate(-50%, -52%) scale(.97); }
+  to   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+.modal-enter { animation: modalEnter .18s ease both; }
+
+@keyframes backdropEnter {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.backdrop-enter { animation: backdropEnter .15s ease both; }
+
+/* Subject card hover */
+.subject-card { transition: border-color .14s ease, box-shadow .14s ease; }
+.subject-card:hover { border-color: var(--line-strong) !important; box-shadow: 0 4px 16px rgba(15,23,42,.06), 0 1px 4px rgba(15,23,42,.04) !important; }
+
+/* 2-line clamp for subject card names */
+.cat-name-clamp { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
@@ -561,7 +656,7 @@ img, video, canvas {
   /* Topbar: hambúrguer visível, "Registrar" vira só ícone */
   .topbar-hamburger { display: grid !important; }
   .topbar-add-label { display: none; }
-  .topbar-add-btn   { padding: 0 !important; width: 38px !important; }
+  .topbar-add-btn   { padding: 0 !important; width: 44px !important; }
   .topbar-bar       { padding-left: 16px !important; padding-right: 16px !important; }
 
   /* Cronograma: grade semanal oculta desde o SSR; lista sempre visível */
@@ -572,8 +667,15 @@ img, video, canvas {
   .schedule-grade-btn { display: none !important; }
 }
 
-/* ── Tablet (768–899px): sidebar icon-only automático ── */
-@media (min-width: 768px) and (max-width: 899px) {
+/* ── Clearance para o FloatingTimer FAB (52px + margem) ──
+   Garante que o FAB fixo não sobreponha o conteúdo inferior
+   em nenhuma página logada. Escopo .shell-main evita afetar o /login. */
+.shell-main > main {
+  padding-bottom: 88px;
+}
+
+/* ── Tablet / desktop estreito (768–1199px): sidebar compacta ── */
+@media (min-width: 768px) and (max-width: 1199px) {
   /* Sidebar reduzida a 72 px (ícones); labels e seta de colapso ocultos */
   .app-sidebar          { width: 72px !important; overflow: hidden; }
   .sidebar-label        { display: none; }
@@ -581,6 +683,7 @@ img, video, canvas {
   .sidebar-brand        { justify-content: center !important; }
   .sidebar-brand-name   { display: none; }
   .sidebar-collapse-btn { display: none; }
+  .sidebar-nav .sidebar-label { display: none; }
 
   /* Conteúdo empurrado para depois dos 72 px */
   .shell-main { margin-left: 72px !important; }
@@ -590,4 +693,179 @@ img, video, canvas {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
   }
+}
+
+/* Componentes flutuantes precisam respeitar as bordas da viewport no mobile. */
+@media (max-width: 767px) {
+  .notification-menu {
+    position: fixed !important;
+    top: calc(var(--topbar-h) + 8px) !important;
+    left: 16px !important;
+    right: 16px !important;
+    width: auto !important;
+    max-height: calc(100dvh - var(--topbar-h) - 24px);
+    overflow-y: auto;
+  }
+}
+
+.sidebar-nav {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.14) transparent;
+}
+.sidebar-nav::-webkit-scrollbar { width: 3px; }
+.sidebar-nav::-webkit-scrollbar-button { display: none; height: 0; width: 0; }
+.sidebar-nav::-webkit-scrollbar-track { background: transparent; }
+.sidebar-nav::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+}
+.sidebar-nav::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+@media (pointer: coarse) {
+  .touch-target {
+    min-height: 44px !important;
+  }
+  .icon-touch-target {
+    min-width: 44px !important;
+    min-height: 44px !important;
+  }
+  .shell-main :where(input, select, textarea) {
+    min-height: 44px;
+  }
+  .shell-main button[aria-label]:not(.block-check),
+  .shell-main button[title]:not(.block-check),
+  .topbar-bar button {
+    min-width: 44px;
+    min-height: 44px;
+  }
+}
+
+/* Em tablets menores a lista preserva contexto e evita uma grade de 888px. */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .schedule-week-grid { display: none !important; }
+  .schedule-list-view { display: flex !important; flex-direction: column; }
+  .schedule-grade-btn { display: none !important; }
+}
+
+.juris-form-actions {
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+  margin: 0 -8px -8px;
+  padding: 12px 8px 8px !important;
+  background: color-mix(in srgb, var(--card) 92%, transparent);
+  backdrop-filter: blur(10px);
+}
+
+@media (max-width: 767px) {
+  .juris-form { gap: 18px !important; }
+  .juris-form-actions {
+    margin-right: -4px;
+    margin-left: -4px;
+  }
+  .juris-form-actions > button { flex: 1; }
+}
+
+/* ── Focus ring universal — inputs, selects e textareas ── */
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--teal) !important;
+  border-color: transparent !important;
+}
+
+/* ── Animações de micro-interação (módulo targets + UI global) ── */
+@keyframes focali-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.38; }
+}
+@keyframes focali-slide-down {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes focali-star-pop {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.38); }
+  100% { transform: scale(1); }
+}
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(10px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0)    scale(1); }
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ===================================================================
+   MÓDULO CONQUISTAS — hover, stagger, celebração, próximas conquistas
+   =================================================================== */
+.conquistas-card {
+  /* box-shadow e border-color via CSS variable — sem inline override, sem !important no hover */
+  box-shadow:   var(--shadow);
+  border-color: var(--badge-border, var(--line));
+  transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+}
+.conquistas-card:hover {
+  transform:    translateY(-2px);
+  box-shadow:   var(--shadow-hover);
+  border-color: var(--line-strong);
+}
+.conquistas-fade-up {
+  animation: fade-up-in .28s ease both;
+  animation-delay: var(--card-delay, 0ms);
+}
+@keyframes conquistas-badge-pop {
+  0%   { transform: scale(1); }
+  35%  { transform: scale(1.06); }
+  100% { transform: scale(1); }
+}
+.conquistas-badge-new {
+  animation: conquistas-badge-pop .55s cubic-bezier(.34,1.56,.64,1);
+}
+/* Barras de progresso — GPU via scaleX, sem reflow a cada frame */
+@keyframes conquistas-prog-grow {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(var(--prog, 0)); }
+}
+.conquistas-prog-fill {
+  width: 100%; height: 100%; border-radius: 99px;
+  /* P0: cor derivada da família (--prog-color), não --ink-faint cinza */
+  background: color-mix(in srgb, var(--prog-color, var(--teal)) 45%, var(--muted));
+  transform-origin: left;
+  animation: conquistas-prog-grow .55s cubic-bezier(.4,0,.2,1) both;
+  animation-delay: calc(80ms + var(--card-delay, 0ms));
+}
+.conquistas-nextup-fill {
+  width: 100%; height: 100%; border-radius: 99px;
+  /* NextUp usa a cor da família com mais saturação (badge quase pronta) */
+  background: color-mix(in srgb, var(--prog-color, var(--ok)) 75%, var(--muted));
+  transform-origin: left;
+  animation: conquistas-prog-grow .65s cubic-bezier(.4,0,.2,1) both;
+  animation-delay: calc(80ms + var(--card-delay, 0ms));
+}
+.conquistas-summary-fill {
+  width: 100%; height: 100%; border-radius: 99px;
+  background: var(--ok);
+  transform-origin: left;
+  animation: conquistas-prog-grow .7s cubic-bezier(.4,0,.2,1) both;
+  animation-delay: 60ms;
+}
+.conquistas-filter-tab {
+  /* P0: 13→14px (md da escala) */
+  font-size: 14px;
+  /* P1: padding vertical mínimo para área de toque adequada */
+  padding: 7px 16px;
+  border-radius: 99px;
+  border: 0.5px solid;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background .14s ease, color .14s ease, border-color .14s ease;
+}
+/* P2: focus-visible para navegação por teclado */
+.conquistas-filter-tab:focus-visible {
+  outline: 2px solid var(--teal);
+  outline-offset: 2px;
 }

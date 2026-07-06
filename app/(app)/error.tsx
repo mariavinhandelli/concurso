@@ -29,7 +29,7 @@ export default function AppError({
 
 const styles: Record<string, React.CSSProperties> = {
   wrap: { minHeight: 360, display: 'grid', placeItems: 'center', padding: 24 },
-  card: { maxWidth: 440, padding: 28, borderRadius: 16, border: '1px solid var(--line)', background: 'var(--card)', boxShadow: 'var(--shadow)', textAlign: 'center' },
+  card: { maxWidth: 440, padding: 28, borderRadius: 16, border: '0.5px solid var(--line)', background: 'var(--card)', boxShadow: 'var(--shadow)', textAlign: 'center' },
   code: { color: 'var(--danger)', fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.8 },
   title: { color: 'var(--ink)', fontSize: 22, margin: '8px 0' },
   text: { color: 'var(--ink-soft)', fontSize: 14, lineHeight: 1.6, margin: '0 0 20px' },

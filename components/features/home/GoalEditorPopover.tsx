@@ -19,8 +19,9 @@ export function GoalEditorPopover({ label, weeklyHint, saving, onSave, onClose, 
       {children}
       {weeklyHint && <div style={styles.popHint}>{weeklyHint}</div>}
       <div style={styles.popActions}>
-        <button style={styles.popCancel} onClick={onClose}>Cancelar</button>
+        <button className="touch-target" style={styles.popCancel} onClick={onClose}>Cancelar</button>
         <button
+          className="touch-target"
           style={{ ...styles.popSave, cursor: saving ? 'not-allowed' : 'pointer' }}
           onClick={onSave}
           disabled={saving}

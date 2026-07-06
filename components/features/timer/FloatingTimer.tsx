@@ -5,8 +5,10 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useTimer } from './TimerContext';
 import { saveStudyLog, type SessionFeedback } from '@/services/studyLogs.service';
+import { refreshHomeAfterSession } from '@/lib/home-refresh';
 import { QualitativeFeedbackForm } from './QualitativeFeedbackForm';
 import { theme } from '@/lib/theme';
 import { useUI } from '@/components/layout/UIContext';
@@ -16,7 +18,8 @@ import type { LogMode } from '@/lib/timer-storage';
 
 export function FloatingTimer() {
   const timer = useTimer();
-  const { isMobile } = useUI();
+  const queryClient = useQueryClient();
+  const { isMobile, mobileOpen } = useUI();
   const toast = useToast();
   const [expanded, setExpanded] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -43,6 +46,10 @@ export function FloatingTimer() {
     return () => document.removeEventListener('keydown', onKey);
   }, [showPicker]);
 
+  // O timer continua contando no contexto, mas sua interface não disputa espaço
+  // nem camada com o drawer de navegação no mobile.
+  if (isMobile && mobileOpen) return null;
+
   function startWithMode(mode: LogMode) {
     timer.start({ mode });
     setShowPicker(false);
@@ -55,6 +62,7 @@ export function FloatingTimer() {
       await saveStudyLog(timer.pendingSession, feedback);
       timer.discardPending();
       setExpanded(false);
+      refreshHomeAfterSession(queryClient);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Erro ao salvar.');
     } finally {
@@ -83,7 +91,7 @@ export function FloatingTimer() {
         <div ref={pickerRef} style={{ ...styles.card, ...pos, width: isMobile ? 'calc(100vw - 32px)' : 236, maxWidth: 340 }}>
           <div style={styles.cardHead}>
             <span style={styles.eyebrow}>Iniciar sessão</span>
-            <button onClick={() => setShowPicker(false)} style={styles.collapseBtn} aria-label="Fechar">
+            <button className="icon-touch-target" onClick={() => setShowPicker(false)} style={styles.collapseBtn} aria-label="Fechar">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M18 6L6 18M6 6l12 12" />
               </svg>
@@ -94,6 +102,7 @@ export function FloatingTimer() {
               <button
                 key={m.value}
                 onClick={() => startWithMode(m.value as LogMode)}
+                className="touch-target"
                 style={styles.modeBtn}
               >
                 {m.label}

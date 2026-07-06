@@ -5,6 +5,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { theme } from '@/lib/theme';
+import { useUI } from '@/components/layout/UIContext';
 import { getHistory, type HistoryDay, type HistorySession } from '@/services/history.service';
 
 const PERIODOS = [
@@ -15,6 +16,7 @@ const PERIODOS = [
 ];
 
 export default function HistoricoPage() {
+  const { isMobile } = useUI();
   const [dias, setDias] = useState(7);
   const [days, setDays] = useState<HistoryDay[]>([]);
   const [loading, setLoading] = useState(true);
@@ -55,9 +57,9 @@ export default function HistoricoPage() {
   const temResultado = daysFiltrados.length > 0;
 
   return (
-    <div style={styles.page}>
+    <div style={{ ...styles.page, padding: isMobile ? '20px 16px' : '34px 40px' }}>
       <div style={styles.header}>
-        <h1 style={styles.h1}>Histórico</h1>
+        <h1 style={{ ...styles.h1, fontSize: isMobile ? 24 : 28 }}>Histórico</h1>
         <p style={styles.sub}>Suas sessões de estudo, dia a dia. Toque numa sessão para ver os detalhes.</p>
       </div>
 
@@ -66,6 +68,7 @@ export default function HistoricoPage() {
         <div style={styles.segment}>
           {PERIODOS.map((p) => (
             <button
+              className="touch-target"
               key={p.dias}
               onClick={() => setDias(p.dias)}
               style={{ ...styles.segmentBtn, ...(dias === p.dias ? styles.segmentActive : {}) }}
@@ -248,8 +251,8 @@ function formataDia(dateKey: string): string {
 const styles: Record<string, React.CSSProperties> = {
   page: { maxWidth: 760, margin: '0 auto', padding: '34px 40px', fontFamily: theme.font },
   header: { marginBottom: 18 },
-  h1: { fontSize: 30, fontWeight: 800, color: theme.ink, letterSpacing: -0.8, margin: 0 },
-  sub: { fontSize: 14.5, color: theme.inkSoft, margin: '6px 0 0', fontWeight: 500 },
+  h1: { fontSize: 28, fontWeight: 800, color: theme.ink, letterSpacing: -0.6, margin: 0 },
+  sub: { fontSize: 14, color: theme.inkSoft, margin: '6px 0 0', fontWeight: 500 },
   muted: { color: theme.inkFaint, fontSize: 14 },
 
   filters: { display: 'flex', gap: 12, marginBottom: 26, flexWrap: 'wrap', alignItems: 'center' },

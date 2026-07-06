@@ -16,9 +16,9 @@ export function TimerProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (timer.status === 'running') {
       document.title = `⏱ ${timer.formatted} · Focali`;
-    } else {
-      document.title = 'Focali';
+      return () => { document.title = 'Focali'; };
     }
+    document.title = 'Focali';
   }, [timer.status, timer.formatted]);
 
   return <TimerContext.Provider value={timer}>{children}</TimerContext.Provider>;

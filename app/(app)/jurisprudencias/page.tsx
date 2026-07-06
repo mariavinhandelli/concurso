@@ -8,7 +8,7 @@ import { useUI } from '@/components/layout/UIContext';
 import { theme } from '@/lib/theme';
 
 const DISCIPLINA_ICON: Record<string, React.ReactNode> = {
-  // Colunas do tribunal → CF/CRFB
+  // Balança da justiça → CF/CRFB
   Constitucional: <>
     <line x1="12" y1="3" x2="12" y2="21" />
     <line x1="3"  y1="21" x2="21" y2="21" />
@@ -18,88 +18,76 @@ const DISCIPLINA_ICON: Record<string, React.ReactNode> = {
   </>,
   // Prédio com janelas → órgão público / Administração
   Administrativo: <>
-    <line x1="12" y1="3" x2="12" y2="21" />
-    <line x1="3"  y1="21" x2="21" y2="21" />
-    <line x1="4"  y1="8"  x2="20" y2="8"  />
-    <path d="M6 8L3.5 14h5L6 8z" />
-    <path d="M18 8l2.5 6h-5L18 8z" />
+    <rect x="5" y="3" width="14" height="18" rx="1" />
+    <path d="M9 7h2M13 7h2M9 11h2M13 11h2M9 15h2M13 15h2" />
+    <path d="M10 21v-3h4v3" />
+  </>,
+  // Lupa sobre documento → fiscalização / Tribunais de Contas
+  'Controle Externo': <>
+    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h6" />
+    <path d="M14 2v6h6" />
+    <path d="M9 13h2M9 9h1" />
+    <circle cx="16.5" cy="16.5" r="3.5" />
+    <path d="m19 19 3 3" />
   </>,
   // Martelo do juiz → sanção penal
   Penal: <>
-    <line x1="12" y1="3" x2="12" y2="21" />
-    <line x1="3"  y1="21" x2="21" y2="21" />
-    <line x1="4"  y1="8"  x2="20" y2="8"  />
-    <path d="M6 8L3.5 14h5L6 8z" />
-    <path d="M18 8l2.5 6h-5L18 8z" />
+    <path d="m14 13-7.5 7.5a2.12 2.12 0 0 1-3-3L11 10" />
+    <path d="m16 16 6-6" />
+    <path d="m8 8 6-6" />
+    <path d="m9 7 8 8" />
+    <path d="m21 11-8-8" />
   </>,
-  // Balança da justiça → processo/julgamento
+  // Algemas/cadeado → persecução penal
   'Processo Penal': <>
-    <line x1="12" y1="3" x2="12" y2="21" />
-    <line x1="3"  y1="21" x2="21" y2="21" />
-    <line x1="4"  y1="8"  x2="20" y2="8"  />
-    <path d="M6 8L3.5 14h5L6 8z" />
-    <path d="M18 8l2.5 6h-5L18 8z" />
+    <rect x="5" y="11" width="14" height="10" rx="2" />
+    <path d="M8 11V7a4 4 0 0 1 8 0v4" />
+    <circle cx="12" cy="16" r="1" />
   </>,
-  // Aperto de mão → contratos, família, obrigações
+  // Pessoas → relações privadas (contratos, família, obrigações)
   Civil: <>
-    <line x1="12" y1="3" x2="12" y2="21" />
-    <line x1="3"  y1="21" x2="21" y2="21" />
-    <line x1="4"  y1="8"  x2="20" y2="8"  />
-    <path d="M6 8L3.5 14h5L6 8z" />
-    <path d="M18 8l2.5 6h-5L18 8z" />
+    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+    <circle cx="9" cy="7" r="4" />
+    <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
   </>,
-  // Documento com seta de processo → rito processual civil
+  // Documento com linhas → rito processual civil
   'Processo Civil': <>
-    <line x1="12" y1="3" x2="12" y2="21" />
-    <line x1="3"  y1="21" x2="21" y2="21" />
-    <line x1="4"  y1="8"  x2="20" y2="8"  />
-    <path d="M6 8L3.5 14h5L6 8z" />
-    <path d="M18 8l2.5 6h-5L18 8z" />
+    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+    <path d="M14 2v6h6" />
+    <path d="M16 13H8M16 17H8M10 9H8" />
   </>,
-  // Capacete de obra → relação de trabalho / CLT
+  // Maleta → relação de trabalho / CLT
   Trabalho: <>
-    <line x1="12" y1="3" x2="12" y2="21" />
-    <line x1="3"  y1="21" x2="21" y2="21" />
-    <line x1="4"  y1="8"  x2="20" y2="8"  />
-    <path d="M6 8L3.5 14h5L6 8z" />
-    <path d="M18 8l2.5 6h-5L18 8z" />
+    <rect x="2" y="7" width="20" height="14" rx="2" />
+    <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
   </>,
-  // Urna eleitoral com cédula → voto
+  // Urna com voto → eleitoral
   Eleitoral: <>
-    <line x1="12" y1="3" x2="12" y2="21" />
-    <line x1="3"  y1="21" x2="21" y2="21" />
-    <line x1="4"  y1="8"  x2="20" y2="8"  />
-    <path d="M6 8L3.5 14h5L6 8z" />
-    <path d="M18 8l2.5 6h-5L18 8z" />
+    <path d="m9 12 2 2 4-4" />
+    <path d="M5 7c0-1.1.9-2 2-2h10a2 2 0 0 1 2 2v12H5V7Z" />
+    <path d="M22 19H2" />
   </>,
-  // Recibo/nota fiscal → tributos, impostos
+  // Percentual → tributos, impostos
   Tributário: <>
-    <line x1="12" y1="3" x2="12" y2="21" />
-    <line x1="3"  y1="21" x2="21" y2="21" />
-    <line x1="4"  y1="8"  x2="20" y2="8"  />
-    <path d="M6 8L3.5 14h5L6 8z" />
-    <path d="M18 8l2.5 6h-5L18 8z" />
+    <line x1="19" y1="5" x2="5" y2="19" />
+    <circle cx="6.5" cy="6.5" r="2.5" />
+    <circle cx="17.5" cy="17.5" r="2.5" />
   </>,
   // Escudo com check → proteção social / previdência
   Previdenciário: <>
-    <line x1="12" y1="3" x2="12" y2="21" />
-    <line x1="3"  y1="21" x2="21" y2="21" />
-    <line x1="4"  y1="8"  x2="20" y2="8"  />
-    <path d="M6 8L3.5 14h5L6 8z" />
-    <path d="M18 8l2.5 6h-5L18 8z" />
+    <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" />
+    <path d="m9 12 2 2 4-4" />
   </>,
   // Estrela de militar → Direito Penal e Processual Penal Militar
   'Penal e Proc. Penal Militar': <>
-    <line x1="12" y1="3" x2="12" y2="21" />
-    <line x1="3"  y1="21" x2="21" y2="21" />
-    <line x1="4"  y1="8"  x2="20" y2="8"  />
-    <path d="M6 8L3.5 14h5L6 8z" />
-    <path d="M18 8l2.5 6h-5L18 8z" />
+    <path d="M12 2l2.4 4.86 5.4.74-3.9 3.8.92 5.36L12 14.24l-4.82 2.52.92-5.36-3.9-3.8 5.4-.74z" />
+    <path d="M8 21h8" />
   </>,
 };
 
 const DISCIPLINA_COLOR: Record<string, string> = {
-  Constitucional: '#3892f8', Administrativo: '#0bd8b6', Penal: '#fe2273',
+  Constitucional: '#3892f8', Administrativo: '#0bd8b6', 'Controle Externo': '#0ea5e9', Penal: '#fe2273',
   'Processo Penal': '#da457c', Civil: '#75f9a5', 'Processo Civil': '#86d39b',
   Trabalho: '#ffad6b', Eleitoral: '#ae67ff', Tributário: '#f85838', Previdenciário: '#5f91bf',
   'Penal e Proc. Penal Militar': '#7c5cbf',
@@ -107,7 +95,7 @@ const DISCIPLINA_COLOR: Record<string, string> = {
 
 export default function JurisprudenciasHubPage() {
   const router = useRouter();
-  const { isMobile } = useUI();
+  const { isMobile, isTablet } = useUI();
   const [search, setSearch] = useState('');
   const [counts, setCounts] = useState<Record<string, number>>({});
   const [revisoesHoje, setRevisoesHoje] = useState<number | null>(null);
@@ -129,14 +117,14 @@ export default function JurisprudenciasHubPage() {
   }
 
   return (
-    <div style={{ maxWidth: 980, margin: '0 auto', padding: isMobile ? '20px 16px' : '34px 40px', fontFamily: theme.font, minWidth: 0 }}>
+    <div style={{ maxWidth: 960, margin: '0 auto', padding: isMobile ? '20px 16px' : '34px 40px', fontFamily: theme.font, minWidth: 0 }}>
 
       {/* Cabeçalho */}
-      <div style={{ textAlign: 'center', marginBottom: isMobile ? 24 : 36 }}>
-        <h1 style={{ fontSize: isMobile ? 26 : 34, fontWeight: 800, color: theme.ink, letterSpacing: -0.8, margin: 0 }}>
+      <div style={{ marginBottom: 24 }}>
+        <h1 style={{ fontSize: isMobile ? 24 : 28, fontWeight: 800, color: theme.ink, letterSpacing: -0.6, margin: 0 }}>
           Jurisprudências
         </h1>
-        <p style={{ fontSize: 15, color: theme.inkSoft, margin: '8px 0 0' }}>
+        <p style={{ fontSize: 14, color: theme.inkSoft, margin: '8px 0 0' }}>
           Teses que caem em concurso, organizadas por disciplina.
         </p>
       </div>
@@ -194,7 +182,7 @@ export default function JurisprudenciasHubPage() {
 
       {/* Painel de insights — só aparece quando há dados de simulado */}
       {insights && (insights.ultimoScore !== null || (revisoesHoje !== null && revisoesHoje > 0)) && (
-        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 28 }}>
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 28, flexDirection: isMobile ? 'column' : 'row' }}>
           {revisoesHoje !== null && revisoesHoje > 0 && (
             <button
               onClick={() => router.push('/jurisprudencias/revisar')}
@@ -247,11 +235,15 @@ export default function JurisprudenciasHubPage() {
         gap: 12,
         justifyContent: 'center',
       }}>
-        {DISCIPLINAS_HUB.map((d) => (
+        {/* Todas as disciplinas do hub sempre aparecem; as zeradas ficam
+            esmaecidas (mas clicáveis) até receberem conteúdo. */}
+        {DISCIPLINAS_HUB.map((d) => {
+          const vazia = Object.keys(counts).length > 0 && (counts[d] ?? 0) === 0;
+          return (
           <button
             key={d}
             onClick={() => openDisciplina(d)}
-            style={{ ...styles.discCard, width: isMobile ? 'calc(50% - 6px)' : 'calc(100% / 6 - 10px)' }}
+            style={{ ...styles.discCard, opacity: vazia ? 0.55 : 1, width: isMobile ? 'calc(50% - 6px)' : isTablet ? 'calc(25% - 9px)' : 'calc(100% / 6 - 10px)' }}
             onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.borderColor = DISCIPLINA_COLOR[d]; (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(-2px)'; }}
             onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.borderColor = theme.line; (e.currentTarget as HTMLButtonElement).style.transform = 'none'; }}
           >
@@ -261,9 +253,10 @@ export default function JurisprudenciasHubPage() {
               </svg>
             </div>
             <span style={styles.discLabel}>{d}</span>
-            <span style={styles.discCount}>{counts[d] ?? 0}</span>
+            <span style={styles.discCount}>{vazia ? 'em breve' : counts[d] ?? 0}</span>
           </button>
-        ))}
+          );
+        })}
       </div>
 
       <div style={{ textAlign: 'center', marginTop: 24 }}>
@@ -282,9 +275,9 @@ const styles: Record<string, React.CSSProperties> = {
     background: theme.card, boxShadow: theme.shadow, cursor: 'pointer',
     fontFamily: 'inherit', textAlign: 'left' as const, flex: '1 1 200px', minWidth: 0,
   },
-  quickBtn: { padding: '9px 18px', borderRadius: 999, border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.inkSoft, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+  quickBtn: { padding: '9px 18px', borderRadius: theme.radiusPill, border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.inkSoft, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
   quickBtnAlert: { border: `0.5px solid ${theme.warn}`, background: theme.warnTint, color: theme.warnDeep },
-  quickBtnPrimary: { padding: '9px 18px', borderRadius: 999, border: 'none', background: theme.teal, color: '#fff', fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+  quickBtnPrimary: { padding: '9px 18px', borderRadius: theme.radiusPill, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
   discCard: {
     display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8,
     padding: '20px 12px', borderRadius: theme.radius, border: `0.5px solid ${theme.line}`,

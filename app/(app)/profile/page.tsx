@@ -162,7 +162,7 @@ export default function ProfilePage() {
   return (
     <div style={{ ...styles.wrap, padding: isMobile ? '20px 16px' : '34px 40px' }}>
       <header style={styles.head}>
-        <h1 style={{ ...styles.h1, fontSize: isMobile ? 25 : 30 }}>Meu perfil</h1>
+        <h1 style={{ ...styles.h1, fontSize: isMobile ? 24 : 28 }}>Meu perfil</h1>
         <p style={styles.sub}>Sua foto e nome de exibição.</p>
       </header>
 
@@ -259,8 +259,8 @@ export default function ProfilePage() {
 const styles: Record<string, React.CSSProperties> = {
   wrap: { maxWidth: 680, margin: '0 auto', padding: '34px 40px', fontFamily: theme.font, minWidth: 0 },
   head: { marginBottom: 24 },
-  h1: { fontSize: 30, fontWeight: 800, color: theme.ink, letterSpacing: -0.8, margin: 0 },
-  sub: { fontSize: 14.5, color: theme.inkSoft, margin: '6px 0 0', fontWeight: 500 },
+  h1: { fontSize: 28, fontWeight: 800, color: theme.ink, letterSpacing: -0.6, margin: 0 },
+  sub: { fontSize: 14, color: theme.inkSoft, margin: '6px 0 0', fontWeight: 500 },
   card: { background: theme.card, border: `0.5px solid ${theme.line}`, borderRadius: theme.radius, boxShadow: theme.shadow, padding: 28 },
   section: { marginBottom: 4 },
   avatarRow: { display: 'flex', alignItems: 'center', gap: 20 },
@@ -273,7 +273,7 @@ const styles: Record<string, React.CSSProperties> = {
   inputDisabled: { background: theme.bg, color: theme.inkSoft, cursor: 'not-allowed' },
   divider: { height: '0.5px', background: theme.line, margin: '22px 0' },
   footer: { display: 'flex', alignItems: 'center', gap: 12, marginTop: 24, paddingTop: 20, borderTop: `0.5px solid ${theme.line}`, flexWrap: 'wrap' },
-  btnPrimary: { padding: '11px 22px', borderRadius: 12, border: 'none', background: theme.teal, color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+  btnPrimary: { padding: '11px 22px', borderRadius: 12, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
   btnSecondary: { padding: '9px 18px', borderRadius: 10, border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.ink, fontSize: 13.5, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' },
   muted: { color: theme.inkFaint, fontSize: 14 },
 };

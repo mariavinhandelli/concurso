@@ -116,9 +116,9 @@ export function CardForm({ subjectId, topicId, card, onSaved, onCreatedAndNew, o
 }
 
 const styles: Record<string, React.CSSProperties> = {
-  box: { background: theme.bg, borderRadius: 14, border: `0.5px solid ${theme.line}`, padding: 18, display: 'flex', flexDirection: 'column', gap: 8, fontFamily: theme.font },
+  box: { background: theme.card, borderRadius: 14, border: `1px solid ${theme.lineStrong}`, boxShadow: '0 1px 4px var(--line)', padding: 18, display: 'flex', flexDirection: 'column', gap: 8, fontFamily: theme.font },
   label: { fontSize: 13, color: theme.inkSoft, marginTop: 4, fontWeight: 500 },
-  textarea: { width: '100%', boxSizing: 'border-box', padding: '10px 12px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.card, fontSize: 14, color: theme.ink, resize: 'vertical', fontFamily: 'inherit', outline: 'none' },
+  textarea: { width: '100%', boxSizing: 'border-box', padding: '10px 12px', borderRadius: theme.radiusSm, border: `1px solid ${theme.lineStrong}`, background: theme.card, fontSize: 14, color: theme.ink, resize: 'vertical', fontFamily: 'inherit', outline: 'none' },
   reviewRow: { display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', cursor: 'pointer' },
   checkbox: { width: 18, height: 18, accentColor: theme.teal, cursor: 'pointer' },
   reviewText: { fontSize: 14, color: theme.ink },

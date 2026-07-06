@@ -4,7 +4,7 @@
 // Bubble Menu pra flashcard, e coluna de leitura confortável.
 'use client';
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useEditor, EditorContent, type Editor } from '@tiptap/react';
 import { BubbleMenu } from '@tiptap/react/menus';
 import StarterKit from '@tiptap/starter-kit';
@@ -13,12 +13,14 @@ import Image from '@tiptap/extension-image';
 import { Color, TextStyle } from '@tiptap/extension-text-style';
 import { createClient } from '@/lib/supabase/client';
 import { theme } from '@/lib/theme';
+import { useToast } from '@/components/ui/ToastProvider';
 
 interface Props {
   initialContent?: object | null;
   onChange?: (json: object, text: string) => void;
   onCreateFlashcard?: (selectedText: string) => void;
   canCreateFlashcard?: boolean;
+  placeholder?: string;
 }
 
 const TEXT_COLORS = [
@@ -76,7 +78,11 @@ async function compressImage(file: File): Promise<Blob> {
   });
 }
 
-export function RichTextEditor({ initialContent = null, onChange, onCreateFlashcard, canCreateFlashcard = true }: Props) {
+export function RichTextEditor({
+  initialContent = null, onChange, onCreateFlashcard, canCreateFlashcard = true,
+  placeholder = 'Descreva o erro, a pegadinha e a correção… (cole um print com Ctrl+V)',
+}: Props) {
+  const toast = useToast();
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -114,6 +120,10 @@ export function RichTextEditor({ initialContent = null, onChange, onCreateFlashc
   // Sobe a imagem pro Storage e insere no editor.
   async function uploadAndInsert(file: File) {
     if (!editor) return;
+    if (file.size > 20 * 1024 * 1024) {
+      toast.error('Imagem muito grande (máximo 20 MB).');
+      return;
+    }
     setUploading(true);
     try {
       const blob = await compressImage(file);
@@ -128,9 +138,9 @@ export function RichTextEditor({ initialContent = null, onChange, onCreateFlashc
       if (error) throw error;
 
       const { data: pub } = supabase.storage.from('notebook-images').getPublicUrl(nome);
-      editor.chain().focus().setImage({ src: pub.publicUrl }).run();
+      if (!editor.isDestroyed) editor.chain().focus().setImage({ src: pub.publicUrl }).run();
     } catch (e) {
-      alert('Erro ao enviar imagem: ' + (e instanceof Error ? e.message : 'desconhecido'));
+      toast.error('Erro ao enviar imagem: ' + (e instanceof Error ? e.message : 'desconhecido'));
     } finally {
       setUploading(false);
     }
@@ -149,7 +159,7 @@ export function RichTextEditor({ initialContent = null, onChange, onCreateFlashc
     const text = editor!.state.doc.textBetween(from, to, ' ');
     if (!text.trim()) return;
     if (!canCreateFlashcard) {
-      alert('Salve o erro primeiro para criar um flashcard a partir dele.');
+      toast.error('Salve o erro primeiro para criar um flashcard a partir dele.');
       return;
     }
     onCreateFlashcard?.(text);
@@ -169,7 +179,7 @@ export function RichTextEditor({ initialContent = null, onChange, onCreateFlashc
         .rte-content mark { border-radius: 3px; padding: 0 2px; }
         .rte-content img { max-width: 100%; height: auto; border-radius: 10px; margin: 0.5em 0; display: block; }
         .rte-content img.ProseMirror-selectednode { outline: 2px solid var(--teal); }
-        .rte-content:empty:before { content: "Descreva o erro, a pegadinha e a correção… (cole um print com Ctrl+V)"; color: var(--ink-faint); }
+        .rte-content > p:only-child:empty::before { content: "${placeholder.replace(/"/g, '\\"')}"; color: var(--ink-faint); pointer-events: none; float: left; height: 0; }
       `}</style>
 
       <BubbleMenu
@@ -200,6 +210,18 @@ export function RichTextEditor({ initialContent = null, onChange, onCreateFlashc
 function Toolbar({ editor, onPickImage, uploading }: { editor: Editor; onPickImage: () => void; uploading: boolean }) {
   const [openPalette, setOpenPalette] = useState(false);
   const [openHl, setOpenHl] = useState(false);
+  const paletteRef = useRef<HTMLDivElement>(null);
+  const hlRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!openPalette && !openHl) return;
+    function onDown(e: MouseEvent) {
+      if (openPalette && paletteRef.current && !paletteRef.current.contains(e.target as Node)) setOpenPalette(false);
+      if (openHl && hlRef.current && !hlRef.current.contains(e.target as Node)) setOpenHl(false);
+    }
+    document.addEventListener('mousedown', onDown);
+    return () => document.removeEventListener('mousedown', onDown);
+  }, [openPalette, openHl]);
 
   const btn = (active: boolean): React.CSSProperties => ({
     ...styles.btn,
@@ -227,7 +249,7 @@ function Toolbar({ editor, onPickImage, uploading }: { editor: Editor; onPickIma
       <span style={styles.divider} />
 
       <div style={styles.group}>
-        <div style={styles.paletteWrap}>
+        <div style={styles.paletteWrap} ref={paletteRef}>
           <button onClick={() => { setOpenPalette(!openPalette); setOpenHl(false); }}
             style={styles.btn} title="Cor da letra">
             <span style={{ fontWeight: 700, fontSize: 13 }}>A</span>
@@ -245,7 +267,7 @@ function Toolbar({ editor, onPickImage, uploading }: { editor: Editor; onPickIma
           )}
         </div>
 
-        <div style={styles.paletteWrap}>
+        <div style={styles.paletteWrap} ref={hlRef}>
           <button onClick={() => { setOpenHl(!openHl); setOpenPalette(false); }}
             style={btn(editor.isActive('highlight'))} title="Marca-texto">{Icon.highlight}</button>
           {openHl && (

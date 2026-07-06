@@ -3,8 +3,10 @@
 
 const CACHE_NAME = 'focali-v1';
 
-// Assets estáticos que valem a pena pré-cachear (Next.js serve com hash no nome)
-const PRECACHE_URLS = ['/', '/jurisprudencias', '/offline.html'];
+// Único asset pré-cacheado: é o único lido pelo fetch handler (fallback de
+// navegação offline, abaixo). Páginas dinâmicas (/, /jurisprudencias) não são
+// servidas do cache — a estratégia de navegação é network-first.
+const PRECACHE_URLS = ['/offline.html'];
 
 // Instala e pré-cacha
 self.addEventListener('install', (event) => {
@@ -30,6 +32,9 @@ self.addEventListener('fetch', (event) => {
 
   // Ignora requisições não-HTTP (chrome-extension, etc.)
   if (!url.protocol.startsWith('http')) return;
+
+  // Em desenvolvimento (localhost) não faz cache — chunks do Turbopack reutilizam nomes
+  if (url.hostname === 'localhost' || url.hostname === '127.0.0.1') return;
 
   // Supabase API → network-first; retorna 503 em falha de rede para que o
   // cliente distinga "sem dados" de "falha real" (evita mascarar 401/403/500).
@@ -71,7 +76,7 @@ self.addEventListener('fetch', (event) => {
         const fresh = fetch(request).then((res) => {
           if (res.ok) cache.put(request, res.clone());
           return res;
-        }).catch(() => cached);
+        }).catch(() => cached || new Response(null, { status: 503 }));
         return cached || fresh;
       })
     )

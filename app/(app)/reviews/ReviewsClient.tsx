@@ -156,6 +156,9 @@ export function ReviewsClient() {
   // ── Animação de saída ────────────────────────────────────────────────────
   const [isExiting, setIsExiting] = useState(false);
 
+  // ── Painel de adiamento ──────────────────────────────────────────────────
+  const [showReschedule, setShowReschedule] = useState(false);
+
   const animateAndRate = useCallback((topicId: string, rating: ReviewRating) => {
     setIsExiting(true);
     setShowReschedule(false);
@@ -167,9 +170,6 @@ export function ReviewsClient() {
     setShowReschedule(false);
     setTimeout(() => { handleReschedule(topicId, dateStr); setIsExiting(false); }, 150);
   }, [handleReschedule]);
-
-  // ── Painel de adiamento ──────────────────────────────────────────────────
-  const [showReschedule, setShowReschedule] = useState(false);
 
   // ── Hover state local dos botões secundários ─────────────────────────────
   const [hovBtn,   setHovBtn]   = useState<string | null>(null);
@@ -218,7 +218,7 @@ export function ReviewsClient() {
   if (error) {
     return (
       <div style={page(isMobile)}>
-        <h1 style={s.h1}>Revisões de hoje</h1>
+        <h1 style={{ ...s.h1, fontSize: isMobile ? 24 : 28 }}>Revisões de hoje</h1>
         <div style={s.errorBox}>
           <WarnIcon />
           <div>
@@ -241,7 +241,7 @@ export function ReviewsClient() {
     return (
       <div style={page(isMobile)}>
         <div style={s.header}>
-          <h1 style={s.h1}>Revisões de hoje</h1>
+          <h1 style={{ ...s.h1, fontSize: isMobile ? 24 : 28 }}>Revisões de hoje</h1>
           <FlashcardStreakBadge streak={fcStreak ?? null} />
         </div>
         <div style={s.emptyWrap}>
@@ -265,7 +265,7 @@ export function ReviewsClient() {
     return (
       <div style={page(isMobile)}>
         <div style={s.header}>
-          <h1 style={s.h1}>Revisões de hoje</h1>
+          <h1 style={{ ...s.h1, fontSize: isMobile ? 24 : 28 }}>Revisões de hoje</h1>
           <FlashcardStreakBadge streak={fcStreak ?? null} />
         </div>
         <div style={s.celebrationWrap}>
@@ -306,7 +306,7 @@ export function ReviewsClient() {
 
         {/* Header */}
         <div style={s.header}>
-          <h1 style={s.h1}>Revisões de hoje</h1>
+          <h1 style={{ ...s.h1, fontSize: isMobile ? 24 : 28 }}>Revisões de hoje</h1>
           <FlashcardStreakBadge streak={fcStreak ?? null} />
         </div>
 
@@ -413,8 +413,8 @@ export function ReviewsClient() {
 function page(isMobile: boolean): React.CSSProperties {
   return {
     maxWidth: 760,
-    margin: '0',
-    padding: isMobile ? '20px 16px' : '34px 48px',
+    margin: '0 auto',
+    padding: isMobile ? '20px 16px' : '34px 40px',
     fontFamily: theme.font,
   };
 }
@@ -423,16 +423,16 @@ function page(isMobile: boolean): React.CSSProperties {
 const s: Record<string, React.CSSProperties> = {
   header: {
     display: 'flex', justifyContent: 'space-between',
-    alignItems: 'center', gap: 16, marginBottom: 20, flexWrap: 'wrap',
+    alignItems: 'center', gap: 16, marginBottom: 24, flexWrap: 'wrap',
   },
   h1: {
-    fontSize: 24, fontWeight: 700,
-    color: theme.ink, letterSpacing: -0.5, margin: 0,
+    fontWeight: 800,
+    color: theme.ink, letterSpacing: -0.6, margin: 0,
   },
 
   progressWrap:  { display: 'flex', alignItems: 'center', gap: 12, marginBottom: 28 },
   progressTrack: { flex: 1, height: 6, background: theme.muted, borderRadius: 99, overflow: 'hidden' },
-  progressFill:  { height: '100%', background: theme.teal, borderRadius: 99, transition: 'width 0.4s ease' },
+  progressFill:  { height: '100%', background: theme.ok, borderRadius: 99, transition: 'width 0.4s ease' },
   progressLabel: {
     fontSize: 12, color: theme.inkFaint, fontWeight: 600,
     whiteSpace: 'nowrap', fontVariantNumeric: 'tabular-nums',
@@ -462,6 +462,7 @@ const s: Record<string, React.CSSProperties> = {
   },
   dateLabel: { fontSize: 12, color: theme.inkFaint, fontWeight: 500, margin: '0 0 6px' },
   dateInput: {
+    width: '100%', boxSizing: 'border-box',
     padding: '8px 10px', borderRadius: 8,
     border: `0.5px solid ${theme.line}`,
     background: theme.card, fontSize: 13,
@@ -496,7 +497,7 @@ const s: Record<string, React.CSSProperties> = {
   ctaRow: { display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' },
   ctaBtn: {
     padding: '12px 24px', borderRadius: 12, border: 'none',
-    background: theme.teal, color: theme.onTeal,
+    background: theme.primary, color: theme.onTeal,
     fontSize: 14, fontWeight: 600, cursor: 'pointer',
     fontFamily: 'inherit', transition: 'background 0.15s ease',
   },

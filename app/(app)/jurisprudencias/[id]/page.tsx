@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import {
-  getJurisprudencia, updateJurisprudencia, deleteJurisprudencia,
+  getJurisprudencia, updateJurisprudencia, deleteJurisprudencia, getJurisprudenciaById,
   type Jurisprudencia, type JurisprudenciaInput,
 } from '@/services/jurisprudencias.service';
 import { JurisprudenciaDetail } from '@/components/features/jurisprudencias/JurisprudenciaDetail';
@@ -34,11 +34,35 @@ export default function JurisprudenciaPage() {
   const { confirm, dialog } = useConfirm();
 
   const id = params.id as string;
+  const isStatic = !!getJurisprudenciaById(id);
   const [item, setItem] = useState<Jurisprudencia | null>(null);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [tab, setTab] = useState<Tab>('leitura');
+
+  // Navegação anterior/próxima seguindo a ordem da última lista visitada
+  // (a lista grava os ids em sessionStorage a cada filtro/busca).
+  const [navIds, setNavIds] = useState<string[]>([]);
+  useEffect(() => {
+    try { setNavIds(JSON.parse(sessionStorage.getItem('juris:navIds') ?? '[]')); } catch { /* json inválido */ }
+  }, []);
+  const navIdx = navIds.indexOf(id);
+  const prevId = navIdx > 0 ? navIds[navIdx - 1] : null;
+  const nextId = navIdx >= 0 && navIdx < navIds.length - 1 ? navIds[navIdx + 1] : null;
+
+  // Atalhos ← → (ignorados durante edição ou digitação em campos).
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (editing) return;
+      const t = e.target as HTMLElement | null;
+      if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
+      if (e.key === 'ArrowLeft' && prevId) router.push(`/jurisprudencias/${prevId}`);
+      if (e.key === 'ArrowRight' && nextId) router.push(`/jurisprudencias/${nextId}`);
+    }
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [editing, prevId, nextId, router]);
 
   const load = useCallback(async () => {
     try {
@@ -113,8 +137,35 @@ export default function JurisprudenciaPage() {
           >
             ← Jurisprudências
           </button>
-          <div style={{ display: 'flex', gap: 8 }}>
-            {!editing && (
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            {!editing && (prevId || nextId) && (
+              <span style={{ display: 'inline-flex', gap: 4, marginRight: 4 }}>
+                <button
+                  onClick={() => prevId && router.push(`/jurisprudencias/${prevId}`)}
+                  disabled={!prevId}
+                  aria-label="Jurisprudência anterior"
+                  aria-keyshortcuts="ArrowLeft"
+                  style={{ ...styles.actionBtn, padding: '8px 12px', opacity: prevId ? 1 : 0.35 }}
+                >‹ Anterior</button>
+                <button
+                  onClick={() => nextId && router.push(`/jurisprudencias/${nextId}`)}
+                  disabled={!nextId}
+                  aria-label="Próxima jurisprudência"
+                  aria-keyshortcuts="ArrowRight"
+                  style={{ ...styles.actionBtn, padding: '8px 12px', opacity: nextId ? 1 : 0.35 }}
+                >Próxima ›</button>
+              </span>
+            )}
+            {/* Itens do banco oficial (data/jurisprudencias.ts) não são editáveis:
+                o update/delete iria para o Supabase e nunca refletiria na tela. */}
+            {!editing && (isStatic ? (
+              <span style={{
+                fontSize: 12, fontWeight: 600, color: theme.inkFaint,
+                border: `0.5px solid ${theme.line}`, borderRadius: theme.radiusPill, padding: '5px 12px',
+              }}>
+                Banco oficial · somente leitura
+              </span>
+            ) : (
               <>
                 <button
                   onClick={() => setEditing(true)}
@@ -129,7 +180,7 @@ export default function JurisprudenciaPage() {
                   Apagar
                 </button>
               </>
-            )}
+            ))}
           </div>
         </div>
 
@@ -154,12 +205,13 @@ export default function JurisprudenciaPage() {
               </span>
             </div>
             <h1 style={{ fontSize: isMobile ? 18 : 22, fontWeight: 700, color: theme.ink, letterSpacing: -0.4, margin: '0 0 4px', lineHeight: 1.4 }}>
-              {item.disciplina}
-              {item.materia ? ` · ${item.materia}` : ''}
+              {item.titulo || `${item.disciplina}${item.materia ? ` · ${item.materia}` : ''}`}
             </h1>
-            {item.assunto && (
-              <p style={{ fontSize: 14, color: theme.inkSoft, margin: 0 }}>{item.assunto}</p>
-            )}
+            <p style={{ fontSize: 14, color: theme.inkSoft, margin: 0 }}>
+              {item.titulo ? `${item.disciplina}${item.materia ? ` · ${item.materia}` : ''}` : ''}
+              {item.titulo && item.assunto ? ' · ' : ''}
+              {item.assunto ?? ''}
+            </p>
           </div>
         )}
 

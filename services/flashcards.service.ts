@@ -6,7 +6,7 @@ import { requireUser, tryGetUser } from '@/lib/supabase/requireUser';
 import { calculateNextReview, daysOverdue, type RecallGrade } from '@/lib/spaced-repetition';
 import { fromDbRow, toDbRow } from '@/lib/spaced-repetition.mapper';
 import { localDateInDays, toLocalDateString } from '@/lib/local-date';
-import { getArchivedSubjectIds } from '@/services/catalog.service';
+import { getArchivedSubjectIds } from '@/services/archivedCache';
 import * as repo from '@/services/flashcards.repository';
 
 export type ReviewRating = 'dificil' | 'intermediario' | 'facil';
@@ -199,6 +199,30 @@ export async function buildDailyQueue(): Promise<QueueCard[]> {
     getArchivedSubjectIds(),
     repo.fetchPendingCards(auth.supabase, auth.userId, today, []),
     repo.fetchNewCards(auth.supabase, auth.userId, DAILY_NEW_LIMIT, []),
+  ]);
+
+  if (archivedIds.length === 0) {
+    return [...pendingRaw.map(toQueueCard), ...newsRaw.map(toQueueCard)];
+  }
+  const excluded = new Set(archivedIds);
+  const filterCard = (c: repo.FlashcardQueueRow) => !c.subject_id || !excluded.has(c.subject_id);
+  return [
+    ...pendingRaw.filter(filterCard).map(toQueueCard),
+    ...newsRaw.filter(filterCard).map(toQueueCard),
+  ];
+}
+
+// Fila de revisão restrita às matérias de um concurso-alvo (ex.: botão
+// "Flashcards" no hub de Targets) — mesma lógica de buildDailyQueue, mas
+// com includeSubjectIds em vez de olhar todas as matérias do usuário.
+export async function buildTargetQueue(subjectIds: string[]): Promise<QueueCard[]> {
+  const auth = await tryGetUser();
+  if (!auth || subjectIds.length === 0) return [];
+  const today = toLocalDateString();
+  const [archivedIds, pendingRaw, newsRaw] = await Promise.all([
+    getArchivedSubjectIds(),
+    repo.fetchPendingCards(auth.supabase, auth.userId, today, [], subjectIds),
+    repo.fetchNewCards(auth.supabase, auth.userId, DAILY_NEW_LIMIT, [], subjectIds),
   ]);
 
   if (archivedIds.length === 0) {

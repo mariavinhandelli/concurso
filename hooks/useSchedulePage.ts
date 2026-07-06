@@ -7,11 +7,12 @@ import { useUI } from '@/components/layout/UIContext';
 import { useToast } from '@/components/ui/ToastProvider';
 import { toggleBlockDone, deleteBlock } from '@/services/studyBlocks.service';
 import {
-  getScheduleBlocks, toggleRecurrenceDone, skipOccurrence,
+  getScheduleBlocks, toggleRecurrenceDone, skipOccurrence, applyReplanMoves,
   type ScheduleBlock,
 } from '@/services/scheduleEngine.service';
 import { listRuleSummaries, type RuleSummary } from '@/services/recurrence.service';
 import { getActiveCycleRule, archiveCycle, reactivateCycle } from '@/services/cycleEngine.service';
+import { computeReplan } from '@/lib/schedule/replan';
 import { toLocalDateString as localDateStr } from '@/lib/local-date';
 import { mondayOf, weekDias, weekLabel as computeWeekLabel } from '@/lib/schedule-utils';
 
@@ -33,6 +34,8 @@ export function useSchedulePage() {
   const [editingRule, setEditingRule] = useState<RuleSummary | null>(null);
   const [editingBlock, setEditingBlock] = useState<ScheduleBlock | null>(null);
   const [generatorOpen, setGeneratorOpen] = useState(false);
+  const [replanModalOpen, setReplanModalOpen] = useState(false);
+  const [replanning, setReplanning] = useState(false);
 
   const pendingTogglesRef = useRef(new Set<string>());
 
@@ -133,6 +136,29 @@ export function useSchedulePage() {
     return { planned, done, pct };
   }
 
+  // — Cronograma vivo: blocos atrasados desta semana e pra onde iriam —
+  // Só faz sentido na semana ATUAL (replanejar o passado ou o futuro não tem significado).
+  const isCurrentWeek = weekKey === localDateStr(mondayOf(new Date()));
+  const replanMoves = useMemo(
+    () => (isCurrentWeek ? computeReplan(blocks, mondayOf(weekStart)) : []),
+    [blocks, weekStart, isCurrentWeek],
+  );
+
+  const handleApplyReplan = useCallback(async () => {
+    setReplanning(true);
+    try {
+      const { ok, falhas } = await applyReplanMoves(replanMoves.map((m) => ({ block: m.block, toDate: m.toDate })));
+      await queryClient.invalidateQueries({ queryKey: ['schedule', weekKey] });
+      setReplanModalOpen(false);
+      if (falhas > 0) toast.error(`${ok} ${ok === 1 ? 'bloco reorganizado' : 'blocos reorganizados'}, ${falhas} ${falhas === 1 ? 'falhou' : 'falharam'}.`);
+      else toast.success(`${ok} ${ok === 1 ? 'bloco reorganizado' : 'blocos reorganizados'} — sua semana está em dia.`);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'Erro ao reorganizar a semana.');
+    } finally {
+      setReplanning(false);
+    }
+  }, [replanMoves, queryClient, weekKey, toast]);
+
   // — Navegação —
 
   function navWeek(deltaWeeks: number) {
@@ -230,12 +256,14 @@ export function useSchedulePage() {
         await toggleBlockDone(b.id, newDone);
       } else {
         await toggleRecurrenceDone(b, newDone);
-        // Recorrência cria/atualiza override — refetch para sincronizar id real
-        queryClient.invalidateQueries({ queryKey: ['schedule', weekKey] });
+        // Recorrência cria/atualiza override com um id real — precisa aguardar
+        // o refetch antes de liberar o lock (abaixo), senão um segundo clique
+        // rápido reutiliza o id virtual sintético contra o override recém-criado.
+        await queryClient.invalidateQueries({ queryKey: ['schedule', weekKey] });
       }
     } catch (e) {
       toast.error(e instanceof Error ? e.message : 'Erro ao atualizar bloco.');
-      queryClient.invalidateQueries({ queryKey: ['schedule', weekKey] });
+      await queryClient.invalidateQueries({ queryKey: ['schedule', weekKey] });
     } finally {
       pendingTogglesRef.current.delete(b.id);
     }
@@ -314,6 +342,8 @@ export function useSchedulePage() {
     // invalidação (compatibilidade com page.tsx)
     load, loadRules, checkCycle,
     blocksOf, dayLoad,
+    // cronograma vivo
+    replanMoves, replanModalOpen, setReplanModalOpen, replanning, handleApplyReplan,
     // handlers de bloco (estáveis — prontos para memo)
     handleToggle, handleDelete, handleSkip, handleEditRule,
     // handlers de ciclo/recorrência

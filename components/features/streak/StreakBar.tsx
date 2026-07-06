@@ -12,6 +12,7 @@ import { Skeleton } from '@/components/ui/Skeleton';
 const COR = {
   meta: '#22c55e',
   estudou: '#6366F1',
+  escudo: '#F59E0B',   // folga perdoada pelo escudo semanal
   falhou: 'rgba(0, 0, 0, 0.22)',
   vazio: theme.muted,
 };
@@ -21,7 +22,7 @@ export const StreakBar = memo(function StreakBar() {
 
   const { data: info, isError: loadError } = useQuery<StreakInfo>({
     queryKey: ['streak'],
-    queryFn: getStreak,
+    queryFn: () => getStreak(),
   });
 
   if (loadError) {
@@ -75,14 +76,16 @@ export const StreakBar = memo(function StreakBar() {
     );
   }
 
-  function corDoDia(d: { minutes: number; metGoal: boolean }, idx: number): string {
+  function corDoDia(d: { minutes: number; metGoal: boolean; forgiven?: boolean }, idx: number): string {
     if (d.minutes > 0) return d.metGoal ? COR.meta : COR.estudou;
+    if (d.forgiven) return COR.escudo;   // folga perdoada não conta como falha
     if (idx > primeiroEstudo) return COR.falhou;
     return COR.vazio;
   }
 
   const hojeStr = toLocalDateString();
   const novoRecorde = info.current > 0 && info.current >= info.longest;
+  const temEscudo = dias.some((d) => d.forgiven);
 
   return (
     <div style={styles.wrap}>
@@ -95,6 +98,9 @@ export const StreakBar = memo(function StreakBar() {
           )}
           {!info.studiedToday && info.current > 0 && (
             <span style={styles.warn}> Estude hoje para manter.</span>
+          )}
+          {info.shieldUsed && (
+            <span style={styles.shield}> 🛡️ uma folga foi perdoada — sua ofensiva continua de pé.</span>
           )}
         </span>
         {novoRecorde ? (
@@ -122,6 +128,7 @@ export const StreakBar = memo(function StreakBar() {
       <div style={styles.legend}>
         <span style={styles.legendItem}><i style={{ ...styles.lDot, background: COR.meta }} />bateu a meta</span>
         <span style={styles.legendItem}><i style={{ ...styles.lDot, background: COR.estudou }} /> estudou</span>
+        {temEscudo && <span style={styles.legendItem}><i style={{ ...styles.lDot, background: COR.escudo }} /> folga perdoada</span>}
         <span style={styles.legendItem}><i style={{ ...styles.lDot, background: COR.falhou }} /> não estudou</span>
         <span style={styles.legendItem}><i style={{ ...styles.lDot, background: COR.vazio }} /> sem registro</span>
       </div>
@@ -135,6 +142,7 @@ const styles: Record<string, React.CSSProperties> = {
   phrase: { fontSize: 14.5, color: theme.inkSoft },
   hi: { color: theme.teal, fontWeight: 700 },
   warn: { color: theme.clay, fontWeight: 500 },
+  shield: { color: '#B45309', fontWeight: 500 },
   record: { fontSize: 13, color: theme.inkSoft },
   recordDestaque: { fontSize: 13, color: theme.warn, fontWeight: 700 },
   bar: { display: 'flex', gap: 3, width: '100%', minWidth: 0 },

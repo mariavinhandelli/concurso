@@ -8,25 +8,33 @@ import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { createClient } from '@/lib/supabase/client';
+import { invalidateArchivedCache } from '@/services/archivedCache';
 import { theme } from '@/lib/theme';
 import { useUI } from './UIContext';
 import { useUser } from './UserContext';
 import { useTimer } from '@/components/features/timer/TimerContext';
 import { ManualLogModal } from '@/components/features/timer/ManualLogModal';
+import { QuickLogModal } from '@/components/features/timer/QuickLogModal';
 import { NotificationBell } from './NotificationBell';
+import { useToast } from '@/components/ui/ToastProvider';
 
 export function Topbar() {
   const router = useRouter();
   const { theme: mode, toggleTheme, toggleMobile } = useUI();
   const { email, avatarUrl } = useUser();
   const timer = useTimer();
+  const toast = useToast();
   const [menuOpen, setMenuOpen] = useState(false);
   const [logOpen, setLogOpen] = useState(false);
+  const [quickOpen, setQuickOpen] = useState(false);
+  const [addMenuOpen, setAddMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const addRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     function onClick(e: MouseEvent) {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false);
+      if (addRef.current && !addRef.current.contains(e.target as Node)) setAddMenuOpen(false);
     }
     document.addEventListener('mousedown', onClick);
     return () => document.removeEventListener('mousedown', onClick);
@@ -36,10 +44,16 @@ export function Topbar() {
     // Limpa o timer ANTES de navegar — o router.push desmonta o componente
     // antes do onAuthStateChange disparar, então o abandon() precisa ser síncrono aqui.
     timer.abandon();
-    const supabase = createClient();
-    await supabase.auth.signOut();
-    router.push('/login');
-    router.refresh();
+    invalidateArchivedCache();
+    try {
+      const supabase = createClient();
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      router.push('/login');
+      router.refresh();
+    } catch {
+      toast.error('Não foi possível sair. Verifique sua conexão e tente novamente.');
+    }
   }
 
   const initial = (email?.[0] ?? '?').toUpperCase();
@@ -56,19 +70,51 @@ export function Topbar() {
       </div>
 
       <div style={styles.right}>
-        {/* Registrar estudo manual — label oculto em mobile via CSS (topbar-add-label / topbar-add-btn). */}
-        <button
-          className="topbar-add-btn"
-          onClick={() => setLogOpen(true)}
-          style={{ ...styles.addBtn, justifyContent: 'center' }}
-          title="Registrar estudo"
-          aria-label="Registrar estudo"
-        >
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M12 5v14M5 12h14" />
-          </svg>
-          <span className="topbar-add-label" style={styles.addLabel}>Registrar estudo</span>
-        </button>
+        {/* Registrar estudo — menu com Quick-Log (questões) e sessão completa.
+            Label oculto em mobile via CSS (topbar-add-label / topbar-add-btn). */}
+        <div ref={addRef} style={{ position: 'relative' }}>
+          <button
+            className="topbar-add-btn"
+            onClick={() => setAddMenuOpen((v) => !v)}
+            style={{ ...styles.addBtn, justifyContent: 'center' }}
+            title="Registrar estudo"
+            aria-label="Registrar estudo"
+            aria-haspopup="menu"
+            aria-expanded={addMenuOpen}
+          >
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 5v14M5 12h14" />
+            </svg>
+            <span className="topbar-add-label" style={styles.addLabel}>Registrar estudo</span>
+          </button>
+
+          {addMenuOpen && (
+            <div style={styles.addMenu} role="menu">
+              <button
+                style={styles.menuItem}
+                role="menuitem"
+                onClick={() => { setAddMenuOpen(false); setQuickOpen(true); }}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={theme.warn} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z" /></svg>
+                <span>
+                  Questões rápidas
+                  <span style={styles.menuHint}>total + acertos, em segundos</span>
+                </span>
+              </button>
+              <button
+                style={styles.menuItem}
+                role="menuitem"
+                onClick={() => { setAddMenuOpen(false); setLogOpen(true); }}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={theme.inkSoft} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 3" /></svg>
+                <span>
+                  Sessão completa
+                  <span style={styles.menuHint}>data, duração, feedback</span>
+                </span>
+              </button>
+            </div>
+          )}
+        </div>
 
         {/* Notificações */}
         <NotificationBell />
@@ -131,49 +177,63 @@ export function Topbar() {
           onSaved={() => router.refresh()}
         />
       )}
+
+      {quickOpen && (
+        <QuickLogModal
+          onClose={() => setQuickOpen(false)}
+          onSaved={() => router.refresh()}
+          onSwitchToFull={() => { setQuickOpen(false); setLogOpen(true); }}
+        />
+      )}
     </header>
   );
 }
 
 const styles: Record<string, React.CSSProperties> = {
   bar: {
-    height: 60, flexShrink: 0, background: theme.bg,
+    height: '60px', flexShrink: 0, background: theme.bg,
     boxShadow: '0 1px 0 ' + theme.line + ', 0 6px 16px -10px rgba(40,40,30,.18)',
     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
     padding: '0 28px', position: 'sticky', top: 0, zIndex: 20, fontFamily: theme.font,
   },
   left: { display: 'flex', alignItems: 'center' },
-  right: { display: 'flex', alignItems: 'center', gap: 6 },
+  right: { display: 'flex', alignItems: 'center', gap: '6px' },
   addBtn: {
-    display: 'flex', alignItems: 'center', gap: 7, height: 38,
-    borderRadius: 10, border: 'none', background: theme.teal, cursor: 'pointer',
-    marginRight: 4, fontFamily: 'inherit', padding: '0 16px 0 13px',
+    display: 'flex', alignItems: 'center', gap: '7px', height: '44px',
+    borderRadius: '10px', borderStyle: 'none', background: theme.primary, cursor: 'pointer',
+    marginRight: '4px', fontFamily: 'inherit', padding: '0 16px 0 13px',
   },
-  addLabel: { color: '#fff', fontSize: 13.5, fontWeight: 600 },
+  addLabel: { color: theme.onTeal, fontSize: 13.5, fontWeight: 600 },
+  addMenu: {
+    position: 'absolute', top: '50px', right: 0, width: 'min(250px, calc(100vw - 32px))', background: theme.card,
+    border: `0.5px solid ${theme.line}`, borderRadius: '14px', boxShadow: theme.shadowHover,
+    padding: '6px', zIndex: 40,
+  },
+  menuHint: { display: 'block', fontSize: 11.5, fontWeight: 400, color: theme.inkFaint, marginTop: 1 },
   iconBtn: {
-    position: 'relative', width: 38, height: 38, borderRadius: 10, border: 'none',
+    position: 'relative', width: '44px', height: '44px', borderRadius: '10px', borderStyle: 'none',
     background: 'transparent', display: 'grid', placeItems: 'center', cursor: 'pointer',
     transition: 'background .15s',
   },
-  sep: { width: 1, height: 22, background: theme.line, margin: '0 8px' },
+  sep: { width: '1px', height: '22px', background: theme.line, margin: '0 8px' },
   avatarBtn: {
-    width: 36, height: 36, borderRadius: '50%', border: `0.5px solid ${theme.card}`,
-    background: theme.teal, cursor: 'pointer', overflow: 'hidden', padding: 0,
+    width: '44px', height: '44px', borderRadius: '50%', border: `0.5px solid ${theme.card}`,
+    background: theme.primary, cursor: 'pointer', overflow: 'hidden', padding: 0,
     display: 'grid', placeItems: 'center',
   },
   avatarImg: { width: '100%', height: '100%', objectFit: 'cover' },
-  avatarFallback: { color: '#fff', fontWeight: 600, fontSize: 15 },
+  avatarFallback: { color: theme.onTeal, fontWeight: 600, fontSize: 15 },
   menu: {
-    position: 'absolute', top: 46, right: 0, width: 'min(240px, calc(100vw - 32px))', background: theme.card,
-    border: `0.5px solid ${theme.line}`, borderRadius: 14, boxShadow: theme.shadowHover,
-    padding: 6, zIndex: 40,
+    position: 'absolute', top: '46px', right: 0, width: 'min(240px, calc(100vw - 32px))', background: theme.card,
+    border: `0.5px solid ${theme.line}`, borderRadius: '14px', boxShadow: theme.shadowHover,
+    padding: '6px', zIndex: 40, maxHeight: 'calc(100vh - 80px)', overflowY: 'auto',
   },
   menuHead: { padding: '10px 12px 12px', borderBottom: `0.5px solid ${theme.line}`, marginBottom: 6 },
   menuName: { fontSize: 13, fontWeight: 700, color: theme.ink },
   menuEmail: { fontSize: 12, color: theme.inkFaint, marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
   menuItem: {
-    display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '9px 12px',
-    borderRadius: 9, border: 'none', background: 'transparent', cursor: 'pointer',
+    display: 'flex', alignItems: 'center', gap: '10px', width: '100%', padding: '9px 12px',
+    borderRadius: '9px', borderStyle: 'none', background: 'transparent', cursor: 'pointer',
     fontSize: 13.5, fontWeight: 500, color: theme.inkSoft, textAlign: 'left', fontFamily: 'inherit',
   },
   menuSep: { height: '0.5px', background: theme.line, margin: '6px 0' },

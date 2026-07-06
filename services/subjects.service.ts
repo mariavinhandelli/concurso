@@ -1,9 +1,9 @@
 // services/subjects.service.ts
-// CRUD de Matérias Base (subjects). Única camada que fala com o Supabase.
+// CRUD de Matérias Base (subjects).
+'use client';
 
-import { createClient } from '@/lib/supabase/client';
+import { requireUser } from '@/lib/supabase/requireUser';
 
-// Formato de uma matéria como vem do banco.
 export interface Subject {
   id: string;
   user_id: string;
@@ -15,96 +15,84 @@ export interface Subject {
   created_at: string;
 }
 
-// Paleta pastel padrão — usada como sugestão ao criar uma matéria.
-export const SUBJECT_COLORS = [
-  '#75f9a5', // verde sálvia
-  '#86d39b',
-  '#0bd8b6',
-  '#5f91bf', // azul névoa
-  '#3892f8',
-  '#ae67ff', // lavanda
-  '#9c3a9f', // rosa antigo
-  '#38134d',
-  '#fe2273',
-  '#da457c', // areia
-  '#ff90b3',
-  '#f85838', // amarelo suave
-  '#771b09',
-  '#ffad6b',
-  '#f5f84e',
-  '#fff9a0',
-];
+export type PickerOption = { id: string; name: string };
 
-// Lista matérias ATIVAS do usuário logado — não inclui arquivadas.
+export { SUBJECT_COLORS } from '@/lib/subject-colors';
+
 export async function listSubjects(): Promise<Subject[]> {
-  const supabase = createClient();
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
-  if (authError || !user) throw new Error('Você precisa estar logado.');
-
+  const { supabase, userId } = await requireUser();
   const { data, error } = await supabase
     .from('subjects')
     .select('*')
-    .eq('user_id', user.id)
+    .eq('user_id', userId)
     .eq('status', 'ativo')
     .order('position', { ascending: true })
     .order('created_at', { ascending: true })
     .limit(200);
-
   if (error) throw new Error('Erro ao listar matérias: ' + error.message);
   return data ?? [];
 }
 
-// Cria uma nova matéria. O user_id é resolvido a partir da sessão.
 export async function createSubject(name: string, color: string): Promise<Subject> {
-  const supabase = createClient();
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
-  if (authError || !user) throw new Error('Você precisa estar logado.');
-
+  const { supabase, userId } = await requireUser();
   const { data, error } = await supabase
     .from('subjects')
-    .insert({ user_id: user.id, name: name.trim(), color })
+    .insert({ user_id: userId, name: name.trim(), color })
     .select()
     .single();
-
   if (error) throw new Error('Erro ao criar matéria: ' + error.message);
   return data;
 }
 
-// Atualiza nome e/ou cor de uma matéria existente.
 export async function updateSubject(
   id: string,
   updates: { name?: string; color?: string },
 ): Promise<Subject> {
-  const supabase = createClient();
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
-  if (authError || !user) throw new Error('Você precisa estar logado.');
-
+  const { supabase, userId } = await requireUser();
   const payload: { name?: string; color?: string } = {};
   if (updates.name !== undefined) payload.name = updates.name.trim();
   if (updates.color !== undefined) payload.color = updates.color;
-
   const { data, error } = await supabase
     .from('subjects')
     .update(payload)
     .eq('id', id)
-    .eq('user_id', user.id)
+    .eq('user_id', userId)
     .select()
     .single();
-
   if (error) throw new Error('Erro ao atualizar matéria: ' + error.message);
   return data;
 }
 
-// Apaga uma matéria. (Os tópicos dela são apagados em cascata pelo banco.)
-export async function deleteSubject(id: string): Promise<void> {
-  const supabase = createClient();
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
-  if (authError || !user) throw new Error('Você precisa estar logado.');
+export async function getSubject(id: string): Promise<Subject | null> {
+  const { supabase, userId } = await requireUser();
+  const { data } = await supabase
+    .from('subjects')
+    .select('*')
+    .eq('id', id)
+    .eq('user_id', userId)
+    .maybeSingle();
+  return data;
+}
 
+export async function listActive(): Promise<{ id: string; name: string }[]> {
+  const { supabase, userId } = await requireUser();
+  const { data, error } = await supabase
+    .from('subjects')
+    .select('id, name')
+    .eq('user_id', userId)
+    .eq('status', 'ativo')
+    .order('name', { ascending: true })
+    .limit(200);
+  if (error) throw new Error('Erro ao carregar matérias: ' + error.message);
+  return data ?? [];
+}
+
+export async function deleteSubject(id: string): Promise<void> {
+  const { supabase, userId } = await requireUser();
   const { error } = await supabase
     .from('subjects')
     .delete()
     .eq('id', id)
-    .eq('user_id', user.id);
+    .eq('user_id', userId);
   if (error) throw new Error('Erro ao apagar matéria: ' + error.message);
 }
