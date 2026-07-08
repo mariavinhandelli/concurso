@@ -6,21 +6,21 @@
 
 import { memo, useCallback, useEffect, useRef, useState, type CSSProperties } from 'react';
 import { useRouter } from 'next/navigation';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTargetList } from '@/hooks/useTargetList';
+import { usePersistedState } from '@/hooks/usePersistedState';
 import { formatTargetLabel, daysUntilExam, countdownInfo } from '@/lib/targets';
-import { type TargetExam } from '@/services/targetExams.service';
+import { type TargetExam, listArchivedTargetExams, unarchiveTargetExam } from '@/services/targetExams.service';
 import { BancoEditaisTab } from '@/components/features/targets/BancoEditaisTab';
 import { ImportarEditalModal } from '@/components/features/targets/ImportarEditalModal';
+import { ArquivarConcursoModal } from '@/components/features/targets/ArquivarConcursoModal';
 import { useToast } from '@/components/ui/ToastProvider';
 import { theme } from '@/lib/theme';
 import { useUI } from '@/components/layout/UIContext';
 
 type Tab = 'meus' | 'banco';
 
-function savedTab(): Tab {
-  if (typeof window === 'undefined') return 'meus';
-  return localStorage.getItem('targets_tab') === 'banco' ? 'banco' : 'meus';
-}
+const parseTab = (v: string | null): Tab => (v === 'banco' ? 'banco' : 'meus');
 
 function ChevronSmall({ open }: { open: boolean }) {
   return (
@@ -41,7 +41,8 @@ export default function TargetsPage() {
     createTarget, setPrimary, promote, deleteTarget, saveDate, addBoard,
   } = useTargetList();
 
-  const [tab, setTab] = useState<Tab>(savedTab);
+  // Aba persistida de forma SSR-safe (sem mismatch de hidratação).
+  const [tab, setTab] = usePersistedState<Tab>('targets_tab', 'meus', parseTab);
   const [showCreate, setShowCreate] = useState(false);
   const [importarOpen, setImportarOpen] = useState(false);
 
@@ -57,12 +58,35 @@ export default function TargetsPage() {
   const [promotingTarget, setPromotingTarget] = useState<TargetExam | null>(null);
   const [promoteBoardId, setPromoteBoardId] = useState('');
 
+  // ── M11: arquivamento de concurso ──
+  const queryClient = useQueryClient();
+  const [archivingTarget, setArchivingTarget] = useState<TargetExam | null>(null);
+  const [showArchived, setShowArchived] = useState(false);
+  const { data: archivedList = [] } = useQuery<TargetExam[]>({
+    queryKey: ['target-exams-archived'],
+    queryFn: listArchivedTargetExams,
+  });
+
+  const refreshTargetViews = useCallback(() => {
+    load(); // recarrega os ativos (useTargetList)
+    for (const key of [['target-exams'], ['target-exams-archived'], ['edital-coverage'], ['raiox']]) {
+      queryClient.invalidateQueries({ queryKey: key });
+    }
+  }, [load, queryClient]);
+
+  async function handleRestore(t: TargetExam) {
+    try {
+      await unarchiveTargetExam(t.id);
+      refreshTargetViews();
+      toast.success('Concurso restaurado.');
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'Erro ao restaurar concurso.');
+    }
+  }
+
   useEffect(() => { load(); }, [load]);
 
-  const handleTabChange = useCallback((t: Tab) => {
-    setTab(t);
-    localStorage.setItem('targets_tab', t);
-  }, []);
+  const handleTabChange = useCallback((t: Tab) => { setTab(t); }, [setTab]);
 
   async function handleCreateBoard() {
     if (!newBoardName.trim()) return;
@@ -283,15 +307,43 @@ export default function TargetsPage() {
                     onSetPrimary={() => setPrimary(t.id, t.is_primary)}
                     onOpen={() => router.push(`/targets/${t.id}`)}
                     onPromote={() => handlePromote(t)}
+                    onArchive={() => setArchivingTarget(t)}
                     onDelete={() => deleteTarget(t.id)}
                     onSaveDate={(date) => saveDate(t.id, date)}
                   />
                 ))}
               </div>
             )}
+
+            {archivedList.length > 0 && (
+              <div style={s.archivedWrap}>
+                <button onClick={() => setShowArchived((v) => !v)} style={s.archivedToggle}>
+                  <ChevronSmall open={showArchived} />
+                  Arquivados ({archivedList.length})
+                </button>
+                {showArchived && (
+                  <div style={s.archivedList}>
+                    {archivedList.map((t) => (
+                      <div key={t.id} style={s.archivedRow}>
+                        <span style={s.archivedName}>{formatTargetLabel(t)}</span>
+                        <button onClick={() => handleRestore(t)} style={s.restoreBtn}>Restaurar</button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
           </>
         )}
       </div>
+
+      {archivingTarget && (
+        <ArquivarConcursoModal
+          target={{ id: archivingTarget.id, label: formatTargetLabel(archivingTarget) }}
+          onClose={() => setArchivingTarget(null)}
+          onArchived={() => { setArchivingTarget(null); refreshTargetViews(); }}
+        />
+      )}
 
       {importarOpen && (
         <ImportarEditalModal
@@ -328,12 +380,13 @@ interface TargetRowProps {
   onSetPrimary: () => void;
   onOpen: () => void;
   onPromote: () => void;
+  onArchive: () => void;
   onDelete: () => void;
   onSaveDate: (date: string | null) => Promise<void>;
 }
 
 const TargetRow = memo(function TargetRow({
-  target: t, topicCount, isMobile, onSetPrimary, onOpen, onPromote, onDelete, onSaveDate,
+  target: t, topicCount, isMobile, onSetPrimary, onOpen, onPromote, onArchive, onDelete, onSaveDate,
 }: TargetRowProps) {
   const days = t.exam_date ? daysUntilExam(t.exam_date) : null;
   const cd = days !== null ? countdownInfo(days) : null;
@@ -461,6 +514,18 @@ const TargetRow = memo(function TargetRow({
           </svg>
         </button>
         <button
+          onClick={onArchive}
+          style={{ ...s.iconBtn, background: iconHover === 'arch' ? theme.muted : 'transparent' }}
+          onMouseEnter={() => setIconHover('arch')}
+          onMouseLeave={() => setIconHover(null)}
+          title="Arquivar concurso"
+          aria-label="Arquivar concurso"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={theme.inkSoft} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="3" y="4" width="18" height="4" rx="1" /><path d="M5 8v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8M10 12h4" />
+          </svg>
+        </button>
+        <button
           onClick={onDelete}
           style={{ ...s.iconBtn, background: iconHover === 'del' ? theme.dangerBg : 'transparent' }}
           onMouseEnter={() => setIconHover('del')}
@@ -525,6 +590,13 @@ const s: Record<string, CSSProperties> = {
   emptyCta: { padding: '10px 20px', borderRadius: theme.radiusSm, border: `1px solid ${theme.teal}`, background: theme.tealBg, color: theme.teal, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
 
   list: { display: 'flex', flexDirection: 'column', gap: 8 },
+
+  archivedWrap: { marginTop: 20, paddingTop: 14, borderTop: `0.5px solid ${theme.line}` },
+  archivedToggle: { display: 'flex', alignItems: 'center', gap: 8, background: 'transparent', border: 'none', color: theme.inkSoft, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', padding: '2px 0' },
+  archivedList: { display: 'flex', flexDirection: 'column', gap: 6, marginTop: 10 },
+  archivedRow: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, padding: '10px 14px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.bg, minWidth: 0 },
+  archivedName: { fontSize: 13.5, color: theme.inkSoft, fontWeight: 500, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
+  restoreBtn: { flexShrink: 0, padding: '6px 14px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.teal}`, background: theme.tealBg, color: theme.teal, fontSize: 12.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
   targetRow: { display: 'flex', alignItems: 'center', gap: 12, background: theme.card, borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, padding: '12px 14px', transition: 'border-color .15s, box-shadow .15s', minWidth: 0 },
   starBtn: { border: 'none', background: 'transparent', cursor: 'pointer', padding: 4, display: 'flex', alignItems: 'center', flexShrink: 0 },
   targetMain: { flex: 1, display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', cursor: 'pointer', minWidth: 0 },

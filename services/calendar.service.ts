@@ -80,6 +80,7 @@ export async function listEvents(startDate: string, endDate: string): Promise<Ca
     .from('target_exams')
     .select('id, orgao, cargo, board_id, exam_date')
     .eq('user_id', user.id)
+    .is('archived_at', null) // M11: provas de concursos arquivados somem do calendário
     .not('exam_date', 'is', null)
     .gte('exam_date', startDate)
     .lte('exam_date', endDate);

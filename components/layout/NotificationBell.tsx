@@ -117,7 +117,7 @@ export function NotificationBell() {
                   style={styles.item}
                   onClick={() => {
                     setOpen(false);
-                    router.push('/calendar');
+                    router.push('/schedule?view=mes');
                   }}
                 >
                   <span style={styles.dot} />

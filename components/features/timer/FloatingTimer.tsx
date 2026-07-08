@@ -154,6 +154,13 @@ export function FloatingTimer() {
         <span style={{ ...styles.pillDot, background: timer.isRunning ? theme.tealSoft : theme.clay }} />
         {timer.isRunning ? 'em andamento' : 'pausado'}
       </div>
+      <button
+        onClick={() => window.dispatchEvent(new CustomEvent('focali:open-focus'))}
+        style={styles.focusBtn}
+      >
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2" /></svg>
+        Modo foco
+      </button>
       <div style={styles.cardActions}>
         {timer.isRunning ? (
           <button onClick={timer.pause} style={styles.secondary}>Pausar</button>
@@ -201,6 +208,7 @@ const styles: Record<string, React.CSSProperties> = {
   collapseBtn: { border: 'none', background: 'transparent', color: theme.inkFaint, cursor: 'pointer', padding: 0, display: 'grid', placeItems: 'center' },
   cardTime: { fontSize: 34, fontWeight: 500, color: theme.ink, fontVariantNumeric: 'tabular-nums', letterSpacing: -1, lineHeight: 1 },
   cardStatus: { display: 'flex', alignItems: 'center', gap: 7, fontSize: 12, color: theme.inkSoft, margin: '8px 0 14px' },
+  focusBtn: { display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, width: '100%', padding: '9px 0', marginBottom: 8, borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.card, color: theme.inkSoft, fontSize: 12.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
   cardActions: { display: 'flex', gap: 8 },
   secondary: { flex: 1, padding: '9px 0', borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.card, color: theme.inkSoft, fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' },
   primary: { flex: 1, padding: '9px 0', borderRadius: theme.radiusSm, border: 'none', background: theme.teal, color: theme.onTeal, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },

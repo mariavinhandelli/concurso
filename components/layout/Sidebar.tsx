@@ -33,28 +33,19 @@ const NAV: NavItem[] = [
   { href: '/', label: 'Home', icon: <path d="m2 8l9.732-4.866a.6.6 0 0 1 .536 0L22 8m-2 3v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8" /> },
 
   { type: 'sep', label: 'Estudar hoje' },
-  { href: '/reviews', label: 'Revisões', icon: <path d="M4 12a8 8 0 0113-6.2L20 8M20 4v4h-4M20 12a8 8 0 01-13 6.2L4 16M4 20v-4h4" /> },
+  { href: '/revisar', label: 'Revisões', icon: <path d="M4 12a8 8 0 0113-6.2L20 8M20 4v4h-4M20 12a8 8 0 01-13 6.2L4 16M4 20v-4h4" /> },
   { href: '/flashcards', label: 'Flashcards', icon: <path d="m21 12l-9 4l-9-4m18 4l-9 4l-9-4m18-8l-9 4l-9-4l9-4z" /> },
 
   { type: 'sep', label: 'Organizar' },
   {
     href: '/schedule',
-    label: 'Cronograma',
+    label: 'Agenda',
     icon: (
       <>
         <path d="M11 21H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v7" />
         <path strokeLinejoin="round" d="M2 7h20M5 5.01l.01-.011M8 5.01l.01-.011M11 5.01l.01-.011m10.657 11.668C21.047 15.097 19.635 14 17.99 14c-1.758 0-3.252 1.255-3.793 3" />
         <path strokeLinejoin="round" d="M19.995 16.772H21.4a.6.6 0 0 0 .6-.6V14.55m-7.666 4.783C14.953 20.903 16.366 22 18.01 22c1.758 0 3.252-1.255 3.793-3" />
         <path strokeLinejoin="round" d="M16.005 19.228H14.6a.6.6 0 0 0-.6.6v1.622" />
-      </>
-    )
-  },
-  { href: '/calendar',
-    label: 'Calendário',
-    icon: (
-      <>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 3.75H2.25a1.5 1.5 0 0 0-1.5 1.5v16.5a1.5 1.5 0 0 0 1.5 1.5h19.5a1.5 1.5 0 0 0 1.5-1.5V5.25a1.5 1.5 0 0 0-1.5-1.5m-21 6h22.5M6.75 6V.75M17.25 6V.75"></path>
-        <path d="M5.625 14.25a.375.375 0 0 1 0-.75m0 .75a.375.375 0 0 0 0-.75m0 6a.375.375 0 0 1 0-.75m0 .75a.375.375 0 0 0 0-.75M12 14.25a.375.375 0 0 1 0-.75m0 .75a.375.375 0 0 0 0-.75m0 6a.375.375 0 0 1 0-.75m0 .75a.375.375 0 0 0 0-.75m6.375-4.5a.375.375 0 0 1 0-.75m0 .75a.375.375 0 0 0 0-.75m0 6a.375.375 0 0 1 0-.75m0 .75a.375.375 0 0 0 0-.75"></path>
       </>
     )
   },
@@ -69,7 +60,6 @@ const NAV: NavItem[] = [
   { href: '/jurisprudencias', label: 'Jurisprudências', icon: <><path d="M3 6h18M3 12h18M3 18h12" /><circle cx="19" cy="18" r="3" /><path d="M21 20.5L22.5 22" /></> },
   { href: '/vademecum', label: 'Vade Mecum', icon: <><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" /><path d="M9 7h6M9 10.5h4" /></> },
   { href: '/caderno', label: 'Caderno', icon: <><path d="M12 20h9" /><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" /></> },
-  { href: '/notebook', label: 'Cadernos de Erros', icon: <path d="M5 20.25c0 .414.336.75.75.75h10.652C17.565 21 18 20.635 18 19.4v-1.445M5 20.25A2.25 2.25 0 0 1 7.25 18h10.152q.339 0 .598-.045M5 20.25V6.2c0-1.136-.072-2.389 1.092-2.982C6.52 3 7.08 3 8.2 3h9.2c1.236 0 1.6.437 1.6 1.6v11.8c0 .995-.282 1.425-1 1.555M10 8l4 4m0-4l-4 4" /> },
 
   { type: 'sep', label: 'Progresso' },
   { href: '/performance', label: 'Performance', icon: <path d="M15 9.429V5a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v8.286m6-3.857V21m0-11.571h4a2 2 0 0 1 2 2V19a2 2 0 0 1-2 2h-4m0 0H9m0 0v-7.714M9 21H5a2 2 0 0 1-2-2v-3.714a2 2 0 0 1 2-2h4" /> },

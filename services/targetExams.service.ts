@@ -53,6 +53,7 @@ export async function listTargetExams(): Promise<TargetExam[]> {
     .from('target_exams')
     .select('id, user_id, board_id, orgao, cargo, ano_alvo, exam_date, slug, is_primary, phase, catalog_edital_id, created_at')
     .eq('user_id', userId)
+    .is('archived_at', null) // M11: concursos arquivados somem de countdown/cobertura/lista ativa
     .order('is_primary', { ascending: false })
     .order('created_at', { ascending: true });
   if (error) throw new Error('Erro ao listar concursos-alvo: ' + error.message);
@@ -153,4 +154,47 @@ export async function deleteTargetExam(targetExamId: string): Promise<void> {
     .eq('id', targetExamId)
     .eq('user_id', userId);
   if (error) throw new Error('Erro ao excluir concurso-alvo: ' + error.message);
+}
+
+// ── M11: arquivamento (não-destrutivo, reversível via archived_at) ──────────
+
+export async function listArchivedTargetExams(): Promise<TargetExam[]> {
+  const { supabase, userId } = await requireUser();
+  const { data, error } = await supabase
+    .from('target_exams')
+    .select('id, user_id, board_id, orgao, cargo, ano_alvo, exam_date, slug, is_primary, phase, catalog_edital_id, created_at')
+    .eq('user_id', userId)
+    .not('archived_at', 'is', null)
+    .order('created_at', { ascending: false });
+  if (error) throw new Error('Erro ao listar concursos arquivados: ' + error.message);
+
+  const { data: boards } = await supabase.from('exam_boards').select('id, name').eq('user_id', userId);
+  const boardMap: Record<string, string> = {};
+  for (const b of boards ?? []) boardMap[b.id] = b.name;
+
+  return (data ?? []).map((row) => ({
+    ...row,
+    boardName: row.board_id ? boardMap[row.board_id] ?? null : null,
+  })) as TargetExam[];
+}
+
+// Arquiva o concurso (não apaga). Deixa de ser primário para sumir do countdown.
+export async function archiveTargetExam(id: string): Promise<void> {
+  const { supabase, userId } = await requireUser();
+  const { error } = await supabase
+    .from('target_exams')
+    .update({ archived_at: new Date().toISOString(), is_primary: false })
+    .eq('id', id)
+    .eq('user_id', userId);
+  if (error) throw new Error('Erro ao arquivar concurso: ' + error.message);
+}
+
+export async function unarchiveTargetExam(id: string): Promise<void> {
+  const { supabase, userId } = await requireUser();
+  const { error } = await supabase
+    .from('target_exams')
+    .update({ archived_at: null })
+    .eq('id', id)
+    .eq('user_id', userId);
+  if (error) throw new Error('Erro ao restaurar concurso: ' + error.message);
 }

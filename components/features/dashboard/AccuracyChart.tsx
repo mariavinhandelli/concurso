@@ -4,12 +4,18 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   getAccuracyBySubject, type AccuracyPoint,
 } from '@/services/accuracyReports.service';
 import { theme, perfColor } from '@/lib/theme';
+import { PerfInsight } from './PerfInsight';
+
+// Abaixo disso a matéria precisa de atenção (mesma régua do perfColor: <65%).
+const LIMIAR_ATENCAO = 65;
 
 export function AccuracyChart() {
+  const router = useRouter();
   const [data, setData] = useState<AccuracyPoint[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -18,6 +24,9 @@ export function AccuracyChart() {
       .then(setData)
       .finally(() => setLoading(false));
   }, []);
+
+  // data já vem ordenada da menor taxa para a maior.
+  const pior = data[0] ?? null;
 
   return (
     <div style={styles.wrap}>
@@ -52,6 +61,23 @@ export function AccuracyChart() {
             );
           })}
         </div>
+      )}
+
+      {/* Insight acionável: aponta a matéria mais fraca e leva direto a ela. */}
+      {!loading && pior && (
+        pior.pct < LIMIAR_ATENCAO ? (
+          <PerfInsight
+            tone="warn"
+            cta={{ label: `Reforçar ${pior.subjectName}`, onClick: () => router.push(`/subjects/${pior.subjectId}`) }}
+          >
+            <b>{pior.subjectName}</b> é sua menor taxa ({pior.pct}%). Reforçar aqui rende
+            mais que praticar o que você já domina.
+          </PerfInsight>
+        ) : (
+          <PerfInsight tone="ok">
+            Nenhuma matéria crítica — a menor está em {pior.pct}%. Bom equilíbrio, siga mantendo.
+          </PerfInsight>
+        )
       )}
     </div>
   );

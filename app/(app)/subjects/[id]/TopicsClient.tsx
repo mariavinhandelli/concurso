@@ -10,6 +10,7 @@ import { useTopics } from '@/hooks/useTopics';
 import { TopicLeafRow } from '@/components/features/subjects/TopicLeafRow';
 import { TopicFolderRow } from '@/components/features/subjects/TopicFolderRow';
 import { TopicNotesPopover } from '@/components/features/subjects/TopicNotesPopover';
+import { pushRecent } from '@/lib/recents';
 import { theme } from '@/lib/theme';
 import type { Subject } from '@/services/subjects.service';
 import type { Topic } from '@/services/topics.service';
@@ -48,6 +49,11 @@ export function TopicsClient({ subjectId, initialSubject }: Props) {
   const router = useRouter();
   const { isMobile } = useUI();
   const { confirm, dialog } = useConfirm();
+
+  // M12: registra a matéria nos "recentes" (client-side).
+  useEffect(() => {
+    pushRecent({ kind: 'subject', id: subjectId, label: initialSubject.name, href: `/subjects/${subjectId}` });
+  }, [subjectId, initialSubject.name]);
 
   const {
     topics, saudeMap, noteCountMap, refreshNoteCounts, loading, error,

@@ -14,6 +14,7 @@ import { EstrelasBadge } from '@/components/features/jurisprudencias/EstrelasBad
 import { useToast } from '@/components/ui/ToastProvider';
 import { useConfirm } from '@/hooks/useConfirm';
 import { useUI } from '@/components/layout/UIContext';
+import { pushRecent } from '@/lib/recents';
 import { theme } from '@/lib/theme';
 
 const INCIDENCIA_LABEL: Record<string, string> = {
@@ -77,6 +78,17 @@ export default function JurisprudenciaPage() {
   }, [id, router, toast]);
 
   useEffect(() => { load(); }, [load]);
+
+  // M12: registra o julgado nos "recentes" (client-side) quando carrega.
+  useEffect(() => {
+    if (!item) return;
+    pushRecent({
+      kind: 'juris', id,
+      label: item.titulo || `${item.disciplina}${item.materia ? ` · ${item.materia}` : ''}`,
+      sublabel: item.tribunal,
+      href: `/jurisprudencias/${id}`,
+    });
+  }, [item, id]);
 
   async function handleSave(data: JurisprudenciaInput) {
     setSaving(true);

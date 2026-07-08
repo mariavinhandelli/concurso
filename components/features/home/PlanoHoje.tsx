@@ -126,12 +126,8 @@ export const PlanoHoje = memo(function PlanoHoje() {
         jurisDueCount > 0 ? `${jurisDueCount} de jurisprudência` : null,
       ].filter(Boolean).join(' · ') + ` · ~${(revisoes ?? 0) * 3 + leiDueCount * 2 + jurisDueCount * 2} min`;
 
-  // Se não há revisão de tópico pendente, o passo leva direto para a fila
-  // que tem itens (lei seca ou jurisprudência) — não faz sentido abrir /reviews vazio.
-  const revisarHref = (revisoes ?? 0) > 0 ? '/reviews'
-    : leiDueCount > 0 ? '/vademecum/revisar'
-    : jurisDueCount > 0 ? '/jurisprudencias/revisar'
-    : '/reviews';
+  // Fila Única de Revisão: tópicos, lei seca e jurisprudência num só player.
+  const revisarHref = '/revisar';
 
   const fcSub = flashcards === undefined ? '…'
     : flashcards > 0 ? `${flashcards} na fila · ~${Math.ceil(flashcards * 1.5)} min`

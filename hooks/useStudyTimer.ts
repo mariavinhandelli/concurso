@@ -29,6 +29,14 @@ export interface StartParams {
   boardId?: string | null;
 }
 
+// Descrição da sessão ativa — exposta para UIs de contexto (Modo Foco, timer).
+export interface ActiveSession {
+  mode: LogMode;
+  topicId: string | null;
+  subjectId: string | null;
+  boardId: string | null;
+}
+
 const TICK_MS = 1000;
 
 function formatHMS(totalSec: number): string {
@@ -43,6 +51,7 @@ export function useStudyTimer() {
   const [status, setStatus] = useState<TimerStatus>('idle');
   const [elapsedSec, setElapsedSec] = useState(0);
   const [pendingSession, setPendingSession] = useState<PendingSession | null>(null);
+  const [active, setActive] = useState<ActiveSession | null>(null);
 
   const timerRef = useRef<PersistedTimer | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -77,6 +86,7 @@ export function useStudyTimer() {
     stopTicking();
     timerRef.current = null;
     setPendingSession(null);
+    setActive(null);
     setElapsedSec(0);
     setStatus('idle');
   }, [stopTicking]);
@@ -116,6 +126,7 @@ export function useStudyTimer() {
       const restored = loadTimer(newUid);
       if (restored) {
         timerRef.current = restored;
+        setActive({ mode: restored.mode, topicId: restored.topicId, subjectId: restored.subjectId, boardId: restored.boardId });
         const paused = isPausedFn(restored);
         setStatus(paused ? 'paused' : 'running');
         syncElapsed();
@@ -150,6 +161,7 @@ export function useStudyTimer() {
         // Outra aba limpou o timer (stop/abandon).
         stopTicking();
         timerRef.current = null;
+        setActive(null);
         setStatus('idle');
         setElapsedSec(0);
         return;
@@ -162,6 +174,7 @@ export function useStudyTimer() {
         ) {
           const parsed = updated as PersistedTimer;
           timerRef.current = parsed;
+          setActive({ mode: parsed.mode, topicId: parsed.topicId, subjectId: parsed.subjectId, boardId: parsed.boardId });
           const paused = isPausedFn(parsed);
           setStatus(paused ? 'paused' : 'running');
           syncElapsed();
@@ -187,6 +200,7 @@ export function useStudyTimer() {
       };
       timerRef.current = state;
       saveTimer(state);
+      setActive({ mode, topicId, subjectId, boardId });
       setElapsedSec(0);
       setStatus('running');
       startTicking();
@@ -251,6 +265,7 @@ export function useStudyTimer() {
     const uid = userIdRef.current;
     if (uid) clearPendingSession(uid);
     setPendingSession(null);
+    setActive(null);
     setElapsedSec(0);
     setStatus('idle');
   }, []);
@@ -269,6 +284,7 @@ export function useStudyTimer() {
       clearPendingSession(uid);
     }
     setPendingSession(null);
+    setActive(null);
     setElapsedSec(0);
     setStatus('idle');
   }, [stopTicking]);
@@ -280,6 +296,7 @@ export function useStudyTimer() {
     isRunning: status === 'running',
     isPaused: status === 'paused',
     pendingSession,
+    active,
     start, pause, resume, stop, discardPending, abandon,
   };
 }

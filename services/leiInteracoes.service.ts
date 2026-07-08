@@ -164,3 +164,16 @@ export async function countRevisoesDue(): Promise<number> {
   if (error) return 0;
   return count ?? 0;
 }
+
+// M12: artigos favoritados (chave 'slug:numero') — para os Favoritos globais do palette.
+export async function listFavoriteLeiArtigos(): Promise<{ artigoKey: string }[]> {
+  const { supabase, userId } = await requireUser();
+  const { data, error } = await supabase
+    .from('lei_interacoes')
+    .select('artigo_key')
+    .eq('user_id', userId)
+    .eq('favorito', true)
+    .order('updated_at', { ascending: false });
+  if (error) return [];
+  return (data ?? []).map((r) => ({ artigoKey: r.artigo_key as string }));
+}

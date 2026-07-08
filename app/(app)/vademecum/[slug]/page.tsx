@@ -15,6 +15,7 @@ import { MapaIncidencia } from '@/components/features/vademecum/MapaIncidencia';
 import { QuestoesBanco } from '@/components/features/vademecum/QuestoesBanco';
 import { useUI } from '@/components/layout/UIContext';
 import { useToast } from '@/components/ui/ToastProvider';
+import { pushRecent } from '@/lib/recents';
 import { theme } from '@/lib/theme';
 
 type Aba = 'texto' | 'mapa' | 'questoes';
@@ -52,7 +53,12 @@ export default function LeiReaderPage() {
   useEffect(() => {
     let cancelled = false;
     getLei(slug)
-      .then((l) => { if (!cancelled) setLei(l); })
+      .then((l) => {
+        if (cancelled) return;
+        setLei(l);
+        // M12: registra a lei nos "recentes" (client-side).
+        pushRecent({ kind: 'lei', id: slug, label: l.nomeCurto, sublabel: l.nome, href: `/vademecum/${slug}` });
+      })
       .catch((e) => { if (!cancelled) setErro(e instanceof Error ? e.message : 'Erro ao carregar a lei.'); });
     listInteracoesByLei(slug)
       .then((m) => { if (!cancelled) setInteracoes(m); })

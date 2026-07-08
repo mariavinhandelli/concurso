@@ -5,6 +5,7 @@
 import { createClient } from '@/lib/supabase/client';
 
 export interface AccuracyPoint {
+  subjectId: string;   // para ações (reforçar / abrir a matéria)
   subjectName: string;
   total: number;       // questões feitas na matéria
   correct: number;     // acertos
@@ -55,6 +56,7 @@ export async function getAccuracyBySubject(): Promise<AccuracyPoint[]> {
   for (const [subjectId, { total, correct }] of agg.entries()) {
     const info = subjectMap.get(subjectId);
     points.push({
+      subjectId,
       subjectName: info?.name ?? 'Matéria',
       total,
       correct,

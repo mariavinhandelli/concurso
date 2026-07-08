@@ -4,18 +4,19 @@ import { Suspense, useEffect, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useRouter } from 'next/navigation';
 import { theme } from '@/lib/theme';
+import { usePersistedState } from '@/hooks/usePersistedState';
 import { useUI } from '@/components/layout/UIContext';
 import { useUser } from '@/components/layout/UserContext';
 import { useTimer } from '@/components/features/timer/TimerContext';
-import { StreakBar } from '@/components/features/streak/StreakBar';
+import { SemanaPanel } from '@/components/features/home/SemanaPanel';
 import { OnboardingGate } from '@/components/features/home/OnboardingWizard';
+import { RetaFinalCard } from '@/components/features/home/RetaFinalCard';
+import { RetomadaCard } from '@/components/features/home/RetomadaCard';
 import { PlanoHoje } from '@/components/features/home/PlanoHoje';
 import { TodayBlock } from '@/components/features/home/TodayBlock';
 import { CoberturaEdital } from '@/components/features/home/CoberturaEdital';
 import { MarcoEditalCelebracao } from '@/components/features/home/MarcoEditalCelebracao';
 import { RaioXCard } from '@/components/features/home/RaioXCard';
-import { MissoesSemana } from '@/components/features/home/MissoesSemana';
-import { CoachSemanal } from '@/components/features/home/CoachSemanal';
 import { UltimaNotaCard } from '@/components/features/home/UltimaNotaCard';
 import { TimePieCard } from '@/components/features/home/TimePieCard';
 import { JourneyStats } from '@/components/features/home/JourneyStats';
@@ -41,10 +42,42 @@ function TimerAutoStart() {
   return null;
 }
 
+// Rótulo de zona: estrutura a Home em blocos mentais ("Agora", "Esta semana",
+// "Panorama") em vez de uma pilha única de cards. O "Panorama" é colapsável.
+function ZoneHeader({
+  label, hint, collapsible, open, onToggle,
+}: {
+  label: string;
+  hint?: string;
+  collapsible?: boolean;
+  open?: boolean;
+  onToggle?: () => void;
+}) {
+  const inner = (
+    <>
+      <span style={zoneStyles.label}>{label}</span>
+      {hint && <span style={zoneStyles.hint}>{hint}</span>}
+      {collapsible && (
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={theme.inkFaint} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: 'auto', transition: 'transform .2s', transform: open ? 'rotate(180deg)' : 'none' }}><path d="M6 9l6 6 6-6" /></svg>
+      )}
+    </>
+  );
+  if (collapsible) {
+    return <button onClick={onToggle} style={zoneStyles.headerBtn} aria-expanded={open}>{inner}</button>;
+  }
+  return <div style={zoneStyles.header}>{inner}</div>;
+}
+
 function HomeContent() {
   const router = useRouter();
   const { name: nome } = useUser();
   const { isMobile } = useUI();
+
+  // "Panorama" começa recolhido (reduz a rolagem diária) e a preferência persiste.
+  const [panorama, setPanorama] = usePersistedState<'open' | 'closed'>(
+    'home:panorama', 'closed', (v) => (v === 'open' ? 'open' : 'closed'),
+  );
+  const panoramaOpen = panorama === 'open';
 
   // Pré-carrega as rotas mais acessadas a partir da Home para navegação instantânea.
   useEffect(() => {
@@ -81,39 +114,50 @@ function HomeContent() {
         </div>
       </div>
 
-      <CoachSemanal />
+      <RetaFinalCard />
 
+      <RetomadaCard />
+
+      {/* ── ZONA 1 · Agora — o que fazer neste momento ── */}
+      <ZoneHeader label="Agora" />
       <PlanoHoje />
-
       <div style={{ marginTop: 16 }}>
         <TodayBlock />
       </div>
 
-      <div style={{ marginTop: 16 }}>
-        <UltimaNotaCard />
+      {/* ── ZONA 2 · Esta semana — streak (laço central) + missões + coach num só painel ── */}
+      <div style={{ marginTop: 28 }}>
+        <ZoneHeader label="Esta semana" />
       </div>
+      <SemanaPanel />
 
-      <div style={{ marginTop: 16 }}>
-        <CoberturaEdital />
+      {/* ── ZONA 3 · Panorama — progresso e estatísticas (colapsável) ── */}
+      <div style={{ marginTop: 28 }}>
+        <ZoneHeader
+          label="Panorama"
+          hint={panoramaOpen ? undefined : 'progresso, cobertura e estatísticas'}
+          collapsible
+          open={panoramaOpen}
+          onToggle={() => setPanorama(panoramaOpen ? 'closed' : 'open')}
+        />
       </div>
-
-      <div style={{ marginTop: 16 }}>
-        <RaioXCard />
-      </div>
-
-      <div style={{ marginTop: 16 }}>
-        <MissoesSemana />
-      </div>
-
-      <div style={{ ...styles.streakStrip, marginBottom: 16, marginTop: 16 }}>
-        <StreakBar />
-      </div>
-
-      <TimePieCard />
-
-      <div style={{ marginTop: 16 }}>
-        <JourneyStats />
-      </div>
+      {panoramaOpen && (
+        <div style={{ marginTop: 4 }}>
+          <CoberturaEdital />
+          <div style={{ marginTop: 16 }}>
+            <RaioXCard />
+          </div>
+          <div style={{ marginTop: 16 }}>
+            <UltimaNotaCard />
+          </div>
+          <div style={{ marginTop: 16 }}>
+            <TimePieCard />
+          </div>
+          <div style={{ marginTop: 16 }}>
+            <JourneyStats />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -128,5 +172,11 @@ const styles: Record<string, React.CSSProperties> = {
   h1: { fontSize: 28, fontWeight: 800, color: theme.ink, letterSpacing: -0.6, margin: 0 },
   sub: { fontSize: 14, color: theme.inkSoft, margin: '4px 0 0', fontWeight: 500 },
   countdownSlot: { flexShrink: 0, minWidth: 0 },
-  streakStrip: { background: theme.card, border: `0.5px solid ${theme.line}`, borderRadius: theme.radius, boxShadow: theme.shadow, padding: 16, marginBottom: 16, minWidth: 0 },
+};
+
+const zoneStyles: Record<string, React.CSSProperties> = {
+  header: { display: 'flex', alignItems: 'center', gap: 10, padding: '0 2px 10px' },
+  headerBtn: { display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '2px 2px 10px', background: 'transparent', border: 'none', cursor: 'pointer', fontFamily: theme.font, textAlign: 'left' },
+  label: { fontSize: 12, fontWeight: 700, letterSpacing: 0.8, textTransform: 'uppercase', color: theme.inkSoft, flexShrink: 0 },
+  hint: { fontSize: 12.5, color: theme.inkFaint, fontWeight: 500, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
 };

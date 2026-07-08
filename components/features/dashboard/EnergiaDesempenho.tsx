@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell, Tooltip } from 'recharts';
 import { getEnergiaDesempenho, type EnergiaPonto } from '@/services/performance.service';
 import { theme } from '@/lib/theme';
+import { PerfInsight } from './PerfInsight';
 
 const ENERGIA_LABEL: Record<number, string> = {
   1: 'Muito baixa',
@@ -29,6 +30,15 @@ export function EnergiaDesempenho() {
     acerto: p.acertoMedio,
     sessoes: p.sessoes,
   }));
+
+  // Leitura acionável: compara onde você mais e menos rende (níveis com sinal
+  // suficiente) e vira uma recomendação de quando encarar o conteúdo difícil.
+  const comSinal = pontos.filter((p) => p.sessoes >= 2);
+  const melhor = comSinal.reduce<EnergiaPonto | null>((a, p) => (!a || p.acertoMedio > a.acertoMedio ? p : a), null);
+  const pior = comSinal.reduce<EnergiaPonto | null>((a, p) => (!a || p.acertoMedio < a.acertoMedio ? p : a), null);
+  const insight = melhor && pior && melhor.energia !== pior.energia && (melhor.acertoMedio - pior.acertoMedio) >= 8
+    ? { melhor, pior, gap: melhor.acertoMedio - pior.acertoMedio }
+    : null;
 
   return (
     <div>
@@ -89,6 +99,13 @@ export function EnergiaDesempenho() {
             <p style={styles.poucos}>
               Com mais níveis de energia registrados, dá pra comparar onde você rende melhor.
             </p>
+          )}
+          {insight && (
+            <PerfInsight tone="info">
+              Você acerta <b>{insight.melhor.acertoMedio}%</b> com energia {(ENERGIA_LABEL[insight.melhor.energia] ?? '').toLowerCase()},
+              contra <b>{insight.pior.acertoMedio}%</b> com {(ENERGIA_LABEL[insight.pior.energia] ?? '').toLowerCase()}.
+              Deixe as matérias mais difíceis para os seus horários de pico.
+            </PerfInsight>
           )}
         </>
       )}

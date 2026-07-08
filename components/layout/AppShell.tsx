@@ -7,6 +7,7 @@ import type { ReactNode } from 'react';
 import { Sidebar } from './Sidebar';
 import { Topbar } from './Topbar';
 import { useUI } from './UIContext';
+import { CommandPalette } from '@/components/features/command/CommandPalette';
 import { theme } from '@/lib/theme';
 
 export function AppShell({ children }: { children: ReactNode }) {
@@ -51,6 +52,8 @@ export function AppShell({ children }: { children: ReactNode }) {
         <Topbar />
         <main style={{ flex: 1, minWidth: 0 }}>{children}</main>
       </div>
+
+      <CommandPalette />
     </div>
   );
 }

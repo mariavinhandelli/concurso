@@ -4,7 +4,7 @@
 // anotações pessoais e toggle de revisão espaçada.
 'use client';
 
-import { memo, useRef, useState, type CSSProperties } from 'react';
+import { memo, useEffect, useRef, useState, type CSSProperties } from 'react';
 import type { LeiArtigo } from '@/services/leis.service';
 import {
   addGrifo, removeGrifo, saveAnotacaoArtigo,
@@ -63,30 +63,59 @@ export const ArtigoCard = memo(function ArtigoCard({ artigo, interacao, onUpdate
   const revisaoVencida = emRevisao && isJurisDue(interacao?.next_review_date ?? null);
 
   // ── Seleção → barra de marcação ──────────────────────────────────────────
-  function handleMouseUp(e: React.MouseEvent) {
-    setPopover(null);
-    if (!rootRef.current) { setPendingSel(null); return; }
+  // Ouve `selectionchange` (dispara no mouse E no toque, ao contrário de
+  // `mouseup`, que nunca acontece ao selecionar por toque no tablet/mobile),
+  // com debounce para esperar a seleção assentar. Cada card só trata a seleção
+  // que começou dentro dele (âncora contida na raiz), evitando duas barras
+  // quando um trecho cruza dois artigos. A barra é posicionada pelo retângulo
+  // da própria seleção — não há coordenadas de mouse em toque.
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout> | undefined;
 
-    const resultado = findBlocoSelecionado(rootRef.current);
-    if (!resultado.ok) {
-      setPendingSel(null);
-      if (resultado.reason === 'multiplos') {
-        toast.info('Selecione um trecho dentro de um mesmo dispositivo (caput, parágrafo ou inciso).');
+    function processarSelecao() {
+      const root = rootRef.current;
+      if (!root) return;
+
+      const sel = window.getSelection();
+      if (!sel || sel.rangeCount === 0 || sel.isCollapsed || !root.contains(sel.anchorNode)) {
+        setPendingSel(null);
+        return;
       }
-      return;
+
+      const resultado = findBlocoSelecionado(root);
+      if (!resultado.ok) {
+        setPendingSel(null);
+        if (resultado.reason === 'multiplos') {
+          toast.info('Selecione um trecho dentro de um mesmo dispositivo (caput, parágrafo ou inciso).');
+        }
+        return;
+      }
+
+      const blocoId = resultado.bloco.dataset.bloco!;
+      if (temSobreposicao(grifos, blocoId, resultado.start, resultado.end)) {
+        setPendingSel(null);
+        toast.error('Esse trecho já cruza uma marcação existente. Remova-a primeiro.');
+        return;
+      }
+
+      const rect = sel.getRangeAt(0).getBoundingClientRect();
+      const x = Math.max(8, Math.min(rect.left, window.innerWidth - 250));
+      const y = Math.min(rect.bottom + 12, window.innerHeight - 60);
+      setPopover(null);
+      setPendingSel({ bloco: blocoId, start: resultado.start, end: resultado.end, x, y });
     }
 
-    const blocoId = resultado.bloco.dataset.bloco!;
-    if (temSobreposicao(grifos, blocoId, resultado.start, resultado.end)) {
-      setPendingSel(null);
-      toast.error('Esse trecho já cruza uma marcação existente. Remova-a primeiro.');
-      return;
+    function onSelectionChange() {
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(processarSelecao, 250);
     }
 
-    const x = Math.min(e.clientX, window.innerWidth - 250);
-    const y = Math.min(e.clientY + 14, window.innerHeight - 60);
-    setPendingSel({ bloco: blocoId, start: resultado.start, end: resultado.end, x, y });
-  }
+    document.addEventListener('selectionchange', onSelectionChange);
+    return () => {
+      document.removeEventListener('selectionchange', onSelectionChange);
+      if (timer) clearTimeout(timer);
+    };
+  }, [grifos, toast]);
 
   async function aplicarGrifo(cor: GrifoCor | null, estilo: 'grifo' | 'sublinhado') {
     if (!pendingSel) return;
@@ -184,7 +213,7 @@ export const ArtigoCard = memo(function ArtigoCard({ artigo, interacao, onUpdate
         <p style={s.incNota}>💡 {artigo.incidenciaNota}</p>
       )}
 
-      <div onMouseUp={handleMouseUp} style={s.texto}>
+      <div style={s.texto}>
         {artigo.blocos.map((b) => (
           <p key={b.id} style={{ ...s.bloco, paddingLeft: b.nivel * 22 }}>
             {b.rotulo && <span style={s.blocoRotulo}>{b.rotulo} </span>}

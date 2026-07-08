@@ -17,6 +17,7 @@ import { ManualLogModal } from '@/components/features/timer/ManualLogModal';
 import { QuickLogModal } from '@/components/features/timer/QuickLogModal';
 import { NotificationBell } from './NotificationBell';
 import { useToast } from '@/components/ui/ToastProvider';
+import { OPEN_COMMAND_EVENT, OPEN_QUICKLOG_EVENT } from '@/components/features/command/CommandPalette';
 
 export function Topbar() {
   const router = useRouter();
@@ -38,6 +39,13 @@ export function Topbar() {
     }
     document.addEventListener('mousedown', onClick);
     return () => document.removeEventListener('mousedown', onClick);
+  }, []);
+
+  // O Command Palette dispara este evento ao escolher "Registrar questões".
+  useEffect(() => {
+    function onQuickLog() { setQuickOpen(true); }
+    window.addEventListener(OPEN_QUICKLOG_EVENT, onQuickLog);
+    return () => window.removeEventListener(OPEN_QUICKLOG_EVENT, onQuickLog);
   }, []);
 
   async function handleLogout() {
@@ -70,6 +78,18 @@ export function Topbar() {
       </div>
 
       <div style={styles.right}>
+        {/* Busca global / Command Palette — atalho Ctrl/Cmd+K */}
+        <button
+          onClick={() => window.dispatchEvent(new CustomEvent(OPEN_COMMAND_EVENT))}
+          style={styles.searchBtn}
+          title="Buscar (Ctrl+K)"
+          aria-label="Buscar"
+        >
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke={theme.inkSoft} strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
+          <span className="topbar-search-hint" style={styles.searchHint}>Buscar</span>
+          <kbd className="topbar-search-hint" style={styles.searchKbd}>Ctrl K</kbd>
+        </button>
+
         {/* Registrar estudo — menu com Quick-Log (questões) e sessão completa.
             Label oculto em mobile via CSS (topbar-add-label / topbar-add-btn). */}
         <div ref={addRef} style={{ position: 'relative' }}>
@@ -204,6 +224,9 @@ const styles: Record<string, React.CSSProperties> = {
     marginRight: '4px', fontFamily: 'inherit', padding: '0 16px 0 13px',
   },
   addLabel: { color: theme.onTeal, fontSize: 13.5, fontWeight: 600 },
+  searchBtn: { display: 'flex', alignItems: 'center', gap: 8, height: 44, padding: '0 10px', borderRadius: 10, border: `0.5px solid ${theme.line}`, background: theme.card, cursor: 'pointer', fontFamily: 'inherit', marginRight: 2 },
+  searchHint: { fontSize: 13, color: theme.inkFaint, fontWeight: 500 },
+  searchKbd: { fontFamily: 'ui-monospace, monospace', fontSize: 10.5, color: theme.inkFaint, border: `0.5px solid ${theme.line}`, borderRadius: 5, padding: '2px 6px', background: theme.muted },
   addMenu: {
     position: 'absolute', top: '50px', right: 0, width: 'min(250px, calc(100vw - 32px))', background: theme.card,
     border: `0.5px solid ${theme.line}`, borderRadius: '14px', boxShadow: theme.shadowHover,

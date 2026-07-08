@@ -5,6 +5,7 @@ import { UserProvider } from '@/components/layout/UserContext';
 import { AppShell } from '@/components/layout/AppShell';
 import { TimerProvider } from '@/components/features/timer/TimerContext';
 import { FloatingTimer } from '@/components/features/timer/FloatingTimer';
+import { FocusMode } from '@/components/features/timer/FocusMode';
 import { ToastProvider } from '@/components/ui/ToastProvider';
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
@@ -15,6 +16,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           <ToastProvider>
             <AppShell>{children}</AppShell>
             <FloatingTimer />
+            <FocusMode />
           </ToastProvider>
         </TimerProvider>
       </UserProvider>

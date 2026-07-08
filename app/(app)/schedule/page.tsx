@@ -6,6 +6,8 @@
 import { memo, useState, useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import { useSchedulePage } from '@/hooks/useSchedulePage';
+import { usePersistedState } from '@/hooks/usePersistedState';
+import { CalendarView } from '@/components/features/calendar/CalendarView';
 import { BlockMenu } from '@/components/features/schedule/BlockMenu';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { theme } from '@/lib/theme';
@@ -56,7 +58,7 @@ const CycleIcon = ({ size = 14, color = 'currentColor', mr = 6 }: { size?: numbe
 export default function SchedulePage() {
   const {
     isMobile, dialog,
-    dias, weekLabel, navWeek, weekStart, setWeekStart,
+    dias, weekLabel, navWeek, setWeekStart,
     blocks, loading, error,
     view, setView, cicloAtivo, cycleViewId, viewingArchivedId, setViewingArchivedId,
     modalDate, setModalDate,
@@ -73,6 +75,24 @@ export default function SchedulePage() {
     replanMoves, replanModalOpen, setReplanModalOpen, replanning, handleApplyReplan,
   } = useSchedulePage();
 
+  // ── Agenda: alterna entre o cronograma (Grade/Lista/Ciclo) e a visão de
+  // calendário (Mês). `calOverride` (deep-link ?view=) tem prioridade sem persistir. ──
+  const [calPref, setCalPref] = usePersistedState<'on' | 'off'>('agenda:view', 'off', (v) => (v === 'on' ? 'on' : 'off'));
+  const [calOverride, setCalOverride] = useState<boolean | null>(null);
+  const calendarOn = calOverride ?? (calPref === 'on');
+
+  // Deep-link ?view=mes (redirect de /calendar, sino de notificações): abre a aba Mês.
+  useEffect(() => {
+    const v = new URLSearchParams(window.location.search).get('view');
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (v === 'mes' || v === 'calendario') setCalOverride(true);
+    if (v) window.history.replaceState(null, '', '/schedule');
+  }, []);
+
+  function abrirCronograma(v: 'semana' | 'lista') { setCalOverride(null); setCalPref('off'); setView(v); }
+  function abrirMes() { setCalOverride(null); setCalPref('on'); }
+  function abrirCiclo() { setCalOverride(null); setCalPref('off'); handleCycleButton(); }
+
   const mostrarLista = view === 'lista' || (view === 'semana' && isMobile);
 
   // — Resumo semanal —
@@ -85,13 +105,15 @@ export default function SchedulePage() {
       {dialog}
       <div style={{ ...styles.container, padding: isMobile ? '20px 16px' : '34px 40px' }}>
         <div style={styles.header}>
-          <h1 style={{ ...styles.h1, fontSize: isMobile ? 24 : 28 }}>Cronograma</h1>
+          <h1 style={{ ...styles.h1, fontSize: isMobile ? 24 : 28 }}>Agenda</h1>
         </div>
 
         {/* ── Toolbar ── */}
         <div style={styles.toolbar}>
           {/* Linha 1: navegação + seletor de view */}
           <div style={styles.toolbarRow}>
+            {/* Navegação semanal — só no cronograma; a aba Mês tem sua própria nav */}
+            {!calendarOn && (
             <div style={{ ...styles.nav, width: isMobile ? '100%' : undefined, gap: isMobile ? 6 : 10 }}>
               <button className="icon-touch-target" style={styles.navBtn} onClick={() => navWeek(-1)} aria-label="Semana anterior">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
@@ -103,7 +125,7 @@ export default function SchedulePage() {
                 title="Ir para uma data"
                 onClick={(e) => {
                   const inp = e.currentTarget.querySelector('input[type=date]') as HTMLInputElement | null;
-                  if (inp) { inp.showPicker ? inp.showPicker() : inp.focus(); }
+                  if (inp?.showPicker) inp.showPicker(); else inp?.focus();
                 }}
               >
                 {weekLabel}
@@ -124,32 +146,40 @@ export default function SchedulePage() {
                 Hoje
               </button>
             </div>
+            )}
 
-            <div style={styles.viewToggle}>
+            <div style={{ ...styles.viewToggle, ...(calendarOn ? { marginLeft: 'auto' } : {}) }}>
               <button
                 className="schedule-grade-btn touch-target"
-                onClick={() => setView('semana')}
-                style={{ ...styles.viewBtn, ...(view === 'semana' ? styles.viewBtnOn : {}) }}
+                onClick={() => abrirCronograma('semana')}
+                style={{ ...styles.viewBtn, ...(!calendarOn && view === 'semana' ? styles.viewBtnOn : {}) }}
               >
                 Grade
               </button>
               <button className="touch-target"
-                onClick={() => setView('lista')}
-                style={{ ...styles.viewBtn, ...(mostrarLista ? styles.viewBtnOn : {}) }}
+                onClick={() => abrirCronograma('lista')}
+                style={{ ...styles.viewBtn, ...(!calendarOn && mostrarLista ? styles.viewBtnOn : {}) }}
               >
                 Lista
               </button>
+              <button className="touch-target"
+                onClick={abrirMes}
+                style={{ ...styles.viewBtn, ...(calendarOn ? styles.viewBtnOn : {}) }}
+              >
+                Mês
+              </button>
               {/* Ciclo: sempre visível — se não houver ciclo, abre o modal de criação */}
               <button className="touch-target"
-                onClick={handleCycleButton}
-                style={{ ...styles.viewBtn, ...(view === 'ciclo' ? styles.viewBtnOn : {}) }}
+                onClick={abrirCiclo}
+                style={{ ...styles.viewBtn, ...(!calendarOn && view === 'ciclo' ? styles.viewBtnOn : {}) }}
               >
                 Ciclo
               </button>
             </div>
           </div>
 
-          {/* Linha 2: ações */}
+          {/* Linha 2: ações — só no cronograma (a aba Mês não usa gerador/recorrência) */}
+          {!calendarOn && (
           <div style={{ ...styles.toolbarActions, flexDirection: isMobile ? 'column' : 'row' }}>
             <button className="touch-target"
               onClick={() => setGeneratorOpen(true)}
@@ -179,11 +209,16 @@ export default function SchedulePage() {
               </button>
             </div>
           </div>
+          )}
         </div>
 
+        {/* ── Conteúdo: calendário (aba Mês) ou cronograma ── */}
+        {calendarOn ? (
+          <CalendarView />
+        ) : (
+        <>
         {error && <p style={styles.error}>{error}</p>}
 
-        {/* ── Conteúdo principal ── */}
         {loading ? (
           /* Skeleton da grade (7 colunas) */
           <div className="schedule-week-grid" style={{ ...styles.weekGrid, display: 'grid' }}>
@@ -372,6 +407,8 @@ export default function SchedulePage() {
             O bloco só é concluído automaticamente quando você registra o estudo específico no timer.
             Registros sem tópico devem ser marcados manualmente.
           </p>
+        )}
+        </>
         )}
 
         {/* ── Modais ── */}

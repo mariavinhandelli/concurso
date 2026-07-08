@@ -653,10 +653,11 @@ img, video, canvas {
   /* Conteúdo ocupa 100 % da largura — sem margem lateral do drawer */
   .shell-main { margin-left: 0 !important; }
 
-  /* Topbar: hambúrguer visível, "Registrar" vira só ícone */
+  /* Topbar: hambúrguer visível, "Registrar" e "Buscar" viram só ícone */
   .topbar-hamburger { display: grid !important; }
   .topbar-add-label { display: none; }
   .topbar-add-btn   { padding: 0 !important; width: 44px !important; }
+  .topbar-search-hint { display: none !important; }
   .topbar-bar       { padding-left: 16px !important; padding-right: 16px !important; }
 
   /* Cronograma: grade semanal oculta desde o SSR; lista sempre visível */

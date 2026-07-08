@@ -10,13 +10,17 @@ import { getMissoesSemana, type MissoesSemana as MissoesSemanaData } from '@/ser
 import { theme } from '@/lib/theme';
 import { Skeleton } from '@/components/ui/Skeleton';
 
-export const MissoesSemana = memo(function MissoesSemana() {
+// `bare`: renderiza sem o chrome de card próprio (para viver dentro do
+// SemanaPanel, com o streak como laço central). Traz o próprio divisor no topo,
+// então some por completo — sem divisor órfão — quando não há missões.
+export const MissoesSemana = memo(function MissoesSemana({ bare = false }: { bare?: boolean } = {}) {
   const { data, isLoading, isError } = useQuery<MissoesSemanaData>({
     queryKey: ['missoes-semana'],
     queryFn: getMissoesSemana,
   });
 
   if (isLoading) {
+    if (bare) return null; // dentro do painel, o streak já cobre o estado de carga
     return (
       <div style={styles.card}>
         <Skeleton width={150} height={11} borderRadius={4} style={{ marginBottom: 14 }} />
@@ -30,8 +34,14 @@ export const MissoesSemana = memo(function MissoesSemana() {
   const concluidas = data.missoes.filter((m) => m.concluida).length;
   const todasFeitas = concluidas === data.missoes.length;
 
+  const Wrapper = bare
+    ? ({ children }: { children: React.ReactNode }) => (
+        <><div style={styles.divider} />{children}</>
+      )
+    : ({ children }: { children: React.ReactNode }) => <div style={styles.card}>{children}</div>;
+
   return (
-    <div style={styles.card}>
+    <Wrapper>
       <div style={styles.header}>
         <span style={styles.eyebrow}>Missões da semana</span>
         <span style={styles.progressText}>{todasFeitas ? 'completas 🎉' : `${concluidas} de ${data.missoes.length}`}</span>
@@ -59,7 +69,7 @@ export const MissoesSemana = memo(function MissoesSemana() {
           </div>
         ))}
       </div>
-    </div>
+    </Wrapper>
   );
 });
 
@@ -68,6 +78,7 @@ const styles: Record<string, React.CSSProperties> = {
     background: theme.card, border: `0.5px solid ${theme.line}`, borderRadius: theme.radius,
     boxShadow: theme.shadow, padding: '16px 18px', fontFamily: theme.font, minWidth: 0,
   },
+  divider: { height: '0.5px', background: theme.line, margin: '16px 0' },
   header: { display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 12, marginBottom: 12 },
   eyebrow: { fontSize: 11, fontWeight: 700, color: theme.teal, letterSpacing: 0.6, textTransform: 'uppercase' },
   progressText: { fontSize: 12.5, fontWeight: 600, color: theme.inkSoft },

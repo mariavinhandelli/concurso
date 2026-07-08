@@ -1,18 +1,15 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { useCallback, useState } from 'react';
+import { useCallback } from 'react';
+import { usePersistedState } from '@/hooks/usePersistedState';
 import { useToast } from '@/components/ui/ToastProvider';
 import { theme, pageWide } from '@/lib/theme';
 import { useUI } from '@/components/layout/UIContext';
 
 type Tab = 'banco' | 'minhas';
 
-function savedTab(): Tab {
-  if (typeof window === 'undefined') return 'banco';
-  const v = localStorage.getItem('subjects_tab');
-  return v === 'minhas' ? 'minhas' : 'banco';
-}
+const parseTab = (v: string | null): Tab => (v === 'minhas' ? 'minhas' : 'banco');
 
 const BancoTab = dynamic(
   () => import('@/components/features/subjects/BancoTab').then((m) => ({ default: m.BancoTab })),
@@ -45,12 +42,10 @@ function TabSkeleton() {
 export default function SubjectsPage() {
   const { isMobile } = useUI();
   const toast = useToast();
-  const [tab, setTab] = useState<Tab>(savedTab);
+  // Aba persistida de forma SSR-safe (sem mismatch de hidratação).
+  const [tab, setTab] = usePersistedState<Tab>('subjects_tab', 'banco', parseTab);
 
-  const handleTabChange = useCallback((t: Tab) => {
-    setTab(t);
-    localStorage.setItem('subjects_tab', t);
-  }, []);
+  const handleTabChange = useCallback((t: Tab) => { setTab(t); }, [setTab]);
 
   const handleError = useCallback((m: string) => toast.error(m), [toast]);
   const handleActivated = useCallback(() => {

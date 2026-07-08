@@ -38,6 +38,7 @@ export async function getEditalCoverage(): Promise<EditalCoverage> {
     .from('target_exams')
     .select('id, orgao, cargo, slug')
     .eq('user_id', userId)
+    .is('archived_at', null) // M11: ignora concursos arquivados
     .order('is_primary', { ascending: false })
     .order('created_at', { ascending: true })
     .limit(1);

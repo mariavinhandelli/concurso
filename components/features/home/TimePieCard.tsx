@@ -1,6 +1,7 @@
 'use client';
 
 import { memo, useState } from 'react';
+import { usePersistedState } from '@/hooks/usePersistedState';
 import dynamic from 'next/dynamic';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -31,15 +32,13 @@ const ABAS: { key: PeriodView; label: string }[] = [
 ];
 
 const VALID_VIEWS: PeriodView[] = ['dia', 'semana', 'mes', 'total'];
+const parsePieView = (v: string | null): PeriodView =>
+  VALID_VIEWS.includes(v as PeriodView) ? (v as PeriodView) : 'semana';
 
 export const TimePieCard = memo(function TimePieCard() {
   const { isMobile } = useUI();
-  // P20 — persistir última aba selecionada; default "semana" (mais informativo que "dia")
-  const [view, setView] = useState<PeriodView>(() => {
-    if (typeof window === 'undefined') return 'semana';
-    const saved = localStorage.getItem('pie:view') as PeriodView | null;
-    return VALID_VIEWS.includes(saved!) ? saved! : 'semana';
-  });
+  // P20 — persistir última aba; default "semana". SSR-safe (sem mismatch de hidratação).
+  const [view, setView] = usePersistedState<PeriodView>('pie:view', 'semana', parsePieView);
   const [offset, setOffset] = useState(0);
   const [logOpen, setLogOpen] = useState(false);
 
@@ -49,9 +48,8 @@ export const TimePieCard = memo(function TimePieCard() {
   });
 
   function trocarView(v: PeriodView) {
-    setView(v);
+    setView(v); // usePersistedState já grava no localStorage
     setOffset(0);
-    localStorage.setItem('pie:view', v);
   }
 
   const temDados = !loadError && data && data.slices.length > 0;
