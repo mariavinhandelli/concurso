@@ -187,13 +187,24 @@ export function EditalDetailModal({ edital, isMobile, onClose, onActivated }: Pr
           )}
           <div style={{ flex: 1 }} />
           <button onClick={onClose} style={s.btnGhost}>Fechar</button>
-          <button
-            onClick={handleActivate}
-            disabled={activating}
-            style={{ ...s.btnPrimary, ...(edital.isActivated ? s.btnOpen : {}) }}
-          >
-            {activating ? 'Ativando…' : edital.isActivated ? 'Abrir concurso' : 'Ativar edital'}
-          </button>
+          {/* Edital sem conteúdo programático: ativar criaria um concurso vazio. */}
+          {!edital.isActivated && edital.subjectCount === 0 ? (
+            <button
+              disabled
+              title="Conteúdo programático em preparação — acompanhe as notícias por aqui."
+              style={{ ...s.btnPrimary, opacity: 0.55, cursor: 'not-allowed' }}
+            >
+              Conteúdo em preparação
+            </button>
+          ) : (
+            <button
+              onClick={handleActivate}
+              disabled={activating}
+              style={{ ...s.btnPrimary, ...(edital.isActivated ? s.btnOpen : {}) }}
+            >
+              {activating ? 'Ativando…' : edital.isActivated ? 'Abrir concurso' : 'Ativar edital'}
+            </button>
+          )}
         </div>
       </div>
     </div>

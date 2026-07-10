@@ -25,7 +25,8 @@ export function validateStudyLogInput(
   if (!Number.isFinite(session.durationSec) || session.durationSec <= 0) {
     throw new Error('A duração da sessão precisa ser maior que zero.');
   }
-  if (!Number.isInteger(values.energyLevel) || values.energyLevel < 1 || values.energyLevel > 5) {
+  // Energia é opcional: 0 = não informado (vira null no banco); 1-5 = informado.
+  if (!Number.isInteger(values.energyLevel) || values.energyLevel < 0 || values.energyLevel > 5) {
     throw new Error('O nível de energia deve estar entre 1 e 5.');
   }
   if (!SESSION_MODES.some((item) => item.value === values.mode)) {

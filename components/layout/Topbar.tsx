@@ -6,6 +6,8 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
+import { refreshHomeAfterSession } from '@/lib/home-refresh';
 import Image from 'next/image';
 import { createClient } from '@/lib/supabase/client';
 import { invalidateArchivedCache } from '@/services/archivedCache';
@@ -21,6 +23,7 @@ import { OPEN_COMMAND_EVENT, OPEN_QUICKLOG_EVENT } from '@/components/features/c
 
 export function Topbar() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { theme: mode, toggleTheme, toggleMobile } = useUI();
   const { email, avatarUrl } = useUser();
   const timer = useTimer();
@@ -194,14 +197,14 @@ export function Topbar() {
       {logOpen && (
         <ManualLogModal
           onClose={() => setLogOpen(false)}
-          onSaved={() => router.refresh()}
+          onSaved={() => { refreshHomeAfterSession(queryClient); router.refresh(); }}
         />
       )}
 
       {quickOpen && (
         <QuickLogModal
           onClose={() => setQuickOpen(false)}
-          onSaved={() => router.refresh()}
+          onSaved={() => { refreshHomeAfterSession(queryClient); router.refresh(); }}
           onSwitchToFull={() => { setQuickOpen(false); setLogOpen(true); }}
         />
       )}

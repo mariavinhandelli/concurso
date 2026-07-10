@@ -54,7 +54,7 @@ export async function saveStudyLog(
       questions_total: feedback.questionsTotal ?? 0,
       questions_correct: feedback.questionsCorrect ?? 0,
       qualitative_feedback: feedback.qualitativeFeedback,
-      energy_level: feedback.energyLevel,
+      energy_level: feedback.energyLevel > 0 ? feedback.energyLevel : null,
       insight: feedback.insight,
       error_cause: feedback.errorCause ?? null,
     }, {

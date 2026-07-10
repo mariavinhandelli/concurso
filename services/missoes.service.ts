@@ -93,12 +93,25 @@ async function topicosNovosNaSemana(ctx: MissaoContexto): Promise<number> {
   return idsSemana.filter((id) => !jaEstudadosAntes.has(id)).length;
 }
 
-async function filaRevisoesZerada(): Promise<number> {
+// "Zerar a fila" só é mérito quando existe fila: usuário sem nenhum item em
+// rotação (conta nova, módulo nunca usado) não ganha a missão de graça.
+async function filaRevisoesZerada(ctx: MissaoContexto): Promise<number> {
+  const { count } = await ctx.supabase
+    .from('topics')
+    .select('id', { count: 'exact', head: true })
+    .eq('user_id', ctx.userId)
+    .eq('is_review_active', true);
+  if ((count ?? 0) === 0) return 0;
   const n = await countDueReviews();
   return n === 0 ? 1 : 0;
 }
 
-async function filaFlashcardsZerada(): Promise<number> {
+async function filaFlashcardsZerada(ctx: MissaoContexto): Promise<number> {
+  const { count } = await ctx.supabase
+    .from('flashcards')
+    .select('id', { count: 'exact', head: true })
+    .eq('user_id', ctx.userId);
+  if ((count ?? 0) === 0) return 0;
   const n = await countDueCards();
   return n === 0 ? 1 : 0;
 }

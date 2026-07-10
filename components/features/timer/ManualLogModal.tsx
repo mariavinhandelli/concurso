@@ -97,7 +97,6 @@ export function ManualLogModal({ onClose, onSaved }: Props) {
     if (!subjectId) { setError('Escolha uma matéria.'); return; }
     const totalMin = (Number(hours) || 0) * 60 + (Number(minutes) || 0);
     if (totalMin <= 0) { setError('Informe uma duração maior que zero.'); return; }
-    if (energy === 0) { setError('Marque o nível de energia da sessão.'); return; }
 
     setSaving(true);
     setError('');

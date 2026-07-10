@@ -86,6 +86,9 @@ function OnboardingWizard({ userId, onClose }: { userId: string; onClose: (remem
   const porArea = useMemo(() => {
     const map = new Map<string, CatalogEdital[]>();
     for (const e of editais ?? []) {
+      // Edital sem conteúdo programático não tem o que ativar — oferecê-lo aqui
+      // faria o usuário "ativar" e receber zero matérias no primeiro contato.
+      if (e.subjectCount === 0) continue;
       const k = e.areaName ?? 'Outros';
       (map.get(k) ?? map.set(k, []).get(k)!).push(e);
     }
@@ -113,6 +116,11 @@ function OnboardingWizard({ userId, onClose }: { userId: string; onClose: (remem
       setPreview(prev);
       refreshHomeAfterSession(queryClient);
       queryClient.invalidateQueries({ queryKey: ['onboarding-status'] });
+      // O concurso recém-ativado alimenta a "Próxima prova" e o ciclo da Agenda —
+      // sem invalidar aqui, os cards só apareciam depois de um F5.
+      queryClient.invalidateQueries({ queryKey: ['target-exams'] });
+      queryClient.invalidateQueries({ queryKey: ['schedule-rules'] });
+      queryClient.invalidateQueries({ queryKey: ['active-cycle'] });
       router.refresh();
       setStep(2);
     } catch (e) {

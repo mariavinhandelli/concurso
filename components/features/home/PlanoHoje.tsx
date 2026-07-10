@@ -97,9 +97,14 @@ export const PlanoHoje = memo(function PlanoHoje() {
   // jurisprudências vencidas — um único passo, uma única fila mental.
   const leiDueCount = leiDue ?? 0;
   const jurisDueCount = jurisDue ?? 0;
-  const revDone = revisoes === 0 && leiDueCount === 0 && jurisDueCount === 0;
-  const fcDone = flashcards === 0;
+  const revEmDia = revisoes === 0 && leiDueCount === 0 && jurisDueCount === 0;
+  const fcEmDia = flashcards === 0;
   const studiedToday = (goals?.todayMinutes ?? 0) > 0;
+  // Fila vazia só vira "concluído" depois que o dia começou (estudo registrado).
+  // Sem isso, usuário novo com filas vazias via "2 de 3 concluídos" sem ter feito nada.
+  const diaComecou = studiedToday || blocosFeitos > 0;
+  const revDone = revEmDia && diaComecou;
+  const fcDone = fcEmDia && diaComecou;
   // Passo "estudar": se há cronograma, concluído = todos os blocos feitos; senão, estudou hoje.
   const estudoDone = temCronograma ? cronogramaCompleto : studiedToday;
 
@@ -135,7 +140,7 @@ export const PlanoHoje = memo(function PlanoHoje() {
     ({ name: s.name, topicId: s.id, subjectId: s.subjectId });
 
   const revSub = revisoes === undefined ? '…'
-    : revDone ? 'tudo em dia'
+    : revEmDia ? 'tudo em dia'
     : [
         revisoes > 0 ? `${revisoes} ${revisoes === 1 ? 'revisão' : 'revisões'}` : null,
         leiDueCount > 0 ? `${leiDueCount} de lei seca` : null,

@@ -3,7 +3,7 @@
 // e atualiza ao salvar.
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { listSubjects, type Subject } from '@/services/subjects.service';
 import { listTopics, type Topic } from '@/services/topics.service';
 import { createBlock, updateBlock } from '@/services/studyBlocks.service';
@@ -34,6 +34,9 @@ export function BlockModal({ blockDate, dateLabel, onClose, onCreated, editBlock
   const [topicId, setTopicId] = useState(editBlock?.topicId ?? '');
   const [minutes, setMinutes] = useState(String(editBlock?.plannedMinutes ?? 60));
   const [saving, setSaving] = useState(false);
+  // Guard síncrono: `disabled={saving}` só vale após o re-render — dois cliques
+  // no mesmo tick disparavam handleSave duas vezes e duplicavam o bloco.
+  const savingRef = useRef(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -56,7 +59,9 @@ export function BlockModal({ blockDate, dateLabel, onClose, onCreated, editBlock
   }, [subjectId]);
 
   async function handleSave() {
+    if (savingRef.current) return;
     if (!subjectId) { setError('Escolha uma matéria.'); return; }
+    savingRef.current = true;
     setSaving(true);
     setError('');
     try {
@@ -79,6 +84,7 @@ export function BlockModal({ blockDate, dateLabel, onClose, onCreated, editBlock
       onClose();
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Erro ao salvar.');
+      savingRef.current = false;
       setSaving(false);
     }
   }

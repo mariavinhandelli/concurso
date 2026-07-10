@@ -89,10 +89,6 @@ export function QualitativeFeedbackForm({ session, onSubmit, onDiscard, saving }
   }, [houveErro, errorCause]);
 
   function handleSubmit() {
-    if (energy === 0) {
-      toast.error('Marque seu nível de energia antes de salvar.');
-      return;
-    }
     onSubmit({
       mode,
       subjectId: subjectId || null,
@@ -187,12 +183,10 @@ export function QualitativeFeedbackForm({ session, onSubmit, onDiscard, saving }
         <div style={styles.actions}>
           <button onClick={handleDiscard} style={styles.cancel} disabled={saving}>Descartar</button>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4 }}>
-            {energy === 0 && <p style={styles.hint}>Marque sua energia para salvar.</p>}
             <button
               onClick={handleSubmit}
-              style={{ ...styles.save, opacity: energy === 0 || saving ? 0.5 : 1, cursor: energy === 0 || saving ? 'not-allowed' : 'pointer' }}
-              disabled={saving || energy === 0}
-              title={energy === 0 ? 'Marque seu nível de energia antes de salvar' : undefined}
+              style={{ ...styles.save, opacity: saving ? 0.5 : 1, cursor: saving ? 'not-allowed' : 'pointer' }}
+              disabled={saving}
             >
               {saving ? 'Salvando…' : 'Salvar sessão'}
             </button>

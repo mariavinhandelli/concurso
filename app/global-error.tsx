@@ -5,7 +5,6 @@ import './globals.css';
 
 export default function GlobalError({
   error,
-  unstable_retry,
 }: {
   error: Error & { digest?: string };
   unstable_retry: () => void;
@@ -14,6 +13,12 @@ export default function GlobalError({
     console.error('Erro global não tratado:', error);
   }, [error]);
 
+  // Reload completo: re-renderizar a mesma árvore não recupera de
+  // ChunkLoadError (chunks de um deploy anterior) — só um reload busca os novos.
+  function handleReload() {
+    window.location.reload();
+  }
+
   return (
     <html lang="pt-BR">
       <body>
@@ -21,7 +26,7 @@ export default function GlobalError({
           <div style={styles.card}>
             <h1 style={styles.title}>A Focali encontrou um problema.</h1>
             <p style={styles.text}>Tente recarregar a aplicação. Seu progresso já salvo não será afetado.</p>
-            <button type="button" onClick={unstable_retry} style={styles.button}>
+            <button type="button" onClick={handleReload} style={styles.button}>
               Recarregar
             </button>
           </div>
