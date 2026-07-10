@@ -4,6 +4,7 @@
 // tryGetUser  → retorna null se não autenticado (queries que retornam vazio).
 
 import { createClient } from '@/lib/supabase/client';
+import { getCachedUser } from '@/lib/supabase/authCache';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
 interface AuthContext {
@@ -13,14 +14,14 @@ interface AuthContext {
 
 export async function requireUser(): Promise<AuthContext> {
   const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getCachedUser();
   if (!user) throw new Error('Você precisa estar logado.');
   return { supabase, userId: user.id };
 }
 
 export async function tryGetUser(): Promise<AuthContext | null> {
   const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getCachedUser();
   if (!user) return null;
   return { supabase, userId: user.id };
 }

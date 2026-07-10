@@ -17,13 +17,7 @@ import type { Subject } from '@/services/subjects.service';
 import { useConfirm } from '@/hooks/useConfirm';
 import { useToast } from '@/components/ui/ToastProvider';
 import { theme } from '@/lib/theme';
-
-export const KIND_CORES: Record<NotaKind, { bg: string; ink: string }> = {
-  resumo:  { bg: 'var(--teal-bg)', ink: 'var(--teal-deep)' },
-  dica:    { bg: 'var(--warn-bg)', ink: 'var(--warn-deep)' },
-  esquema: { bg: 'rgba(127,119,221,.14)', ink: '#534AB7' },
-  outro:   { bg: 'var(--muted)', ink: 'var(--ink-soft)' },
-};
+import { KIND_CORES } from './notaCores';
 
 type SaveStatus = 'salvo' | 'pendente' | 'salvando' | 'erro';
 

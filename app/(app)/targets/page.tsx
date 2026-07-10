@@ -10,7 +10,8 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTargetList } from '@/hooks/useTargetList';
 import { usePersistedState } from '@/hooks/usePersistedState';
 import { formatTargetLabel, daysUntilExam, countdownInfo } from '@/lib/targets';
-import { type TargetExam, listArchivedTargetExams, unarchiveTargetExam } from '@/services/targetExams.service';
+import { type TargetExam, listArchivedTargetExams } from '@/services/targetExams.service';
+import { unarchiveConcurso } from '@/services/concursoArchive.service';
 import { BancoEditaisTab } from '@/components/features/targets/BancoEditaisTab';
 import { ImportarEditalModal } from '@/components/features/targets/ImportarEditalModal';
 import { ArquivarConcursoModal } from '@/components/features/targets/ArquivarConcursoModal';
@@ -76,7 +77,7 @@ export default function TargetsPage() {
 
   async function handleRestore(t: TargetExam) {
     try {
-      await unarchiveTargetExam(t.id);
+      await unarchiveConcurso(t.id); // reativa também as matérias exclusivas arquivadas
       refreshTargetViews();
       toast.success('Concurso restaurado.');
     } catch (e) {

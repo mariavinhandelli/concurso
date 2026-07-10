@@ -7,8 +7,8 @@
 'use client';
 
 import { requireUser } from '@/lib/supabase/requireUser';
-import { archiveTargetExam } from '@/services/targetExams.service';
-import { archiveSubject } from '@/services/userSubjects.service';
+import { archiveTargetExam, unarchiveTargetExam } from '@/services/targetExams.service';
+import { archiveSubject, unarchiveSubject } from '@/services/userSubjects.service';
 import { getActiveCycleRule, archiveCycle } from '@/services/cycleEngine.service';
 import { invalidateArchivedCache } from '@/services/archivedCache';
 
@@ -18,23 +18,21 @@ export interface ConcursoArchivePreview {
   hasActiveCycle: boolean;
 }
 
-// Calcula o que o gesto de arquivar pode incluir, respeitando exclusividade.
-export async function getConcursoArchivePreview(targetId: string): Promise<ConcursoArchivePreview> {
+// Núcleo reusável: matérias exclusivas a um concurso (tocadas só por ele, entre
+// os alvos NÃO-arquivados) + quantas são compartilhadas. Usado pelo preview de
+// arquivar e pela restauração (que reativa as exclusivas que ficaram arquivadas).
+async function computeExclusive(targetId: string): Promise<{ exclusiveIds: string[]; sharedCount: number }> {
   const { supabase, userId } = await requireUser();
-  const hasActiveCycle = !!(await getActiveCycleRule());
 
-  // Alvos ativos (não-arquivados) do usuário — inclui o próprio.
   const { data: activeTargets } = await supabase
     .from('target_exams').select('id').eq('user_id', userId).is('archived_at', null);
   const activeIds = (activeTargets ?? []).map((t) => t.id as string);
-  if (activeIds.length === 0) return { exclusiveSubjects: [], sharedCount: 0, hasActiveCycle };
+  if (activeIds.length === 0) return { exclusiveIds: [], sharedCount: 0 };
 
-  // Vínculos tópico↔alvo para todos os alvos ativos.
   const { data: links } = await supabase
     .from('topic_target_exams').select('topic_id, target_exam_id').in('target_exam_id', activeIds);
   const linkRows = (links ?? []) as { topic_id: string; target_exam_id: string }[];
 
-  // Mapa tópico → matéria (só dos tópicos vinculados).
   const topicIds = [...new Set(linkRows.map((l) => l.topic_id))];
   const subjOfTopic = new Map<string, string>();
   if (topicIds.length > 0) {
@@ -43,7 +41,6 @@ export async function getConcursoArchivePreview(targetId: string): Promise<Concu
     for (const t of topics ?? []) subjOfTopic.set(t.id as string, t.subject_id as string);
   }
 
-  // Matéria → conjunto de alvos ativos que a tocam.
   const subjTargets = new Map<string, Set<string>>();
   for (const l of linkRows) {
     const sid = subjOfTopic.get(l.topic_id);
@@ -51,7 +48,6 @@ export async function getConcursoArchivePreview(targetId: string): Promise<Concu
     (subjTargets.get(sid) ?? subjTargets.set(sid, new Set()).get(sid)!).add(l.target_exam_id);
   }
 
-  // Exclusiva a este concurso = tocada só por ele.
   const exclusiveIds: string[] = [];
   let sharedCount = 0;
   for (const [sid, targets] of subjTargets) {
@@ -59,6 +55,14 @@ export async function getConcursoArchivePreview(targetId: string): Promise<Concu
     if (targets.size === 1) exclusiveIds.push(sid);
     else sharedCount++;
   }
+  return { exclusiveIds, sharedCount };
+}
+
+// Calcula o que o gesto de arquivar pode incluir, respeitando exclusividade.
+export async function getConcursoArchivePreview(targetId: string): Promise<ConcursoArchivePreview> {
+  const { supabase, userId } = await requireUser();
+  const hasActiveCycle = !!(await getActiveCycleRule());
+  const { exclusiveIds, sharedCount } = await computeExclusive(targetId);
 
   // Nomes das exclusivas — só as que ainda estão ativas (sem sentido oferecer as já arquivadas).
   let exclusiveSubjects: { id: string; name: string }[] = [];
@@ -85,6 +89,22 @@ export async function archiveConcurso(
   if (opts.includeCycle) {
     const cycleId = await getActiveCycleRule();
     if (cycleId) await archiveCycle(cycleId);
+  }
+  invalidateArchivedCache();
+}
+
+// Restaura o concurso e reativa as matérias que são exclusivas dele e ficaram
+// arquivadas (fase 2 do M11). O ciclo é restaurado à parte (ciclos arquivados),
+// por ser global — não há como saber qual "pertencia" a este concurso.
+export async function unarchiveConcurso(targetId: string): Promise<void> {
+  await unarchiveTargetExam(targetId); // volta a ativo antes de recomputar exclusividade
+  const { exclusiveIds } = await computeExclusive(targetId);
+  if (exclusiveIds.length > 0) {
+    const { supabase, userId } = await requireUser();
+    const { data: subs } = await supabase
+      .from('subjects').select('id, status').in('id', exclusiveIds).eq('user_id', userId);
+    const archived = (subs ?? []).filter((s) => s.status === 'arquivado').map((s) => s.id as string);
+    for (const id of archived) await unarchiveSubject(id);
   }
   invalidateArchivedCache();
 }

@@ -6,6 +6,7 @@ import { recalcularSaude } from '@/services/metrics.service';
 import { autoCompleteByTopic } from '@/services/studyBlocks.service';
 import { findCycleItemForSubject, completeCycleSubject } from '@/services/cycleEngine.service';
 import { validateStudyLogInput } from '@/lib/study-log-validation';
+import { track, EV } from '@/lib/analytics';
 
 export type ErrorCause = 'teoria' | 'interpretacao' | 'tempo';
 
@@ -64,6 +65,8 @@ export async function saveStudyLog(
   if (error) {
     throw new Error('Erro ao salvar a sessão: ' + error.message);
   }
+
+  track(EV.studyCompleted, { minutes: Math.round(session.durationSec / 60), mode: feedback.mode });
 
   // Aplica a intenção de revisão (só se mudou de estado).
   if (topicId && feedback.reviewIntent) {

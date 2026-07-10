@@ -3,15 +3,20 @@
 // + topbar + conteúdo. No mobile o conteúdo ocupa 100% e um overlay fecha o drawer.
 'use client';
 
-import type { ReactNode } from 'react';
+import { useEffect, type ReactNode } from 'react';
 import { Sidebar } from './Sidebar';
 import { Topbar } from './Topbar';
 import { useUI } from './UIContext';
 import { CommandPalette } from '@/components/features/command/CommandPalette';
+import { SocialStatsSync } from '@/components/features/social/SocialStatsSync';
+import { track, EV } from '@/lib/analytics';
 import { theme } from '@/lib/theme';
 
 export function AppShell({ children }: { children: ReactNode }) {
   const { collapsed, isMobile, isTablet, mobileOpen, setMobileOpen } = useUI();
+
+  // Instrumentação: 1 evento por carga do app (Rodada 3).
+  useEffect(() => { track(EV.appOpened); }, []);
 
   // marginLeft controlado por JS apenas para desktop (colapsado vs expandido).
   // O reset para 0 no mobile é feito via CSS (.shell-main) para evitar FOIC.
@@ -54,6 +59,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       </div>
 
       <CommandPalette />
+      <SocialStatsSync />
     </div>
   );
 }

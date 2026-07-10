@@ -13,7 +13,7 @@ import { useQuery } from '@tanstack/react-query';
 import { listSubjects, type Subject } from '@/services/subjects.service';
 import { listAllTopics, type Topic } from '@/services/topics.service';
 import { LEIS_CATALOG } from '@/services/leis.service';
-import { listFavoritas, type JurisComInteracao } from '@/services/jurisInteracoes.service';
+import { type JurisComInteracao } from '@/services/jurisInteracoes.service';
 import { listFavoriteLeiArtigos } from '@/services/leiInteracoes.service';
 import { getRecents } from '@/lib/recents';
 import { theme, zIndex } from '@/lib/theme';
@@ -99,8 +99,12 @@ export function CommandPalette() {
 
   // M12: Recentes (client-side, lidos a cada abertura) + Favoritos (juris + lei).
   const recents = useMemo(() => (open ? getRecents() : []), [open]);
+  // Perf F1: import dinâmico — listFavoritas puxa data/jurisprudencias (~766KB).
+  // Como só roda ao abrir o palette (enabled: open), vira um chunk à parte em vez
+  // de entrar no bundle compartilhado (AppShell → toda página, incl. Home).
   const { data: jurisFavs } = useQuery<JurisComInteracao[]>({
-    queryKey: ['cmd-fav-juris'], queryFn: listFavoritas, enabled: open, staleTime: 60_000,
+    queryKey: ['cmd-fav-juris'], enabled: open, staleTime: 60_000,
+    queryFn: async () => (await import('@/services/jurisInteracoes.service')).listFavoritas(),
   });
   const { data: leiFavs } = useQuery<{ artigoKey: string }[]>({
     queryKey: ['cmd-fav-lei'], queryFn: listFavoriteLeiArtigos, enabled: open, staleTime: 60_000,

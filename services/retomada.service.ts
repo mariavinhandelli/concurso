@@ -10,7 +10,7 @@ import { toLocalDateString, parseLocalDate } from '@/lib/local-date';
 import { countDueReviews } from '@/services/reviews.service';
 import { countDueCards } from '@/services/flashcards.service';
 import { countRevisoesDue } from '@/services/leiInteracoes.service';
-import { countRevisoesHoje } from '@/services/jurisInteracoes.service';
+import { countRevisoesHoje } from '@/services/jurisRevisao.service';
 
 export const HIATO_MIN_DIAS = 4;
 

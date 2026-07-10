@@ -6,16 +6,21 @@
 // Grade/Lista. Traz os próprios controles (nav + "+ Lembrete").
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useConfirm } from '@/hooks/useConfirm';
 import { useToast } from '@/components/ui/ToastProvider';
 import { listEvents, type CalendarEvent } from '@/services/calendar.service';
 import { createReminder, deleteReminder } from '@/services/reminders.service';
+import { getScheduleBlocks } from '@/services/scheduleEngine.service';
 import { theme } from '@/lib/theme';
 import { useUI } from '@/components/layout/UIContext';
 
 type Mode = 'week' | 'month';
+
+// M9 fase 2: além dos eventos, o Mês mostra os blocos de estudo planejados.
+type EvType = CalendarEvent['type'] | 'block';
+interface ViewEvent { date: string; type: EvType; label: string; color: string; reminderId?: string; }
 
 const WEEKDAYS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 const MONTHS = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
@@ -28,7 +33,7 @@ function toLocalISO(d: Date): string {
   return `${y}-${m}-${day}`;
 }
 
-function chipBg(type: CalendarEvent['type'], color: string): string {
+function chipBg(type: EvType, color: string): string {
   const hex = color.replace('#', '');
   const r = parseInt(hex.slice(0, 2), 16);
   const g = parseInt(hex.slice(2, 4), 16);
@@ -36,13 +41,20 @@ function chipBg(type: CalendarEvent['type'], color: string): string {
   return `rgba(${r},${g},${b},0.10)`;
 }
 
-function EventIcon({ type, color, size = 11 }: { type: CalendarEvent['type']; color: string; size?: number }) {
+function EventIcon({ type, color, size = 11 }: { type: EvType; color: string; size?: number }) {
   const sw = size >= 16 ? 1.8 : 2;
   const common = {
     width: size, height: size, viewBox: '0 0 24 24', fill: 'none',
     stroke: color, strokeWidth: sw, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const,
     style: { flexShrink: 0 },
   };
+  if (type === 'block') {
+    return (
+      <svg {...common}>
+        <circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" />
+      </svg>
+    );
+  }
   if (type === 'exam') {
     return (
       <svg {...common}>
@@ -76,7 +88,8 @@ function EventIcon({ type, color, size = 11 }: { type: CalendarEvent['type']; co
   );
 }
 
-function tipoLabel(type: CalendarEvent['type']): string {
+function tipoLabel(type: EvType): string {
+  if (type === 'block') return 'Bloco de estudo';
   if (type === 'exam') return 'Prova';
   if (type === 'flashcard') return 'Flashcards';
   if (type === 'reminder') return 'Lembrete';
@@ -106,6 +119,21 @@ export function CalendarView() {
     queryFn: () => listEvents(startISO, endISO),
     staleTime: 60_000,
   });
+  // M9 fase 2: blocos de estudo planejados no intervalo, mostrados junto dos eventos.
+  const { data: blocks = [] } = useQuery({
+    queryKey: ['calendar-blocks', startISO, endISO],
+    queryFn: () => getScheduleBlocks(startISO, endISO),
+    staleTime: 60_000,
+  });
+  const allEvents = useMemo<ViewEvent[]>(() => {
+    const blockEvents: ViewEvent[] = blocks.map((b) => ({
+      date: b.block_date,
+      type: 'block',
+      label: `${b.subjectName ?? 'Estudo'}${b.topicName ? ` · ${b.topicName}` : ''} · ${b.planned_minutes}min`,
+      color: b.subjectColor ?? '#C9B8DD',
+    }));
+    return [...(events as ViewEvent[]), ...blockEvents];
+  }, [events, blocks]);
   const reload = () => queryClient.invalidateQueries({ queryKey: ['calendar-events'] });
 
   function navigate(dir: -1 | 1) {
@@ -115,9 +143,9 @@ export function CalendarView() {
     setAnchor(next);
   }
 
-  function eventsForDay(d: Date | string): CalendarEvent[] {
+  function eventsForDay(d: Date | string): ViewEvent[] {
     const iso = typeof d === 'string' ? d : toLocalISO(d);
-    return events.filter((e) => e.date === iso);
+    return allEvents.filter((e) => e.date === iso);
   }
 
   function abrirDia(dateISO: string) {
@@ -144,7 +172,7 @@ export function CalendarView() {
     }
   }
 
-  async function apagarLembrete(ev: CalendarEvent) {
+  async function apagarLembrete(ev: ViewEvent) {
     if (!ev.reminderId) return;
     if (!await confirm({ title: `Apagar o lembrete "${ev.label}"?`, confirmLabel: 'Apagar', danger: true })) return;
     try {
@@ -235,6 +263,7 @@ export function CalendarView() {
 
       <div style={{ ...styles.legend, gap: isMobile ? '8px 12px' : 18 }}>
         {([
+          { color: theme.teal,    label: 'Bloco de estudo' },
           { color: theme.ok,      label: 'Revisão de tópico' },
           { color: theme.clay,    label: 'Flashcards' },
           { color: theme.danger,  label: 'Prova' },

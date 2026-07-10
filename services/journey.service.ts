@@ -3,6 +3,7 @@
 // Usado no widget JourneyStats (Home) e na cobertura do ExamCountdown.
 
 import { createClient } from '@/lib/supabase/client';
+import { getCachedUser } from '@/lib/supabase/authCache';
 
 export interface JourneyStats {
   totalMinutes: number;          // tempo total de estudo (all-time)
@@ -26,7 +27,7 @@ const EMPTY: JourneyStats = {
 
 export async function getJourneyStats(): Promise<JourneyStats> {
   const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getCachedUser();
   if (!user) return EMPTY;
 
   const now = new Date();

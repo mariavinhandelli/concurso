@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { DISCIPLINAS_HUB, countByDisciplina } from '@/services/jurisprudencias.service';
-import { countRevisoesHoje, getSimuladoInsights, type SimuladoInsights } from '@/services/jurisInteracoes.service';
+import { getSimuladoInsights, type SimuladoInsights } from '@/services/jurisInteracoes.service';
+import { countRevisoesHoje } from '@/services/jurisRevisao.service';
 import { useUI } from '@/components/layout/UIContext';
 import { theme } from '@/lib/theme';
 

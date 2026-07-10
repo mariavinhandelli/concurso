@@ -5,7 +5,9 @@
 // (evita "foguinho vazio" — manter a sequência com poucos minutos de presença).
 
 import { createClient } from '@/lib/supabase/client';
+import { getCachedUser } from '@/lib/supabase/authCache';
 import { getDailyTarget } from '@/services/goals.service';
+import { getStudyDayTotals } from '@/services/studyTotals.service';
 import { toLocalDateString as localDateStr } from '@/lib/local-date';
 
 const MIN_SEGUNDOS_DIA = 30 * 60; // 30 min = sessão mínima produtiva (referência Tec Concursos / Gran Cursos)
@@ -42,46 +44,15 @@ type SupabaseClient = ReturnType<typeof createClient>;
 // QW5: aceita client + userId opcionais para evitar segundo getUser() quando chamado
 // de dentro de getBadgeState() (que já fez getUser() no início).
 export async function getStreak(_supabase?: SupabaseClient, _userId?: string): Promise<StreakInfo> {
-  const supabase = _supabase ?? createClient();
-  const uid = _userId ?? (await supabase.auth.getUser()).data.user?.id;
+  const uid = _userId ?? (await getCachedUser())?.id;
   if (!uid) return { current: 0, longest: 0, studiedToday: false, lastDays: [], shieldUsed: false };
 
-  // Janela de 3 anos para capturar recordes antigos sem perder histórico.
-  const since = new Date();
-  since.setDate(since.getDate() - 1095);
-  since.setHours(0, 0, 0, 0);
-  const sinceIso = since.toISOString();
-
-  // QW5: getDailyTarget corre em paralelo com o loop paginado.
-  const dailyTargetPromise = getDailyTarget();
-
-  // QW5: paginar para não depender do max_rows do PostgREST (padrão 1000).
-  const PAGE_SIZE = 1000;
-  type LogRow = { duration_sec: number | null; started_at: string };
-  const allLogs: LogRow[] = [];
-  let from = 0;
-  while (true) {
-    const { data, error } = await supabase
-      .from('study_logs')
-      .select('duration_sec, started_at')
-      .eq('user_id', uid)
-      .gte('started_at', sinceIso)
-      .order('id', { ascending: true })
-      .range(from, from + PAGE_SIZE - 1);
-    if (error) throw new Error('Erro ao calcular constância: ' + error.message);
-    if (!data || data.length === 0) break;
-    allLogs.push(...data);
-    if (data.length < PAGE_SIZE) break;
-    from += PAGE_SIZE;
-  }
-  const dailyTarget = await dailyTargetPromise;
-
-  // Soma segundos por dia.
+  // Perf F4: os totais por dia vêm agregados do servidor (get_study_day_totals) em
+  // vez de paginar ~3 anos de logs crus. A lógica de streak (perdão, limiar de 30min,
+  // recorde) segue idêntica, agora sobre poucos day-rows. byDay = segundos por dia local.
+  const [dailyTarget, dayTotals] = await Promise.all([getDailyTarget(), getStudyDayTotals()]);
   const byDay = new Map<string, number>();
-  for (const log of allLogs) {
-    const key = localDateStr(new Date(log.started_at));
-    byDay.set(key, (byDay.get(key) ?? 0) + (log.duration_sec ?? 0));
-  }
+  for (const d of dayTotals) byDay.set(d.day, d.seconds);
 
   const todayStr = localDateStr(new Date());
   const studiedToday = diaConta(byDay.get(todayStr) ?? 0);

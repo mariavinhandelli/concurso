@@ -82,3 +82,38 @@ self.addEventListener('fetch', (event) => {
     )
   );
 });
+
+// ─── Web Push (N1) ──────────────────────────────────────────────────────────
+// Recebe o payload JSON enviado pela Edge Function e mostra a notificação.
+self.addEventListener('push', (event) => {
+  let data = {};
+  try { data = event.data ? event.data.json() : {}; } catch (_) { data = {}; }
+
+  const title = data.title || 'Focali';
+  const options = {
+    body: data.body || '',
+    icon: data.icon || '/brand/symbol.svg',
+    badge: '/brand/symbol.svg',
+    tag: data.tag || 'focali-lembrete',
+    renotify: true,
+    data: { url: data.url || '/' },
+  };
+  event.waitUntil(self.registration.showNotification(title, options));
+});
+
+// Clicar na notificação foca uma aba aberta (navegando até a URL) ou abre uma nova.
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const url = (event.notification.data && event.notification.data.url) || '/';
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clients) => {
+      for (const client of clients) {
+        if ('focus' in client) {
+          if ('navigate' in client) { try { client.navigate(url); } catch (_) { /* cross-origin */ } }
+          return client.focus();
+        }
+      }
+      return self.clients.openWindow(url);
+    })
+  );
+});

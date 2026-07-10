@@ -187,6 +187,23 @@ export async function listFavoritas(): Promise<JurisComInteracao[]> {
   return hydrateInteracoes(data ?? []);
 }
 
+// M8 fase 2: julgados com anotação pessoal — para a busca unificada "Tudo".
+export async function listAnotacoesJuris(): Promise<JurisComInteracao[]> {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return [];
+
+  const { data, error } = await supabase
+    .from('juris_interacoes')
+    .select('*')
+    .eq('user_id', user.id)
+    .not('anotacoes', 'is', null)
+    .order('updated_at', { ascending: false });
+
+  if (error) throw new Error('Erro ao listar anotações: ' + error.message);
+  return hydrateInteracoes((data ?? []).filter((r) => (r.anotacoes ?? '').trim()) as JurisInteracao[]);
+}
+
 export async function listRevisoesHoje(): Promise<JurisComInteracao[]> {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -206,23 +223,8 @@ export async function listRevisoesHoje(): Promise<JurisComInteracao[]> {
   return hydrateInteracoes(data ?? []);
 }
 
-export async function countRevisoesHoje(): Promise<number> {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return 0;
-
-  const hoje = toLocalDateString();
-
-  const { count, error } = await supabase
-    .from('juris_interacoes')
-    .select('id', { count: 'exact', head: true })
-    .eq('user_id', user.id)
-    .eq('is_review_active', true)
-    .lte('next_review_date', hoje);
-
-  if (error) return 0;
-  return count ?? 0;
-}
+// countRevisoesHoje foi movido para services/jurisRevisao.service.ts (perf F1) —
+// contagem pura, sem puxar data/jurisprudencias para a Home.
 
 export async function listFavoritosByIds(ids: string[]): Promise<Record<string, boolean>> {
   if (ids.length === 0) return {};

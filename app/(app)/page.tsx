@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useEffect, useRef } from 'react';
+import { Suspense, useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useRouter } from 'next/navigation';
 import { theme } from '@/lib/theme';
@@ -8,12 +8,13 @@ import { usePersistedState } from '@/hooks/usePersistedState';
 import { useUI } from '@/components/layout/UIContext';
 import { useUser } from '@/components/layout/UserContext';
 import { useTimer } from '@/components/features/timer/TimerContext';
+import { useCoachDecision } from '@/hooks/useCoach';
 import { SemanaPanel } from '@/components/features/home/SemanaPanel';
 import { OnboardingGate } from '@/components/features/home/OnboardingWizard';
-import { RetaFinalCard } from '@/components/features/home/RetaFinalCard';
-import { RetomadaCard } from '@/components/features/home/RetomadaCard';
+import { CoachSlot } from '@/components/features/home/CoachSlot';
 import { PlanoHoje } from '@/components/features/home/PlanoHoje';
 import { TodayBlock } from '@/components/features/home/TodayBlock';
+import { MetaSugeridaHint } from '@/components/features/home/MetaSugeridaHint';
 import { CoberturaEdital } from '@/components/features/home/CoberturaEdital';
 import { MarcoEditalCelebracao } from '@/components/features/home/MarcoEditalCelebracao';
 import { RaioXCard } from '@/components/features/home/RaioXCard';
@@ -73,6 +74,11 @@ function HomeContent() {
   const { name: nome } = useUser();
   const { isMobile } = useUI();
 
+  // Decisor único de coaching (Rodada 3): 1 card no topo + sinal de modo retorno.
+  const decision = useCoachDecision();
+  const [expandido, setExpandido] = useState(false);
+  const returnMode = decision.returnMode && !expandido;
+
   // "Panorama" começa recolhido (reduz a rolagem diária) e a preferência persiste.
   const [panorama, setPanorama] = usePersistedState<'open' | 'closed'>(
     'home:panorama', 'closed', (v) => (v === 'open' ? 'open' : 'closed'),
@@ -114,49 +120,60 @@ function HomeContent() {
         </div>
       </div>
 
-      <RetaFinalCard />
-
-      <RetomadaCard />
+      {/* Decisor único: no máximo UM card de coaching no topo (Rodada 3) */}
+      <CoachSlot decision={decision} />
 
       {/* ── ZONA 1 · Agora — o que fazer neste momento ── */}
       <ZoneHeader label="Agora" />
       <PlanoHoje />
-      <div style={{ marginTop: 16 }}>
-        <TodayBlock />
-      </div>
 
-      {/* ── ZONA 2 · Esta semana — streak (laço central) + missões + coach num só painel ── */}
-      <div style={{ marginTop: 28 }}>
-        <ZoneHeader label="Esta semana" />
-      </div>
-      <SemanaPanel />
+      {returnMode ? (
+        /* Modo retorno (hiato): acolhe + 1 ação; o resto fica atrás de "ver tudo"
+           para não entregar a montanha nem a parede de zeros a quem voltou de longe. */
+        <button style={styles.verTudo} onClick={() => setExpandido(true)}>
+          Ver painel completo ↓
+        </button>
+      ) : (
+        <>
+          <div style={{ marginTop: 16 }}>
+            <TodayBlock />
+            <MetaSugeridaHint />
+          </div>
 
-      {/* ── ZONA 3 · Panorama — progresso e estatísticas (colapsável) ── */}
-      <div style={{ marginTop: 28 }}>
-        <ZoneHeader
-          label="Panorama"
-          hint={panoramaOpen ? undefined : 'progresso, cobertura e estatísticas'}
-          collapsible
-          open={panoramaOpen}
-          onToggle={() => setPanorama(panoramaOpen ? 'closed' : 'open')}
-        />
-      </div>
-      {panoramaOpen && (
-        <div style={{ marginTop: 4 }}>
-          <CoberturaEdital />
-          <div style={{ marginTop: 16 }}>
-            <RaioXCard />
+          {/* ── ZONA 2 · Esta semana — streak + missões + coach num só painel ── */}
+          <div style={{ marginTop: 28 }}>
+            <ZoneHeader label="Esta semana" />
           </div>
-          <div style={{ marginTop: 16 }}>
-            <UltimaNotaCard />
+          <SemanaPanel />
+
+          {/* ── ZONA 3 · Panorama — progresso e estatísticas (colapsável) ── */}
+          <div style={{ marginTop: 28 }}>
+            <ZoneHeader
+              label="Panorama"
+              hint={panoramaOpen ? undefined : 'progresso, cobertura e estatísticas'}
+              collapsible
+              open={panoramaOpen}
+              onToggle={() => setPanorama(panoramaOpen ? 'closed' : 'open')}
+            />
           </div>
-          <div style={{ marginTop: 16 }}>
-            <TimePieCard />
-          </div>
-          <div style={{ marginTop: 16 }}>
-            <JourneyStats />
-          </div>
-        </div>
+          {panoramaOpen && (
+            <div style={{ marginTop: 4 }}>
+              <CoberturaEdital />
+              <div style={{ marginTop: 16 }}>
+                <RaioXCard />
+              </div>
+              <div style={{ marginTop: 16 }}>
+                <UltimaNotaCard />
+              </div>
+              <div style={{ marginTop: 16 }}>
+                <TimePieCard />
+              </div>
+              <div style={{ marginTop: 16 }}>
+                <JourneyStats />
+              </div>
+            </div>
+          )}
+        </>
       )}
     </div>
   );
@@ -172,6 +189,7 @@ const styles: Record<string, React.CSSProperties> = {
   h1: { fontSize: 28, fontWeight: 800, color: theme.ink, letterSpacing: -0.6, margin: 0 },
   sub: { fontSize: 14, color: theme.inkSoft, margin: '4px 0 0', fontWeight: 500 },
   countdownSlot: { flexShrink: 0, minWidth: 0 },
+  verTudo: { marginTop: 16, width: '100%', padding: '11px 16px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.inkSoft, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: theme.font },
 };
 
 const zoneStyles: Record<string, React.CSSProperties> = {

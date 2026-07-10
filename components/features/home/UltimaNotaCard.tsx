@@ -7,7 +7,7 @@ import { memo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { getLastEditedNote, NOTA_KINDS, type StudyNoteMeta } from '@/services/studyNotes.service';
-import { KIND_CORES } from '@/components/features/caderno/NotaEditor';
+import { KIND_CORES } from '@/components/features/caderno/notaCores';
 import { theme } from '@/lib/theme';
 
 function fmtRelative(iso: string): string {

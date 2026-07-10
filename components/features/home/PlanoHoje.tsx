@@ -6,12 +6,14 @@ import { useQuery } from '@tanstack/react-query';
 import { countDueReviews } from '@/services/reviews.service';
 import { countDueCards } from '@/services/flashcards.service';
 import { countRevisoesDue } from '@/services/leiInteracoes.service';
-import { countRevisoesHoje } from '@/services/jurisInteracoes.service';
+import { countRevisoesHoje } from '@/services/jurisRevisao.service';
 import { getGoalsSummary, type GoalsSummary } from '@/services/goals.service';
 import { listBlocks, type StudyBlock } from '@/services/studyBlocks.service';
 import {
   getSuggestions, type SuggestionsResult, type SuggestedTopic, type SuggestionKind,
 } from '@/services/suggestion.service';
+import { getDormantModules, type DormantModules } from '@/services/activation.service';
+import { track, EV } from '@/lib/analytics';
 import { useTimer } from '@/components/features/timer/TimerContext';
 import { toLocalDateString } from '@/lib/local-date';
 import { theme } from '@/lib/theme';
@@ -25,6 +27,16 @@ const KIND_META: Record<SuggestionKind, { label: string; fg: string; bg: string 
   revisao:   { label: 'Revisar',   fg: theme.teal,     bg: theme.tealBg },
   reforco:   { label: 'Reforçar',  fg: theme.warn,     bg: theme.warnBg },
   recuperar: { label: 'Recuperar', fg: theme.clayDeep, bg: theme.clayBg },
+};
+
+// N7 — convites de 1º uso para módulos dormentes. Ordem = prioridade de exibição
+// (mostra só um por vez para não poluir). Cada convite é concreto e acionável.
+const DORMANT_ORDER = ['lei', 'juris', 'flashcards'] as const;
+type DormantKey = typeof DORMANT_ORDER[number];
+const DORMANT_INVITES: Record<DormantKey, { label: string; desc: string; href: string }> = {
+  lei: { label: 'Vade Mecum', desc: 'grife e revise a lei seca do seu edital', href: '/vademecum' },
+  juris: { label: 'Jurisprudências', desc: 'domine os julgados que mais caem', href: '/jurisprudencias' },
+  flashcards: { label: 'Flashcards', desc: 'crie seu primeiro para fixar na memória', href: '/flashcards' },
 };
 
 function KindPill({ kind }: { kind: SuggestionKind }) {
@@ -68,6 +80,10 @@ export const PlanoHoje = memo(function PlanoHoje() {
   const { data: goals } = useQuery<GoalsSummary>({ queryKey: ['goals-summary'], queryFn: getGoalsSummary });
   const { data: sug } = useQuery<SuggestionsResult>({ queryKey: ['home-suggestions'], queryFn: getSuggestions });
   const { data: blocos } = useQuery<StudyBlock[]>({ queryKey: ['today-blocks', hoje], queryFn: () => listBlocks(hoje, hoje) });
+  const { data: dormant } = useQuery<DormantModules>({ queryKey: ['dormant-modules'], queryFn: getDormantModules, staleTime: 5 * 60_000 });
+
+  // N7 — primeiro módulo nunca usado (se houver) para o convite de descoberta.
+  const dormanteKey: DormantKey | null = dormant ? (DORMANT_ORDER.find((k) => dormant[k]) ?? null) : null;
 
   // ── Cronograma do dia — o plano explícito do usuário tem prioridade sobre a sugestão. ──
   const blocksDia = blocos ?? [];
@@ -215,6 +231,18 @@ export const PlanoHoje = memo(function PlanoHoje() {
         </div>
       </div>
 
+      {/* N7 — convite de 1º uso a um módulo dormente (Vade Mecum, Juris, Flashcards) */}
+      {dormanteKey && (
+        <button style={styles.descobrir} onClick={() => { track(EV.dormantOpened, { module: dormanteKey }); router.push(DORMANT_INVITES[dormanteKey].href); }}>
+          <span style={styles.descobrirPill}>Descobrir</span>
+          <span style={styles.descobrirText}>
+            <b style={styles.descobrirLabel}>{DORMANT_INVITES[dormanteKey].label}</b>
+            {' — '}{DORMANT_INVITES[dormanteKey].desc}
+          </span>
+          <Chevron />
+        </button>
+      )}
+
       {/* Seção expansível: blocos do dia (cronograma) ou sugestões secundárias */}
       {temExtras && (
         <div style={styles.alsoWrap}>
@@ -348,6 +376,18 @@ const styles: Record<string, React.CSSProperties> = {
     background: theme.card, color: theme.inkSoft, fontSize: 13,
     fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap', flexShrink: 0,
   },
+
+  descobrir: {
+    display: 'flex', alignItems: 'center', gap: 10, width: '100%', marginTop: 10,
+    padding: '10px 12px', borderRadius: theme.radiusSm, border: `0.5px dashed ${theme.line}`,
+    background: 'transparent', cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit', minWidth: 0,
+  },
+  descobrirPill: {
+    fontSize: 10.5, fontWeight: 700, letterSpacing: 0.3, textTransform: 'uppercase',
+    color: theme.tealDeep, background: theme.tealBg, padding: '2px 8px', borderRadius: theme.radiusPill, flexShrink: 0,
+  },
+  descobrirText: { fontSize: 12.5, color: theme.inkSoft, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, minWidth: 0 },
+  descobrirLabel: { color: theme.ink, fontWeight: 700 },
 
   alsoWrap: { marginTop: 12, paddingTop: 12, borderTop: `0.5px solid ${theme.line}` },
   alsoToggle: {

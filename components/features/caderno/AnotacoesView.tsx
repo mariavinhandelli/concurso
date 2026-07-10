@@ -11,7 +11,8 @@ import {
   listStudyNotes, getStudyNote, createStudyNote,
   type StudyNoteMeta, type StudyNote, type NotaKind,
 } from '@/services/studyNotes.service';
-import { NotaEditor, KIND_CORES } from '@/components/features/caderno/NotaEditor';
+import { NotaEditor } from '@/components/features/caderno/NotaEditor';
+import { KIND_CORES } from '@/components/features/caderno/notaCores';
 import { useUI } from '@/components/layout/UIContext';
 import { useToast } from '@/components/ui/ToastProvider';
 import { theme } from '@/lib/theme';

@@ -177,3 +177,18 @@ export async function listFavoriteLeiArtigos(): Promise<{ artigoKey: string }[]>
   if (error) return [];
   return (data ?? []).map((r) => ({ artigoKey: r.artigo_key as string }));
 }
+
+// M8 fase 2: artigos com anotação — para a busca unificada "Tudo" do Caderno.
+export async function listAnotacoesLei(): Promise<{ artigoKey: string; anotacoes: string; updated_at: string }[]> {
+  const { supabase, userId } = await requireUser();
+  const { data, error } = await supabase
+    .from('lei_interacoes')
+    .select('artigo_key, anotacoes, updated_at')
+    .eq('user_id', userId)
+    .not('anotacoes', 'is', null)
+    .order('updated_at', { ascending: false });
+  if (error) return [];
+  return (data ?? [])
+    .filter((r) => (r.anotacoes ?? '').trim())
+    .map((r) => ({ artigoKey: r.artigo_key as string, anotacoes: r.anotacoes as string, updated_at: r.updated_at as string }));
+}

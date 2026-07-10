@@ -9,6 +9,7 @@ import { createClient } from '@/lib/supabase/client';
 import { theme } from '@/lib/theme';
 import { useUI, PALETTES } from '@/components/layout/UIContext';
 import { listAllBoards, createBoard, updateBoard, deleteBoard, type Board } from '@/services/boards.service';
+import { NotificacoesCard } from '@/components/features/settings/NotificacoesCard';
 
 export default function SettingsPage() {
   const supabase = createClient();
@@ -200,6 +201,9 @@ export default function SettingsPage() {
           </button>
         </div>
       </section>
+
+      {/* NOTIFICAÇÕES (N1 — web push) */}
+      <NotificacoesCard />
 
       {/* BANCAS */}
       <section style={styles.card}>

@@ -6,14 +6,20 @@
 'use client';
 
 import { useEffect, useMemo, useState, type CSSProperties } from 'react';
+import { useRouter } from 'next/navigation';
 import { listStudyNotes, type NotaKind } from '@/services/studyNotes.service';
 import { listRecentNotes } from '@/services/notebook.service';
-import { KIND_CORES } from '@/components/features/caderno/NotaEditor';
+import { listAnotacoesLei } from '@/services/leiInteracoes.service';
+import { listAnotacoesJuris } from '@/services/jurisInteracoes.service';
+import { LEIS_CATALOG } from '@/services/leis.service';
+import { KIND_CORES } from '@/components/features/caderno/notaCores';
 import { useToast } from '@/components/ui/ToastProvider';
 import { theme } from '@/lib/theme';
 
-type Fonte = 'nota' | 'erro';
-type Tipo = NotaKind | 'erro';
+// 'lei'/'juris' são anotações que vivem no Vade Mecum/Jurisprudências — aqui só
+// aparecem para busca/leitura e o clique abre o artigo/julgado (não o Caderno).
+type Fonte = 'nota' | 'erro' | 'lei' | 'juris';
+type Tipo = NotaKind | 'erro' | 'lei' | 'juris';
 
 interface Item {
   fonte: Fonte;
@@ -23,12 +29,17 @@ interface Item {
   tipo: Tipo;
   topicName: string | null;
   updated: string;
+  href?: string; // presente em lei/juris → navega direto
 }
 
 const TIPO_LABEL: Record<Tipo, string> = {
-  resumo: 'Resumo', dica: 'Dica', esquema: 'Esquema', outro: 'Outro', erro: 'Erro',
+  resumo: 'Resumo', dica: 'Dica', esquema: 'Esquema', outro: 'Outro', erro: 'Erro', lei: 'Lei seca', juris: 'Juris',
 };
-const ERRO_COR = { bg: theme.clayBg, ink: theme.clayDeep };
+const COR_EXTRA: Partial<Record<Tipo, { bg: string; ink: string }>> = {
+  erro: { bg: theme.clayBg, ink: theme.clayDeep },
+  lei: { bg: theme.tealBg, ink: theme.tealDeep },
+  juris: { bg: theme.warnTint, ink: theme.warnDeep },
+};
 
 // Janela de erros exibida por padrão na visão unificada; a busca no módulo
 // Erros cobre o histórico completo quando necessário.
@@ -40,6 +51,8 @@ const FILTROS: { value: 'all' | Tipo; label: string }[] = [
   { value: 'dica', label: 'Dicas' },
   { value: 'esquema', label: 'Esquemas' },
   { value: 'erro', label: 'Erros' },
+  { value: 'lei', label: 'Lei seca' },
+  { value: 'juris', label: 'Juris' },
 ];
 
 function fmtRelative(iso: string): string {
@@ -55,7 +68,8 @@ function fmtRelative(iso: string): string {
   return new Date(iso).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
 }
 
-export function TudoView({ onAbrir }: { onAbrir: (item: { fonte: Fonte; id: string }) => void }) {
+export function TudoView({ onAbrir }: { onAbrir: (item: { fonte: 'nota' | 'erro'; id: string }) => void }) {
+  const router = useRouter();
   const toast = useToast();
   const [itens, setItens] = useState<Item[] | null>(null);
   const [busca, setBusca] = useState('');
@@ -63,8 +77,14 @@ export function TudoView({ onAbrir }: { onAbrir: (item: { fonte: Fonte; id: stri
 
   useEffect(() => {
     let cancelled = false;
-    Promise.all([listStudyNotes(), listRecentNotes(JANELA_ERROS_DIAS)])
-      .then(([notas, erros]) => {
+    const nomeCurtoPorSlug = new Map(LEIS_CATALOG.map((l) => [l.slug, l.nomeCurto]));
+    Promise.all([
+      listStudyNotes(),
+      listRecentNotes(JANELA_ERROS_DIAS),
+      listAnotacoesLei().catch(() => []),
+      listAnotacoesJuris().catch(() => []),
+    ])
+      .then(([notas, erros, leiAnot, jurisAnot]) => {
         if (cancelled) return;
         const combinados: Item[] = [
           ...notas.map((n): Item => ({
@@ -77,6 +97,20 @@ export function TudoView({ onAbrir }: { onAbrir: (item: { fonte: Fonte; id: stri
             preview: (e.content_text ?? '').trim().slice(0, 140),
             tipo: 'erro', topicName: null, updated: e.updated_at,
           })),
+          ...leiAnot.map((a): Item => {
+            const [slug, numero] = a.artigoKey.split(':');
+            return {
+              fonte: 'lei', id: a.artigoKey, title: `Art. ${numero} · ${nomeCurtoPorSlug.get(slug) ?? slug}`,
+              preview: a.anotacoes.trim().slice(0, 140), tipo: 'lei', topicName: null,
+              updated: a.updated_at, href: `/vademecum/${slug}`,
+            };
+          }),
+          ...jurisAnot.map((j): Item => ({
+            fonte: 'juris', id: j.id, title: j.titulo || j.disciplina,
+            preview: (j.interacao?.anotacoes ?? '').trim().slice(0, 140), tipo: 'juris',
+            topicName: j.tribunal, updated: j.interacao?.updated_at ?? j.updated_at,
+            href: `/jurisprudencias/${j.id}`,
+          })),
         ];
         combinados.sort((a, b) => b.updated.localeCompare(a.updated));
         setItens(combinados);
@@ -86,6 +120,11 @@ export function TudoView({ onAbrir }: { onAbrir: (item: { fonte: Fonte; id: stri
       });
     return () => { cancelled = true; };
   }, [toast]);
+
+  function abrir(i: Item) {
+    if (i.href) { router.push(i.href); return; }         // lei/juris → abre no módulo nativo
+    onAbrir({ fonte: i.fonte as 'nota' | 'erro', id: i.id }); // nota/erro → aba do hub
+  }
 
   const filtrados = useMemo(() => {
     let out = itens ?? [];
@@ -131,9 +170,9 @@ export function TudoView({ onAbrir }: { onAbrir: (item: { fonte: Fonte; id: stri
       ) : (
         <div style={s.list}>
           {filtrados.map((i) => {
-            const cor = i.tipo === 'erro' ? ERRO_COR : KIND_CORES[i.tipo];
+            const cor = COR_EXTRA[i.tipo] ?? KIND_CORES[i.tipo as NotaKind];
             return (
-              <button key={`${i.fonte}-${i.id}`} onClick={() => onAbrir({ fonte: i.fonte, id: i.id })} style={s.card}>
+              <button key={`${i.fonte}-${i.id}`} onClick={() => abrir(i)} style={s.card}>
                 <span style={s.titulo}>{i.title}</span>
                 {i.preview && <span style={s.preview}>{i.preview}</span>}
                 <span style={s.metaRow}>

@@ -10,7 +10,7 @@ import {
   listNotesByTopic, createStudyNote, NOTA_KINDS,
   type StudyNoteMeta,
 } from '@/services/studyNotes.service';
-import { KIND_CORES } from '@/components/features/caderno/NotaEditor';
+import { KIND_CORES } from '@/components/features/caderno/notaCores';
 import { useToast } from '@/components/ui/ToastProvider';
 import { theme, zIndex } from '@/lib/theme';
 import type { Topic } from '@/services/topics.service';
