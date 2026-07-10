@@ -154,3 +154,47 @@ export async function insertTopicsBulk(
   if (error) throw new Error('Erro ao importar tópicos: ' + error.message);
   return data?.length ?? 0;
 }
+
+// Igual ao bulk, mas devolve os ids NA ORDEM inserida — a importação com
+// hierarquia precisa deles para apontar os filhos aos pais recém-criados.
+export async function insertTopicsBulkReturningIds(
+  supabase: SupabaseClient,
+  userId: string,
+  subjectId: string,
+  names: string[],
+  parentId: string | null,
+  startPos: number,
+): Promise<string[]> {
+  const rows = names.map((name, i) => ({
+    user_id: userId,
+    subject_id: subjectId,
+    name,
+    parent_id: parentId,
+    position: startPos + i,
+  }));
+  const { data, error } = await supabase
+    .from('topics')
+    .insert(rows)
+    .select('id, position')
+    .order('position', { ascending: true });
+  if (error) throw new Error('Erro ao importar tópicos: ' + error.message);
+  return (data ?? []).map((r) => r.id);
+}
+
+export async function insertTopicChildren(
+  supabase: SupabaseClient,
+  userId: string,
+  subjectId: string,
+  children: { name: string; parentId: string }[],
+  startPos: number,
+): Promise<void> {
+  const rows = children.map((c, i) => ({
+    user_id: userId,
+    subject_id: subjectId,
+    name: c.name,
+    parent_id: c.parentId,
+    position: startPos + i,
+  }));
+  const { error } = await supabase.from('topics').insert(rows);
+  if (error) throw new Error('Erro ao importar subtópicos: ' + error.message);
+}

@@ -12,9 +12,10 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
-  listTopics, createTopic, createTopicsBulk, updateTopic,
+  listTopics, createTopic, createTopicsTree, updateTopic,
   toggleCompleted, deleteTopic, type Topic,
 } from '@/services/topics.service';
+import type { ParsedTopic } from '@/lib/parse-topics';
 import { getSubject, type Subject } from '@/services/subjects.service';
 import { activateReview, deactivateReview } from '@/services/reviews.service';
 import { getSaudeMap } from '@/services/metrics.service';
@@ -36,7 +37,7 @@ export interface UseTopicsReturn {
   doneLeaf: number;
   pct: number;
   handleCreate: (name: string, parentId?: string | null) => Promise<void>;
-  handleCreateBulk: (names: string[], parentId: string | null) => Promise<void>;
+  handleCreateBulk: (itens: ParsedTopic[], parentId: string | null) => Promise<void>;
   handleToggle: (topic: Topic) => Promise<void>;
   handleToggleReview: (topic: Topic) => Promise<void>;
   handleDelete: (id: string) => Promise<void>;
@@ -124,9 +125,9 @@ export function useTopics(subjectId: string, initialSubject?: Subject): UseTopic
     }
   }, [subjectId, refresh]);
 
-  const handleCreateBulk = useCallback(async (names: string[], parentId: string | null) => {
+  const handleCreateBulk = useCallback(async (itens: ParsedTopic[], parentId: string | null) => {
     try {
-      await createTopicsBulk(subjectId, names, parentId);
+      await createTopicsTree(subjectId, itens, parentId);
       await refresh();
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Erro ao importar.');

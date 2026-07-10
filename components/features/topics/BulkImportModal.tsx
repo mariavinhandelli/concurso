@@ -3,11 +3,11 @@
 'use client';
 
 import { useState } from 'react';
-import { parseTopics } from '@/lib/parse-topics';
+import { parseTopicsTree, type ParsedTopic } from '@/lib/parse-topics';
 import { theme } from '@/lib/theme';
 
 interface Props {
-  onConfirm: (nomes: string[]) => Promise<void>;
+  onConfirm: (itens: ParsedTopic[]) => Promise<void>;
   onClose: () => void;
 }
 
@@ -15,14 +15,15 @@ export function BulkImportModal({ onConfirm, onClose }: Props) {
   const [raw, setRaw] = useState('');
   const [saving, setSaving] = useState(false);
   const [importError, setImportError] = useState('');
-  const nomes = parseTopics(raw);
+  const itens = parseTopicsTree(raw);
+  const nSub = itens.filter((i) => i.child).length;
 
   async function handleConfirm() {
-    if (nomes.length === 0) return;
+    if (itens.length === 0) return;
     setSaving(true);
     setImportError('');
     try {
-      await onConfirm(nomes);
+      await onConfirm(itens);
       onClose();
     } catch (e) {
       setImportError(e instanceof Error ? e.message : 'Erro ao importar tópicos.');
@@ -37,7 +38,8 @@ export function BulkImportModal({ onConfirm, onClose }: Props) {
         <h2 style={styles.h2}>Colar tópicos</h2>
         <p style={styles.hint}>
           Cole o conteúdo programático da disciplina — um tópico por linha.
-          Numeração e marcadores (1., a), -, •) são limpos automaticamente.
+          Numeração e marcadores (1., a), -, •) são limpos automaticamente;
+          subitens (a), i., 1.1 ou linhas indentadas) viram subtópicos do item anterior.
         </p>
 
         <div style={styles.split}>
@@ -53,14 +55,20 @@ export function BulkImportModal({ onConfirm, onClose }: Props) {
           {/* Preview da árvore */}
           <div style={styles.preview}>
             <div style={styles.previewHeader}>
-              {nomes.length === 0 ? 'Pré-visualização' : `${nomes.length} tópico(s)`}
+              {itens.length === 0
+                ? 'Pré-visualização'
+                : `${itens.length} tópico(s)${nSub > 0 ? ` · ${nSub} subtópico(s)` : ''}`}
             </div>
-            {nomes.length === 0 ? (
+            {itens.length === 0 ? (
               <p style={styles.previewEmpty}>Os tópicos limpos aparecem aqui.</p>
             ) : (
-              <ol style={styles.previewList}>
-                {nomes.map((n, i) => <li key={i} style={styles.previewItem}>{n}</li>)}
-              </ol>
+              <ul style={styles.previewList}>
+                {itens.map((t, i) => (
+                  <li key={i} style={{ ...styles.previewItem, ...(t.child ? styles.previewChild : {}) }}>
+                    {t.child ? '↳ ' : ''}{t.name}
+                  </li>
+                ))}
+              </ul>
             )}
           </div>
         </div>
@@ -70,10 +78,10 @@ export function BulkImportModal({ onConfirm, onClose }: Props) {
           <button onClick={onClose} style={styles.cancelBtn}>Cancelar</button>
           <button
             onClick={handleConfirm}
-            disabled={nomes.length === 0 || saving}
-            style={{ ...styles.confirmBtn, ...(nomes.length === 0 || saving ? styles.confirmBtnOff : {}) }}
+            disabled={itens.length === 0 || saving}
+            style={{ ...styles.confirmBtn, ...(itens.length === 0 || saving ? styles.confirmBtnOff : {}) }}
           >
-            {saving ? 'Importando…' : `Adicionar ${nomes.length || ''} tópico(s)`}
+            {saving ? 'Importando…' : `Adicionar ${itens.length || ''} tópico(s)`}
           </button>
         </div>
       </div>
@@ -91,8 +99,9 @@ const styles: Record<string, React.CSSProperties> = {
   preview: { flex: 1, minHeight: 240, maxHeight: 300, overflowY: 'auto', padding: 14, borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.muted },
   previewHeader: { fontSize: 12, fontWeight: 700, color: theme.inkSoft, marginBottom: 10, textTransform: 'uppercase', letterSpacing: 0.4 },
   previewEmpty: { fontSize: 13, color: theme.inkFaint, margin: 0 },
-  previewList: { margin: 0, paddingLeft: 20, display: 'flex', flexDirection: 'column', gap: 6 },
+  previewList: { margin: 0, paddingLeft: 6, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 6 },
   previewItem: { fontSize: 14, color: theme.ink, lineHeight: 1.4 },
+  previewChild: { paddingLeft: 18, color: theme.inkSoft, fontSize: 13.5 },
   actions: { display: 'flex', gap: 12, justifyContent: 'flex-end' },
   cancelBtn: { padding: '11px 22px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.inkSoft, fontSize: 14, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' },
   confirmBtn: { padding: '11px 22px', borderRadius: theme.radiusSm, border: 'none', background: theme.teal, color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },

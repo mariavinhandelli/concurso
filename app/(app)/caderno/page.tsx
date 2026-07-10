@@ -36,17 +36,20 @@ export default function CadernoHubPage() {
 
   const tab = override ?? tabPref;
 
-  // Deep-links (client-only): ?nota= abre a nota na aba Anotações; ?tab= escolhe a aba.
+  // Deep-links (client-only): ?nota= abre a nota na aba Anotações; ?erro= abre o
+  // erro na aba Erros (usado pela busca global); ?tab= escolhe a aba.
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const nota = params.get('nota');
+    const erro = params.get('erro');
     const tabParam = params.get('tab');
     // Sincroniza a aba a partir da URL uma vez na montagem (sistema externo).
     /* eslint-disable react-hooks/set-state-in-effect */
     if (nota) { setOverride('anotacoes'); setOpenNotaId(nota); }
+    else if (erro) { setOverride('erros'); setOpenNoteId(erro); }
     else if (tabParam) { setOverride(parseTab(tabParam)); }
     /* eslint-enable react-hooks/set-state-in-effect */
-    if (nota || tabParam) window.history.replaceState(null, '', '/caderno');
+    if (nota || erro || tabParam) window.history.replaceState(null, '', '/caderno');
   }, []);
 
   // Clique numa aba: vira preferência e limpa qualquer abertura pendente.

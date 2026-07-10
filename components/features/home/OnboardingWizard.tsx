@@ -15,6 +15,7 @@ import { getOnboardingStatus } from '@/services/onboarding.service';
 import { listCatalogEditais, activateCatalogEdital, type CatalogEdital } from '@/services/editaisCatalog.service';
 import { buildPreview, type GeneratorPreview } from '@/services/scheduleGenerator.service';
 import { createRule, type RecurrenceItemInput } from '@/services/recurrence.service';
+import { getDailyTarget, setDailyTarget } from '@/services/goals.service';
 import { refreshHomeAfterSession } from '@/lib/home-refresh';
 import { theme, zIndex } from '@/lib/theme';
 
@@ -112,6 +113,15 @@ function OnboardingWizard({ userId, onClose }: { userId: string; onClose: (remem
           subjectId: s.subjectId, plannedMinutes: s.minutesPerCycle, cycleOrder: i, position: i,
         }));
         await createRule({ mode: 'ciclo', endDate: null, cycleDailyMinutes: horasNum * 60, items });
+      }
+      // As horas declaradas viram também a meta diária (se ainda não houver uma).
+      // Sem isso, o usuário dizia "3h/dia" e a Home seguia com meta 0 — e a Meta
+      // Adaptativa sugeria "25min/dia" na mesma tela, contradizendo o wizard.
+      try {
+        const metaAtual = await getDailyTarget();
+        if (metaAtual <= 0) await setDailyTarget(horasNum * 60);
+      } catch (e) {
+        console.error('Meta diária não definida (plano criado mesmo assim):', e);
       }
       setPreview(prev);
       refreshHomeAfterSession(queryClient);

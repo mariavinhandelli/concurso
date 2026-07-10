@@ -3,7 +3,7 @@
 // Tipos Confidence e Topic são definidos no repositório e re-exportados aqui para
 // manter compatibilidade com todos os importadores existentes.
 
-import { requireUser } from '@/lib/supabase/requireUser';
+import { requireUser, tryGetUser } from '@/lib/supabase/requireUser';
 import * as repo from '@/services/topics.repository';
 
 export type { Confidence, Topic } from '@/services/topics.repository';
@@ -12,6 +12,40 @@ export type { PickerOption } from '@/services/subjects.service';
 export async function listTopics(subjectId: string) {
   const { supabase, userId } = await requireUser();
   return repo.fetchTopics(supabase, userId, subjectId);
+}
+
+// Rótulo do alvo de uma sessão (painel do timer): "Matéria · Tópico" ou só a
+// matéria. Sem isso o cronômetro não dizia O QUE estava sendo cronometrado.
+export async function getSessionTargetLabel(
+  subjectId: string | null,
+  topicId: string | null,
+): Promise<string | null> {
+  const ctx = await tryGetUser();
+  if (!ctx) return null;
+  const { supabase, userId } = ctx;
+
+  if (topicId) {
+    const { data } = await supabase
+      .from('topics')
+      .select('name, subjects(name)')
+      .eq('id', topicId)
+      .eq('user_id', userId)
+      .maybeSingle();
+    if (data) {
+      const subj = Array.isArray(data.subjects) ? data.subjects[0] : data.subjects;
+      return subj?.name ? `${subj.name} · ${data.name}` : data.name;
+    }
+  }
+  if (subjectId) {
+    const { data } = await supabase
+      .from('subjects')
+      .select('name')
+      .eq('id', subjectId)
+      .eq('user_id', userId)
+      .maybeSingle();
+    return data?.name ?? null;
+  }
+  return null;
 }
 
 export async function listAllTopics() {
@@ -68,4 +102,40 @@ export async function createTopicsBulk(
   const { supabase, userId } = await requireUser();
   const startPos = await repo.fetchMaxTopicPosition(supabase, subjectId);
   return repo.insertTopicsBulk(supabase, userId, subjectId, nomes, parentId, startPos);
+}
+
+// Importação com hierarquia: itens `child` viram subtópicos do item de nível
+// superior imediatamente anterior. Dentro de uma pasta (parentId), a hierarquia
+// colapsa — tudo vira filho direto da pasta (só há um nível de aninhamento).
+export async function createTopicsTree(
+  subjectId: string,
+  itens: { name: string; child: boolean }[],
+  parentId: string | null = null,
+): Promise<number> {
+  if (itens.length === 0) return 0;
+  if (itens.length > 500) throw new Error('Limite de 500 tópicos por importação. Divida em partes menores.');
+  if (parentId !== null || itens.every((i) => !i.child)) {
+    return createTopicsBulk(subjectId, itens.map((i) => i.name), parentId);
+  }
+
+  const { supabase, userId } = await requireUser();
+  const startPos = await repo.fetchMaxTopicPosition(supabase, subjectId);
+
+  // Fase 1: insere os itens de nível superior (ordem preservada pelo insert).
+  const tops = itens.filter((i) => !i.child);
+  const topIds = await repo.insertTopicsBulkReturningIds(
+    supabase, userId, subjectId, tops.map((t) => t.name), null, startPos,
+  );
+
+  // Fase 2: filhos apontam para o pai correspondente na sequência colada.
+  const children: { name: string; parentId: string }[] = [];
+  let topIdx = -1;
+  for (const item of itens) {
+    if (!item.child) { topIdx++; continue; }
+    if (topIdx >= 0 && topIds[topIdx]) children.push({ name: item.name, parentId: topIds[topIdx] });
+  }
+  if (children.length > 0) {
+    await repo.insertTopicChildren(supabase, userId, subjectId, children, startPos + tops.length);
+  }
+  return tops.length + children.length;
 }

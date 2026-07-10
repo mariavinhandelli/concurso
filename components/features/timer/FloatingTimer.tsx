@@ -5,9 +5,10 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTimer } from './TimerContext';
 import { saveStudyLog, type SessionFeedback } from '@/services/studyLogs.service';
+import { getSessionTargetLabel } from '@/services/topics.service';
 import { refreshHomeAfterSession } from '@/lib/home-refresh';
 import { QualitativeFeedbackForm } from './QualitativeFeedbackForm';
 import { theme } from '@/lib/theme';
@@ -25,6 +26,17 @@ export function FloatingTimer() {
   const [saving, setSaving] = useState(false);
   const [showPicker, setShowPicker] = useState(false);
   const pickerRef = useRef<HTMLDivElement>(null);
+
+  // O que está sendo cronometrado ("Matéria · Tópico") — sem isso o usuário
+  // abria o painel e não sabia a que sessão o tempo pertencia.
+  const alvoSubjectId = timer.active?.subjectId ?? null;
+  const alvoTopicId = timer.active?.topicId ?? null;
+  const { data: alvoLabel } = useQuery({
+    queryKey: ['timer-alvo', alvoSubjectId, alvoTopicId],
+    queryFn: () => getSessionTargetLabel(alvoSubjectId, alvoTopicId),
+    enabled: !!(alvoSubjectId || alvoTopicId),
+    staleTime: Infinity,
+  });
 
   // Fecha o picker ao clicar fora dele.
   useEffect(() => {
@@ -150,6 +162,7 @@ export function FloatingTimer() {
         </button>
       </div>
       <div style={styles.cardTime}>{timer.formatted}</div>
+      {alvoLabel && <div style={styles.cardAlvo} title={alvoLabel}>{alvoLabel}</div>}
       <div style={styles.cardStatus}>
         <span style={{ ...styles.pillDot, background: timer.isRunning ? theme.tealSoft : theme.clay }} />
         {timer.isRunning ? 'em andamento' : 'pausado'}
@@ -207,6 +220,7 @@ const styles: Record<string, React.CSSProperties> = {
   eyebrow: { fontSize: 10, fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase', color: theme.inkFaint },
   collapseBtn: { border: 'none', background: 'transparent', color: theme.inkFaint, cursor: 'pointer', padding: 0, display: 'grid', placeItems: 'center' },
   cardTime: { fontSize: 34, fontWeight: 500, color: theme.ink, fontVariantNumeric: 'tabular-nums', letterSpacing: -1, lineHeight: 1 },
+  cardAlvo: { fontSize: 12, fontWeight: 600, color: theme.inkSoft, marginTop: 8, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
   cardStatus: { display: 'flex', alignItems: 'center', gap: 7, fontSize: 12, color: theme.inkSoft, margin: '8px 0 14px' },
   focusBtn: { display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, width: '100%', padding: '9px 0', marginBottom: 8, borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.card, color: theme.inkSoft, fontSize: 12.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
   cardActions: { display: 'flex', gap: 8 },
