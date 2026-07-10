@@ -17,6 +17,7 @@ interface Props {
 }
 
 const RATINGS: { key: ReviewRating; grade: RecallGrade; label: string; fg: string; bg: string }[] = [
+  { key: 'errei',         grade: 'errou',   label: 'Errei',   fg: theme.danger,  bg: theme.dangerBg },
   { key: 'dificil',       grade: 'dificil', label: 'Difícil', fg: theme.inkSoft, bg: theme.muted  },
   { key: 'intermediario', grade: 'bom',     label: 'Médio',   fg: theme.info,    bg: theme.infoBg },
   { key: 'facil',         grade: 'facil',   label: 'Fácil',   fg: theme.okDeep,  bg: theme.okBg   },
@@ -99,7 +100,7 @@ export function FlashcardEngine({ queue, onFinish, onExit }: Props) {
   }, [trackedTimeout]);
 
   const handleRate = useCallback(async (r: (typeof RATINGS)[0]) => {
-    const days = intervals?.[r.key];
+    const days = r.key === 'errei' ? -1 : intervals?.[r.key]; // -1 = volta nesta sessão
     await sessionRef.current.rate(r.key);
     if (days != null) {
       setGhostRating({ label: r.label, days });
@@ -128,6 +129,7 @@ export function FlashcardEngine({ queue, onFinish, onExit }: Props) {
         if (e.key === '1') void handleRateRef.current(RATINGS[0]);
         if (e.key === '2') void handleRateRef.current(RATINGS[1]);
         if (e.key === '3') void handleRateRef.current(RATINGS[2]);
+        if (e.key === '4') void handleRateRef.current(RATINGS[3]);
       }
     }
     window.addEventListener('keydown', onKey);
@@ -231,7 +233,9 @@ export function FlashcardEngine({ queue, onFinish, onExit }: Props) {
                 <span style={styles.ratingKey}>{i + 1}</span>
                 <span style={styles.ratingLabel}>{r.label}</span>
                 {intervals && (
-                  <span style={styles.ratingInterval}>{formatDays(intervals[r.key])}</span>
+                  <span style={styles.ratingInterval}>
+                    {r.key === 'errei' ? 'rever hoje' : formatDays(intervals[r.key])}
+                  </span>
                 )}
               </button>
             ))}
@@ -242,12 +246,16 @@ export function FlashcardEngine({ queue, onFinish, onExit }: Props) {
             <kbd style={kbdStyle}>2</kbd>
             {' · '}
             <kbd style={kbdStyle}>3</kbd>
+            {' · '}
+            <kbd style={kbdStyle}>4</kbd>
           </p>
         </>
       ) : (
         ghostRating ? (
-          <p style={styles.ghostFeedback}>
-            ✓ {ghostRating.label} — próxima revisão em {formatDays(ghostRating.days)}
+          <p style={{ ...styles.ghostFeedback, ...(ghostRating.days < 0 ? { color: theme.danger } : {}) }}>
+            {ghostRating.days < 0
+              ? '↩ Errei — o card volta no fim desta sessão'
+              : `✓ ${ghostRating.label} — próxima revisão em ${formatDays(ghostRating.days)}`}
           </p>
         ) : (
           <p style={styles.remainingHint}>

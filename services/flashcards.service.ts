@@ -9,9 +9,11 @@ import { localDateInDays, toLocalDateString } from '@/lib/local-date';
 import { getArchivedSubjectIds } from '@/services/archivedCache';
 import * as repo from '@/services/flashcards.repository';
 
-export type ReviewRating = 'dificil' | 'intermediario' | 'facil';
+// 'errei' = lapso (quality 0 no SM-2): reseta as repetições, derruba o ease factor
+// e o card volta para o fim da fila da sessão atual (rever ainda hoje).
+export type ReviewRating = 'errei' | 'dificil' | 'intermediario' | 'facil';
 const RATING_TO_GRADE: Record<ReviewRating, RecallGrade> = {
-  dificil: 'dificil', intermediario: 'bom', facil: 'facil',
+  errei: 'errou', dificil: 'dificil', intermediario: 'bom', facil: 'facil',
 };
 
 const DAILY_NEW_LIMIT = 20;

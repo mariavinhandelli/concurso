@@ -137,6 +137,14 @@ export function GeneratorModal({ onClose, onGenerated, presetExamId }: Props) {
 
   const dias = diasUntil();
 
+  // Aviso de carga: com muitas matérias e carga baixa, o piso de 30min faz a
+  // volta do ciclo exceder a carga diária — os pesos "somem" (tudo vira 30min)
+  // e o usuário acha que declarou 3h mas a volta tem 4h30. Melhor avisar.
+  const voltaMinutos = mode === 'ciclo' && preview
+    ? preview.subjects.reduce((s, x) => s + x.minutesPerCycle, 0)
+    : 0;
+  const voltaExcede = voltaMinutos > cargaMinutos && cargaMinutos > 0;
+
   return (
     <div style={styles.overlay} onClick={onClose}>
       <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
@@ -213,6 +221,13 @@ export function GeneratorModal({ onClose, onGenerated, presetExamId }: Props) {
               </div>
             ))}
             {mode === 'dia_fixo' && <p style={styles.previewNote}>No dia-fixo, matérias com mais peso aparecem em mais dias e com sessões maiores.</p>}
+            {voltaExcede && (
+              <p style={styles.cargaAviso}>
+                Uma volta completa do ciclo soma <b>{fmtH(voltaMinutos)}</b> (mínimo de 30min por matéria) — mais que
+                suas <b>{fmtH(cargaMinutos)}</b> por dia. Tudo bem: a volta atravessa mais de um dia. Se preferir
+                sessões proporcionais ao peso, aumente a carga diária.
+              </p>
+            )}
           </div>
         )}
 
@@ -258,6 +273,7 @@ const styles: Record<string, React.CSSProperties> = {
   previewFill: { display: 'block', height: '100%', borderRadius: 999 },
   previewTime: { fontSize: 12.5, fontWeight: 600, color: theme.inkSoft, width: 56, textAlign: 'right', flexShrink: 0, fontVariantNumeric: 'tabular-nums' },
   previewNote: { fontSize: 11.5, color: theme.inkFaint, marginTop: 6, lineHeight: 1.4 },
+  cargaAviso: { fontSize: 12.5, color: theme.inkSoft, background: theme.warnBg, padding: '9px 12px', borderRadius: theme.radiusSm, margin: '10px 0 0', lineHeight: 1.5 },
   error: { color: theme.danger, fontSize: 13, margin: '12px 0 0' },
   actions: { display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 20 },
   cancel: { padding: '10px 18px', borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.card, color: theme.inkSoft, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },

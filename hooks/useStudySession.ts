@@ -29,6 +29,20 @@ export function useStudySession(
   queue: QueueCard[],
   onError: (msg: string) => void,
 ): StudySessionState & StudySessionActions {
+  // Fila interna: "Errei" re-enfileira o card no fim da sessão (rever ainda hoje),
+  // então a fila da sessão pode crescer além da fila recebida.
+  const [cards, setCards] = useState<QueueCard[]>(queue);
+  const queuePropRef = useRef(queue);
+  useEffect(() => {
+    if (queuePropRef.current !== queue) {
+      queuePropRef.current = queue;
+      setCards(queue);
+      setIndex(0);
+      setFlipped(false);
+      setNewLearned(0);
+    }
+  }, [queue]);
+
   const [index, setIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -37,19 +51,19 @@ export function useStudySession(
   const onErrorRef = useRef(onError);
   useEffect(() => { onErrorRef.current = onError; }, [onError]);
 
-  const total = queue.length;
-  const current = queue[index];
+  const total = cards.length;
+  const current = cards[index];
   const remaining = total - index;
   const isFinished = index >= total;
   const progress = total > 0 ? Math.round((index / total) * 100) : 0;
 
   const pendingCount = useMemo(
-    () => queue.slice(index).filter(c => !c.isNew).length,
-    [queue, index],
+    () => cards.slice(index).filter(c => !c.isNew).length,
+    [cards, index],
   );
   const newCount = useMemo(
-    () => queue.slice(index).filter(c => c.isNew).length,
-    [queue, index],
+    () => cards.slice(index).filter(c => c.isNew).length,
+    [cards, index],
   );
 
   const flip = useCallback(() => setFlipped(v => !v), []);
@@ -60,7 +74,13 @@ export function useStudySession(
     setSaving(true);
     try {
       await submitCardReview(current.id, rating);
-      if (current.isNew) setNewLearned(n => n + 1);
+      if (rating === 'errei') {
+        // Estado pós-lapso (SM-2 já persistido): repetições zeradas, intervalo 1.
+        // O card volta pro fim desta sessão para ser visto de novo hoje.
+        setCards(prev => [...prev, { ...current, isNew: false, repetitions: 0, intervalDays: 1 }]);
+      } else if (current.isNew) {
+        setNewLearned(n => n + 1);
+      }
       setFlipped(false);
       setIndex(i => i + 1);
     } catch (e) {

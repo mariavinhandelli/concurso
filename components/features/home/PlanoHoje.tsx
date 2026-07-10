@@ -13,6 +13,8 @@ import {
   getSuggestions, type SuggestionsResult, type SuggestedTopic, type SuggestionKind,
 } from '@/services/suggestion.service';
 import { getDormantModules, type DormantModules } from '@/services/activation.service';
+import { getActiveCycleRule, getCycleState, type CycleState } from '@/services/cycleEngine.service';
+import { fmtMin } from '@/lib/format/time';
 import { track, EV } from '@/lib/analytics';
 import { useTimer } from '@/components/features/timer/TimerContext';
 import { toLocalDateString } from '@/lib/local-date';
@@ -82,6 +84,18 @@ export const PlanoHoje = memo(function PlanoHoje() {
   const { data: blocos } = useQuery<StudyBlock[]>({ queryKey: ['today-blocks', hoje], queryFn: () => listBlocks(hoje, hoje) });
   const { data: dormant } = useQuery<DormantModules>({ queryKey: ['dormant-modules'], queryFn: getDormantModules, staleTime: 5 * 60_000 });
 
+  // C2 — ciclo ativo alimenta o passo "Estudar" quando não há blocos hoje.
+  // Sem isto, o plano gerado no onboarding vivia só na aba Ciclo da Agenda e o
+  // Plano de Hoje seguia genérico ("escolha um tópico") — a promessa quebrava.
+  const { data: cycleRuleId = null } = useQuery({
+    queryKey: ['active-cycle'], queryFn: getActiveCycleRule, staleTime: 5 * 60_000,
+  });
+  const { data: ciclo } = useQuery<CycleState | null>({
+    queryKey: ['cycle-state', cycleRuleId],
+    queryFn: () => getCycleState(cycleRuleId as string),
+    enabled: !!cycleRuleId,
+  });
+
   // N7 — primeiro módulo nunca usado (se houver) para o convite de descoberta.
   const dormanteKey: DormantKey | null = dormant ? (DORMANT_ORDER.find((k) => dormant[k]) ?? null) : null;
 
@@ -91,6 +105,12 @@ export const PlanoHoje = memo(function PlanoHoje() {
   const blocosFeitos = blocksDia.filter((b) => b.is_done).length;
   const proximoBloco = blocksDia.find((b) => !b.is_done) ?? null;
   const cronogramaCompleto = temCronograma && blocosFeitos === blocksDia.length;
+
+  // Ciclo ativo: usado quando não há blocos avulsos hoje. A matéria sugerida é a
+  // mais atrasada na volta (mesma regra da aba Ciclo da Agenda).
+  const temCiclo = !temCronograma && !!ciclo && ciclo.subjects.length > 0;
+  const cicloSugerida = temCiclo ? (ciclo.subjects.find((s) => s.isSuggested) ?? ciclo.subjects[0]) : null;
+  const cicloMetaBatida = temCiclo && ciclo.todayMinutes >= ciclo.dailyMinutes;
 
   // ── Estado de conclusão de cada passo ──
   // "Revisar" soma revisões de tópicos (SM-2) + artigos de lei seca +
@@ -105,8 +125,9 @@ export const PlanoHoje = memo(function PlanoHoje() {
   const diaComecou = studiedToday || blocosFeitos > 0;
   const revDone = revEmDia && diaComecou;
   const fcDone = fcEmDia && diaComecou;
-  // Passo "estudar": se há cronograma, concluído = todos os blocos feitos; senão, estudou hoje.
-  const estudoDone = temCronograma ? cronogramaCompleto : studiedToday;
+  // Passo "estudar": blocos → todos feitos; ciclo → meta diária do ciclo batida;
+  // sem plano → estudou hoje.
+  const estudoDone = temCronograma ? cronogramaCompleto : temCiclo ? cicloMetaBatida : studiedToday;
 
   const doneCount = [revDone, fcDone, estudoDone].filter(Boolean).length;
   const pct = Math.round((doneCount / 3) * 100);
@@ -155,11 +176,15 @@ export const PlanoHoje = memo(function PlanoHoje() {
     : 'tudo em dia';
 
   // Passo 3 muda de rótulo/fonte conforme haja cronograma planejado hoje.
-  const estudoLabel = temCronograma ? 'Cronograma' : 'Estudar';
+  const estudoLabel = temCronograma ? 'Cronograma' : temCiclo ? 'Ciclo' : 'Estudar';
   const estudoSub = temCronograma
     ? (proximoBloco
         ? `${proximoBloco.topicName ?? proximoBloco.subjectName}${proximoBloco.planned_minutes ? ` · ${proximoBloco.planned_minutes} min` : ''}`
         : 'blocos concluídos')
+    : temCiclo
+    ? (cicloMetaBatida
+        ? 'meta do ciclo batida hoje 🎉'
+        : `${cicloSugerida!.subjectName} · ${cicloSugerida!.plannedMinutes} min`)
     : (sug === undefined ? '…'
         : principal ? principal.name
         : studiedToday ? 'nenhum tópico pendente' : 'escolha um tópico para começar');
@@ -220,6 +245,8 @@ export const PlanoHoje = memo(function PlanoHoje() {
               <span style={{ ...styles.stepLabel, ...(estudoDone ? styles.stepLabelDone : {}) }}>{estudoLabel}</span>
               {temCronograma
                 ? <span style={styles.countChip}>{blocosFeitos}/{blocksDia.length} blocos</span>
+                : temCiclo
+                ? <span style={styles.countChip}>{fmtMin(ciclo!.todayMinutes)} de {fmtMin(ciclo!.dailyMinutes)}</span>
                 : principal && <KindPill kind={principal.kind} />}
             </div>
             <span style={styles.stepSub}>{estudoSub}</span>
@@ -228,6 +255,10 @@ export const PlanoHoje = memo(function PlanoHoje() {
             proximoBloco
               ? <button style={styles.studyBtn} onClick={(e) => iniciar(blocoStart(proximoBloco), e)}>Estudar agora</button>
               : <button style={styles.studyGhost} onClick={() => router.push('/schedule')}>Ver cronograma</button>
+          ) : temCiclo ? (
+            cicloMetaBatida
+              ? <button style={styles.studyGhost} onClick={() => router.push('/schedule')}>Ver ciclo</button>
+              : <button style={styles.studyBtn} onClick={(e) => iniciar({ name: cicloSugerida!.subjectName, topicId: null, subjectId: cicloSugerida!.subjectId }, e)}>Estudar agora</button>
           ) : principal ? (
             <button style={styles.studyBtn} onClick={(e) => iniciar(sugStart(principal), e)}>Estudar agora</button>
           ) : (

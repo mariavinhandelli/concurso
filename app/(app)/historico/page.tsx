@@ -3,9 +3,14 @@
 // por texto. Cada sessão expande para revelar feedback, insight, horário e modo.
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { theme } from '@/lib/theme';
 import { useUI } from '@/components/layout/UIContext';
+import { useConfirm } from '@/hooks/useConfirm';
+import { useToast } from '@/components/ui/ToastProvider';
+import { refreshHomeAfterSession } from '@/lib/home-refresh';
+import { updateStudyLogDuration, deleteStudyLog } from '@/services/studyLogs.service';
 import { getHistory, type HistoryDay, type HistorySession } from '@/services/history.service';
 
 const PERIODOS = [
@@ -17,21 +22,55 @@ const PERIODOS = [
 
 export default function HistoricoPage() {
   const { isMobile } = useUI();
+  const queryClient = useQueryClient();
+  const { confirm, dialog } = useConfirm();
+  const toast = useToast();
   const [dias, setDias] = useState(7);
   const [days, setDays] = useState<HistoryDay[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandido, setExpandido] = useState<string | null>(null);
   const [busca, setBusca] = useState('');
 
-  useEffect(() => {
+  const reload = useCallback(() => {
     setLoading(true);
     getHistory(dias)
       .then((d) => setDays(d))
       .finally(() => setLoading(false));
   }, [dias]);
 
+  useEffect(() => { reload(); }, [reload]);
+
   function toggle(id: string) {
     setExpandido((cur) => (cur === id ? null : id));
+  }
+
+  async function handleSaveDuration(id: string, minutes: number) {
+    try {
+      await updateStudyLogDuration(id, minutes);
+      toast.success('Duração corrigida.');
+      refreshHomeAfterSession(queryClient); // stats, streak e meta refletem a correção
+      reload();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'Erro ao corrigir a duração.');
+    }
+  }
+
+  async function handleDelete(s: HistorySession) {
+    const ok = await confirm({
+      title: 'Apagar esta sessão?',
+      description: `${s.subjectName} · ${formataDuracao(s.durationSec)}. As estatísticas, o streak e as metas serão recalculados sem ela.`,
+      confirmLabel: 'Apagar',
+      danger: true,
+    });
+    if (!ok) return;
+    try {
+      await deleteStudyLog(s.id);
+      toast.success('Sessão apagada.');
+      refreshHomeAfterSession(queryClient);
+      reload();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'Erro ao apagar a sessão.');
+    }
   }
 
   // Filtra por texto (matéria, feedback, insight) dentro do período carregado.
@@ -58,6 +97,7 @@ export default function HistoricoPage() {
 
   return (
     <div style={{ ...styles.page, padding: isMobile ? '20px 16px' : '34px 40px' }}>
+      {dialog}
       <div style={styles.header}>
         <h1 style={{ ...styles.h1, fontSize: isMobile ? 24 : 28 }}>Histórico</h1>
         <p style={styles.sub}>Suas sessões de estudo, dia a dia. Toque numa sessão para ver os detalhes.</p>
@@ -121,6 +161,8 @@ export default function HistoricoPage() {
                   session={s}
                   aberto={expandido === s.id}
                   onToggle={() => toggle(s.id)}
+                  onSaveDuration={handleSaveDuration}
+                  onDelete={() => handleDelete(s)}
                 />
               ))}
             </div>
@@ -131,11 +173,41 @@ export default function HistoricoPage() {
   );
 }
 
-function SessionRow({ session, aberto, onToggle }: { session: HistorySession; aberto: boolean; onToggle: () => void }) {
+function SessionRow({ session, aberto, onToggle, onSaveDuration, onDelete }: {
+  session: HistorySession;
+  aberto: boolean;
+  onToggle: () => void;
+  onSaveDuration: (id: string, minutes: number) => Promise<void>;
+  onDelete: () => void;
+}) {
   const temDetalhe = !!(session.qualitativeFeedback || session.insight);
   const acerto = session.questionsTotal > 0
     ? Math.round((session.questionsCorrect / session.questionsTotal) * 100)
     : null;
+
+  // Correção de duração inline (typo no registro manual não pode ser eterno).
+  const [editing, setEditing] = useState(false);
+  const [salvando, setSalvando] = useState(false);
+  const [h, setH] = useState('0');
+  const [m, setM] = useState('0');
+
+  function startEdit() {
+    const totalMin = Math.round(session.durationSec / 60);
+    setH(String(Math.floor(totalMin / 60)));
+    setM(String(totalMin % 60));
+    setEditing(true);
+  }
+
+  async function saveEdit() {
+    const totalMin = (Number(h) || 0) * 60 + (Number(m) || 0);
+    setSalvando(true);
+    try {
+      await onSaveDuration(session.id, totalMin);
+      setEditing(false);
+    } finally {
+      setSalvando(false);
+    }
+  }
 
   return (
     <div style={styles.row}>
@@ -188,6 +260,27 @@ function SessionRow({ session, aberto, onToggle }: { session: HistorySession; ab
           {!temDetalhe && (
             <p style={styles.semDetalhe}>Sem anotações nesta sessão.</p>
           )}
+
+          {/* Ações: corrigir duração / apagar */}
+          <div style={styles.actionsRow}>
+            {editing ? (
+              <div style={styles.editRow}>
+                <input type="number" min="0" value={h} onChange={(e) => setH(e.target.value)} style={styles.editInput} aria-label="Horas" />
+                <span style={styles.editUnit}>h</span>
+                <input type="number" min="0" max="59" value={m} onChange={(e) => setM(e.target.value)} style={styles.editInput} aria-label="Minutos" />
+                <span style={styles.editUnit}>min</span>
+                <button onClick={saveEdit} disabled={salvando} style={styles.actionPrimary}>
+                  {salvando ? 'Salvando…' : 'Salvar'}
+                </button>
+                <button onClick={() => setEditing(false)} disabled={salvando} style={styles.actionGhost}>Cancelar</button>
+              </div>
+            ) : (
+              <>
+                <button onClick={startEdit} style={styles.actionGhost}>Corrigir duração</button>
+                <button onClick={onDelete} style={styles.actionDanger}>Apagar sessão</button>
+              </>
+            )}
+          </div>
         </div>
       )}
     </div>
@@ -282,6 +375,13 @@ const styles: Record<string, React.CSSProperties> = {
   energyBar: { width: 3, height: 14, borderRadius: 1 },
 
   detail: { padding: '4px 16px 16px', borderTop: `0.5px solid ${theme.line}` },
+  actionsRow: { display: 'flex', alignItems: 'center', gap: 10, marginTop: 14, flexWrap: 'wrap' },
+  editRow: { display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' },
+  editInput: { width: 58, padding: '7px 9px', borderRadius: 8, border: `0.5px solid ${theme.line}`, background: theme.card, fontSize: 13.5, color: theme.ink, fontFamily: 'inherit', outline: 'none' },
+  editUnit: { fontSize: 12.5, color: theme.inkFaint, fontWeight: 500 },
+  actionPrimary: { padding: '7px 14px', borderRadius: 8, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 12.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+  actionGhost: { padding: '7px 12px', borderRadius: 8, border: `0.5px solid ${theme.line}`, background: 'transparent', color: theme.inkSoft, fontSize: 12.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+  actionDanger: { padding: '7px 12px', borderRadius: 8, border: `0.5px solid ${theme.line}`, background: 'transparent', color: theme.danger, fontSize: 12.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
   detailMeta: { display: 'flex', gap: 6, flexWrap: 'wrap', fontSize: 12, color: theme.inkFaint, fontWeight: 500, margin: '12px 0 14px' },
   detailBlock: { marginBottom: 12 },
   detailLabel: { display: 'block', fontSize: 11, fontWeight: 700, color: theme.inkFaint, textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 4 },

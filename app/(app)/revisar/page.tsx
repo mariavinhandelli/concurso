@@ -11,7 +11,7 @@ import { useRouter } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 import { buildFilaUnificada, type UnifiedItem, type UnifiedKind } from '@/services/revisaoUnificada.service';
 import { submitReview, type ReviewRating } from '@/services/reviews.service';
-import { submitCardReview } from '@/services/flashcards.service';
+import { submitCardReview, type ReviewRating as CardRating } from '@/services/flashcards.service';
 import { submitRevisaoArtigo } from '@/services/leiInteracoes.service';
 import { submitRevisao as submitJurisRevisao } from '@/services/jurisInteracoes.service';
 import { RATING_LABEL, type JurisRating } from '@/lib/juris-review';
@@ -31,6 +31,15 @@ const KIND_META: Record<UnifiedKind, { label: string; fg: string; bg: string }> 
 };
 
 const RATINGS_3: { key: ReviewRating; label: string; fg: string; bg: string }[] = [
+  { key: 'dificil',       label: 'Difícil', fg: theme.inkSoft, bg: theme.muted  },
+  { key: 'intermediario', label: 'Médio',   fg: theme.info,    bg: theme.infoBg },
+  { key: 'facil',         label: 'Fácil',   fg: theme.okDeep,  bg: theme.okBg   },
+];
+
+// Flashcards ganham o lapso ("Errei"): quality 0 no SM-2 — reseta repetições e
+// derruba o ease factor. Alinha com lei/juris, que já tinham o botão.
+const FC_RATINGS: { key: CardRating; label: string; fg: string; bg: string }[] = [
+  { key: 'errei',         label: 'Errei',   fg: theme.danger,  bg: theme.dangerTint },
   { key: 'dificil',       label: 'Difícil', fg: theme.inkSoft, bg: theme.muted  },
   { key: 'intermediario', label: 'Médio',   fg: theme.info,    bg: theme.infoBg },
   { key: 'facil',         label: 'Fácil',   fg: theme.okDeep,  bg: theme.okBg   },
@@ -140,8 +149,8 @@ export default function RevisarUnificadoPage() {
 
       if (current.kind === 'topic' && n <= 3) {
         void commit(() => submitReview(current.id, RATINGS_3[n - 1].key));
-      } else if (current.kind === 'flashcard' && n <= 3) {
-        void commit(() => submitCardReview(current.id, RATINGS_3[n - 1].key));
+      } else if (current.kind === 'flashcard' && n <= 4) {
+        void commit(() => submitCardReview(current.id, FC_RATINGS[n - 1].key));
       } else if (current.kind === 'lei' && n <= 4) {
         void commit(() => submitRevisaoArtigo(current.id, RATINGS_4[n - 1].key));
       } else if (current.kind === 'juris' && n <= 4) {
@@ -279,7 +288,7 @@ function FlashcardBody({
 }: {
   item: Extract<UnifiedItem, { kind: 'flashcard' }>;
   revealed: boolean; saving: boolean;
-  onReveal: () => void; onRate: (r: ReviewRating) => void;
+  onReveal: () => void; onRate: (r: CardRating) => void;
 }) {
   const { card } = item;
   return (
@@ -295,7 +304,7 @@ function FlashcardBody({
           <p style={s.kbdHint}>ou aperte <kbd style={s.kbd}>espaço</kbd></p>
         </div>
       ) : (
-        <RatingRow3 saving={saving} onRate={onRate} />
+        <RatingRowFC saving={saving} onRate={onRate} />
       )}
     </div>
   );
@@ -421,6 +430,20 @@ function RatingRow3({ saving, onRate }: { saving: boolean; onRate: (r: ReviewRat
       {RATINGS_3.map((r, i) => (
         <button key={r.key} onClick={() => onRate(r.key)} disabled={saving}
           style={{ ...s.rating3Btn, color: r.fg, background: r.bg, opacity: saving ? 0.55 : 1 }}>
+          <span style={s.ratingKey}>{i + 1}</span>
+          <span style={s.ratingLbl}>{r.label}</span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function RatingRowFC({ saving, onRate }: { saving: boolean; onRate: (r: CardRating) => void }) {
+  return (
+    <div style={s.ratings4}>
+      {FC_RATINGS.map((r, i) => (
+        <button key={r.key} onClick={() => onRate(r.key)} disabled={saving}
+          style={{ ...s.rating4Btn, border: `0.5px solid ${r.fg}`, background: r.bg, color: r.fg, opacity: saving ? 0.55 : 1 }}>
           <span style={s.ratingKey}>{i + 1}</span>
           <span style={s.ratingLbl}>{r.label}</span>
         </button>

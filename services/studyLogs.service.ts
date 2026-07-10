@@ -124,3 +124,90 @@ export async function saveStudyLog(
   }
 
 }
+
+// ─── Correções pós-registro (Histórico) ─────────────────────────────────────
+// Um registro manual com a duração errada (10h em vez de 1h) contaminaria as
+// estatísticas, o streak e a meta para sempre — por isso duração é editável e a
+// sessão é apagável. Ambos propagam para o ciclo (via client_session_id) e
+// recalculam a Saúde do tópico.
+
+export async function updateStudyLogDuration(logId: string, durationMinutes: number): Promise<void> {
+  if (!Number.isFinite(durationMinutes) || durationMinutes <= 0) {
+    throw new Error('Informe uma duração maior que zero.');
+  }
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('Você precisa estar logado.');
+
+  const { data: log, error: readErr } = await supabase
+    .from('study_logs')
+    .select('id, started_at, topic_id, client_session_id')
+    .eq('id', logId)
+    .eq('user_id', user.id)
+    .maybeSingle();
+  if (readErr || !log) throw new Error('Sessão não encontrada.');
+
+  const durationSec = Math.round(durationMinutes * 60);
+  const endedAt = new Date(new Date(log.started_at).getTime() + durationSec * 1000).toISOString();
+
+  const { error } = await supabase
+    .from('study_logs')
+    .update({ duration_sec: durationSec, ended_at: endedAt })
+    .eq('id', logId)
+    .eq('user_id', user.id);
+  if (error) throw new Error('Erro ao corrigir a duração: ' + error.message);
+
+  // Propaga para o ciclo, se esta sessão gerou uma completion.
+  if (log.client_session_id) {
+    try {
+      await supabase
+        .from('cycle_completions')
+        .update({ minutes: Math.round(durationMinutes) })
+        .eq('user_id', user.id)
+        .eq('client_session_id', log.client_session_id);
+    } catch (e) {
+      console.error('Ciclo não ajustado (duração corrigida mesmo assim):', e);
+    }
+  }
+
+  if (log.topic_id) {
+    try { await recalcularSaude(log.topic_id); } catch { /* não bloqueia */ }
+  }
+}
+
+export async function deleteStudyLog(logId: string): Promise<void> {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('Você precisa estar logado.');
+
+  const { data: log, error: readErr } = await supabase
+    .from('study_logs')
+    .select('id, topic_id, client_session_id')
+    .eq('id', logId)
+    .eq('user_id', user.id)
+    .maybeSingle();
+  if (readErr || !log) throw new Error('Sessão não encontrada.');
+
+  const { error } = await supabase
+    .from('study_logs')
+    .delete()
+    .eq('id', logId)
+    .eq('user_id', user.id);
+  if (error) throw new Error('Erro ao apagar a sessão: ' + error.message);
+
+  if (log.client_session_id) {
+    try {
+      await supabase
+        .from('cycle_completions')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('client_session_id', log.client_session_id);
+    } catch (e) {
+      console.error('Completion do ciclo não removida (sessão apagada mesmo assim):', e);
+    }
+  }
+
+  if (log.topic_id) {
+    try { await recalcularSaude(log.topic_id); } catch { /* não bloqueia */ }
+  }
+}

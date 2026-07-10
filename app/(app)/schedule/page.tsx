@@ -296,21 +296,38 @@ export default function SchedulePage() {
 
             {/* — Callout quando a semana está vazia — */}
             {blocks.length === 0 && (
-              <div style={styles.emptyCallout}>
-                <p style={styles.emptyCalloutMsg}>
-                  <strong>Semana sem blocos.</strong>
-                  {' '}Crie uma recorrência para preencher automaticamente, ou adicione blocos avulsos clicando em &ldquo;+ bloco&rdquo;.
-                </p>
-                <div style={styles.emptyCalloutActions}>
-                  <button onClick={abrirRecorrencia} style={styles.recBtn}>
-                    <RepeatIcon size={13} color={theme.teal} mr={5} />
-                    Criar recorrência
-                  </button>
-                  <button onClick={() => setGeneratorOpen(true)} style={styles.genBtn}>
-                    ✦ Gerar do edital
-                  </button>
+              cicloAtivo ? (
+                // Ciclo ativo: semana sem blocos é o estado normal (o plano gira na
+                // aba Ciclo). Mandar "criar recorrência" aqui fazia o usuário achar
+                // que o plano gerado no onboarding tinha sumido.
+                <div style={styles.emptyCallout}>
+                  <p style={styles.emptyCalloutMsg}>
+                    <strong>Seu ciclo de estudos está ativo.</strong>
+                    {' '}Ele gira na aba Ciclo — blocos avulsos aqui são opcionais, para compromissos de dia fixo.
+                  </p>
+                  <div style={styles.emptyCalloutActions}>
+                    <button onClick={() => setView('ciclo')} style={styles.recBtn}>
+                      Ver ciclo →
+                    </button>
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div style={styles.emptyCallout}>
+                  <p style={styles.emptyCalloutMsg}>
+                    <strong>Semana sem blocos.</strong>
+                    {' '}Crie uma recorrência para preencher automaticamente, ou adicione blocos avulsos clicando em &ldquo;+ bloco&rdquo;.
+                  </p>
+                  <div style={styles.emptyCalloutActions}>
+                    <button onClick={abrirRecorrencia} style={styles.recBtn}>
+                      <RepeatIcon size={13} color={theme.teal} mr={5} />
+                      Criar recorrência
+                    </button>
+                    <button onClick={() => setGeneratorOpen(true)} style={styles.genBtn}>
+                      ✦ Gerar do edital
+                    </button>
+                  </div>
+                </div>
+              )
             )}
 
             {/* — Grade semanal (oculta em mobile/lista) — */}

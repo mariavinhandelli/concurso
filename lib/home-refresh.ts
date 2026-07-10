@@ -18,6 +18,7 @@ const HOME_KEYS: readonly (readonly string[])[] = [
   ['questions-summary'],
   ['streak'],
   ['due-lei-count'],
+  ['cycle-state'],      // casa por prefixo com ['cycle-state', <ruleId>] (passo Ciclo do Plano de Hoje)
 ];
 
 export function refreshHomeAfterSession(queryClient: QueryClient): void {

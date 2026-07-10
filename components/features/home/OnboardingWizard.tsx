@@ -273,6 +273,18 @@ function OnboardingWizard({ userId, onClose }: { userId: string; onClose: (remem
                     <span style={s.previewTime}>{fmtH(p.minutesPerCycle)}</span>
                   </div>
                 ))}
+                {(() => {
+                  // Piso de 30min × muitas matérias: a volta excede a carga diária.
+                  // Sem o aviso, o usuário declara 3h e recebe uma volta de 4h30 sem entender.
+                  const volta = preview.subjects.reduce((acc, p) => acc + p.minutesPerCycle, 0);
+                  return volta > preview.totalMinutes ? (
+                    <p style={s.cargaAviso}>
+                      Uma volta completa soma <b>{fmtH(volta)}</b> (mínimo de 30min por matéria) — mais que
+                      suas <b>{fmtH(preview.totalMinutes)}</b> diárias. Tudo bem: a volta atravessa mais de um
+                      dia, girando na ordem acima.
+                    </p>
+                  ) : null;
+                })()}
               </div>
             )}
 
@@ -329,6 +341,7 @@ const s: Record<string, CSSProperties> = {
   hint: { fontSize: 12.5, color: theme.tealDeep, background: theme.tealBg, padding: '10px 12px', borderRadius: theme.radiusSm, margin: '14px 0 0', lineHeight: 1.5 },
 
   previewList: { display: 'flex', flexDirection: 'column', gap: 8, margin: '4px 0 0' },
+  cargaAviso: { fontSize: 12.5, color: theme.inkSoft, background: theme.warnBg, padding: '9px 12px', borderRadius: theme.radiusSm, margin: '6px 0 0', lineHeight: 1.5 },
   previewRow: { display: 'flex', alignItems: 'center', gap: 10 },
   pDot: { width: 10, height: 10, borderRadius: 3, flexShrink: 0 },
   previewName: { fontSize: 13, color: theme.ink, width: 130, flexShrink: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
