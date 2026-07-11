@@ -126,7 +126,7 @@ const s: Record<string, React.CSSProperties> = {
   body: { fontSize: 13.5, color: theme.inkSoft, lineHeight: 1.55, margin: '0 0 12px', maxWidth: 560 },
   strong: { color: theme.ink, fontWeight: 700 },
   actions: { display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' },
-  primary: { padding: '9px 16px', borderRadius: theme.radiusSm, border: 'none', background: theme.teal, color: theme.onTeal, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+  primary: { padding: '9px 16px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
   ghost: { padding: '9px 12px', borderRadius: theme.radiusSm, border: 'none', background: 'transparent', color: theme.inkSoft, fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' },
 
   proj: {

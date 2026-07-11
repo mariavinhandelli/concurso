@@ -122,7 +122,7 @@ export default function JurisprudenciaPage() {
 
   if (loading) {
     return (
-      <div style={{ maxWidth: 900, margin: '0 auto', padding: isMobile ? '20px 16px' : '34px 40px' }}>
+      <div style={{ maxWidth: 960, margin: '0 auto', padding: isMobile ? '20px 16px' : '34px 40px' }}>
         <div style={{ height: 200, background: theme.card, borderRadius: theme.radius, border: `0.5px solid ${theme.line}`, animation: 'skeleton-pulse 1.4s ease-in-out infinite' }} />
       </div>
     );
@@ -139,7 +139,7 @@ export default function JurisprudenciaPage() {
   return (
     <>
       {dialog}
-      <div style={{ maxWidth: 900, margin: '0 auto', padding: isMobile ? '20px 16px' : '34px 40px', fontFamily: theme.font, minWidth: 0 }}>
+      <div style={{ maxWidth: 960, margin: '0 auto', padding: isMobile ? '20px 16px' : '34px 40px', fontFamily: theme.font, minWidth: 0 }}>
 
         {/* Navegação e ações */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, flexWrap: 'wrap', gap: 10 }}>
@@ -200,7 +200,7 @@ export default function JurisprudenciaPage() {
         {!editing && (
           <div style={{ marginBottom: 20 }}>
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 10, alignItems: 'center' }}>
-              <span style={{ fontSize: 12, fontWeight: 700, color: '#fff', background: theme.teal, borderRadius: 6, padding: '3px 10px' }}>
+              <span style={{ fontSize: 12, fontWeight: 700, color: theme.onTeal, background: theme.teal, borderRadius: 6, padding: '3px 10px' }}>
                 {item.tribunal}
               </span>
               <span style={{ fontSize: 12, color: theme.inkSoft, background: 'rgba(15,23,42,.06)', borderRadius: 6, padding: '3px 10px' }}>

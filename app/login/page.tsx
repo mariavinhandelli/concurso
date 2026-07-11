@@ -6,23 +6,25 @@ import { createClient } from '@/lib/supabase/client';
 
 type Mode = 'login' | 'signup' | 'recover';
 
+// Tokens do design system (globals.css). O boot script do layout raiz aplica
+// data-palette/data-mode também aqui, então o login acompanha paleta e modo.
 const B = {
-  navy: '#143D45',
-  navyHover: '#194A53',
-  green: '#22C55E',
-  greenBg: '#DCFCE7',
-  indigo: '#6366F1',
-  bg: '#F8FAFC',
-  surface: '#FFFFFF',
-  ink: '#0F172A',
-  inkSoft: '#475569',
-  inkMuted: '#94A3B8',
-  border: '#CBD5E1',
-  borderLight: '#E2E8F0',
-  danger: '#EF4444',
-  dangerBg: '#FEE2E2',
-  ok: '#22C55E',
-  okBg: '#DCFCE7',
+  navy: 'var(--primary)',
+  navyHover: 'var(--primary-hover)',
+  green: 'var(--brand-accent)',
+  greenBg: 'var(--ok-bg)',
+  indigo: 'var(--clay)',
+  bg: 'var(--bg)',
+  surface: 'var(--card)',
+  ink: 'var(--ink)',
+  inkSoft: 'var(--ink-soft)',
+  inkMuted: 'var(--ink-faint)',
+  border: 'var(--line-strong)',
+  borderLight: 'var(--line)',
+  danger: 'var(--danger)',
+  dangerBg: 'var(--danger-bg)',
+  ok: 'var(--ok)',
+  okBg: 'var(--ok-bg)',
 };
 
 function traduzErro(raw: string): string {
@@ -228,7 +230,7 @@ export default function LoginPage() {
               <h1 style={{ margin: '0 0 12px', fontSize: 36, fontWeight: 700, color: B.ink, lineHeight: 1.2, letterSpacing: -0.8 }}>
                 Estude com foco e <br /> <span style={{ color: B.green }}>direção.</span>
               </h1>
-              <p style={{ margin: '0 0 36px', fontSize: 15, color: '#1E293B', lineHeight: 1.65 }}>
+              <p style={{ margin: '0 0 36px', fontSize: 15, color: 'var(--ink-soft)', lineHeight: 1.65 }}>
                 A plataforma que transforma<br />seu aprendizado em evolução real.{' '}
     
               </p>
@@ -240,8 +242,8 @@ export default function LoginPage() {
                       {f.icon}
                     </div>
                     <div>
-                      <div style={{ fontWeight: 600, fontSize: 14, color: '#0F172A', marginBottom: 2 }}>{f.title}</div>
-                      <div style={{ fontSize: 13, color: '#334155', lineHeight: 1.4 }}>{f.desc}</div>
+                      <div style={{ fontWeight: 600, fontSize: 14, color: 'var(--ink)', marginBottom: 2 }}>{f.title}</div>
+                      <div style={{ fontSize: 13, color: 'var(--ink-soft)', lineHeight: 1.4 }}>{f.desc}</div>
                     </div>
                   </div>
                 ))}
@@ -261,8 +263,8 @@ export default function LoginPage() {
   padding: narrow ? '20px 16px 24px' : '24px 40px 32px',
   minWidth: 0,
   overflowY: 'auto',
-  background: '#fffffff0',
-  borderLeft: '1px solid rgba(0,0,0,0.05)',
+  background: 'color-mix(in srgb, var(--card) 94%, transparent)',
+  borderLeft: '1px solid var(--line)',
   boxShadow: '-10px 0 30px rgba(0,0,0,0.03)',
 }}>
 
@@ -432,10 +434,9 @@ export default function LoginPage() {
               style={{
                 width: '100%', padding: '14px 0', borderRadius: 12, border: 'none',
                 background: loading
-                  ? B.border
-                  : `linear-gradient(135deg, #22C55E 0%, #6366F1 100%)`,
-                filter: !loading && btnHover ? 'brightness(0.88)' : undefined,
-                color: '#FFFFFF', fontSize: 15, fontWeight: 600,
+                  ? 'var(--muted)'
+                  : btnHover ? 'var(--gradient-cta-hover)' : 'var(--gradient-cta)',
+                color: loading ? 'var(--ink-faint)' : 'var(--on-cta)', fontSize: 15, fontWeight: 600,
                 cursor: loading ? 'wait' : 'pointer', fontFamily: 'inherit',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
                 transition: 'filter 150ms cubic-bezier(.4,0,.2,1)',
@@ -512,8 +513,8 @@ function inputStyle(icons: 'left' | 'both'): React.CSSProperties {
   return {
     width: '100%', boxSizing: 'border-box',
     padding: icons === 'left' ? '13px 14px 13px 42px' : '13px 44px 13px 42px',
-    borderRadius: 12, border: `1.5px solid #CBD5E1`,
-    background: '#FFFFFF', fontSize: 14, color: '#0F172A',
+    borderRadius: 12, border: `1.5px solid var(--line-strong)`,
+    background: 'var(--card)', fontSize: 14, color: 'var(--ink)',
     fontFamily: 'inherit', outline: 'none',
   };
 }
@@ -523,7 +524,7 @@ const FEATURES = [
     title: 'Organize seus estudos',
     desc: 'Sua rotina sob controle, do planejamento à execução.',
     icon: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--ok)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         
       <>
         <path d="M11 21H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v7" />
@@ -539,7 +540,7 @@ const FEATURES = [
     title: 'Enxergue sua evolução',
     desc: 'Dados precisos para decisões mais assertivas.',
     icon: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--ok)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M20 20H4V4"></path>
     <path d="M4 16.5L12 9l3 3l4.5-4.5"></path>
       </svg>
@@ -549,7 +550,7 @@ const FEATURES = [
     title: 'Estude com propósito',
     desc: 'Direcionamento claro para ir muito mais longe.',
     icon: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--ok)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M10.66 10.66A1.9 1.9 0 0 0 10.1 12a1.9 1.9 0 0 0 1.9 1.9a1.9 1.9 0 0 0 1.34-.56"></path>
     <path d="M12 6.3a5.7 5.7 0 1 0 5.7 5.7"></path>
     <path d="M12 2.5a9.5 9.5 0 1 0 9.5 9.5m-5.975-3.524L12.95 11.05"></path>

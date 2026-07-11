@@ -25,7 +25,7 @@ export function Topbar() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { theme: mode, toggleTheme, toggleMobile } = useUI();
-  const { email, avatarUrl } = useUser();
+  const { email, avatarUrl, loaded: userLoaded } = useUser();
   const timer = useTimer();
   const toast = useToast();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -105,7 +105,7 @@ export function Topbar() {
             aria-haspopup="menu"
             aria-expanded={addMenuOpen}
           >
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke={theme.onTeal} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M12 5v14M5 12h14" />
             </svg>
             <span className="topbar-add-label" style={styles.addLabel}>Registrar estudo</span>
@@ -165,8 +165,10 @@ export function Topbar() {
           <button onClick={() => setMenuOpen((v) => !v)} style={styles.avatarBtn} aria-label="Menu da conta">
             {avatarUrl ? (
               <Image src={avatarUrl} alt="Avatar do usuário" width={36} height={36} style={styles.avatarImg} />
-            ) : (
+            ) : userLoaded ? (
               <span style={styles.avatarFallback}>{initial}</span>
+            ) : (
+              <span aria-hidden="true" style={styles.avatarSkeleton} />
             )}
           </button>
 
@@ -249,6 +251,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   avatarImg: { width: '100%', height: '100%', objectFit: 'cover' },
   avatarFallback: { color: theme.onTeal, fontWeight: 600, fontSize: 15 },
+  avatarSkeleton: { width: '100%', height: '100%', borderRadius: '50%', background: theme.muted, animation: 'skeleton-pulse 1.4s ease infinite', display: 'block' },
   menu: {
     position: 'absolute', top: '46px', right: 0, width: 'min(240px, calc(100vw - 32px))', background: theme.card,
     border: `0.5px solid ${theme.line}`, borderRadius: '14px', boxShadow: theme.shadowHover,

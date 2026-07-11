@@ -10,7 +10,18 @@
 :root,
 [data-palette="petroleo"][data-mode="light"] {
   --topbar-h: 60px;
-  --bg:  #fffffa;
+  --bg:  #F8FAFC;
+  /* Marca — gradiente do CTA (verde→índigo do login, pontas escurecidas p/ AA),
+     acento de destaque e backdrop único de modais. */
+  --gradient-cta: linear-gradient(135deg, #16A34A 0%, #4F46E5 100%);
+  --gradient-cta-hover: linear-gradient(135deg, #15803D 0%, #4338CA 100%);
+  --on-cta: #FFFFFF;
+  --brand-accent: #16A34A;
+  --backdrop: rgba(15,23,42,0.45);
+  --on-danger: #FFFFFF;
+  --on-warn: #452A00;
+  --on-clay: #FFFFFF;
+  --on-ok: #052e16;
   --card: #FFFFFF;
   --muted: #F1F5F9;
   --line: rgba(15,23,42,.08);
@@ -80,6 +91,15 @@
 /* ---- Focali escuro ---- */
 [data-palette="petroleo"][data-mode="dark"] {
   --bg: #0A0F1A;
+  --gradient-cta: linear-gradient(135deg, #16A34A 0%, #4F46E5 100%);
+  --gradient-cta-hover: linear-gradient(135deg, #22C55E 0%, #6366F1 100%);
+  --on-cta: #FFFFFF;
+  --brand-accent: #4ADE80;
+  --backdrop: rgba(0,0,0,0.55);
+  --on-danger: #310A0A;
+  --on-warn: #2D1B00;
+  --on-clay: #14143A;
+  --on-ok: #052e16;
   --card: #111827;
   --muted: #1F2937;
   --line: rgba(255,255,255,.07);
@@ -123,7 +143,16 @@
 
 /* ---- Rosé claro ---- */
 [data-palette="rose"][data-mode="light"] {
-  --bg: #fffffa;
+  --bg: #F8FAFC;
+  --gradient-cta: linear-gradient(135deg, #A85F62 0%, #7A4456 100%);
+  --gradient-cta-hover: linear-gradient(135deg, #8A4850 0%, #5E3242 100%);
+  --on-cta: #FFFFFF;
+  --brand-accent: #A85F62;
+  --backdrop: rgba(60,40,40,0.45);
+  --on-danger: #FFFFFF;
+  --on-warn: #452A00;
+  --on-clay: #FFFFFF;
+  --on-ok: #FFFFFF;
   --card: #FFFFFF;
   --muted: #F3ECE9;
   --line: rgba(60,40,40,.10);
@@ -161,6 +190,15 @@
 /* ---- Rosé escuro ---- */
 [data-palette="rose"][data-mode="dark"] {
   --bg: #211A1A;
+  --gradient-cta: linear-gradient(135deg, #A85F62 0%, #7A4456 100%);
+  --gradient-cta-hover: linear-gradient(135deg, #C67D80 0%, #9B5C6E 100%);
+  --on-cta: #FFFFFF;
+  --brand-accent: #D7969A;
+  --backdrop: rgba(0,0,0,0.55);
+  --on-danger: #33110D;
+  --on-warn: #332512;
+  --on-clay: #331420;
+  --on-ok: #052e16;
   --card: #2A2120;
   --muted: #332827;
   --line: rgba(255,235,235,.08);
@@ -202,7 +240,16 @@
 
 /* ---- Menta claro ---- */
 [data-palette="menta"][data-mode="light"] {
-  --bg: #fffffa;
+  --bg: #F8FAFC;
+  --gradient-cta: linear-gradient(135deg, #6366F1 0%, #4338CA 100%);
+  --gradient-cta-hover: linear-gradient(135deg, #4F46E5 0%, #3730A3 100%);
+  --on-cta: #FFFFFF;
+  --brand-accent: #4F46E5;
+  --backdrop: rgba(30,55,45,0.45);
+  --on-danger: #FFFFFF;
+  --on-warn: #452A00;
+  --on-clay: #FFFFFF;
+  --on-ok: #FFFFFF;
   --card: #FFFFFF;
   --muted: #ECF3EF;
   --line: rgba(30,55,45,.10);
@@ -240,6 +287,15 @@
 /* ---- Menta escuro ---- */
 [data-palette="menta"][data-mode="dark"] {
   --bg: #25353a;
+  --gradient-cta: linear-gradient(135deg, #6366F1 0%, #4338CA 100%);
+  --gradient-cta-hover: linear-gradient(135deg, #7577F3 0%, #4F46E5 100%);
+  --on-cta: #FFFFFF;
+  --brand-accent: #A5B4FC;
+  --backdrop: rgba(0,0,0,0.55);
+  --on-danger: #33110D;
+  --on-warn: #332512;
+  --on-clay: #33200F;
+  --on-ok: #052e16;
   --card: #2D4148;
   --muted: #364D54;
   --line: rgba(200,220,240,.08);
@@ -281,7 +337,17 @@
 
 /* ---- Grafite claro (mono sóbrio) ---- */
 [data-palette="grafite"][data-mode="light"] {
-  --bg: #fffffa;
+  --bg: #F8FAFC;
+  /* Grafite é mono sóbrio: CTA chapado, sem gradiente. */
+  --gradient-cta: linear-gradient(135deg, #1b221f 0%, #1b221f 100%);
+  --gradient-cta-hover: linear-gradient(135deg, #10140f 0%, #10140f 100%);
+  --on-cta: #FFFFFF;
+  --brand-accent: #3A4A42;
+  --backdrop: rgba(27,34,31,0.45);
+  --on-danger: #FFFFFF;
+  --on-warn: #452A00;
+  --on-clay: #FFFFFF;
+  --on-ok: #FFFFFF;
   --card: #FFFFFF;
   --muted: #ECEAE4;
   --line: rgba(27,34,31,.12);
@@ -319,6 +385,15 @@
 /* ---- Grafite escuro (mono sóbrio) ---- */
 [data-palette="grafite"][data-mode="dark"] {
   --bg: #131715;
+  --gradient-cta: linear-gradient(135deg, #C8C8C8 0%, #C8C8C8 100%);
+  --gradient-cta-hover: linear-gradient(135deg, #E0E0E0 0%, #E0E0E0 100%);
+  --on-cta: #131715;
+  --brand-accent: #9AAAA2;
+  --backdrop: rgba(0,0,0,0.55);
+  --on-danger: #33110D;
+  --on-warn: #332512;
+  --on-clay: #131715;
+  --on-ok: #052e16;
   --card: #1C211E;
   --muted: #252C28;
   --line: rgba(232,236,234,.09);
@@ -601,7 +676,12 @@ img, video, canvas {
   from { opacity: 0; transform: translateY(4px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-.tab-enter { animation: tabEnter .15s ease both; }
+/* Sem fill-mode "both": "forwards" mantinha o transform computado após o fim
+   da animação, o que cria containing block para descendentes position:fixed
+   (modais abertos a partir de conteúdo com troca de aba) e os posicionava fora
+   da viewport. Sem delay, o estado final (opacity 1, transform none) é
+   idêntico mesmo revertendo ao valor não-animado. */
+.tab-enter { animation: tabEnter .15s ease; }
 
 /* Entrada do modal */
 @keyframes modalEnter {
@@ -638,6 +718,22 @@ img, video, canvas {
    Tablet 768–899px → sidebar colapsa para 72 px (ícones) automaticamente.
    Desktop ≥ 900px  → sidebar com largura controlada pelo estado JS.
    =================================================================== */
+
+/* ── Primitivo Button (components/ui/Button.tsx) — hovers por variante.
+   !important vence o background inline do componente. ── */
+.ui-btn { transition: background .15s ease, border-color .15s ease, opacity .15s ease, filter .15s ease; }
+.ui-btn-primary:hover:not(:disabled) { background: var(--primary-hover) !important; }
+.ui-btn-outline:hover:not(:disabled) { background: var(--muted) !important; border-color: var(--line-strong) !important; }
+.ui-btn-ghost:hover:not(:disabled) { background: var(--muted) !important; }
+.ui-btn-danger:hover:not(:disabled),
+.ui-btn-dangerSoft:hover:not(:disabled) { filter: brightness(0.94); }
+
+/* CTA do topbar — cromo fica sólido (navy); o gradiente da marca é reservado
+   a CTAs full-width de formulário (login, reset, onboarding), onde as duas
+   cores têm largura pra aparecer. !important vence o background inline. */
+.topbar-add-btn:hover {
+  background: var(--primary-hover) !important;
+}
 
 /* ── Hambúrguer oculto por padrão (aparece só em mobile via media query) ── */
 @media (min-width: 768px) {

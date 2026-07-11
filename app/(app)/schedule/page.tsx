@@ -602,7 +602,7 @@ const styles: Record<string, React.CSSProperties> = {
   // Cronograma vivo — banner de replanejamento
   replanBanner: { display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', background: theme.warnBg, borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.warn, marginBottom: 14 },
   replanMsg: { fontSize: 13.5, color: theme.ink },
-  replanBtn: { padding: '8px 14px', borderRadius: theme.radiusSm, border: 'none', background: theme.warn, color: '#fff', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
+  replanBtn: { padding: '8px 14px', borderRadius: theme.radiusSm, border: 'none', background: theme.warn, color: theme.onWarn, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
 
   // Callout semana vazia
   emptyCallout: { display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', background: theme.card, borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, marginBottom: 14 },
@@ -616,7 +616,7 @@ const styles: Record<string, React.CSSProperties> = {
   dayHeadToday: { borderTopWidth: 2, borderTopStyle: 'solid', borderTopColor: theme.teal },
   dayName: { fontSize: 10, fontWeight: 700, color: theme.inkFaint, textTransform: 'uppercase', letterSpacing: '0.08em' },
   dayNum: { fontSize: 18, fontWeight: 700, color: theme.ink, lineHeight: 1 },
-  dayNumToday: { background: theme.teal, color: '#fff', borderRadius: '50%', width: 30, height: 30, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15 },
+  dayNumToday: { background: theme.teal, color: theme.onTeal, borderRadius: '50%', width: 30, height: 30, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15 },
   progressWrap: { padding: '6px 10px 8px', borderLeftWidth: 0.5, borderLeftStyle: 'solid', borderLeftColor: theme.line, borderRightWidth: 0.5, borderRightStyle: 'solid', borderRightColor: theme.line, background: theme.card },
   progressLabels: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 },
   progressText: { fontSize: 10, color: theme.inkFaint, fontVariantNumeric: 'tabular-nums' },

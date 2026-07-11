@@ -4,6 +4,7 @@ import { memo, useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { type Blueprint } from '@/services/blueprints.service';
 import { type SubjectTree } from '@/lib/targets';
 import { theme } from '@/lib/theme';
+import { Button } from '@/components/ui/Button';
 
 function Chevron({ open }: { open: boolean }) {
   return (
@@ -93,7 +94,7 @@ export const MontarEditalTab = memo(function MontarEditalTab({
         </svg>
         <p style={s.emptyTitle}>Biblioteca vazia</p>
         <p style={s.emptyHint}>Cadastre matérias e tópicos para começar a montar o edital.</p>
-        <button onClick={onNavigateToSubjects} style={s.emptyBtn}>Ir para Matérias →</button>
+        <Button variant="outline" style={{ borderColor: theme.teal, background: theme.tealBg, color: theme.teal }} onClick={onNavigateToSubjects}>Ir para Matérias →</Button>
       </div>
     );
   }
@@ -107,10 +108,10 @@ export const MontarEditalTab = memo(function MontarEditalTab({
             Marcar todos os {pendingNode.topics.length} tópicos de <strong>{pendingNode.subject.name}</strong>?
           </span>
           <div style={{ display: 'flex', gap: 8 }}>
-            <button onClick={() => { onToggleAll(pendingNode, pendingMarkAll!.marcar); setPendingMarkAll(null); }} style={s.confirmYes}>
+            <Button size="sm" onClick={() => { onToggleAll(pendingNode, pendingMarkAll!.marcar); setPendingMarkAll(null); }}>
               Marcar tudo
-            </button>
-            <button onClick={() => setPendingMarkAll(null)} style={s.confirmNo}>Cancelar</button>
+            </Button>
+            <Button variant="ghost" size="sm" onClick={() => setPendingMarkAll(null)}>Cancelar</Button>
           </div>
         </div>
       )}
@@ -276,7 +277,7 @@ const s: Record<string, CSSProperties> = {
 
   confirmBanner: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, background: theme.tealBg, border: `1px solid ${theme.teal}`, borderRadius: theme.radiusSm, padding: '10px 14px', flexWrap: 'wrap', animation: 'focali-slide-down 0.18s ease' },
   confirmText: { fontSize: 13, color: theme.ink, flex: 1 },
-  confirmYes: { padding: '6px 14px', borderRadius: theme.radiusXs, border: 'none', background: theme.teal, color: '#fff', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+  confirmYes: { padding: '6px 14px', borderRadius: theme.radiusXs, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
   confirmNo: { padding: '6px 10px', borderRadius: theme.radiusXs, border: 'none', background: 'transparent', color: theme.inkFaint, fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' },
 
   coverageRow: { display: 'flex', alignItems: 'center', gap: 10 },
@@ -309,7 +310,7 @@ const s: Record<string, CSSProperties> = {
   libRow: { display: 'flex', alignItems: 'center', gap: 10, padding: '9px 12px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.card, cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit', width: '100%', minWidth: 0, transition: 'background .12s' },
   libRowOn: { background: theme.tealBg, border: `1px solid ${theme.teal}` },
   libCheck: { width: 20, height: 20, borderRadius: theme.radiusXs, border: `1.5px solid ${theme.lineStrong}`, background: theme.card, color: 'transparent', fontSize: 12, display: 'grid', placeItems: 'center', flexShrink: 0 },
-  libCheckOn: { background: theme.teal, border: `1.5px solid ${theme.teal}`, color: '#fff' },
+  libCheckOn: { background: theme.teal, border: `1.5px solid ${theme.teal}`, color: theme.onTeal },
   libTopicName: { flex: 1, fontSize: 13, color: theme.ink, minWidth: 0 },
 
   // Spinner 14px — visível dentro do checkbox 20×20

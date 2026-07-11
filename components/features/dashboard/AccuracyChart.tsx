@@ -3,6 +3,7 @@
 // A cor reflete o desempenho: vermelho (crítico) → âmbar → verde.
 'use client';
 
+import { Skeleton } from '@/components/ui/Skeleton';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
@@ -36,7 +37,7 @@ export function AccuracyChart() {
       </div>
 
       {loading ? (
-        <p style={styles.muted}>Carregando…</p>
+        <Skeleton height={220} borderRadius={12} />
       ) : data.length === 0 ? (
         <p style={styles.muted}>
           Ainda sem dados. Faça sessões de questões com matéria e acertos registrados.

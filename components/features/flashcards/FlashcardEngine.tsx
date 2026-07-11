@@ -8,6 +8,7 @@ import { useConfirm } from '@/hooks/useConfirm';
 import { calculateNextReview, INITIAL_SR_STATE, type RecallGrade } from '@/lib/spaced-repetition';
 import { fromDbRow } from '@/lib/spaced-repetition.mapper';
 import { theme, kbd as kbdStyle } from '@/lib/theme';
+import { Button } from '@/components/ui/Button';
 import type { ReviewRating, QueueCard } from '@/services/flashcards.service';
 
 interface Props {
@@ -61,7 +62,11 @@ export function FlashcardEngine({ queue, onFinish, onExit }: Props) {
     [session.progress],
   );
   const badgeStyle = useMemo(
-    () => ({ ...styles.badge, background: session.current?.subjectColor ?? theme.teal }),
+    () => ({
+      ...styles.badge,
+      background: session.current?.subjectColor ?? theme.teal,
+      color: session.current?.subjectColor ? '#fff' : theme.onTeal,
+    }),
     [session.current?.subjectColor],
   );
   const cardStyle = useMemo(() => ({
@@ -169,9 +174,9 @@ export function FlashcardEngine({ queue, onFinish, onExit }: Props) {
             </div>
           )}
         </div>
-        <button onClick={onFinish} style={{ ...styles.finishBtn, animation: 'fade-up-in 0.3s ease 0.35s both' }}>
+        <Button onClick={onFinish} style={{ marginTop: 8, padding: '12px 28px', animation: 'fade-up-in 0.3s ease 0.35s both' }}>
           Voltar
-        </button>
+        </Button>
       </div>
     );
   }
@@ -298,7 +303,7 @@ const styles: Record<string, React.CSSProperties> = {
   doneStatBox: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 },
   doneStatNum: { fontSize: 36, color: theme.ink, fontWeight: 700, letterSpacing: -1, fontVariantNumeric: 'tabular-nums', lineHeight: 1 },
   doneStatLabel: { fontSize: 12, color: theme.inkFaint, fontWeight: 500 },
-  finishBtn: { marginTop: 8, padding: '12px 28px', borderRadius: 12, border: 'none', background: theme.teal, color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+  finishBtn: { marginTop: 8, padding: '12px 28px', borderRadius: 12, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
 };
 
 const ratingStyles = RATINGS.map(r => ({ ...styles.ratingBtn, color: r.fg, background: r.bg }));

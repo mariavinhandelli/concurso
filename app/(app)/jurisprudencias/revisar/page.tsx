@@ -10,6 +10,7 @@ import {
 import { RATING_LABEL, type JurisRating, jurisDaysOverdue, calculateNextJurisReview, fromJurisDbRow, INITIAL_JURIS_STATE } from '@/lib/juris-review';
 import { useUI } from '@/components/layout/UIContext';
 import { theme } from '@/lib/theme';
+import { Button } from '@/components/ui/Button';
 
 const RATINGS: { key: JurisRating; color: string; bg: string }[] = [
   { key: 'errei',   color: theme.danger,   bg: theme.dangerTint },
@@ -68,7 +69,7 @@ export default function RevisarPage() {
 
   if (items === null) {
     return (
-      <div style={{ maxWidth: 700, margin: '0 auto', padding: isMobile ? '40px 16px' : '60px 40px', textAlign: 'center', fontFamily: theme.font }}>
+      <div style={{ maxWidth: 720, margin: '0 auto', padding: isMobile ? '40px 16px' : '60px 40px', textAlign: 'center', fontFamily: theme.font }}>
         <p style={{ color: theme.inkFaint, fontSize: 15 }}>Carregando revisões…</p>
       </div>
     );
@@ -76,7 +77,7 @@ export default function RevisarPage() {
 
   if (done || total === 0) {
     return (
-      <div style={{ maxWidth: 700, margin: '0 auto', padding: isMobile ? '40px 16px' : '80px 40px', textAlign: 'center', fontFamily: theme.font }}>
+      <div style={{ maxWidth: 720, margin: '0 auto', padding: isMobile ? '40px 16px' : '80px 40px', textAlign: 'center', fontFamily: theme.font }}>
         <div style={{ fontSize: 56, marginBottom: 20 }}>🎉</div>
         <h1 style={{ fontSize: 26, fontWeight: 800, color: theme.ink, margin: '0 0 12px' }}>
           {total === 0 ? 'Nada para revisar hoje!' : 'Sessão concluída!'}
@@ -87,19 +88,19 @@ export default function RevisarPage() {
             : `Você revisou ${total} jurisprudência${total !== 1 ? 's' : ''} hoje.`}
         </p>
         <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
-          <button onClick={() => router.push('/jurisprudencias')} style={styles.btnPrimary}>
+          <Button onClick={() => router.push('/jurisprudencias')}>
             Voltar ao início
-          </button>
-          <button onClick={() => router.push('/jurisprudencias/lista')} style={styles.btnSecondary}>
+          </Button>
+          <Button variant="outline" onClick={() => router.push('/jurisprudencias/lista')}>
             Ver todas
-          </button>
+          </Button>
         </div>
       </div>
     );
   }
 
   return (
-    <div style={{ maxWidth: 720, margin: '0 auto', padding: isMobile ? '20px 16px' : '40px 40px', fontFamily: theme.font }}>
+    <div style={{ maxWidth: 720, margin: '0 auto', padding: isMobile ? '20px 16px' : '34px 40px', fontFamily: theme.font }}>
 
       {/* Cabeçalho */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
@@ -275,11 +276,11 @@ const styles = {
   }),
   revealBtn: {
     padding: '13px 32px', borderRadius: theme.radiusSm, border: 'none',
-    background: theme.teal, color: '#fff', fontSize: 15, fontWeight: 600, cursor: 'pointer', fontFamily: theme.font,
+    background: theme.primary, color: theme.onTeal, fontSize: 15, fontWeight: 600, cursor: 'pointer', fontFamily: theme.font,
   },
   btnPrimary: {
     padding: '12px 28px', borderRadius: theme.radiusSm, border: 'none',
-    background: theme.teal, color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: theme.font,
+    background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: theme.font,
   },
   btnSecondary: {
     padding: '12px 28px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`,

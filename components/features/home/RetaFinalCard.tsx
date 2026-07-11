@@ -15,6 +15,7 @@ import { getRaioX, NIVEL_LABEL, type RaioX, type NivelProntidao } from '@/servic
 import { daysUntilExam, formatTargetLabel } from '@/lib/targets';
 import { usePersistedState } from '@/hooks/usePersistedState';
 import { theme } from '@/lib/theme';
+import { Button } from '@/components/ui/Button';
 
 const LIMITE_RETA = 30;
 const LIMITE_CHECKLIST = 3;
@@ -103,17 +104,17 @@ export function RetaFinalCard() {
       )}
 
       <div style={s.actions}>
-        <button onClick={() => router.push('/revisar')} style={{ ...s.btn, ...s.btnPrimary, background: cor }}>
+        <Button onClick={() => router.push('/revisar')} style={{ background: cor, color: critico ? theme.onDanger : theme.onWarn }}>
           Revisar tudo
-        </button>
+        </Button>
         {foco && (
-          <button onClick={() => router.push(`/subjects/${foco.subjectId}`)} style={{ ...s.btn, ...s.btnGhost }}>
+          <Button variant="outline" onClick={() => router.push(`/subjects/${foco.subjectId}`)}>
             Fechar lacuna: {foco.subjectName}
-          </button>
+          </Button>
         )}
-        <button onClick={() => router.push('/vademecum/simulado')} style={{ ...s.btn, ...s.btnGhost }}>
+        <Button variant="outline" onClick={() => router.push('/vademecum/simulado')}>
           Praticar questões
-        </button>
+        </Button>
       </div>
 
       {mostrarChecklist && (
@@ -127,7 +128,7 @@ export function RetaFinalCard() {
             return (
               <button key={i.id} onClick={() => toggle(i.id)} style={s.checkItem}>
                 <span style={{ ...s.checkbox, ...(on ? { background: cor, borderColor: cor } : {}) }}>
-                  {on && <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>}
+                  {on && <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={critico ? theme.onDanger : theme.onWarn} strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>}
                 </span>
                 <span style={{ ...s.checkLabel, ...(on ? { color: theme.inkFaint, textDecoration: 'line-through' } : {}) }}>{i.label}</span>
               </button>
@@ -156,7 +157,7 @@ const s: Record<string, React.CSSProperties> = {
 
   actions: { display: 'flex', gap: 10, flexWrap: 'wrap' },
   btn: { padding: '10px 16px', borderRadius: theme.radiusSm, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
-  btnPrimary: { border: 'none', color: '#fff' },
+  btnPrimary: { border: 'none' },
   btnGhost: { border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.inkSoft },
 
   checklist: { marginTop: 18, paddingTop: 16, borderTop: `0.5px solid ${theme.line}` },

@@ -92,8 +92,8 @@ self.addEventListener('push', (event) => {
   const title = data.title || 'Focali';
   const options = {
     body: data.body || '',
-    icon: data.icon || '/brand/symbol.svg',
-    badge: '/brand/symbol.svg',
+    icon: data.icon || '/brand/symbol-tile.svg',
+    badge: '/brand/symbol-tile.svg',
     tag: data.tag || 'focali-lembrete',
     renotify: true,
     data: { url: data.url || '/' },

@@ -50,7 +50,7 @@ export function PerfInsight({
       <ToneIcon tone={tone} color={c.fg} />
       <p style={s.text}>{children}</p>
       {cta && (
-        <button onClick={cta.onClick} style={{ ...s.cta, color: '#fff', background: c.fg }}>
+        <button onClick={cta.onClick} style={{ ...s.cta, color: theme.onTeal, background: theme.primary }}>
           {cta.label}
         </button>
       )}

@@ -311,7 +311,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   confirmDateBtn: {
     padding: '4px 10px', borderRadius: 6, border: 'none',
-    background: theme.teal, color: '#fff', fontSize: 12, fontWeight: 600,
+    background: theme.teal, color: theme.onTeal, fontSize: 12, fontWeight: 600,
     cursor: 'pointer', fontFamily: 'inherit',
   },
   cancelDateBtn: {
@@ -328,7 +328,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   saveBtn: {
     flex: 1, padding: '8px 0', borderRadius: 8, border: 'none',
-    background: theme.teal, color: '#fff', fontSize: 13, fontWeight: 700,
+    background: theme.teal, color: theme.onTeal, fontSize: 13, fontWeight: 700,
     cursor: 'pointer', fontFamily: 'inherit',
   },
   errorMsg: { fontSize: 11.5, color: theme.crit, margin: 0, textAlign: 'center' },

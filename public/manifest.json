@@ -4,12 +4,13 @@
   "description": "Plataforma de estudos de alta performance para concursos.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0f172a",
-  "theme_color": "#0bd8b6",
+  "background_color": "#F8FAFC",
+  "theme_color": "#143D45",
   "orientation": "portrait-primary",
   "lang": "pt-BR",
   "icons": [
-    { "src": "/brand/symbol.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+    { "src": "/brand/symbol.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "/brand/symbol-tile.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
   ],
   "categories": ["education", "productivity"],
   "screenshots": []

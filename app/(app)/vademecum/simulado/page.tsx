@@ -16,6 +16,7 @@ import {
 } from '@/services/leiQuestoes.service';
 import { useUI } from '@/components/layout/UIContext';
 import { theme } from '@/lib/theme';
+import { Button } from '@/components/ui/Button';
 
 interface QuestaoComLei extends LeiQuestao {
   leiSlug: string;
@@ -37,12 +38,18 @@ function SimuladoContent() {
   const router = useRouter();
   const { isMobile } = useUI();
 
-  const leis = useMemo<LeiMeta[]>(() => {
-    const slugs = (params.get('leis') ?? '').split(',').map((s) => s.trim()).filter(Boolean);
-    return slugs
-      .map((slug) => LEIS_CATALOG.find((l) => l.slug === slug))
-      .filter((l): l is LeiMeta => !!l);
-  }, [params]);
+  const slugsPedidos = useMemo(
+    () => (params.get('leis') ?? '').split(',').map((s) => s.trim()).filter(Boolean),
+    [params],
+  );
+  const leis = useMemo<LeiMeta[]>(
+    () => slugsPedidos.map((slug) => LEIS_CATALOG.find((l) => l.slug === slug)).filter((l): l is LeiMeta => !!l),
+    [slugsPedidos],
+  );
+  const slugsInvalidos = useMemo(
+    () => slugsPedidos.filter((slug) => !leis.some((l) => l.slug === slug)),
+    [slugsPedidos, leis],
+  );
 
   // chave estável independente da ordem em que as leis foram marcadas —
   // assim duas sessões com as mesmas leis sempre caem no mesmo histórico.
@@ -79,8 +86,9 @@ function SimuladoContent() {
   const acabou = fila !== null && fila.length > 0 && idx >= fila.length;
 
   // Salva a sessão uma única vez ao concluir, e recarrega o histórico.
+  // `chave` vazia (nenhum slug válido) não deve virar sessão no histórico.
   useEffect(() => {
-    if (!acabou || salvoRef.current || !fila) return;
+    if (!acabou || salvoRef.current || !fila || !chave) return;
     salvoRef.current = true;
     const respostas: LeiSimuladoResposta[] = historico.map((h) => ({
       artigoKey: h.questao.artigoKey, gabarito: h.questao.gabarito, resposta: h.resposta, acertou: h.acertou,
@@ -118,8 +126,12 @@ function SimuladoContent() {
       <div style={{ ...s.wrap, padding: isMobile ? '24px 16px' : '40px' }}>
         <div style={s.doneBox}>
           <p style={s.doneTitle}>Nenhuma lei selecionada.</p>
-          <p style={s.doneSub}>Volte à biblioteca e marque uma ou mais leis para montar o simulado.</p>
-          <button onClick={() => router.push('/vademecum')} style={s.doneBtn}>Voltar ao Vade Mecum</button>
+          <p style={s.doneSub}>
+            {slugsInvalidos.length > 0
+              ? `A seleção recebida (${slugsInvalidos.join(', ')}) não corresponde a nenhuma lei do catálogo.`
+              : 'Volte à biblioteca e marque uma ou mais leis para montar o simulado.'}
+          </p>
+          <Button onClick={() => router.push('/vademecum')}>Voltar ao Vade Mecum</Button>
         </div>
       </div>
     );
@@ -134,20 +146,25 @@ function SimuladoContent() {
       <div style={{ ...s.wrap, padding: isMobile ? '24px 16px' : '40px' }}>
         <div style={s.doneBox}>
           <p style={s.doneTitle}>Nenhuma questão disponível para essa seleção.</p>
-          <button onClick={() => router.push('/vademecum')} style={s.doneBtn}>Voltar ao Vade Mecum</button>
+          <Button onClick={() => router.push('/vademecum')}>Voltar ao Vade Mecum</Button>
         </div>
       </div>
     );
   }
 
   return (
-    <div style={{ ...s.wrap, padding: isMobile ? '20px 14px' : '30px 40px' }}>
+    <div style={{ ...s.wrap, padding: isMobile ? '20px 16px' : '34px 40px' }}>
       <div style={s.topo}>
         <button onClick={() => router.push('/vademecum')} style={s.voltar}>← {titulo}</button>
         {!acabou && <span style={s.progresso}>{idx + 1} de {fila.length} · {acertos} certas</span>}
       </div>
       {leis.length > 1 && (
         <p style={s.leisChips}>{leis.map((l) => l.nomeCurto).join(' · ')}</p>
+      )}
+      {slugsInvalidos.length > 0 && (
+        <p style={s.avisoInvalidos}>
+          {slugsInvalidos.length === 1 ? 'Uma lei selecionada' : `${slugsInvalidos.length} leis selecionadas`} não {slugsInvalidos.length === 1 ? 'foi encontrada' : 'foram encontradas'} e {slugsInvalidos.length === 1 ? 'foi ignorada' : 'foram ignoradas'} ({slugsInvalidos.join(', ')}).
+        </p>
       )}
 
       {acabou ? (
@@ -160,8 +177,8 @@ function SimuladoContent() {
               : 'Ainda dá pra evoluir bastante — volte ao texto e grife o que errou aqui.'}
           </p>
           <div style={s.doneActions}>
-            <button onClick={reiniciar} style={s.doneBtnGhost}>Refazer simulado</button>
-            <button onClick={() => router.push('/vademecum')} style={s.doneBtn}>Voltar ao Vade Mecum</button>
+            <Button variant="outline" onClick={reiniciar}>Refazer simulado</Button>
+            <Button onClick={() => router.push('/vademecum')}>Voltar ao Vade Mecum</Button>
           </div>
 
           {sessoesAnteriores.length > 1 && (
@@ -212,9 +229,9 @@ function SimuladoContent() {
                 gabarito: <b>{atual.gabarito ? 'Certo' : 'Errado'}</b>
               </div>
               <p style={s.comentario}>{atual.comentario}</p>
-              <button onClick={proxima} style={s.proxima}>
+              <Button onClick={proxima}>
                 {idx + 1 === fila.length ? 'Ver resultado →' : 'Próxima questão →'}
-              </button>
+              </Button>
             </>
           )}
         </div>
@@ -232,11 +249,12 @@ export default function SimuladoPage() {
 }
 
 const s: Record<string, CSSProperties> = {
-  wrap: { maxWidth: 700, margin: '0 auto', fontFamily: theme.font },
+  wrap: { maxWidth: 720, margin: '0 auto', fontFamily: theme.font },
   topo: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 },
   voltar: { border: 'none', background: 'transparent', color: theme.inkFaint, fontSize: 13, cursor: 'pointer', fontFamily: 'inherit', padding: 0 },
   progresso: { fontSize: 13, fontWeight: 600, color: theme.inkSoft },
   leisChips: { fontSize: 12, color: theme.inkFaint, margin: '0 0 14px' },
+  avisoInvalidos: { fontSize: 12, color: theme.warn, background: theme.muted, borderRadius: theme.radiusSm, padding: '7px 10px', margin: '0 0 14px' },
   card: { background: theme.card, border: `0.5px solid ${theme.line}`, borderRadius: theme.radius, padding: '20px 22px' },
   artChip: { fontSize: 11.5, fontWeight: 700, color: theme.teal, background: theme.tealBg, borderRadius: 999, padding: '3px 10px' },
   enunciado: { fontSize: 15, color: theme.ink, lineHeight: 1.65, margin: '14px 0 18px' },
@@ -247,12 +265,12 @@ const s: Record<string, CSSProperties> = {
   resultadoOk: { background: theme.okBg, color: theme.okDeep },
   resultadoErro: { background: theme.dangerBg, color: theme.danger },
   comentario: { fontSize: 13.5, color: theme.inkSoft, lineHeight: 1.6, margin: '0 0 16px' },
-  proxima: { padding: '11px 20px', borderRadius: theme.radiusSm, border: 'none', background: theme.teal, color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+  proxima: { padding: '11px 20px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
   doneBox: { textAlign: 'center', padding: '50px 20px' },
   doneTitle: { fontSize: 22, fontWeight: 700, color: theme.ink, margin: '10px 0 6px' },
   doneSub: { fontSize: 14, color: theme.inkSoft, margin: '0 0 20px', maxWidth: 460, marginLeft: 'auto', marginRight: 'auto', lineHeight: 1.6 },
   doneActions: { display: 'flex', gap: 10, justifyContent: 'center' },
-  doneBtn: { padding: '11px 22px', borderRadius: theme.radiusSm, border: 'none', background: theme.teal, color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+  doneBtn: { padding: '11px 22px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
   doneBtnGhost: { padding: '11px 22px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.inkSoft, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
   evolucao: { textAlign: 'left', marginTop: 28, paddingTop: 20, borderTop: `0.5px solid ${theme.line}` },
   evolucaoRow: { display: 'flex', alignItems: 'flex-end', gap: 10, height: 70, marginTop: 6 },

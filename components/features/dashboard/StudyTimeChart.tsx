@@ -3,6 +3,7 @@
 // Transparente — herda a superfície de quem o contém. Filtros dia/semana/mês/ano.
 'use client';
 
+import { Skeleton } from '@/components/ui/Skeleton';
 import { useEffect, useState } from 'react';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
@@ -51,7 +52,7 @@ export function StudyTimeChart() {
       </div>
 
       {loading ? (
-        <p style={styles.muted}>Carregando…</p>
+        <Skeleton height={220} borderRadius={12} />
       ) : (
         <ResponsiveContainer width="100%" height={260} minWidth={0}>
           <LineChart data={data} margin={{ top: 8, right: 8, bottom: 0, left: -16 }}>

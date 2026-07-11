@@ -85,6 +85,9 @@ export function QuestoesBanco({ lei, questoes, onNavigate }: Props) {
   }, [questoes, filtro, respostas, reabertas, ordem, sorteio, incidenciaDe, ordemArtigo]);
 
   const respondidas = questoes.filter((q) => respostas.has(q.id)).length;
+  // "não respondidas" no chip precisa contar igual ao filtro da lista: uma
+  // questão reaberta volta a contar como não respondida até a nova resposta.
+  const naoRespondidasCount = questoes.filter((q) => !respostas.has(q.id) || reabertas.has(q.id)).length;
   const acertos = questoes.filter((q) => respostas.get(q.id)?.acertou).length;
   const erradasCount = questoes.filter((q) => respostas.get(q.id)?.acertou === false).length;
   const pctAcerto = respondidas > 0 ? Math.round((acertos / respondidas) * 100) : 0;
@@ -147,7 +150,7 @@ export function QuestoesBanco({ lei, questoes, onNavigate }: Props) {
         <span style={s.ctrlLabel}>Mostrar:</span>
         <button onClick={() => setFiltro('todas')} style={{ ...s.chip, ...(filtro === 'todas' ? s.chipOn : {}) }}>Todas</button>
         <button onClick={() => setFiltro('nao-respondidas')} style={{ ...s.chip, ...(filtro === 'nao-respondidas' ? s.chipOn : {}) }}>
-          Não respondidas ({questoes.length - respondidas})
+          Não respondidas ({naoRespondidasCount})
         </button>
         <button onClick={() => setFiltro('erradas')} style={{ ...s.chip, ...(filtro === 'erradas' ? s.chipOn : {}) }}>
           Que errei ({erradasCount})

@@ -7,6 +7,7 @@ import { getStreak, type StreakInfo } from '@/services/streak.service';
 import { getJourneyStats, type JourneyStats } from '@/services/journey.service';
 import { useUser } from '@/components/layout/UserContext';
 import { theme, zIndex } from '@/lib/theme';
+import { Button } from '@/components/ui/Button';
 
 // Paleta do card exportado — tema claro, no estilo da página de login (a imagem é fixa).
 const BG = '#FFFFFF';
@@ -273,8 +274,8 @@ export function ShareProgressCard({ onClose }: { onClose: () => void }) {
         </div>
 
         <div style={styles.actions}>
-          <button style={styles.primary} onClick={baixar} disabled={!ready}>Baixar imagem</button>
-          {canShare && <button style={styles.secondary} onClick={compartilhar} disabled={!ready}>Compartilhar</button>}
+          <Button style={{ flex: 1 }} onClick={baixar} disabled={!ready}>Baixar imagem</Button>
+          {canShare && <Button variant="outline" style={{ flex: 1 }} onClick={compartilhar} disabled={!ready}>Compartilhar</Button>}
         </div>
       </div>
     </div>
@@ -283,7 +284,7 @@ export function ShareProgressCard({ onClose }: { onClose: () => void }) {
 
 const styles: Record<string, React.CSSProperties> = {
   overlay: {
-    position: 'fixed', inset: 0, background: 'rgba(9,17,30,0.55)',
+    position: 'fixed', inset: 0, background: 'var(--backdrop)',
     display: 'grid', placeItems: 'center', padding: 20, zIndex: zIndex.modal,
   },
   modal: {
@@ -303,7 +304,7 @@ const styles: Record<string, React.CSSProperties> = {
   actions: { display: 'flex', gap: 10, marginTop: 18 },
   primary: {
     flex: 1, padding: '12px 16px', borderRadius: theme.radiusSm, border: 'none',
-    background: theme.teal, color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
+    background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
   },
   secondary: {
     flex: 1, padding: '12px 16px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`,

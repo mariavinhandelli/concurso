@@ -15,6 +15,7 @@ import { MapaIncidencia } from '@/components/features/vademecum/MapaIncidencia';
 import { QuestoesBanco } from '@/components/features/vademecum/QuestoesBanco';
 import { useUI } from '@/components/layout/UIContext';
 import { useToast } from '@/components/ui/ToastProvider';
+import { EmptyState } from '@/components/ui/EmptyState';
 import { pushRecent } from '@/lib/recents';
 import { theme } from '@/lib/theme';
 
@@ -137,7 +138,16 @@ export default function LeiReaderPage() {
   }
 
   if (erro) {
-    return <div style={{ ...s.wrap, padding: 40 }}><p style={{ color: theme.danger }}>{erro}</p></div>;
+    return (
+      <div style={{ ...s.wrap, padding: 40 }}>
+        <EmptyState
+          icon={<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke={theme.teal} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" /></svg>}
+          title="Não encontramos essa lei"
+          body="O endereço pode ter mudado ou a lei ainda não está no Vade Mecum. Volte à lista para escolher uma das leis disponíveis."
+          action={{ label: '← Voltar ao Vade Mecum', onClick: () => router.push('/vademecum') }}
+        />
+      </div>
+    );
   }
   if (!lei) {
     return <div style={{ ...s.wrap, padding: 40 }}><p style={{ color: theme.inkFaint }}>Carregando {slug}…</p></div>;
@@ -152,7 +162,7 @@ export default function LeiReaderPage() {
   const pctGrifado = artigosVigentes.length > 0 ? Math.round((artigosComGrifo / artigosVigentes.length) * 100) : 0;
 
   return (
-    <div style={{ ...s.wrap, padding: isMobile ? '20px 14px' : '30px 40px' }}>
+    <div style={{ ...s.wrap, padding: isMobile ? '20px 16px' : '34px 40px' }}>
       {/* Cabeçalho */}
       <button onClick={() => router.push('/vademecum')} style={s.voltar}>← Vade Mecum</button>
       <div style={s.head}>
@@ -276,7 +286,7 @@ export default function LeiReaderPage() {
 }
 
 const s: Record<string, CSSProperties> = {
-  wrap: { maxWidth: 900, margin: '0 auto', fontFamily: theme.font },
+  wrap: { maxWidth: 960, margin: '0 auto', fontFamily: theme.font },
   voltar: { border: 'none', background: 'transparent', color: theme.inkFaint, fontSize: 13, cursor: 'pointer', fontFamily: 'inherit', padding: 0, marginBottom: 10 },
   head: { display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 14, flexWrap: 'wrap', marginBottom: 14 },
   h1: { fontSize: 24, fontWeight: 700, color: theme.ink, margin: 0 },

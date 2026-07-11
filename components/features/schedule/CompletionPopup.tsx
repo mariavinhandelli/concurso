@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { theme } from '@/lib/theme';
+import { Button } from '@/components/ui/Button';
 
 interface Props {
   plannedMinutes: number;
@@ -29,10 +30,10 @@ export function CompletionPopup({ plannedMinutes, saving, onConfirm, onClose }: 
           <span style={styles.durUnit}>min</span>
         </div>
         <div style={styles.actions}>
-          <button onClick={onClose} style={styles.cancel}>Cancelar</button>
-          <button onClick={handleConfirm} disabled={saving} style={styles.confirm}>
+          <Button variant="outline" onClick={onClose}>Cancelar</Button>
+          <Button onClick={handleConfirm} disabled={saving}>
             {saving ? 'Registrando…' : 'Registrar'}
-          </button>
+          </Button>
         </div>
       </div>
     </div>
@@ -40,7 +41,7 @@ export function CompletionPopup({ plannedMinutes, saving, onConfirm, onClose }: 
 }
 
 const styles: Record<string, React.CSSProperties> = {
-  overlay: { position: 'fixed', inset: 0, background: 'rgba(30,28,24,0.4)', display: 'grid', placeItems: 'center', zIndex: 60, padding: 20 },
+  overlay: { position: 'fixed', inset: 0, background: 'var(--backdrop)', display: 'grid', placeItems: 'center', zIndex: 60, padding: 20 },
   popup: { background: theme.card, borderRadius: theme.radius, boxShadow: '0 20px 60px rgba(0,0,0,0.18)', padding: 24, width: '100%', maxWidth: 340, fontFamily: theme.font },
   title: { fontSize: 16, fontWeight: 700, color: theme.ink, margin: '0 0 16px' },
   durRow: { display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'center' },
@@ -48,5 +49,5 @@ const styles: Record<string, React.CSSProperties> = {
   durUnit: { fontSize: 13, color: theme.inkSoft },
   actions: { display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 18 },
   cancel: { padding: '9px 16px', borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.card, color: theme.inkSoft, fontSize: 14, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' },
-  confirm: { padding: '9px 18px', borderRadius: theme.radiusSm, border: 'none', background: theme.teal, color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+  confirm: { padding: '9px 18px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
 };

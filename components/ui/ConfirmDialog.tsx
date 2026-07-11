@@ -43,7 +43,7 @@ export function ConfirmDialog({
           <button onClick={onCancel} style={styles.cancelBtn}>{cancelLabel}</button>
           <button
             onClick={onConfirm}
-            style={{ ...styles.confirmBtn, background: danger ? theme.danger : theme.teal }}
+            style={{ ...styles.confirmBtn, background: danger ? theme.danger : theme.primary, color: danger ? theme.onDanger : theme.onTeal }}
           >
             {confirmLabel}
           </button>
@@ -55,16 +55,16 @@ export function ConfirmDialog({
 
 const styles: Record<string, React.CSSProperties> = {
   overlay: {
-    position: 'fixed', inset: 0, background: 'rgba(15,23,42,0.45)',
+    position: 'fixed', inset: 0, background: 'var(--backdrop)',
     display: 'flex', alignItems: 'center', justifyContent: 'center',
     zIndex: zIndex.dialog, padding: 16,
   },
   modal: {
-    background: theme.card, borderRadius: 16, padding: '24px 24px 20px',
-    width: 'min(380px, 94vw)', boxShadow: '0 20px 60px rgba(0,0,0,0.2)',
+    background: theme.card, borderRadius: theme.radius, padding: '24px 24px 20px',
+    width: 'min(380px, 94vw)', boxShadow: theme.shadowModal,
     fontFamily: theme.font,
   },
-  title: { fontSize: 16, fontWeight: 700, color: theme.ink, margin: 0 },
+  title: { fontSize: 18, fontWeight: 700, color: theme.ink, margin: 0 },
   desc: { fontSize: 13.5, color: theme.inkSoft, margin: '8px 0 0', lineHeight: 1.5 },
   actions: { display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 20 },
   cancelBtn: {
@@ -74,6 +74,6 @@ const styles: Record<string, React.CSSProperties> = {
   },
   confirmBtn: {
     padding: '10px 20px', borderRadius: 10, cursor: 'pointer', fontFamily: 'inherit',
-    border: 'none', color: '#fff', fontSize: 14, fontWeight: 600,
+    border: 'none', fontSize: 14, fontWeight: 600,
   },
 };

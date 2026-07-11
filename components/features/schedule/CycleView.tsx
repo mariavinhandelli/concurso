@@ -12,6 +12,7 @@ import {
 import { theme } from '@/lib/theme';
 import { useUI } from '@/components/layout/UIContext';
 import { useConfirm } from '@/hooks/useConfirm';
+import { Button } from '@/components/ui/Button';
 import { ArchivedCycles } from './ArchivedCycles';
 import { CompletionPopup } from './CompletionPopup';
 
@@ -127,19 +128,19 @@ export function CycleView({
         <div style={styles.cycleHeader}>
           {isArchived ? (
             <>
-              <button onClick={onVoltar} style={styles.novoBtn}>← Voltar aos arquivados</button>
+              <Button variant="outline" size="sm" style={{ borderColor: theme.teal, color: theme.teal }} onClick={onVoltar}>← Voltar aos arquivados</Button>
               <div style={styles.cycleHeaderRight}>
                 <span style={styles.archivedTag}>Arquivado</span>
-                <button onClick={() => onReativar(ruleId)} style={styles.reativarBtn}>Reativar</button>
-                <button onClick={handleExcluir} style={styles.excluirBtn}>Excluir</button>
+                <Button size="sm" onClick={() => onReativar(ruleId)}>Reativar</Button>
+                <Button variant="ghost" size="sm" style={{ color: theme.danger }} onClick={handleExcluir}>Excluir</Button>
               </div>
             </>
           ) : (
             <>
-              <button onClick={onNovoCiclo} style={styles.novoBtn}>+ Novo ciclo</button>
+              <Button variant="outline" size="sm" style={{ borderColor: theme.teal, color: theme.teal }} onClick={onNovoCiclo}>+ Novo ciclo</Button>
               <div style={styles.cycleHeaderRight}>
-                <button onClick={handleArquivar} style={styles.arquivarBtn}>Arquivar</button>
-                <button onClick={handleExcluir} style={styles.excluirBtn}>Excluir</button>
+                <Button variant="ghost" size="sm" onClick={handleArquivar}>Arquivar</Button>
+                <Button variant="ghost" size="sm" style={{ color: theme.danger }} onClick={handleExcluir}>Excluir</Button>
               </div>
             </>
           )}
@@ -234,7 +235,7 @@ const styles: Record<string, React.CSSProperties> = {
   cycleHeaderRight: { display: 'flex', alignItems: 'center', gap: 8 },
   novoBtn: { padding: '8px 14px', borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.teal, background: theme.card, color: theme.teal, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
   arquivarBtn: { padding: '7px 12px', borderRadius: theme.radiusSm, border: 'none', background: 'transparent', color: theme.inkSoft, fontSize: 12.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
-  reativarBtn: { padding: '7px 14px', borderRadius: theme.radiusSm, border: 'none', background: theme.teal, color: '#fff', fontSize: 12.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+  reativarBtn: { padding: '7px 14px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 12.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
   excluirBtn: { padding: '7px 12px', borderRadius: theme.radiusSm, border: 'none', background: 'transparent', color: theme.danger, fontSize: 12.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
   archivedTag: { fontSize: 11, fontWeight: 700, color: theme.inkSoft, background: 'rgba(15,23,42,.05)', padding: '4px 10px', borderRadius: 999, letterSpacing: 0.3 },
   wrap: { display: 'flex', gap: 24, alignItems: 'flex-start', flexWrap: 'wrap' },
@@ -256,5 +257,5 @@ const styles: Record<string, React.CSSProperties> = {
   progressText: { fontSize: 11, color: theme.inkSoft, fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap' },
   undoBtn: { border: 'none', background: 'transparent', color: theme.inkFaint, fontSize: 11, cursor: 'pointer', padding: 0, marginTop: 4, fontFamily: 'inherit', opacity: 0.8 },
   completeBtn: { padding: '7px 14px', borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.card, color: theme.ink, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', flexShrink: 0, alignSelf: 'flex-start' },
-  completeBtnPrimary: { background: theme.teal, color: '#fff', borderWidth: 0 },
+  completeBtnPrimary: { background: theme.teal, color: theme.onTeal, borderWidth: 0 },
 };

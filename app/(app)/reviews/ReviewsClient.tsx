@@ -479,7 +479,7 @@ const s: Record<string, React.CSSProperties> = {
   },
   errorMsg: { margin: '0 0 12px', fontSize: 14, color: theme.ink, fontWeight: 500 },
   retryBtn: {
-    border: 'none', background: theme.crit, color: '#fff',
+    border: 'none', background: theme.crit, color: theme.onDanger,
     fontSize: 13, fontWeight: 600, padding: '8px 16px',
     borderRadius: 8, cursor: 'pointer', fontFamily: 'inherit',
     transition: 'opacity 0.15s ease',

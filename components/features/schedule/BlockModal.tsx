@@ -9,6 +9,7 @@ import { listTopics, type Topic } from '@/services/topics.service';
 import { createBlock, updateBlock } from '@/services/studyBlocks.service';
 import { theme, zIndex } from '@/lib/theme';
 import { useToast } from '@/components/ui/ToastProvider';
+import { Button } from '@/components/ui/Button';
 
 interface EditTarget {
   id: string;
@@ -139,10 +140,10 @@ export function BlockModal({ blockDate, dateLabel, onClose, onCreated, editBlock
         {error && <p style={styles.error}>{error}</p>}
 
         <div style={styles.actions}>
-          <button onClick={onClose} style={styles.cancel}>Cancelar</button>
-          <button onClick={handleSave} disabled={saving} style={styles.save}>
+          <Button variant="outline" onClick={onClose}>Cancelar</Button>
+          <Button onClick={handleSave} disabled={saving}>
             {saving ? 'Salvando…' : (isEdit ? 'Salvar' : 'Adicionar bloco')}
-          </button>
+          </Button>
         </div>
       </div>
     </div>
@@ -150,7 +151,7 @@ export function BlockModal({ blockDate, dateLabel, onClose, onCreated, editBlock
 }
 
 const styles: Record<string, React.CSSProperties> = {
-  overlay: { position: 'fixed', inset: 0, background: 'rgba(30,28,24,0.4)', display: 'grid', placeItems: 'center', zIndex: zIndex.overlay, padding: 20 },
+  overlay: { position: 'fixed', inset: 0, background: 'var(--backdrop)', display: 'grid', placeItems: 'center', zIndex: zIndex.overlay, padding: 20 },
   modal: { background: theme.card, borderRadius: theme.radius, boxShadow: '0 20px 60px rgba(0,0,0,0.18)', padding: 24, width: '100%', maxWidth: 380, maxHeight: 'calc(100dvh - 32px)', overflowY: 'auto', fontFamily: theme.font },
   h2: { fontSize: 18, fontWeight: 700, color: theme.ink, margin: '0 0 18px' },
   label: { display: 'block', fontSize: 12.5, fontWeight: 600, color: theme.inkSoft, margin: '14px 0 6px' },
@@ -164,5 +165,5 @@ const styles: Record<string, React.CSSProperties> = {
   error: { color: theme.danger, fontSize: 13, margin: '12px 0 0' },
   actions: { display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 20 },
   cancel: { padding: '10px 18px', borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.card, color: theme.inkSoft, fontSize: 14, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' },
-  save: { padding: '10px 18px', borderRadius: theme.radiusSm, border: 'none', background: theme.teal, color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+  save: { padding: '10px 18px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
 };

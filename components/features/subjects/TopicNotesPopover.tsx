@@ -103,7 +103,7 @@ export function TopicNotesPopover({ topic, subjectId, onClose, onChanged }: Prop
 }
 
 const s: Record<string, CSSProperties> = {
-  overlay: { position: 'fixed', inset: 0, background: 'rgba(15,23,42,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: zIndex.modal, padding: 16 },
+  overlay: { position: 'fixed', inset: 0, background: 'var(--backdrop)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: zIndex.modal, padding: 16 },
   modal: { background: theme.card, borderRadius: theme.radius, width: 'min(440px, 96vw)', maxHeight: '80vh', display: 'flex', flexDirection: 'column', boxShadow: theme.shadowModal, fontFamily: theme.font },
   head: { display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 10, padding: '18px 20px 12px' },
   eyebrow: { fontSize: 11, fontWeight: 700, color: theme.teal, letterSpacing: 0.6, textTransform: 'uppercase' },
@@ -117,5 +117,5 @@ const s: Record<string, CSSProperties> = {
   itemPreview: { fontSize: 12, color: theme.inkSoft, lineHeight: 1.45, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const, overflow: 'hidden' },
   itemKind: { fontSize: 10, fontWeight: 700, borderRadius: 999, padding: '2px 8px', alignSelf: 'flex-start', marginTop: 2 },
   actions: { padding: '12px 20px 18px', borderTop: `0.5px solid ${theme.line}` },
-  novaBtn: { width: '100%', padding: '10px 0', borderRadius: theme.radiusSm, border: 'none', background: theme.teal, color: '#fff', fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+  novaBtn: { width: '100%', padding: '10px 0', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
 };

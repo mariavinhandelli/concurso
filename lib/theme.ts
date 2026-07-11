@@ -36,6 +36,20 @@ export const theme = {
 
   info: 'var(--info)',    infoBg: 'var(--info-bg)',
 
+  /* Marca — gradiente de CTA (1 por tela, no topbar e momentos-chave),
+     acento de destaque (links/palavras) e backdrop único de modais. */
+  gradientCta: 'var(--gradient-cta)',
+  gradientCtaHover: 'var(--gradient-cta-hover)',
+  onCta: 'var(--on-cta)',
+  brandAccent: 'var(--brand-accent)',
+  backdrop: 'var(--backdrop)',
+
+  /* Texto sobre fundos de status — nunca '#fff' hardcoded (quebra no dark). */
+  onDanger: 'var(--on-danger)',
+  onWarn: 'var(--on-warn)',
+  onClay: 'var(--on-clay)',
+  onOk: 'var(--on-ok)',
+
   okDeep: 'var(--ok-deep)',
   warnDeep: 'var(--warn-deep)',
   dangerTint: 'var(--danger-tint)',
@@ -59,14 +73,14 @@ export const theme = {
 //   pageList: listas e formulários (coluna contida, leitura confortável).
 //   pageWide: dashboards e grades (ocupa a largura com conteúdo denso).
 export const pageList: React.CSSProperties = {
-  maxWidth: 760,
+  maxWidth: 720,
   margin: '0 auto',
   padding: '34px 40px',
   fontFamily: theme.font,
 };
 
 export const pageWide: React.CSSProperties = {
-  maxWidth: 1280,
+  maxWidth: 1080,
   margin: '0 auto',
   padding: '34px 40px',
   fontFamily: theme.font,

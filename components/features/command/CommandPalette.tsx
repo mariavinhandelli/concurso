@@ -286,7 +286,7 @@ export function CommandPalette() {
 }
 
 const s: Record<string, CSSProperties> = {
-  backdrop: { position: 'fixed', inset: 0, zIndex: zIndex.dialog, background: 'rgba(20,28,30,.42)', backdropFilter: 'blur(2px)', display: 'flex', justifyContent: 'center', alignItems: 'flex-start', padding: '12vh 16px 16px', fontFamily: theme.font },
+  backdrop: { position: 'fixed', inset: 0, zIndex: zIndex.dialog, background: 'var(--backdrop)', backdropFilter: 'blur(2px)', display: 'flex', justifyContent: 'center', alignItems: 'flex-start', padding: '12vh 16px 16px', fontFamily: theme.font },
   panel: { width: 'min(560px, 100%)', maxHeight: '70vh', background: theme.card, border: `0.5px solid ${theme.line}`, borderRadius: 16, boxShadow: theme.shadowHover, display: 'flex', flexDirection: 'column', overflow: 'hidden' },
   inputRow: { display: 'flex', alignItems: 'center', gap: 10, padding: '14px 16px', borderBottom: `0.5px solid ${theme.line}` },
   input: { flex: 1, border: 'none', outline: 'none', background: 'transparent', fontSize: 15.5, color: theme.ink, fontFamily: 'inherit' },

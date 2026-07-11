@@ -10,6 +10,7 @@ import { useToast } from '@/components/ui/ToastProvider';
 import { createRule, editRuleVersioned, type RuleSummary, type RecurrenceMode } from '@/services/recurrence.service';
 import { theme } from '@/lib/theme';
 import { toLocalDateString } from '@/lib/local-date';
+import { Button } from '@/components/ui/Button';
 import { DiaFixoForm, type DiaFixoFormRef } from './DiaFixoForm';
 import { CicloForm, type CicloFormRef } from './CicloForm';
 
@@ -121,10 +122,10 @@ export function RecurrenceModal({ onClose, onCreated, editRule = null, modoInici
         {error && <p style={styles.error}>{error}</p>}
 
         <div style={styles.actions}>
-          <button onClick={onClose} style={styles.cancel}>Cancelar</button>
-          <button onClick={handleSave} disabled={saving} style={styles.save}>
+          <Button variant="outline" onClick={onClose}>Cancelar</Button>
+          <Button onClick={handleSave} disabled={saving}>
             {saving ? 'Salvando…' : (isEdit ? 'Salvar alterações' : 'Criar recorrência')}
-          </button>
+          </Button>
         </div>
       </div>
     </div>
@@ -132,7 +133,7 @@ export function RecurrenceModal({ onClose, onCreated, editRule = null, modoInici
 }
 
 const styles: Record<string, React.CSSProperties> = {
-  overlay: { position: 'fixed', inset: 0, background: 'rgba(30,28,24,0.4)', display: 'grid', placeItems: 'center', zIndex: 60, padding: 20 },
+  overlay: { position: 'fixed', inset: 0, background: 'var(--backdrop)', display: 'grid', placeItems: 'center', zIndex: 60, padding: 20 },
   modal: { background: theme.card, borderRadius: theme.radius, boxShadow: '0 20px 60px rgba(0,0,0,0.18)', padding: 24, width: '100%', maxWidth: 480, maxHeight: '88vh', overflowY: 'auto', fontFamily: theme.font },
   h2: { fontSize: 18, fontWeight: 700, color: theme.ink, margin: 0 },
   subtitle: { fontSize: 13, color: theme.inkSoft, margin: '4px 0 16px', lineHeight: 1.5 },
@@ -147,5 +148,5 @@ const styles: Record<string, React.CSSProperties> = {
   error: { color: theme.danger, fontSize: 13, margin: '12px 0 0' },
   actions: { display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 20 },
   cancel: { padding: '10px 18px', borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.card, color: theme.inkSoft, fontSize: 14, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' },
-  save: { padding: '10px 18px', borderRadius: theme.radiusSm, border: 'none', background: theme.teal, color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+  save: { padding: '10px 18px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
 };

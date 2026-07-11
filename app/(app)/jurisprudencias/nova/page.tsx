@@ -28,7 +28,7 @@ export default function NovaJurisprudenciaPage() {
   }
 
   return (
-    <div style={{ maxWidth: 860, margin: '0 auto', padding: isMobile ? '20px 16px' : '34px 40px', fontFamily: theme.font, minWidth: 0 }}>
+    <div style={{ maxWidth: 960, margin: '0 auto', padding: isMobile ? '20px 16px' : '34px 40px', fontFamily: theme.font, minWidth: 0 }}>
       <button
         className="touch-target"
         onClick={() => router.push('/jurisprudencias')}

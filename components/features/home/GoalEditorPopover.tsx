@@ -2,6 +2,7 @@
 
 import type { ReactNode } from 'react';
 import { theme } from '@/lib/theme';
+import { Button } from '@/components/ui/Button';
 
 interface GoalEditorPopoverProps {
   label: string;
@@ -19,15 +20,10 @@ export function GoalEditorPopover({ label, weeklyHint, saving, onSave, onClose, 
       {children}
       {weeklyHint && <div style={styles.popHint}>{weeklyHint}</div>}
       <div style={styles.popActions}>
-        <button className="touch-target" style={styles.popCancel} onClick={onClose}>Cancelar</button>
-        <button
-          className="touch-target"
-          style={{ ...styles.popSave, cursor: saving ? 'not-allowed' : 'pointer' }}
-          onClick={onSave}
-          disabled={saving}
-        >
+        <Button variant="ghost" size="sm" className="touch-target" onClick={onClose}>Cancelar</Button>
+        <Button size="sm" className="touch-target" onClick={onSave} disabled={saving}>
           {saving ? '…' : 'Salvar'}
-        </button>
+        </Button>
       </div>
     </div>
   );
@@ -49,7 +45,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   popSave: {
     padding: '7px 14px', borderRadius: 8, border: 'none',
-    background: theme.teal, color: '#fff', fontSize: 13, fontWeight: 600,
+    background: theme.teal, color: theme.onTeal, fontSize: 13, fontWeight: 600,
     fontFamily: 'inherit',
   },
 };

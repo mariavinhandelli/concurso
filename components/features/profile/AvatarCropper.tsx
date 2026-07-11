@@ -123,7 +123,7 @@ export function AvatarCropper({ imageSrc, onCancel, onConfirm }: Props) {
 }
 
 const styles: Record<string, React.CSSProperties> = {
-  overlay: { position: 'fixed', inset: 0, background: 'rgba(30,28,24,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 60, padding: 16 },
+  overlay: { position: 'fixed', inset: 0, background: 'var(--backdrop)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 60, padding: 16 },
   modal: { background: theme.card, borderRadius: theme.radius, padding: 24, width: 'min(420px, 95vw)', boxShadow: '0 20px 60px rgba(0,0,0,0.2)', fontFamily: theme.font, boxSizing: 'border-box' },
   title: { fontSize: 18, fontWeight: 700, color: theme.ink, margin: '0 0 4px' },
   hint: { fontSize: 13, color: theme.inkSoft, margin: '0 0 16px', lineHeight: 1.45 },
@@ -133,6 +133,6 @@ const styles: Record<string, React.CSSProperties> = {
   slider: { flex: 1, accentColor: theme.teal, cursor: 'pointer' },
   actions: { display: 'flex', gap: 12, justifyContent: 'flex-end', marginTop: 18 },
   cancelBtn: { padding: '11px 20px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.inkSoft, fontSize: 14, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' },
-  confirmBtn: { padding: '11px 24px', borderRadius: theme.radiusSm, border: 'none', background: theme.teal, color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+  confirmBtn: { padding: '11px 24px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
   errorMsg: { fontSize: 13, color: theme.danger, background: theme.dangerTint, borderRadius: 8, padding: '8px 12px', margin: '12px 0 0' },
 };

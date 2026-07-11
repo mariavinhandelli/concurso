@@ -6,6 +6,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { createFlashcard } from '@/services/flashcards.service';
 import { theme } from '@/lib/theme';
+import { Button } from '@/components/ui/Button';
 
 interface Props {
   frontText: string;
@@ -79,11 +80,10 @@ export function FlashcardModal({ frontText, sourceErrorId, subjectId, topicId, o
         {error && <p style={styles.error}>{error}</p>}
 
         <div style={styles.actions}>
-          <button onClick={onClose} style={styles.cancelBtn} disabled={saving}>Cancelar</button>
-          <button onClick={handleSave} disabled={!canSave || saving}
-            style={{ ...styles.saveBtn, ...(canSave && !saving ? {} : styles.saveBtnDisabled) }}>
+          <Button variant="outline" onClick={onClose} disabled={saving}>Cancelar</Button>
+          <Button onClick={handleSave} disabled={!canSave || saving}>
             {saving ? 'Salvando…' : 'Criar flashcard'}
-          </button>
+          </Button>
         </div>
       </div>
     </div>
@@ -91,7 +91,7 @@ export function FlashcardModal({ frontText, sourceErrorId, subjectId, topicId, o
 }
 
 const styles: Record<string, React.CSSProperties> = {
-  overlay: { position: 'fixed', inset: 0, background: 'rgba(30,28,24,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 60, padding: 16 },
+  overlay: { position: 'fixed', inset: 0, background: 'var(--backdrop)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 60, padding: 16 },
   modal: { background: theme.card, borderRadius: theme.radius, padding: 28, width: 'min(480px, 95vw)', maxHeight: 'calc(100dvh - 32px)', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,0.18)', fontFamily: theme.font },
   title: { margin: '0 0 20px', fontSize: 19, color: theme.ink, fontWeight: 700 },
   label: { display: 'block', fontSize: 12.5, color: theme.inkSoft, fontWeight: 600, marginBottom: 6, marginTop: 10 },
@@ -102,6 +102,6 @@ const styles: Record<string, React.CSSProperties> = {
   error: { color: theme.danger, fontSize: 13 },
   actions: { display: 'flex', gap: 12, justifyContent: 'flex-end', marginTop: 16 },
   cancelBtn: { padding: '11px 20px', borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.card, color: theme.inkSoft, fontSize: 14, fontWeight: 500, cursor: 'pointer', fontFamily: theme.font },
-  saveBtn: { padding: '11px 24px', borderRadius: theme.radiusSm, border: 'none', background: theme.teal, color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: theme.font },
+  saveBtn: { padding: '11px 24px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: theme.font },
   saveBtnDisabled: { background: theme.muted, color: theme.inkFaint, cursor: 'not-allowed' },
 };

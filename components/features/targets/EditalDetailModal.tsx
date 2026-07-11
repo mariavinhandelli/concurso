@@ -11,6 +11,7 @@ import {
 } from '@/services/editaisCatalog.service';
 import { useToast } from '@/components/ui/ToastProvider';
 import { theme, zIndex } from '@/lib/theme';
+import { Button } from '@/components/ui/Button';
 
 const SITUACAO_LABEL: Record<CatalogEdital['situacao'], string> = {
   vigente: 'Edital vigente',
@@ -186,24 +187,20 @@ export function EditalDetailModal({ edital, isMobile, onClose, onActivated }: Pr
             </a>
           )}
           <div style={{ flex: 1 }} />
-          <button onClick={onClose} style={s.btnGhost}>Fechar</button>
+          <Button variant="ghost" onClick={onClose}>Fechar</Button>
           {/* Edital sem conteúdo programático: ativar criaria um concurso vazio. */}
           {!edital.isActivated && edital.subjectCount === 0 ? (
-            <button
-              disabled
-              title="Conteúdo programático em preparação — acompanhe as notícias por aqui."
-              style={{ ...s.btnPrimary, opacity: 0.55, cursor: 'not-allowed' }}
-            >
+            <Button disabled title="Conteúdo programático em preparação — acompanhe as notícias por aqui.">
               Conteúdo em preparação
-            </button>
+            </Button>
           ) : (
-            <button
+            <Button
               onClick={handleActivate}
               disabled={activating}
-              style={{ ...s.btnPrimary, ...(edital.isActivated ? s.btnOpen : {}) }}
+              style={edital.isActivated ? { background: theme.card, color: theme.teal, border: `1px solid ${theme.teal}` } : undefined}
             >
               {activating ? 'Ativando…' : edital.isActivated ? 'Abrir concurso' : 'Ativar edital'}
-            </button>
+            </Button>
           )}
         </div>
       </div>
@@ -212,14 +209,14 @@ export function EditalDetailModal({ edital, isMobile, onClose, onActivated }: Pr
 }
 
 const s: Record<string, CSSProperties> = {
-  overlay: { position: 'fixed', inset: 0, background: 'rgba(15,23,42,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: zIndex.modal, padding: 16 },
+  overlay: { position: 'fixed', inset: 0, background: 'var(--backdrop)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: zIndex.modal, padding: 16 },
   modal: { background: theme.card, borderRadius: theme.radius, maxHeight: '92vh', display: 'flex', flexDirection: 'column', boxShadow: theme.shadowModal, fontFamily: theme.font },
 
   head: { display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, padding: '20px 22px 14px', borderBottom: `0.5px solid ${theme.line}` },
   titleRow: { display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' },
   h2: { fontSize: 18, fontWeight: 700, color: theme.ink, margin: 0, overflowWrap: 'break-word' },
   situacaoTag: { fontSize: 10.5, fontWeight: 700, borderRadius: theme.radiusXs, padding: '3px 9px', flexShrink: 0, letterSpacing: 0.2 },
-  situacaoVigente: { color: '#fff', background: theme.teal },
+  situacaoVigente: { color: theme.onTeal, background: theme.teal },
   situacaoExpectativa: { color: theme.warn, background: theme.warnBg },
   situacaoEncerrado: { color: theme.inkFaint, background: theme.muted },
   areaLabel: { fontSize: 12, color: theme.inkFaint, margin: '4px 0 0', fontWeight: 500 },
@@ -258,6 +255,6 @@ const s: Record<string, CSSProperties> = {
   footer: { display: 'flex', alignItems: 'center', gap: 10, padding: '14px 22px', borderTop: `0.5px solid ${theme.line}` },
   linkBtn: { fontSize: 12.5, fontWeight: 600, color: theme.teal, textDecoration: 'none', padding: '8px 0' },
   btnGhost: { padding: '10px 14px', borderRadius: theme.radiusSm, border: 'none', background: 'transparent', color: theme.inkFaint, fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' },
-  btnPrimary: { padding: '10px 20px', borderRadius: theme.radiusSm, border: 'none', background: theme.teal, color: '#fff', fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
+  btnPrimary: { padding: '10px 20px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
   btnOpen: { background: theme.card, color: theme.teal, border: `1px solid ${theme.teal}` },
 };

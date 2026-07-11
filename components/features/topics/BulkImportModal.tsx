@@ -5,6 +5,7 @@
 import { useState } from 'react';
 import { parseTopicsTree, type ParsedTopic } from '@/lib/parse-topics';
 import { theme } from '@/lib/theme';
+import { Button } from '@/components/ui/Button';
 
 interface Props {
   onConfirm: (itens: ParsedTopic[]) => Promise<void>;
@@ -75,14 +76,10 @@ export function BulkImportModal({ onConfirm, onClose }: Props) {
 
         {importError && <p style={{ color: '#ef4444', fontSize: 13, margin: '0 0 10px', textAlign: 'right' }}>{importError}</p>}
         <div style={styles.actions}>
-          <button onClick={onClose} style={styles.cancelBtn}>Cancelar</button>
-          <button
-            onClick={handleConfirm}
-            disabled={itens.length === 0 || saving}
-            style={{ ...styles.confirmBtn, ...(itens.length === 0 || saving ? styles.confirmBtnOff : {}) }}
-          >
+          <Button variant="outline" onClick={onClose}>Cancelar</Button>
+          <Button onClick={handleConfirm} disabled={itens.length === 0 || saving}>
             {saving ? 'Importando…' : `Adicionar ${itens.length || ''} tópico(s)`}
-          </button>
+          </Button>
         </div>
       </div>
     </div>
@@ -90,7 +87,7 @@ export function BulkImportModal({ onConfirm, onClose }: Props) {
 }
 
 const styles: Record<string, React.CSSProperties> = {
-  overlay: { position: 'fixed', inset: 0, background: 'rgba(30,28,24,0.4)', display: 'grid', placeItems: 'center', zIndex: 50, padding: 20 },
+  overlay: { position: 'fixed', inset: 0, background: 'var(--backdrop)', display: 'grid', placeItems: 'center', zIndex: 50, padding: 20 },
   modal: { background: theme.card, borderRadius: theme.radius, boxShadow: '0 20px 60px rgba(0,0,0,0.18)', padding: 26, width: '100%', maxWidth: 680, maxHeight: 'calc(100dvh - 32px)', overflowY: 'auto', fontFamily: theme.font },
   h2: { fontSize: 20, fontWeight: 700, color: theme.ink, margin: 0 },
   hint: { fontSize: 13.5, color: theme.inkSoft, margin: '8px 0 18px', lineHeight: 1.5 },
@@ -104,6 +101,6 @@ const styles: Record<string, React.CSSProperties> = {
   previewChild: { paddingLeft: 18, color: theme.inkSoft, fontSize: 13.5 },
   actions: { display: 'flex', gap: 12, justifyContent: 'flex-end' },
   cancelBtn: { padding: '11px 22px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.inkSoft, fontSize: 14, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' },
-  confirmBtn: { padding: '11px 22px', borderRadius: theme.radiusSm, border: 'none', background: theme.teal, color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+  confirmBtn: { padding: '11px 22px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
   confirmBtnOff: { background: theme.muted, color: theme.inkFaint, cursor: 'not-allowed' },
 };

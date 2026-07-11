@@ -67,7 +67,7 @@ export default function CadernoHubPage() {
   }
 
   return (
-    <div style={{ ...s.wrap, padding: isMobile ? '16px 12px' : '28px 32px' }}>
+    <div style={{ ...s.wrap, padding: isMobile ? '20px 16px' : '34px 40px' }}>
       <div style={s.head}>
         <h1 style={{ ...s.h1, fontSize: isMobile ? 24 : 28 }}>Caderno</h1>
         <p style={s.sub}>Tudo que você escreveu — anotações e erros, num lugar só.</p>
@@ -95,10 +95,10 @@ export default function CadernoHubPage() {
 }
 
 const s: Record<string, CSSProperties> = {
-  wrap: { maxWidth: 1240, margin: '0 auto', fontFamily: theme.font, minWidth: 0 },
+  wrap: { maxWidth: 1080, margin: '0 auto', fontFamily: theme.font, minWidth: 0 },
   head: { marginBottom: 14 },
   h1: { fontWeight: 800, color: theme.ink, letterSpacing: -0.6, margin: 0 },
-  sub: { fontSize: 13.5, color: theme.inkSoft, margin: '4px 0 0' },
+  sub: { fontSize: 14, color: theme.inkSoft, margin: '6px 0 0', fontWeight: 500 },
   tabs: { display: 'flex', gap: 4, marginBottom: 18, padding: 3, background: 'rgba(15,23,42,.06)', borderRadius: theme.radiusSm, width: 'fit-content' },
   tab: { padding: '8px 18px', borderRadius: theme.radiusXs, border: 'none', background: 'transparent', color: theme.inkSoft, fontSize: 14, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit', transition: 'all .15s', whiteSpace: 'nowrap' },
   tabOn: { background: theme.card, color: theme.ink, boxShadow: theme.shadow, fontWeight: 600 },

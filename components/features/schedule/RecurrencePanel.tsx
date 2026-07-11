@@ -159,7 +159,7 @@ export function RecurrencePanel({ onClose, onChanged, onEdit }: Props) {
 
 const styles: Record<string, React.CSSProperties> = {
   errorMsg: { color: theme.danger, fontSize: 13, margin: '0 0 12px' },
-  overlay: { position: 'fixed', inset: 0, background: 'rgba(30,28,24,0.4)', display: 'grid', placeItems: 'center', zIndex: 60, padding: 20 },
+  overlay: { position: 'fixed', inset: 0, background: 'var(--backdrop)', display: 'grid', placeItems: 'center', zIndex: 60, padding: 20 },
   modal: { background: theme.card, borderRadius: theme.radius, boxShadow: '0 20px 60px rgba(0,0,0,0.18)', padding: 24, width: '100%', maxWidth: 460, maxHeight: '88vh', overflowY: 'auto', fontFamily: theme.font },
   head: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
   h2: { fontSize: 18, fontWeight: 700, color: theme.ink, margin: 0 },

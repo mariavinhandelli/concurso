@@ -11,6 +11,7 @@ import { useQuery } from '@tanstack/react-query';
 import { getRaioX, NIVEL_LABEL, type RaioX, type NivelProntidao } from '@/services/raiox.service';
 import { theme } from '@/lib/theme';
 import { Skeleton } from '@/components/ui/Skeleton';
+import { Button } from '@/components/ui/Button';
 
 const NIVEL_COR: Record<NivelProntidao, string> = {
   construcao: theme.danger,
@@ -103,9 +104,9 @@ export const RaioXCard = memo(function RaioXCard() {
               ? 'peso alto no edital, mas nenhum tópico vinculado ainda'
               : `score ${focoPrincipal.score}% · ${focoPrincipal.topicosNaoIniciados} de ${focoPrincipal.topicosTotal} tópicos não iniciados`}
           </p>
-          <button style={styles.focoBtn} onClick={() => router.push(`/subjects/${focoPrincipal.subjectId}`)}>
+          <Button size="sm" onClick={() => router.push(`/subjects/${focoPrincipal.subjectId}`)}>
             Estudar {focoPrincipal.subjectName} →
-          </button>
+          </Button>
         </div>
       )}
 
@@ -154,7 +155,7 @@ const styles: Record<string, React.CSSProperties> = {
   focoBox: { background: theme.bg, border: `0.5px solid ${theme.line}`, borderRadius: theme.radiusSm, padding: '12px 14px', marginBottom: 12 },
   focoTitulo: { fontSize: 13.5, color: theme.ink, margin: '0 0 3px' },
   focoDetalhe: { fontSize: 12.5, color: theme.inkSoft, margin: '0 0 10px' },
-  focoBtn: { border: 'none', background: theme.teal, color: '#fff', fontSize: 13, fontWeight: 600, borderRadius: theme.radiusSm, padding: '8px 14px', cursor: 'pointer', fontFamily: 'inherit' },
+  focoBtn: { border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 13, fontWeight: 600, borderRadius: theme.radiusSm, padding: '8px 14px', cursor: 'pointer', fontFamily: 'inherit' },
 
   lista: { display: 'flex', flexDirection: 'column', gap: 6 },
   listaItem: { display: 'flex', alignItems: 'center', gap: 8 },

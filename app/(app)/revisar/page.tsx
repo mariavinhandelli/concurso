@@ -21,6 +21,7 @@ import { ReviewCard } from '@/components/features/reviews/ReviewCard';
 import { useUI } from '@/components/layout/UIContext';
 import { useToast } from '@/components/ui/ToastProvider';
 import { theme } from '@/lib/theme';
+import { Button } from '@/components/ui/Button';
 
 // ── Metadados por tipo (rótulo + cor do chip) ──────────────────────────────
 const KIND_META: Record<UnifiedKind, { label: string; fg: string; bg: string }> = {
@@ -202,13 +203,13 @@ export default function RevisarUnificadoPage() {
         )}
         <div style={s.doneActions}>
           {restante > 0 && (
-            <button onClick={continuar} style={s.doneBtn}>
+            <Button onClick={continuar}>
               Continuar · +{Math.min(limite ?? restante, restante)}
-            </button>
+            </Button>
           )}
-          <button onClick={() => router.push('/')} style={restante > 0 ? s.doneGhost : s.doneBtn}>
+          <Button variant={restante > 0 ? 'outline' : 'primary'} onClick={() => router.push('/')}>
             Voltar para a Home
-          </button>
+          </Button>
         </div>
       </div>
     );
@@ -216,7 +217,7 @@ export default function RevisarUnificadoPage() {
 
   // ── Player ─────────────────────────────────────────────────────────────────
   return (
-    <div style={{ ...s.wrap, padding: isMobile ? '20px 16px' : '32px 40px' }}>
+    <div style={{ ...s.wrap, padding: isMobile ? '20px 16px' : '34px 40px' }}>
       {/* Barra superior: sair · progresso · contador */}
       <div style={s.topBar}>
         <button onClick={() => router.push('/')} style={s.exitBtn} className="touch-target">
@@ -300,7 +301,7 @@ function FlashcardBody({
       </div>
       {!revealed ? (
         <div style={{ textAlign: 'center' }}>
-          <button onClick={onReveal} style={s.revealBtn}>Mostrar resposta</button>
+          <Button onClick={onReveal} style={{ padding: '13px 32px', fontSize: 15 }}>Mostrar resposta</Button>
           <p style={s.kbdHint}>ou aperte <kbd style={s.kbd}>espaço</kbd></p>
         </div>
       ) : (
@@ -324,7 +325,7 @@ function LeiBody({
   return (
     <div style={s.card}>
       <div style={s.leiHead}>
-        <span style={{ ...s.subjBadge, background: theme.clay }}>{lei.nomeCurto}</span>
+        <span style={{ ...s.subjBadge, background: theme.clay, color: theme.onClay }}>{lei.nomeCurto}</span>
         <span style={s.leiRotulo}>{artigo.rotulo}</span>
         {artigo.caminho && <span style={s.leiCaminho}>{artigo.caminho}</span>}
       </div>
@@ -379,7 +380,7 @@ function JurisBody({
   return (
     <div style={s.card}>
       <div style={s.leiHead}>
-        <span style={{ ...s.subjBadge, background: theme.teal }}>{j.tribunal}</span>
+        <span style={{ ...s.subjBadge, background: theme.teal, color: theme.onTeal }}>{j.tribunal}</span>
         <span style={{ ...s.subjBadge, background: 'rgba(15,23,42,.08)', color: theme.inkSoft }}>{j.disciplina}</span>
       </div>
       <div style={s.teseBox}>
@@ -413,7 +414,7 @@ function JurisBody({
       )}
       {!revealed ? (
         <div style={{ textAlign: 'center' }}>
-          <button onClick={onReveal} style={s.revealBtn}>{temFlash ? 'Ver resposta' : 'Ver tudo'}</button>
+          <Button onClick={onReveal} style={{ padding: '13px 32px', fontSize: 15 }}>{temFlash ? 'Ver resposta' : 'Ver tudo'}</Button>
           <p style={s.kbdHint}>ou aperte <kbd style={s.kbd}>espaço</kbd></p>
         </div>
       ) : (
@@ -505,7 +506,7 @@ const s: Record<string, CSSProperties> = {
   secText: { fontSize: 14, color: theme.ink, lineHeight: 1.65, margin: 0 },
 
   // ações
-  revealBtn: { padding: '13px 32px', borderRadius: theme.radiusSm, border: 'none', background: theme.teal, color: '#fff', fontSize: 15, fontWeight: 600, cursor: 'pointer', fontFamily: theme.font },
+  revealBtn: { padding: '13px 32px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 15, fontWeight: 600, cursor: 'pointer', fontFamily: theme.font },
   kbdHint: { fontSize: 12, color: theme.inkFaint, marginTop: 10 },
   kbd: { fontFamily: 'ui-monospace, monospace', fontSize: 11, padding: '1px 6px', borderRadius: 5, border: `0.5px solid ${theme.line}`, background: theme.muted, color: theme.inkSoft },
   ratings3: { display: 'flex', gap: 8 },
@@ -523,6 +524,6 @@ const s: Record<string, CSSProperties> = {
   doneStatNum: { fontSize: 34, fontWeight: 800, letterSpacing: -1, fontVariantNumeric: 'tabular-nums', lineHeight: 1 },
   doneStatLabel: { fontSize: 12, color: theme.inkFaint, fontWeight: 500 },
   doneActions: { display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' },
-  doneBtn: { padding: '12px 28px', borderRadius: theme.radiusSm, border: 'none', background: theme.teal, color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: theme.font },
+  doneBtn: { padding: '12px 28px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: theme.font },
   doneGhost: { padding: '12px 22px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.inkSoft, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: theme.font },
 };

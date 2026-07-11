@@ -18,6 +18,7 @@ import { createRule, type RecurrenceItemInput } from '@/services/recurrence.serv
 import { getDailyTarget, setDailyTarget } from '@/services/goals.service';
 import { refreshHomeAfterSession } from '@/lib/home-refresh';
 import { theme, zIndex } from '@/lib/theme';
+import { Button } from '@/components/ui/Button';
 
 function skipKey(userId: string) { return `focali_onboarding_skipped_${userId}`; }
 
@@ -205,14 +206,13 @@ function OnboardingWizard({ userId, onClose }: { userId: string; onClose: (remem
             {error && <p style={s.error}>{error}</p>}
 
             <div style={s.actions}>
-              <button onClick={() => onClose(true)} style={s.skip}>Pular por enquanto</button>
+              <Button variant="ghost" onClick={() => onClose(true)}>Pular por enquanto</Button>
               <div style={{ flex: 1 }} />
-              <button
+              <Button
                 onClick={() => { if (!editalId) { setError('Escolha um concurso para continuar.'); return; } setError(''); setStep(1); }}
-                style={s.primary}
               >
                 Continuar
-              </button>
+              </Button>
             </div>
           </>
         )}
@@ -253,11 +253,11 @@ function OnboardingWizard({ userId, onClose }: { userId: string; onClose: (remem
             {error && <p style={s.error}>{error}</p>}
 
             <div style={s.actions}>
-              <button onClick={() => setStep(0)} style={s.skip}>Voltar</button>
+              <Button variant="ghost" onClick={() => setStep(0)}>Voltar</Button>
               <div style={{ flex: 1 }} />
-              <button onClick={gerarPlano} disabled={busy} style={s.primary}>
+              <Button onClick={gerarPlano} disabled={busy}>
                 {busy ? 'Montando seu plano…' : 'Gerar meu plano'}
-              </button>
+              </Button>
             </div>
           </>
         )}
@@ -304,9 +304,9 @@ function OnboardingWizard({ userId, onClose }: { userId: string; onClose: (remem
 
             <div style={s.actions}>
               <div style={{ flex: 1 }} />
-              <button onClick={() => onClose(false)} style={s.primary}>
+              <Button onClick={() => onClose(false)}>
                 Começar a estudar
-              </button>
+              </Button>
             </div>
           </>
         )}
@@ -316,7 +316,7 @@ function OnboardingWizard({ userId, onClose }: { userId: string; onClose: (remem
 }
 
 const s: Record<string, CSSProperties> = {
-  overlay: { position: 'fixed', inset: 0, background: 'rgba(15,23,42,0.55)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: zIndex.modal, padding: 16 },
+  overlay: { position: 'fixed', inset: 0, background: 'var(--backdrop)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: zIndex.modal, padding: 16 },
   modal: { background: theme.card, borderRadius: theme.radius, width: 'min(540px, 96vw)', maxHeight: '90vh', overflowY: 'auto', boxShadow: theme.shadowModal, fontFamily: theme.font, padding: 24 },
   head: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 },
   brand: { fontSize: 15, fontWeight: 800, color: theme.teal, letterSpacing: 0.2 },
@@ -343,7 +343,7 @@ const s: Record<string, CSSProperties> = {
 
   chipsRow: { display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginTop: 6 },
   chip: { padding: '10px 18px', borderRadius: 10, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.bg, color: theme.inkSoft, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
-  chipOn: { borderColor: theme.teal, background: theme.teal, color: '#fff' },
+  chipOn: { borderColor: theme.teal, background: theme.teal, color: theme.onTeal },
   customWrap: { position: 'relative', marginLeft: 4 },
   customInput: { width: 92, boxSizing: 'border-box', padding: '10px 44px 10px 12px', borderRadius: 10, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.card, fontSize: 14, color: theme.ink, fontFamily: 'inherit', outline: 'none', textAlign: 'center' },
   customUnit: { position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', fontSize: 12, color: theme.inkFaint, pointerEvents: 'none' },
@@ -362,5 +362,5 @@ const s: Record<string, CSSProperties> = {
   error: { color: theme.danger, fontSize: 13, margin: '12px 0 0' },
   actions: { display: 'flex', alignItems: 'center', gap: 10, marginTop: 20 },
   skip: { padding: '10px 14px', borderRadius: theme.radiusSm, border: 'none', background: 'transparent', color: theme.inkFaint, fontSize: 13.5, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' },
-  primary: { padding: '11px 22px', borderRadius: theme.radiusSm, border: 'none', background: theme.teal, color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+  primary: { padding: '11px 22px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
 };

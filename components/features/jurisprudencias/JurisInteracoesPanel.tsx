@@ -8,6 +8,7 @@ import {
 } from '@/services/jurisInteracoes.service';
 import { INTERVALOS_RAPIDOS } from '@/lib/juris-review';
 import { useToast } from '@/components/ui/ToastProvider';
+import { Button } from '@/components/ui/Button';
 
 interface Props {
   jurisId: string;
@@ -219,13 +220,14 @@ export function JurisInteracoesPanel({ jurisId }: Props) {
           </div>
         </div>
 
-        <button
+        <Button
+          size="sm"
+          style={savedAnot ? { marginTop: 12, background: theme.ok, color: theme.onOk } : { marginTop: 12 }}
           onClick={handleSaveAnotacao}
           disabled={savingAnot}
-          style={{ ...styles.saveBtn, ...(savedAnot ? styles.saveBtnOk : {}) }}
         >
           {savedAnot ? '✓ Salvo' : savingAnot ? 'Salvando…' : 'Salvar anotação'}
-        </button>
+        </Button>
       </div>
 
       {/* ── AGENDAMENTO DE REVISÃO ── */}
@@ -322,11 +324,11 @@ const styles: Record<string, React.CSSProperties> = {
   },
   tagAddBtn: {
     padding: '8px 14px', borderRadius: theme.radiusSm, border: 'none',
-    background: theme.teal, color: '#fff', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: theme.font,
+    background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: theme.font,
   },
   saveBtn: {
     marginTop: 12, padding: '9px 18px', borderRadius: theme.radiusSm, border: 'none',
-    background: theme.teal, color: '#fff', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: theme.font,
+    background: theme.primary, color: theme.onTeal, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: theme.font,
   },
   saveBtnOk: { background: theme.ok },
   activeBadge: { fontSize: 11, fontWeight: 700, color: theme.ok, background: theme.okBg, borderRadius: 999, padding: '2px 8px' },

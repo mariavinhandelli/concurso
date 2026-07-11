@@ -75,6 +75,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               style={{
                 ...s.toast,
                 background: t.kind === 'error' ? theme.danger : t.kind === 'success' ? theme.ok : theme.teal,
+                color: t.kind === 'error' ? theme.onDanger : t.kind === 'success' ? theme.onOk : theme.onTeal,
               }}
             >
               <span style={s.msg}>{t.message}</span>
@@ -113,14 +114,14 @@ const s: Record<string, CSSProperties> = {
     boxShadow: '0 8px 24px rgba(0,0,0,0.18)',
     fontFamily: theme.font, animation: 'toast-in 0.2s ease',
   },
-  msg: { flex: 1, fontSize: 13.5, fontWeight: 500, color: '#fff', lineHeight: 1.4 },
+  msg: { flex: 1, fontSize: 13.5, fontWeight: 500, color: 'inherit', lineHeight: 1.4 },
   actionBtn: {
-    background: 'rgba(255,255,255,0.22)', border: 'none', color: '#fff',
+    background: 'rgba(255,255,255,0.22)', border: 'none', color: 'inherit',
     cursor: 'pointer', fontSize: 12.5, fontWeight: 700, fontFamily: 'inherit',
     borderRadius: 6, padding: '4px 10px', whiteSpace: 'nowrap', flexShrink: 0,
   },
   close: {
-    background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.7)',
+    background: 'transparent', border: 'none', color: 'inherit', opacity: 0.7,
     cursor: 'pointer', fontSize: 13, padding: 0, flexShrink: 0,
   },
 };

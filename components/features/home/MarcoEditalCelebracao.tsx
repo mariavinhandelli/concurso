@@ -10,6 +10,7 @@ import { useQuery } from '@tanstack/react-query';
 import { getEditalCoverage, type EditalCoverage } from '@/services/coverage.service';
 import { ShareProgressCard } from './ShareProgressCard';
 import { theme, zIndex } from '@/lib/theme';
+import { Button } from '@/components/ui/Button';
 
 const MARCOS = [25, 50, 75, 100];
 
@@ -53,8 +54,8 @@ export function MarcoEditalCelebracao() {
             : `Continue nesse ritmo — faltam ${100 - marco}% para cobrir tudo.`}
         </p>
         <div style={s.actions}>
-          <button style={s.ghost} onClick={fechar}>Fechar</button>
-          <button style={s.primary} onClick={() => setSharing(true)}>Compartilhar →</button>
+          <Button variant="outline" onClick={fechar}>Fechar</Button>
+          <Button onClick={() => setSharing(true)}>Compartilhar →</Button>
         </div>
       </div>
       {sharing && <ShareProgressCard onClose={() => { setSharing(false); fechar(); }} />}
@@ -63,12 +64,12 @@ export function MarcoEditalCelebracao() {
 }
 
 const s: Record<string, CSSProperties> = {
-  overlay: { position: 'fixed', inset: 0, background: 'rgba(15,23,42,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: zIndex.modal, padding: 16 },
+  overlay: { position: 'fixed', inset: 0, background: 'var(--backdrop)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: zIndex.modal, padding: 16 },
   modal: { background: theme.card, borderRadius: theme.radius, width: 'min(420px, 96vw)', padding: '32px 28px', textAlign: 'center', boxShadow: theme.shadowModal, fontFamily: theme.font },
   emoji: { fontSize: 46, marginBottom: 6 },
   h2: { fontSize: 20, fontWeight: 700, color: theme.ink, margin: '0 0 8px' },
   sub: { fontSize: 14, color: theme.inkSoft, margin: '0 0 22px', lineHeight: 1.55 },
   actions: { display: 'flex', gap: 10, justifyContent: 'center' },
   ghost: { padding: '10px 18px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.inkSoft, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
-  primary: { padding: '10px 18px', borderRadius: theme.radiusSm, border: 'none', background: theme.teal, color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+  primary: { padding: '10px 18px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
 };

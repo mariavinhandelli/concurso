@@ -15,6 +15,8 @@ interface UserState {
   name: string;
   email: string | null;
   avatarUrl: string | null;
+  /* false até a primeira resposta do getUser() — permite skeleton em vez de fallback "?" */
+  loaded: boolean;
   refreshUser: () => Promise<void>;
 }
 
@@ -24,6 +26,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState<string | null>(null);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [loaded, setLoaded] = useState(false);
 
   // Busca o usuário via getUser() — valida o token com o servidor. Usado tanto
   // na leitura inicial quanto em refreshUser (chamado explicitamente após mutations).
@@ -38,12 +41,13 @@ export function UserProvider({ children }: { children: ReactNode }) {
       setEmail(u.email ?? null);
       setAvatarUrl(isHttpsUrl(meta.avatar_url) ? meta.avatar_url : null);
     } catch { /* silencioso — contexto de usuário é best-effort */ }
+    finally { setLoaded(true); }
   }, []);
 
   useEffect(() => { refreshUser(); }, [refreshUser]);
 
   return (
-    <UserContext.Provider value={{ name, email, avatarUrl, refreshUser }}>
+    <UserContext.Provider value={{ name, email, avatarUrl, loaded, refreshUser }}>
       {children}
     </UserContext.Provider>
   );

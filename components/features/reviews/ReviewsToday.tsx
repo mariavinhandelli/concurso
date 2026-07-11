@@ -58,5 +58,5 @@ const styles: Record<string, React.CSSProperties> = {
   metric:   { display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 'auto' },
   num:      { fontSize: 40, color: theme.ink, fontWeight: 600, letterSpacing: -1.5, lineHeight: 1, fontVariantNumeric: 'tabular-nums' },
   label:    { fontSize: 14, color: theme.inkSoft, fontWeight: 500 },
-  startBtn: { display: 'block', width: '100%', boxSizing: 'border-box', padding: '12px 0', borderRadius: 12, border: 'none', background: theme.teal, color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer', textAlign: 'center', textDecoration: 'none', marginTop: 16, transition: 'all .15s' },
+  startBtn: { display: 'block', width: '100%', boxSizing: 'border-box', padding: '12px 0', borderRadius: 12, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', textAlign: 'center', textDecoration: 'none', marginTop: 16, transition: 'all .15s' },
 };

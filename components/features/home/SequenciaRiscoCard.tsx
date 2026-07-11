@@ -84,6 +84,6 @@ const s: Record<string, React.CSSProperties> = {
   body: { fontSize: 14, color: theme.inkSoft, lineHeight: 1.55, margin: '0 0 14px', maxWidth: 600 },
   strong: { color: theme.ink, fontWeight: 700 },
   actions: { display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' },
-  primary: { padding: '10px 18px', borderRadius: theme.radiusSm, border: 'none', background: theme.warn, color: '#fff', fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+  primary: { padding: '10px 18px', borderRadius: theme.radiusSm, border: 'none', background: theme.warn, color: theme.onWarn, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
   ghost: { padding: '10px 14px', borderRadius: theme.radiusSm, border: 'none', background: 'transparent', color: theme.inkSoft, fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' },
 };

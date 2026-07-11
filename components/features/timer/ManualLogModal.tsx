@@ -151,7 +151,13 @@ export function ManualLogModal({ onClose, onSaved }: Props) {
     <>
     {discardDialog}
     <div style={styles.overlay} onClick={handleOverlayClick}>
-      <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
+      <div style={{ ...styles.modal, position: 'relative' }} onClick={(e) => e.stopPropagation()}>
+        <button
+          onClick={handleOverlayClick}
+          aria-label="Fechar"
+          aria-keyshortcuts="Escape"
+          style={{ position: 'absolute', top: 14, right: 16, border: 'none', background: 'transparent', fontSize: 18, color: theme.inkFaint, cursor: 'pointer', lineHeight: 1, padding: 4 }}
+        >✕</button>
         <h2 style={styles.h2}>Registrar estudo</h2>
         <p style={styles.subtitle}>Pra quando você estudou sem o cronômetro.</p>
 
@@ -251,8 +257,8 @@ export function ManualLogModal({ onClose, onSaved }: Props) {
 }
 
 const styles: Record<string, React.CSSProperties> = {
-  overlay: { position: 'fixed', inset: 0, background: 'rgba(30,28,24,0.4)', display: 'grid', placeItems: 'center', zIndex: 60, padding: 20 },
-  modal: { background: theme.card, borderRadius: theme.radius, boxShadow: '0 20px 60px rgba(0,0,0,0.18)', padding: 24, width: '100%', maxWidth: 420, maxHeight: '88vh', overflowY: 'auto', fontFamily: theme.font },
+  overlay: { position: 'fixed', inset: 0, background: 'var(--backdrop)', display: 'grid', placeItems: 'center', zIndex: 60, padding: 20 },
+  modal: { background: theme.card, borderRadius: theme.radius, boxShadow: theme.shadowModal, padding: 24, width: '100%', maxWidth: 420, maxHeight: '88vh', overflowY: 'auto', fontFamily: theme.font },
   h2: { fontSize: 18, fontWeight: 700, color: theme.ink, margin: 0 },
   subtitle: { fontSize: 13, color: theme.inkSoft, margin: '4px 0 14px' },
   row2: { display: 'flex', gap: 12 },
@@ -264,7 +270,7 @@ const styles: Record<string, React.CSSProperties> = {
   checkbox: { width: 16, height: 16, accentColor: theme.teal, marginTop: 1, flexShrink: 0, cursor: 'pointer' },
   segment: { display: 'flex', gap: 6 },
   segBtn: { flex: 1, padding: '9px 8px', borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.card, color: theme.inkSoft, fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' },
-  segBtnActive: { borderColor: theme.teal, background: theme.teal, color: '#fff', fontWeight: 600 },
+  segBtnActive: { borderColor: theme.teal, background: theme.teal, color: theme.onTeal, fontWeight: 600 },
   durRow: { display: 'flex', alignItems: 'center', gap: 8 },
   durInput: { width: 64, boxSizing: 'border-box', padding: '10px 12px', borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.card, fontSize: 14, color: theme.ink, fontFamily: 'inherit', outline: 'none', textAlign: 'center' },
   durUnit: { fontSize: 13, color: theme.inkSoft },
@@ -273,5 +279,5 @@ const styles: Record<string, React.CSSProperties> = {
   error: { color: theme.danger, fontSize: 13, margin: '12px 0 0' },
   actions: { display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 20 },
   cancel: { padding: '10px 18px', borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.card, color: theme.inkSoft, fontSize: 14, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' },
-  save: { padding: '10px 18px', borderRadius: theme.radiusSm, border: 'none', background: theme.teal, color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+  save: { padding: '10px 18px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
 };

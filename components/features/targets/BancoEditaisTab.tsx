@@ -9,6 +9,7 @@ import { useQuery } from '@tanstack/react-query';
 import { listCatalogEditais, type CatalogEdital } from '@/services/editaisCatalog.service';
 import { EditalDetailModal } from '@/components/features/targets/EditalDetailModal';
 import { theme } from '@/lib/theme';
+import { Button } from '@/components/ui/Button';
 
 const SITUACAO_LABEL: Record<CatalogEdital['situacao'], string> = {
   vigente: 'Edital vigente',
@@ -61,7 +62,7 @@ export function BancoEditaisTab({ isMobile, onActivated, onImportar }: Props) {
       <div style={s.empty}>
         <p style={s.emptyTitle}>Banco de editais em construção</p>
         <p style={s.emptyHint}>Em breve, concursos prontos aqui. Por ora, crie seu concurso manualmente ou importe um edital colado.</p>
-        <button onClick={onImportar} style={s.importBtn}>Importar edital colado →</button>
+        <Button variant="outline" style={{ borderColor: theme.teal, background: theme.tealBg, color: theme.teal }} onClick={onImportar}>Importar edital colado →</Button>
       </div>
     );
   }
@@ -171,7 +172,7 @@ const s: Record<string, CSSProperties> = {
   cardTitleRow: { display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', minWidth: 0 },
   cardTitle: { fontSize: 14.5, fontWeight: 600, color: theme.ink, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
   situacaoTag: { fontSize: 10.5, fontWeight: 700, borderRadius: theme.radiusXs, padding: '2px 8px', flexShrink: 0, letterSpacing: 0.2 },
-  situacaoVigente: { color: '#fff', background: theme.teal },
+  situacaoVigente: { color: theme.onTeal, background: theme.teal },
   situacaoExpectativa: { color: theme.warn, background: theme.warnBg },
   situacaoEncerrado: { color: theme.inkFaint, background: theme.muted },
   activatedTag: { fontSize: 10.5, fontWeight: 700, color: theme.teal, background: theme.tealBg, borderRadius: theme.radiusXs, padding: '2px 8px', flexShrink: 0 },

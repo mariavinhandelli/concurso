@@ -144,7 +144,7 @@ const s: Record<string, CSSProperties> = {
   dot: { width: 8, height: 8, borderRadius: 99 },
   actions: { display: 'flex', gap: 12 },
   secondary: { minWidth: 130, padding: '13px 22px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.inkSoft, fontSize: 14.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
-  primary: { minWidth: 130, padding: '13px 22px', borderRadius: theme.radiusSm, border: 'none', background: theme.teal, color: theme.onTeal, fontSize: 14.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+  primary: { minWidth: 130, padding: '13px 22px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 14.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
   hint: { fontSize: 12, color: theme.inkFaint, marginTop: 22 },
   kbd: { fontFamily: 'ui-monospace, monospace', fontSize: 11, padding: '1px 6px', borderRadius: 5, border: `0.5px solid ${theme.line}`, background: theme.muted, color: theme.inkSoft, margin: '0 2px' },
 };

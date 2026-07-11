@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { listSimuladoSessions, type SimuladoSession } from '@/services/jurisInteracoes.service';
 import { useUI } from '@/components/layout/UIContext';
 import { theme } from '@/lib/theme';
+import { Button } from '@/components/ui/Button';
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
   LineChart, Line, CartesianGrid,
@@ -143,7 +144,7 @@ export default function SimuladosPage() {
   }, []);
 
   return (
-    <div style={{ maxWidth: 860, margin: '0 auto', padding: isMobile ? '20px 16px' : '40px 40px', fontFamily: theme.font }}>
+    <div style={{ maxWidth: 960, margin: '0 auto', padding: isMobile ? '20px 16px' : '34px 40px', fontFamily: theme.font }}>
       <button
         onClick={() => router.push('/jurisprudencias')}
         style={{ border: 'none', background: 'transparent', color: theme.teal, fontSize: 13, fontWeight: 500, cursor: 'pointer', padding: 0, fontFamily: 'inherit', marginBottom: 8 }}
@@ -152,15 +153,12 @@ export default function SimuladosPage() {
       </button>
 
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, marginBottom: 28 }}>
-        <h1 style={{ fontSize: isMobile ? 22 : 26, fontWeight: 800, color: theme.ink, letterSpacing: -0.6, margin: 0 }}>
+        <h1 style={{ fontSize: isMobile ? 24 : 28, fontWeight: 800, color: theme.ink, letterSpacing: -0.6, margin: 0 }}>
           Histórico de Simulados
         </h1>
-        <button
-          onClick={() => router.push('/jurisprudencias/lista')}
-          style={{ padding: '10px 20px', borderRadius: theme.radiusSm, border: 'none', background: theme.teal, color: '#fff', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}
-        >
+        <Button size="sm" onClick={() => router.push('/jurisprudencias/lista')}>
           Novo simulado
-        </button>
+        </Button>
       </div>
 
       {sessions && sessions.length >= 2 && <SimuladoAnalytics sessions={sessions} />}
@@ -178,12 +176,9 @@ export default function SimuladosPage() {
           <p style={{ fontSize: 13, color: theme.inkFaint, margin: '0 0 20px' }}>
             Complete um simulado na lista de jurisprudências para ver o histórico aqui.
           </p>
-          <button
-            onClick={() => router.push('/jurisprudencias/lista')}
-            style={{ padding: '11px 22px', borderRadius: theme.radiusSm, border: 'none', background: theme.teal, color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}
-          >
+          <Button onClick={() => router.push('/jurisprudencias/lista')}>
             Ir para a lista
-          </button>
+          </Button>
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>

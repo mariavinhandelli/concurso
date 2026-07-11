@@ -6,6 +6,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { theme } from '@/lib/theme';
+import { Skeleton } from '@/components/ui/Skeleton';
 import { useUI } from '@/components/layout/UIContext';
 import { useConfirm } from '@/hooks/useConfirm';
 import { useToast } from '@/components/ui/ToastProvider';
@@ -135,7 +136,13 @@ export default function HistoricoPage() {
       </div>
 
       {loading && days.length === 0 ? (
-        <p style={styles.muted}>Carregando…</p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }} aria-label="Carregando histórico">
+          <Skeleton width={140} height={14} />
+          <Skeleton height={72} borderRadius={16} />
+          <Skeleton height={72} borderRadius={16} />
+          <Skeleton width={120} height={14} style={{ marginTop: 8 }} />
+          <Skeleton height={72} borderRadius={16} />
+        </div>
       ) : !temResultado ? (
         <p style={styles.muted}>
           {busca
@@ -342,7 +349,7 @@ function formataDia(dateKey: string): string {
 }
 
 const styles: Record<string, React.CSSProperties> = {
-  page: { maxWidth: 760, margin: '0 auto', padding: '34px 40px', fontFamily: theme.font },
+  page: { maxWidth: 720, margin: '0 auto', padding: '34px 40px', fontFamily: theme.font },
   header: { marginBottom: 18 },
   h1: { fontSize: 28, fontWeight: 800, color: theme.ink, letterSpacing: -0.6, margin: 0 },
   sub: { fontSize: 14, color: theme.inkSoft, margin: '6px 0 0', fontWeight: 500 },

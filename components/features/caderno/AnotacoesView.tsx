@@ -16,6 +16,7 @@ import { KIND_CORES } from '@/components/features/caderno/notaCores';
 import { useUI } from '@/components/layout/UIContext';
 import { useToast } from '@/components/ui/ToastProvider';
 import { theme } from '@/lib/theme';
+import { Button } from '@/components/ui/Button';
 
 const KIND_LABEL: Record<NotaKind, string> = {
   resumo: 'Resumo', dica: 'Dica', esquema: 'Esquema', outro: 'Outro',
@@ -174,7 +175,7 @@ export function AnotacoesView({ openNotaId }: { openNotaId?: string | null }) {
           style={s.buscaInput}
           aria-label="Buscar anotações"
         />
-        <button className="touch-target" onClick={novaNota} style={s.novaBtn} title="Nova anotação">+ Nova</button>
+        <Button size="sm" className="touch-target" onClick={novaNota} title="Nova anotação">+ Nova</Button>
       </div>
 
       {notas === null ? (
@@ -231,7 +232,7 @@ export function AnotacoesView({ openNotaId }: { openNotaId?: string | null }) {
         Escolha uma anotação ao lado — ou crie uma nova. Selecione qualquer trecho
         do texto para transformá-lo em flashcard.
       </p>
-      <button onClick={novaNota} style={s.novaBtnGrande}>+ Nova anotação</button>
+      <Button style={{ marginTop: 16 }} onClick={novaNota}>+ Nova anotação</Button>
     </div>
   );
 
@@ -289,7 +290,7 @@ const s: Record<string, CSSProperties> = {
   vazioBox: { textAlign: 'center', padding: '28px 12px' },
   vazioTitulo: { fontSize: 15, fontWeight: 700, color: theme.ink, margin: '0 0 6px' },
   vazioSub: { fontSize: 13, color: theme.inkSoft, lineHeight: 1.55, maxWidth: 320, margin: '0 auto' },
-  novaBtnGrande: { marginTop: 16, padding: '11px 20px', borderRadius: theme.radiusSm, border: 'none', background: theme.teal, color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+  novaBtnGrande: { marginTop: 16, padding: '11px 20px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
 
   mobileMaterias: { display: 'flex', gap: 6, overflowX: 'auto', paddingBottom: 10, marginBottom: 6 },
   mobileEditor: { minWidth: 0 },

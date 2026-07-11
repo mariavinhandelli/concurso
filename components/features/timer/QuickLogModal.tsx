@@ -263,7 +263,7 @@ export function QuickLogModal({ onClose, onSaved, onSwitchToFull }: Props) {
 }
 
 const styles: Record<string, React.CSSProperties> = {
-  overlay: { position: 'fixed', inset: 0, background: 'rgba(30,28,24,0.4)', display: 'grid', placeItems: 'center', zIndex: 60, padding: 20 },
+  overlay: { position: 'fixed', inset: 0, background: 'var(--backdrop)', display: 'grid', placeItems: 'center', zIndex: 60, padding: 20 },
   modal: { background: theme.card, borderRadius: theme.radius, boxShadow: '0 20px 60px rgba(0,0,0,0.18)', padding: 24, width: '100%', maxWidth: 400, maxHeight: '88vh', overflowY: 'auto', fontFamily: theme.font },
   h2: { fontSize: 18, fontWeight: 700, color: theme.ink, margin: 0 },
   subtitle: { fontSize: 13, color: theme.inkSoft, margin: '4px 0 6px' },
@@ -277,11 +277,11 @@ const styles: Record<string, React.CSSProperties> = {
   minUnit: { position: 'absolute', right: 11, top: '50%', transform: 'translateY(-50%)', fontSize: 12, color: theme.inkFaint, pointerEvents: 'none' },
   segment: { display: 'flex', gap: 6 },
   segBtn: { flex: 1, padding: '9px 8px', borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.card, color: theme.inkSoft, fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' },
-  segBtnActive: { borderColor: theme.teal, background: theme.teal, color: '#fff', fontWeight: 600 },
+  segBtnActive: { borderColor: theme.teal, background: theme.teal, color: theme.onTeal, fontWeight: 600 },
   linkBtn: { display: 'block', marginTop: 14, padding: 0, border: 'none', background: 'transparent', color: theme.teal, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
   error: { color: theme.danger, fontSize: 13, margin: '12px 0 0' },
   actions: { display: 'flex', alignItems: 'center', gap: 10, marginTop: 20 },
   switchBtn: { padding: 0, border: 'none', background: 'transparent', color: theme.inkFaint, fontSize: 12.5, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit', textDecoration: 'underline' },
   cancel: { padding: '10px 18px', borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.card, color: theme.inkSoft, fontSize: 14, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' },
-  save: { padding: '10px 18px', borderRadius: theme.radiusSm, border: 'none', background: theme.teal, color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+  save: { padding: '10px 18px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
 };

@@ -118,7 +118,7 @@ export default function ConquistasPage() {
     [filter, badges, unlockedCount, totalCount],
   );
 
-  const pad = isMobile ? '20px 16px' : '32px 40px';
+  const pad = isMobile ? '20px 16px' : '34px 40px';
 
   if (loading) return <SkeletonPage isMobile={isMobile} pad={pad} />;
 

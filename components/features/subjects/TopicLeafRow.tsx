@@ -173,7 +173,7 @@ const styles: Record<string, React.CSSProperties> = {
   deleteBtn: { border: 'none', background: 'transparent', color: theme.inkFaint, cursor: 'pointer', opacity: 0.6, width: 30, height: 30, borderRadius: 8, display: 'grid', placeItems: 'center', flexShrink: 0, padding: 0 },
   noteBadge: {
     position: 'absolute', top: 2, right: 2, minWidth: 13, height: 13, borderRadius: 999,
-    background: theme.teal, color: '#fff', fontSize: 8.5, fontWeight: 700, lineHeight: '13px',
+    background: theme.teal, color: theme.onTeal, fontSize: 8.5, fontWeight: 700, lineHeight: '13px',
     textAlign: 'center', padding: '0 2px',
   },
 };

@@ -4,6 +4,7 @@ import { memo, useEffect, useState, type CSSProperties } from 'react';
 import { HealthBar } from '@/components/features/topics/HealthBar';
 import { type SubjectTree, pesoEfetivo } from '@/lib/targets';
 import { theme } from '@/lib/theme';
+import { Button } from '@/components/ui/Button';
 
 const COACH_KEY = 'focali_vert_coach_seen';
 
@@ -96,7 +97,7 @@ export const VerticalizadoTab = memo(function VerticalizadoTab({
         </svg>
         <p style={s.emptyTitle}>Nada aqui ainda</p>
         <p style={s.emptyHint}>Vincule tópicos na aba &quot;Montar edital&quot; para ver o progresso aqui.</p>
-        <button onClick={onSwitchToTopics} style={s.emptyBtn}>Ir para Montar edital →</button>
+        <Button variant="outline" style={{ borderColor: theme.teal, background: theme.tealBg, color: theme.teal }} onClick={onSwitchToTopics}>Ir para Montar edital →</Button>
       </div>
     );
   }

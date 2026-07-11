@@ -2,6 +2,7 @@
 // Painel de ritmo de estudo: métricas do período (30 dias) + total geral.
 'use client';
 
+import { Skeleton } from '@/components/ui/Skeleton';
 import { useEffect, useState } from 'react';
 import { getConstanciaResumo, type ConstanciaResumo as Resumo } from '@/services/performance.service';
 import { theme } from '@/lib/theme';
@@ -21,7 +22,7 @@ export function ConstanciaResumo() {
     getConstanciaResumo(30).then((r) => { setData(r); setLoading(false); });
   }, []);
 
-  if (loading) return <p style={styles.muted}>Carregando ritmo…</p>;
+  if (loading) return <Skeleton height={64} borderRadius={12} />;
   if (!data) return <p style={styles.muted}>Sem dados de estudo ainda.</p>;
 
   const metricasPeriodo = [

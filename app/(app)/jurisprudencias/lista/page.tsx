@@ -18,10 +18,11 @@ import { useConfirm } from '@/hooks/useConfirm';
 import { useUI } from '@/components/layout/UIContext';
 import { createClient } from '@/lib/supabase/client';
 import { theme } from '@/lib/theme';
+import { Button } from '@/components/ui/Button';
 
 function ListaSkeleton() {
   return (
-    <div style={{ maxWidth: 1180, margin: '0 auto', padding: '34px 40px' }}>
+    <div style={{ maxWidth: 1080, margin: '0 auto', padding: '34px 40px' }}>
       {[1, 2, 3, 4].map((i) => (
         <div key={i} style={{ height: 150, background: theme.card, borderRadius: theme.radius, border: `0.5px solid ${theme.line}`, animation: 'skeleton-pulse 1.4s ease-in-out infinite', animationDelay: `${(i - 1) * 0.1}s`, marginBottom: 12 }} />
       ))}
@@ -174,7 +175,7 @@ function ListaContent() {
         <JurisSimulado items={items} onClose={() => setShowSimulado(false)} />
       )}
 
-      <div style={{ maxWidth: 1180, margin: '0 auto', padding: isMobile ? '20px 16px' : '34px 40px', fontFamily: theme.font, minWidth: 0 }}>
+      <div style={{ maxWidth: 1080, margin: '0 auto', padding: isMobile ? '20px 16px' : '34px 40px', fontFamily: theme.font, minWidth: 0 }}>
 
         {/* Cabeçalho */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16, flexWrap: 'wrap', marginBottom: 20 }}>
@@ -184,9 +185,9 @@ function ListaContent() {
               {isFavoritasView ? '★ Favoritas' : (filters.disciplina || 'Todas as jurisprudências')}
             </h1>
           </div>
-          <button onClick={() => router.push('/jurisprudencias/nova')} style={styles.addBtn}>
+          <Button onClick={() => router.push('/jurisprudencias/nova')}>
             + Nova jurisprudência
-          </button>
+          </Button>
         </div>
 
         {!isFavoritasView && (
@@ -235,9 +236,9 @@ function ListaContent() {
                     <p style={{ fontSize: 13, color: theme.inkFaint, margin: '0 0 20px', maxWidth: 340, marginLeft: 'auto', marginRight: 'auto' }}>
                       Clique na ★ em qualquer card para guardar as jurisprudências mais importantes.
                     </p>
-                    <button onClick={() => router.push('/jurisprudencias/lista')} style={styles.addBtn}>
+                    <Button onClick={() => router.push('/jurisprudencias/lista')}>
                       Explorar jurisprudências
-                    </button>
+                    </Button>
                   </>
                 ) : (
                   <>
@@ -245,9 +246,9 @@ function ListaContent() {
                       {hasFilters ? 'Nenhuma jurisprudência encontrada com esses filtros.' : 'Nenhuma jurisprudência cadastrada ainda.'}
                     </p>
                     {!hasFilters && (
-                      <button onClick={() => router.push('/jurisprudencias/nova')} style={styles.addBtn}>
+                      <Button onClick={() => router.push('/jurisprudencias/nova')}>
                         Cadastrar primeira jurisprudência
-                      </button>
+                      </Button>
                     )}
                   </>
                 )}
@@ -352,7 +353,7 @@ function CoverageChip({ active, total, label, color, bg }: {
 
 const styles: Record<string, React.CSSProperties> = {
   backBtn: { border: 'none', background: 'transparent', color: theme.teal, fontSize: 13, fontWeight: 500, cursor: 'pointer', padding: 0, fontFamily: 'inherit' },
-  addBtn: { padding: '11px 22px', borderRadius: theme.radiusSm, border: 'none', background: theme.teal, color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
+  addBtn: { padding: '11px 22px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
   searchInput: { width: '100%', boxSizing: 'border-box', padding: '12px 16px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.card, fontSize: 14, color: theme.ink, fontFamily: 'inherit', outline: 'none', boxShadow: theme.shadow },
   studyBtn: {
     display: 'flex', alignItems: 'center',

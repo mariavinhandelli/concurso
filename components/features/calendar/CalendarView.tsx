@@ -417,7 +417,7 @@ const styles: Record<string, React.CSSProperties> = {
   cellSelected: { border: `1.5px solid ${theme.teal}`, boxShadow: `0 0 0 3px ${theme.tealBg}` },
   dayNum: { fontSize: 13, color: theme.inkSoft, fontWeight: 500, lineHeight: 1 },
   dayNumToday: {
-    background: theme.teal, color: '#fff', borderRadius: '50%',
+    background: theme.teal, color: theme.onTeal, borderRadius: '50%',
     width: 24, height: 24, display: 'inline-flex', alignItems: 'center',
     justifyContent: 'center', fontWeight: 700, fontSize: 13,
   },
@@ -433,7 +433,7 @@ const styles: Record<string, React.CSSProperties> = {
   legend: { display: 'flex', gap: 18, marginTop: 20, flexWrap: 'wrap', padding: '10px 0 0', borderTop: `0.5px solid ${theme.line}` },
   legendItem: { display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: theme.inkSoft, fontWeight: 500 },
 
-  overlay: { position: 'fixed', inset: 0, zIndex: 60, background: 'rgba(20,28,30,.46)', display: 'flex', justifyContent: 'center', padding: 0 },
+  overlay: { position: 'fixed', inset: 0, zIndex: 60, background: 'var(--backdrop)', display: 'flex', justifyContent: 'center', padding: 0 },
   sheet: { background: theme.card, boxShadow: '0 -8px 40px rgba(0,0,0,.2)', display: 'flex', flexDirection: 'column', fontFamily: theme.font },
   sheetMobile: { width: '100%', maxHeight: '78dvh', borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: '10px 18px max(env(safe-area-inset-bottom), 20px)' },
   sheetDesktop: { width: 420, maxWidth: '92vw', maxHeight: '80vh', borderRadius: 18, padding: 22, alignSelf: 'center', boxShadow: theme.shadowHover },

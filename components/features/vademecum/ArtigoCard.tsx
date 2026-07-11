@@ -19,10 +19,11 @@ import {
 import type { LeiQuestao } from '@/services/leiQuestoes.service';
 import { useToast } from '@/components/ui/ToastProvider';
 import { theme } from '@/lib/theme';
+import { Button } from '@/components/ui/Button';
 
 const INCIDENCIA_CHIP: Record<string, { label: string; bg: string; ink: string }> = {
-  muito_alta: { label: 'incidência muito alta', bg: 'rgba(226,75,74,.12)',  ink: '#C03A39' },
-  alta:       { label: 'incidência alta',       bg: 'rgba(239,159,39,.14)', ink: '#A96F10' },
+  muito_alta: { label: 'incidência muito alta', bg: 'rgba(226,75,74,.12)',  ink: theme.danger },
+  alta:       { label: 'incidência alta',       bg: 'rgba(239,159,39,.14)', ink: theme.warnDeep },
 };
 
 interface Props {
@@ -49,6 +50,8 @@ interface GrifoPopover {
 export const ArtigoCard = memo(function ArtigoCard({ artigo, interacao, onUpdate, questoes }: Props) {
   const toast = useToast();
   const rootRef = useRef<HTMLDivElement>(null);
+  const toolbarRef = useRef<HTMLDivElement>(null);
+  const popoverRef = useRef<HTMLDivElement>(null);
   const [pendingSel, setPendingSel] = useState<PendingSel | null>(null);
   const [popover, setPopover] = useState<GrifoPopover | null>(null);
   const [notasOpen, setNotasOpen] = useState(false);
@@ -76,33 +79,39 @@ export const ArtigoCard = memo(function ArtigoCard({ artigo, interacao, onUpdate
       const root = rootRef.current;
       if (!root) return;
 
-      const sel = window.getSelection();
-      if (!sel || sel.rangeCount === 0 || sel.isCollapsed || !root.contains(sel.anchorNode)) {
-        setPendingSel(null);
-        return;
-      }
-
-      const resultado = findBlocoSelecionado(root);
-      if (!resultado.ok) {
-        setPendingSel(null);
-        if (resultado.reason === 'multiplos') {
-          toast.info('Selecione um trecho dentro de um mesmo dispositivo (caput, parágrafo ou inciso).');
+      try {
+        const sel = window.getSelection();
+        if (!sel || sel.rangeCount === 0 || sel.isCollapsed || !root.contains(sel.anchorNode)) {
+          setPendingSel(null);
+          return;
         }
-        return;
-      }
 
-      const blocoId = resultado.bloco.dataset.bloco!;
-      if (temSobreposicao(grifos, blocoId, resultado.start, resultado.end)) {
+        const resultado = findBlocoSelecionado(root);
+        if (!resultado.ok) {
+          setPendingSel(null);
+          if (resultado.reason === 'multiplos') {
+            toast.info('Selecione um trecho dentro de um mesmo dispositivo (caput, parágrafo ou inciso).');
+          }
+          return;
+        }
+
+        const blocoId = resultado.bloco.dataset.bloco!;
+        if (temSobreposicao(grifos, blocoId, resultado.start, resultado.end)) {
+          setPendingSel(null);
+          toast.error('Esse trecho já cruza uma marcação existente. Remova-a primeiro.');
+          return;
+        }
+
+        const rect = sel.getRangeAt(0).getBoundingClientRect();
+        const x = Math.max(8, Math.min(rect.left, window.innerWidth - 250));
+        const y = Math.min(rect.bottom + 12, window.innerHeight - 60);
+        setPopover(null);
+        setPendingSel({ bloco: blocoId, start: resultado.start, end: resultado.end, x, y });
+      } catch {
+        // Seleção anômala (comum em touch, Range com âncora/foco invertidos) —
+        // não deixa exceção não tratada travar o card sem toolbar.
         setPendingSel(null);
-        toast.error('Esse trecho já cruza uma marcação existente. Remova-a primeiro.');
-        return;
       }
-
-      const rect = sel.getRangeAt(0).getBoundingClientRect();
-      const x = Math.max(8, Math.min(rect.left, window.innerWidth - 250));
-      const y = Math.min(rect.bottom + 12, window.innerHeight - 60);
-      setPopover(null);
-      setPendingSel({ bloco: blocoId, start: resultado.start, end: resultado.end, x, y });
     }
 
     function onSelectionChange() {
@@ -117,9 +126,33 @@ export const ArtigoCard = memo(function ArtigoCard({ artigo, interacao, onUpdate
     };
   }, [grifos, toast]);
 
+  // Fecha a toolbar de grifo e o popover ao clicar fora deles — sem isso, um
+  // clique em "Anotar"/"Questão C/E" com a seleção do browser ainda "viva"
+  // podia deixar a toolbar flutuante sobreposta à caixa recém-aberta.
+  useEffect(() => {
+    if (!pendingSel && !popover) return;
+    function onMouseDown(e: MouseEvent) {
+      const target = e.target as Node;
+      if (toolbarRef.current?.contains(target)) return;
+      if (popoverRef.current?.contains(target)) return;
+      setPendingSel(null);
+      setPopover(null);
+    }
+    document.addEventListener('mousedown', onMouseDown);
+    return () => document.removeEventListener('mousedown', onMouseDown);
+  }, [pendingSel, popover]);
+
   async function aplicarGrifo(cor: GrifoCor | null, estilo: 'grifo' | 'sublinhado') {
     if (!pendingSel) return;
     const { bloco, start, end } = pendingSel;
+    // Revalida contra o estado ATUAL de grifos — pendingSel pode ter sido
+    // calculado antes de outro grifo ser salvo (nesta aba ou noutra) no
+    // intervalo até o clique.
+    if (temSobreposicao(grifos, bloco, start, end)) {
+      setPendingSel(null);
+      toast.error('Esse trecho passou a cruzar uma marcação existente. Selecione de novo.');
+      return;
+    }
     setPendingSel(null);
     window.getSelection()?.removeAllRanges();
     try {
@@ -223,17 +256,28 @@ export const ArtigoCard = memo(function ArtigoCard({ artigo, interacao, onUpdate
                 const estiloSeg: CSSProperties = seg.grifo.estilo === 'sublinhado'
                   ? { borderBottom: `2px solid ${SUBLINHADO_COR}`, cursor: 'pointer' }
                   : { background: GRIFO_CORES[seg.grifo.cor ?? 'regra'].bg, borderRadius: 3, cursor: 'pointer' };
+                const abrirPopover = (x: number, y: number) => setPopover({
+                  grifo: seg.grifo!,
+                  x: Math.min(x, window.innerWidth - 230),
+                  y: Math.min(y + 12, window.innerHeight - 60),
+                });
                 return (
                   <span
                     key={i}
                     style={estiloSeg}
+                    tabIndex={0}
+                    role="button"
+                    aria-label={`Grifo: ${seg.grifo.estilo === 'sublinhado' ? 'sublinhado' : GRIFO_CORES[seg.grifo.cor ?? 'regra'].label}. Ativar para remover.`}
                     onClick={(e) => {
                       e.stopPropagation();
-                      setPopover({
-                        grifo: seg.grifo!,
-                        x: Math.min(e.clientX, window.innerWidth - 230),
-                        y: Math.min(e.clientY + 12, window.innerHeight - 60),
-                      });
+                      abrirPopover(e.clientX, e.clientY);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key !== 'Enter' && e.key !== ' ') return;
+                      e.preventDefault();
+                      e.stopPropagation();
+                      const rect = (e.target as HTMLElement).getBoundingClientRect();
+                      abrirPopover(rect.left, rect.bottom);
                     }}
                   >
                     {seg.texto}
@@ -276,10 +320,10 @@ export const ArtigoCard = memo(function ArtigoCard({ artigo, interacao, onUpdate
             style={s.notaInput}
           />
           <div style={s.notaActions}>
-            <button onClick={() => { setNotasOpen(false); setNotaDraft(null); }} style={s.notaCancel}>Fechar</button>
-            <button onClick={salvarNota} disabled={savingNota || notaDraft === null} style={s.notaSave}>
+            <Button variant="outline" size="sm" onClick={() => { setNotasOpen(false); setNotaDraft(null); }}>Fechar</Button>
+            <Button size="sm" onClick={salvarNota} disabled={savingNota || notaDraft === null}>
               {savingNota ? 'Salvando…' : 'Salvar'}
-            </button>
+            </Button>
           </div>
         </div>
       )}
@@ -312,7 +356,7 @@ export const ArtigoCard = memo(function ArtigoCard({ artigo, interacao, onUpdate
 
       {/* Barra de marcação (aparece ao selecionar) */}
       {pendingSel && (
-        <div style={{ ...s.toolbar, left: pendingSel.x, top: pendingSel.y }} onMouseUp={(e) => e.stopPropagation()}>
+        <div ref={toolbarRef} style={{ ...s.toolbar, left: pendingSel.x, top: pendingSel.y }} onMouseUp={(e) => e.stopPropagation()}>
           {GRIFO_CORES_ORDEM.map((cor) => (
             <button
               key={cor}
@@ -330,7 +374,7 @@ export const ArtigoCard = memo(function ArtigoCard({ artigo, interacao, onUpdate
 
       {/* Popover de grifo existente */}
       {popover && (
-        <div style={{ ...s.toolbar, left: popover.x, top: popover.y }}>
+        <div ref={popoverRef} style={{ ...s.toolbar, left: popover.x, top: popover.y }}>
           <span style={s.popLabel}>
             {popover.grifo.estilo === 'sublinhado' ? 'Sublinhado' : GRIFO_CORES[popover.grifo.cor ?? 'regra'].label}
           </span>
@@ -361,7 +405,7 @@ const s: Record<string, CSSProperties> = {
   notaInput: { width: '100%', boxSizing: 'border-box', padding: '10px 12px', borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.card, fontSize: 13.5, color: theme.ink, fontFamily: 'inherit', outline: 'none', resize: 'vertical' },
   notaActions: { display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 8 },
   notaCancel: { padding: '7px 14px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: 'transparent', color: theme.inkSoft, fontSize: 13, cursor: 'pointer', fontFamily: 'inherit' },
-  notaSave: { padding: '7px 14px', borderRadius: theme.radiusSm, border: 'none', background: theme.teal, color: '#fff', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+  notaSave: { padding: '7px 14px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
   questaoBox: { marginTop: 10, background: theme.bg, border: `0.5px solid ${theme.line}`, borderRadius: theme.radiusSm, padding: '12px 14px' },
   questaoEnunciado: { fontSize: 13.5, color: theme.ink, lineHeight: 1.6, margin: '0 0 12px' },
   questaoBtns: { display: 'flex', gap: 8 },

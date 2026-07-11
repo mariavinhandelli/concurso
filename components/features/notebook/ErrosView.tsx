@@ -16,6 +16,7 @@ import { scheduleReviewFromError } from '@/services/reviews.service';
 import { NoteEditor } from '@/components/features/notebook/NoteEditor';
 import { theme } from '@/lib/theme';
 import { useUI } from '@/components/layout/UIContext';
+import { Button } from '@/components/ui/Button';
 
 type Level = 'subjects' | 'topics' | 'notes';
 type ViewMode = 'navegar' | 'recentes' | 'criticos';
@@ -234,7 +235,7 @@ export function ErrosView({ openNoteId }: { openNoteId?: string | null }) {
     <div>
       <div style={styles.actionsRow}>
         <p style={styles.sub}>Registre o erro. Revise os recentes e ataque os críticos.</p>
-        <button onClick={handleNewGlobal} style={{ ...styles.addTopBtn, width: isMobile ? '100%' : undefined }}>+ Adicionar erro</button>
+        <Button onClick={handleNewGlobal} style={{ width: isMobile ? '100%' : undefined }}>+ Adicionar erro</Button>
       </div>
 
       {dialog}
@@ -374,7 +375,7 @@ export function ErrosView({ openNoteId }: { openNoteId?: string | null }) {
                       <p style={styles.crumbSubject}>
                         {curTopic === 'none' ? 'Sem tópico' : (curTopic as PickerOption)?.name}
                       </p>
-                      <button onClick={handleNew} style={styles.newBtn}>+ Novo erro</button>
+                      <Button fullWidth onClick={handleNew}>+ Novo erro</Button>
                       {loadingNotes ? (
                         <p style={styles.muted}>Carregando…</p>
                       ) : notes.length === 0 ? (
@@ -463,7 +464,7 @@ const styles: Record<string, React.CSSProperties> = {
   critAlert: { borderWidth: 1.5, borderColor: theme.crit, background: theme.bg },
   critTop: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
   critName: { fontSize: 14, color: theme.ink, fontWeight: 600, lineHeight: 1.35 },
-  critBadge: { fontSize: 10, fontWeight: 700, color: '#fff', background: theme.crit, padding: '2px 7px', borderRadius: 6, textTransform: 'uppercase', letterSpacing: 0.4, flexShrink: 0 },
+  critBadge: { fontSize: 10, fontWeight: 700, color: theme.onDanger, background: theme.crit, padding: '2px 7px', borderRadius: 6, textTransform: 'uppercase', letterSpacing: 0.4, flexShrink: 0 },
   critSubject: { fontSize: 12, color: theme.inkFaint },
   critStats: { display: 'flex', alignItems: 'center', gap: 6, marginTop: 4, fontSize: 12.5, color: theme.inkSoft },
   critErrors: { fontWeight: 600, color: theme.ink },

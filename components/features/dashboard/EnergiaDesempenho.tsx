@@ -3,6 +3,7 @@
 // "eu rendo mais quando estou com mais energia?".
 'use client';
 
+import { Skeleton } from '@/components/ui/Skeleton';
 import { useEffect, useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell, Tooltip } from 'recharts';
 import { getEnergiaDesempenho, type EnergiaPonto } from '@/services/performance.service';
@@ -48,7 +49,7 @@ export function EnergiaDesempenho() {
       </div>
 
       {loading ? (
-        <p style={styles.muted}>Carregando…</p>
+        <Skeleton height={220} borderRadius={12} />
       ) : dados.length === 0 ? (
         <p style={styles.muted}>
           Ainda não há sessões com energia e questões registradas. Conforme você

@@ -11,6 +11,7 @@ import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { getCoachSemanal, type CoachResumo } from '@/services/coach.service';
 import { theme, zIndex } from '@/lib/theme';
+import { Button } from '@/components/ui/Button';
 
 function dismissKey(weekStart: string): string { return `focali_coach_dismissed_${weekStart}`; }
 
@@ -161,8 +162,8 @@ export function CoachSemanal({ variant = 'banner' }: { variant?: 'banner' | 'row
             </div>
 
             <div style={s.actions}>
-              <button onClick={fecharModal} style={s.fecharBtn}>Fechar</button>
-              <button onClick={() => { fecharModal(); router.push('/performance'); }} style={s.verMaisBtn}>Ver desempenho completo →</button>
+              <Button variant="outline" onClick={fecharModal}>Fechar</Button>
+              <Button onClick={() => { fecharModal(); router.push('/performance'); }}>Ver desempenho completo →</Button>
             </div>
           </div>
         </div>
@@ -175,7 +176,7 @@ const s: Record<string, CSSProperties> = {
   banner: { display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', background: 'rgba(127,119,221,.10)', border: '0.5px solid rgba(127,119,221,.35)', borderRadius: theme.radius, marginBottom: 16 },
   bannerMsg: { fontSize: 13.5, color: theme.ink },
   bannerActions: { display: 'flex', alignItems: 'center', gap: 6 },
-  bannerBtn: { padding: '8px 14px', borderRadius: theme.radiusSm, border: 'none', background: '#7F77DD', color: '#fff', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
+  bannerBtn: { padding: '8px 14px', borderRadius: theme.radiusSm, border: 'none', background: theme.clay, color: theme.onClay, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
   bannerDismiss: { border: 'none', background: 'transparent', color: theme.inkFaint, fontSize: 14, cursor: 'pointer', padding: '4px 6px' },
 
   rowDivider: { height: '0.5px', background: theme.line, margin: '16px 0' },
@@ -183,7 +184,7 @@ const s: Record<string, CSSProperties> = {
   rowMsg: { fontSize: 13.5, color: theme.inkSoft, fontWeight: 500, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
   rowCta: { fontSize: 13, fontWeight: 600, color: '#7F77DD', flexShrink: 0 },
 
-  overlay: { position: 'fixed', inset: 0, background: 'rgba(15,23,42,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: zIndex.modal, padding: 16 },
+  overlay: { position: 'fixed', inset: 0, background: 'var(--backdrop)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: zIndex.modal, padding: 16 },
   modal: { background: theme.card, borderRadius: theme.radius, width: 'min(520px, 96vw)', maxHeight: '85vh', display: 'flex', flexDirection: 'column', boxShadow: theme.shadowModal, fontFamily: theme.font },
   head: { display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, padding: '20px 22px 12px' },
   eyebrow: { fontSize: 11, fontWeight: 700, color: '#7F77DD', letterSpacing: 0.6, textTransform: 'uppercase' },
@@ -199,5 +200,5 @@ const s: Record<string, CSSProperties> = {
 
   actions: { display: 'flex', gap: 10, justifyContent: 'flex-end', padding: '14px 22px', borderTop: `0.5px solid ${theme.line}` },
   fecharBtn: { padding: '9px 16px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.inkSoft, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
-  verMaisBtn: { padding: '9px 16px', borderRadius: theme.radiusSm, border: 'none', background: theme.teal, color: '#fff', fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+  verMaisBtn: { padding: '9px 16px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
 };

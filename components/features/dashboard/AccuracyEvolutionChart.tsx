@@ -2,6 +2,7 @@
 // Evolução semanal da taxa de acerto, com filtro por matéria.
 'use client';
 
+import { Skeleton } from '@/components/ui/Skeleton';
 import { useEffect, useState } from 'react';
 import { useToast } from '@/components/ui/ToastProvider';
 import {
@@ -47,7 +48,7 @@ export function AccuracyEvolutionChart() {
       </div>
 
       {loading ? (
-        <p style={styles.muted}>Carregando…</p>
+        <Skeleton height={220} borderRadius={12} />
       ) : !hasData ? (
         <p style={styles.muted}>
           Sem questões registradas ainda neste recorte. Faça sessões de questões com acertos.

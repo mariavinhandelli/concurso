@@ -14,6 +14,7 @@ import { pushRecent } from '@/lib/recents';
 import { theme } from '@/lib/theme';
 import type { Subject } from '@/services/subjects.service';
 import type { Topic } from '@/services/topics.service';
+import { Button } from '@/components/ui/Button';
 import { listEditalPresence, type EditalPresence } from '@/services/targetTopics.service';
 
 const BulkImportModal = dynamic(
@@ -233,16 +234,17 @@ export function TopicsClient({ subjectId, initialSubject }: Props) {
             placeholder="Novo tópico (ex: Controle de Constitucionalidade)"
             style={{ ...styles.input, flexBasis: isMobile ? '100%' : undefined }}
           />
-          <button onClick={handleCreateLoose} style={{ ...styles.addBtn, flex: isMobile ? 1 : undefined }}>
+          <Button onClick={handleCreateLoose} style={{ flex: isMobile ? 1 : undefined }}>
             Adicionar
-          </button>
-          <button
+          </Button>
+          <Button
+            variant="outline"
+            style={{ flex: isMobile ? 1 : undefined, borderColor: theme.teal, color: theme.teal }}
             onClick={() => setBulkParent(null)}
-            style={{ ...styles.bulkBtn, flex: isMobile ? 1 : undefined }}
             title="Cole o conteúdo programático do edital — um tópico por linha"
           >
             Importar lista
-          </button>
+          </Button>
         </div>
 
         {bulkParent !== undefined && (
@@ -370,7 +372,7 @@ export function TopicsClient({ subjectId, initialSubject }: Props) {
 }
 
 const styles: Record<string, React.CSSProperties> = {
-  container: { maxWidth: 900, margin: '0 auto', fontFamily: theme.font, minWidth: 0 },
+  container: { maxWidth: 960, margin: '0 auto', fontFamily: theme.font, minWidth: 0 },
 
   breadcrumb: { display: 'flex', alignItems: 'center', gap: 6, marginBottom: 16 },
   breadcrumbLink: {

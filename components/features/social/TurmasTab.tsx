@@ -12,6 +12,7 @@ import {
 } from '@/services/turmas.service';
 import { RankRow } from './SocialUI';
 import { theme } from '@/lib/theme';
+import { Button } from '@/components/ui/Button';
 
 function turmaInviteUrl(code: string): string {
   const origin = typeof window !== 'undefined' ? window.location.origin : '';
@@ -85,8 +86,8 @@ export function TurmasTab() {
           </div>
           <div style={s.inviteRow}>
             <code style={s.codeBox}>{selected.joinCode}</code>
-            <button onClick={() => copiarLink(turmaInviteUrl(selected.joinCode))} style={s.secondary}>{copiado ? 'Copiado!' : 'Copiar link'}</button>
-            <button onClick={() => compartilhar(selected.name, turmaInviteUrl(selected.joinCode))} style={s.primary}>Convidar</button>
+            <Button variant="outline" onClick={() => copiarLink(turmaInviteUrl(selected.joinCode))}>{copiado ? 'Copiado!' : 'Copiar link'}</Button>
+            <Button onClick={() => compartilhar(selected.name, turmaInviteUrl(selected.joinCode))}>Convidar</Button>
           </div>
         </section>
 
@@ -126,11 +127,11 @@ export function TurmasTab() {
         <div style={s.cardTitle}>Criar ou entrar numa turma</div>
         <div style={s.formRow}>
           <input value={nome} onChange={(e) => setNome(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && criar()} placeholder="Nome da nova turma" style={s.input} aria-label="Nome da turma" />
-          <button onClick={criar} disabled={busy} style={s.primary}>Criar</button>
+          <Button onClick={criar} disabled={busy}>Criar</Button>
         </div>
         <div style={s.formRow}>
           <input value={code} onChange={(e) => setCode(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && entrar()} placeholder="Entrar com um código" style={s.input} aria-label="Código da turma" />
-          <button onClick={entrar} disabled={busy} style={s.secondary}>Entrar</button>
+          <Button variant="outline" onClick={entrar} disabled={busy}>Entrar</Button>
         </div>
       </section>
 
@@ -179,7 +180,7 @@ const s: Record<string, CSSProperties> = {
 
   rankList: { display: 'flex', flexDirection: 'column', gap: 6 },
 
-  primary: { padding: '10px 18px', borderRadius: theme.radiusSm, border: 'none', background: theme.teal, color: theme.onTeal, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
+  primary: { padding: '10px 18px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
   secondary: { padding: '10px 16px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.ink, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
   dangerBtn: { border: 'none', background: 'transparent', color: theme.danger, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', padding: '4px 2px', textDecoration: 'underline' },
 };

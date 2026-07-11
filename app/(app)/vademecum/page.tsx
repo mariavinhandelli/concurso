@@ -81,7 +81,7 @@ export default function VademecumPage() {
 
   return (
     <div style={{ ...s.wrap, padding: isMobile ? '20px 16px' : '34px 40px' }}>
-      <h1 style={s.h1}>Vade Mecum</h1>
+      <h1 style={{ ...s.h1, fontSize: isMobile ? 24 : 28 }}>Vade Mecum</h1>
       <p style={s.sub}>Lei seca para grifar, anotar e revisar — o texto vira estudo ativo.</p>
 
       {dueCount > 0 && (
@@ -143,9 +143,9 @@ export default function VademecumPage() {
 }
 
 const s: Record<string, CSSProperties> = {
-  wrap: { maxWidth: 980, margin: '0 auto', fontFamily: theme.font },
-  h1: { fontSize: 26, fontWeight: 700, color: theme.ink, margin: 0 },
-  sub: { fontSize: 14, color: theme.inkSoft, margin: '6px 0 22px' },
+  wrap: { maxWidth: 960, margin: '0 auto', fontFamily: theme.font },
+  h1: { fontWeight: 800, color: theme.ink, letterSpacing: -0.6, margin: 0 },
+  sub: { fontSize: 14, color: theme.inkSoft, margin: '6px 0 22px', fontWeight: 500 },
   dueBanner: { display: 'block', width: '100%', textAlign: 'left', background: 'rgba(226,75,74,.10)', color: '#C03A39', border: '0.5px solid rgba(226,75,74,.35)', borderRadius: theme.radius, padding: '12px 16px', fontSize: 13.5, cursor: 'pointer', fontFamily: 'inherit', marginBottom: 18 },
 
   acoesRow: { display: 'flex', gap: 10, marginBottom: 18 },

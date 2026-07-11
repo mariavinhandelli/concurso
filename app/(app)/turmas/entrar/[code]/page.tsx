@@ -11,6 +11,7 @@ import { useToast } from '@/components/ui/ToastProvider';
 import { findTurmaByCode, joinTurmaByCode } from '@/services/turmas.service';
 import { getMySocialProfile, type SocialProfile } from '@/services/social.service';
 import { theme } from '@/lib/theme';
+import { Button } from '@/components/ui/Button';
 
 export default function EntrarTurmaPage() {
   const params = useParams<{ code: string }>();
@@ -52,7 +53,7 @@ export default function EntrarTurmaPage() {
             <div style={s.emoji}>🔍</div>
             <h1 style={s.h1}>Turma não encontrada</h1>
             <p style={s.body}>O código <code style={s.code}>{code}</code> não corresponde a nenhuma turma. Confira o link com quem te enviou.</p>
-            <button onClick={() => router.push('/amigos?tab=turmas')} style={s.primary}>Ir para Turmas</button>
+            <Button onClick={() => router.push('/amigos?tab=turmas')}>Ir para Turmas</Button>
           </>
         ) : (
           <>
@@ -63,10 +64,10 @@ export default function EntrarTurmaPage() {
               <p style={s.note}>Ao entrar, seu perfil social é ativado — a turma vê só seus números (sequência, minutos, % do edital), nunca seu conteúdo.</p>
             )}
             <div style={s.actions}>
-              <button onClick={entrar} disabled={busy} style={{ ...s.primary, opacity: busy ? 0.6 : 1 }}>
+              <Button onClick={entrar} disabled={busy}>
                 {busy ? 'Entrando…' : jaAtivo ? 'Entrar na turma' : 'Ativar e entrar'}
-              </button>
-              <button onClick={() => router.push('/amigos?tab=turmas')} style={s.ghost}>Agora não</button>
+              </Button>
+              <Button variant="ghost" onClick={() => router.push('/amigos?tab=turmas')}>Agora não</Button>
             </div>
           </>
         )}
@@ -84,7 +85,7 @@ const s: Record<string, React.CSSProperties> = {
   note: { fontSize: 12.5, color: theme.inkFaint, lineHeight: 1.55, margin: '0 0 18px', background: theme.bg, border: `0.5px solid ${theme.line}`, borderRadius: theme.radiusSm, padding: '10px 12px' },
   code: { fontFamily: 'ui-monospace, monospace', fontWeight: 700, letterSpacing: 1, color: theme.ink },
   actions: { display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' },
-  primary: { padding: '12px 22px', borderRadius: theme.radiusSm, border: 'none', background: theme.teal, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+  primary: { padding: '12px 22px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
   ghost: { padding: '12px 16px', borderRadius: theme.radiusSm, border: 'none', background: 'transparent', color: theme.inkSoft, fontSize: 13.5, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' },
   muted: { fontSize: 14, color: theme.inkFaint, textAlign: 'center', margin: 0 },
 };

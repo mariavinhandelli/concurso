@@ -124,7 +124,7 @@ const styles: Record<string, React.CSSProperties> = {
   removeBtn: { border: 'none', background: 'transparent', color: theme.inkFaint, fontSize: 13, cursor: 'pointer', flexShrink: 0 },
   daysRow: { display: 'flex', gap: 5 },
   dayBtn: { flex: 1, textAlign: 'center', fontSize: 12.5, fontWeight: 600, padding: '7px 0', borderRadius: 6, border: 'none', background: theme.muted, color: theme.inkFaint, cursor: 'pointer', fontFamily: 'inherit' },
-  dayBtnOn: { background: theme.teal, color: '#fff' },
+  dayBtnOn: { background: theme.teal, color: theme.onTeal },
   addBtn: { width: '100%', padding: 10, borderWidth: 1, borderStyle: 'dashed', borderColor: theme.line, borderRadius: theme.radiusSm, background: 'transparent', color: theme.inkSoft, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
   error: { color: theme.danger, fontSize: 13, margin: '8px 0 0' },
 };

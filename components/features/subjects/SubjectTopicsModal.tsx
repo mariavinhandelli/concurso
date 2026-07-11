@@ -2,6 +2,7 @@
 
 import { type CatalogSubject, type CatalogTopic } from '@/services/catalog.service';
 import { theme } from '@/lib/theme';
+import { Button } from '@/components/ui/Button';
 
 interface Props {
   subject: CatalogSubject;
@@ -28,7 +29,7 @@ export function SubjectTopicsModal({ subject, topics, loading, activating, onAct
         className="backdrop-enter"
         onClick={() => { if (!activating) onClose(); }}
         style={{
-          position: 'fixed', inset: 0, background: 'rgba(15,23,42,.45)',
+          position: 'fixed', inset: 0, background: 'var(--backdrop)',
           zIndex: 60, backdropFilter: 'blur(3px)',
           cursor: activating ? 'not-allowed' : 'default',
         }}
@@ -121,13 +122,7 @@ export function SubjectTopicsModal({ subject, topics, loading, activating, onAct
             borderTop: `0.5px solid ${theme.line}`,
             display: 'flex', justifyContent: 'flex-end', gap: 10,
           }}>
-            <button onClick={onClose} style={{
-              padding: '10px 18px', borderRadius: 10, border: `0.5px solid ${theme.line}`,
-              background: 'transparent', color: theme.inkSoft, fontSize: 14, fontWeight: 500,
-              cursor: 'pointer', fontFamily: 'inherit',
-            }}>
-              Fechar
-            </button>
+            <Button variant="outline" onClick={onClose}>Fechar</Button>
             {subject.is_activated ? (
               <span style={{
                 display: 'inline-flex', alignItems: 'center', gap: 6,
@@ -138,18 +133,9 @@ export function SubjectTopicsModal({ subject, topics, loading, activating, onAct
                 Matéria ativa
               </span>
             ) : (
-              <button
-                onClick={onActivate}
-                disabled={activating}
-                style={{
-                  padding: '10px 20px', borderRadius: 10, border: 'none',
-                  background: theme.teal, color: theme.onTeal,
-                  fontSize: 14, fontWeight: 600, cursor: activating ? 'wait' : 'pointer',
-                  fontFamily: 'inherit', opacity: activating ? 0.7 : 1,
-                }}
-              >
+              <Button onClick={onActivate} disabled={activating} style={{ cursor: activating ? 'wait' : 'pointer' }}>
                 {activating ? 'Ativando…' : '+ Ativar matéria'}
-              </button>
+              </Button>
             )}
           </div>
         )}

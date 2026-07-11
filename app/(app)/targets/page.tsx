@@ -18,6 +18,7 @@ import { ArquivarConcursoModal } from '@/components/features/targets/ArquivarCon
 import { useToast } from '@/components/ui/ToastProvider';
 import { theme } from '@/lib/theme';
 import { useUI } from '@/components/layout/UIContext';
+import { Button } from '@/components/ui/Button';
 
 type Tab = 'meus' | 'banco';
 
@@ -162,7 +163,7 @@ export default function TargetsPage() {
       {dialog}
       <div style={{ ...s.container, padding: isMobile ? '20px 16px' : '34px 40px' }}>
         <div style={s.header}>
-          <h1 style={{ ...s.h1, fontSize: isMobile ? 22 : 28 }}>Concursos</h1>
+          <h1 style={{ ...s.h1, fontSize: isMobile ? 24 : 28 }}>Concursos</h1>
           <p style={s.sub}>Acompanhe seus concursos e explore editais prontos para começar em um clique.</p>
         </div>
 
@@ -188,9 +189,14 @@ export default function TargetsPage() {
           <>
             {/* Ações da aba */}
             <div style={s.actionsRow}>
-              <button onClick={() => setShowCreate((v) => !v)} style={s.newBtn}>
+              <Button
+                variant="outline"
+                size="sm"
+                style={{ borderColor: theme.teal, background: theme.tealBg, color: theme.teal }}
+                onClick={() => setShowCreate((v) => !v)}
+              >
                 {showCreate ? '– Fechar' : '+ Novo concurso'}
-              </button>
+              </Button>
               <button onClick={() => setImportarOpen(true)} style={s.importarLink}>
                 importar edital colado →
               </button>
@@ -228,8 +234,8 @@ export default function TargetsPage() {
                         autoFocus
                         style={s.input}
                       />
-                      <button onClick={handleCreateBoard} style={s.btnPrimary}>Salvar</button>
-                      <button onClick={() => { setAddingBoard(false); setNewBoardName(''); }} style={s.btnGhost}>Cancelar</button>
+                      <Button onClick={handleCreateBoard}>Salvar</Button>
+                      <Button variant="ghost" onClick={() => { setAddingBoard(false); setNewBoardName(''); }}>Cancelar</Button>
                     </div>
                   ) : (
                     <div style={{ ...s.selectWrap, flexBasis: isMobile ? '100%' : undefined }}>
@@ -277,9 +283,9 @@ export default function TargetsPage() {
                     <ChevronSmall open={showAdvanced} />
                     {showAdvanced ? 'Menos detalhes' : 'Mais detalhes'}
                   </button>
-                  <button onClick={handleCreate} style={{ ...s.btnPrimary, padding: '11px 24px', fontSize: 14, width: isMobile ? '100%' : undefined }}>
+                  <Button onClick={handleCreate} style={{ width: isMobile ? '100%' : undefined }}>
                     Adicionar concurso
-                  </button>
+                  </Button>
                 </div>
               </div>
             )}
@@ -295,7 +301,7 @@ export default function TargetsPage() {
                 </svg>
                 <p style={s.emptyTitle}>Ainda sem concursos</p>
                 <p style={s.emptyHint}>Explore o banco de editais para ativar um concurso pronto em um clique — ou crie o seu manualmente.</p>
-                <button onClick={() => handleTabChange('banco')} style={s.emptyCta}>Explorar banco de editais →</button>
+                <Button variant="outline" style={{ borderColor: theme.teal, background: theme.tealBg, color: theme.teal }} onClick={() => handleTabChange('banco')}>Explorar banco de editais →</Button>
               </div>
             ) : (
               <div style={s.list}>
@@ -327,7 +333,7 @@ export default function TargetsPage() {
                     {archivedList.map((t) => (
                       <div key={t.id} style={s.archivedRow}>
                         <span style={s.archivedName}>{formatTargetLabel(t)}</span>
-                        <button onClick={() => handleRestore(t)} style={s.restoreBtn}>Restaurar</button>
+                        <Button variant="outline" size="sm" style={{ borderColor: theme.teal, background: theme.tealBg, color: theme.teal }} onClick={() => handleRestore(t)}>Restaurar</Button>
                       </div>
                     ))}
                   </div>
@@ -362,10 +368,10 @@ export default function TargetsPage() {
               {boards.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
             </select>
             <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 16 }}>
-              <button onClick={() => setPromotingTarget(null)} style={s.btnGhost}>Cancelar</button>
-              <button onClick={handleConfirmPromote} disabled={!promoteBoardId || promoting} style={s.btnPrimary}>
+              <Button variant="ghost" onClick={() => setPromotingTarget(null)}>Cancelar</Button>
+              <Button onClick={handleConfirmPromote} disabled={!promoteBoardId || promoting}>
                 {promoting ? 'Promovendo…' : 'Promover para pós-edital'}
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -499,7 +505,7 @@ const TargetRow = memo(function TargetRow({
 
       <div style={{ ...s.targetActions, ...(isMobile ? { width: '100%', justifyContent: 'flex-end', marginTop: 4 } : {}) }}>
         {t.phase === 'pre' && (
-          <button onClick={onPromote} style={s.btnSecondary}>Edital publicado?</button>
+          <Button variant="outline" size="sm" style={{ padding: '6px 14px', fontSize: 12.5, borderColor: theme.teal, background: theme.tealBg, color: theme.teal }} onClick={onPromote}>Edital publicado?</Button>
         )}
         <button
           onClick={onOpen}
@@ -547,8 +553,8 @@ const TargetRow = memo(function TargetRow({
 const s: Record<string, CSSProperties> = {
   container: { maxWidth: 720, margin: '0 auto', fontFamily: theme.font, minWidth: 0 },
   header: { marginBottom: 20 },
-  h1: { fontWeight: 700, color: theme.ink, letterSpacing: -0.4, margin: 0 },
-  sub: { fontSize: 14, color: theme.inkSoft, margin: '6px 0 0', fontWeight: 400 },
+  h1: { fontWeight: 800, color: theme.ink, letterSpacing: -0.6, margin: 0 },
+  sub: { fontSize: 14, color: theme.inkSoft, margin: '6px 0 0', fontWeight: 500 },
 
   // Abas — mesmo padrão da página de Matérias
   tabs: { display: 'flex', gap: 4, marginBottom: 20, padding: 3, background: 'rgba(15,23,42,.06)', borderRadius: theme.radiusSm, width: 'fit-content' },
@@ -577,7 +583,7 @@ const s: Record<string, CSSProperties> = {
   fieldLabel: { fontSize: 12, color: theme.inkFaint, fontWeight: 500 },
   formFooter: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10, marginTop: 4 },
 
-  btnPrimary: { padding: '10px 20px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: '#fff', fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
+  btnPrimary: { padding: '10px 20px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
   btnSecondary: { padding: '6px 14px', borderRadius: theme.radiusSm, border: `1px solid ${theme.teal}`, background: theme.tealBg, color: theme.teal, fontSize: 12.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
   btnGhost: { padding: '10px 12px', borderRadius: theme.radiusSm, border: 'none', background: 'transparent', color: theme.inkFaint, fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
   btnAdvanced: { display: 'inline-flex', alignItems: 'center', gap: 5, background: 'transparent', border: 'none', color: theme.teal, fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit', padding: '4px 2px' },
@@ -604,16 +610,16 @@ const s: Record<string, CSSProperties> = {
   targetLabel: { fontSize: 15, color: theme.ink, fontWeight: 600 },
   phaseTag: { fontSize: 11, fontWeight: 600, borderRadius: theme.radiusXs, padding: '3px 8px', flexShrink: 0 },
   phaseTagPre: { color: theme.inkSoft, background: theme.muted },
-  phaseTagPos: { color: '#fff', background: theme.teal },
+  phaseTagPos: { color: theme.onTeal, background: theme.teal },
   countdownTag: { fontSize: 11, fontWeight: 600, borderRadius: theme.radiusXs, padding: '3px 8px', flexShrink: 0 },
   topicCountTag: { fontSize: 11.5, color: theme.inkFaint, fontVariantNumeric: 'tabular-nums', flexShrink: 0 },
   targetActions: { display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0 },
   dateBtn: { fontSize: 12, color: theme.teal, border: `1px dashed ${theme.teal}`, background: 'transparent', borderRadius: theme.radiusXs, padding: '3px 10px', cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
   dateInput: { padding: '4px 8px', borderRadius: theme.radiusXs, border: `1px solid ${theme.lineStrong}`, background: theme.card, fontSize: 13, color: theme.ink, fontFamily: 'inherit', outline: 'none' },
-  dateSaveBtn: { border: 'none', background: theme.primary, color: '#fff', borderRadius: theme.radiusXs, padding: '4px 8px', cursor: 'pointer', fontSize: 12, fontFamily: 'inherit' },
+  dateSaveBtn: { border: 'none', background: theme.primary, color: theme.onTeal, borderRadius: theme.radiusXs, padding: '4px 8px', cursor: 'pointer', fontSize: 12, fontFamily: 'inherit' },
   dateCancelBtn: { border: 'none', background: 'transparent', color: theme.inkFaint, borderRadius: theme.radiusXs, padding: '4px 6px', cursor: 'pointer', fontSize: 12, fontFamily: 'inherit' },
 
-  promoteOverlay: { position: 'fixed', inset: 0, background: 'rgba(15,23,42,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 60, padding: 16 },
+  promoteOverlay: { position: 'fixed', inset: 0, background: 'var(--backdrop)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 60, padding: 16 },
   promoteModal: { background: theme.card, borderRadius: theme.radius, padding: '24px', width: 'min(400px, 94vw)', boxShadow: theme.shadowModal, fontFamily: theme.font },
   promoteTitle: { fontSize: 16, fontWeight: 700, color: theme.ink, margin: '0 0 6px' },
   promoteSub: { fontSize: 13, color: theme.inkSoft, margin: '0 0 16px', lineHeight: 1.5 },

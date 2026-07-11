@@ -150,7 +150,7 @@ const styles: Record<string, React.CSSProperties> = {
     transition: 'border-color .15s, box-shadow .15s', fontFamily: theme.font,
     display: 'flex', flexDirection: 'column', gap: 10,
   },
-  tribunalBadge: { fontSize: 11.5, fontWeight: 700, color: '#fff', background: theme.teal, borderRadius: 6, padding: '2px 8px' },
+  tribunalBadge: { fontSize: 11.5, fontWeight: 700, color: theme.onTeal, background: theme.teal, borderRadius: 6, padding: '2px 8px' },
   tipoBadge: { fontSize: 11.5, fontWeight: 500, color: theme.inkSoft, background: 'rgba(15,23,42,.06)', borderRadius: 6, padding: '2px 8px' },
   tese: {
     fontSize: 14, color: theme.ink, margin: 0, lineHeight: 1.55, fontWeight: 500,

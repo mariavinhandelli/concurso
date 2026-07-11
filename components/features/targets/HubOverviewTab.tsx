@@ -13,6 +13,7 @@ import { type CatalogEditalInfo, type EditalUpdate, type EditalUpdateTipo } from
 import { countByDisciplina, normalizeDisciplina } from '@/services/jurisprudencias.service';
 import { type SubjectTree, daysUntilExam, countdownInfo } from '@/lib/targets';
 import { theme } from '@/lib/theme';
+import { Button } from '@/components/ui/Button';
 
 const PREP_KEY_PREFIX = 'focali_prep_';
 
@@ -203,7 +204,14 @@ export function HubOverviewTab({
               : 'Edital publicado — acompanhe o progresso e mantenha o cronograma em dia.'}
           </p>
           {isPre && (
-            <button onClick={onPromote} style={s.promoteBtn}>Edital publicado?</button>
+            <Button
+              variant="outline"
+              size="sm"
+              style={{ marginTop: 10, borderColor: theme.teal, background: theme.tealBg, color: theme.teal }}
+              onClick={onPromote}
+            >
+              Edital publicado?
+            </Button>
           )}
         </div>
 
@@ -398,7 +406,7 @@ export function HubOverviewTab({
         </div>
 
         {stats.totalLinked === 0 ? (
-          <button onClick={onGoMontar} style={s.emptyCta}>Montar edital →</button>
+          <Button variant="outline" style={{ marginTop: 12, borderColor: theme.teal, background: theme.tealBg, color: theme.teal }} onClick={onGoMontar}>Montar edital →</Button>
         ) : (
           <>
             <div style={s.prepTrack}>
@@ -427,33 +435,34 @@ export function HubOverviewTab({
       <div style={s.card}>
         <h3 style={{ ...s.cardTitle, marginBottom: 12 }}>Ações rápidas</h3>
         <div style={{ ...s.actionsGrid, gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(3, 1fr)' }}>
-          <button
+          <Button
+            variant={canGenerate ? 'primary' : 'outline'}
+            style={canGenerate ? undefined : { background: theme.muted, color: theme.inkFaint, cursor: 'not-allowed', border: `0.5px solid ${theme.line}` }}
             onClick={onGenerate}
             disabled={!canGenerate}
-            style={{ ...s.actionBtn, ...(canGenerate ? s.actionPrimary : s.actionDisabled) }}
             title={!canGenerate ? 'Vincule ao menos um tópico para gerar o cronograma' : undefined}
           >
             Gerar cronograma
-          </button>
-          <button onClick={onGoMontar} style={s.actionBtn}>Montar edital</button>
-          <button onClick={() => router.push('/schedule')} style={s.actionBtn}>Plano de hoje</button>
-          <button
+          </Button>
+          <Button variant="outline" onClick={onGoMontar}>Montar edital</Button>
+          <Button variant="outline" onClick={() => router.push('/schedule')}>Plano de hoje</Button>
+          <Button
+            variant="outline"
             onClick={() => router.push(
               linkedSubjectIds.length > 0
                 ? `/flashcards?subjectIds=${encodeURIComponent(linkedSubjectIds.join(','))}`
                 : '/flashcards',
             )}
-            style={s.actionBtn}
           >
             Flashcards
-          </button>
-          <button
+          </Button>
+          <Button
+            variant="outline"
             onClick={() => router.push(topDisciplina ? `/jurisprudencias/lista?disciplina=${encodeURIComponent(topDisciplina)}` : '/jurisprudencias')}
-            style={s.actionBtn}
           >
             Jurisprudências
-          </button>
-          <button onClick={() => router.push('/vademecum')} style={s.actionBtn}>Vade Mecum</button>
+          </Button>
+          <Button variant="outline" onClick={() => router.push('/vademecum')}>Vade Mecum</Button>
         </div>
       </div>
     </div>
@@ -467,7 +476,7 @@ const s: Record<string, CSSProperties> = {
   statusTags: { display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', marginBottom: 8 },
   phaseTag: { fontSize: 11, fontWeight: 600, borderRadius: theme.radiusXs, padding: '3px 8px', flexShrink: 0 },
   phaseTagPre: { color: theme.inkSoft, background: theme.muted },
-  phaseTagPos: { color: '#fff', background: theme.teal },
+  phaseTagPos: { color: theme.onTeal, background: theme.teal },
   metaChip: { fontSize: 11.5, fontWeight: 500, color: theme.inkSoft, background: theme.bg, border: `0.5px solid ${theme.line}`, borderRadius: theme.radiusXs, padding: '3px 8px' },
   statusHint: { fontSize: 12.5, color: theme.inkFaint, margin: 0, lineHeight: 1.55 },
   promoteBtn: { marginTop: 10, padding: '7px 14px', borderRadius: theme.radiusSm, border: `1px solid ${theme.teal}`, background: theme.tealBg, color: theme.teal, fontSize: 12.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
@@ -479,7 +488,7 @@ const s: Record<string, CSSProperties> = {
   countdownDate: { fontSize: 11.5, color: theme.inkFaint, marginTop: 2 },
   setDateBtn: { fontSize: 12.5, color: theme.teal, border: `1px dashed ${theme.teal}`, background: 'transparent', borderRadius: theme.radiusXs, padding: '8px 14px', cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
   dateInput: { padding: '6px 10px', borderRadius: theme.radiusXs, border: `1px solid ${theme.lineStrong}`, background: theme.card, fontSize: 13, color: theme.ink, fontFamily: 'inherit', outline: 'none' },
-  dateSaveBtn: { border: 'none', background: theme.primary, color: '#fff', borderRadius: theme.radiusXs, padding: '6px 10px', cursor: 'pointer', fontSize: 12, fontFamily: 'inherit' },
+  dateSaveBtn: { border: 'none', background: theme.primary, color: theme.onTeal, borderRadius: theme.radiusXs, padding: '6px 10px', cursor: 'pointer', fontSize: 12, fontFamily: 'inherit' },
   dateCancelBtn: { border: 'none', background: 'transparent', color: theme.inkFaint, borderRadius: theme.radiusXs, padding: '6px 8px', cursor: 'pointer', fontSize: 12, fontFamily: 'inherit' },
 
   card: { background: theme.card, border: `0.5px solid ${theme.line}`, borderRadius: theme.radiusSm, boxShadow: theme.shadow, padding: 18, minWidth: 0 },
@@ -494,7 +503,7 @@ const s: Record<string, CSSProperties> = {
   prepRow: { display: 'flex', alignItems: 'center', gap: 10, padding: '9px 12px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.card, cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit', width: '100%', minWidth: 0, transition: 'background .12s' },
   prepRowDone: { background: theme.tealBg, border: `1px solid ${theme.teal}` },
   prepCheck: { width: 20, height: 20, borderRadius: theme.radiusXs, border: `1.5px solid ${theme.lineStrong}`, background: theme.card, color: 'transparent', fontSize: 12, display: 'grid', placeItems: 'center', flexShrink: 0 },
-  prepCheckOn: { background: theme.teal, border: `1.5px solid ${theme.teal}`, color: '#fff' },
+  prepCheckOn: { background: theme.teal, border: `1.5px solid ${theme.teal}`, color: theme.onTeal },
   prepLabel: { flex: 1, fontSize: 13, color: theme.ink, minWidth: 0 },
   prepLabelDone: { color: theme.inkSoft },
   autoTag: { fontSize: 10, fontWeight: 700, color: theme.teal, background: theme.tealBg, borderRadius: theme.radiusXs, padding: '2px 6px', letterSpacing: 0.4, textTransform: 'uppercase', flexShrink: 0 },
@@ -530,6 +539,6 @@ const s: Record<string, CSSProperties> = {
 
   actionsGrid: { display: 'grid', gap: 8 },
   actionBtn: { padding: '11px 12px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.bg, color: theme.ink, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', transition: 'border-color .12s, background .12s' },
-  actionPrimary: { background: theme.teal, color: '#fff', border: `0.5px solid ${theme.teal}` },
+  actionPrimary: { background: theme.teal, color: theme.onTeal, border: `0.5px solid ${theme.teal}` },
   actionDisabled: { background: theme.muted, color: theme.inkFaint, cursor: 'not-allowed', border: `0.5px solid ${theme.line}` },
 };

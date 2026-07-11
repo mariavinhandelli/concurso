@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { createFlashcard, updateFlashcardContent, type Flashcard } from '@/services/flashcards.service';
 import { theme } from '@/lib/theme';
+import { Button } from '@/components/ui/Button';
 
 interface Props {
   subjectId: string | null;
@@ -93,23 +94,20 @@ export function CardForm({ subjectId, topicId, card, onSaved, onCreatedAndNew, o
       {error && <p style={styles.error}>{error}</p>}
 
       <div style={styles.actions}>
-        <button onClick={onCancel} style={styles.cancelBtn}>Cancelar</button>
+        <Button variant="outline" onClick={onCancel}>Cancelar</Button>
         {!isEdit && onCreatedAndNew && (
-          <button
+          <Button
+            variant="outline"
+            style={{ borderColor: theme.teal, borderWidth: 1.5, color: theme.tealDeep }}
             onClick={handleSaveAndNew}
             disabled={!canSave || saving}
-            style={canSave && !saving ? styles.saveSecondaryBtn : { ...styles.saveSecondaryBtn, ...styles.saveBtnDisabled }}
           >
             Criar e continuar
-          </button>
+          </Button>
         )}
-        <button
-          onClick={handleSave}
-          disabled={!canSave || saving}
-          style={canSave && !saving ? styles.saveBtn : { ...styles.saveBtn, ...styles.saveBtnDisabled }}
-        >
+        <Button onClick={handleSave} disabled={!canSave || saving}>
           {saving ? 'Salvando…' : isEdit ? 'Salvar' : 'Criar card'}
-        </button>
+        </Button>
       </div>
     </div>
   );
@@ -126,6 +124,6 @@ const styles: Record<string, React.CSSProperties> = {
   actions: { display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 6, flexWrap: 'wrap' },
   cancelBtn: { padding: '10px 18px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.inkSoft, fontSize: 14, cursor: 'pointer', fontFamily: 'inherit' },
   saveSecondaryBtn: { padding: '10px 18px', borderRadius: theme.radiusSm, border: `1.5px solid ${theme.teal}`, background: 'transparent', color: theme.tealDeep, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
-  saveBtn: { padding: '10px 20px', borderRadius: theme.radiusSm, border: 'none', background: theme.teal, color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+  saveBtn: { padding: '10px 20px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
   saveBtnDisabled: { opacity: 0.45, cursor: 'not-allowed' },
 };

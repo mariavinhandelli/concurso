@@ -7,6 +7,7 @@ import { getSimuladoInsights, type SimuladoInsights } from '@/services/jurisInte
 import { countRevisoesHoje } from '@/services/jurisRevisao.service';
 import { useUI } from '@/components/layout/UIContext';
 import { theme } from '@/lib/theme';
+import { Button } from '@/components/ui/Button';
 
 const DISCIPLINA_ICON: Record<string, React.ReactNode> = {
   // Balança da justiça → CF/CRFB
@@ -176,9 +177,9 @@ export default function JurisprudenciasHubPage() {
           </svg>
           Simulados
         </button>
-        <button onClick={() => router.push('/jurisprudencias/nova')} style={styles.quickBtnPrimary}>
+        <Button size="sm" style={{ borderRadius: theme.radiusPill }} onClick={() => router.push('/jurisprudencias/nova')}>
           + Nova jurisprudência
-        </button>
+        </Button>
       </div>
 
       {/* Painel de insights — só aparece quando há dados de simulado */}

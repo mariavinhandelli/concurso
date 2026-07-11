@@ -1,7 +1,8 @@
 'use client';
 
 import { memo, useEffect, useMemo, useState } from 'react';
-import { theme, btnOutline, kbd } from '@/lib/theme';
+import { theme, kbd } from '@/lib/theme';
+import { Button } from '@/components/ui/Button';
 import type { Jurisprudencia } from '@/services/jurisprudencias.service';
 import { submitRevisao } from '@/services/jurisInteracoes.service';
 import { RATING_LABEL, type JurisRating } from '@/lib/juris-review';
@@ -72,7 +73,7 @@ export const JurisFlashcardPlayer = memo(function JurisFlashcardPlayer({ items, 
       <Overlay onClose={onClose}>
         <div style={{ textAlign: 'center', padding: '40px 24px' }}>
           <p style={{ fontSize: 15, color: theme.inkSoft, marginBottom: 20 }}>Nenhum flashcard disponível nesta seleção.</p>
-          <button onClick={onClose} style={btnOutline}>Fechar</button>
+          <Button variant="outline" onClick={onClose}>Fechar</Button>
         </div>
       </Overlay>
     );
@@ -154,8 +155,8 @@ export const JurisFlashcardPlayer = memo(function JurisFlashcardPlayer({ items, 
           )}
 
           <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
-            <button onClick={restart} style={btnPrimary}>Recomeçar</button>
-            <button onClick={onClose} style={btnOutline}>Fechar</button>
+            <Button onClick={restart}>Recomeçar</Button>
+            <Button variant="outline" onClick={onClose}>Fechar</Button>
           </div>
         </div>
       </Overlay>
@@ -222,21 +223,22 @@ export const JurisFlashcardPlayer = memo(function JurisFlashcardPlayer({ items, 
 
       {/* Navegação */}
       <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-        <button
+        <Button
+          variant="outline"
           onClick={prev}
           disabled={idx === 0}
           aria-keyshortcuts="ArrowLeft"
-          style={{ ...btnOutline, opacity: idx === 0 ? 0.35 : 1, flexShrink: 0 }}
+          style={{ flexShrink: 0 }}
         >
           ← Anterior
-        </button>
+        </Button>
 
         {!flipped ? (
           <>
             <span style={{ flex: 1 }} />
-            <button onClick={() => setFlipped(true)} aria-keyshortcuts="Space Enter" style={btnPrimary}>
+            <Button onClick={() => setFlipped(true)} aria-keyshortcuts="Space Enter">
               Revelar resposta
-            </button>
+            </Button>
           </>
         ) : (
           // Botões de avaliação — substituem "Próximo" e alimentam a revisão espaçada
@@ -272,8 +274,3 @@ export const JurisFlashcardPlayer = memo(function JurisFlashcardPlayer({ items, 
   );
 });
 
-const btnPrimary: React.CSSProperties = {
-  padding: '10px 22px', borderRadius: theme.radiusSm, border: 'none',
-  background: theme.teal, color: '#fff', fontSize: 14, fontWeight: 600,
-  cursor: 'pointer', fontFamily: theme.font,
-};

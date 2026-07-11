@@ -10,6 +10,7 @@ import { listLeaves as listTopicOptions, type PickerOption } from '@/services/to
 import { getAcertoTopico } from '@/services/metrics.service';
 import { FlashcardModal } from '@/components/features/notebook/FlashcardModal';
 import { theme } from '@/lib/theme';
+import { Button } from '@/components/ui/Button';
 
 interface Props {
   note: ErrorNote | null;
@@ -221,11 +222,10 @@ export function NoteEditor({ note, presetSubjectId = null, presetTopicId = null,
       {error && <p style={styles.error}>{error}</p>}
 
       <div style={styles.actions}>
-        <button onClick={onCancel} style={styles.cancelBtn}>Cancelar</button>
-        <button onClick={handleSave} disabled={!canSave || saving}
-          style={{ ...styles.saveBtn, ...(canSave && !saving ? {} : styles.saveBtnDisabled) }}>
+        <Button variant="outline" onClick={onCancel}>Cancelar</Button>
+        <Button onClick={handleSave} disabled={!canSave || saving}>
           {saving ? 'Salvando…' : note ? 'Atualizar' : 'Salvar erro'}
-        </button>
+        </Button>
       </div>
       {!canSave && <p style={styles.hint}>Preencha o título e o tipo de erro para salvar.</p>}
       {note && <p style={styles.tip}>Dica: selecione um trecho do texto para criar um flashcard.</p>}
@@ -239,8 +239,8 @@ export function NoteEditor({ note, presetSubjectId = null, presetTopicId = null,
               Você registrou um erro em <b>{reviewSuggestion.topicName}</b>. Quer agendar uma revisão para fixar?
             </p>
             <div style={styles.reviewBtns}>
-              <button onClick={() => handleScheduleReview(1)} disabled={scheduling} style={styles.reviewBtn}>Em 24h</button>
-              <button onClick={() => handleScheduleReview(2)} disabled={scheduling} style={styles.reviewBtn}>Em 48h</button>
+              <Button style={{ flex: 1 }} onClick={() => handleScheduleReview(1)} disabled={scheduling}>Em 24h</Button>
+              <Button style={{ flex: 1 }} onClick={() => handleScheduleReview(2)} disabled={scheduling}>Em 48h</Button>
             </div>
             <button onClick={dismissReview} disabled={scheduling} style={styles.reviewDismiss}>Agora não</button>
           </div>
@@ -267,7 +267,7 @@ const styles: Record<string, React.CSSProperties> = {
   chipsLabel: { fontSize: 12.5, fontWeight: 600, color: theme.inkSoft, margin: '0 0 8px' },
   chipsRow: { display: 'flex', flexWrap: 'wrap', gap: 8 },
   chip: { padding: '8px 14px', borderRadius: 999, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.card, color: theme.inkSoft, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', transition: 'all .12s' },
-  chipOn: { background: theme.teal, borderColor: theme.teal, color: '#fff' },
+  chipOn: { background: theme.teal, borderColor: theme.teal, color: theme.onTeal },
   metaRow: { display: 'flex', gap: 12, width: '100%', minWidth: 0, flexWrap: 'wrap' },
   select: { flex: '1 1 0', minWidth: 140, maxWidth: '100%', boxSizing: 'border-box', padding: '10px 12px', borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.card, fontSize: 14, color: theme.ink, fontFamily: theme.font, cursor: 'pointer', outline: 'none', textOverflow: 'ellipsis' },
   acertoBox: { display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', borderRadius: theme.radiusSm, background: theme.bg, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line },
@@ -278,15 +278,15 @@ const styles: Record<string, React.CSSProperties> = {
   error: { color: theme.danger, fontSize: 13 },
   actions: { display: 'flex', gap: 12, justifyContent: 'flex-end', marginTop: 4 },
   cancelBtn: { padding: '11px 20px', borderRadius: 12, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.card, color: theme.inkSoft, fontSize: 14, fontWeight: 500, cursor: 'pointer', fontFamily: theme.font },
-  saveBtn: { padding: '11px 24px', borderRadius: 12, border: 'none', background: theme.teal, color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: theme.font },
+  saveBtn: { padding: '11px 24px', borderRadius: 12, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: theme.font },
   saveBtnDisabled: { background: theme.muted, color: theme.inkFaint, cursor: 'not-allowed' },
   hint: { fontSize: 12, color: theme.inkFaint, textAlign: 'right', margin: 0 },
   tip: { fontSize: 12, color: theme.inkFaint, margin: '4px 0 0' },
-  reviewOverlay: { position: 'fixed', inset: 0, background: 'rgba(30,28,24,0.4)', display: 'grid', placeItems: 'center', zIndex: 70, padding: 20 },
+  reviewOverlay: { position: 'fixed', inset: 0, background: 'var(--backdrop)', display: 'grid', placeItems: 'center', zIndex: 70, padding: 20 },
   reviewCard: { background: theme.card, borderRadius: theme.radius, padding: 24, width: '100%', maxWidth: 380, boxShadow: '0 20px 60px rgba(0,0,0,0.18)', fontFamily: theme.font, textAlign: 'center' },
   reviewTitle: { fontSize: 17, fontWeight: 700, color: theme.ink, margin: '0 0 8px' },
   reviewText: { fontSize: 13.5, color: theme.inkSoft, margin: '0 0 18px', lineHeight: 1.5 },
   reviewBtns: { display: 'flex', gap: 10, justifyContent: 'center' },
-  reviewBtn: { flex: 1, padding: '11px 0', borderRadius: theme.radiusSm, border: 'none', background: theme.teal, color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+  reviewBtn: { flex: 1, padding: '11px 0', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
   reviewDismiss: { marginTop: 12, border: 'none', background: 'transparent', color: theme.inkFaint, fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' },
 };

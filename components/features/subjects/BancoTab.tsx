@@ -219,7 +219,7 @@ const styles: Record<string, React.CSSProperties> = {
   catMeta: { fontSize: 12, color: theme.inkSoft, marginTop: 4 },
   activateBtn: {
     fontSize: 12.5, padding: '6px 14px', borderRadius: 999, border: 'none',
-    background: theme.teal, color: theme.onTeal, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap', flexShrink: 0,
+    background: theme.primary, color: theme.onTeal, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap', flexShrink: 0,
   },
   activeBadge: {
     display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 12.5, padding: '6px 12px',

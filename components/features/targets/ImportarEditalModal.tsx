@@ -93,10 +93,10 @@ export function ImportarEditalModal({
 }
 
 const s: Record<string, CSSProperties> = {
-  overlay: { position: 'fixed', inset: 0, background: 'rgba(15,23,42,0.45)', display: 'grid', placeItems: 'center', zIndex: 60, padding: 16 },
+  overlay: { position: 'fixed', inset: 0, background: 'var(--backdrop)', display: 'grid', placeItems: 'center', zIndex: 60, padding: 16 },
   modal: { background: theme.card, borderRadius: theme.radius, boxShadow: theme.shadowModal, padding: 24, width: '100%', maxWidth: 680, maxHeight: '92vh', overflowY: 'auto', fontFamily: theme.font },
   head: { display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, marginBottom: 16 },
-  h2: { fontSize: 19, fontWeight: 700, color: theme.ink, margin: 0 },
+  h2: { fontSize: 18, fontWeight: 700, color: theme.ink, margin: 0 },
   sub: { fontSize: 13, color: theme.inkSoft, margin: '5px 0 0', lineHeight: 1.5 },
   close: { border: 'none', background: 'transparent', color: theme.inkSoft, fontSize: 16, cursor: 'pointer', fontFamily: 'inherit', padding: 4, lineHeight: 1, flexShrink: 0 },
 
@@ -115,6 +115,6 @@ const s: Record<string, CSSProperties> = {
 
   actions: { display: 'flex', gap: 12, justifyContent: 'flex-end' },
   cancelBtn: { padding: '11px 22px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.inkSoft, fontSize: 14, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' },
-  confirmBtn: { padding: '11px 22px', borderRadius: theme.radiusSm, border: 'none', background: theme.teal, color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+  confirmBtn: { padding: '11px 22px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
   confirmOff: { background: theme.muted, color: theme.inkFaint, cursor: 'not-allowed' },
 };

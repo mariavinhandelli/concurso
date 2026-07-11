@@ -127,7 +127,7 @@ const styles: Record<string, React.CSSProperties> = {
   editRow: { display: 'flex', alignItems: 'center', gap: 8 },
   numInput: { width: 56, padding: 10, borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.bg, fontSize: 14, color: theme.ink, fontFamily: 'inherit' },
   unit: { fontSize: 13, color: theme.inkFaint },
-  saveBtn: { marginLeft: 'auto', padding: '10px 18px', borderRadius: theme.radiusSm, border: 'none', background: theme.teal, color: '#fff', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+  saveBtn: { marginLeft: 'auto', padding: '10px 18px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
   blocks: { display: 'flex', flexDirection: 'column', gap: 18, justifyContent: 'center', flex: 1 },
   block: {},
   blockHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 8 },

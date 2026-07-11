@@ -52,7 +52,7 @@ export const MissoesSemana = memo(function MissoesSemana({ bare = false }: { bar
           <div key={m.id} style={{ ...styles.item, ...(m.concluida ? styles.itemOn : {}) }}>
             <span style={{ ...styles.marker, ...(m.concluida ? styles.markerOn : {}) }}>
               {m.concluida ? (
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={theme.onOk} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
               ) : null}
             </span>
             <div style={styles.itemText}>

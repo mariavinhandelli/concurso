@@ -160,7 +160,7 @@ export function JurisFilterBar({ values, onChange, disciplinas }: Props) {
 }
 
 const styles: Record<string, React.CSSProperties> = {
-  countBadge: { fontSize: 11, fontWeight: 700, color: '#fff', background: theme.teal, borderRadius: 999, padding: '1px 7px', minWidth: 18, textAlign: 'center' },
+  countBadge: { fontSize: 11, fontWeight: 700, color: theme.onTeal, background: theme.teal, borderRadius: 999, padding: '1px 7px', minWidth: 18, textAlign: 'center' },
   clearBtn: { fontSize: 11.5, fontWeight: 600, color: theme.teal, border: 'none', background: 'transparent', cursor: 'pointer', fontFamily: 'inherit' },
   grid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '10px 14px', marginTop: 10 },
   label: { display: 'block', fontSize: 11, fontWeight: 600, color: theme.inkFaint, textTransform: 'uppercase', letterSpacing: 0.4, marginBottom: 5 },

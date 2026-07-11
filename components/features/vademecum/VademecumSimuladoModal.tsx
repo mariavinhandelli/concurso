@@ -12,6 +12,7 @@ import { Overlay } from '@/components/ui/Overlay';
 import { LEIS_CATALOG, type LeiMeta } from '@/services/leis.service';
 import { getQuestoesLei, LEIS_COM_QUESTOES } from '@/services/leiQuestoes.service';
 import { theme } from '@/lib/theme';
+import { Button } from '@/components/ui/Button';
 
 function useQuestoesCount(slug: string): number {
   const { data } = useQuery({
@@ -71,11 +72,11 @@ export function VademecumSimuladoModal({ onClose }: { onClose: () => void }) {
         ))}
       </div>
 
-      <button onClick={iniciar} disabled={selecionadas.size === 0} style={{ ...s.iniciarBtn, ...(selecionadas.size === 0 ? s.iniciarBtnOff : {}) }}>
+      <Button fullWidth onClick={iniciar} disabled={selecionadas.size === 0}>
         {selecionadas.size === 0
           ? 'Selecione ao menos uma lei'
           : `Iniciar simulado — ${selecionadas.size} lei${selecionadas.size === 1 ? '' : 's'} selecionada${selecionadas.size === 1 ? '' : 's'}`}
-      </button>
+      </Button>
     </Overlay>
   );
 }
@@ -91,6 +92,6 @@ const s: Record<string, React.CSSProperties> = {
   checkInput: { flexShrink: 0, cursor: 'pointer' },
   checkNome: { fontSize: 13, fontWeight: 600, color: theme.ink, flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
   checkCount: { fontSize: 11.5, color: theme.inkFaint, flexShrink: 0 },
-  iniciarBtn: { width: '100%', padding: '12px 0', borderRadius: theme.radiusSm, border: 'none', background: theme.teal, color: '#fff', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' },
+  iniciarBtn: { width: '100%', padding: '12px 0', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' },
   iniciarBtnOff: { background: theme.line, color: theme.inkFaint, cursor: 'not-allowed' },
 };

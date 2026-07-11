@@ -12,6 +12,7 @@ import {
   findProfileByCode, getMySocialProfile, enableSocial, sendFriendRequest, type SocialProfile,
 } from '@/services/social.service';
 import { theme } from '@/lib/theme';
+import { Button } from '@/components/ui/Button';
 
 export default function AdicionarAmigoPage() {
   const params = useParams<{ code: string }>();
@@ -55,14 +56,14 @@ export default function AdicionarAmigoPage() {
             <div style={s.emoji}>🔍</div>
             <h1 style={s.h1}>Convite não encontrado</h1>
             <p style={s.body}>O código <code style={s.code}>{code}</code> não corresponde a nenhum perfil ativo. Confira o link com quem te enviou.</p>
-            <button onClick={() => router.push('/amigos')} style={s.primary}>Ir para Amigos</button>
+            <Button onClick={() => router.push('/amigos')}>Ir para Amigos</Button>
           </>
         ) : done ? (
           <>
             <div style={s.emoji}>🤝</div>
             <h1 style={s.h1}>Feito!</h1>
             <p style={s.body}>Assim que <b style={s.strong}>{prof.name}</b> aceitar (ou já aceitou), vocês aparecem no ranking um do outro.</p>
-            <button onClick={() => router.push('/amigos')} style={s.primary}>Ver meus amigos</button>
+            <Button onClick={() => router.push('/amigos')}>Ver meus amigos</Button>
           </>
         ) : (
           <>
@@ -73,9 +74,9 @@ export default function AdicionarAmigoPage() {
               <p style={s.note}>Ao adicionar, seu perfil social é ativado — amigos veem só seus números (sequência, minutos, % do edital), nunca seu conteúdo.</p>
             )}
             <div style={s.actions}>
-              <button onClick={adicionar} disabled={busy} style={{ ...s.primary, opacity: busy ? 0.6 : 1 }}>
+              <Button onClick={adicionar} disabled={busy}>
                 {busy ? 'Adicionando…' : jaAtivo ? 'Adicionar amigo' : 'Ativar e adicionar'}
-              </button>
+              </Button>
               <button onClick={() => router.push('/amigos')} style={s.ghost}>Agora não</button>
             </div>
           </>
@@ -96,7 +97,7 @@ const s: Record<string, React.CSSProperties> = {
   strong: { color: theme.ink, fontWeight: 700 },
   code: { fontFamily: 'ui-monospace, monospace', fontWeight: 700, letterSpacing: 1, color: theme.ink },
   actions: { display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' },
-  primary: { padding: '12px 22px', borderRadius: theme.radiusSm, border: 'none', background: theme.teal, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+  primary: { padding: '12px 22px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
   ghost: { padding: '12px 16px', borderRadius: theme.radiusSm, border: 'none', background: 'transparent', color: theme.inkSoft, fontSize: 13.5, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' },
   muted: { fontSize: 14, color: theme.inkFaint, textAlign: 'center', margin: 0 },
 };

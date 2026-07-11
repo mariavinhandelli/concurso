@@ -15,12 +15,17 @@ import { refreshHomeAfterSession } from '@/lib/home-refresh';
 import { useUI } from '@/components/layout/UIContext';
 import { useToast } from '@/components/ui/ToastProvider';
 import { theme } from '@/lib/theme';
+import { Button } from '@/components/ui/Button';
 
 interface ItemFila {
   interacao: LeiInteracao;
   artigo: LeiArtigo;
   lei: Lei;
 }
+
+// Largura fixa da lacuna — não proporcional ao trecho oculto, para não vazar
+// pista do tamanho da resposta (recall ativo puro).
+const LACUNA_LARGURA = 14;
 
 const RATINGS: { value: JurisRating; cor: string }[] = [
   { value: 'errei',   cor: '#E24B4A' },
@@ -107,14 +112,14 @@ export default function RevisarArtigosPage() {
               ? 'A lei seca agradece. Os intervalos foram reagendados.'
               : 'Grife artigos no Vade Mecum e ative a revisão para construir sua fila.'}
           </p>
-          <button onClick={() => router.push('/vademecum')} style={s.doneBtn}>Voltar ao Vade Mecum</button>
+          <Button onClick={() => router.push('/vademecum')}>Voltar ao Vade Mecum</Button>
         </div>
       </div>
     );
   }
 
   return (
-    <div style={{ ...s.wrap, padding: isMobile ? '20px 14px' : '30px 40px' }}>
+    <div style={{ ...s.wrap, padding: isMobile ? '20px 16px' : '34px 40px' }}>
       <div style={s.topo}>
         <button onClick={() => router.push('/vademecum')} style={s.voltar}>← Vade Mecum</button>
         <span style={s.progresso}>{idx + 1} de {fila.length}</span>
@@ -151,7 +156,7 @@ export default function RevisarArtigosPage() {
                       title="Clique para revelar"
                       style={s.lacuna}
                     >
-                      {' '.repeat(Math.max(6, Math.min(seg.texto.length, 40)))}
+                      {' '.repeat(LACUNA_LARGURA)}
                     </span>
                   );
                 }
@@ -182,7 +187,7 @@ export default function RevisarArtigosPage() {
 }
 
 const s: Record<string, CSSProperties> = {
-  wrap: { maxWidth: 780, margin: '0 auto', fontFamily: theme.font },
+  wrap: { maxWidth: 720, margin: '0 auto', fontFamily: theme.font },
   topo: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 },
   voltar: { border: 'none', background: 'transparent', color: theme.inkFaint, fontSize: 13, cursor: 'pointer', fontFamily: 'inherit', padding: 0 },
   progresso: { fontSize: 13, fontWeight: 600, color: theme.inkSoft },
@@ -202,5 +207,5 @@ const s: Record<string, CSSProperties> = {
   doneBox: { textAlign: 'center', padding: '60px 20px' },
   doneTitle: { fontSize: 22, fontWeight: 700, color: theme.ink, margin: '10px 0 6px' },
   doneSub: { fontSize: 14, color: theme.inkSoft, margin: '0 0 20px' },
-  doneBtn: { padding: '11px 22px', borderRadius: theme.radiusSm, border: 'none', background: theme.teal, color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+  doneBtn: { padding: '11px 22px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
 };

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { theme } from '@/lib/theme';
+import { Button } from '@/components/ui/Button';
 import { EstrelasBadge } from './EstrelasBadge';
 import {
   TRIBUNAIS, TIPOS, STATUS_OPTIONS, INCIDENCIA_OPTIONS,
@@ -394,10 +395,10 @@ export function JurisprudenciaForm({ initial = {}, saving, onSave, onCancel }: P
 
       {/* ── AÇÕES ── */}
       <div className="juris-form-actions" style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', paddingTop: 8, borderTop: `0.5px solid ${theme.line}` }}>
-        <button className="touch-target" onClick={onCancel} style={styles.cancelBtn}>Cancelar</button>
-        <button className="touch-target" onClick={handleSubmit} disabled={saving} style={{ ...styles.saveBtn, opacity: saving ? 0.6 : 1 }}>
+        <Button variant="outline" className="touch-target" onClick={onCancel}>Cancelar</Button>
+        <Button className="touch-target" onClick={handleSubmit} disabled={saving}>
           {saving ? 'Salvando…' : 'Salvar jurisprudência'}
-        </button>
+        </Button>
       </div>
     </div>
   );
@@ -413,7 +414,7 @@ const styles: Record<string, React.CSSProperties> = {
   tagChip: { display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 12, fontWeight: 500, color: theme.tealDeep, background: theme.tealBg, borderRadius: 999, padding: '3px 10px' },
   tagRemove: { border: 'none', background: 'transparent', color: theme.tealDeep, cursor: 'pointer', padding: 0, fontSize: 14, lineHeight: 1, fontFamily: 'inherit' },
   cancelBtn: { padding: '11px 20px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.inkSoft, fontSize: 14, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' },
-  saveBtn: { padding: '11px 24px', borderRadius: theme.radiusSm, border: 'none', background: theme.teal, color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+  saveBtn: { padding: '11px 24px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
   gabaritoBtn: { padding: '9px 22px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.inkSoft, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
   gabaritoBtnCerto: { border: `1.5px solid ${theme.ok}`, background: theme.okTint, color: theme.ok },
   gabaritoBtnErrado: { border: `1.5px solid ${theme.danger}`, background: theme.dangerTint, color: theme.danger },

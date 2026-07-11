@@ -15,6 +15,7 @@ const FlashcardEngine = dynamic(
 import { ReviewTab } from '@/components/features/flashcards/ReviewTab';
 import { CardsTab } from '@/components/features/flashcards/CardsTab';
 import { theme } from '@/lib/theme';
+import { Button } from '@/components/ui/Button';
 
 type Tab = 'cards' | 'review';
 
@@ -81,7 +82,7 @@ function FlashcardsContent() {
               <button onClick={() => setSession(null)} style={styles.exitFocus}>✕ Sair</button>
               <span style={styles.emptyIcon}>✓</span>
               <p style={styles.muted}>Nada para estudar agora. Tudo em dia!</p>
-              <button onClick={() => setSession(null)} style={styles.finishBtn}>Voltar</button>
+              <Button style={{ marginTop: 8, padding: '12px 28px' }} onClick={() => setSession(null)}>Voltar</Button>
             </div>
           ) : (
             <FlashcardEngine
@@ -117,9 +118,9 @@ function FlashcardsContent() {
 }
 
 const styles: Record<string, React.CSSProperties> = {
-  container: { maxWidth: 680, margin: '0 auto', fontFamily: theme.font, minWidth: 0 },
+  container: { maxWidth: 720, margin: '0 auto', fontFamily: theme.font, minWidth: 0 },
   header: { marginBottom: 24 },
-  h1: { fontWeight: 700, color: theme.ink, letterSpacing: -0.6, margin: 0 },
+  h1: { fontWeight: 800, color: theme.ink, letterSpacing: -0.6, margin: 0 },
   sub: { fontSize: 14, color: theme.inkSoft, margin: '6px 0 0', fontWeight: 500 },
   focusPage: { minHeight: 'calc(100vh - var(--topbar-h))', fontFamily: theme.font, display: 'flex', alignItems: 'flex-start', justifyContent: 'center' },
   focusContainer: { width: '100%', maxWidth: 560, padding: 'clamp(16px, 4vw, 40px) clamp(12px, 3vw, 24px)', position: 'relative' },

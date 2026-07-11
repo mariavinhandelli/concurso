@@ -13,6 +13,7 @@ import { listAllBoards, type Board } from '@/services/boards.service';
 import { useToast } from '@/components/ui/ToastProvider';
 import { theme } from '@/lib/theme';
 import { useUI } from '@/components/layout/UIContext';
+import { Button } from '@/components/ui/Button';
 
 const HubOverviewTab = dynamic(
   () => import('@/components/features/targets/HubOverviewTab').then((m) => ({ default: m.HubOverviewTab })),
@@ -147,7 +148,7 @@ export default function TargetDetailPage() {
 
       <div style={s.headerRow}>
         <div style={{ minWidth: 0, flex: '1 1 240px' }}>
-          <h1 style={{ ...s.h1, fontSize: isMobile ? 22 : 28 }}>{formatTargetLabel(target)}</h1>
+          <h1 style={{ ...s.h1, fontSize: isMobile ? 24 : 28 }}>{formatTargetLabel(target)}</h1>
           <div style={s.coverageRow}>
             <div style={s.coverageTrack}>
               <div style={{ ...s.coverageFill, width: `${coveragePct}%` }} />
@@ -245,10 +246,10 @@ export default function TargetDetailPage() {
               {promoteBoards.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
             </select>
             <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 16 }}>
-              <button onClick={() => setPromoteOpen(false)} style={s.btnGhost}>Cancelar</button>
-              <button onClick={handleConfirmPromote} disabled={!promoteBoardId || promoting} style={s.btnPrimary}>
+              <Button variant="ghost" onClick={() => setPromoteOpen(false)}>Cancelar</Button>
+              <Button onClick={handleConfirmPromote} disabled={!promoteBoardId || promoting}>
                 {promoting ? 'Promovendo…' : 'Promover para pós-edital'}
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -266,22 +267,22 @@ const s: Record<string, CSSProperties> = {
     borderRadius: theme.radiusSm, marginLeft: -12, transition: 'background .12s',
   },
   headerRow: { display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, marginBottom: 24, flexWrap: 'wrap' },
-  h1: { fontWeight: 700, color: theme.ink, letterSpacing: -0.4, margin: '0 0 12px', overflowWrap: 'break-word' },
+  h1: { fontWeight: 800, color: theme.ink, letterSpacing: -0.6, margin: '0 0 12px', overflowWrap: 'break-word' },
   coverageRow: { display: 'flex', alignItems: 'center', gap: 10 },
   coverageTrack: { flex: 1, maxWidth: 260, height: 6, background: theme.muted, borderRadius: 999, overflow: 'hidden' },
   coverageFill: { height: '100%', background: theme.teal, borderRadius: 999, transition: 'width 0.4s ease' },
   coverageLabel: { fontSize: 12, color: theme.inkFaint, whiteSpace: 'nowrap', fontVariantNumeric: 'tabular-nums' },
-  genBtn: { display: 'inline-flex', alignItems: 'center', padding: '10px 18px', borderRadius: theme.radiusSm, border: 'none', background: theme.teal, color: '#fff', fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
+  genBtn: { display: 'inline-flex', alignItems: 'center', padding: '10px 18px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
   genBtnDisabled: { background: theme.muted, color: theme.inkFaint, cursor: 'not-allowed' },
   tabs: { display: 'flex', gap: 0, marginBottom: 24, borderBottom: `1px solid ${theme.line}` },
   tab: { padding: '10px 18px', border: 'none', background: 'transparent', color: theme.inkSoft, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', borderBottom: '2px solid transparent', marginBottom: -1, transition: 'color .15s' },
   tabOn: { color: theme.teal, borderBottomColor: theme.teal },
 
-  promoteOverlay: { position: 'fixed', inset: 0, background: 'rgba(15,23,42,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 60, padding: 16 },
+  promoteOverlay: { position: 'fixed', inset: 0, background: 'var(--backdrop)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 60, padding: 16 },
   promoteModal: { background: theme.card, borderRadius: theme.radius, padding: '24px', width: 'min(400px, 94vw)', boxShadow: theme.shadowModal, fontFamily: theme.font },
   promoteTitle: { fontSize: 16, fontWeight: 700, color: theme.ink, margin: '0 0 6px' },
   promoteSub: { fontSize: 13, color: theme.inkSoft, margin: '0 0 16px', lineHeight: 1.5 },
   promoteSelect: { width: '100%', padding: '10px 14px', borderRadius: theme.radiusSm, border: `1px solid ${theme.lineStrong}`, background: theme.card, fontSize: 14, color: theme.ink, fontFamily: 'inherit', outline: 'none' },
-  btnPrimary: { padding: '10px 20px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: '#fff', fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
+  btnPrimary: { padding: '10px 20px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
   btnGhost: { padding: '10px 12px', borderRadius: theme.radiusSm, border: 'none', background: 'transparent', color: theme.inkFaint, fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
 };

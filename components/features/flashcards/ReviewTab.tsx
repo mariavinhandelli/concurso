@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react';
 import { countDailyQueue } from '@/services/flashcards.service';
 import { theme } from '@/lib/theme';
+import { Button } from '@/components/ui/Button';
+import { EmptyState } from '@/components/ui/EmptyState';
 
 interface Props {
   onStart: () => void;
@@ -50,10 +52,11 @@ export function ReviewTab({ onStart, loading }: Props) {
           <p style={{ ...styles.muted, color: theme.danger }}>Erro ao carregar flashcards. Recarregue a página.</p>
         </div>
       ) : total === 0 ? (
-        <div style={styles.empty}>
-          <span style={styles.emptyIcon}>✓</span>
-          <p style={styles.muted}>Nenhum flashcard para revisar hoje!</p>
-        </div>
+        <EmptyState
+          icon={<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke={theme.teal} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>}
+          title="Revisão em dia"
+          body="Nenhum flashcard para revisar hoje. Crie novos cards na aba Meus Cards ou volte amanhã."
+        />
       ) : (
         <>
           <div style={styles.counts}>
@@ -68,13 +71,9 @@ export function ReviewTab({ onStart, loading }: Props) {
             </div>
           </div>
           {estMin > 0 && <p style={styles.estTime}>~{estMin} min de estudo</p>}
-          <button
-            onClick={onStart}
-            disabled={loading}
-            style={{ ...styles.startBtn, opacity: loading ? 0.7 : 1 }}
-          >
+          <Button onClick={onStart} disabled={loading} style={{ padding: '13px 30px', fontSize: 15 }}>
             {loading ? 'Carregando…' : 'Iniciar sessão de estudo'}
-          </button>
+          </Button>
         </>
       )}
     </div>
@@ -93,5 +92,5 @@ const styles: Record<string, React.CSSProperties> = {
   num: { fontSize: 40, color: theme.ink, fontWeight: 600, letterSpacing: -1.5, fontVariantNumeric: 'tabular-nums' },
   label: { fontSize: 13, color: theme.inkFaint, fontWeight: 500 },
   estTime: { fontSize: 13, color: theme.inkFaint, margin: '-8px 0 0' },
-  startBtn: { padding: '13px 30px', borderRadius: 12, border: 'none', background: theme.teal, color: '#fff', fontSize: 15, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+  startBtn: { padding: '13px 30px', borderRadius: 12, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 15, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
 };

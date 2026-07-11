@@ -19,6 +19,7 @@ import { track, EV } from '@/lib/analytics';
 import { useTimer } from '@/components/features/timer/TimerContext';
 import { toLocalDateString } from '@/lib/local-date';
 import { theme } from '@/lib/theme';
+import { Button } from '@/components/ui/Button';
 
 // Alvo genérico de "iniciar sessão" — unifica sugestões e blocos do cronograma.
 type PendingStart = { name: string; topicId: string | null; subjectId: string | null };
@@ -51,7 +52,7 @@ function StepMarker({ index, done }: { index: number; done: boolean }) {
   if (done) {
     return (
       <span style={{ ...markerBase, background: theme.ok, border: 'none' }}>
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={theme.onOk} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
       </span>
     );
   }
@@ -200,8 +201,8 @@ export const PlanoHoje = memo(function PlanoHoje() {
             Há uma sessão em andamento. Iniciar <b>&quot;{confirming.name}&quot;</b> vai encerrar a sessão atual.
           </p>
           <div style={styles.confirmBtns}>
-            <button style={styles.confirmCancel} onClick={() => setConfirming(null)}>Cancelar</button>
-            <button style={styles.confirmOk} onClick={confirmarTroca}>Encerrar e iniciar</button>
+            <Button variant="ghost" size="sm" onClick={() => setConfirming(null)}>Cancelar</Button>
+            <Button variant="primary" size="sm" style={{ background: theme.warn, color: theme.onWarn }} onClick={confirmarTroca}>Encerrar e iniciar</Button>
           </div>
         </div>
       )}
@@ -404,7 +405,7 @@ const styles: Record<string, React.CSSProperties> = {
 
   studyBtn: {
     padding: '9px 16px', borderRadius: 10, border: 'none',
-    background: theme.teal, color: '#fff', fontSize: 13.5,
+    background: theme.teal, color: theme.onTeal, fontSize: 13.5,
     fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap', flexShrink: 0,
   },
   studyGhost: {
@@ -459,5 +460,5 @@ const styles: Record<string, React.CSSProperties> = {
   confirmMsg: { margin: '0 0 10px', fontSize: 13.5, color: theme.ink, lineHeight: 1.5 },
   confirmBtns: { display: 'flex', gap: 8 },
   confirmCancel: { padding: '7px 14px', borderRadius: 8, border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.inkSoft, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
-  confirmOk: { padding: '7px 14px', borderRadius: 8, border: 'none', background: theme.warn, color: '#fff', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+  confirmOk: { padding: '7px 14px', borderRadius: 8, border: 'none', background: theme.warn, color: theme.onWarn, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
 };

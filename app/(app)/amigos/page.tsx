@@ -15,6 +15,7 @@ import {
 import { Avatar, RankRow } from '@/components/features/social/SocialUI';
 import { TurmasTab } from '@/components/features/social/TurmasTab';
 import { theme } from '@/lib/theme';
+import { Button } from '@/components/ui/Button';
 
 function inviteUrl(code: string): string {
   const origin = typeof window !== 'undefined' ? window.location.origin : '';
@@ -115,7 +116,7 @@ function AmigosContent() {
             <div style={s.inviteRow}>
               <code style={s.codeBox}>{p.inviteCode}</code>
               <button onClick={() => copiarLink(inviteUrl(p.inviteCode ?? ''))} style={s.secondary}>{copiado ? 'Copiado!' : 'Copiar link'}</button>
-              <button onClick={() => compartilharLink(inviteUrl(p.inviteCode ?? ''))} style={s.primary}>Compartilhar</button>
+              <Button onClick={() => compartilharLink(inviteUrl(p.inviteCode ?? ''))}>Compartilhar</Button>
             </div>
             <div style={s.addRow}>
               <input value={code} onChange={(e) => setCode(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && adicionarPorCodigo()} placeholder="Tem um código? Cole aqui" style={s.input} aria-label="Código de amigo" />
@@ -131,8 +132,8 @@ function AmigosContent() {
                   <Avatar name={r.name} url={r.avatarUrl} />
                   <span style={s.reqName}>{r.name}</span>
                   <span style={s.reqTag}>quer te adicionar</span>
-                  <button onClick={() => aceitar(r)} disabled={busy} style={s.miniPrimary}>Aceitar</button>
-                  <button onClick={() => recusar(r)} disabled={busy} style={s.miniGhost}>Recusar</button>
+                  <Button size="sm" style={{ padding: '7px 13px', fontSize: 12.5, flexShrink: 0 }} onClick={() => aceitar(r)} disabled={busy}>Aceitar</Button>
+                  <Button variant="outline" size="sm" style={{ padding: '7px 11px', fontSize: 12.5, flexShrink: 0 }} onClick={() => recusar(r)} disabled={busy}>Recusar</Button>
                 </div>
               ))}
               {data.outgoing.map((r) => (
@@ -140,7 +141,7 @@ function AmigosContent() {
                   <Avatar name={r.name} url={r.avatarUrl} />
                   <span style={s.reqName}>{r.name}</span>
                   <span style={s.reqTag}>pedido enviado</span>
-                  <button onClick={() => cancelar(r)} disabled={busy} style={s.miniGhost}>Cancelar</button>
+                  <Button variant="outline" size="sm" style={{ padding: '7px 11px', fontSize: 12.5, flexShrink: 0 }} onClick={() => cancelar(r)} disabled={busy}>Cancelar</Button>
                 </div>
               ))}
             </section>
@@ -181,7 +182,7 @@ export default function AmigosPage() {
 }
 
 const s: Record<string, CSSProperties> = {
-  wrap: { maxWidth: 680, margin: '0 auto', padding: '34px 40px', fontFamily: theme.font, minWidth: 0 },
+  wrap: { maxWidth: 720, margin: '0 auto', padding: '34px 40px', fontFamily: theme.font, minWidth: 0 },
   head: { marginBottom: 18 },
   h1: { fontSize: 28, fontWeight: 800, color: theme.ink, letterSpacing: -0.6, margin: 0 },
   sub: { fontSize: 14, color: theme.inkSoft, margin: '6px 0 0', fontWeight: 500, lineHeight: 1.5 },
@@ -212,9 +213,9 @@ const s: Record<string, CSSProperties> = {
 
   rankList: { display: 'flex', flexDirection: 'column', gap: 6 },
 
-  primary: { padding: '11px 20px', borderRadius: theme.radiusSm, border: 'none', background: theme.teal, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
+  primary: { padding: '11px 20px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
   secondary: { padding: '11px 16px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.ink, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
-  miniPrimary: { padding: '7px 13px', borderRadius: 8, border: 'none', background: theme.teal, color: theme.onTeal, fontSize: 12.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', flexShrink: 0 },
+  miniPrimary: { padding: '7px 13px', borderRadius: 8, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 12.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', flexShrink: 0 },
   miniGhost: { padding: '7px 11px', borderRadius: 8, border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.inkSoft, fontSize: 12.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', flexShrink: 0 },
   disableBtn: { border: 'none', background: 'transparent', color: theme.inkFaint, fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit', padding: '4px 2px', textDecoration: 'underline' },
 };

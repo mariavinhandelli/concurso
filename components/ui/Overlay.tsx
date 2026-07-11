@@ -41,7 +41,7 @@ export function Overlay({ children, onClose, labelledBy }: {
     <div
       style={{
         position: 'fixed', inset: 0,
-        background: 'rgba(0,0,0,0.55)',
+        background: 'var(--backdrop)',
         zIndex: zIndex.overlay,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         padding: 20,

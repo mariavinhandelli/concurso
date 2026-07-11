@@ -10,6 +10,8 @@ import { theme } from '@/lib/theme';
 import { useUI, PALETTES } from '@/components/layout/UIContext';
 import { listAllBoards, createBoard, updateBoard, deleteBoard, type Board } from '@/services/boards.service';
 import { NotificacoesCard } from '@/components/features/settings/NotificacoesCard';
+import { Button } from '@/components/ui/Button';
+import { Skeleton } from '@/components/ui/Skeleton';
 
 export default function SettingsPage() {
   const supabase = createClient();
@@ -221,7 +223,7 @@ export default function SettingsPage() {
             placeholder="Nome da banca (ex: FCC)"
             style={styles.input}
           />
-          <button onClick={handleCreateBoard} style={styles.btnPrimary}>Adicionar</button>
+          <Button onClick={handleCreateBoard}>Adicionar</Button>
         </div>
 
         {boardMsg && (
@@ -231,7 +233,10 @@ export default function SettingsPage() {
         )}
 
         {loadingBoards ? (
-          <p style={styles.muted}>Carregando…</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 4 }} aria-label="Carregando bancas">
+            <Skeleton height={42} borderRadius={10} />
+            <Skeleton height={42} borderRadius={10} />
+          </div>
         ) : boards.length === 0 ? (
           <p style={styles.muted}>Nenhuma banca cadastrada ainda.</p>
         ) : (
@@ -251,8 +256,8 @@ export default function SettingsPage() {
                       autoFocus
                       style={styles.boardEditInput}
                     />
-                    <button onClick={saveEdit} style={styles.boardSave}>Salvar</button>
-                    <button onClick={cancelEdit} style={styles.boardCancel}>Cancelar</button>
+                    <Button size="sm" onClick={saveEdit}>Salvar</Button>
+                    <Button size="sm" variant="ghost" onClick={cancelEdit}>Cancelar</Button>
                   </>
                 ) : (
                   <>
@@ -308,10 +313,9 @@ export default function SettingsPage() {
               {pwdMsg.text}
             </span>
           )}
-          <button onClick={handleChangePassword} disabled={savingPwd}
-            style={{ ...styles.btnPrimary, marginLeft: 'auto', opacity: savingPwd ? 0.6 : 1 }}>
+          <Button onClick={handleChangePassword} disabled={savingPwd} style={{ marginLeft: 'auto' }}>
             {savingPwd ? 'Alterando…' : 'Alterar senha'}
-          </button>
+          </Button>
         </div>
       </section>
 
@@ -323,10 +327,9 @@ export default function SettingsPage() {
             <div style={styles.rowLabel}>Sair de todos os dispositivos</div>
             <div style={styles.rowHint}>Encerra a sessão em qualquer aparelho onde você esteja logado.</div>
           </div>
-          <button onClick={handleSignOutAll} disabled={signingOut}
-            style={{ ...styles.btnDanger, opacity: signingOut ? 0.6 : 1 }}>
+          <Button variant="dangerSoft" onClick={handleSignOutAll} disabled={signingOut}>
             {signingOut ? 'Saindo…' : 'Sair de tudo'}
-          </button>
+          </Button>
         </div>
       </section>
     </div>
@@ -335,7 +338,7 @@ export default function SettingsPage() {
 }
 
 const styles: Record<string, React.CSSProperties> = {
-  wrap: { maxWidth: 680, margin: '0 auto', padding: '34px 40px', fontFamily: theme.font },
+  wrap: { maxWidth: 720, margin: '0 auto', padding: '34px 40px', fontFamily: theme.font },
   head: { marginBottom: 24 },
   h1: { fontSize: 28, fontWeight: 800, color: theme.ink, letterSpacing: -0.6, margin: 0 },
   sub: { fontSize: 14, color: theme.inkSoft, margin: '6px 0 0', fontWeight: 500 },
@@ -356,8 +359,6 @@ const styles: Record<string, React.CSSProperties> = {
   label: { display: 'block', fontSize: 13, fontWeight: 600, color: theme.ink, marginBottom: 7 },
   input: { width: '100%', boxSizing: 'border-box', padding: '11px 14px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.card, fontSize: 14.5, color: theme.ink, fontFamily: 'inherit', outline: 'none' },
   actions: { display: 'flex', alignItems: 'center', gap: 12, marginTop: 20, paddingTop: 18, borderTop: `0.5px solid ${theme.line}` },
-  btnPrimary: { padding: '11px 22px', borderRadius: 12, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
-  btnDanger: { padding: '10px 18px', borderRadius: 10, border: `0.5px solid rgba(220,38,38,.3)`, background: theme.dangerBg, color: theme.danger, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
   toggle: { position: 'relative', width: 44, height: 24, borderRadius: 999, border: 'none', background: theme.muted, cursor: 'pointer', padding: 2, flexShrink: 0 },
   toggleKnob: { display: 'block', width: 20, height: 20, borderRadius: '50%', boxShadow: theme.shadow, transition: 'transform .2s, background .2s' },
   boardCreate: { display: 'flex', gap: 10, marginBottom: 14 },
@@ -367,8 +368,6 @@ const styles: Record<string, React.CSSProperties> = {
   boardName: { flex: 1, fontSize: 14.5, color: theme.ink, fontWeight: 500 },
   boardEditInput: { flex: 1, padding: '7px 10px', borderRadius: 8, border: `0.5px solid ${theme.teal}`, background: theme.card, fontSize: 14, color: theme.ink, fontFamily: 'inherit', outline: 'none' },
   boardEdit: { border: 'none', background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: 4, opacity: 0.7 },
-  boardSave: { border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 12.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', borderRadius: 8, padding: '6px 12px' },
-  boardCancel: { border: 'none', background: 'transparent', color: theme.inkFaint, fontSize: 12.5, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit', padding: '6px 8px' },
   boardDel: { border: 'none', background: 'transparent', color: theme.inkFaint, fontSize: 13, cursor: 'pointer', opacity: 0.6 },
   muted: { color: theme.inkFaint, fontSize: 14 },
 };

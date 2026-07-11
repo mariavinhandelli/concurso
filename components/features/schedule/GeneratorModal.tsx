@@ -11,6 +11,7 @@ import { createRule, type RecurrenceMode, type RecurrenceItemInput } from '@/ser
 import { distribuirDiaFixo } from '@/lib/schedule/distributor';
 import { theme } from '@/lib/theme';
 import { toLocalDateString } from '@/lib/local-date';
+import { Button } from '@/components/ui/Button';
 
 interface Props {
   onClose: () => void;
@@ -234,10 +235,10 @@ export function GeneratorModal({ onClose, onGenerated, presetExamId }: Props) {
         {error && <p style={styles.error}>{error}</p>}
 
         <div style={styles.actions}>
-          <button onClick={onClose} style={styles.cancel}>Cancelar</button>
-          <button onClick={handleGenerate} disabled={saving || !preview || preview.subjects.length === 0} style={styles.save}>
+          <Button variant="outline" onClick={onClose}>Cancelar</Button>
+          <Button onClick={handleGenerate} disabled={saving || !preview || preview.subjects.length === 0}>
             {saving ? 'Gerando…' : 'Gerar cronograma'}
-          </button>
+          </Button>
         </div>
       </div>
     </div>
@@ -245,7 +246,7 @@ export function GeneratorModal({ onClose, onGenerated, presetExamId }: Props) {
 }
 
 const styles: Record<string, React.CSSProperties> = {
-  overlay: { position: 'fixed', inset: 0, background: 'rgba(30,28,24,0.4)', display: 'grid', placeItems: 'center', zIndex: 60, padding: 20 },
+  overlay: { position: 'fixed', inset: 0, background: 'var(--backdrop)', display: 'grid', placeItems: 'center', zIndex: 60, padding: 20 },
   modal: { background: theme.card, borderRadius: theme.radius, boxShadow: '0 20px 60px rgba(0,0,0,0.18)', padding: 24, width: '100%', maxWidth: 460, maxHeight: '88vh', overflowY: 'auto', fontFamily: theme.font },
   h2: { fontSize: 18, fontWeight: 700, color: theme.ink, margin: 0 },
   subtitle: { fontSize: 13, color: theme.inkSoft, margin: '4px 0 16px', lineHeight: 1.5 },
@@ -263,7 +264,7 @@ const styles: Record<string, React.CSSProperties> = {
   durUnit: { fontSize: 13, color: theme.inkSoft },
   daysRow: { display: 'flex', gap: 5 },
   dayBtn: { flex: 1, textAlign: 'center', fontSize: 12.5, fontWeight: 600, padding: '8px 0', borderRadius: 6, borderWidth: 0, background: theme.muted, color: theme.inkFaint, cursor: 'pointer', fontFamily: 'inherit' },
-  dayBtnOn: { background: theme.teal, color: '#fff' },
+  dayBtnOn: { background: theme.teal, color: theme.onTeal },
   muted: { color: theme.inkFaint, fontSize: 13 },
   previewList: { display: 'flex', flexDirection: 'column', gap: 8 },
   previewRow: { display: 'flex', alignItems: 'center', gap: 10 },
@@ -277,5 +278,5 @@ const styles: Record<string, React.CSSProperties> = {
   error: { color: theme.danger, fontSize: 13, margin: '12px 0 0' },
   actions: { display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 20 },
   cancel: { padding: '10px 18px', borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.card, color: theme.inkSoft, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
-  save: { padding: '10px 18px', borderRadius: theme.radiusSm, border: 'none', background: theme.teal, color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+  save: { padding: '10px 18px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
 };

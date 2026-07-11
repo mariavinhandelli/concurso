@@ -35,7 +35,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           position: 'fixed',
           inset: 0,
           zIndex: 29,
-          background: 'rgba(20, 28, 30, .46)',
+          background: 'var(--backdrop)',
           backdropFilter: mobileOpen && isMobile ? 'blur(2px)' : 'none',
           opacity: mobileOpen && isMobile ? 1 : 0,
           pointerEvents: mobileOpen && isMobile ? 'auto' : 'none',

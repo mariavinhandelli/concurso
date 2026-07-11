@@ -109,7 +109,7 @@ export function ArquivarConcursoModal({
 function Check({ on }: { on: boolean }) {
   return (
     <span style={{ ...checkStyle.box, ...(on ? { background: theme.teal, borderColor: theme.teal } : {}) }}>
-      {on && <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>}
+      {on && <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={theme.onTeal} strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>}
     </span>
   );
 }
@@ -119,9 +119,9 @@ const checkStyle = {
 };
 
 const s: Record<string, CSSProperties> = {
-  overlay: { position: 'fixed', inset: 0, background: 'rgba(15,23,42,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: zIndex.modal, padding: 16, fontFamily: theme.font },
+  overlay: { position: 'fixed', inset: 0, background: 'var(--backdrop)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: zIndex.modal, padding: 16, fontFamily: theme.font },
   modal: { background: theme.card, borderRadius: theme.radius, padding: 24, width: 'min(440px, 94vw)', maxHeight: '85vh', overflowY: 'auto', boxShadow: theme.shadowModal },
-  title: { fontSize: 17, fontWeight: 700, color: theme.ink, margin: '0 0 6px' },
+  title: { fontSize: 18, fontWeight: 700, color: theme.ink, margin: '0 0 6px' },
   sub: { fontSize: 13.5, color: theme.inkSoft, margin: '0 0 16px', lineHeight: 1.5 },
   body: { display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 8 },
   group: { display: 'flex', flexDirection: 'column', gap: 2, marginTop: 6 },
@@ -132,5 +132,5 @@ const s: Record<string, CSSProperties> = {
   muted: { fontSize: 13, color: theme.inkFaint, margin: '4px 0' },
   actions: { display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 18 },
   cancelBtn: { padding: '10px 16px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.inkSoft, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
-  confirmBtn: { padding: '10px 18px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: '#fff', fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+  confirmBtn: { padding: '10px 18px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
 };

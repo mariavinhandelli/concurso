@@ -86,7 +86,7 @@ const styles: Record<string, React.CSSProperties> = {
   label: { fontSize: 12, color: theme.inkFaint, fontWeight: 500 },
   startBtn: {
     width: '100%', padding: '12px 0', borderRadius: 12, border: 'none',
-    background: theme.teal, color: '#fff', fontSize: 14, fontWeight: 600,
+    background: theme.teal, color: theme.onTeal, fontSize: 14, fontWeight: 600,
     cursor: 'pointer', fontFamily: 'inherit', marginTop: 16, transition: 'all .15s',
   },
 };

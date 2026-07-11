@@ -54,7 +54,7 @@ const NAV: NavItem[] = [
     label: 'Matérias',
     icon: <path d="m3.882 18.043l4.041-5.623a4 4 0 0 1 3.249-1.665h8.752M3.882 18.043a3.65 3.65 0 0 0 2.777 1.277h8.343a4 4 0 0 0 3.405-1.9l2.918-4.734a1.287 1.287 0 0 0-1.115-1.931h-.286M3.882 18.043A3.65 3.65 0 0 1 3 15.661V7.424A2.744 2.744 0 0 1 5.744 4.68h2.653c.607 0 1.189.24 1.618.67l.911.91a1.83 1.83 0 0 0 1.294.537l4.044-.001a3.66 3.66 0 0 1 3.66 3.66v.299" />
   },
-  { href: '/targets', label: 'Editais', icon: <path d="M8 6.5h12M8 12h12M8 17.5h12M4 6.5h1M4 12h1m-1 5.5h1" /> },
+  { href: '/targets', label: 'Concursos', icon: <path d="M8 6.5h12M8 12h12M8 17.5h12M4 6.5h1M4 12h1m-1 5.5h1" /> },
 
   { type: 'sep', label: 'Conteúdo' },
   { href: '/jurisprudencias', label: 'Jurisprudências', icon: <><path d="M3 6h18M3 12h18M3 18h12" /><circle cx="19" cy="18" r="3" /><path d="M21 20.5L22.5 22" /></> },
@@ -221,7 +221,7 @@ const styles: Record<string, CSSProperties> = {
   brand: { display: 'flex', alignItems: 'center', height: 40, marginBottom: 18, padding: '0 4px', flexShrink: 0 },
   brandInner: { display: 'flex', alignItems: 'center', gap: 10 },
   logo: { width: 32, height: 32, borderRadius: 9, background: '#fff', display: 'grid', placeItems: 'center', flexShrink: 0, boxShadow: '0 1px 6px rgba(0,0,0,0.18)' },
-  brandName: { fontWeight: 700, fontSize: 20, color: '#fff', letterSpacing: -0.5, whiteSpace: 'nowrap', fontFamily: 'var(--font-poppins), sans-serif' },
+  brandName: { fontWeight: 700, fontSize: 20, color: SB.textActive, letterSpacing: -0.5, whiteSpace: 'nowrap', fontFamily: 'var(--font-poppins), sans-serif' },
   collapseBtn: { width: 30, height: 30, borderRadius: 8, border: 'none', background: 'transparent', display: 'grid', placeItems: 'center', cursor: 'pointer', flexShrink: 0 },
   nav: { display: 'flex', flexDirection: 'column', gap: 4, flex: 1, minHeight: 0, overflowY: 'auto', overflowX: 'hidden', paddingRight: 2, overscrollBehavior: 'contain', scrollbarGutter: 'stable' },
   item: { display: 'flex', alignItems: 'center', gap: 12, padding: '10px 12px', height: 40, borderRadius: 10, border: 'none', textAlign: 'left', cursor: 'pointer', fontSize: 14, transition: 'background .15s, color .15s', fontFamily: 'inherit', whiteSpace: 'nowrap' },

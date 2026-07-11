@@ -13,6 +13,7 @@ import { usePersistedState } from '@/hooks/usePersistedState';
 import { useUser } from '@/components/layout/UserContext';
 import { toLocalDateString } from '@/lib/local-date';
 import { theme } from '@/lib/theme';
+import { Button } from '@/components/ui/Button';
 
 const LIMITE_LEVE = 10;
 
@@ -54,13 +55,13 @@ export function RetomadaCard() {
 
       <div style={s.actions}>
         {temPilha ? (
-          <button onClick={() => router.push(`/revisar?limite=${LIMITE_LEVE}`)} style={s.primary}>
+          <Button onClick={() => router.push(`/revisar?limite=${LIMITE_LEVE}`)}>
             Recomeçar leve · {leve} {leve === 1 ? 'item' : 'itens'}
-          </button>
+          </Button>
         ) : (
-          <button onClick={() => setDismissedOn(hoje)} style={s.primary}>Vamos nessa</button>
+          <Button onClick={() => setDismissedOn(hoje)}>Vamos nessa</Button>
         )}
-        <button onClick={() => setDismissedOn(hoje)} style={s.ghost}>agora não</button>
+        <Button variant="ghost" onClick={() => setDismissedOn(hoje)}>agora não</Button>
       </div>
 
       <p style={s.reassure}>
@@ -87,7 +88,7 @@ const s: Record<string, React.CSSProperties> = {
   title: { fontSize: 21, fontWeight: 800, color: theme.ink, letterSpacing: -0.4, margin: '0 0 6px' },
   body: { fontSize: 14.5, color: theme.inkSoft, lineHeight: 1.6, margin: '0 0 16px', maxWidth: 620 },
   actions: { display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' },
-  primary: { padding: '11px 20px', borderRadius: theme.radiusSm, border: 'none', background: theme.teal, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+  primary: { padding: '11px 20px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
   ghost: { padding: '11px 14px', borderRadius: theme.radiusSm, border: 'none', background: 'transparent', color: theme.inkSoft, fontSize: 13.5, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' },
   reassure: { display: 'flex', alignItems: 'center', gap: 7, fontSize: 12.5, color: theme.tealDeep, margin: '14px 0 0', fontWeight: 500 },
 };

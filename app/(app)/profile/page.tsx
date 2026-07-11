@@ -6,6 +6,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { theme } from '@/lib/theme';
+import { Skeleton } from '@/components/ui/Skeleton';
+import { Button } from '@/components/ui/Button';
 import { useUI } from '@/components/layout/UIContext';
 import { useUser } from '@/components/layout/UserContext';
 import { AvatarCropper } from '@/components/features/profile/AvatarCropper';
@@ -156,7 +158,13 @@ export default function ProfilePage() {
   const initial = (name?.[0] ?? email?.[0] ?? '?').toUpperCase();
 
   if (loading) {
-    return <div style={{ ...styles.wrap, padding: isMobile ? '20px 16px' : '34px 40px' }}><p style={styles.muted}>Carregando…</p></div>;
+    return (
+      <div style={{ ...styles.wrap, padding: isMobile ? '20px 16px' : '34px 40px' }} aria-label="Carregando perfil">
+        <Skeleton width={180} height={28} />
+        <Skeleton width={220} height={14} style={{ marginTop: 10, marginBottom: 24 }} />
+        <Skeleton height={280} borderRadius={16} />
+      </div>
+    );
   }
 
   return (
@@ -179,21 +187,19 @@ export default function ProfilePage() {
               <div style={styles.label}>Foto de perfil</div>
               <div style={styles.hint}>JPG ou PNG, até 2MB.</div>
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 10 }}>
-                <button
-                  onClick={() => fileInput.current?.click()}
-                  disabled={uploading}
-                  style={{ ...styles.btnSecondary, opacity: uploading ? 0.6 : 1 }}
-                >
+                <Button variant="outline" size="sm" onClick={() => fileInput.current?.click()} disabled={uploading}>
                   {uploading ? 'Enviando…' : 'Trocar foto'}
-                </button>
+                </Button>
                 {avatarUrl && (
-                  <button
+                  <Button
+                    variant="outline"
+                    size="sm"
                     onClick={handleRemoveAvatar}
                     disabled={uploading}
-                    style={{ ...styles.btnSecondary, color: 'var(--danger)', borderColor: 'var(--danger)', opacity: uploading ? 0.6 : 1 }}
+                    style={{ color: 'var(--danger)', borderColor: 'var(--danger)' }}
                   >
                     Remover foto
-                  </button>
+                  </Button>
                 )}
               </div>
               <input
@@ -239,9 +245,9 @@ export default function ProfilePage() {
               {msg.text}
             </span>
           )}
-          <button onClick={handleSaveName} disabled={saving} style={{ ...styles.btnPrimary, marginLeft: 'auto', opacity: saving ? 0.6 : 1 }}>
+          <Button onClick={handleSaveName} disabled={saving} style={{ marginLeft: 'auto' }}>
             {saving ? 'Salvando…' : 'Salvar alterações'}
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -257,7 +263,7 @@ export default function ProfilePage() {
 }
 
 const styles: Record<string, React.CSSProperties> = {
-  wrap: { maxWidth: 680, margin: '0 auto', padding: '34px 40px', fontFamily: theme.font, minWidth: 0 },
+  wrap: { maxWidth: 720, margin: '0 auto', padding: '34px 40px', fontFamily: theme.font, minWidth: 0 },
   head: { marginBottom: 24 },
   h1: { fontSize: 28, fontWeight: 800, color: theme.ink, letterSpacing: -0.6, margin: 0 },
   sub: { fontSize: 14, color: theme.inkSoft, margin: '6px 0 0', fontWeight: 500 },
@@ -266,14 +272,12 @@ const styles: Record<string, React.CSSProperties> = {
   avatarRow: { display: 'flex', alignItems: 'center', gap: 20 },
   avatar: { width: 84, height: 84, borderRadius: '50%', background: theme.teal, display: 'grid', placeItems: 'center', overflow: 'hidden', flexShrink: 0 },
   avatarImg: { width: '100%', height: '100%', objectFit: 'cover' },
-  avatarInitial: { color: '#fff', fontWeight: 600, fontSize: 32 },
+  avatarInitial: { color: theme.onTeal, fontWeight: 600, fontSize: 32 },
   label: { display: 'block', fontSize: 13, fontWeight: 600, color: theme.ink, marginBottom: 8 },
   hint: { fontSize: 12.5, color: theme.inkFaint, marginTop: 6 },
   input: { width: '100%', boxSizing: 'border-box', padding: '11px 14px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.card, fontSize: 14.5, color: theme.ink, fontFamily: 'inherit', outline: 'none' },
   inputDisabled: { background: theme.bg, color: theme.inkSoft, cursor: 'not-allowed' },
   divider: { height: '0.5px', background: theme.line, margin: '22px 0' },
   footer: { display: 'flex', alignItems: 'center', gap: 12, marginTop: 24, paddingTop: 20, borderTop: `0.5px solid ${theme.line}`, flexWrap: 'wrap' },
-  btnPrimary: { padding: '11px 22px', borderRadius: 12, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
-  btnSecondary: { padding: '9px 18px', borderRadius: 10, border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.ink, fontSize: 13.5, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' },
   muted: { color: theme.inkFaint, fontSize: 14 },
 };

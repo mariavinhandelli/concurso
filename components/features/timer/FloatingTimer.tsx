@@ -190,7 +190,7 @@ const styles: Record<string, React.CSSProperties> = {
   fab: {
     position: 'fixed', bottom: 24, right: 24, zIndex: 50,
     width: 52, height: 52, borderRadius: '50%', border: 'none',
-    background: theme.teal, color: theme.onTeal, cursor: 'pointer',
+    background: theme.primary, color: theme.onTeal, cursor: 'pointer',
     display: 'grid', placeItems: 'center',
     boxShadow: '0 6px 20px rgba(0,0,0,0.18)', fontFamily: theme.font,
   },
@@ -225,5 +225,5 @@ const styles: Record<string, React.CSSProperties> = {
   focusBtn: { display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, width: '100%', padding: '9px 0', marginBottom: 8, borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.card, color: theme.inkSoft, fontSize: 12.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
   cardActions: { display: 'flex', gap: 8 },
   secondary: { flex: 1, padding: '9px 0', borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.card, color: theme.inkSoft, fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' },
-  primary: { flex: 1, padding: '9px 0', borderRadius: theme.radiusSm, border: 'none', background: theme.teal, color: theme.onTeal, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+  primary: { flex: 1, padding: '9px 0', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
 };

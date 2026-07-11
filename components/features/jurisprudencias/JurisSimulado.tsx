@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { theme, perfColor, btnOutline, kbd } from '@/lib/theme';
+import { theme, perfColor, kbd } from '@/lib/theme';
+import { Button } from '@/components/ui/Button';
 import { Overlay } from '@/components/ui/Overlay';
 import type { Jurisprudencia } from '@/services/jurisprudencias.service';
 import { useConfirm } from '@/hooks/useConfirm';
@@ -86,7 +87,7 @@ export function JurisSimulado({ items, onClose }: Props) {
       <Overlay onClose={onClose}>
         <div style={{ textAlign: 'center', padding: '40px 24px' }}>
           <p style={{ fontSize: 15, color: theme.inkSoft, marginBottom: 20 }}>Nenhuma questão C/E disponível nesta seleção.</p>
-          <button onClick={onClose} style={btnOutline}>Fechar</button>
+          <Button variant="outline" onClick={onClose}>Fechar</Button>
         </div>
       </Overlay>
     );
@@ -110,7 +111,7 @@ export function JurisSimulado({ items, onClose }: Props) {
                 {n} questões
               </button>
             ))}
-            <button onClick={() => iniciar(null)} style={{ ...configChip, background: theme.clay, border: 'none', color: '#fff' }}>
+            <button onClick={() => iniciar(null)} style={{ ...configChip, background: theme.clay, border: 'none', color: theme.onClay }}>
               Todas ({disponiveis.length})
             </button>
           </div>
@@ -322,8 +323,8 @@ export function JurisSimulado({ items, onClose }: Props) {
           </details>
 
           <div style={{ display: 'flex', gap: 10 }}>
-            <button onClick={reiniciar} style={btnPrimary}>Refazer simulado</button>
-            <button onClick={onClose} style={btnOutline}>Fechar</button>
+            <Button style={{ background: theme.clay, color: theme.onClay }} onClick={reiniciar}>Refazer simulado</Button>
+            <Button variant="outline" onClick={onClose}>Fechar</Button>
           </div>
         </div>
       </Overlay>
@@ -413,9 +414,9 @@ export function JurisSimulado({ items, onClose }: Props) {
               </p>
             )}
           </div>
-          <button onClick={avancar} aria-keyshortcuts="Enter" style={btnPrimary}>
+          <Button style={{ background: theme.clay, color: theme.onClay }} onClick={avancar} aria-keyshortcuts="Enter">
             {idx < questoes.length - 1 ? 'Próxima questão →' : 'Ver resultado'}
-          </button>
+          </Button>
           <p style={{ fontSize: 11.5, color: theme.inkFaint, textAlign: 'center', margin: 0 }}>
             Pressione <kbd style={kbd}>Enter</kbd> para avançar
           </p>
@@ -426,11 +427,6 @@ export function JurisSimulado({ items, onClose }: Props) {
   );
 }
 
-const btnPrimary: React.CSSProperties = {
-  padding: '11px 24px', borderRadius: theme.radiusSm, border: 'none',
-  background: theme.clay, color: '#fff', fontSize: 14, fontWeight: 600,
-  cursor: 'pointer', fontFamily: theme.font,
-};
 
 const configChip: React.CSSProperties = {
   padding: '12px 20px', borderRadius: theme.radiusSm,

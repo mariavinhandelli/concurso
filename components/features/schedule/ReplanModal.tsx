@@ -7,6 +7,7 @@
 import { theme, zIndex } from '@/lib/theme';
 import { tons, dateLabelOf } from '@/lib/schedule-utils';
 import type { ReplanMove } from '@/lib/schedule/replan';
+import { Button } from '@/components/ui/Button';
 
 interface Props {
   moves: ReplanMove[];
@@ -44,10 +45,10 @@ export function ReplanModal({ moves, applying, onConfirm, onClose }: Props) {
         </div>
 
         <div style={s.actions}>
-          <button onClick={onClose} style={s.cancel} disabled={applying}>Cancelar</button>
-          <button onClick={onConfirm} style={s.confirm} disabled={applying}>
+          <Button variant="outline" onClick={onClose} disabled={applying}>Cancelar</Button>
+          <Button onClick={onConfirm} disabled={applying}>
             {applying ? 'Reorganizando…' : 'Reorganizar'}
-          </button>
+          </Button>
         </div>
       </div>
     </div>
@@ -55,7 +56,7 @@ export function ReplanModal({ moves, applying, onConfirm, onClose }: Props) {
 }
 
 const s: Record<string, React.CSSProperties> = {
-  overlay: { position: 'fixed', inset: 0, background: 'rgba(15,23,42,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: zIndex.modal, padding: 16 },
+  overlay: { position: 'fixed', inset: 0, background: 'var(--backdrop)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: zIndex.modal, padding: 16 },
   modal: { background: theme.card, borderRadius: theme.radius, width: 'min(480px, 96vw)', maxHeight: '85vh', display: 'flex', flexDirection: 'column', padding: 24, boxShadow: theme.shadowModal, fontFamily: theme.font },
   h2: { fontSize: 18, fontWeight: 700, color: theme.ink, margin: 0 },
   sub: { fontSize: 13.5, color: theme.inkSoft, margin: '6px 0 16px', lineHeight: 1.5 },
@@ -68,5 +69,5 @@ const s: Record<string, React.CSSProperties> = {
   seta: { fontSize: 12, color: theme.inkSoft, whiteSpace: 'nowrap', flexShrink: 0 },
   actions: { display: 'flex', gap: 10, justifyContent: 'flex-end' },
   cancel: { padding: '10px 18px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.inkSoft, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
-  confirm: { padding: '10px 18px', borderRadius: theme.radiusSm, border: 'none', background: theme.teal, color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+  confirm: { padding: '10px 18px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
 };
