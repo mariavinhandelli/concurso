@@ -9,7 +9,7 @@
 import { requireUser } from '@/lib/supabase/requireUser';
 import { archiveTargetExam, unarchiveTargetExam } from '@/services/targetExams.service';
 import { archiveSubject, unarchiveSubject } from '@/services/userSubjects.service';
-import { getActiveCycleRule, archiveCycle } from '@/services/cycleEngine.service';
+import { getActiveCycleRule, archiveCycle, reactivateCycle } from '@/services/cycleEngine.service';
 import { invalidateArchivedCache } from '@/services/archivedCache';
 
 export interface ConcursoArchivePreview {
@@ -78,6 +78,8 @@ export async function getConcursoArchivePreview(targetId: string): Promise<Concu
 }
 
 // Executa o gesto: arquiva o concurso + as matérias escolhidas + (opcional) o ciclo ativo.
+// O ciclo arquivado fica registrado no alvo (archived_cycle_rule_id) para a
+// restauração poder reativá-lo junto.
 export async function archiveConcurso(
   targetId: string,
   opts: { subjectIds: string[]; includeCycle: boolean },
@@ -88,23 +90,51 @@ export async function archiveConcurso(
   }
   if (opts.includeCycle) {
     const cycleId = await getActiveCycleRule();
-    if (cycleId) await archiveCycle(cycleId);
+    if (cycleId) {
+      await archiveCycle(cycleId);
+      const { supabase, userId } = await requireUser();
+      await supabase
+        .from('target_exams')
+        .update({ archived_cycle_rule_id: cycleId })
+        .eq('id', targetId)
+        .eq('user_id', userId);
+    }
   }
   invalidateArchivedCache();
 }
 
-// Restaura o concurso e reativa as matérias que são exclusivas dele e ficaram
-// arquivadas (fase 2 do M11). O ciclo é restaurado à parte (ciclos arquivados),
-// por ser global — não há como saber qual "pertencia" a este concurso.
+// Restaura o concurso, reativa as matérias que são exclusivas dele e ficaram
+// arquivadas (fase 2 do M11) e reativa o ciclo arquivado junto no gesto —
+// desde que o usuário não tenha criado outro ciclo ativo nesse meio-tempo.
 export async function unarchiveConcurso(targetId: string): Promise<void> {
   await unarchiveTargetExam(targetId); // volta a ativo antes de recomputar exclusividade
   const { exclusiveIds } = await computeExclusive(targetId);
+  const { supabase, userId } = await requireUser();
   if (exclusiveIds.length > 0) {
-    const { supabase, userId } = await requireUser();
     const { data: subs } = await supabase
       .from('subjects').select('id, status').in('id', exclusiveIds).eq('user_id', userId);
     const archived = (subs ?? []).filter((s) => s.status === 'arquivado').map((s) => s.id as string);
     for (const id of archived) await unarchiveSubject(id);
+  }
+
+  const { data: target } = await supabase
+    .from('target_exams')
+    .select('archived_cycle_rule_id')
+    .eq('id', targetId)
+    .eq('user_id', userId)
+    .maybeSingle();
+  const ruleId = target?.archived_cycle_rule_id as string | null;
+  if (ruleId) {
+    const activeNow = await getActiveCycleRule();
+    if (!activeNow) {
+      // Só reativa se não houver ciclo ativo — um ciclo criado depois tem prioridade.
+      try { await reactivateCycle(ruleId); } catch { /* ciclo pode ter sido excluído */ }
+    }
+    await supabase
+      .from('target_exams')
+      .update({ archived_cycle_rule_id: null })
+      .eq('id', targetId)
+      .eq('user_id', userId);
   }
   invalidateArchivedCache();
 }
