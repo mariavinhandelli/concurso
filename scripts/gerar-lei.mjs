@@ -168,8 +168,10 @@ function parseLei(html) {
 
     text = collapse(text.split(BR_MARK).join(' '));
 
-    // Novo artigo: "Art. 121." / "Art. 121-A" / "Art. 359-M-A" / "Art 1º"
-    const mArt = text.match(/^Art\.?\s*(\d+(?:\.\d{3})*)\s*[ºo°]?((?:\s*-\s*[A-Z]{1,2}\b)*)\s*[.:–-]?\s*/);
+    // Novo artigo: "Art. 121." / "Art. 121-A" / "Art. 359-M-A" / "Art 1º".
+    // Sufixo de letra: hífen COLADO ao número ("121-A") e sem letra minúscula
+    // depois — "Art. 1º - Não há crime" tem espaço antes do hífen e não é sufixo.
+    const mArt = text.match(/^Art\.?\s*(\d+(?:\.\d{3})*)\s*[ºo°]?((?:-[A-Z]{1,2}(?![a-zA-Zà-öø-ÿ]))*)\s*[.:–-]?\s*/);
     if (mArt) {
       pushArtigo();
       const num = mArt[1].replace(/\./g, '');

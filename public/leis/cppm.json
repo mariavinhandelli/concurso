@@ -19473,10 +19473,10 @@
    ]
   },
   {
-   "key": "cppm:527-O",
+   "key": "cppm:527",
    "ordem": 525,
-   "numero": "527-O",
-   "rotulo": "Art. 527-O",
+   "numero": "527",
+   "rotulo": "Art. 527",
    "caminho": "LIVRO III — Das Nulidades e Recursos em Geral › TÍTULO II — DOS RECURSOS › CAPÍTULO III — DA APELAÇÃO",
    "incidencia": "media",
    "incidenciaNota": null,
@@ -19485,7 +19485,7 @@
     {
      "id": "b1",
      "rotulo": null,
-     "texto": "réu não poderá apelar sem recolher-se à prisão, salvo se primário e de bons antecedentes, reconhecidas tais circunstâncias na sentença condenatória.",
+     "texto": "O réu não poderá apelar sem recolher-se à prisão, salvo se primário e de bons antecedentes, reconhecidas tais circunstâncias na sentença condenatória.",
      "nivel": 0
     },
     {
@@ -20145,10 +20145,10 @@
    ]
   },
   {
-   "key": "cppm:549-O",
+   "key": "cppm:549",
    "ordem": 547,
-   "numero": "549-O",
-   "rotulo": "Art. 549-O",
+   "numero": "549",
+   "rotulo": "Art. 549",
    "caminho": "LIVRO III — Das Nulidades e Recursos em Geral › TÍTULO II — DOS RECURSOS › CAPÍTULO IV — DOS EMBARGOS",
    "incidencia": "media",
    "incidenciaNota": null,
@@ -20157,7 +20157,7 @@
     {
      "id": "b1",
      "rotulo": null,
-     "texto": "réu condenado a pena privativa da liberdade não poderá opor embargos infringentes ou de nulidade, sem se recolher à prisão, salvo se atendidos os pressupostos do art. 527.",
+     "texto": "O réu condenado a pena privativa da liberdade não poderá opor embargos infringentes ou de nulidade, sem se recolher à prisão, salvo se atendidos os pressupostos do art. 527.",
      "nivel": 0
     },
     {
@@ -21759,10 +21759,10 @@
    ]
   },
   {
-   "key": "cppm:606-O",
+   "key": "cppm:606",
    "ordem": 604,
-   "numero": "606-O",
-   "rotulo": "Art. 606-O",
+   "numero": "606",
+   "rotulo": "Art. 606",
    "caminho": "LIVRO IV — Da Execução › TÍTULO II — DOS INCIDENTES DA EXECUÇÃO › CAPÍTULO I — DA SUSPENSÃO CONDICIONAL DA PENA",
    "incidencia": "media",
    "incidenciaNota": null,
@@ -21771,7 +21771,7 @@
     {
      "id": "b1",
      "rotulo": null,
-     "texto": "Conselho de Justiça, o Auditor ou o Tribunal poderão suspender, por tempo não inferior a 2 (dois) anos nem superior a 6 (seis) anos, a execução da pena privativa da liberdade que não exceda a 2 (dois) anos, desde que:",
+     "texto": "O Conselho de Justiça, o Auditor ou o Tribunal poderão suspender, por tempo não inferior a 2 (dois) anos nem superior a 6 (seis) anos, a execução da pena privativa da liberdade que não exceda a 2 (dois) anos, desde que:",
      "nivel": 0
     },
     {
@@ -21807,10 +21807,10 @@
    ]
   },
   {
-   "key": "cppm:607-O",
+   "key": "cppm:607",
    "ordem": 605,
-   "numero": "607-O",
-   "rotulo": "Art. 607-O",
+   "numero": "607",
+   "rotulo": "Art. 607",
    "caminho": "LIVRO IV — Da Execução › TÍTULO II — DOS INCIDENTES DA EXECUÇÃO › CAPÍTULO I — DA SUSPENSÃO CONDICIONAL DA PENA",
    "incidencia": "media",
    "incidenciaNota": null,
@@ -21819,7 +21819,7 @@
     {
      "id": "b1",
      "rotulo": null,
-     "texto": "Conselho de Justiça, o Auditor ou o Tribunal, na decisão que aplicar pena privativa da liberdade não superior a 2 (dois) anos, deverão pronunciar-se, motivadamente, sobre a suspensão condicional, quer a concedam, quer a deneguem.",
+     "texto": "O Conselho de Justiça, o Auditor ou o Tribunal, na decisão que aplicar pena privativa da liberdade não superior a 2 (dois) anos, deverão pronunciar-se, motivadamente, sobre a suspensão condicional, quer a concedam, quer a deneguem.",
      "nivel": 0
     },
     {
@@ -22041,10 +22041,10 @@
    ]
   },
   {
-   "key": "cppm:614-A",
+   "key": "cppm:614",
    "ordem": 612,
-   "numero": "614-A",
-   "rotulo": "Art. 614-A",
+   "numero": "614",
+   "rotulo": "Art. 614",
    "caminho": "LIVRO IV — Da Execução › TÍTULO II — DOS INCIDENTES DA EXECUÇÃO › CAPÍTULO I — DA SUSPENSÃO CONDICIONAL DA PENA",
    "incidencia": "media",
    "incidenciaNota": null,
@@ -22053,7 +22053,7 @@
     {
      "id": "b1",
      "rotulo": null,
-     "texto": "suspensão será revogada se, no curso do prazo, o beneficiário:",
+     "texto": "A suspensão será revogada se, no curso do prazo, o beneficiário:",
      "nivel": 0
     },
     {

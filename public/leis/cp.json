@@ -9,10 +9,10 @@
  "geradoEm": "2026-07-11",
  "artigos": [
   {
-   "key": "cp:1-N",
+   "key": "cp:1",
    "ordem": 1,
-   "numero": "1-N",
-   "rotulo": "Art. 1-N",
+   "numero": "1",
+   "rotulo": "Art. 1º",
    "caminho": "PARTE GERAL — TÍTULO I DA APLICAÇÃO DA LEI PENAL",
    "incidencia": "media",
    "incidenciaNota": null,
@@ -27,7 +27,7 @@
     {
      "id": "b2",
      "rotulo": null,
-     "texto": "ão há crime sem lei anterior que o defina. Não há pena sem prévia cominação legal.",
+     "texto": "Não há crime sem lei anterior que o defina. Não há pena sem prévia cominação legal.",
      "nivel": 0
     },
     {
@@ -69,10 +69,10 @@
    ]
   },
   {
-   "key": "cp:3-A",
+   "key": "cp:3",
    "ordem": 3,
-   "numero": "3-A",
-   "rotulo": "Art. 3-A",
+   "numero": "3",
+   "rotulo": "Art. 3º",
    "caminho": "PARTE GERAL — TÍTULO I DA APLICAÇÃO DA LEI PENAL",
    "incidencia": "media",
    "incidenciaNota": null,
@@ -81,7 +81,7 @@
     {
      "id": "b1",
      "rotulo": null,
-     "texto": "lei excepcional ou temporária, embora decorrido o período de sua duração ou cessadas as circunstâncias que a determinaram, aplica-se ao fato praticado durante sua vigência.",
+     "texto": "A lei excepcional ou temporária, embora decorrido o período de sua duração ou cessadas as circunstâncias que a determinaram, aplica-se ao fato praticado durante sua vigência.",
      "nivel": 0
     },
     {
@@ -315,10 +315,10 @@
    ]
   },
   {
-   "key": "cp:8-A",
+   "key": "cp:8",
    "ordem": 8,
-   "numero": "8-A",
-   "rotulo": "Art. 8-A",
+   "numero": "8",
+   "rotulo": "Art. 8º",
    "caminho": "PARTE GERAL — TÍTULO I DA APLICAÇÃO DA LEI PENAL",
    "incidencia": "media",
    "incidenciaNota": null,
@@ -327,7 +327,7 @@
     {
      "id": "b1",
      "rotulo": null,
-     "texto": "pena cumprida no estrangeiro atenua a pena imposta no Brasil pelo mesmo crime, quando diversas, ou nela é computada, quando idênticas.",
+     "texto": "A pena cumprida no estrangeiro atenua a pena imposta no Brasil pelo mesmo crime, quando diversas, ou nela é computada, quando idênticas.",
      "nivel": 0
     },
     {
@@ -339,10 +339,10 @@
    ]
   },
   {
-   "key": "cp:9-A",
+   "key": "cp:9",
    "ordem": 9,
-   "numero": "9-A",
-   "rotulo": "Art. 9-A",
+   "numero": "9",
+   "rotulo": "Art. 9º",
    "caminho": "PARTE GERAL — TÍTULO I DA APLICAÇÃO DA LEI PENAL",
    "incidencia": "media",
    "incidenciaNota": null,
@@ -351,7 +351,7 @@
     {
      "id": "b1",
      "rotulo": null,
-     "texto": "sentença estrangeira, quando a aplicação da lei brasileira produz na espécie as mesmas conseqüências, pode ser homologada no Brasil para:",
+     "texto": "A sentença estrangeira, quando a aplicação da lei brasileira produz na espécie as mesmas conseqüências, pode ser homologada no Brasil para:",
      "nivel": 0
     },
     {
@@ -393,10 +393,10 @@
    ]
   },
   {
-   "key": "cp:10-O",
+   "key": "cp:10",
    "ordem": 10,
-   "numero": "10-O",
-   "rotulo": "Art. 10-O",
+   "numero": "10",
+   "rotulo": "Art. 10",
    "caminho": "PARTE GERAL — TÍTULO I DA APLICAÇÃO DA LEI PENAL",
    "incidencia": "media",
    "incidenciaNota": null,
@@ -405,7 +405,7 @@
     {
      "id": "b1",
      "rotulo": null,
-     "texto": "dia do começo inclui-se no cômputo do prazo. Contam-se os dias, os meses e os anos pelo calendário comum.",
+     "texto": "O dia do começo inclui-se no cômputo do prazo. Contam-se os dias, os meses e os anos pelo calendário comum.",
      "nivel": 0
     },
     {
@@ -465,10 +465,10 @@
    ]
   },
   {
-   "key": "cp:13-O",
+   "key": "cp:13",
    "ordem": 13,
-   "numero": "13-O",
-   "rotulo": "Art. 13-O",
+   "numero": "13",
+   "rotulo": "Art. 13",
    "caminho": "PARTE GERAL — TÍTULO I DA APLICAÇÃO DA LEI PENAL › TÍTULO II — DO CRIME",
    "incidencia": "media",
    "incidenciaNota": null,
@@ -477,7 +477,7 @@
     {
      "id": "b1",
      "rotulo": null,
-     "texto": "resultado, de que depende a existência do crime, somente é imputável a quem lhe deu causa. Considera-se causa a ação ou omissão sem a qual o resultado não teria ocorrido.",
+     "texto": "O resultado, de que depende a existência do crime, somente é imputável a quem lhe deu causa. Considera-se causa a ação ou omissão sem a qual o resultado não teria ocorrido.",
      "nivel": 0
     },
     {
@@ -585,10 +585,10 @@
    ]
   },
   {
-   "key": "cp:15-O",
+   "key": "cp:15",
    "ordem": 15,
-   "numero": "15-O",
-   "rotulo": "Art. 15-O",
+   "numero": "15",
+   "rotulo": "Art. 15",
    "caminho": "PARTE GERAL — TÍTULO I DA APLICAÇÃO DA LEI PENAL › TÍTULO II — DO CRIME",
    "incidencia": "media",
    "incidenciaNota": null,
@@ -597,7 +597,7 @@
     {
      "id": "b1",
      "rotulo": null,
-     "texto": "agente que, voluntariamente, desiste de prosseguir na execução ou impede que o resultado se produza, só responde pelos atos já praticados.",
+     "texto": "O agente que, voluntariamente, desiste de prosseguir na execução ou impede que o resultado se produza, só responde pelos atos já praticados.",
      "nivel": 0
     },
     {
@@ -633,10 +633,10 @@
    ]
   },
   {
-   "key": "cp:17-N",
+   "key": "cp:17",
    "ordem": 17,
-   "numero": "17-N",
-   "rotulo": "Art. 17-N",
+   "numero": "17",
+   "rotulo": "Art. 17",
    "caminho": "PARTE GERAL — TÍTULO I DA APLICAÇÃO DA LEI PENAL › TÍTULO II — DO CRIME",
    "incidencia": "media",
    "incidenciaNota": null,
@@ -645,7 +645,7 @@
     {
      "id": "b1",
      "rotulo": null,
-     "texto": "ão se pune a tentativa quando, por ineficácia absoluta do meio ou por absoluta impropriedade do objeto, é impossível consumar-se o crime.",
+     "texto": "Não se pune a tentativa quando, por ineficácia absoluta do meio ou por absoluta impropriedade do objeto, é impossível consumar-se o crime.",
      "nivel": 0
     }
    ]
@@ -729,10 +729,10 @@
    ]
   },
   {
-   "key": "cp:20-O",
+   "key": "cp:20",
    "ordem": 20,
-   "numero": "20-O",
-   "rotulo": "Art. 20-O",
+   "numero": "20",
+   "rotulo": "Art. 20",
    "caminho": "PARTE GERAL — TÍTULO I DA APLICAÇÃO DA LEI PENAL › TÍTULO II — DO CRIME",
    "incidencia": "media",
    "incidenciaNota": null,
@@ -741,7 +741,7 @@
     {
      "id": "b1",
      "rotulo": null,
-     "texto": "erro sobre elemento constitutivo do tipo legal de crime exclui o dolo, mas permite a punição por crime culposo, se previsto em lei.",
+     "texto": "O erro sobre elemento constitutivo do tipo legal de crime exclui o dolo, mas permite a punição por crime culposo, se previsto em lei.",
      "nivel": 0
     },
     {
@@ -789,10 +789,10 @@
    ]
   },
   {
-   "key": "cp:21-O",
+   "key": "cp:21",
    "ordem": 21,
-   "numero": "21-O",
-   "rotulo": "Art. 21-O",
+   "numero": "21",
+   "rotulo": "Art. 21",
    "caminho": "PARTE GERAL — TÍTULO I DA APLICAÇÃO DA LEI PENAL › TÍTULO II — DO CRIME",
    "incidencia": "media",
    "incidenciaNota": null,
@@ -801,7 +801,7 @@
     {
      "id": "b1",
      "rotulo": null,
-     "texto": "desconhecimento da lei é inescusável. O erro sobre a ilicitude do fato, se inevitável, isenta de pena; se evitável, poderá diminuí-la de um sexto a um terço.",
+     "texto": "O desconhecimento da lei é inescusável. O erro sobre a ilicitude do fato, se inevitável, isenta de pena; se evitável, poderá diminuí-la de um sexto a um terço.",
      "nivel": 0
     },
     {
@@ -843,10 +843,10 @@
    ]
   },
   {
-   "key": "cp:23-N",
+   "key": "cp:23",
    "ordem": 23,
-   "numero": "23-N",
-   "rotulo": "Art. 23-N",
+   "numero": "23",
+   "rotulo": "Art. 23",
    "caminho": "PARTE GERAL — TÍTULO I DA APLICAÇÃO DA LEI PENAL › TÍTULO II — DO CRIME",
    "incidencia": "media",
    "incidenciaNota": null,
@@ -855,7 +855,7 @@
     {
      "id": "b1",
      "rotulo": null,
-     "texto": "ão há crime quando o agente pratica o fato:",
+     "texto": "Não há crime quando o agente pratica o fato:",
      "nivel": 0
     },
     {
@@ -1023,10 +1023,10 @@
    ]
   },
   {
-   "key": "cp:28-N",
+   "key": "cp:28",
    "ordem": 28,
-   "numero": "28-N",
-   "rotulo": "Art. 28-N",
+   "numero": "28",
+   "rotulo": "Art. 28",
    "caminho": "PARTE GERAL — TÍTULO I DA APLICAÇÃO DA LEI PENAL › TÍTULO III — DA IMPUTABILIDADE PENAL",
    "incidencia": "media",
    "incidenciaNota": null,
@@ -1035,7 +1035,7 @@
     {
      "id": "b1",
      "rotulo": null,
-     "texto": "ão excluem a imputabilidade penal:",
+     "texto": "Não excluem a imputabilidade penal:",
      "nivel": 0
     },
     {
@@ -1107,10 +1107,10 @@
    ]
   },
   {
-   "key": "cp:30-N",
+   "key": "cp:30",
    "ordem": 30,
-   "numero": "30-N",
-   "rotulo": "Art. 30-N",
+   "numero": "30",
+   "rotulo": "Art. 30",
    "caminho": "PARTE GERAL — TÍTULO I DA APLICAÇÃO DA LEI PENAL › TÍTULO IV — DO CONCURSO DE PESSOAS",
    "incidencia": "media",
    "incidenciaNota": null,
@@ -1119,7 +1119,7 @@
     {
      "id": "b1",
      "rotulo": null,
-     "texto": "ão se comunicam as circunstâncias e as condições de caráter pessoal, salvo quando elementares do crime.",
+     "texto": "Não se comunicam as circunstâncias e as condições de caráter pessoal, salvo quando elementares do crime.",
      "nivel": 0
     },
     {
@@ -1131,10 +1131,10 @@
    ]
   },
   {
-   "key": "cp:31-O",
+   "key": "cp:31",
    "ordem": 31,
-   "numero": "31-O",
-   "rotulo": "Art. 31-O",
+   "numero": "31",
+   "rotulo": "Art. 31",
    "caminho": "PARTE GERAL — TÍTULO I DA APLICAÇÃO DA LEI PENAL › TÍTULO IV — DO CONCURSO DE PESSOAS",
    "incidencia": "media",
    "incidenciaNota": null,
@@ -1143,7 +1143,7 @@
     {
      "id": "b1",
      "rotulo": null,
-     "texto": "ajuste, a determinação ou instigação e o auxílio, salvo disposição expressa em contrário, não são puníveis, se o crime não chega, pelo menos, a ser tentado.",
+     "texto": "O ajuste, a determinação ou instigação e o auxílio, salvo disposição expressa em contrário, não são puníveis, se o crime não chega, pelo menos, a ser tentado.",
      "nivel": 0
     }
    ]
@@ -1191,10 +1191,10 @@
    ]
   },
   {
-   "key": "cp:33-A",
+   "key": "cp:33",
    "ordem": 33,
-   "numero": "33-A",
-   "rotulo": "Art. 33-A",
+   "numero": "33",
+   "rotulo": "Art. 33",
    "caminho": "PARTE GERAL — TÍTULO I DA APLICAÇÃO DA LEI PENAL › TÍTULO V — DAS PENAS › CAPÍTULO I — DAS ESPÉCIES DE PENA › SEÇÃO I — DAS PENAS PRIVATIVAS DE LIBERDADE",
    "incidencia": "media",
    "incidenciaNota": null,
@@ -1203,7 +1203,7 @@
     {
      "id": "b1",
      "rotulo": null,
-     "texto": "pena de reclusão deve ser cumprida em regime fechado, semi-aberto ou aberto. A de detenção, em regime semi-aberto, ou aberto, salvo necessidade de transferência a regime fechado.",
+     "texto": "A pena de reclusão deve ser cumprida em regime fechado, semi-aberto ou aberto. A de detenção, em regime semi-aberto, ou aberto, salvo necessidade de transferência a regime fechado.",
      "nivel": 0
     },
     {
@@ -1275,10 +1275,10 @@
    ]
   },
   {
-   "key": "cp:34-O",
+   "key": "cp:34",
    "ordem": 34,
-   "numero": "34-O",
-   "rotulo": "Art. 34-O",
+   "numero": "34",
+   "rotulo": "Art. 34",
    "caminho": "PARTE GERAL — TÍTULO I DA APLICAÇÃO DA LEI PENAL › TÍTULO V — DAS PENAS › CAPÍTULO I — DAS ESPÉCIES DE PENA › SEÇÃO I — DAS PENAS PRIVATIVAS DE LIBERDADE",
    "incidencia": "media",
    "incidenciaNota": null,
@@ -1287,7 +1287,7 @@
     {
      "id": "b1",
      "rotulo": null,
-     "texto": "condenado será submetido, no início do cumprimento da pena, a exame criminológico de classificação para individualização da execução.",
+     "texto": "O condenado será submetido, no início do cumprimento da pena, a exame criminológico de classificação para individualização da execução.",
      "nivel": 0
     },
     {
@@ -1353,10 +1353,10 @@
    ]
   },
   {
-   "key": "cp:36-O",
+   "key": "cp:36",
    "ordem": 36,
-   "numero": "36-O",
-   "rotulo": "Art. 36-O",
+   "numero": "36",
+   "rotulo": "Art. 36",
    "caminho": "PARTE GERAL — TÍTULO I DA APLICAÇÃO DA LEI PENAL › TÍTULO V — DAS PENAS › CAPÍTULO I — DAS ESPÉCIES DE PENA › SEÇÃO I — DAS PENAS PRIVATIVAS DE LIBERDADE",
    "incidencia": "media",
    "incidenciaNota": null,
@@ -1365,7 +1365,7 @@
     {
      "id": "b1",
      "rotulo": null,
-     "texto": "regime aberto baseia-se na autodisciplina e senso de responsabilidade do condenado.",
+     "texto": "O regime aberto baseia-se na autodisciplina e senso de responsabilidade do condenado.",
      "nivel": 0
     },
     {
@@ -1413,10 +1413,10 @@
    ]
   },
   {
-   "key": "cp:38-O",
+   "key": "cp:38",
    "ordem": 38,
-   "numero": "38-O",
-   "rotulo": "Art. 38-O",
+   "numero": "38",
+   "rotulo": "Art. 38",
    "caminho": "PARTE GERAL — TÍTULO I DA APLICAÇÃO DA LEI PENAL › TÍTULO V — DAS PENAS › CAPÍTULO I — DAS ESPÉCIES DE PENA › SEÇÃO I — DAS PENAS PRIVATIVAS DE LIBERDADE",
    "incidencia": "media",
    "incidenciaNota": null,
@@ -1425,7 +1425,7 @@
     {
      "id": "b1",
      "rotulo": null,
-     "texto": "preso conserva todos os direitos não atingidos pela perda da liberdade, impondo-se a todas as autoridades o respeito à sua integridade física e moral.",
+     "texto": "O preso conserva todos os direitos não atingidos pela perda da liberdade, impondo-se a todas as autoridades o respeito à sua integridade física e moral.",
      "nivel": 0
     },
     {
@@ -1437,10 +1437,10 @@
    ]
   },
   {
-   "key": "cp:39-O",
+   "key": "cp:39",
    "ordem": 39,
-   "numero": "39-O",
-   "rotulo": "Art. 39-O",
+   "numero": "39",
+   "rotulo": "Art. 39",
    "caminho": "PARTE GERAL — TÍTULO I DA APLICAÇÃO DA LEI PENAL › TÍTULO V — DAS PENAS › CAPÍTULO I — DAS ESPÉCIES DE PENA › SEÇÃO I — DAS PENAS PRIVATIVAS DE LIBERDADE",
    "incidencia": "media",
    "incidenciaNota": null,
@@ -1449,7 +1449,7 @@
     {
      "id": "b1",
      "rotulo": null,
-     "texto": "trabalho do preso será sempre remunerado, sendo-lhe garantidos os benefícios da Previdência Social.",
+     "texto": "O trabalho do preso será sempre remunerado, sendo-lhe garantidos os benefícios da Previdência Social.",
      "nivel": 0
     },
     {
@@ -1461,10 +1461,10 @@
    ]
   },
   {
-   "key": "cp:40-A",
+   "key": "cp:40",
    "ordem": 40,
-   "numero": "40-A",
-   "rotulo": "Art. 40-A",
+   "numero": "40",
+   "rotulo": "Art. 40",
    "caminho": "PARTE GERAL — TÍTULO I DA APLICAÇÃO DA LEI PENAL › TÍTULO V — DAS PENAS › CAPÍTULO I — DAS ESPÉCIES DE PENA › SEÇÃO I — DAS PENAS PRIVATIVAS DE LIBERDADE",
    "incidencia": "media",
    "incidenciaNota": null,
@@ -1473,7 +1473,7 @@
     {
      "id": "b1",
      "rotulo": null,
-     "texto": "legislação especial regulará a matéria prevista nos arts. 38 e 39 deste Código, bem como especificará os deveres e direitos do preso, os critérios para revogação e transferência dos regimes e estabelecerá as infrações disciplinares e correspondentes sanções.",
+     "texto": "A legislação especial regulará a matéria prevista nos arts. 38 e 39 deste Código, bem como especificará os deveres e direitos do preso, os critérios para revogação e transferência dos regimes e estabelecerá as infrações disciplinares e correspondentes sanções.",
      "nivel": 0
     },
     {
@@ -1485,10 +1485,10 @@
    ]
   },
   {
-   "key": "cp:41-O",
+   "key": "cp:41",
    "ordem": 41,
-   "numero": "41-O",
-   "rotulo": "Art. 41-O",
+   "numero": "41",
+   "rotulo": "Art. 41",
    "caminho": "PARTE GERAL — TÍTULO I DA APLICAÇÃO DA LEI PENAL › TÍTULO V — DAS PENAS › CAPÍTULO I — DAS ESPÉCIES DE PENA › SEÇÃO I — DAS PENAS PRIVATIVAS DE LIBERDADE",
    "incidencia": "media",
    "incidenciaNota": null,
@@ -1497,7 +1497,7 @@
     {
      "id": "b1",
      "rotulo": null,
-     "texto": "condenado a quem sobrevém doença mental deve ser recolhido a hospital de custódia e tratamento psiquiátrico ou, à falta, a outro estabelecimento adequado.",
+     "texto": "O condenado a quem sobrevém doença mental deve ser recolhido a hospital de custódia e tratamento psiquiátrico ou, à falta, a outro estabelecimento adequado.",
      "nivel": 0
     },
     {
@@ -1809,10 +1809,10 @@
    ]
   },
   {
-   "key": "cp:48-A",
+   "key": "cp:48",
    "ordem": 48,
-   "numero": "48-A",
-   "rotulo": "Art. 48-A",
+   "numero": "48",
+   "rotulo": "Art. 48",
    "caminho": "PARTE GERAL — TÍTULO I DA APLICAÇÃO DA LEI PENAL › TÍTULO V — DAS PENAS › CAPÍTULO I — DAS ESPÉCIES DE PENA › SEÇÃO II — DAS PENAS RESTRITIVAS DE DIREITOS",
    "incidencia": "media",
    "incidenciaNota": null,
@@ -1821,7 +1821,7 @@
     {
      "id": "b1",
      "rotulo": null,
-     "texto": "limitação de fim de semana consiste na obrigação de permanecer, aos sábados e domingos, por 5 (cinco) horas diárias, em casa de albergado ou outro estabelecimento adequado.",
+     "texto": "A limitação de fim de semana consiste na obrigação de permanecer, aos sábados e domingos, por 5 (cinco) horas diárias, em casa de albergado ou outro estabelecimento adequado.",
      "nivel": 0
     },
     {
@@ -1839,10 +1839,10 @@
    ]
   },
   {
-   "key": "cp:49-A",
+   "key": "cp:49",
    "ordem": 49,
-   "numero": "49-A",
-   "rotulo": "Art. 49-A",
+   "numero": "49",
+   "rotulo": "Art. 49",
    "caminho": "PARTE GERAL — TÍTULO I DA APLICAÇÃO DA LEI PENAL › TÍTULO V — DAS PENAS › CAPÍTULO I — DAS ESPÉCIES DE PENA › SEÇÃO III — DA PENA DE MULTA",
    "incidencia": "media",
    "incidenciaNota": null,
@@ -1851,7 +1851,7 @@
     {
      "id": "b1",
      "rotulo": null,
-     "texto": "pena de multa consiste no pagamento ao fundo penitenciário da quantia fixada na sentença e calculada em dias-multa. Será, no mínimo, de 10 (dez) e, no máximo, de 360 (trezentos e sessenta) dias-multa.",
+     "texto": "A pena de multa consiste no pagamento ao fundo penitenciário da quantia fixada na sentença e calculada em dias-multa. Será, no mínimo, de 10 (dez) e, no máximo, de 360 (trezentos e sessenta) dias-multa.",
      "nivel": 0
     },
     {
@@ -1875,10 +1875,10 @@
    ]
   },
   {
-   "key": "cp:50-A",
+   "key": "cp:50",
    "ordem": 50,
-   "numero": "50-A",
-   "rotulo": "Art. 50-A",
+   "numero": "50",
+   "rotulo": "Art. 50",
    "caminho": "PARTE GERAL — TÍTULO I DA APLICAÇÃO DA LEI PENAL › TÍTULO V — DAS PENAS › CAPÍTULO I — DAS ESPÉCIES DE PENA › SEÇÃO III — DA PENA DE MULTA",
    "incidencia": "media",
    "incidenciaNota": null,
@@ -1887,7 +1887,7 @@
     {
      "id": "b1",
      "rotulo": null,
-     "texto": "multa deve ser paga dentro de 10 (dez) dias depois de transitada em julgado a sentença. A requerimento do condenado e conforme as circunstâncias, o juiz pode permitir que o pagamento se realize em parcelas mensais.",
+     "texto": "A multa deve ser paga dentro de 10 (dez) dias depois de transitada em julgado a sentença. A requerimento do condenado e conforme as circunstâncias, o juiz pode permitir que o pagamento se realize em parcelas mensais.",
      "nivel": 0
     },
     {
@@ -2067,10 +2067,10 @@
    ]
   },
   {
-   "key": "cp:57-A",
+   "key": "cp:57",
    "ordem": 57,
-   "numero": "57-A",
-   "rotulo": "Art. 57-A",
+   "numero": "57",
+   "rotulo": "Art. 57",
    "caminho": "PARTE GERAL — TÍTULO I DA APLICAÇÃO DA LEI PENAL › TÍTULO V — DAS PENAS › CAPÍTULO II — DA COMINAÇÃO DAS PENAS",
    "incidencia": "media",
    "incidenciaNota": null,
@@ -2079,7 +2079,7 @@
     {
      "id": "b1",
      "rotulo": null,
-     "texto": "pena de interdição, prevista no inciso III do art. 47 deste Código, aplica-se aos crimes culposos de trânsito.",
+     "texto": "A pena de interdição, prevista no inciso III do art. 47 deste Código, aplica-se aos crimes culposos de trânsito.",
      "nivel": 0
     },
     {
@@ -2091,10 +2091,10 @@
    ]
   },
   {
-   "key": "cp:58-A",
+   "key": "cp:58",
    "ordem": 58,
-   "numero": "58-A",
-   "rotulo": "Art. 58-A",
+   "numero": "58",
+   "rotulo": "Art. 58",
    "caminho": "PARTE GERAL — TÍTULO I DA APLICAÇÃO DA LEI PENAL › TÍTULO V — DAS PENAS › CAPÍTULO II — DA COMINAÇÃO DAS PENAS",
    "incidencia": "media",
    "incidenciaNota": null,
@@ -2103,7 +2103,7 @@
     {
      "id": "b1",
      "rotulo": null,
-     "texto": "multa, prevista em cada tipo legal de crime, tem os limites fixados no art. 49 e seus parágrafos deste Código.",
+     "texto": "A multa, prevista em cada tipo legal de crime, tem os limites fixados no art. 49 e seus parágrafos deste Código.",
      "nivel": 0
     },
     {
@@ -2121,10 +2121,10 @@
    ]
   },
   {
-   "key": "cp:59-O",
+   "key": "cp:59",
    "ordem": 59,
-   "numero": "59-O",
-   "rotulo": "Art. 59-O",
+   "numero": "59",
+   "rotulo": "Art. 59",
    "caminho": "PARTE GERAL — TÍTULO I DA APLICAÇÃO DA LEI PENAL › TÍTULO V — DAS PENAS › CAPÍTULO III — DA APLICAÇÃO DA PENA",
    "incidencia": "media",
    "incidenciaNota": null,
@@ -2133,7 +2133,7 @@
     {
      "id": "b1",
      "rotulo": null,
-     "texto": "juiz, atendendo à culpabilidade, aos antecedentes, à conduta social, à personalidade do agente, aos motivos, às circunstâncias e conseqüências do crime, bem como ao comportamento da vítima, estabelecerá, conforme seja necessário e suficiente para reprovação e prevenção do crime:",
+     "texto": "O juiz, atendendo à culpabilidade, aos antecedentes, à conduta social, à personalidade do agente, aos motivos, às circunstâncias e conseqüências do crime, bem como ao comportamento da vítima, estabelecerá, conforme seja necessário e suficiente para reprovação e prevenção do crime:",
      "nivel": 0
     },
     {
@@ -2211,10 +2211,10 @@
    ]
   },
   {
-   "key": "cp:61-S",
+   "key": "cp:61",
    "ordem": 61,
-   "numero": "61-S",
-   "rotulo": "Art. 61-S",
+   "numero": "61",
+   "rotulo": "Art. 61",
    "caminho": "PARTE GERAL — TÍTULO I DA APLICAÇÃO DA LEI PENAL › TÍTULO V — DAS PENAS › CAPÍTULO III — DA APLICAÇÃO DA PENA",
    "incidencia": "media",
    "incidenciaNota": null,
@@ -2223,7 +2223,7 @@
     {
      "id": "b1",
      "rotulo": null,
-     "texto": "ão circunstâncias que sempre agravam a pena, quando não constituem ou qualificam o crime:",
+     "texto": "São circunstâncias que sempre agravam a pena, quando não constituem ou qualificam o crime:",
      "nivel": 0
     },
     {
@@ -2319,10 +2319,10 @@
    ]
   },
   {
-   "key": "cp:62-A",
+   "key": "cp:62",
    "ordem": 62,
-   "numero": "62-A",
-   "rotulo": "Art. 62-A",
+   "numero": "62",
+   "rotulo": "Art. 62",
    "caminho": "PARTE GERAL — TÍTULO I DA APLICAÇÃO DA LEI PENAL › TÍTULO V — DAS PENAS › CAPÍTULO III — DA APLICAÇÃO DA PENA",
    "incidencia": "media",
    "incidenciaNota": null,
@@ -2331,7 +2331,7 @@
     {
      "id": "b1",
      "rotulo": null,
-     "texto": "pena será ainda agravada em relação ao agente que:",
+     "texto": "A pena será ainda agravada em relação ao agente que:",
      "nivel": 0
     },
     {
@@ -2421,10 +2421,10 @@
    ]
   },
   {
-   "key": "cp:65-S",
+   "key": "cp:65",
    "ordem": 65,
-   "numero": "65-S",
-   "rotulo": "Art. 65-S",
+   "numero": "65",
+   "rotulo": "Art. 65",
    "caminho": "PARTE GERAL — TÍTULO I DA APLICAÇÃO DA LEI PENAL › TÍTULO V — DAS PENAS › CAPÍTULO III — DA APLICAÇÃO DA PENA",
    "incidencia": "media",
    "incidenciaNota": null,
@@ -2433,7 +2433,7 @@
     {
      "id": "b1",
      "rotulo": null,
-     "texto": "ão circunstâncias que sempre atenuam a pena:",
+     "texto": "São circunstâncias que sempre atenuam a pena:",
      "nivel": 0
     },
     {
@@ -2487,10 +2487,10 @@
    ]
   },
   {
-   "key": "cp:66-A",
+   "key": "cp:66",
    "ordem": 66,
-   "numero": "66-A",
-   "rotulo": "Art. 66-A",
+   "numero": "66",
+   "rotulo": "Art. 66",
    "caminho": "PARTE GERAL — TÍTULO I DA APLICAÇÃO DA LEI PENAL › TÍTULO V — DAS PENAS › CAPÍTULO III — DA APLICAÇÃO DA PENA",
    "incidencia": "media",
    "incidenciaNota": null,
@@ -2499,7 +2499,7 @@
     {
      "id": "b1",
      "rotulo": null,
-     "texto": "pena poderá ser ainda atenuada em razão de circunstância relevante, anterior ou posterior ao crime, embora não prevista expressamente em lei.",
+     "texto": "A pena poderá ser ainda atenuada em razão de circunstância relevante, anterior ou posterior ao crime, embora não prevista expressamente em lei.",
      "nivel": 0
     },
     {
@@ -2535,10 +2535,10 @@
    ]
   },
   {
-   "key": "cp:68-A",
+   "key": "cp:68",
    "ordem": 68,
-   "numero": "68-A",
-   "rotulo": "Art. 68-A",
+   "numero": "68",
+   "rotulo": "Art. 68",
    "caminho": "PARTE GERAL — TÍTULO I DA APLICAÇÃO DA LEI PENAL › TÍTULO V — DAS PENAS › CAPÍTULO III — DA APLICAÇÃO DA PENA",
    "incidencia": "media",
    "incidenciaNota": null,
@@ -2547,7 +2547,7 @@
     {
      "id": "b1",
      "rotulo": null,
-     "texto": "pena-base será fixada atendendo-se ao critério do art. 59 deste Código; em seguida serão consideradas as circunstâncias atenuantes e agravantes; por último, as causas de diminuição e de aumento.",
+     "texto": "A pena-base será fixada atendendo-se ao critério do art. 59 deste Código; em seguida serão consideradas as circunstâncias atenuantes e agravantes; por último, as causas de diminuição e de aumento.",
      "nivel": 0
     },
     {
@@ -2793,10 +2793,10 @@
    ]
   },
   {
-   "key": "cp:77-A",
+   "key": "cp:77",
    "ordem": 77,
-   "numero": "77-A",
-   "rotulo": "Art. 77-A",
+   "numero": "77",
+   "rotulo": "Art. 77",
    "caminho": "PARTE GERAL — TÍTULO I DA APLICAÇÃO DA LEI PENAL › TÍTULO V — DAS PENAS › CAPÍTULO IV — DA SUSPENSÃO CONDICIONAL DA PENA",
    "incidencia": "media",
    "incidenciaNota": null,
@@ -2805,7 +2805,7 @@
     {
      "id": "b1",
      "rotulo": null,
-     "texto": "execução da pena privativa de liberdade, não superior a 2 (dois) anos, poderá ser suspensa, por 2 (dois) a 4 (quatro) anos, desde que:",
+     "texto": "A execução da pena privativa de liberdade, não superior a 2 (dois) anos, poderá ser suspensa, por 2 (dois) a 4 (quatro) anos, desde que:",
      "nivel": 0
     },
     {
@@ -2889,10 +2889,10 @@
    ]
   },
   {
-   "key": "cp:79-A",
+   "key": "cp:79",
    "ordem": 79,
-   "numero": "79-A",
-   "rotulo": "Art. 79-A",
+   "numero": "79",
+   "rotulo": "Art. 79",
    "caminho": "PARTE GERAL — TÍTULO I DA APLICAÇÃO DA LEI PENAL › TÍTULO V — DAS PENAS › CAPÍTULO IV — DA SUSPENSÃO CONDICIONAL DA PENA",
    "incidencia": "media",
    "incidenciaNota": null,
@@ -2901,16 +2901,16 @@
     {
      "id": "b1",
      "rotulo": null,
-     "texto": "sentença poderá especificar outras condições a que fica subordinada a suspensão, desde que adequadas ao fato e à situação pessoal do condenado.",
+     "texto": "A sentença poderá especificar outras condições a que fica subordinada a suspensão, desde que adequadas ao fato e à situação pessoal do condenado.",
      "nivel": 0
     }
    ]
   },
   {
-   "key": "cp:80-A",
+   "key": "cp:80",
    "ordem": 80,
-   "numero": "80-A",
-   "rotulo": "Art. 80-A",
+   "numero": "80",
+   "rotulo": "Art. 80",
    "caminho": "PARTE GERAL — TÍTULO I DA APLICAÇÃO DA LEI PENAL › TÍTULO V — DAS PENAS › CAPÍTULO IV — DA SUSPENSÃO CONDICIONAL DA PENA",
    "incidencia": "media",
    "incidenciaNota": null,
@@ -2919,7 +2919,7 @@
     {
      "id": "b1",
      "rotulo": null,
-     "texto": "suspensão não se estende às penas restritivas de direitos nem à multa.",
+     "texto": "A suspensão não se estende às penas restritivas de direitos nem à multa.",
      "nivel": 0
     },
     {
@@ -2931,10 +2931,10 @@
    ]
   },
   {
-   "key": "cp:81-A",
+   "key": "cp:81",
    "ordem": 81,
-   "numero": "81-A",
-   "rotulo": "Art. 81-A",
+   "numero": "81",
+   "rotulo": "Art. 81",
    "caminho": "PARTE GERAL — TÍTULO I DA APLICAÇÃO DA LEI PENAL › TÍTULO V — DAS PENAS › CAPÍTULO IV — DA SUSPENSÃO CONDICIONAL DA PENA",
    "incidencia": "media",
    "incidenciaNota": null,
@@ -2943,7 +2943,7 @@
     {
      "id": "b1",
      "rotulo": null,
-     "texto": "suspensão será revogada se, no curso do prazo, o beneficiário:",
+     "texto": "A suspensão será revogada se, no curso do prazo, o beneficiário:",
      "nivel": 0
     },
     {
@@ -3027,10 +3027,10 @@
    ]
   },
   {
-   "key": "cp:83-O",
+   "key": "cp:83",
    "ordem": 83,
-   "numero": "83-O",
-   "rotulo": "Art. 83-O",
+   "numero": "83",
+   "rotulo": "Art. 83",
    "caminho": "PARTE GERAL — TÍTULO I DA APLICAÇÃO DA LEI PENAL › TÍTULO V — DAS PENAS › CAPÍTULO V — DO LIVRAMENTO CONDICIONAL",
    "incidencia": "media",
    "incidenciaNota": null,
@@ -3039,7 +3039,7 @@
     {
      "id": "b1",
      "rotulo": null,
-     "texto": "juiz poderá conceder livramento condicional ao condenado a pena privativa de liberdade igual ou superior a 2 (dois) anos, desde que:",
+     "texto": "O juiz poderá conceder livramento condicional ao condenado a pena privativa de liberdade igual ou superior a 2 (dois) anos, desde que:",
      "nivel": 0
     },
     {
@@ -3135,10 +3135,10 @@
    ]
   },
   {
-   "key": "cp:85-A",
+   "key": "cp:85",
    "ordem": 85,
-   "numero": "85-A",
-   "rotulo": "Art. 85-A",
+   "numero": "85",
+   "rotulo": "Art. 85",
    "caminho": "PARTE GERAL — TÍTULO I DA APLICAÇÃO DA LEI PENAL › TÍTULO V — DAS PENAS › CAPÍTULO V — DO LIVRAMENTO CONDICIONAL",
    "incidencia": "media",
    "incidenciaNota": null,
@@ -3147,7 +3147,7 @@
     {
      "id": "b1",
      "rotulo": null,
-     "texto": "sentença especificará as condições a que fica subordinado o livramento.",
+     "texto": "A sentença especificará as condições a que fica subordinado o livramento.",
      "nivel": 0
     },
     {
@@ -3195,10 +3195,10 @@
    ]
   },
   {
-   "key": "cp:87-O",
+   "key": "cp:87",
    "ordem": 87,
-   "numero": "87-O",
-   "rotulo": "Art. 87-O",
+   "numero": "87",
+   "rotulo": "Art. 87",
    "caminho": "PARTE GERAL — TÍTULO I DA APLICAÇÃO DA LEI PENAL › TÍTULO V — DAS PENAS › CAPÍTULO V — DO LIVRAMENTO CONDICIONAL",
    "incidencia": "media",
    "incidenciaNota": null,
@@ -3207,7 +3207,7 @@
     {
      "id": "b1",
      "rotulo": null,
-     "texto": "juiz poderá, também, revogar o livramento, se o liberado deixar de cumprir qualquer das obrigações constantes da sentença, ou for irrecorrivelmente condenado, por crime ou contravenção, a pena que não seja privativa de liberdade.",
+     "texto": "O juiz poderá, também, revogar o livramento, se o liberado deixar de cumprir qualquer das obrigações constantes da sentença, ou for irrecorrivelmente condenado, por crime ou contravenção, a pena que não seja privativa de liberdade.",
      "nivel": 0
     },
     {
@@ -3237,10 +3237,10 @@
    ]
   },
   {
-   "key": "cp:89-O",
+   "key": "cp:89",
    "ordem": 89,
-   "numero": "89-O",
-   "rotulo": "Art. 89-O",
+   "numero": "89",
+   "rotulo": "Art. 89",
    "caminho": "PARTE GERAL — TÍTULO I DA APLICAÇÃO DA LEI PENAL › TÍTULO V — DAS PENAS › CAPÍTULO V — DO LIVRAMENTO CONDICIONAL",
    "incidencia": "media",
    "incidenciaNota": null,
@@ -3249,7 +3249,7 @@
     {
      "id": "b1",
      "rotulo": null,
-     "texto": "juiz não poderá declarar extinta a pena, enquanto não passar em julgado a sentença em processo a que responde o liberado, por crime cometido na vigência do livramento.",
+     "texto": "O juiz não poderá declarar extinta a pena, enquanto não passar em julgado a sentença em processo a que responde o liberado, por crime cometido na vigência do livramento.",
      "nivel": 0
     }
    ]
@@ -3279,10 +3279,10 @@
    ]
   },
   {
-   "key": "cp:91-S",
+   "key": "cp:91",
    "ordem": 91,
-   "numero": "91-S",
-   "rotulo": "Art. 91-S",
+   "numero": "91",
+   "rotulo": "Art. 91",
    "caminho": "PARTE GERAL — TÍTULO I DA APLICAÇÃO DA LEI PENAL › TÍTULO V — DAS PENAS › CAPÍTULO VI — DOS EFEITOS DA CONDENAÇÃO",
    "incidencia": "media",
    "incidenciaNota": null,
@@ -3291,7 +3291,7 @@
     {
      "id": "b1",
      "rotulo": null,
-     "texto": "ão efeitos da condenação:",
+     "texto": "São efeitos da condenação:",
      "nivel": 0
     },
     {
@@ -3393,10 +3393,10 @@
    ]
   },
   {
-   "key": "cp:92-S",
+   "key": "cp:92",
    "ordem": 93,
-   "numero": "92-S",
-   "rotulo": "Art. 92-S",
+   "numero": "92",
+   "rotulo": "Art. 92",
    "caminho": "PARTE GERAL — TÍTULO I DA APLICAÇÃO DA LEI PENAL › TÍTULO V — DAS PENAS › CAPÍTULO VI — DOS EFEITOS DA CONDENAÇÃO",
    "incidencia": "media",
    "incidenciaNota": null,
@@ -3405,7 +3405,7 @@
     {
      "id": "b1",
      "rotulo": null,
-     "texto": "ão também efeitos da condenação:",
+     "texto": "São também efeitos da condenação:",
      "nivel": 0
     },
     {
@@ -3495,10 +3495,10 @@
    ]
   },
   {
-   "key": "cp:93-A",
+   "key": "cp:93",
    "ordem": 94,
-   "numero": "93-A",
-   "rotulo": "Art. 93-A",
+   "numero": "93",
+   "rotulo": "Art. 93",
    "caminho": "PARTE GERAL — TÍTULO I DA APLICAÇÃO DA LEI PENAL › TÍTULO V — DAS PENAS › CAPÍTULO VII — DA REABILITAÇÃO",
    "incidencia": "media",
    "incidenciaNota": null,
@@ -3507,7 +3507,7 @@
     {
      "id": "b1",
      "rotulo": null,
-     "texto": "reabilitação alcança quaisquer penas aplicadas em sentença definitiva, assegurando ao condenado o sigilo dos registros sobre o seu processo e condenação.",
+     "texto": "A reabilitação alcança quaisquer penas aplicadas em sentença definitiva, assegurando ao condenado o sigilo dos registros sobre o seu processo e condenação.",
      "nivel": 0
     },
     {
@@ -3519,10 +3519,10 @@
    ]
   },
   {
-   "key": "cp:94-A",
+   "key": "cp:94",
    "ordem": 95,
-   "numero": "94-A",
-   "rotulo": "Art. 94-A",
+   "numero": "94",
+   "rotulo": "Art. 94",
    "caminho": "PARTE GERAL — TÍTULO I DA APLICAÇÃO DA LEI PENAL › TÍTULO V — DAS PENAS › CAPÍTULO VII — DA REABILITAÇÃO",
    "incidencia": "media",
    "incidenciaNota": null,
@@ -3531,7 +3531,7 @@
     {
      "id": "b1",
      "rotulo": null,
-     "texto": "reabilitação poderá ser requerida, decorridos 2 (dois) anos do dia em que for extinta, de qualquer modo, a pena ou terminar sua execução, computando-se o período de prova da suspensão e o do livramento condicional, se não sobrevier revogação, desde que o condenado:",
+     "texto": "A reabilitação poderá ser requerida, decorridos 2 (dois) anos do dia em que for extinta, de qualquer modo, a pena ou terminar sua execução, computando-se o período de prova da suspensão e o do livramento condicional, se não sobrevier revogação, desde que o condenado:",
      "nivel": 0
     },
     {
@@ -3561,10 +3561,10 @@
    ]
   },
   {
-   "key": "cp:95-A",
+   "key": "cp:95",
    "ordem": 96,
-   "numero": "95-A",
-   "rotulo": "Art. 95-A",
+   "numero": "95",
+   "rotulo": "Art. 95",
    "caminho": "PARTE GERAL — TÍTULO I DA APLICAÇÃO DA LEI PENAL › TÍTULO V — DAS PENAS › CAPÍTULO VII — DA REABILITAÇÃO",
    "incidencia": "media",
    "incidenciaNota": null,
@@ -3573,7 +3573,7 @@
     {
      "id": "b1",
      "rotulo": null,
-     "texto": "reabilitação será revogada, de ofício ou a requerimento do Ministério Público, se o reabilitado for condenado, como reincidente, por decisão definitiva, a pena que não seja de multa.",
+     "texto": "A reabilitação será revogada, de ofício ou a requerimento do Ministério Público, se o reabilitado for condenado, como reincidente, por decisão definitiva, a pena que não seja de multa.",
      "nivel": 0
     },
     {
@@ -3717,10 +3717,10 @@
    ]
   },
   {
-   "key": "cp:99-O",
+   "key": "cp:99",
    "ordem": 100,
-   "numero": "99-O",
-   "rotulo": "Art. 99-O",
+   "numero": "99",
+   "rotulo": "Art. 99",
    "caminho": "PARTE GERAL — TÍTULO I DA APLICAÇÃO DA LEI PENAL › TÍTULO VI — DAS MEDIDAS DE SEGURANÇA",
    "incidencia": "media",
    "incidenciaNota": null,
@@ -3729,7 +3729,7 @@
     {
      "id": "b1",
      "rotulo": null,
-     "texto": "internado será recolhido a estabelecimento dotado de características hospitalares e será submetido a tratamento.",
+     "texto": "O internado será recolhido a estabelecimento dotado de características hospitalares e será submetido a tratamento.",
      "nivel": 0
     },
     {
@@ -3741,10 +3741,10 @@
    ]
   },
   {
-   "key": "cp:100-A",
+   "key": "cp:100",
    "ordem": 101,
-   "numero": "100-A",
-   "rotulo": "Art. 100-A",
+   "numero": "100",
+   "rotulo": "Art. 100",
    "caminho": "PARTE GERAL — TÍTULO I DA APLICAÇÃO DA LEI PENAL › TÍTULO VII — DA AÇÃO PENAL",
    "incidencia": "media",
    "incidenciaNota": null,
@@ -3753,7 +3753,7 @@
     {
      "id": "b1",
      "rotulo": null,
-     "texto": "ação penal é pública, salvo quando a lei expressamente a declara privativa do ofendido.",
+     "texto": "A ação penal é pública, salvo quando a lei expressamente a declara privativa do ofendido.",
      "nivel": 0
     },
     {
@@ -3813,10 +3813,10 @@
    ]
   },
   {
-   "key": "cp:102-A",
+   "key": "cp:102",
    "ordem": 103,
-   "numero": "102-A",
-   "rotulo": "Art. 102-A",
+   "numero": "102",
+   "rotulo": "Art. 102",
    "caminho": "PARTE GERAL — TÍTULO I DA APLICAÇÃO DA LEI PENAL › TÍTULO VII — DA AÇÃO PENAL",
    "incidencia": "media",
    "incidenciaNota": null,
@@ -3825,7 +3825,7 @@
     {
      "id": "b1",
      "rotulo": null,
-     "texto": "representação será irretratável depois de oferecida a denúncia.",
+     "texto": "A representação será irretratável depois de oferecida a denúncia.",
      "nivel": 0
     },
     {
@@ -3867,10 +3867,10 @@
    ]
   },
   {
-   "key": "cp:104-O",
+   "key": "cp:104",
    "ordem": 105,
-   "numero": "104-O",
-   "rotulo": "Art. 104-O",
+   "numero": "104",
+   "rotulo": "Art. 104",
    "caminho": "PARTE GERAL — TÍTULO I DA APLICAÇÃO DA LEI PENAL › TÍTULO VII — DA AÇÃO PENAL",
    "incidencia": "media",
    "incidenciaNota": null,
@@ -3879,7 +3879,7 @@
     {
      "id": "b1",
      "rotulo": null,
-     "texto": "direito de queixa não pode ser exercido quando renunciado expressa ou tacitamente.",
+     "texto": "O direito de queixa não pode ser exercido quando renunciado expressa ou tacitamente.",
      "nivel": 0
     },
     {
@@ -3897,10 +3897,10 @@
    ]
   },
   {
-   "key": "cp:105-O",
+   "key": "cp:105",
    "ordem": 106,
-   "numero": "105-O",
-   "rotulo": "Art. 105-O",
+   "numero": "105",
+   "rotulo": "Art. 105",
    "caminho": "PARTE GERAL — TÍTULO I DA APLICAÇÃO DA LEI PENAL › TÍTULO VII — DA AÇÃO PENAL",
    "incidencia": "media",
    "incidenciaNota": null,
@@ -3909,16 +3909,16 @@
     {
      "id": "b1",
      "rotulo": null,
-     "texto": "perdão do ofendido, nos crimes em que somente se procede mediante queixa, obsta ao prosseguimento da ação.",
+     "texto": "O perdão do ofendido, nos crimes em que somente se procede mediante queixa, obsta ao prosseguimento da ação.",
      "nivel": 0
     }
    ]
   },
   {
-   "key": "cp:106-O",
+   "key": "cp:106",
    "ordem": 107,
-   "numero": "106-O",
-   "rotulo": "Art. 106-O",
+   "numero": "106",
+   "rotulo": "Art. 106",
    "caminho": "PARTE GERAL — TÍTULO I DA APLICAÇÃO DA LEI PENAL › TÍTULO VII — DA AÇÃO PENAL",
    "incidencia": "media",
    "incidenciaNota": null,
@@ -3927,7 +3927,7 @@
     {
      "id": "b1",
      "rotulo": null,
-     "texto": "perdão, no processo ou fora dele, expresso ou tácito:",
+     "texto": "O perdão, no processo ou fora dele, expresso ou tácito:",
      "nivel": 0
     },
     {
@@ -4029,10 +4029,10 @@
    ]
   },
   {
-   "key": "cp:108-A",
+   "key": "cp:108",
    "ordem": 108,
-   "numero": "108-A",
-   "rotulo": "Art. 108-A",
+   "numero": "108",
+   "rotulo": "Art. 108",
    "caminho": "PARTE GERAL — TÍTULO I DA APLICAÇÃO DA LEI PENAL › TÍTULO VIII — DA EXTINÇÃO DA PUNIBILIDADE",
    "incidencia": "media",
    "incidenciaNota": null,
@@ -4041,7 +4041,7 @@
     {
      "id": "b1",
      "rotulo": null,
-     "texto": "extinção da punibilidade de crime que é pressuposto, elemento constitutivo ou circunstância agravante de outro não se estende a este. Nos crimes conexos, a extinção da punibilidade de um deles não impede, quanto aos outros, a agravação da pena resultante da conexão.",
+     "texto": "A extinção da punibilidade de crime que é pressuposto, elemento constitutivo ou circunstância agravante de outro não se estende a este. Nos crimes conexos, a extinção da punibilidade de um deles não impede, quanto aos outros, a agravação da pena resultante da conexão.",
      "nivel": 0
     },
     {
@@ -4125,10 +4125,10 @@
    ]
   },
   {
-   "key": "cp:110-A",
+   "key": "cp:110",
    "ordem": 110,
-   "numero": "110-A",
-   "rotulo": "Art. 110-A",
+   "numero": "110",
+   "rotulo": "Art. 110",
    "caminho": "PARTE GERAL — TÍTULO I DA APLICAÇÃO DA LEI PENAL › TÍTULO VIII — DA EXTINÇÃO DA PUNIBILIDADE",
    "incidencia": "media",
    "incidenciaNota": null,
@@ -4137,7 +4137,7 @@
     {
      "id": "b1",
      "rotulo": null,
-     "texto": "prescrição depois de transitar em julgado a sentença condenatória regula-se pela pena aplicada e verifica-se nos prazos fixados no artigo anterior, os quais se aumentam de um terço, se o condenado é reincidente.",
+     "texto": "A prescrição depois de transitar em julgado a sentença condenatória regula-se pela pena aplicada e verifica-se nos prazos fixados no artigo anterior, os quais se aumentam de um terço, se o condenado é reincidente.",
      "nivel": 0
     },
     {
@@ -4161,10 +4161,10 @@
    ]
   },
   {
-   "key": "cp:111-A",
+   "key": "cp:111",
    "ordem": 111,
-   "numero": "111-A",
-   "rotulo": "Art. 111-A",
+   "numero": "111",
+   "rotulo": "Art. 111",
    "caminho": "PARTE GERAL — TÍTULO I DA APLICAÇÃO DA LEI PENAL › TÍTULO VIII — DA EXTINÇÃO DA PUNIBILIDADE",
    "incidencia": "media",
    "incidenciaNota": null,
@@ -4173,7 +4173,7 @@
     {
      "id": "b1",
      "rotulo": null,
-     "texto": "prescrição, antes de transitar em julgado a sentença final, começa a correr:",
+     "texto": "A prescrição, antes de transitar em julgado a sentença final, começa a correr:",
      "nivel": 0
     },
     {
@@ -4275,10 +4275,10 @@
    ]
   },
   {
-   "key": "cp:114-A",
+   "key": "cp:114",
    "ordem": 114,
-   "numero": "114-A",
-   "rotulo": "Art. 114-A",
+   "numero": "114",
+   "rotulo": "Art. 114",
    "caminho": "PARTE GERAL — TÍTULO I DA APLICAÇÃO DA LEI PENAL › TÍTULO VIII — DA EXTINÇÃO DA PUNIBILIDADE",
    "incidencia": "media",
    "incidenciaNota": null,
@@ -4287,7 +4287,7 @@
     {
      "id": "b1",
      "rotulo": null,
-     "texto": "prescrição da pena de multa ocorrerá:",
+     "texto": "A prescrição da pena de multa ocorrerá:",
      "nivel": 0
     },
     {
@@ -4389,10 +4389,10 @@
    ]
   },
   {
-   "key": "cp:117-O",
+   "key": "cp:117",
    "ordem": 117,
-   "numero": "117-O",
-   "rotulo": "Art. 117-O",
+   "numero": "117",
+   "rotulo": "Art. 117",
    "caminho": "PARTE GERAL — TÍTULO I DA APLICAÇÃO DA LEI PENAL › TÍTULO VIII — DA EXTINÇÃO DA PUNIBILIDADE",
    "incidencia": "media",
    "incidenciaNota": null,
@@ -4401,7 +4401,7 @@
     {
      "id": "b1",
      "rotulo": null,
-     "texto": "curso da prescrição interrompe-se:",
+     "texto": "O curso da prescrição interrompe-se:",
      "nivel": 0
     },
     {
@@ -4497,10 +4497,10 @@
    ]
   },
   {
-   "key": "cp:120-A",
+   "key": "cp:120",
    "ordem": 120,
-   "numero": "120-A",
-   "rotulo": "Art. 120-A",
+   "numero": "120",
+   "rotulo": "Art. 120",
    "caminho": "PARTE GERAL — TÍTULO I DA APLICAÇÃO DA LEI PENAL › TÍTULO VIII — DA EXTINÇÃO DA PUNIBILIDADE",
    "incidencia": "media",
    "incidenciaNota": null,
@@ -4509,7 +4509,7 @@
     {
      "id": "b1",
      "rotulo": null,
-     "texto": "sentença que conceder perdão judicial não será considerada para efeitos de reincidência.",
+     "texto": "A sentença que conceder perdão judicial não será considerada para efeitos de reincidência.",
      "nivel": 0
     },
     {
@@ -5163,10 +5163,10 @@
    ]
   },
   {
-   "key": "cp:128-N",
+   "key": "cp:128",
    "ordem": 130,
-   "numero": "128-N",
-   "rotulo": "Art. 128-N",
+   "numero": "128",
+   "rotulo": "Art. 128",
    "caminho": "PARTE ESPECIAL › TÍTULO I — DOS CRIMES CONTRA A PESSOA › CAPÍTULO I — DOS CRIMES CONTRA A VIDA",
    "incidencia": "media",
    "incidenciaNota": null,
@@ -5175,7 +5175,7 @@
     {
      "id": "b1",
      "rotulo": null,
-     "texto": "ão se pune o aborto praticado por médico:",
+     "texto": "Não se pune o aborto praticado por médico:",
      "nivel": 0
     },
     {
@@ -6195,10 +6195,10 @@
    ]
   },
   {
-   "key": "cp:142-N",
+   "key": "cp:142",
    "ordem": 145,
-   "numero": "142-N",
-   "rotulo": "Art. 142-N",
+   "numero": "142",
+   "rotulo": "Art. 142",
    "caminho": "PARTE ESPECIAL › TÍTULO I — DOS CRIMES CONTRA A PESSOA › CAPÍTULO V — DOS CRIMES CONTRA A HONRA",
    "incidencia": "media",
    "incidenciaNota": null,
@@ -6207,7 +6207,7 @@
     {
      "id": "b1",
      "rotulo": null,
-     "texto": "ão constituem injúria ou difamação punível:",
+     "texto": "Não constituem injúria ou difamação punível:",
      "nivel": 0
     },
     {
@@ -6243,10 +6243,10 @@
    ]
   },
   {
-   "key": "cp:143-O",
+   "key": "cp:143",
    "ordem": 146,
-   "numero": "143-O",
-   "rotulo": "Art. 143-O",
+   "numero": "143",
+   "rotulo": "Art. 143",
    "caminho": "PARTE ESPECIAL › TÍTULO I — DOS CRIMES CONTRA A PESSOA › CAPÍTULO V — DOS CRIMES CONTRA A HONRA",
    "incidencia": "media",
    "incidenciaNota": null,
@@ -6255,7 +6255,7 @@
     {
      "id": "b1",
      "rotulo": null,
-     "texto": "querelado que, antes da sentença, se retrata cabalmente da calúnia ou da difamação, fica isento de pena.",
+     "texto": "O querelado que, antes da sentença, se retrata cabalmente da calúnia ou da difamação, fica isento de pena.",
      "nivel": 0
     },
     {
@@ -9117,10 +9117,10 @@
    ]
   },
   {
-   "key": "cp:183-N",
+   "key": "cp:183",
    "ordem": 196,
-   "numero": "183-N",
-   "rotulo": "Art. 183-N",
+   "numero": "183",
+   "rotulo": "Art. 183",
    "caminho": "PARTE ESPECIAL › TÍTULO II — DOS CRIMES CONTRA O PATRIMÔNIO › CAPÍTULO VIII — DISPOSIÇÕES GERAIS",
    "incidencia": "media",
    "incidenciaNota": null,
@@ -9129,7 +9129,7 @@
     {
      "id": "b1",
      "rotulo": null,
-     "texto": "ão se aplica o disposto nos dois artigos anteriores:",
+     "texto": "Não se aplica o disposto nos dois artigos anteriores:",
      "nivel": 0
     },
     {

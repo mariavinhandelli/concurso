@@ -27,6 +27,10 @@ const QUESTOES_ARQUIVO: Record<string, string> = {
   'lgpd': '/leis/lgpd-questoes.json',
   'lei-9784': '/leis/lei-9784-questoes.json',
   'go-13800': '/leis/go-13800-questoes.json',
+  'cp': '/leis/cp-questoes.json',
+  'cpp': '/leis/cpp-questoes.json',
+  'cpm': '/leis/cpm-questoes.json',
+  'cppm': '/leis/cppm-questoes.json',
 };
 
 // Slugs que têm banco de questões — usado para montar o composer de simulado

@@ -2007,10 +2007,10 @@
    ]
   },
   {
-   "key": "cpm:59-A",
+   "key": "cpm:59",
    "ordem": 59,
-   "numero": "59-A",
-   "rotulo": "Art. 59-A",
+   "numero": "59",
+   "rotulo": "Art. 59",
    "caminho": "PARTE GERAL › LIVRO ÚNICO › TÍTULO V — DAS PENAS › CAPÍTULO I — DAS PENAS PRINCIPAIS",
    "incidencia": "media",
    "incidenciaNota": null,
@@ -2019,7 +2019,7 @@
     {
      "id": "b1",
      "rotulo": null,
-     "texto": "pena de reclusão ou de detenção até 2 (dois) anos, aplicada a militar, é convertida em pena de prisão e cumprida, quando não cabível a suspensão condicional:",
+     "texto": "A pena de reclusão ou de detenção até 2 (dois) anos, aplicada a militar, é convertida em pena de prisão e cumprida, quando não cabível a suspensão condicional:",
      "nivel": 0
     },
     {
@@ -2073,10 +2073,10 @@
    ]
   },
   {
-   "key": "cpm:61-A",
+   "key": "cpm:61",
    "ordem": 61,
-   "numero": "61-A",
-   "rotulo": "Art. 61-A",
+   "numero": "61",
+   "rotulo": "Art. 61",
    "caminho": "PARTE GERAL › LIVRO ÚNICO › TÍTULO V — DAS PENAS › CAPÍTULO I — DAS PENAS PRINCIPAIS",
    "incidencia": "media",
    "incidenciaNota": null,
@@ -2085,7 +2085,7 @@
     {
      "id": "b1",
      "rotulo": null,
-     "texto": "pena privativa da liberdade por mais de 2 (dois) anos, aplicada a militar, é cumprida em penitenciária militar e, na falta dessa, em estabelecimento prisional civil, ficando o recluso ou detento sujeito ao regime conforme a legislação penal comum, de cujos benefícios e concessões, também, poderá gozar.",
+     "texto": "A pena privativa da liberdade por mais de 2 (dois) anos, aplicada a militar, é cumprida em penitenciária militar e, na falta dessa, em estabelecimento prisional civil, ficando o recluso ou detento sujeito ao regime conforme a legislação penal comum, de cujos benefícios e concessões, também, poderá gozar.",
      "nivel": 0
     },
     {
@@ -2097,10 +2097,10 @@
    ]
   },
   {
-   "key": "cpm:62-O",
+   "key": "cpm:62",
    "ordem": 62,
-   "numero": "62-O",
-   "rotulo": "Art. 62-O",
+   "numero": "62",
+   "rotulo": "Art. 62",
    "caminho": "PARTE GERAL › LIVRO ÚNICO › TÍTULO V — DAS PENAS › CAPÍTULO I — DAS PENAS PRINCIPAIS",
    "incidencia": "media",
    "incidenciaNota": null,
@@ -2109,7 +2109,7 @@
     {
      "id": "b1",
      "rotulo": null,
-     "texto": "civil cumpre a pena aplicada pela Justiça Militar, em estabelecimento prisional civil, ficando ele sujeito ao regime conforme a legislação penal comum, de cujos benefícios e concessões, também, poderá gozar.",
+     "texto": "O civil cumpre a pena aplicada pela Justiça Militar, em estabelecimento prisional civil, ficando ele sujeito ao regime conforme a legislação penal comum, de cujos benefícios e concessões, também, poderá gozar.",
      "nivel": 0
     },
     {
