@@ -10,6 +10,7 @@ import {
 import { fromDbRow, toDbRow } from '@/lib/spaced-repetition.mapper';
 import { localDateInDays, toLocalDateString, parseLocalDate } from '@/lib/local-date';
 import { getArchivedSubjectIds } from '@/services/archivedCache';
+import { getUserFeatures, srsModifierFor } from '@/services/userFeatures.service';
 import * as repo from '@/services/reviews.repository';
 
 export type ReviewRating = 'dificil' | 'intermediario' | 'facil';
@@ -38,12 +39,14 @@ export async function listDueReviews(): Promise<ReviewItem[]> {
   if (!auth) return [];
 
   // getArchivedSubjectIds tem cache de 5s; aguardar para repassar ao repo e filtrar no SQL.
-  const archivedIds = await getArchivedSubjectIds();
+  const [archivedIds, features] = await Promise.all([getArchivedSubjectIds(), getUserFeatures()]);
   const rows = await repo.fetchDueTopicReviews(auth.supabase, auth.userId, archivedIds);
 
   return rows.map(t => {
     const subj = Array.isArray(t.subjects) ? t.subjects[0] : t.subjects;
     const srState = fromDbRow({ ease_factor: t.ease_factor, interval_days: t.interval_days, repetitions: t.repetitions });
+    // Ajuste pessoal por matéria — os botões mostram o intervalo que será aplicado de fato.
+    const mod = srsModifierFor(features, t.subject_id);
     return {
       id: t.id,
       name: t.name,
@@ -53,9 +56,9 @@ export async function listDueReviews(): Promise<ReviewItem[]> {
       nextReviewDate: t.next_review_date,
       overdueDays: daysOverdue(t.next_review_date),
       nextIntervals: {
-        dificil:      calculateNextReview(srState, RATING_TO_GRADE.dificil).intervalDays,
-        intermediario: calculateNextReview(srState, RATING_TO_GRADE.intermediario).intervalDays,
-        facil:        calculateNextReview(srState, RATING_TO_GRADE.facil).intervalDays,
+        dificil:      calculateNextReview(srState, RATING_TO_GRADE.dificil, new Date(), mod).intervalDays,
+        intermediario: calculateNextReview(srState, RATING_TO_GRADE.intermediario, new Date(), mod).intervalDays,
+        facil:        calculateNextReview(srState, RATING_TO_GRADE.facil, new Date(), mod).intervalDays,
       },
     };
   });
@@ -113,8 +116,12 @@ export async function deactivateReview(topicId: string): Promise<void> {
 
 export async function submitReview(topicId: string, rating: ReviewRating): Promise<void> {
   const { supabase, userId } = await requireUser();
-  const topic = await repo.fetchTopicSRState(supabase, userId, topicId);
-  const result = calculateNextReview(fromDbRow(topic), RATING_TO_GRADE[rating]);
+  const [topic, features] = await Promise.all([
+    repo.fetchTopicSRState(supabase, userId, topicId),
+    getUserFeatures(),
+  ]);
+  const mod = srsModifierFor(features, topic.subject_id);
+  const result = calculateNextReview(fromDbRow(topic), RATING_TO_GRADE[rating], new Date(), mod);
   await repo.updateTopicReview(supabase, userId, topicId, toDbRow(result));
 }
 

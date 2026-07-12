@@ -10,12 +10,13 @@
 
 import { forwardRef, type ButtonHTMLAttributes, type CSSProperties } from 'react';
 import { theme } from '@/lib/theme';
+import { Spinner } from './Spinner';
 
 export type ButtonVariant = 'primary' | 'outline' | 'ghost' | 'danger' | 'dangerSoft';
 export type ButtonSize = 'md' | 'sm';
 
 const VARIANTS: Record<ButtonVariant, CSSProperties> = {
-  primary:    { background: theme.primary, color: theme.onTeal, border: 'none', fontWeight: 600 },
+  primary:    { background: theme.primary, color: theme.onPrimary, border: 'none', fontWeight: 600 },
   outline:    { background: theme.card, color: theme.inkSoft, border: `0.5px solid ${theme.line}`, fontWeight: 500 },
   ghost:      { background: 'transparent', color: theme.inkSoft, border: 'none', fontWeight: 500 },
   danger:     { background: theme.danger, color: theme.onDanger, border: 'none', fontWeight: 600 },
@@ -24,28 +25,32 @@ const VARIANTS: Record<ButtonVariant, CSSProperties> = {
 
 const SIZES: Record<ButtonSize, CSSProperties> = {
   md: { padding: '11px 22px', fontSize: 14, borderRadius: theme.radiusSm },
-  sm: { padding: '8px 14px', fontSize: 13, borderRadius: 10 },
+  sm: { padding: '8px 14px', fontSize: 13, borderRadius: theme.radiusSm },
 };
+
+const SPINNER_SIZE: Record<ButtonSize, number> = { md: 14, sm: 12 };
 
 interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
   size?: ButtonSize;
   fullWidth?: boolean;
+  loading?: boolean;
 }
 
 export const Button = forwardRef<HTMLButtonElement, Props>(function Button(
-  { variant = 'primary', size = 'md', fullWidth, style, className, disabled, type = 'button', ...rest },
+  { variant = 'primary', size = 'md', fullWidth, loading, style, className, disabled, type = 'button', children, ...rest },
   ref,
 ) {
   return (
     <button
       ref={ref}
       type={type}
-      disabled={disabled}
+      disabled={disabled || loading}
+      aria-busy={loading || undefined}
       className={`ui-btn ui-btn-${variant}${className ? ` ${className}` : ''}`}
       style={{
         display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-        cursor: disabled ? 'not-allowed' : 'pointer', fontFamily: 'inherit',
+        cursor: disabled || loading ? 'not-allowed' : 'pointer', fontFamily: 'inherit',
         whiteSpace: 'nowrap', opacity: disabled ? 0.55 : 1,
         width: fullWidth ? '100%' : undefined,
         ...SIZES[size],
@@ -53,6 +58,9 @@ export const Button = forwardRef<HTMLButtonElement, Props>(function Button(
         ...style,
       }}
       {...rest}
-    />
+    >
+      {loading && <Spinner size={SPINNER_SIZE[size]} />}
+      {children}
+    </button>
   );
 });

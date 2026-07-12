@@ -1,4 +1,5 @@
 import { theme } from '@/lib/theme';
+import { Button } from './Button';
 
 interface EmptyStateProps {
   icon: React.ReactNode;
@@ -34,17 +35,9 @@ export function EmptyState({ icon, title, body, action, compact = false }: Empty
         )}
       </div>
       {action && (
-        <button
-          onClick={action.onClick}
-          style={{
-            marginTop: 4, padding: '10px 22px', borderRadius: theme.radiusSm,
-            border: 'none', background: theme.primary, color: theme.onTeal,
-            fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: theme.font,
-            display: 'inline-flex', alignItems: 'center', gap: 6,
-          }}
-        >
+        <Button onClick={action.onClick} style={{ marginTop: 4 }}>
           {action.label}
-        </button>
+        </Button>
       )}
     </div>
   );

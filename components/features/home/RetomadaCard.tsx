@@ -8,6 +8,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
+import { X } from 'lucide-react';
 import { getRetomadaStatus, type RetomadaStatus } from '@/services/retomada.service';
 import { usePersistedState } from '@/hooks/usePersistedState';
 import { useUser } from '@/components/layout/UserContext';
@@ -41,7 +42,7 @@ export function RetomadaCard() {
       <div style={s.top}>
         <span style={s.eyebrow}>Bem-vindo de volta</span>
         <button onClick={() => setDismissedOn(hoje)} style={s.dismiss} aria-label="Dispensar por hoje">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
+          <X size={15} strokeWidth={2} />
         </button>
       </div>
 
@@ -86,9 +87,9 @@ const s: Record<string, React.CSSProperties> = {
   eyebrow: { fontSize: 11, fontWeight: 700, letterSpacing: 0.8, textTransform: 'uppercase', color: theme.tealDeep },
   dismiss: { border: 'none', background: 'transparent', color: theme.tealDeep, cursor: 'pointer', padding: 2, display: 'grid', placeItems: 'center', opacity: 0.7 },
   title: { fontSize: 21, fontWeight: 800, color: theme.ink, letterSpacing: -0.4, margin: '0 0 6px' },
-  body: { fontSize: 14.5, color: theme.inkSoft, lineHeight: 1.6, margin: '0 0 16px', maxWidth: 620 },
+  body: { fontSize: 15, color: theme.inkSoft, lineHeight: 1.6, margin: '0 0 16px', maxWidth: 620 },
   actions: { display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' },
   primary: { padding: '11px 20px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
-  ghost: { padding: '11px 14px', borderRadius: theme.radiusSm, border: 'none', background: 'transparent', color: theme.inkSoft, fontSize: 13.5, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' },
-  reassure: { display: 'flex', alignItems: 'center', gap: 7, fontSize: 12.5, color: theme.tealDeep, margin: '14px 0 0', fontWeight: 500 },
+  ghost: { padding: '11px 14px', borderRadius: theme.radiusSm, border: 'none', background: 'transparent', color: theme.inkSoft, fontSize: 14, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' },
+  reassure: { display: 'flex', alignItems: 'center', gap: 7, fontSize: 13, color: theme.tealDeep, margin: '14px 0 0', fontWeight: 500 },
 };

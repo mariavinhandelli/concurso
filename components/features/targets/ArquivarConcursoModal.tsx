@@ -6,9 +6,12 @@
 
 import { useState, type CSSProperties } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { Check as CheckIcon } from 'lucide-react';
 import { getConcursoArchivePreview, archiveConcurso, type ConcursoArchivePreview } from '@/services/concursoArchive.service';
 import { useToast } from '@/components/ui/ToastProvider';
-import { theme, zIndex } from '@/lib/theme';
+import { theme } from '@/lib/theme';
+import { Overlay } from '@/components/ui/Overlay';
+import { Button } from '@/components/ui/Button';
 
 export function ArquivarConcursoModal({
   target, onClose, onArchived,
@@ -54,9 +57,8 @@ export function ArquivarConcursoModal({
   }
 
   return (
-    <div style={s.overlay} onClick={onClose}>
-      <div style={s.modal} onClick={(e) => e.stopPropagation()} role="dialog" aria-label="Arquivar concurso">
-        <h3 style={s.title}>Arquivar {target.label}?</h3>
+    <Overlay onClose={onClose} maxWidth={440} labelledBy="arquivar-concurso-title">
+      <h3 id="arquivar-concurso-title" style={s.title}>Arquivar {target.label}?</h3>
         <p style={s.sub}>Ele sai do painel, do countdown e da cobertura — mas <b>nada é apagado</b>. Dá pra restaurar depois.</p>
 
         {preview === undefined ? (
@@ -96,20 +98,19 @@ export function ArquivarConcursoModal({
         )}
 
         <div style={s.actions}>
-          <button onClick={onClose} style={s.cancelBtn}>Cancelar</button>
-          <button onClick={confirmar} disabled={saving || preview === undefined} style={{ ...s.confirmBtn, opacity: saving || preview === undefined ? 0.6 : 1 }}>
+          <Button variant="outline" onClick={onClose}>Cancelar</Button>
+          <Button onClick={confirmar} disabled={preview === undefined} loading={saving}>
             {saving ? 'Arquivando…' : 'Arquivar'}
-          </button>
+          </Button>
         </div>
-      </div>
-    </div>
+    </Overlay>
   );
 }
 
 function Check({ on }: { on: boolean }) {
   return (
     <span style={{ ...checkStyle.box, ...(on ? { background: theme.teal, borderColor: theme.teal } : {}) }}>
-      {on && <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={theme.onTeal} strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>}
+      {on && <CheckIcon size={12} color={theme.onTeal} strokeWidth={3.2} />}
     </span>
   );
 }
@@ -119,18 +120,14 @@ const checkStyle = {
 };
 
 const s: Record<string, CSSProperties> = {
-  overlay: { position: 'fixed', inset: 0, background: 'var(--backdrop)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: zIndex.modal, padding: 16, fontFamily: theme.font },
-  modal: { background: theme.card, borderRadius: theme.radius, padding: 24, width: 'min(440px, 94vw)', maxHeight: '85vh', overflowY: 'auto', boxShadow: theme.shadowModal },
   title: { fontSize: 18, fontWeight: 700, color: theme.ink, margin: '0 0 6px' },
-  sub: { fontSize: 13.5, color: theme.inkSoft, margin: '0 0 16px', lineHeight: 1.5 },
+  sub: { fontSize: 14, color: theme.inkSoft, margin: '0 0 16px', lineHeight: 1.5 },
   body: { display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 8 },
   group: { display: 'flex', flexDirection: 'column', gap: 2, marginTop: 6 },
-  groupTitle: { fontSize: 11.5, fontWeight: 700, color: theme.inkFaint, letterSpacing: 0.4, textTransform: 'uppercase', margin: '4px 0 4px' },
+  groupTitle: { fontSize: 12, fontWeight: 700, color: theme.inkFaint, letterSpacing: 0.4, textTransform: 'uppercase', margin: '4px 0 4px' },
   row: { display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '8px 4px', background: 'transparent', border: 'none', cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left' },
   rowLabel: { fontSize: 14, color: theme.ink, fontWeight: 500 },
-  info: { display: 'flex', alignItems: 'center', gap: 8, fontSize: 12.5, color: theme.inkSoft, background: theme.tealBg, borderRadius: theme.radiusSm, padding: '10px 12px', margin: '10px 0 0', lineHeight: 1.45 },
+  info: { display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: theme.inkSoft, background: theme.tealBg, borderRadius: theme.radiusSm, padding: '10px 12px', margin: '10px 0 0', lineHeight: 1.45 },
   muted: { fontSize: 13, color: theme.inkFaint, margin: '4px 0' },
   actions: { display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 18 },
-  cancelBtn: { padding: '10px 16px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.inkSoft, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
-  confirmBtn: { padding: '10px 18px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
 };

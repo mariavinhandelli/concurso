@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { CircleHelp } from 'lucide-react';
 import { theme, perfColor, kbd } from '@/lib/theme';
 import { Button } from '@/components/ui/Button';
 import { Overlay } from '@/components/ui/Overlay';
@@ -68,10 +69,9 @@ export function JurisSimulado({ items, onClose }: Props) {
     onClose();
   }
 
-  // Fecha com Escape; C/E para responder
+  // Escape é tratado pelo Overlay (chama o mesmo onClose/safeClose); C/E para responder
   useEffect(() => {
-    async function onKey(e: KeyboardEvent) {
-      if (e.key === 'Escape') { await safeClose(); return; }
+    function onKey(e: KeyboardEvent) {
       if (questoes.length === 0) return; // tela de configuração: só Esc
       if (resposta !== null) { if (e.key === 'Enter') avancar(); return; }
       if (e.key === 'c' || e.key === 'C') responder(true);
@@ -102,7 +102,7 @@ export function JurisSimulado({ items, onClose }: Props) {
           <h2 id="simulado-config-title" style={{ fontSize: 20, fontWeight: 800, color: theme.ink, margin: '0 0 6px' }}>
             Simulado C/E
           </h2>
-          <p style={{ fontSize: 13.5, color: theme.inkSoft, margin: '0 0 20px' }}>
+          <p style={{ fontSize: 14, color: theme.inkSoft, margin: '0 0 20px' }}>
             {disponiveis.length} {disponiveis.length === 1 ? 'questão disponível' : 'questões disponíveis'} nesta seleção. Quantas quer responder?
           </p>
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 16 }}>
@@ -115,7 +115,7 @@ export function JurisSimulado({ items, onClose }: Props) {
               Todas ({disponiveis.length})
             </button>
           </div>
-          <p style={{ fontSize: 11.5, color: theme.inkFaint, margin: 0 }}>
+          <p style={{ fontSize: 12, color: theme.inkFaint, margin: 0 }}>
             As questões vêm em ordem aleatória a cada simulado.
           </p>
         </div>
@@ -244,8 +244,8 @@ export function JurisSimulado({ items, onClose }: Props) {
                   return (
                     <div key={disc} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                       <span style={{ fontSize: 12, color: theme.ink, minWidth: 120, fontWeight: 500 }}>{disc}</span>
-                      <div style={{ flex: 1, height: 5, background: theme.line, borderRadius: 99, overflow: 'hidden' }}>
-                        <div style={{ height: '100%', width: `${taxaAcerto}%`, background: cor, borderRadius: 99 }} />
+                      <div style={{ flex: 1, height: 5, background: theme.line, borderRadius: theme.radiusPill, overflow: 'hidden' }}>
+                        <div style={{ height: '100%', width: `${taxaAcerto}%`, background: cor, borderRadius: theme.radiusPill }} />
                       </div>
                       <span style={{ fontSize: 11, fontWeight: 700, color: cor, background: bg, borderRadius: 5, padding: '1px 7px', whiteSpace: 'nowrap', minWidth: 48, textAlign: 'center' }}>
                         {taxaAcerto}%
@@ -281,7 +281,7 @@ export function JurisSimulado({ items, onClose }: Props) {
                         overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
                         {q.questao_enunciado}
                       </p>
-                      <span style={{ fontSize: 10.5, color: theme.inkFaint }}>
+                      <span style={{ fontSize: 11, color: theme.inkFaint }}>
                         {q.tribunal} · {q.disciplina} · Gabarito: <strong>{q.questao_gabarito ? 'Certo' : 'Errado'}</strong>
                       </span>
                     </div>
@@ -308,7 +308,7 @@ export function JurisSimulado({ items, onClose }: Props) {
                     {acertos[i] ? '✓' : '✗'}
                   </span>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <p style={{ fontSize: 12.5, color: theme.ink, margin: '0 0 2px', lineHeight: 1.45,
+                    <p style={{ fontSize: 13, color: theme.ink, margin: '0 0 2px', lineHeight: 1.45,
                       overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
                       {q.questao_enunciado}
                     </p>
@@ -338,12 +338,10 @@ export function JurisSimulado({ items, onClose }: Props) {
       {/* Cabeçalho */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
         <span id="simulado-modal-title" style={{ fontSize: 13, fontWeight: 700, color: theme.clay, display: 'flex', alignItems: 'center', gap: 6 }}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="12" cy="12" r="10" /><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01" />
-          </svg>
+          <CircleHelp size={14} strokeWidth={1.7} />
           Simulado C/E
         </span>
-        <span style={{ fontSize: 12.5, color: theme.inkFaint }}>Questão {idx + 1} de {questoes.length}</span>
+        <span style={{ fontSize: 13, color: theme.inkFaint }}>Questão {idx + 1} de {questoes.length}</span>
         {/* Timer */}
         <span style={{ marginLeft: 'auto', fontSize: 13, fontWeight: 600, color: elapsed >= 3600 ? theme.danger : theme.inkSoft, fontVariantNumeric: 'tabular-nums' }}>
           ⏱ {formatTime(elapsed)}
@@ -357,7 +355,7 @@ export function JurisSimulado({ items, onClose }: Props) {
       </div>
 
       {/* Contexto */}
-      <div style={{ fontSize: 11.5, color: theme.inkFaint, marginBottom: 14, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+      <div style={{ fontSize: 12, color: theme.inkFaint, marginBottom: 14, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
         <span style={{ fontWeight: 700, color: theme.tealDeep, background: theme.tealBg, borderRadius: 5, padding: '1px 7px' }}>{q.tribunal}</span>
         <span>{q.disciplina}{q.materia ? ` · ${q.materia}` : ''}</span>
       </div>
@@ -391,7 +389,7 @@ export function JurisSimulado({ items, onClose }: Props) {
               <span aria-hidden="true">✗</span> Errado
             </button>
           </div>
-          <p style={{ fontSize: 11.5, color: theme.inkFaint, textAlign: 'center', margin: 0 }}>
+          <p style={{ fontSize: 12, color: theme.inkFaint, textAlign: 'center', margin: 0 }}>
             Atalhos: <kbd style={kbd}>C</kbd> Certo · <kbd style={kbd}>E</kbd> Errado · <kbd style={kbd}>Esc</kbd> fechar
           </p>
         </>
@@ -409,7 +407,7 @@ export function JurisSimulado({ items, onClose }: Props) {
               Gabarito: <strong style={{ color: theme.ink }}>{gabarito ? 'Certo' : 'Errado'}</strong>
             </p>
             {q.questao_comentario && (
-              <p style={{ fontSize: 13.5, color: theme.ink, margin: 0, lineHeight: 1.65 }}>
+              <p style={{ fontSize: 14, color: theme.ink, margin: 0, lineHeight: 1.65 }}>
                 {q.questao_comentario}
               </p>
             )}
@@ -417,7 +415,7 @@ export function JurisSimulado({ items, onClose }: Props) {
           <Button style={{ background: theme.clay, color: theme.onClay }} onClick={avancar} aria-keyshortcuts="Enter">
             {idx < questoes.length - 1 ? 'Próxima questão →' : 'Ver resultado'}
           </Button>
-          <p style={{ fontSize: 11.5, color: theme.inkFaint, textAlign: 'center', margin: 0 }}>
+          <p style={{ fontSize: 12, color: theme.inkFaint, textAlign: 'center', margin: 0 }}>
             Pressione <kbd style={kbd}>Enter</kbd> para avançar
           </p>
         </div>

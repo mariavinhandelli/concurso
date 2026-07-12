@@ -11,6 +11,9 @@ import { createRule, editRuleVersioned, type RuleSummary, type RecurrenceMode } 
 import { theme } from '@/lib/theme';
 import { toLocalDateString } from '@/lib/local-date';
 import { Button } from '@/components/ui/Button';
+import { Overlay } from '@/components/ui/Overlay';
+import { Input } from '@/components/ui/Input';
+import { SegmentedControl } from '@/components/ui/SegmentedControl';
 import { DiaFixoForm, type DiaFixoFormRef } from './DiaFixoForm';
 import { CicloForm, type CicloFormRef } from './CicloForm';
 
@@ -34,12 +37,6 @@ export function RecurrenceModal({ onClose, onCreated, editRule = null, modoInici
 
   const diaRef = useRef<DiaFixoFormRef>(null);
   const cicloRef = useRef<CicloFormRef>(null);
-
-  useEffect(() => {
-    const h = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
-    document.addEventListener('keydown', h);
-    return () => document.removeEventListener('keydown', h);
-  }, [onClose]);
 
   useEffect(() => {
     listSubjects()
@@ -83,9 +80,8 @@ export function RecurrenceModal({ onClose, onCreated, editRule = null, modoInici
   }
 
   return (
-    <div style={styles.overlay} onClick={onClose}>
-      <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
-        <h2 style={styles.h2}>{isEdit ? 'Editar recorrência' : 'Nova recorrência'}</h2>
+    <Overlay onClose={onClose} maxWidth={480} labelledBy="recurrence-modal-title">
+      <h2 id="recurrence-modal-title" style={styles.h2}>{isEdit ? 'Editar recorrência' : 'Nova recorrência'}</h2>
         <p style={styles.subtitle}>
           {isEdit
             ? 'As mudanças valem a partir de hoje. As semanas passadas ficam como estavam.'
@@ -93,9 +89,12 @@ export function RecurrenceModal({ onClose, onCreated, editRule = null, modoInici
         </p>
 
         {!isEdit && (
-          <div style={styles.modeToggle}>
-            <button onClick={() => setMode('dia_fixo')} style={{ ...styles.modeBtn, ...(mode === 'dia_fixo' ? styles.modeBtnOn : {}) }}>Dia fixo</button>
-            <button onClick={() => setMode('ciclo')} style={{ ...styles.modeBtn, ...(mode === 'ciclo' ? styles.modeBtnOn : {}) }}>Ciclo</button>
+          <div style={{ marginBottom: 8 }}>
+            <SegmentedControl
+              options={[{ value: 'dia_fixo', label: 'Dia fixo' }, { value: 'ciclo', label: 'Ciclo' }]}
+              value={mode}
+              onChange={setMode}
+            />
           </div>
         )}
         <p style={styles.modeHint}>
@@ -116,7 +115,7 @@ export function RecurrenceModal({ onClose, onCreated, editRule = null, modoInici
           <span>Indeterminado</span>
         </label>
         {!indeterminado && (
-          <input type="date" value={endDate} min={toLocalDateString()} onChange={(e) => setEndDate(e.target.value)} style={styles.dateInput} />
+          <Input type="date" value={endDate} min={toLocalDateString()} onChange={(e) => setEndDate(e.target.value)} style={{ marginTop: 10 }} />
         )}
 
         {error && <p style={styles.error}>{error}</p>}
@@ -127,24 +126,17 @@ export function RecurrenceModal({ onClose, onCreated, editRule = null, modoInici
             {saving ? 'Salvando…' : (isEdit ? 'Salvar alterações' : 'Criar recorrência')}
           </Button>
         </div>
-      </div>
-    </div>
+    </Overlay>
   );
 }
 
 const styles: Record<string, React.CSSProperties> = {
-  overlay: { position: 'fixed', inset: 0, background: 'var(--backdrop)', display: 'grid', placeItems: 'center', zIndex: 60, padding: 20 },
-  modal: { background: theme.card, borderRadius: theme.radius, boxShadow: '0 20px 60px rgba(0,0,0,0.18)', padding: 24, width: '100%', maxWidth: 480, maxHeight: '88vh', overflowY: 'auto', fontFamily: theme.font },
   h2: { fontSize: 18, fontWeight: 700, color: theme.ink, margin: 0 },
   subtitle: { fontSize: 13, color: theme.inkSoft, margin: '4px 0 16px', lineHeight: 1.5 },
-  modeToggle: { display: 'flex', gap: 4, background: 'rgba(15,23,42,.06)', borderRadius: theme.radiusSm, padding: 4, marginBottom: 8 },
-  modeBtn: { flex: 1, padding: '9px 0', border: 'none', background: 'transparent', color: theme.inkSoft, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', borderRadius: theme.radiusSm - 2 },
-  modeBtnOn: { background: theme.card, color: theme.teal, boxShadow: theme.shadow },
   modeHint: { fontSize: 12, color: theme.inkFaint, margin: '0 0 8px', lineHeight: 1.5 },
   sectionLabel: { display: 'block', fontSize: 12, fontWeight: 700, color: theme.inkSoft, margin: '16px 0 8px', letterSpacing: 0.3 },
-  checkRow: { display: 'flex', alignItems: 'center', gap: 9, fontSize: 13.5, color: theme.ink, cursor: 'pointer' },
+  checkRow: { display: 'flex', alignItems: 'center', gap: 9, fontSize: 14, color: theme.ink, cursor: 'pointer' },
   checkbox: { width: 16, height: 16, accentColor: theme.teal, cursor: 'pointer' },
-  dateInput: { marginTop: 10, padding: '9px 12px', borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.card, fontSize: 14, color: theme.ink, fontFamily: 'inherit', outline: 'none' },
   error: { color: theme.danger, fontSize: 13, margin: '12px 0 0' },
   actions: { display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 20 },
   cancel: { padding: '10px 18px', borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.card, color: theme.inkSoft, fontSize: 14, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' },

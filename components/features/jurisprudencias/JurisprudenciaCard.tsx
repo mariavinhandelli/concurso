@@ -1,6 +1,7 @@
 'use client';
 
 import { memo, useEffect, useState } from 'react';
+import { Star } from 'lucide-react';
 import { theme } from '@/lib/theme';
 import { EstrelasBadge } from './EstrelasBadge';
 import { getInteracao, toggleFavorito } from '@/services/jurisInteracoes.service';
@@ -91,9 +92,7 @@ export const JurisprudenciaCard = memo(function JurisprudenciaCard({ item, onCli
           aria-label={favorito ? 'Remover dos favoritos' : 'Marcar como favorito'}
           style={{ marginLeft: 'auto', border: 'none', background: 'transparent', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, minWidth: 44, minHeight: 44 }}
         >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill={favorito ? '#f59e0b' : 'none'} stroke={favorito ? '#f59e0b' : theme.inkFaint} strokeWidth="1.7">
-            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z" />
-          </svg>
+          <Star size={18} fill={favorito ? '#f59e0b' : 'none'} color={favorito ? '#f59e0b' : theme.inkFaint} strokeWidth={1.7} />
         </button>
       </div>
 
@@ -114,7 +113,7 @@ export const JurisprudenciaCard = memo(function JurisprudenciaCard({ item, onCli
       )}
 
       {/* Disciplina / matéria */}
-      <div style={{ fontSize: 12.5, color: theme.inkSoft }}>
+      <div style={{ fontSize: 13, color: theme.inkSoft }}>
         {item.disciplina}{item.materia ? ` · ${item.materia}` : ''}
         {item.assunto ? ` · ${item.assunto}` : ''}
       </div>
@@ -122,7 +121,7 @@ export const JurisprudenciaCard = memo(function JurisprudenciaCard({ item, onCli
       {/* Rodapé: estrelas + incidência + tags + ações */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
         <EstrelasBadge value={item.estrelas} size={13} />
-        <span style={{ fontSize: 11.5, fontWeight: 600, color: INCIDENCIA_COLOR[item.incidencia_concursos] }}>
+        <span style={{ fontSize: 12, fontWeight: 600, color: INCIDENCIA_COLOR[item.incidencia_concursos] }}>
           ↑ {INCIDENCIA_LABEL[item.incidencia_concursos]}
         </span>
         {item.palavras_chave.slice(0, 2).map((t) => (
@@ -150,8 +149,8 @@ const styles: Record<string, React.CSSProperties> = {
     transition: 'border-color .15s, box-shadow .15s', fontFamily: theme.font,
     display: 'flex', flexDirection: 'column', gap: 10,
   },
-  tribunalBadge: { fontSize: 11.5, fontWeight: 700, color: theme.onTeal, background: theme.teal, borderRadius: 6, padding: '2px 8px' },
-  tipoBadge: { fontSize: 11.5, fontWeight: 500, color: theme.inkSoft, background: 'rgba(15,23,42,.06)', borderRadius: 6, padding: '2px 8px' },
+  tribunalBadge: { fontSize: 12, fontWeight: 700, color: theme.onTeal, background: theme.teal, borderRadius: 6, padding: '2px 8px' },
+  tipoBadge: { fontSize: 12, fontWeight: 500, color: theme.inkSoft, background: 'rgba(15,23,42,.06)', borderRadius: 6, padding: '2px 8px' },
   tese: {
     fontSize: 14, color: theme.ink, margin: 0, lineHeight: 1.55, fontWeight: 500,
     display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden',
@@ -160,10 +159,10 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: 13, color: theme.inkSoft, margin: 0, lineHeight: 1.5,
     display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden',
   },
-  comoCaiBox: { background: 'rgba(99,102,241,.06)', borderRadius: 8, padding: '8px 12px' },
-  comoCaiLabel: { fontSize: 10.5, fontWeight: 700, color: theme.clay, textTransform: 'uppercase', letterSpacing: 0.4 },
+  comoCaiBox: { background: 'rgba(99,102,241,.06)', borderRadius: theme.radiusXs, padding: '8px 12px' },
+  comoCaiLabel: { fontSize: 11, fontWeight: 700, color: theme.clay, textTransform: 'uppercase', letterSpacing: 0.4 },
   comoCaiText: {
-    fontSize: 12.5, color: theme.ink, margin: '3px 0 0', lineHeight: 1.5,
+    fontSize: 13, color: theme.ink, margin: '3px 0 0', lineHeight: 1.5,
     display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden',
   },
   tag: { fontSize: 11, color: theme.tealDeep, background: theme.tealBg, borderRadius: 6, padding: '2px 7px', fontWeight: 500 },

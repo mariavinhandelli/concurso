@@ -12,7 +12,9 @@ import {
 } from '@/services/studyNotes.service';
 import { KIND_CORES } from '@/components/features/caderno/notaCores';
 import { useToast } from '@/components/ui/ToastProvider';
-import { theme, zIndex } from '@/lib/theme';
+import { theme } from '@/lib/theme';
+import { Overlay } from '@/components/ui/Overlay';
+import { IconButton } from '@/components/ui/IconButton';
 import type { Topic } from '@/services/topics.service';
 
 const KIND_LABEL = Object.fromEntries(NOTA_KINDS.map((k) => [k.value, k.label]));
@@ -38,12 +40,6 @@ export function TopicNotesPopover({ topic, subjectId, onClose, onChanged }: Prop
     return () => { cancelled = true; };
   }, [topic.id]);
 
-  useEffect(() => {
-    function onKey(e: KeyboardEvent) { if (e.key === 'Escape') onClose(); }
-    document.addEventListener('keydown', onKey);
-    return () => document.removeEventListener('keydown', onKey);
-  }, [onClose]);
-
   function abrirNota(id: string) {
     router.push(`/caderno?nota=${id}`);
   }
@@ -61,14 +57,13 @@ export function TopicNotesPopover({ topic, subjectId, onClose, onChanged }: Prop
   }
 
   return (
-    <div style={s.overlay} onClick={onClose}>
-      <div style={s.modal} onClick={(e) => e.stopPropagation()}>
+    <Overlay onClose={onClose} maxWidth={440} labelledBy="topic-notes-title" padding={0} hideClose>
         <div style={s.head}>
           <div style={{ minWidth: 0 }}>
             <span style={s.eyebrow}>Anotações do tópico</span>
-            <h2 style={s.h2}>{topic.name}</h2>
+            <h2 id="topic-notes-title" style={s.h2}>{topic.name}</h2>
           </div>
-          <button onClick={onClose} style={s.close} aria-label="Fechar">✕</button>
+          <IconButton onClick={onClose} aria-label="Fechar" size="sm" style={{ fontSize: 15, flexShrink: 0 }}>✕</IconButton>
         </div>
 
         <div style={s.body}>
@@ -97,25 +92,21 @@ export function TopicNotesPopover({ topic, subjectId, onClose, onChanged }: Prop
             {criando ? 'Criando…' : '+ Nova anotação'}
           </button>
         </div>
-      </div>
-    </div>
+    </Overlay>
   );
 }
 
 const s: Record<string, CSSProperties> = {
-  overlay: { position: 'fixed', inset: 0, background: 'var(--backdrop)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: zIndex.modal, padding: 16 },
-  modal: { background: theme.card, borderRadius: theme.radius, width: 'min(440px, 96vw)', maxHeight: '80vh', display: 'flex', flexDirection: 'column', boxShadow: theme.shadowModal, fontFamily: theme.font },
   head: { display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 10, padding: '18px 20px 12px' },
   eyebrow: { fontSize: 11, fontWeight: 700, color: theme.teal, letterSpacing: 0.6, textTransform: 'uppercase' },
-  h2: { fontSize: 16.5, fontWeight: 700, color: theme.ink, margin: '3px 0 0', lineHeight: 1.35 },
-  close: { border: 'none', background: 'transparent', color: theme.inkSoft, fontSize: 15, cursor: 'pointer', padding: 4, flexShrink: 0 },
+  h2: { fontSize: 17, fontWeight: 700, color: theme.ink, margin: '3px 0 0', lineHeight: 1.35 },
   body: { overflowY: 'auto', padding: '0 20px 12px' },
   muted: { fontSize: 13, color: theme.inkFaint, padding: '8px 0 16px' },
   lista: { display: 'flex', flexDirection: 'column', gap: 8 },
   item: { display: 'flex', flexDirection: 'column', gap: 4, width: '100%', textAlign: 'left', padding: '10px 12px', borderRadius: 10, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.bg, cursor: 'pointer', fontFamily: 'inherit' },
-  itemTitulo: { fontSize: 13.5, fontWeight: 700, color: theme.ink },
+  itemTitulo: { fontSize: 14, fontWeight: 700, color: theme.ink },
   itemPreview: { fontSize: 12, color: theme.inkSoft, lineHeight: 1.45, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const, overflow: 'hidden' },
-  itemKind: { fontSize: 10, fontWeight: 700, borderRadius: 999, padding: '2px 8px', alignSelf: 'flex-start', marginTop: 2 },
+  itemKind: { fontSize: 10, fontWeight: 700, borderRadius: theme.radiusPill, padding: '2px 8px', alignSelf: 'flex-start', marginTop: 2 },
   actions: { padding: '12px 20px 18px', borderTop: `0.5px solid ${theme.line}` },
-  novaBtn: { width: '100%', padding: '10px 0', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+  novaBtn: { width: '100%', padding: '10px 0', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
 };

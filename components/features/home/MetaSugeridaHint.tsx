@@ -10,6 +10,7 @@
 'use client';
 
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { X } from 'lucide-react';
 import {
   getGoalsSummary, getSuggestedDailyTarget, setDailyTarget,
   type GoalsSummary, type SuggestedTarget,
@@ -79,7 +80,7 @@ export function MetaSugeridaHint() {
             : <>Ainda não estudou hoje — <b style={s.strong}>1 bloco de {BLOCO_MIN} min = {pct}% da meta.</b> Todo começo conta.</>}
         </span>
         <button onClick={() => setDismissedOn(hoje)} style={s.dismissX} aria-label="Dispensar por hoje">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
+          <X size={13} strokeWidth={2} />
         </button>
       </div>
     );
@@ -99,7 +100,7 @@ export function MetaSugeridaHint() {
       <div style={s.top}>
         <span style={s.eyebrow}>Meta adaptativa</span>
         <button onClick={() => setDismissedOn(hoje)} style={s.dismiss} aria-label="Dispensar por hoje">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
+          <X size={14} strokeWidth={2} />
         </button>
       </div>
       <p style={s.title}>{titulo}</p>
@@ -120,19 +121,19 @@ const s: Record<string, React.CSSProperties> = {
     padding: '14px 16px', marginTop: 12, fontFamily: theme.font, minWidth: 0,
   },
   top: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 },
-  eyebrow: { fontSize: 10.5, fontWeight: 700, letterSpacing: 0.8, textTransform: 'uppercase', color: theme.tealDeep },
+  eyebrow: { fontSize: 11, fontWeight: 700, letterSpacing: 0.8, textTransform: 'uppercase', color: theme.tealDeep },
   dismiss: { border: 'none', background: 'transparent', color: theme.tealDeep, cursor: 'pointer', padding: 2, display: 'grid', placeItems: 'center', opacity: 0.65 },
   title: { fontSize: 15, fontWeight: 700, color: theme.ink, margin: '0 0 4px', letterSpacing: -0.2 },
-  body: { fontSize: 13.5, color: theme.inkSoft, lineHeight: 1.55, margin: '0 0 12px', maxWidth: 560 },
+  body: { fontSize: 14, color: theme.inkSoft, lineHeight: 1.55, margin: '0 0 12px', maxWidth: 560 },
   strong: { color: theme.ink, fontWeight: 700 },
   actions: { display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' },
-  primary: { padding: '9px 16px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+  primary: { padding: '9px 16px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
   ghost: { padding: '9px 12px', borderRadius: theme.radiusSm, border: 'none', background: 'transparent', color: theme.inkSoft, fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' },
 
   proj: {
     display: 'flex', alignItems: 'center', gap: 9, marginTop: 10, padding: '9px 12px',
     background: theme.card, border: `0.5px solid ${theme.line}`, borderRadius: theme.radiusSm, minWidth: 0,
   },
-  projText: { fontSize: 12.5, color: theme.inkSoft, lineHeight: 1.45, flex: 1, minWidth: 0 },
+  projText: { fontSize: 13, color: theme.inkSoft, lineHeight: 1.45, flex: 1, minWidth: 0 },
   dismissX: { border: 'none', background: 'transparent', color: theme.inkFaint, cursor: 'pointer', padding: 2, display: 'grid', placeItems: 'center', flexShrink: 0 },
 };

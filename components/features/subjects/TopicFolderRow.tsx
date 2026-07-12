@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { X, Pencil } from 'lucide-react';
 import type { Topic } from '@/services/topics.service';
 import { TopicLeafRow } from './TopicLeafRow';
 import { theme } from '@/lib/theme';
@@ -144,12 +145,10 @@ function TopicFolderRowFn({
             style={{ ...styles.iconBtn, color: isFolderEditing ? theme.teal : theme.inkSoft }}
             title="Editar nome da pasta" aria-label="Editar pasta"
           >
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
-            </svg>
+            <Pencil size={15} strokeWidth={1.8} />
           </button>
           <button onClick={() => onDeleteFolder(topic.id)} style={styles.deleteBtn} aria-label="Apagar pasta" title="Apagar pasta">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
+            <X size={14} strokeWidth={2} />
           </button>
         </div>
       </div>
@@ -205,7 +204,7 @@ export const TopicFolderRow = React.memo(TopicFolderRowFn, folderPropsEqual);
 
 const styles: Record<string, React.CSSProperties> = {
   folderWrap: {
-    background: theme.card, borderRadius: 12,
+    background: theme.card, borderRadius: theme.radiusSm,
     border: `0.5px solid ${theme.line}`, overflow: 'hidden',
   },
   folderHead: { display: 'flex', alignItems: 'center', gap: 10, padding: '12px 16px' },
@@ -214,28 +213,28 @@ const styles: Record<string, React.CSSProperties> = {
     background: 'transparent', display: 'grid', placeItems: 'center', cursor: 'pointer', flexShrink: 0,
   },
   folderName: {
-    fontSize: 15.5, color: theme.ink, fontWeight: 600, cursor: 'pointer',
+    fontSize: 16, color: theme.ink, fontWeight: 600, cursor: 'pointer',
     display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
   },
-  folderTrack: { height: 5, background: theme.muted, borderRadius: 999, overflow: 'hidden', marginTop: 7 },
-  folderFill: { height: '100%', background: theme.teal, borderRadius: 999, transition: 'width 0.4s cubic-bezier(.2,.7,.3,1)' },
-  folderMeta: { fontSize: 11.5, color: theme.inkSoft, marginTop: 4 },
+  folderTrack: { height: 5, background: theme.muted, borderRadius: theme.radiusPill, overflow: 'hidden', marginTop: 7 },
+  folderFill: { height: '100%', background: theme.teal, borderRadius: theme.radiusPill, transition: 'width 0.4s cubic-bezier(.2,.7,.3,1)' },
+  folderMeta: { fontSize: 12, color: theme.inkSoft, marginTop: 4 },
   folderBody: { padding: '4px 12px 12px 40px', display: 'flex', flexDirection: 'column', gap: 6 },
   folderActions: { display: 'flex', alignItems: 'center', gap: 2, flexShrink: 0 },
   row: {
     display: 'flex', alignItems: 'center', gap: 10,
-    background: theme.card, borderRadius: 12, border: `0.5px solid ${theme.line}`,
+    background: theme.card, borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`,
     padding: '12px 16px', minWidth: 0,
   },
   rowChild: { background: theme.bg, borderRadius: 10 },
   editInput: {
-    flex: 1, minWidth: 0, width: '100%', padding: '7px 10px', borderRadius: 8,
+    flex: 1, minWidth: 0, width: '100%', padding: '7px 10px', borderRadius: theme.radiusXs,
     border: `1.5px solid ${theme.teal}`, background: theme.card,
     fontSize: 15, color: theme.ink, fontFamily: 'inherit', outline: 'none',
   },
   iconBtn: {
-    width: 32, height: 32, borderRadius: 8, border: 'none', background: 'transparent',
+    width: 32, height: 32, borderRadius: theme.radiusXs, border: 'none', background: 'transparent',
     display: 'grid', placeItems: 'center', cursor: 'pointer', transition: 'all .15s', flexShrink: 0,
   },
-  deleteBtn: { border: 'none', background: 'transparent', color: theme.inkFaint, cursor: 'pointer', opacity: 0.6, width: 30, height: 30, borderRadius: 8, display: 'grid', placeItems: 'center', flexShrink: 0, padding: 0 },
+  deleteBtn: { border: 'none', background: 'transparent', color: theme.inkFaint, cursor: 'pointer', opacity: 0.6, width: 30, height: 30, borderRadius: theme.radiusXs, display: 'grid', placeItems: 'center', flexShrink: 0, padding: 0 },
 };

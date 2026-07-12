@@ -7,6 +7,7 @@ import { calculateNextReview, daysOverdue, type RecallGrade } from '@/lib/spaced
 import { fromDbRow, toDbRow } from '@/lib/spaced-repetition.mapper';
 import { localDateInDays, toLocalDateString } from '@/lib/local-date';
 import { getArchivedSubjectIds } from '@/services/archivedCache';
+import { getUserFeatures, srsModifierFor } from '@/services/userFeatures.service';
 import * as repo from '@/services/flashcards.repository';
 
 // 'errei' = lapso (quality 0 no SM-2): reseta as repetições, derruba o ease factor
@@ -51,6 +52,7 @@ export interface QueueCard {
   id: string;
   front: string;
   back: string;
+  subjectId?: string | null;
   subjectName?: string;
   subjectColor?: string;
   isNew?: boolean;
@@ -65,6 +67,7 @@ function toQueueCard(c: repo.FlashcardQueueRow): QueueCard {
   const subj = Array.isArray(c.subjects) ? c.subjects[0] : c.subjects;
   return {
     id: c.id, front: c.front, back: c.back,
+    subjectId: c.subject_id ?? null,
     subjectName: subj?.name ?? 'Sem matéria',
     subjectColor: subj?.color ?? '#C9B8DD',
     isNew: c.next_review_date === null,
@@ -99,8 +102,12 @@ export async function createFlashcard(input: FlashcardInput): Promise<void> {
 
 export async function submitCardReview(cardId: string, rating: ReviewRating): Promise<void> {
   const { supabase, userId } = await requireUser();
-  const row = await repo.fetchCardSRState(supabase, userId, cardId);
-  const result = calculateNextReview(fromDbRow(row), RATING_TO_GRADE[rating]);
+  const [row, features] = await Promise.all([
+    repo.fetchCardSRState(supabase, userId, cardId),
+    getUserFeatures(),
+  ]);
+  const mod = srsModifierFor(features, row.subject_id);
+  const result = calculateNextReview(fromDbRow(row), RATING_TO_GRADE[rating], new Date(), mod);
   await repo.updateFlashcard(supabase, userId, cardId, { ...toDbRow(result), is_review_active: true });
 }
 

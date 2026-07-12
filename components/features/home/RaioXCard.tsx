@@ -143,25 +143,25 @@ const styles: Record<string, React.CSSProperties> = {
   },
   header: { display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 12, marginBottom: 10 },
   eyebrow: { fontSize: 11, fontWeight: 700, color: theme.teal, letterSpacing: 0.6, textTransform: 'uppercase' },
-  targetName: { fontSize: 12.5, fontWeight: 600, color: theme.inkSoft, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 },
+  targetName: { fontSize: 13, fontWeight: 600, color: theme.inkSoft, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 },
 
   heroRow: { display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 },
   heroPct: { fontSize: 36, fontWeight: 800, color: theme.ink, letterSpacing: -1, lineHeight: 1 },
-  nivelChip: { fontSize: 11.5, fontWeight: 700, borderRadius: 999, padding: '3px 10px' },
-  heroLabel: { fontSize: 12.5, color: theme.inkFaint, margin: '4px 0 0' },
+  nivelChip: { fontSize: 12, fontWeight: 700, borderRadius: theme.radiusPill, padding: '3px 10px' },
+  heroLabel: { fontSize: 13, color: theme.inkFaint, margin: '4px 0 0' },
 
-  bar: { display: 'flex', height: 10, background: theme.muted, borderRadius: 999, overflow: 'hidden', marginBottom: 14, gap: 1.5 },
+  bar: { display: 'flex', height: 10, background: theme.muted, borderRadius: theme.radiusPill, overflow: 'hidden', marginBottom: 14, gap: 1.5 },
 
   focoBox: { background: theme.bg, border: `0.5px solid ${theme.line}`, borderRadius: theme.radiusSm, padding: '12px 14px', marginBottom: 12 },
-  focoTitulo: { fontSize: 13.5, color: theme.ink, margin: '0 0 3px' },
-  focoDetalhe: { fontSize: 12.5, color: theme.inkSoft, margin: '0 0 10px' },
+  focoTitulo: { fontSize: 14, color: theme.ink, margin: '0 0 3px' },
+  focoDetalhe: { fontSize: 13, color: theme.inkSoft, margin: '0 0 10px' },
   focoBtn: { border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 13, fontWeight: 600, borderRadius: theme.radiusSm, padding: '8px 14px', cursor: 'pointer', fontFamily: 'inherit' },
 
   lista: { display: 'flex', flexDirection: 'column', gap: 6 },
   listaItem: { display: 'flex', alignItems: 'center', gap: 8 },
   listaDot: { width: 8, height: 8, borderRadius: '50%', flexShrink: 0 },
   listaNome: { fontSize: 13, color: theme.ink, flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
-  listaScore: { fontSize: 12.5, fontWeight: 600, color: theme.inkSoft, fontVariantNumeric: 'tabular-nums' },
+  listaScore: { fontSize: 13, fontWeight: 600, color: theme.inkSoft, fontVariantNumeric: 'tabular-nums' },
   verMaisBtn: { marginTop: 10, border: 'none', background: 'transparent', color: theme.inkSoft, fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', padding: 0 },
 
   emptyMsg: { fontSize: 14, color: theme.inkSoft, margin: '4px 0 0', lineHeight: 1.5 },

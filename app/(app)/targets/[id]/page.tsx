@@ -12,8 +12,10 @@ import { updateTargetExamDate, promoteToPos } from '@/services/targetExams.servi
 import { listAllBoards, type Board } from '@/services/boards.service';
 import { useToast } from '@/components/ui/ToastProvider';
 import { theme } from '@/lib/theme';
+import { Overlay } from '@/components/ui/Overlay';
 import { useUI } from '@/components/layout/UIContext';
 import { Button } from '@/components/ui/Button';
+import { Select } from '@/components/ui/Select';
 
 const HubOverviewTab = dynamic(
   () => import('@/components/features/targets/HubOverviewTab').then((m) => ({ default: m.HubOverviewTab })),
@@ -128,9 +130,9 @@ export default function TargetDetailPage() {
 
   if (loading) return (
     <div style={{ ...s.container, padding: isMobile ? '20px 16px' : '34px 40px' }}>
-      <div style={{ height: 16, width: 88, borderRadius: 8, background: theme.muted, animation: 'focali-pulse 1.4s ease infinite', marginBottom: 20 }} />
+      <div style={{ height: 16, width: 88, borderRadius: theme.radiusXs, background: theme.muted, animation: 'focali-pulse 1.4s ease infinite', marginBottom: 20 }} />
       <div style={{ height: 34, width: '55%', borderRadius: theme.radiusSm, background: theme.muted, animation: 'focali-pulse 1.4s ease infinite', marginBottom: 8 }} />
-      <div style={{ height: 12, width: '35%', borderRadius: 8, background: theme.muted, animation: 'focali-pulse 1.4s ease infinite', marginBottom: 28 }} />
+      <div style={{ height: 12, width: '35%', borderRadius: theme.radiusXs, background: theme.muted, animation: 'focali-pulse 1.4s ease infinite', marginBottom: 28 }} />
       <SkeletonList />
     </div>
   );
@@ -238,21 +240,19 @@ export default function TargetDetailPage() {
       )}
 
       {promoteOpen && (
-        <div style={s.promoteOverlay} onClick={() => setPromoteOpen(false)}>
-          <div style={s.promoteModal} onClick={(e) => e.stopPropagation()}>
-            <h3 style={s.promoteTitle}>Edital publicado! Qual é a banca?</h3>
-            <p style={s.promoteSub}>Selecione a banca definida para <strong>{formatTargetLabel(target)}</strong>.</p>
-            <select value={promoteBoardId} onChange={(e) => setPromoteBoardId(e.target.value)} style={s.promoteSelect} autoFocus>
-              {promoteBoards.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
-            </select>
-            <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 16 }}>
-              <Button variant="ghost" onClick={() => setPromoteOpen(false)}>Cancelar</Button>
-              <Button onClick={handleConfirmPromote} disabled={!promoteBoardId || promoting}>
-                {promoting ? 'Promovendo…' : 'Promover para pós-edital'}
-              </Button>
-            </div>
+        <Overlay onClose={() => setPromoteOpen(false)} maxWidth={400} labelledBy="promote-target-detail-title">
+          <h3 id="promote-target-detail-title" style={s.promoteTitle}>Edital publicado! Qual é a banca?</h3>
+          <p style={s.promoteSub}>Selecione a banca definida para <strong>{formatTargetLabel(target)}</strong>.</p>
+          <Select value={promoteBoardId} onChange={(e) => setPromoteBoardId(e.target.value)} autoFocus>
+            {promoteBoards.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
+          </Select>
+          <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 16 }}>
+            <Button variant="ghost" onClick={() => setPromoteOpen(false)}>Cancelar</Button>
+            <Button onClick={handleConfirmPromote} disabled={!promoteBoardId || promoting}>
+              {promoting ? 'Promovendo…' : 'Promover para pós-edital'}
+            </Button>
           </div>
-        </div>
+        </Overlay>
       )}
     </div>
   );
@@ -269,20 +269,17 @@ const s: Record<string, CSSProperties> = {
   headerRow: { display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, marginBottom: 24, flexWrap: 'wrap' },
   h1: { fontWeight: 800, color: theme.ink, letterSpacing: -0.6, margin: '0 0 12px', overflowWrap: 'break-word' },
   coverageRow: { display: 'flex', alignItems: 'center', gap: 10 },
-  coverageTrack: { flex: 1, maxWidth: 260, height: 6, background: theme.muted, borderRadius: 999, overflow: 'hidden' },
-  coverageFill: { height: '100%', background: theme.teal, borderRadius: 999, transition: 'width 0.4s ease' },
+  coverageTrack: { flex: 1, maxWidth: 260, height: 6, background: theme.muted, borderRadius: theme.radiusPill, overflow: 'hidden' },
+  coverageFill: { height: '100%', background: theme.teal, borderRadius: theme.radiusPill, transition: 'width 0.4s ease' },
   coverageLabel: { fontSize: 12, color: theme.inkFaint, whiteSpace: 'nowrap', fontVariantNumeric: 'tabular-nums' },
-  genBtn: { display: 'inline-flex', alignItems: 'center', padding: '10px 18px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
+  genBtn: { display: 'inline-flex', alignItems: 'center', padding: '10px 18px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
   genBtnDisabled: { background: theme.muted, color: theme.inkFaint, cursor: 'not-allowed' },
   tabs: { display: 'flex', gap: 0, marginBottom: 24, borderBottom: `1px solid ${theme.line}` },
   tab: { padding: '10px 18px', border: 'none', background: 'transparent', color: theme.inkSoft, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', borderBottom: '2px solid transparent', marginBottom: -1, transition: 'color .15s' },
   tabOn: { color: theme.teal, borderBottomColor: theme.teal },
 
-  promoteOverlay: { position: 'fixed', inset: 0, background: 'var(--backdrop)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 60, padding: 16 },
-  promoteModal: { background: theme.card, borderRadius: theme.radius, padding: '24px', width: 'min(400px, 94vw)', boxShadow: theme.shadowModal, fontFamily: theme.font },
   promoteTitle: { fontSize: 16, fontWeight: 700, color: theme.ink, margin: '0 0 6px' },
   promoteSub: { fontSize: 13, color: theme.inkSoft, margin: '0 0 16px', lineHeight: 1.5 },
-  promoteSelect: { width: '100%', padding: '10px 14px', borderRadius: theme.radiusSm, border: `1px solid ${theme.lineStrong}`, background: theme.card, fontSize: 14, color: theme.ink, fontFamily: 'inherit', outline: 'none' },
-  btnPrimary: { padding: '10px 20px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
+  btnPrimary: { padding: '10px 20px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
   btnGhost: { padding: '10px 12px', borderRadius: theme.radiusSm, border: 'none', background: 'transparent', color: theme.inkFaint, fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
 };

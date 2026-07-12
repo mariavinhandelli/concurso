@@ -7,6 +7,7 @@
 import { memo, useCallback, useEffect, useRef, useState, type CSSProperties } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { ChevronDown, Star, Trash2 } from 'lucide-react';
 import { useTargetList } from '@/hooks/useTargetList';
 import { usePersistedState } from '@/hooks/usePersistedState';
 import { formatTargetLabel, daysUntilExam, countdownInfo } from '@/lib/targets';
@@ -17,8 +18,12 @@ import { ImportarEditalModal } from '@/components/features/targets/ImportarEdita
 import { ArquivarConcursoModal } from '@/components/features/targets/ArquivarConcursoModal';
 import { useToast } from '@/components/ui/ToastProvider';
 import { theme } from '@/lib/theme';
+import { Overlay } from '@/components/ui/Overlay';
 import { useUI } from '@/components/layout/UIContext';
 import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
+import { Select } from '@/components/ui/Select';
+import { PageContainer, PageHeader } from '@/components/ui/Page';
 
 type Tab = 'meus' | 'banco';
 
@@ -26,10 +31,8 @@ const parseTab = (v: string | null): Tab => (v === 'banco' ? 'banco' : 'meus');
 
 function ChevronSmall({ open }: { open: boolean }) {
   return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
-      style={{ transform: open ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform .2s', flexShrink: 0 }}>
-      <path d="M6 9l6 6 6-6" />
-    </svg>
+    <ChevronDown size={14} strokeWidth={2.5}
+      style={{ transform: open ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform .2s', flexShrink: 0 }} />
   );
 }
 
@@ -161,11 +164,8 @@ export default function TargetsPage() {
   return (
     <>
       {dialog}
-      <div style={{ ...s.container, padding: isMobile ? '20px 16px' : '34px 40px' }}>
-        <div style={s.header}>
-          <h1 style={{ ...s.h1, fontSize: isMobile ? 24 : 28 }}>Concursos</h1>
-          <p style={s.sub}>Acompanhe seus concursos e explore editais prontos para começar em um clique.</p>
-        </div>
+      <PageContainer width="narrow">
+        <PageHeader title="Concursos" subtitle="Acompanhe seus concursos e explore editais prontos para começar em um clique." />
 
         {/* Abas */}
         <div style={s.tabs}>
@@ -216,63 +216,63 @@ export default function TargetsPage() {
                 </p>
 
                 <div style={s.formGrid}>
-                  <input
+                  <Input
                     value={cargo}
                     onChange={(e) => setCargo(e.target.value)}
                     placeholder="Cargo (ex: Auditor Fiscal)"
-                    style={{ ...s.input, flexBasis: isMobile ? '100%' : undefined }}
+                    style={{ flex: 1, minWidth: 120, flexBasis: isMobile ? '100%' : undefined }}
                     onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
                   />
 
                   {addingBoard ? (
                     <div style={{ ...s.inlineBoard, flexBasis: '100%' }}>
-                      <input
+                      <Input
                         value={newBoardName}
                         onChange={(e) => setNewBoardName(e.target.value)}
                         onKeyDown={(e) => e.key === 'Enter' && handleCreateBoard()}
                         placeholder="Nome da nova banca"
                         autoFocus
-                        style={s.input}
+                        style={{ flex: 1, minWidth: 120 }}
                       />
                       <Button onClick={handleCreateBoard}>Salvar</Button>
                       <Button variant="ghost" onClick={() => { setAddingBoard(false); setNewBoardName(''); }}>Cancelar</Button>
                     </div>
                   ) : (
                     <div style={{ ...s.selectWrap, flexBasis: isMobile ? '100%' : undefined }}>
-                      <select
+                      <Select
                         value={boardId}
                         onChange={(e) => {
                           if (e.target.value === '__new__') { setAddingBoard(true); return; }
                           setBoardId(e.target.value);
                         }}
-                        style={{ ...s.input, ...(bancaObrigatoria && !boardId ? s.inputAlert : {}) }}
+                        style={bancaObrigatoria && !boardId ? { border: `1.5px solid ${theme.danger}` } : undefined}
                       >
                         <option value="">{bancaObrigatoria ? 'Banca (obrigatória)' : 'Banca (opcional)'}</option>
                         {boards.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
                         <option value="__new__">+ Nova banca…</option>
-                      </select>
+                      </Select>
                     </div>
                   )}
                 </div>
 
                 {showAdvanced && (
                   <div style={{ ...s.formGrid, marginTop: 0, animation: 'focali-slide-down 0.18s ease' }}>
-                    <input
+                    <Input
                       value={orgao}
                       onChange={(e) => setOrgao(e.target.value)}
                       placeholder="Órgão (ex: TCE-GO)"
-                      style={{ ...s.input, flexBasis: isMobile ? '100%' : undefined }}
+                      style={{ flex: 1, minWidth: 120, flexBasis: isMobile ? '100%' : undefined }}
                     />
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 4, flexBasis: isMobile ? '100%' : 'auto' }}>
                       <label style={s.fieldLabel}>Ano previsto</label>
-                      <input
+                      <Input
                         value={ano}
                         onChange={(e) => setAno(e.target.value)}
                         placeholder="ex: 2026"
                         type="number"
                         min="2000"
                         max="2100"
-                        style={{ ...s.input, maxWidth: isMobile ? '100%' : 110 }}
+                        style={{ maxWidth: isMobile ? '100%' : 110 }}
                       />
                     </div>
                   </div>
@@ -296,9 +296,7 @@ export default function TargetsPage() {
               </div>
             ) : targets.length === 0 ? (
               <div style={s.emptyState}>
-                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke={theme.inkFaint} strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" style={{ marginBottom: 12 }}>
-                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z" />
-                </svg>
+                <Star size={40} color={theme.inkFaint} strokeWidth={1.2} style={{ marginBottom: 12 }} />
                 <p style={s.emptyTitle}>Ainda sem concursos</p>
                 <p style={s.emptyHint}>Explore o banco de editais para ativar um concurso pronto em um clique — ou crie o seu manualmente.</p>
                 <Button variant="outline" style={{ borderColor: theme.teal, background: theme.tealBg, color: theme.teal }} onClick={() => handleTabChange('banco')}>Explorar banco de editais →</Button>
@@ -342,7 +340,7 @@ export default function TargetsPage() {
             )}
           </>
         )}
-      </div>
+      </PageContainer>
 
       {archivingTarget && (
         <ArquivarConcursoModal
@@ -360,21 +358,19 @@ export default function TargetsPage() {
       )}
 
       {promotingTarget && (
-        <div style={s.promoteOverlay} onClick={() => setPromotingTarget(null)}>
-          <div style={s.promoteModal} onClick={(e) => e.stopPropagation()}>
-            <h3 style={s.promoteTitle}>Edital publicado! Qual é a banca?</h3>
-            <p style={s.promoteSub}>Selecione a banca definida para <strong>{formatTargetLabel(promotingTarget)}</strong>.</p>
-            <select value={promoteBoardId} onChange={(e) => setPromoteBoardId(e.target.value)} style={s.input} autoFocus>
-              {boards.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
-            </select>
-            <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 16 }}>
-              <Button variant="ghost" onClick={() => setPromotingTarget(null)}>Cancelar</Button>
-              <Button onClick={handleConfirmPromote} disabled={!promoteBoardId || promoting}>
-                {promoting ? 'Promovendo…' : 'Promover para pós-edital'}
-              </Button>
-            </div>
+        <Overlay onClose={() => setPromotingTarget(null)} maxWidth={400} labelledBy="promote-target-title">
+          <h3 id="promote-target-title" style={s.promoteTitle}>Edital publicado! Qual é a banca?</h3>
+          <p style={s.promoteSub}>Selecione a banca definida para <strong>{formatTargetLabel(promotingTarget)}</strong>.</p>
+          <Select value={promoteBoardId} onChange={(e) => setPromoteBoardId(e.target.value)} autoFocus>
+            {boards.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
+          </Select>
+          <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 16 }}>
+            <Button variant="ghost" onClick={() => setPromotingTarget(null)}>Cancelar</Button>
+            <Button onClick={handleConfirmPromote} disabled={!promoteBoardId || promoting}>
+              {promoting ? 'Promovendo…' : 'Promover para pós-edital'}
+            </Button>
           </div>
-        </div>
+        </Overlay>
       )}
     </>
   );
@@ -445,12 +441,10 @@ const TargetRow = memo(function TargetRow({
         title={t.is_primary ? 'Este é o concurso em foco' : 'Definir como foco'}
         aria-label={t.is_primary ? 'Concurso em foco' : 'Definir como foco'}
       >
-        <svg width="19" height="19" viewBox="0 0 24 24"
+        <Star size={19}
           fill={t.is_primary ? theme.teal : 'none'}
-          stroke={t.is_primary ? theme.teal : theme.inkFaint}
-          strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z" />
-        </svg>
+          color={t.is_primary ? theme.teal : theme.inkFaint}
+          strokeWidth={1.8} />
       </button>
 
       <div style={s.targetMain} onClick={onOpen}>
@@ -505,7 +499,7 @@ const TargetRow = memo(function TargetRow({
 
       <div style={{ ...s.targetActions, ...(isMobile ? { width: '100%', justifyContent: 'flex-end', marginTop: 4 } : {}) }}>
         {t.phase === 'pre' && (
-          <Button variant="outline" size="sm" style={{ padding: '6px 14px', fontSize: 12.5, borderColor: theme.teal, background: theme.tealBg, color: theme.teal }} onClick={onPromote}>Edital publicado?</Button>
+          <Button variant="outline" size="sm" style={{ padding: '6px 14px', fontSize: 13, borderColor: theme.teal, background: theme.tealBg, color: theme.teal }} onClick={onPromote}>Edital publicado?</Button>
         )}
         <button
           onClick={onOpen}
@@ -540,10 +534,7 @@ const TargetRow = memo(function TargetRow({
           title="Apagar"
           aria-label="Apagar concurso"
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={iconHover === 'del' ? theme.danger : theme.inkFaint} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M3 6h18M8 6V4a1 1 0 011-1h6a1 1 0 011 1v2m2 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6" />
-            <path d="M10 11v6M14 11v6" />
-          </svg>
+          <Trash2 size={16} color={iconHover === 'del' ? theme.danger : theme.inkFaint} strokeWidth={1.8} />
         </button>
       </div>
     </div>
@@ -551,10 +542,6 @@ const TargetRow = memo(function TargetRow({
 });
 
 const s: Record<string, CSSProperties> = {
-  container: { maxWidth: 720, margin: '0 auto', fontFamily: theme.font, minWidth: 0 },
-  header: { marginBottom: 20 },
-  h1: { fontWeight: 800, color: theme.ink, letterSpacing: -0.6, margin: 0 },
-  sub: { fontSize: 14, color: theme.inkSoft, margin: '6px 0 0', fontWeight: 500 },
 
   // Abas — mesmo padrão da página de Matérias
   tabs: { display: 'flex', gap: 4, marginBottom: 20, padding: 3, background: 'rgba(15,23,42,.06)', borderRadius: theme.radiusSm, width: 'fit-content' },
@@ -562,7 +549,7 @@ const s: Record<string, CSSProperties> = {
   tabOn: { background: theme.card, color: theme.ink, boxShadow: theme.shadow, fontWeight: 600 },
 
   actionsRow: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 14, flexWrap: 'wrap' },
-  newBtn: { padding: '9px 18px', borderRadius: theme.radiusSm, border: `1px solid ${theme.teal}`, background: theme.tealBg, color: theme.teal, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+  newBtn: { padding: '9px 18px', borderRadius: theme.radiusSm, border: `1px solid ${theme.teal}`, background: theme.tealBg, color: theme.teal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
   importarLink: { background: 'transparent', border: 'none', color: theme.inkSoft, fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit', padding: 0, whiteSpace: 'nowrap' },
 
   // Card de criação
@@ -576,15 +563,11 @@ const s: Record<string, CSSProperties> = {
   formGrid: { display: 'flex', gap: 12, marginBottom: 12, flexWrap: 'wrap' },
   selectWrap: { flex: 1, minWidth: 160 },
   inlineBoard: { display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' },
-  input: { flex: 1, minWidth: 120, padding: '10px 14px', borderRadius: theme.radiusSm, border: `1px solid ${theme.lineStrong}`, background: theme.card, fontSize: 14, color: theme.ink, fontFamily: 'inherit', outline: 'none' },
-  // border completo (não borderColor/borderWidth): misturar shorthand com
-  // propriedades individuais dispara warning do React ao alternar Pré/Pós.
-  inputAlert: { border: `1.5px solid ${theme.danger}` },
   fieldLabel: { fontSize: 12, color: theme.inkFaint, fontWeight: 500 },
   formFooter: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10, marginTop: 4 },
 
-  btnPrimary: { padding: '10px 20px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
-  btnSecondary: { padding: '6px 14px', borderRadius: theme.radiusSm, border: `1px solid ${theme.teal}`, background: theme.tealBg, color: theme.teal, fontSize: 12.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
+  btnPrimary: { padding: '10px 20px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
+  btnSecondary: { padding: '6px 14px', borderRadius: theme.radiusSm, border: `1px solid ${theme.teal}`, background: theme.tealBg, color: theme.teal, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
   btnGhost: { padding: '10px 12px', borderRadius: theme.radiusSm, border: 'none', background: 'transparent', color: theme.inkFaint, fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
   btnAdvanced: { display: 'inline-flex', alignItems: 'center', gap: 5, background: 'transparent', border: 'none', color: theme.teal, fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit', padding: '4px 2px' },
   iconBtn: { border: 'none', cursor: 'pointer', padding: 8, display: 'flex', alignItems: 'center', borderRadius: theme.radiusSm, transition: 'background .12s', flexShrink: 0 },
@@ -594,7 +577,7 @@ const s: Record<string, CSSProperties> = {
   emptyState: { display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '48px 20px', color: theme.inkFaint, textAlign: 'center' },
   emptyTitle: { fontSize: 15, fontWeight: 600, color: theme.inkSoft, margin: '0 0 6px' },
   emptyHint: { fontSize: 13, color: theme.inkFaint, maxWidth: 340, lineHeight: 1.6, margin: '0 0 16px' },
-  emptyCta: { padding: '10px 20px', borderRadius: theme.radiusSm, border: `1px solid ${theme.teal}`, background: theme.tealBg, color: theme.teal, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+  emptyCta: { padding: '10px 20px', borderRadius: theme.radiusSm, border: `1px solid ${theme.teal}`, background: theme.tealBg, color: theme.teal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
 
   list: { display: 'flex', flexDirection: 'column', gap: 8 },
 
@@ -602,8 +585,8 @@ const s: Record<string, CSSProperties> = {
   archivedToggle: { display: 'flex', alignItems: 'center', gap: 8, background: 'transparent', border: 'none', color: theme.inkSoft, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', padding: '2px 0' },
   archivedList: { display: 'flex', flexDirection: 'column', gap: 6, marginTop: 10 },
   archivedRow: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, padding: '10px 14px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.bg, minWidth: 0 },
-  archivedName: { fontSize: 13.5, color: theme.inkSoft, fontWeight: 500, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
-  restoreBtn: { flexShrink: 0, padding: '6px 14px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.teal}`, background: theme.tealBg, color: theme.teal, fontSize: 12.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+  archivedName: { fontSize: 14, color: theme.inkSoft, fontWeight: 500, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
+  restoreBtn: { flexShrink: 0, padding: '6px 14px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.teal}`, background: theme.tealBg, color: theme.teal, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
   targetRow: { display: 'flex', alignItems: 'center', gap: 12, background: theme.card, borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, padding: '12px 14px', transition: 'border-color .15s, box-shadow .15s', minWidth: 0 },
   starBtn: { border: 'none', background: 'transparent', cursor: 'pointer', padding: 4, display: 'flex', alignItems: 'center', flexShrink: 0 },
   targetMain: { flex: 1, display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', cursor: 'pointer', minWidth: 0 },
@@ -612,15 +595,13 @@ const s: Record<string, CSSProperties> = {
   phaseTagPre: { color: theme.inkSoft, background: theme.muted },
   phaseTagPos: { color: theme.onTeal, background: theme.teal },
   countdownTag: { fontSize: 11, fontWeight: 600, borderRadius: theme.radiusXs, padding: '3px 8px', flexShrink: 0 },
-  topicCountTag: { fontSize: 11.5, color: theme.inkFaint, fontVariantNumeric: 'tabular-nums', flexShrink: 0 },
+  topicCountTag: { fontSize: 12, color: theme.inkFaint, fontVariantNumeric: 'tabular-nums', flexShrink: 0 },
   targetActions: { display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0 },
   dateBtn: { fontSize: 12, color: theme.teal, border: `1px dashed ${theme.teal}`, background: 'transparent', borderRadius: theme.radiusXs, padding: '3px 10px', cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
   dateInput: { padding: '4px 8px', borderRadius: theme.radiusXs, border: `1px solid ${theme.lineStrong}`, background: theme.card, fontSize: 13, color: theme.ink, fontFamily: 'inherit', outline: 'none' },
   dateSaveBtn: { border: 'none', background: theme.primary, color: theme.onTeal, borderRadius: theme.radiusXs, padding: '4px 8px', cursor: 'pointer', fontSize: 12, fontFamily: 'inherit' },
   dateCancelBtn: { border: 'none', background: 'transparent', color: theme.inkFaint, borderRadius: theme.radiusXs, padding: '4px 6px', cursor: 'pointer', fontSize: 12, fontFamily: 'inherit' },
 
-  promoteOverlay: { position: 'fixed', inset: 0, background: 'var(--backdrop)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 60, padding: 16 },
-  promoteModal: { background: theme.card, borderRadius: theme.radius, padding: '24px', width: 'min(400px, 94vw)', boxShadow: theme.shadowModal, fontFamily: theme.font },
   promoteTitle: { fontSize: 16, fontWeight: 700, color: theme.ink, margin: '0 0 6px' },
   promoteSub: { fontSize: 13, color: theme.inkSoft, margin: '0 0 16px', lineHeight: 1.5 },
 };

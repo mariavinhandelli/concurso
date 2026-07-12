@@ -5,14 +5,18 @@
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
+import { ChevronDown } from 'lucide-react';
 import { theme } from '@/lib/theme';
 import { Skeleton } from '@/components/ui/Skeleton';
-import { useUI } from '@/components/layout/UIContext';
 import { useConfirm } from '@/hooks/useConfirm';
 import { useToast } from '@/components/ui/ToastProvider';
 import { refreshHomeAfterSession } from '@/lib/home-refresh';
 import { updateStudyLogDuration, deleteStudyLog } from '@/services/studyLogs.service';
 import { getHistory, type HistoryDay, type HistorySession } from '@/services/history.service';
+import { YearHeatmap } from '@/components/features/history/YearHeatmap';
+import { PageContainer, PageHeader } from '@/components/ui/Page';
+import { Input } from '@/components/ui/Input';
+import { Button } from '@/components/ui/Button';
 
 const PERIODOS = [
   { label: 'Hoje', dias: 1 },
@@ -22,7 +26,6 @@ const PERIODOS = [
 ];
 
 export default function HistoricoPage() {
-  const { isMobile } = useUI();
   const queryClient = useQueryClient();
   const { confirm, dialog } = useConfirm();
   const toast = useToast();
@@ -97,12 +100,12 @@ export default function HistoricoPage() {
   const temResultado = daysFiltrados.length > 0;
 
   return (
-    <div style={{ ...styles.page, padding: isMobile ? '20px 16px' : '34px 40px' }}>
+    <PageContainer width="narrow">
       {dialog}
-      <div style={styles.header}>
-        <h1 style={{ ...styles.h1, fontSize: isMobile ? 24 : 28 }}>Histórico</h1>
-        <p style={styles.sub}>Suas sessões de estudo, dia a dia. Toque numa sessão para ver os detalhes.</p>
-      </div>
+      <PageHeader title="Histórico" subtitle="Suas sessões de estudo, dia a dia. Toque numa sessão para ver os detalhes." />
+
+      {/* Mapa de constância anual (estilo GitHub) — o retrato do hábito */}
+      <YearHeatmap />
 
       {/* Barra de filtros */}
       <div style={styles.filters}>
@@ -118,16 +121,17 @@ export default function HistoricoPage() {
             </button>
           ))}
         </div>
-        <div style={styles.searchWrap}>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={theme.inkFaint} strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" style={styles.searchIcon}>
-            <circle cx="11" cy="11" r="7" />
-            <path d="M21 21l-4.3-4.3" />
-          </svg>
-          <input
+        <div style={{ position: 'relative', flex: 1, minWidth: 200 }}>
+          <Input
             value={busca}
             onChange={(e) => setBusca(e.target.value)}
             placeholder="Buscar em anotações e matérias…"
-            style={styles.search}
+            icon={
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="11" cy="11" r="7" /><path d="M21 21l-4.3-4.3" />
+              </svg>
+            }
+            style={{ borderRadius: 10, paddingRight: busca ? 34 : undefined }}
           />
           {busca && (
             <button onClick={() => setBusca('')} style={styles.clearBtn} aria-label="Limpar busca">✕</button>
@@ -176,7 +180,7 @@ export default function HistoricoPage() {
           </section>
         ))
       )}
-    </div>
+    </PageContainer>
   );
 }
 
@@ -233,13 +237,10 @@ function SessionRow({ session, aberto, onToggle, onSaveDuration, onDelete }: {
           <EnergyMeter level={session.energyLevel} />
         </span>
 
-        <svg
-          width="16" height="16" viewBox="0 0 24 24" fill="none"
-          stroke={theme.inkFaint} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+        <ChevronDown
+          size={16} color={theme.inkFaint} strokeWidth={2}
           style={{ transform: aberto ? 'rotate(180deg)' : 'none', transition: 'transform .2s', flexShrink: 0 }}
-        >
-          <path d="M6 9l6 6 6-6" />
-        </svg>
+        />
       </button>
 
       {aberto && (
@@ -272,19 +273,19 @@ function SessionRow({ session, aberto, onToggle, onSaveDuration, onDelete }: {
           <div style={styles.actionsRow}>
             {editing ? (
               <div style={styles.editRow}>
-                <input type="number" min="0" value={h} onChange={(e) => setH(e.target.value)} style={styles.editInput} aria-label="Horas" />
+                <Input type="number" min="0" value={h} onChange={(e) => setH(e.target.value)} style={{ width: 58, padding: '7px 9px', fontSize: 14 }} aria-label="Horas" />
                 <span style={styles.editUnit}>h</span>
-                <input type="number" min="0" max="59" value={m} onChange={(e) => setM(e.target.value)} style={styles.editInput} aria-label="Minutos" />
+                <Input type="number" min="0" max="59" value={m} onChange={(e) => setM(e.target.value)} style={{ width: 58, padding: '7px 9px', fontSize: 14 }} aria-label="Minutos" />
                 <span style={styles.editUnit}>min</span>
-                <button onClick={saveEdit} disabled={salvando} style={styles.actionPrimary}>
+                <Button size="sm" onClick={saveEdit} loading={salvando}>
                   {salvando ? 'Salvando…' : 'Salvar'}
-                </button>
-                <button onClick={() => setEditing(false)} disabled={salvando} style={styles.actionGhost}>Cancelar</button>
+                </Button>
+                <Button size="sm" variant="outline" onClick={() => setEditing(false)} disabled={salvando}>Cancelar</Button>
               </div>
             ) : (
               <>
-                <button onClick={startEdit} style={styles.actionGhost}>Corrigir duração</button>
-                <button onClick={onDelete} style={styles.actionDanger}>Apagar sessão</button>
+                <Button size="sm" variant="outline" onClick={startEdit}>Corrigir duração</Button>
+                <Button size="sm" variant="dangerSoft" onClick={onDelete}>Apagar sessão</Button>
               </>
             )}
           </div>
@@ -349,31 +350,24 @@ function formataDia(dateKey: string): string {
 }
 
 const styles: Record<string, React.CSSProperties> = {
-  page: { maxWidth: 720, margin: '0 auto', padding: '34px 40px', fontFamily: theme.font },
-  header: { marginBottom: 18 },
-  h1: { fontSize: 28, fontWeight: 800, color: theme.ink, letterSpacing: -0.6, margin: 0 },
-  sub: { fontSize: 14, color: theme.inkSoft, margin: '6px 0 0', fontWeight: 500 },
   muted: { color: theme.inkFaint, fontSize: 14 },
 
   filters: { display: 'flex', gap: 12, marginBottom: 26, flexWrap: 'wrap', alignItems: 'center' },
   segment: { display: 'flex', gap: 3, padding: 3, background: 'rgba(15,23,42,.06)', borderRadius: 10, flexShrink: 0 },
   segmentBtn: { padding: '7px 14px', borderRadius: 7, border: 'none', background: 'transparent', color: theme.inkSoft, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
   segmentActive: { background: theme.card, color: theme.ink, boxShadow: theme.shadow },
-  searchWrap: { position: 'relative', flex: 1, minWidth: 200, display: 'flex', alignItems: 'center' },
-  searchIcon: { position: 'absolute', left: 12, pointerEvents: 'none' },
-  search: { width: '100%', boxSizing: 'border-box', padding: '10px 34px 10px 36px', borderRadius: 10, border: `0.5px solid ${theme.line}`, background: theme.card, fontSize: 14, color: theme.ink, fontFamily: 'inherit', outline: 'none' },
-  clearBtn: { position: 'absolute', right: 10, border: 'none', background: 'transparent', color: theme.inkFaint, fontSize: 13, cursor: 'pointer' },
+  clearBtn: { position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', border: 'none', background: 'transparent', color: theme.inkFaint, fontSize: 13, cursor: 'pointer' },
 
   daySection: { marginBottom: 26 },
   dayHead: { display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 10, gap: 12, flexWrap: 'wrap' },
   dayTitle: { fontSize: 15, fontWeight: 700, color: theme.ink, textTransform: 'capitalize', letterSpacing: -0.2 },
-  daySummary: { fontSize: 12.5, color: theme.inkFaint, fontWeight: 500 },
+  daySummary: { fontSize: 13, color: theme.inkFaint, fontWeight: 500 },
 
   sessionList: { display: 'flex', flexDirection: 'column', gap: 8 },
-  row: { background: theme.card, border: `0.5px solid ${theme.line}`, borderRadius: 12, boxShadow: theme.shadow, overflow: 'hidden' },
+  row: { background: theme.card, border: `0.5px solid ${theme.line}`, borderRadius: theme.radiusSm, boxShadow: theme.shadow, overflow: 'hidden' },
   rowMain: { width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: '13px 16px', border: 'none', background: 'transparent', cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left' },
   subjectDot: { width: 10, height: 10, borderRadius: '50%', flexShrink: 0 },
-  subjectName: { fontSize: 14.5, fontWeight: 600, color: theme.ink, flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
+  subjectName: { fontSize: 15, fontWeight: 600, color: theme.ink, flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
   metaGroup: { display: 'flex', alignItems: 'center', gap: 14, flexShrink: 0 },
   metaItem: { fontSize: 13, color: theme.inkSoft, fontWeight: 500, whiteSpace: 'nowrap' },
   acerto: { color: theme.inkFaint },
@@ -384,11 +378,7 @@ const styles: Record<string, React.CSSProperties> = {
   detail: { padding: '4px 16px 16px', borderTop: `0.5px solid ${theme.line}` },
   actionsRow: { display: 'flex', alignItems: 'center', gap: 10, marginTop: 14, flexWrap: 'wrap' },
   editRow: { display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' },
-  editInput: { width: 58, padding: '7px 9px', borderRadius: 8, border: `0.5px solid ${theme.line}`, background: theme.card, fontSize: 13.5, color: theme.ink, fontFamily: 'inherit', outline: 'none' },
-  editUnit: { fontSize: 12.5, color: theme.inkFaint, fontWeight: 500 },
-  actionPrimary: { padding: '7px 14px', borderRadius: 8, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 12.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
-  actionGhost: { padding: '7px 12px', borderRadius: 8, border: `0.5px solid ${theme.line}`, background: 'transparent', color: theme.inkSoft, fontSize: 12.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
-  actionDanger: { padding: '7px 12px', borderRadius: 8, border: `0.5px solid ${theme.line}`, background: 'transparent', color: theme.danger, fontSize: 12.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+  editUnit: { fontSize: 13, color: theme.inkFaint, fontWeight: 500 },
   detailMeta: { display: 'flex', gap: 6, flexWrap: 'wrap', fontSize: 12, color: theme.inkFaint, fontWeight: 500, margin: '12px 0 14px' },
   detailBlock: { marginBottom: 12 },
   detailLabel: { display: 'block', fontSize: 11, fontWeight: 700, color: theme.inkFaint, textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 4 },

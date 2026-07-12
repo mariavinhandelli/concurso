@@ -3,6 +3,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { Check, Pencil } from 'lucide-react';
 import { useConfirm } from '@/hooks/useConfirm';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
@@ -12,11 +13,15 @@ import { listAllBoards, createBoard, updateBoard, deleteBoard, type Board } from
 import { NotificacoesCard } from '@/components/features/settings/NotificacoesCard';
 import { Button } from '@/components/ui/Button';
 import { Skeleton } from '@/components/ui/Skeleton';
+import { PageContainer, PageHeader } from '@/components/ui/Page';
+import { Input } from '@/components/ui/Input';
+import { Switch } from '@/components/ui/Switch';
+import { IconButton } from '@/components/ui/IconButton';
 
 export default function SettingsPage() {
   const supabase = createClient();
   const router = useRouter();
-  const { theme: mode, toggleTheme, palette, setPalette, isMobile } = useUI();
+  const { theme: mode, toggleTheme, palette, setPalette } = useUI();
   const { confirm: showConfirm, dialog } = useConfirm();
 
   // --- bancas ---
@@ -143,11 +148,8 @@ export default function SettingsPage() {
   return (
     <>
     {dialog}
-    <div style={{ ...styles.wrap, padding: isMobile ? '20px 16px' : '34px 40px' }}>
-      <header style={styles.head}>
-        <h1 style={{ ...styles.h1, fontSize: isMobile ? 24 : 28 }}>Configurações</h1>
-        <p style={styles.sub}>Bancas, aparência, senha e sessões.</p>
-      </header>
+    <PageContainer width="narrow">
+      <PageHeader title="Configurações" subtitle="Bancas, aparência, senha e sessões." />
 
       {/* APARÊNCIA */}
       <section style={styles.card}>
@@ -178,9 +180,7 @@ export default function SettingsPage() {
                   <span style={styles.paletteHint}>{p.hint}</span>
                 </span>
                 {active && (
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={theme.teal} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={styles.paletteCheck}>
-                    <path d="M20 6L9 17l-5-5" />
-                  </svg>
+                  <Check size={16} color={theme.teal} strokeWidth={2.4} style={styles.paletteCheck} />
                 )}
               </button>
             );
@@ -194,13 +194,7 @@ export default function SettingsPage() {
               {mode === 'light' ? 'Modo claro' : 'Modo escuro'} · alterna entre claro e escuro.
             </div>
           </div>
-          <button onClick={toggleTheme} style={styles.toggle} aria-label="Alternar entre claro e escuro">
-            <span style={{
-              ...styles.toggleKnob,
-              transform: mode === 'dark' ? 'translateX(20px)' : 'translateX(0)',
-              background: mode === 'dark' ? theme.teal : '#fff',
-            }} />
-          </button>
+          <Switch checked={mode === 'dark'} onChange={toggleTheme} aria-label="Alternar entre claro e escuro" />
         </div>
       </section>
 
@@ -216,12 +210,11 @@ export default function SettingsPage() {
         </p>
 
         <div style={styles.boardCreate}>
-          <input
+          <Input
             value={boardName}
             onChange={(e) => setBoardName(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleCreateBoard()}
             placeholder="Nome da banca (ex: FCC)"
-            style={styles.input}
           />
           <Button onClick={handleCreateBoard}>Adicionar</Button>
         </div>
@@ -246,7 +239,7 @@ export default function SettingsPage() {
                 <span style={{ ...styles.boardDot, background: b.color }} />
                 {editingId === b.id ? (
                   <>
-                    <input
+                    <Input
                       value={editingName}
                       onChange={(e) => setEditingName(e.target.value)}
                       onKeyDown={(e) => {
@@ -254,7 +247,7 @@ export default function SettingsPage() {
                         if (e.key === 'Escape') cancelEdit();
                       }}
                       autoFocus
-                      style={styles.boardEditInput}
+                      style={{ flex: 1, padding: '7px 10px', borderRadius: theme.radiusXs, borderColor: theme.teal }}
                     />
                     <Button size="sm" onClick={saveEdit}>Salvar</Button>
                     <Button size="sm" variant="ghost" onClick={cancelEdit}>Cancelar</Button>
@@ -262,25 +255,12 @@ export default function SettingsPage() {
                 ) : (
                   <>
                     <span style={styles.boardName}>{b.name}</span>
-                    <button
-                      className="icon-touch-target"
-                      onClick={() => startEdit(b)}
-                      style={styles.boardEdit}
-                      aria-label={`Renomear ${b.name}`}
-                    >
-                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={theme.inkSoft} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M12 20h9" />
-                        <path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z" />
-                      </svg>
-                    </button>
-                    <button
-                      className="icon-touch-target"
-                      onClick={() => handleDeleteBoard(b.id, b.name)}
-                      style={styles.boardDel}
-                      aria-label={`Apagar ${b.name}`}
-                    >
+                    <IconButton size="sm" onClick={() => startEdit(b)} aria-label={`Renomear ${b.name}`}>
+                      <Pencil size={15} strokeWidth={1.8} />
+                    </IconButton>
+                    <IconButton size="sm" onClick={() => handleDeleteBoard(b.id, b.name)} aria-label={`Apagar ${b.name}`} style={{ color: theme.inkFaint, fontSize: 13 }}>
                       ✕
-                    </button>
+                    </IconButton>
                   </>
                 )}
               </div>
@@ -293,19 +273,16 @@ export default function SettingsPage() {
       <section style={styles.card}>
         <div style={styles.cardTitle}>Trocar senha</div>
         <div style={styles.field}>
-          <label style={styles.label}>Senha atual</label>
-          <input type="password" value={current} onChange={(e) => setCurrent(e.target.value)}
-            style={styles.input} placeholder="••••••••" autoComplete="current-password" />
+          <Input type="password" label="Senha atual" value={current} onChange={(e) => setCurrent(e.target.value)}
+            placeholder="••••••••" autoComplete="current-password" />
         </div>
         <div style={styles.field}>
-          <label style={styles.label}>Nova senha</label>
-          <input type="password" value={next} onChange={(e) => setNext(e.target.value)}
-            style={styles.input} placeholder="ao menos 6 caracteres" autoComplete="new-password" />
+          <Input type="password" label="Nova senha" value={next} onChange={(e) => setNext(e.target.value)}
+            placeholder="ao menos 6 caracteres" autoComplete="new-password" />
         </div>
         <div style={styles.field}>
-          <label style={styles.label}>Confirmar nova senha</label>
-          <input type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)}
-            style={styles.input} placeholder="repita a nova senha" autoComplete="new-password" />
+          <Input type="password" label="Confirmar nova senha" value={confirm} onChange={(e) => setConfirm(e.target.value)}
+            placeholder="repita a nova senha" autoComplete="new-password" />
         </div>
         <div style={styles.actions}>
           {pwdMsg && (
@@ -332,42 +309,31 @@ export default function SettingsPage() {
           </Button>
         </div>
       </section>
-    </div>
+    </PageContainer>
     </>
   );
 }
 
 const styles: Record<string, React.CSSProperties> = {
-  wrap: { maxWidth: 720, margin: '0 auto', padding: '34px 40px', fontFamily: theme.font },
-  head: { marginBottom: 24 },
-  h1: { fontSize: 28, fontWeight: 800, color: theme.ink, letterSpacing: -0.6, margin: 0 },
-  sub: { fontSize: 14, color: theme.inkSoft, margin: '6px 0 0', fontWeight: 500 },
   card: { background: theme.card, border: `0.5px solid ${theme.line}`, borderRadius: theme.radius, boxShadow: theme.shadow, padding: 24, marginBottom: 18 },
   cardTitle: { fontSize: 12, fontWeight: 600, color: theme.inkFaint, letterSpacing: 1, textTransform: 'uppercase', marginBottom: 18 },
   sectionIntro: { fontSize: 13, color: theme.inkSoft, margin: '0 0 16px', lineHeight: 1.5 },
   row: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 },
-  rowLabel: { fontSize: 14.5, fontWeight: 600, color: theme.ink },
-  rowHint: { fontSize: 12.5, color: theme.inkFaint, marginTop: 3 },
+  rowLabel: { fontSize: 15, fontWeight: 600, color: theme.ink },
+  rowHint: { fontSize: 13, color: theme.inkFaint, marginTop: 3 },
   paletteGrid: { display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 10, marginTop: 14 },
   paletteCard: { display: 'flex', alignItems: 'center', gap: 12, padding: '13px 14px', borderRadius: theme.radiusSm, borderStyle: 'solid', cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left', position: 'relative' },
   paletteSwatch: { width: 26, height: 26, borderRadius: 7, flexShrink: 0, boxShadow: 'inset 0 0 0 0.5px rgba(0,0,0,0.12)' },
   paletteText: { display: 'flex', flexDirection: 'column', flex: 1, minWidth: 0 },
   paletteName: { fontSize: 14, fontWeight: 600, color: theme.ink },
-  paletteHint: { fontSize: 11.5, color: theme.inkFaint, marginTop: 1 },
+  paletteHint: { fontSize: 12, color: theme.inkFaint, marginTop: 1 },
   paletteCheck: { flexShrink: 0 },
   field: { marginBottom: 14 },
-  label: { display: 'block', fontSize: 13, fontWeight: 600, color: theme.ink, marginBottom: 7 },
-  input: { width: '100%', boxSizing: 'border-box', padding: '11px 14px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.card, fontSize: 14.5, color: theme.ink, fontFamily: 'inherit', outline: 'none' },
   actions: { display: 'flex', alignItems: 'center', gap: 12, marginTop: 20, paddingTop: 18, borderTop: `0.5px solid ${theme.line}` },
-  toggle: { position: 'relative', width: 44, height: 24, borderRadius: 999, border: 'none', background: theme.muted, cursor: 'pointer', padding: 2, flexShrink: 0 },
-  toggleKnob: { display: 'block', width: 20, height: 20, borderRadius: '50%', boxShadow: theme.shadow, transition: 'transform .2s, background .2s' },
   boardCreate: { display: 'flex', gap: 10, marginBottom: 14 },
   boardList: { display: 'flex', flexDirection: 'column', gap: 8, marginTop: 4 },
   boardItem: { display: 'flex', alignItems: 'center', gap: 12, background: theme.bg, borderRadius: 10, border: `0.5px solid ${theme.line}`, padding: '11px 14px' },
   boardDot: { width: 12, height: 12, borderRadius: '50%', flexShrink: 0 },
-  boardName: { flex: 1, fontSize: 14.5, color: theme.ink, fontWeight: 500 },
-  boardEditInput: { flex: 1, padding: '7px 10px', borderRadius: 8, border: `0.5px solid ${theme.teal}`, background: theme.card, fontSize: 14, color: theme.ink, fontFamily: 'inherit', outline: 'none' },
-  boardEdit: { border: 'none', background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: 4, opacity: 0.7 },
-  boardDel: { border: 'none', background: 'transparent', color: theme.inkFaint, fontSize: 13, cursor: 'pointer', opacity: 0.6 },
+  boardName: { flex: 1, fontSize: 15, color: theme.ink, fontWeight: 500 },
   muted: { color: theme.inkFaint, fontSize: 14 },
 };

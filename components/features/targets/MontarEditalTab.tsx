@@ -1,18 +1,18 @@
 'use client';
 
 import { memo, useEffect, useMemo, useState, type CSSProperties } from 'react';
+import { ChevronRight, Search, Pencil } from 'lucide-react';
 import { type Blueprint } from '@/services/blueprints.service';
 import { type SubjectTree } from '@/lib/targets';
 import { theme } from '@/lib/theme';
 import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
+import { Select } from '@/components/ui/Select';
 
 function Chevron({ open }: { open: boolean }) {
   return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-      stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-      style={{ transform: open ? 'rotate(90deg)' : 'rotate(0deg)', transition: 'transform .15s', flexShrink: 0 }}>
-      <path d="M9 18l6-6-6-6" />
-    </svg>
+    <ChevronRight size={16} strokeWidth={2}
+      style={{ transform: open ? 'rotate(90deg)' : 'rotate(0deg)', transition: 'transform .15s', flexShrink: 0 }} />
   );
 }
 
@@ -89,9 +89,7 @@ export const MontarEditalTab = memo(function MontarEditalTab({
   if (tree.length === 0) {
     return (
       <div style={s.emptyState}>
-        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke={theme.inkFaint} strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" style={{ marginBottom: 10 }}>
-          <path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z" />
-        </svg>
+        <Pencil size={36} color={theme.inkFaint} strokeWidth={1.2} style={{ marginBottom: 10 }} />
         <p style={s.emptyTitle}>Biblioteca vazia</p>
         <p style={s.emptyHint}>Cadastre matérias e tópicos para começar a montar o edital.</p>
         <Button variant="outline" style={{ borderColor: theme.teal, background: theme.tealBg, color: theme.teal }} onClick={onNavigateToSubjects}>Ir para Matérias →</Button>
@@ -145,9 +143,7 @@ export const MontarEditalTab = memo(function MontarEditalTab({
         <>
           {/* M2: busca */}
           <div style={s.searchWrap}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={theme.inkFaint} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
-              <circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" />
-            </svg>
+            <Search size={14} color={theme.inkFaint} strokeWidth={2} style={{ flexShrink: 0 }} />
             <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar tópico…" style={s.searchInput} />
             {search && <button onClick={() => setSearch('')} style={s.searchClear} aria-label="Limpar busca">✕</button>}
           </div>
@@ -217,20 +213,20 @@ export const MontarEditalTab = memo(function MontarEditalTab({
                 <div key={sid} style={{ ...s.weightRow, flexDirection: isMobile ? 'column' : 'row', alignItems: isMobile ? 'stretch' : 'center', gap: isMobile ? 10 : 0 }}>
                   <span style={s.weightSubject}>{node.subject.name}</span>
                   <div style={{ ...s.weightControls, ...(isMobile ? { width: '100%' } : {}) }}>
-                    <select
+                    <Select
                       value={weight}
                       onChange={(e) => onChangeSubjectWeight(sid, Number(e.target.value), nQ)}
-                      style={{ ...s.weightSelectInput, flex: isMobile ? 1 : undefined }}
+                      style={{ flex: isMobile ? 1 : undefined }}
                     >
                       {[1, 2, 3, 4, 5].map((w) => <option key={w} value={w}>Peso {w}</option>)}
-                    </select>
-                    <input
+                    </Select>
+                    <Input
                       value={nQ}
                       onChange={(e) => onNQChange(sid, e.target.value)}
                       onBlur={(e) => onChangeSubjectWeight(sid, weight, e.target.value)}
                       placeholder="nº questões"
                       type="number"
-                      style={{ ...s.qInput, width: isMobile ? undefined : 120, flex: isMobile ? 1 : undefined, minWidth: 0 }}
+                      style={{ width: isMobile ? undefined : 120, flex: isMobile ? 1 : undefined, minWidth: 0 }}
                     />
                   </div>
                 </div>
@@ -273,7 +269,7 @@ const s: Record<string, CSSProperties> = {
   emptyState: { display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '40px 20px', textAlign: 'center' },
   emptyTitle: { fontSize: 15, fontWeight: 600, color: theme.inkSoft, margin: '0 0 6px' },
   emptyHint: { fontSize: 13, color: theme.inkFaint, maxWidth: 300, lineHeight: 1.6, margin: '0 0 16px' },
-  emptyBtn: { padding: '10px 20px', borderRadius: theme.radiusSm, border: `1px solid ${theme.teal}`, background: theme.tealBg, color: theme.teal, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+  emptyBtn: { padding: '10px 20px', borderRadius: theme.radiusSm, border: `1px solid ${theme.teal}`, background: theme.tealBg, color: theme.teal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
 
   confirmBanner: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, background: theme.tealBg, border: `1px solid ${theme.teal}`, borderRadius: theme.radiusSm, padding: '10px 14px', flexWrap: 'wrap', animation: 'focali-slide-down 0.18s ease' },
   confirmText: { fontSize: 13, color: theme.ink, flex: 1 },
@@ -281,8 +277,8 @@ const s: Record<string, CSSProperties> = {
   confirmNo: { padding: '6px 10px', borderRadius: theme.radiusXs, border: 'none', background: 'transparent', color: theme.inkFaint, fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' },
 
   coverageRow: { display: 'flex', alignItems: 'center', gap: 10 },
-  coverageTrack: { flex: 1, maxWidth: 200, height: 6, background: theme.muted, borderRadius: 999, overflow: 'hidden' },
-  coverageFill: { height: '100%', background: theme.teal, borderRadius: 999, transition: 'width 0.4s ease' },
+  coverageTrack: { flex: 1, maxWidth: 200, height: 6, background: theme.muted, borderRadius: theme.radiusPill, overflow: 'hidden' },
+  coverageFill: { height: '100%', background: theme.teal, borderRadius: theme.radiusPill, transition: 'width 0.4s ease' },
   coverageLabel: { fontSize: 12, color: theme.inkFaint, whiteSpace: 'nowrap', fontVariantNumeric: 'tabular-nums' },
 
   // Segmented control — unificado: container radiusSm, botões radiusXs
@@ -292,7 +288,7 @@ const s: Record<string, CSSProperties> = {
   innerTabOn: { background: theme.card, color: theme.teal, boxShadow: theme.shadow },
 
   headerActions: { display: 'flex', alignItems: 'center', gap: 4 },
-  actionLink: { background: 'transparent', border: 'none', color: theme.teal, fontSize: 12.5, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit', padding: '2px 4px' },
+  actionLink: { background: 'transparent', border: 'none', color: theme.teal, fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit', padding: '2px 4px' },
 
   searchWrap: { display: 'flex', alignItems: 'center', gap: 8, background: theme.card, border: `1px solid ${theme.lineStrong}`, borderRadius: theme.radiusSm, padding: '8px 12px' },
   searchInput: { flex: 1, border: 'none', background: 'transparent', fontSize: 13, color: theme.ink, fontFamily: 'inherit', outline: 'none' },
@@ -323,6 +319,4 @@ const s: Record<string, CSSProperties> = {
   weightRow: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: theme.bg, borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, padding: '10px 14px', minWidth: 0 },
   weightSubject: { fontSize: 13, color: theme.ink, flex: 1, minWidth: 0 },
   weightControls: { display: 'flex', gap: 10 },
-  weightSelectInput: { padding: '8px 12px', borderRadius: theme.radiusSm, border: `1px solid ${theme.lineStrong}`, background: theme.card, fontSize: 13, color: theme.ink, fontFamily: 'inherit', cursor: 'pointer', outline: 'none' },
-  qInput: { padding: '8px 12px', borderRadius: theme.radiusSm, border: `1px solid ${theme.lineStrong}`, background: theme.card, fontSize: 13, color: theme.ink, fontFamily: 'inherit', outline: 'none' },
 };

@@ -7,6 +7,8 @@ import {
   getGoalsSummary, setDailyTarget, type GoalsSummary,
 } from '@/services/goals.service';
 import { theme } from '@/lib/theme';
+import { Input } from '@/components/ui/Input';
+import { Button } from '@/components/ui/Button';
 
 export function GoalsWidget() {
   const [summary, setSummary] = useState<GoalsSummary | null>(null);
@@ -65,13 +67,13 @@ export function GoalsWidget() {
 
       {editing ? (
         <div style={styles.editRow}>
-          <input type="number" value={hours} onChange={(e) => setHours(e.target.value)}
-            style={styles.numInput} min="0" />
+          <Input type="number" value={hours} onChange={(e) => setHours(e.target.value)}
+            style={{ width: 56, padding: 10, background: theme.bg }} min="0" />
           <span style={styles.unit}>h</span>
-          <input type="number" value={mins} onChange={(e) => setMins(e.target.value)}
-            style={styles.numInput} min="0" max="59" />
+          <Input type="number" value={mins} onChange={(e) => setMins(e.target.value)}
+            style={{ width: 56, padding: 10, background: theme.bg }} min="0" max="59" />
           <span style={styles.unit}>min/dia</span>
-          <button onClick={handleSaveTarget} style={styles.saveBtn}>Salvar</button>
+          <Button size="sm" onClick={handleSaveTarget} style={{ marginLeft: 'auto' }}>Salvar</Button>
         </div>
       ) : noTarget ? (
         <p style={styles.muted}>Defina uma meta diária para acompanhar seu ritmo.</p>
@@ -125,17 +127,15 @@ const styles: Record<string, React.CSSProperties> = {
   eyebrow: { fontSize: 11, fontWeight: 500, color: theme.inkFaint, letterSpacing: 1, textTransform: 'uppercase' },
   editBtn: { border: 'none', background: 'transparent', color: theme.teal, fontSize: 13, fontWeight: 500, cursor: 'pointer', padding: 0 },
   editRow: { display: 'flex', alignItems: 'center', gap: 8 },
-  numInput: { width: 56, padding: 10, borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.bg, fontSize: 14, color: theme.ink, fontFamily: 'inherit' },
   unit: { fontSize: 13, color: theme.inkFaint },
-  saveBtn: { marginLeft: 'auto', padding: '10px 18px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
   blocks: { display: 'flex', flexDirection: 'column', gap: 18, justifyContent: 'center', flex: 1 },
   block: {},
   blockHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 8 },
   blockLabel: { fontSize: 13, color: theme.inkSoft, fontWeight: 500 },
   blockValue: { display: 'flex', alignItems: 'baseline', gap: 8, fontSize: 15 },
   frac: { fontSize: 12, color: theme.inkFaint, fontVariantNumeric: 'tabular-nums' },
-  track: { height: 8, background: theme.muted, borderRadius: 999, overflow: 'hidden' },
-  fill: { height: '100%', borderRadius: 999, transition: 'width 0.4s cubic-bezier(.2,.7,.3,1)' },
+  track: { height: 8, background: theme.muted, borderRadius: theme.radiusPill, overflow: 'hidden' },
+  fill: { height: '100%', borderRadius: theme.radiusPill, transition: 'width 0.4s cubic-bezier(.2,.7,.3,1)' },
   muted: { color: theme.inkFaint, fontSize: 14, margin: 0, fontFamily: theme.font },
   error: { color: theme.danger, fontSize: 13, marginTop: 12, marginBottom: 0, fontFamily: theme.font },
 };

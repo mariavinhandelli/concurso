@@ -11,6 +11,8 @@ import {
 } from '@/services/push.service';
 import { useToast } from '@/components/ui/ToastProvider';
 import { theme } from '@/lib/theme';
+import { Switch } from '@/components/ui/Switch';
+import { Select } from '@/components/ui/Select';
 
 const HORAS = Array.from({ length: 24 }, (_, h) => h);
 
@@ -108,15 +110,12 @@ export function NotificacoesCard() {
                   : enabled ? 'Ativo neste dispositivo.' : 'Desligado.'}
               </div>
             </div>
-            <button
-              onClick={toggle}
+            <Switch
+              checked={enabled}
+              onChange={toggle}
               disabled={busy || blocked || isLoading}
-              style={{ ...styles.toggle, background: enabled ? theme.teal : theme.muted, opacity: (busy || blocked) ? 0.6 : 1 }}
               aria-label="Ativar lembretes diários"
-              aria-pressed={enabled}
-            >
-              <span style={{ ...styles.toggleKnob, transform: enabled ? 'translateX(20px)' : 'translateX(0)', background: '#fff' }} />
-            </button>
+            />
           </div>
 
           {enabled && (
@@ -126,17 +125,17 @@ export function NotificacoesCard() {
                 <div style={styles.rowHint}>Quando você quer ser lembrado.</div>
               </div>
               <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                <select
+                <Select
                   value={st?.hour ?? 19}
                   onChange={(e) => changeHour(Number(e.target.value))}
                   disabled={busy}
-                  style={styles.select}
+                  style={{ width: 'auto' }}
                   aria-label="Horário do lembrete"
                 >
                   {HORAS.map((h) => (
                     <option key={h} value={h}>{String(h).padStart(2, '0')}:00</option>
                   ))}
-                </select>
+                </Select>
                 <button onClick={testar} style={styles.testBtn}>Enviar teste</button>
               </div>
             </div>
@@ -152,11 +151,8 @@ const styles: Record<string, React.CSSProperties> = {
   cardTitle: { fontSize: 12, fontWeight: 600, color: theme.inkFaint, letterSpacing: 1, textTransform: 'uppercase', marginBottom: 14 },
   intro: { fontSize: 13, color: theme.inkSoft, margin: '0 0 18px', lineHeight: 1.5 },
   row: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 },
-  rowLabel: { fontSize: 14.5, fontWeight: 600, color: theme.ink },
-  rowHint: { fontSize: 12.5, color: theme.inkFaint, marginTop: 3, maxWidth: 380 },
-  toggle: { position: 'relative', width: 44, height: 24, borderRadius: 999, border: 'none', cursor: 'pointer', padding: 2, flexShrink: 0 },
-  toggleKnob: { display: 'block', width: 20, height: 20, borderRadius: '50%', boxShadow: theme.shadow, transition: 'transform .2s' },
-  select: { padding: '8px 10px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.card, fontSize: 14, color: theme.ink, fontFamily: 'inherit', cursor: 'pointer' },
-  testBtn: { padding: '8px 12px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.bg, color: theme.inkSoft, fontSize: 12.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+  rowLabel: { fontSize: 15, fontWeight: 600, color: theme.ink },
+  rowHint: { fontSize: 13, color: theme.inkFaint, marginTop: 3, maxWidth: 380 },
+  testBtn: { padding: '8px 12px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.bg, color: theme.inkSoft, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
   muted: { color: theme.inkFaint, fontSize: 14 },
 };

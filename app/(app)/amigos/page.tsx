@@ -6,7 +6,6 @@
 import { Suspense, useState, type CSSProperties } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useUI } from '@/components/layout/UIContext';
 import { useToast } from '@/components/ui/ToastProvider';
 import {
   getSocialOverview, enableSocial, disableSocial, findProfileByCode, sendFriendRequest,
@@ -16,6 +15,7 @@ import { Avatar, RankRow } from '@/components/features/social/SocialUI';
 import { TurmasTab } from '@/components/features/social/TurmasTab';
 import { theme } from '@/lib/theme';
 import { Button } from '@/components/ui/Button';
+import { PageContainer, PageHeader } from '@/components/ui/Page';
 
 function inviteUrl(code: string): string {
   const origin = typeof window !== 'undefined' ? window.location.origin : '';
@@ -26,7 +26,6 @@ type Tab = 'amigos' | 'turmas';
 
 function AmigosContent() {
   const params = useSearchParams();
-  const { isMobile } = useUI();
   const toast = useToast();
   const qc = useQueryClient();
   const [tab, setTab] = useState<Tab>(params.get('tab') === 'turmas' ? 'turmas' : 'amigos');
@@ -75,11 +74,8 @@ function AmigosContent() {
   const p = data?.profile;
 
   return (
-    <div style={{ ...s.wrap, padding: isMobile ? '20px 16px' : '34px 40px' }}>
-      <header style={s.head}>
-        <h1 style={{ ...s.h1, fontSize: isMobile ? 24 : 28 }}>Amigos</h1>
-        <p style={s.sub}>Constância é mais fácil em companhia. Estude com quem te cobra (no bom sentido).</p>
-      </header>
+    <PageContainer width="narrow">
+      <PageHeader title="Amigos" subtitle="Constância é mais fácil em companhia. Estude com quem te cobra (no bom sentido)." />
 
       <div style={s.segmented}>
         <button onClick={() => setTab('amigos')} style={{ ...s.segBtn, ...(tab === 'amigos' ? s.segOn : {}) }}>Amigos</button>
@@ -132,8 +128,8 @@ function AmigosContent() {
                   <Avatar name={r.name} url={r.avatarUrl} />
                   <span style={s.reqName}>{r.name}</span>
                   <span style={s.reqTag}>quer te adicionar</span>
-                  <Button size="sm" style={{ padding: '7px 13px', fontSize: 12.5, flexShrink: 0 }} onClick={() => aceitar(r)} disabled={busy}>Aceitar</Button>
-                  <Button variant="outline" size="sm" style={{ padding: '7px 11px', fontSize: 12.5, flexShrink: 0 }} onClick={() => recusar(r)} disabled={busy}>Recusar</Button>
+                  <Button size="sm" style={{ padding: '7px 13px', fontSize: 13, flexShrink: 0 }} onClick={() => aceitar(r)} disabled={busy}>Aceitar</Button>
+                  <Button variant="outline" size="sm" style={{ padding: '7px 11px', fontSize: 13, flexShrink: 0 }} onClick={() => recusar(r)} disabled={busy}>Recusar</Button>
                 </div>
               ))}
               {data.outgoing.map((r) => (
@@ -141,7 +137,7 @@ function AmigosContent() {
                   <Avatar name={r.name} url={r.avatarUrl} />
                   <span style={s.reqName}>{r.name}</span>
                   <span style={s.reqTag}>pedido enviado</span>
-                  <Button variant="outline" size="sm" style={{ padding: '7px 11px', fontSize: 12.5, flexShrink: 0 }} onClick={() => cancelar(r)} disabled={busy}>Cancelar</Button>
+                  <Button variant="outline" size="sm" style={{ padding: '7px 11px', fontSize: 13, flexShrink: 0 }} onClick={() => cancelar(r)} disabled={busy}>Cancelar</Button>
                 </div>
               ))}
             </section>
@@ -173,7 +169,7 @@ function AmigosContent() {
           <button onClick={desativar} disabled={busy} style={s.disableBtn}>Desativar perfil social</button>
         </>
       )}
-    </div>
+    </PageContainer>
   );
 }
 
@@ -182,14 +178,10 @@ export default function AmigosPage() {
 }
 
 const s: Record<string, CSSProperties> = {
-  wrap: { maxWidth: 720, margin: '0 auto', padding: '34px 40px', fontFamily: theme.font, minWidth: 0 },
-  head: { marginBottom: 18 },
-  h1: { fontSize: 28, fontWeight: 800, color: theme.ink, letterSpacing: -0.6, margin: 0 },
-  sub: { fontSize: 14, color: theme.inkSoft, margin: '6px 0 0', fontWeight: 500, lineHeight: 1.5 },
   muted: { fontSize: 14, color: theme.inkFaint, padding: '16px 4px' },
 
-  segmented: { display: 'inline-flex', gap: 2, padding: 3, borderRadius: 999, background: theme.muted, marginBottom: 18 },
-  segBtn: { padding: '7px 20px', borderRadius: 999, border: 'none', background: 'transparent', color: theme.inkSoft, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+  segmented: { display: 'inline-flex', gap: 2, padding: 3, borderRadius: theme.radiusPill, background: theme.muted, marginBottom: 18 },
+  segBtn: { padding: '7px 20px', borderRadius: theme.radiusPill, border: 'none', background: 'transparent', color: theme.inkSoft, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
   segOn: { background: theme.card, color: theme.ink, boxShadow: theme.shadow },
 
   card: { background: theme.card, border: `0.5px solid ${theme.line}`, borderRadius: theme.radius, boxShadow: theme.shadow, padding: 22, marginBottom: 16, minWidth: 0 },
@@ -199,8 +191,8 @@ const s: Record<string, CSSProperties> = {
   strong: { color: theme.ink, fontWeight: 700 },
 
   privacyRow: { display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 14 },
-  pillOk: { fontSize: 12, fontWeight: 600, color: theme.tealDeep, background: theme.tealBg, padding: '5px 10px', borderRadius: 999 },
-  pillNo: { fontSize: 12, fontWeight: 600, color: theme.inkSoft, background: theme.muted, padding: '5px 10px', borderRadius: 999 },
+  pillOk: { fontSize: 12, fontWeight: 600, color: theme.tealDeep, background: theme.tealBg, padding: '5px 10px', borderRadius: theme.radiusPill },
+  pillNo: { fontSize: 12, fontWeight: 600, color: theme.inkSoft, background: theme.muted, padding: '5px 10px', borderRadius: theme.radiusPill },
 
   inviteRow: { display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' },
   codeBox: { fontFamily: 'ui-monospace, monospace', fontSize: 16, fontWeight: 700, letterSpacing: 2, color: theme.ink, background: theme.bg, border: `0.5px solid ${theme.line}`, borderRadius: theme.radiusSm, padding: '10px 14px', flex: 1, minWidth: 120, textAlign: 'center' },
@@ -214,8 +206,8 @@ const s: Record<string, CSSProperties> = {
   rankList: { display: 'flex', flexDirection: 'column', gap: 6 },
 
   primary: { padding: '11px 20px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
-  secondary: { padding: '11px 16px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.ink, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
-  miniPrimary: { padding: '7px 13px', borderRadius: 8, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 12.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', flexShrink: 0 },
-  miniGhost: { padding: '7px 11px', borderRadius: 8, border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.inkSoft, fontSize: 12.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', flexShrink: 0 },
+  secondary: { padding: '11px 16px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.ink, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
+  miniPrimary: { padding: '7px 13px', borderRadius: theme.radiusXs, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', flexShrink: 0 },
+  miniGhost: { padding: '7px 11px', borderRadius: theme.radiusXs, border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.inkSoft, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', flexShrink: 0 },
   disableBtn: { border: 'none', background: 'transparent', color: theme.inkFaint, fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit', padding: '4px 2px', textDecoration: 'underline' },
 };

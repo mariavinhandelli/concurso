@@ -6,6 +6,8 @@
 import { useCallback, useState } from 'react';
 import Cropper, { type Area } from 'react-easy-crop';
 import { theme } from '@/lib/theme';
+import { Overlay } from '@/components/ui/Overlay';
+import { Button } from '@/components/ui/Button';
 
 interface Props {
   // URL local (object URL) da imagem escolhida pelo usuário.
@@ -72,10 +74,9 @@ export function AvatarCropper({ imageSrc, onCancel, onConfirm }: Props) {
   }
 
   return (
-    <div style={styles.overlay} onClick={onCancel}>
-      <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
-        <h3 style={styles.title}>Ajustar foto</h3>
-        <p style={styles.hint}>Arraste para posicionar e use o controle para aproximar.</p>
+    <Overlay onClose={processing ? () => {} : onCancel} maxWidth={420} labelledBy="avatar-cropper-title">
+      <h3 id="avatar-cropper-title" style={styles.title}>Ajustar foto</h3>
+      <p style={styles.hint}>Arraste para posicionar e use o controle para aproximar.</p>
 
         <div style={styles.cropArea}>
           <Cropper
@@ -111,20 +112,16 @@ export function AvatarCropper({ imageSrc, onCancel, onConfirm }: Props) {
         )}
 
         <div style={styles.actions}>
-          <button onClick={onCancel} disabled={processing} style={styles.cancelBtn}>Cancelar</button>
-          <button onClick={handleConfirm} disabled={processing || !areaPixels}
-            style={{ ...styles.confirmBtn, opacity: processing || !areaPixels ? 0.6 : 1 }}>
+          <Button variant="outline" onClick={onCancel} disabled={processing}>Cancelar</Button>
+          <Button onClick={handleConfirm} disabled={!areaPixels} loading={processing}>
             {processing ? 'Processando…' : 'Confirmar'}
-          </button>
+          </Button>
         </div>
-      </div>
-    </div>
+    </Overlay>
   );
 }
 
 const styles: Record<string, React.CSSProperties> = {
-  overlay: { position: 'fixed', inset: 0, background: 'var(--backdrop)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 60, padding: 16 },
-  modal: { background: theme.card, borderRadius: theme.radius, padding: 24, width: 'min(420px, 95vw)', boxShadow: '0 20px 60px rgba(0,0,0,0.2)', fontFamily: theme.font, boxSizing: 'border-box' },
   title: { fontSize: 18, fontWeight: 700, color: theme.ink, margin: '0 0 4px' },
   hint: { fontSize: 13, color: theme.inkSoft, margin: '0 0 16px', lineHeight: 1.45 },
   cropArea: { position: 'relative', width: '100%', height: 300, background: theme.bg, borderRadius: theme.radiusSm, overflow: 'hidden' },
@@ -132,7 +129,5 @@ const styles: Record<string, React.CSSProperties> = {
   zoomIcon: { fontSize: 18, fontWeight: 700, color: theme.inkSoft, width: 16, textAlign: 'center', flexShrink: 0 },
   slider: { flex: 1, accentColor: theme.teal, cursor: 'pointer' },
   actions: { display: 'flex', gap: 12, justifyContent: 'flex-end', marginTop: 18 },
-  cancelBtn: { padding: '11px 20px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.inkSoft, fontSize: 14, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' },
-  confirmBtn: { padding: '11px 24px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
-  errorMsg: { fontSize: 13, color: theme.danger, background: theme.dangerTint, borderRadius: 8, padding: '8px 12px', margin: '12px 0 0' },
+  errorMsg: { fontSize: 13, color: theme.danger, background: theme.dangerTint, borderRadius: theme.radiusXs, padding: '8px 12px', margin: '12px 0 0' },
 };

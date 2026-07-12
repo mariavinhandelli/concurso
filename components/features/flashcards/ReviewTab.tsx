@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { Check } from 'lucide-react';
 import { countDailyQueue } from '@/services/flashcards.service';
 import { theme } from '@/lib/theme';
 import { Button } from '@/components/ui/Button';
@@ -41,11 +42,11 @@ export function ReviewTab({ onStart, loading }: Props) {
       {counts === null ? (
         <div style={styles.skeleton}>
           <div style={{ display: 'flex', gap: 28, alignItems: 'center' }}>
-            <div style={{ ...SKEL, width: 80, height: 52, borderRadius: 12 }} />
+            <div style={{ ...SKEL, width: 80, height: 52, borderRadius: theme.radiusSm }} />
             <div style={{ ...SKEL, width: 1, height: 40, borderRadius: 1 }} />
-            <div style={{ ...SKEL, width: 80, height: 52, borderRadius: 12 }} />
+            <div style={{ ...SKEL, width: 80, height: 52, borderRadius: theme.radiusSm }} />
           </div>
-          <div style={{ ...SKEL, width: 220, height: 46, borderRadius: 12 }} />
+          <div style={{ ...SKEL, width: 220, height: 46, borderRadius: theme.radiusSm }} />
         </div>
       ) : hasError ? (
         <div style={styles.empty}>
@@ -53,7 +54,7 @@ export function ReviewTab({ onStart, loading }: Props) {
         </div>
       ) : total === 0 ? (
         <EmptyState
-          icon={<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke={theme.teal} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>}
+          icon={<Check size={26} color={theme.teal} strokeWidth={1.8} />}
           title="Revisão em dia"
           body="Nenhum flashcard para revisar hoje. Crie novos cards na aba Meus Cards ou volte amanhã."
         />
@@ -92,5 +93,5 @@ const styles: Record<string, React.CSSProperties> = {
   num: { fontSize: 40, color: theme.ink, fontWeight: 600, letterSpacing: -1.5, fontVariantNumeric: 'tabular-nums' },
   label: { fontSize: 13, color: theme.inkFaint, fontWeight: 500 },
   estTime: { fontSize: 13, color: theme.inkFaint, margin: '-8px 0 0' },
-  startBtn: { padding: '13px 30px', borderRadius: 12, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 15, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+  startBtn: { padding: '13px 30px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 15, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
 };

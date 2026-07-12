@@ -62,7 +62,7 @@ export function StudyTimeChart() {
             <Tooltip
               contentStyle={{
                 background: theme.card, border: `0.5px solid ${theme.line}`,
-                borderRadius: 12, fontSize: 12, boxShadow: theme.shadow,
+                borderRadius: theme.radiusSm, fontSize: 12, boxShadow: theme.shadow,
               }}
               labelStyle={{ color: theme.ink, fontWeight: 600 }}
               formatter={(v) => [`${v} min`, '']}
@@ -89,7 +89,7 @@ const styles: Record<string, React.CSSProperties> = {
   wrap: { fontFamily: theme.font, width: '100%', boxSizing: 'border-box' },
   header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, flexWrap: 'wrap', gap: 12 },
   title: { margin: 0, fontSize: 16, color: theme.ink, fontWeight: 600, letterSpacing: -0.2 },
-  filters: { display: 'flex', gap: 4, padding: 3, background: 'rgba(15,23,42,.06)', borderRadius: 12 },
+  filters: { display: 'flex', gap: 4, padding: 3, background: 'rgba(15,23,42,.06)', borderRadius: theme.radiusSm },
   filterBtn: {
     padding: '5px 13px', borderRadius: 9, border: 'none', background: 'transparent',
     color: theme.inkSoft, fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit',

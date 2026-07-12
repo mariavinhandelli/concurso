@@ -2,12 +2,14 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { Star, RefreshCw, Search, CircleHelp } from 'lucide-react';
 import { DISCIPLINAS_HUB, countByDisciplina } from '@/services/jurisprudencias.service';
 import { getSimuladoInsights, type SimuladoInsights } from '@/services/jurisInteracoes.service';
 import { countRevisoesHoje } from '@/services/jurisRevisao.service';
 import { useUI } from '@/components/layout/UIContext';
 import { theme } from '@/lib/theme';
 import { Button } from '@/components/ui/Button';
+import { PageContainer, PageHeader } from '@/components/ui/Page';
 
 const DISCIPLINA_ICON: Record<string, React.ReactNode> = {
   // Balança da justiça → CF/CRFB
@@ -119,17 +121,8 @@ export default function JurisprudenciasHubPage() {
   }
 
   return (
-    <div style={{ maxWidth: 960, margin: '0 auto', padding: isMobile ? '20px 16px' : '34px 40px', fontFamily: theme.font, minWidth: 0 }}>
-
-      {/* Cabeçalho */}
-      <div style={{ marginBottom: 24 }}>
-        <h1 style={{ fontSize: isMobile ? 24 : 28, fontWeight: 800, color: theme.ink, letterSpacing: -0.6, margin: 0 }}>
-          Jurisprudências
-        </h1>
-        <p style={{ fontSize: 14, color: theme.inkSoft, margin: '8px 0 0' }}>
-          Teses que caem em concurso, organizadas por disciplina.
-        </p>
-      </div>
+    <PageContainer style={{ minWidth: 0 }}>
+      <PageHeader title="Jurisprudências" subtitle="Teses que caem em concurso, organizadas por disciplina." />
 
       {/* Busca */}
       <form onSubmit={handleSearch} style={{ maxWidth: 560, margin: '0 auto 28px' }}>
@@ -139,9 +132,7 @@ export default function JurisprudenciasHubPage() {
             style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', border: 'none', background: 'transparent', cursor: 'pointer', padding: 2, display: 'flex', alignItems: 'center' }}
             aria-label="Buscar"
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={theme.inkFaint} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" />
-            </svg>
+            <Search size={18} color={theme.inkFaint} strokeWidth={1.7} />
           </button>
           <input
             value={search}
@@ -160,21 +151,15 @@ export default function JurisprudenciasHubPage() {
       {/* Ações rápidas */}
       <div style={{ display: 'flex', gap: 10, justifyContent: 'center', marginBottom: 32, flexWrap: 'wrap' }}>
         <button onClick={() => router.push('/jurisprudencias/lista?favoritas=1')} style={{ ...styles.quickBtn, display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b" strokeWidth="1.7">
-            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z" />
-          </svg>
+          <Star size={13} fill="#f59e0b" color="#f59e0b" strokeWidth={1.7} />
           Favoritas
         </button>
         <button onClick={() => router.push('/jurisprudencias/revisar')} style={{ ...styles.quickBtn, ...(revisoesHoje ? styles.quickBtnAlert : {}), display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M4 12a8 8 0 0113-6.2L20 8M20 4v4h-4M20 12a8 8 0 01-13 6.2L4 16M4 20v-4h4" />
-          </svg>
+          <RefreshCw size={13} strokeWidth={1.7} />
           Revisões de hoje{revisoesHoje ? ` (${revisoesHoje})` : ''}
         </button>
         <button onClick={() => router.push('/jurisprudencias/simulados')} style={{ ...styles.quickBtn, display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="12" cy="12" r="10" /><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01" />
-          </svg>
+          <CircleHelp size={13} strokeWidth={1.7} />
           Simulados
         </button>
         <Button size="sm" style={{ borderRadius: theme.radiusPill }} onClick={() => router.push('/jurisprudencias/nova')}>
@@ -266,7 +251,7 @@ export default function JurisprudenciasHubPage() {
           Ver todas as jurisprudências →
         </button>
       </div>
-    </div>
+    </PageContainer>
   );
 }
 
@@ -277,17 +262,17 @@ const styles: Record<string, React.CSSProperties> = {
     background: theme.card, boxShadow: theme.shadow, cursor: 'pointer',
     fontFamily: 'inherit', textAlign: 'left' as const, flex: '1 1 200px', minWidth: 0,
   },
-  quickBtn: { padding: '9px 18px', borderRadius: theme.radiusPill, border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.inkSoft, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+  quickBtn: { padding: '9px 18px', borderRadius: theme.radiusPill, border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.inkSoft, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
   quickBtnAlert: { border: `0.5px solid ${theme.warn}`, background: theme.warnTint, color: theme.warnDeep },
-  quickBtnPrimary: { padding: '9px 18px', borderRadius: theme.radiusPill, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+  quickBtnPrimary: { padding: '9px 18px', borderRadius: theme.radiusPill, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
   discCard: {
     display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8,
     padding: '20px 12px', borderRadius: theme.radius, border: `0.5px solid ${theme.line}`,
     background: theme.card, boxShadow: theme.shadow, cursor: 'pointer',
     fontFamily: 'inherit', transition: 'border-color .15s, transform .15s',
   },
-  discIcon: { width: 44, height: 44, borderRadius: 12, display: 'grid', placeItems: 'center', flexShrink: 0 },
+  discIcon: { width: 44, height: 44, borderRadius: theme.radiusSm, display: 'grid', placeItems: 'center', flexShrink: 0 },
   discLabel: { fontSize: 13, fontWeight: 600, color: theme.ink, textAlign: 'center', lineHeight: 1.3 },
   discCount: { fontSize: 11, color: theme.inkFaint, fontWeight: 500 },
-  verTodasBtn: { border: 'none', background: 'transparent', color: theme.teal, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+  verTodasBtn: { border: 'none', background: 'transparent', color: theme.teal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
 };

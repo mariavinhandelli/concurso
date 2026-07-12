@@ -34,13 +34,23 @@ function addDays(from: Date, days: number): Date {
   return d;
 }
 
+// intervalModifier: ajuste pessoal por matéria vindo do feature store
+// (user_features.srs_adjust — taxa de acerto real em questões). Só alonga/encurta
+// intervalos MADUROS (3ª repetição em diante); os degraus fixos de 1 e 6 dias e o
+// reset por erro ficam intactos. Clamp defensivo caso o banco traga valor fora da faixa.
+const MIN_INTERVAL_MODIFIER = 0.7;
+const MAX_INTERVAL_MODIFIER = 1.3;
+
 export function calculateNextReview(
   state: SpacedRepetitionState,
   grade: RecallGrade,
   now: Date = new Date(),
+  intervalModifier: number = 1,
 ): ReviewResult {
   const quality = GRADE_TO_QUALITY[grade];
   let { easeFactor, intervalDays, repetitions } = state;
+
+  const mod = Math.min(MAX_INTERVAL_MODIFIER, Math.max(MIN_INTERVAL_MODIFIER, intervalModifier || 1));
 
   easeFactor = easeFactor + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02));
   easeFactor = Math.max(MIN_EASE_FACTOR, easeFactor);
@@ -52,7 +62,7 @@ export function calculateNextReview(
     repetitions += 1;
     if (repetitions === 1) intervalDays = FIRST_INTERVAL;
     else if (repetitions === 2) intervalDays = SECOND_INTERVAL;
-    else intervalDays = Math.round(intervalDays * easeFactor);
+    else intervalDays = Math.max(1, Math.round(intervalDays * easeFactor * mod));
   }
 
   return {

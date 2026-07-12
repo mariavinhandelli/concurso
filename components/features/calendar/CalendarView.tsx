@@ -8,12 +8,15 @@
 
 import { useMemo, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { X, Trash2 } from 'lucide-react';
 import { useConfirm } from '@/hooks/useConfirm';
 import { useToast } from '@/components/ui/ToastProvider';
 import { listEvents, type CalendarEvent } from '@/services/calendar.service';
 import { createReminder, deleteReminder } from '@/services/reminders.service';
 import { getScheduleBlocks } from '@/services/scheduleEngine.service';
 import { theme } from '@/lib/theme';
+import { Input } from '@/components/ui/Input';
+import { Button } from '@/components/ui/Button';
 import { useUI } from '@/components/layout/UIContext';
 
 type Mode = 'week' | 'month';
@@ -295,9 +298,7 @@ export function CalendarView() {
                 </div>
               </div>
               <button onClick={fecharDia} style={styles.sheetClose} aria-label="Fechar">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={theme.inkSoft} strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M18 6L6 18M6 6l12 12" />
-                </svg>
+                <X size={18} color={theme.inkSoft} strokeWidth={1.9} />
               </button>
             </div>
 
@@ -322,9 +323,7 @@ export function CalendarView() {
                       </div>
                       {isReminder && (
                         <button onClick={() => apagarLembrete(e)} style={styles.sheetItemDel} aria-label="Apagar lembrete">
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={theme.inkFaint} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M3 6h18M8 6V4a1 1 0 011-1h6a1 1 0 011 1v2m2 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6" />
-                          </svg>
+                          <Trash2 size={16} color={theme.inkFaint} strokeWidth={1.8} />
                         </button>
                       )}
                     </div>
@@ -335,7 +334,7 @@ export function CalendarView() {
 
             {adding ? (
               <div style={styles.addForm}>
-                <input
+                <Input
                   value={reminderTitle}
                   onChange={(e) => setReminderTitle(e.target.value)}
                   onKeyDown={(e) => {
@@ -344,10 +343,10 @@ export function CalendarView() {
                   }}
                   placeholder="Título do lembrete…"
                   autoFocus
-                  style={styles.addInput}
+                  style={{ flex: 1, minWidth: 140, padding: '11px 14px', borderRadius: 10, background: theme.bg }}
                 />
-                <button onClick={salvarLembrete} style={styles.addSave}>Salvar</button>
-                <button onClick={() => setAdding(false)} style={styles.addCancel}>Cancelar</button>
+                <Button onClick={salvarLembrete}>Salvar</Button>
+                <Button variant="ghost" onClick={() => setAdding(false)}>Cancelar</Button>
               </div>
             ) : (
               <button onClick={() => setAdding(true)} style={styles.addTrigger}>
@@ -398,17 +397,17 @@ const styles: Record<string, React.CSSProperties> = {
   periodLabel: { fontSize: 15, color: theme.ink, margin: 0, fontWeight: 700, textTransform: 'capitalize' },
   controls: { display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' },
   addReminderBtn: { padding: '8px 14px', borderRadius: 10, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
-  modeToggle: { display: 'flex', gap: 4, padding: 3, background: 'rgba(15,23,42,.06)', borderRadius: 12, marginRight: 4 },
+  modeToggle: { display: 'flex', gap: 4, padding: 3, background: 'rgba(15,23,42,.06)', borderRadius: theme.radiusSm, marginRight: 4 },
   modeBtn: { padding: '6px 14px', borderRadius: 9, border: 'none', background: 'transparent', color: theme.inkSoft, fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit', transition: 'all .15s' },
   modeBtnActive: { background: theme.card, color: theme.ink, boxShadow: theme.shadow, fontWeight: 600 },
   navBtn: { width: 44, height: 44, borderRadius: 10, border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.inkSoft, fontSize: 18, cursor: 'pointer', display: 'grid', placeItems: 'center' },
   todayBtn: { padding: '8px 16px', borderRadius: 10, border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.ink, fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' },
   weekHeader: { display: 'grid', gridTemplateColumns: 'repeat(7, minmax(0, 1fr))', gap: 8, marginBottom: 8 },
-  weekDay: { textAlign: 'center', fontSize: 11.5, color: theme.inkFaint, fontWeight: 600, letterSpacing: 0.5, textTransform: 'uppercase' },
+  weekDay: { textAlign: 'center', fontSize: 12, color: theme.inkFaint, fontWeight: 600, letterSpacing: 0.5, textTransform: 'uppercase' },
   grid: { display: 'grid', gridTemplateColumns: 'repeat(7, minmax(0, 1fr))', gap: 8 },
   cell: {
     minWidth: 0, minHeight: 96, background: theme.card,
-    borderRadius: 12, border: `0.5px solid ${theme.line}`,
+    borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`,
     padding: 8, display: 'flex', flexDirection: 'column', gap: 4,
     overflow: 'hidden', cursor: 'pointer',
     transition: 'box-shadow .15s, border-color .15s',
@@ -424,7 +423,7 @@ const styles: Record<string, React.CSSProperties> = {
   events: { display: 'flex', flexDirection: 'column', gap: 2, minWidth: 0 },
   event: {
     display: 'flex', alignItems: 'center', gap: 5,
-    fontSize: 11.5, fontWeight: 500, color: theme.ink,
+    fontSize: 12, fontWeight: 500, color: theme.ink,
     borderRadius: 6, padding: '3px 7px',
     minWidth: 0, overflow: 'hidden',
   },
@@ -437,7 +436,7 @@ const styles: Record<string, React.CSSProperties> = {
   sheet: { background: theme.card, boxShadow: '0 -8px 40px rgba(0,0,0,.2)', display: 'flex', flexDirection: 'column', fontFamily: theme.font },
   sheetMobile: { width: '100%', maxHeight: '78dvh', borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: '10px 18px max(env(safe-area-inset-bottom), 20px)' },
   sheetDesktop: { width: 420, maxWidth: '92vw', maxHeight: '80vh', borderRadius: 18, padding: 22, alignSelf: 'center', boxShadow: theme.shadowHover },
-  grabber: { width: 40, height: 4, borderRadius: 999, background: theme.line, margin: '4px auto 14px' },
+  grabber: { width: 40, height: 4, borderRadius: theme.radiusPill, background: theme.line, margin: '4px auto 14px' },
   sheetHead: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 },
   sheetDate: { fontSize: 17, fontWeight: 700, color: theme.ink, textTransform: 'capitalize' },
   sheetCount: { fontSize: 13, color: theme.inkFaint, marginTop: 2 },
@@ -447,16 +446,13 @@ const styles: Record<string, React.CSSProperties> = {
   sheetItem: {
     display: 'flex', alignItems: 'center', gap: 12,
     padding: '12px 14px', background: theme.bg,
-    borderRadius: 12, borderLeft: 'none', minWidth: 0,
+    borderRadius: theme.radiusSm, borderLeft: 'none', minWidth: 0,
     border: `0.5px solid ${theme.line}`,
   },
   sheetItemInfo: { flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 2 },
-  sheetItemLabel: { fontSize: 14.5, color: theme.ink, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
+  sheetItemLabel: { fontSize: 15, color: theme.ink, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
   sheetItemType: { fontSize: 12, color: theme.inkSoft, fontWeight: 400 },
-  sheetItemDel: { width: 44, height: 44, borderRadius: 8, border: 'none', background: 'transparent', display: 'grid', placeItems: 'center', cursor: 'pointer', flexShrink: 0 },
+  sheetItemDel: { width: 44, height: 44, borderRadius: theme.radiusXs, border: 'none', background: 'transparent', display: 'grid', placeItems: 'center', cursor: 'pointer', flexShrink: 0 },
   addForm: { display: 'flex', gap: 8, marginTop: 14, flexWrap: 'wrap' },
-  addInput: { flex: 1, minWidth: 140, padding: '11px 14px', borderRadius: 10, border: `0.5px solid ${theme.line}`, background: theme.bg, fontSize: 14, color: theme.ink, fontFamily: 'inherit', outline: 'none' },
-  addSave: { padding: '11px 18px', borderRadius: 10, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
-  addCancel: { padding: '11px 12px', borderRadius: 10, border: 'none', background: 'transparent', color: theme.inkFaint, fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' },
   addTrigger: { display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: 14, padding: '12px 0', borderRadius: 10, border: `1px dashed ${theme.line}`, background: 'transparent', color: theme.teal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', width: '100%' },
 };

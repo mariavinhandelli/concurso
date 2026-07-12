@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { theme, zIndex } from '@/lib/theme';
+import { Button } from './Button';
 
 interface Props {
   title: string;
@@ -40,13 +41,10 @@ export function ConfirmDialog({
         <h3 id="confirm-title" style={styles.title}>{title}</h3>
         {description && <p style={styles.desc}>{description}</p>}
         <div style={styles.actions}>
-          <button onClick={onCancel} style={styles.cancelBtn}>{cancelLabel}</button>
-          <button
-            onClick={onConfirm}
-            style={{ ...styles.confirmBtn, background: danger ? theme.danger : theme.primary, color: danger ? theme.onDanger : theme.onTeal }}
-          >
+          <Button variant="outline" onClick={onCancel}>{cancelLabel}</Button>
+          <Button variant={danger ? 'danger' : 'primary'} onClick={onConfirm}>
             {confirmLabel}
-          </button>
+          </Button>
         </div>
       </div>
     </div>
@@ -65,15 +63,6 @@ const styles: Record<string, React.CSSProperties> = {
     fontFamily: theme.font,
   },
   title: { fontSize: 18, fontWeight: 700, color: theme.ink, margin: 0 },
-  desc: { fontSize: 13.5, color: theme.inkSoft, margin: '8px 0 0', lineHeight: 1.5 },
+  desc: { fontSize: 14, color: theme.inkSoft, margin: '8px 0 0', lineHeight: 1.5 },
   actions: { display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 20 },
-  cancelBtn: {
-    padding: '10px 18px', borderRadius: 10, cursor: 'pointer', fontFamily: 'inherit',
-    border: `0.5px solid ${theme.line}`, background: theme.card,
-    color: theme.inkSoft, fontSize: 14, fontWeight: 500,
-  },
-  confirmBtn: {
-    padding: '10px 20px', borderRadius: 10, cursor: 'pointer', fontFamily: 'inherit',
-    border: 'none', fontSize: 14, fontWeight: 600,
-  },
 };

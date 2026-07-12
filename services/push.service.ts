@@ -92,7 +92,9 @@ export async function enablePush(reminderHour: number = DEFAULT_REMINDER_HOUR): 
   const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'America/Sao_Paulo';
   await supabase.rpc('merge_profile_settings', {
     p_user_id: user.id,
-    p_patch: { reminderEnabled: true, reminderHour, reminderTz: tz },
+    // reminderPaused: false — reativar o lembrete desfaz a pausa automática
+    // aplicada pelo cron quando os avisos vinham sendo ignorados.
+    p_patch: { reminderEnabled: true, reminderHour, reminderTz: tz, reminderPaused: false },
   });
   track(EV.pushEnabled, { hour: reminderHour });
 }
@@ -122,5 +124,8 @@ export async function setReminderHour(hour: number): Promise<void> {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
-  await supabase.rpc('merge_profile_settings', { p_user_id: user.id, p_patch: { reminderHour: hour } });
+  // reminderHourManual: a pessoa escolheu a hora de propósito — o cron passa a
+  // respeitá-la sempre. Sem o flag, o lembrete segue o horário de pico real de
+  // estudo aprendido pelo feature store (user_features.peak_hour).
+  await supabase.rpc('merge_profile_settings', { p_user_id: user.id, p_patch: { reminderHour: hour, reminderHourManual: true } });
 }

@@ -1,8 +1,9 @@
 'use client';
 
-import { memo, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
+import { ChevronDown, ChevronRight, Check } from 'lucide-react';
 import { countDueReviews } from '@/services/reviews.service';
 import { countDueCards } from '@/services/flashcards.service';
 import { countRevisoesDue } from '@/services/leiInteracoes.service';
@@ -13,7 +14,9 @@ import {
   getSuggestions, type SuggestionsResult, type SuggestedTopic, type SuggestionKind,
 } from '@/services/suggestion.service';
 import { getDormantModules, type DormantModules } from '@/services/activation.service';
+import { PactoEstudo } from '@/components/features/home/PactoEstudo';
 import { getActiveCycleRule, getCycleState, type CycleState } from '@/services/cycleEngine.service';
+import { getUserFeatures, DEFAULT_FEATURES, type UserFeatures } from '@/services/userFeatures.service';
 import { fmtMin } from '@/lib/format/time';
 import { track, EV } from '@/lib/analytics';
 import { useTimer } from '@/components/features/timer/TimerContext';
@@ -52,7 +55,7 @@ function StepMarker({ index, done }: { index: number; done: boolean }) {
   if (done) {
     return (
       <span style={{ ...markerBase, background: theme.ok, border: 'none' }}>
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={theme.onOk} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
+        <Check size={13} color={theme.onOk} strokeWidth={3} />
       </span>
     );
   }
@@ -60,9 +63,7 @@ function StepMarker({ index, done }: { index: number; done: boolean }) {
 }
 
 function Chevron() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={theme.inkFaint} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M9 18l6-6-6-6" /></svg>
-  );
+  return <ChevronRight size={16} color={theme.inkFaint} strokeWidth={2.2} style={{ flexShrink: 0 }} />;
 }
 
 export const PlanoHoje = memo(function PlanoHoje() {
@@ -111,7 +112,23 @@ export const PlanoHoje = memo(function PlanoHoje() {
   // mais atrasada na volta (mesma regra da aba Ciclo da Agenda).
   const temCiclo = !temCronograma && !!ciclo && ciclo.subjects.length > 0;
   const cicloSugerida = temCiclo ? (ciclo.subjects.find((s) => s.isSuggested) ?? ciclo.subjects[0]) : null;
-  const cicloMetaBatida = temCiclo && ciclo.todayMinutes >= ciclo.dailyMinutes;
+
+  // ── Dia leve (IA invisível) — user_features.plan_scale < 1 sinaliza risco de
+  // abandono; a meta e o bloco do ciclo encolhem SÓ aqui na Home (a Agenda segue
+  // mostrando o plano canônico). Voltar num dia fraco com um plano pequeno e
+  // completável preserva o hábito; o plano cheio intimida e vira abandono.
+  const { data: features = DEFAULT_FEATURES } = useQuery<UserFeatures>({
+    queryKey: ['user-features'], queryFn: getUserFeatures, staleTime: 60 * 60_000,
+  });
+  const diaLeve = features.planScale < 1;
+  const arred5 = (min: number) => Math.max(10, Math.round(min / 5) * 5);
+  const metaCicloHoje = temCiclo ? arred5(ciclo.dailyMinutes * features.planScale) : 0;
+  const minutosSugeridos = cicloSugerida ? arred5(cicloSugerida.plannedMinutes * features.planScale) : 0;
+  const cicloMetaBatida = temCiclo && ciclo.todayMinutes >= metaCicloHoje;
+
+  useEffect(() => {
+    if (diaLeve && temCiclo) track(EV.lightPlanShown, { planScale: features.planScale, churnScore: features.churnScore });
+  }, [diaLeve, temCiclo, features.planScale, features.churnScore]);
 
   // ── Estado de conclusão de cada passo ──
   // "Revisar" soma revisões de tópicos (SM-2) + artigos de lei seca +
@@ -185,7 +202,7 @@ export const PlanoHoje = memo(function PlanoHoje() {
     : temCiclo
     ? (cicloMetaBatida
         ? 'meta do ciclo batida hoje 🎉'
-        : `${cicloSugerida!.subjectName} · ${cicloSugerida!.plannedMinutes} min`)
+        : `${cicloSugerida!.subjectName} · ${minutosSugeridos} min${diaLeve ? ' · dia leve' : ''}`)
     : (sug === undefined ? '…'
         : principal ? principal.name
         : studiedToday ? 'nenhum tópico pendente' : 'escolha um tópico para começar');
@@ -215,6 +232,9 @@ export const PlanoHoje = memo(function PlanoHoje() {
         </span>
       </div>
       <div style={styles.bar}><div style={{ ...styles.barFill, width: `${pct}%` }} /></div>
+
+      {/* Pacto de estudo (intenção de implementação) — o cue do dia; some ao estudar */}
+      <PactoEstudo diaComecou={diaComecou} />
 
       {/* ── Passos ── */}
       <div style={styles.steps}>
@@ -247,7 +267,7 @@ export const PlanoHoje = memo(function PlanoHoje() {
               {temCronograma
                 ? <span style={styles.countChip}>{blocosFeitos}/{blocksDia.length} blocos</span>
                 : temCiclo
-                ? <span style={styles.countChip}>{fmtMin(ciclo!.todayMinutes)} de {fmtMin(ciclo!.dailyMinutes)}</span>
+                ? <span style={styles.countChip}>{fmtMin(ciclo!.todayMinutes)} de {fmtMin(metaCicloHoje)}</span>
                 : principal && <KindPill kind={principal.kind} />}
             </div>
             <span style={styles.stepSub}>{estudoSub}</span>
@@ -289,7 +309,7 @@ export const PlanoHoje = memo(function PlanoHoje() {
               : (temCronograma
                   ? `ver os ${blocksDia.length} blocos do dia`
                   : `ver outras ${secundarias.length} ${secundarias.length === 1 ? 'sugestão' : 'sugestões'}`)}
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={theme.inkFaint} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ transition: 'transform .2s', transform: expandido ? 'rotate(180deg)' : 'none' }}><path d="M6 9l6 6 6-6" /></svg>
+            <ChevronDown size={13} color={theme.inkFaint} strokeWidth={2.2} style={{ transition: 'transform .2s', transform: expandido ? 'rotate(180deg)' : 'none' }} />
           </button>
 
           {expandido && temCronograma && (
@@ -302,7 +322,7 @@ export const PlanoHoje = memo(function PlanoHoje() {
                   disabled={b.is_done}
                 >
                   {b.is_done
-                    ? <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={theme.ok} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M20 6 9 17l-5-5" /></svg>
+                    ? <Check size={16} color={theme.ok} strokeWidth={2.4} style={{ flexShrink: 0 }} />
                     : <span style={{ ...styles.dot, background: b.subjectColor }} />}
                   <span style={{ ...styles.blockName, ...(b.is_done ? styles.stepLabelDone : {}) }}>
                     {b.topicName ?? b.subjectName}
@@ -338,7 +358,7 @@ export const PlanoHoje = memo(function PlanoHoje() {
           <button style={styles.atencaoToggle} onClick={() => setVerAtencao((v) => !v)}>
             <span style={{ ...styles.dot, background: theme.clay }} />
             {atencao.length} {atencao.length === 1 ? 'tópico fora do plano pede' : 'tópicos fora do plano pedem'} atenção
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={theme.inkFaint} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ transition: 'transform .2s', transform: verAtencao ? 'rotate(180deg)' : 'none' }}><path d="M6 9l6 6 6-6" /></svg>
+            <ChevronDown size={13} color={theme.inkFaint} strokeWidth={2.2} style={{ transition: 'transform .2s', transform: verAtencao ? 'rotate(180deg)' : 'none' }} />
           </button>
           {verAtencao && (
             <div style={styles.alsoList}>
@@ -358,7 +378,7 @@ export const PlanoHoje = memo(function PlanoHoje() {
 });
 
 const pillBase: React.CSSProperties = {
-  fontSize: 10.5, fontWeight: 700, letterSpacing: 0.3,
+  fontSize: 11, fontWeight: 700, letterSpacing: 0.3,
   textTransform: 'uppercase', padding: '2px 7px', borderRadius: theme.radiusPill,
   whiteSpace: 'nowrap', flexShrink: 0,
 };
@@ -381,9 +401,9 @@ const styles: Record<string, React.CSSProperties> = {
   },
   header: { display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 12, marginBottom: 10 },
   eyebrow: { fontSize: 11, fontWeight: 700, color: theme.teal, letterSpacing: 0.6, textTransform: 'uppercase' },
-  progressText: { fontSize: 12.5, fontWeight: 600, color: theme.inkSoft },
-  bar: { height: 6, background: theme.muted, borderRadius: 999, overflow: 'hidden', marginBottom: 14 },
-  barFill: { height: '100%', background: theme.teal, borderRadius: 999, transition: 'width .4s ease' },
+  progressText: { fontSize: 13, fontWeight: 600, color: theme.inkSoft },
+  bar: { height: 6, background: theme.muted, borderRadius: theme.radiusPill, overflow: 'hidden', marginBottom: 14 },
+  barFill: { height: '100%', background: theme.teal, borderRadius: theme.radiusPill, transition: 'width .4s ease' },
 
   steps: { display: 'flex', flexDirection: 'column', gap: 8 },
   step: {
@@ -395,17 +415,17 @@ const styles: Record<string, React.CSSProperties> = {
   stepStudy: { border: `0.5px solid ${theme.line}`, background: theme.tealBg },
   stepText: { flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 1 },
   studyTop: { display: 'flex', alignItems: 'center', gap: 8, minWidth: 0, overflow: 'hidden' },
-  stepLabel: { fontSize: 14.5, fontWeight: 600, color: theme.ink, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
+  stepLabel: { fontSize: 15, fontWeight: 600, color: theme.ink, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
   stepLabelDone: { color: theme.inkSoft, textDecoration: 'line-through' },
-  stepSub: { fontSize: 12.5, color: theme.inkSoft, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
+  stepSub: { fontSize: 13, color: theme.inkSoft, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
   countChip: {
-    fontSize: 10.5, fontWeight: 700, letterSpacing: 0.3, color: theme.inkSoft,
+    fontSize: 11, fontWeight: 700, letterSpacing: 0.3, color: theme.inkSoft,
     background: theme.muted, padding: '2px 7px', borderRadius: theme.radiusPill, whiteSpace: 'nowrap', flexShrink: 0,
   },
 
   studyBtn: {
     padding: '9px 16px', borderRadius: 10, border: 'none',
-    background: theme.teal, color: theme.onTeal, fontSize: 13.5,
+    background: theme.teal, color: theme.onTeal, fontSize: 14,
     fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap', flexShrink: 0,
   },
   studyGhost: {
@@ -420,45 +440,45 @@ const styles: Record<string, React.CSSProperties> = {
     background: 'transparent', cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit', minWidth: 0,
   },
   descobrirPill: {
-    fontSize: 10.5, fontWeight: 700, letterSpacing: 0.3, textTransform: 'uppercase',
+    fontSize: 11, fontWeight: 700, letterSpacing: 0.3, textTransform: 'uppercase',
     color: theme.tealDeep, background: theme.tealBg, padding: '2px 8px', borderRadius: theme.radiusPill, flexShrink: 0,
   },
-  descobrirText: { fontSize: 12.5, color: theme.inkSoft, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, minWidth: 0 },
+  descobrirText: { fontSize: 13, color: theme.inkSoft, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, minWidth: 0 },
   descobrirLabel: { color: theme.ink, fontWeight: 700 },
 
   alsoWrap: { marginTop: 12, paddingTop: 12, borderTop: `0.5px solid ${theme.line}` },
   alsoToggle: {
     display: 'flex', alignItems: 'center', gap: 6, border: 'none', background: 'transparent',
-    color: theme.inkSoft, fontSize: 12.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', padding: 0,
+    color: theme.inkSoft, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', padding: 0,
   },
   alsoList: { display: 'flex', flexDirection: 'column', gap: 5, marginTop: 10 },
   alsoItem: {
-    display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px', borderRadius: 8,
+    display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px', borderRadius: theme.radiusXs,
     border: `0.5px solid ${theme.line}`, background: theme.bg,
     cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit', width: '100%',
   },
-  alsoName: { fontSize: 13.5, color: theme.ink, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 },
+  alsoName: { fontSize: 14, color: theme.ink, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 },
   alsoMotivo: { fontSize: 12, color: theme.inkFaint, whiteSpace: 'nowrap', flexShrink: 0 },
   verMaisBtn: { marginTop: 4, border: 'none', background: 'transparent', color: theme.inkSoft, fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', padding: 0, alignSelf: 'flex-start' },
 
   blockItem: {
-    display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px', borderRadius: 8,
+    display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px', borderRadius: theme.radiusXs,
     border: `0.5px solid ${theme.line}`, background: theme.bg,
     cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit', width: '100%',
   },
   dot: { width: 10, height: 10, borderRadius: '50%', flexShrink: 0 },
-  blockName: { fontSize: 13.5, color: theme.ink, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 },
+  blockName: { fontSize: 14, color: theme.ink, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 },
   blockMin: { fontSize: 12, color: theme.inkFaint, whiteSpace: 'nowrap', flexShrink: 0 },
 
   atencaoWrap: { marginTop: 10 },
   atencaoToggle: {
     display: 'flex', alignItems: 'center', gap: 8, border: 'none', background: 'transparent',
-    color: theme.inkSoft, fontSize: 12.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', padding: 0,
+    color: theme.inkSoft, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', padding: 0,
   },
 
   confirmBanner: { marginBottom: 12, padding: '11px 14px', borderRadius: theme.radiusSm, background: theme.warnBg, border: `0.5px solid ${theme.warn}` },
-  confirmMsg: { margin: '0 0 10px', fontSize: 13.5, color: theme.ink, lineHeight: 1.5 },
+  confirmMsg: { margin: '0 0 10px', fontSize: 14, color: theme.ink, lineHeight: 1.5 },
   confirmBtns: { display: 'flex', gap: 8 },
-  confirmCancel: { padding: '7px 14px', borderRadius: 8, border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.inkSoft, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
-  confirmOk: { padding: '7px 14px', borderRadius: 8, border: 'none', background: theme.warn, color: theme.onWarn, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+  confirmCancel: { padding: '7px 14px', borderRadius: theme.radiusXs, border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.inkSoft, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+  confirmOk: { padding: '7px 14px', borderRadius: theme.radiusXs, border: 'none', background: theme.warn, color: theme.onWarn, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
 };

@@ -139,7 +139,7 @@ export const StreakBar = memo(function StreakBar() {
 const styles: Record<string, React.CSSProperties> = {
   wrap: { fontFamily: theme.font, width: '100%', minWidth: 0 },
   header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, flexWrap: 'wrap', gap: 8 },
-  phrase: { fontSize: 14.5, color: theme.inkSoft },
+  phrase: { fontSize: 15, color: theme.inkSoft },
   hi: { color: theme.teal, fontWeight: 700 },
   warn: { color: theme.clay, fontWeight: 500 },
   shield: { color: '#B45309', fontWeight: 500 },

@@ -268,19 +268,19 @@ const s: Record<string, CSSProperties> = {
   materiaItemOn: { background: theme.tealBg },
   materiaDot: { width: 8, height: 8, borderRadius: '50%', flexShrink: 0 },
   materiaNome: { fontSize: 13, fontWeight: 600, color: theme.ink, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 },
-  materiaCount: { fontSize: 11.5, color: theme.inkFaint, flexShrink: 0, fontVariantNumeric: 'tabular-nums' },
+  materiaCount: { fontSize: 12, color: theme.inkFaint, flexShrink: 0, fontVariantNumeric: 'tabular-nums' },
 
   painelNotas: { display: 'flex', flexDirection: 'column', gap: 8, overflowY: 'auto', paddingRight: 2, minWidth: 0 },
   notasTools: { display: 'flex', gap: 8, position: 'sticky', top: 0, background: theme.bg, paddingBottom: 2, zIndex: 1 },
   buscaInput: { flex: 1, minWidth: 0, boxSizing: 'border-box', padding: '9px 12px', borderRadius: 10, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.card, fontSize: 13, color: theme.ink, fontFamily: 'inherit', outline: 'none' },
   novaBtn: { padding: '9px 14px', borderRadius: 10, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap', flexShrink: 0 },
 
-  notaCard: { display: 'flex', flexDirection: 'column', gap: 4, width: '100%', textAlign: 'left', padding: '11px 13px', borderRadius: 12, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.card, cursor: 'pointer', fontFamily: 'inherit', minWidth: 0 },
+  notaCard: { display: 'flex', flexDirection: 'column', gap: 4, width: '100%', textAlign: 'left', padding: '11px 13px', borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.card, cursor: 'pointer', fontFamily: 'inherit', minWidth: 0 },
   notaCardOn: { borderColor: theme.teal, background: theme.tealBg },
-  notaTitulo: { fontSize: 13.5, fontWeight: 700, color: theme.ink, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
+  notaTitulo: { fontSize: 14, fontWeight: 700, color: theme.ink, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
   notaPreview: { fontSize: 12, color: theme.inkSoft, lineHeight: 1.45, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const, overflow: 'hidden' },
   notaMetaRow: { display: 'flex', alignItems: 'center', gap: 8, marginTop: 2, minWidth: 0 },
-  notaKind: { fontSize: 10, fontWeight: 700, borderRadius: 999, padding: '2px 8px', flexShrink: 0 },
+  notaKind: { fontSize: 10, fontWeight: 700, borderRadius: theme.radiusPill, padding: '2px 8px', flexShrink: 0 },
   notaTopico: { fontSize: 11, color: theme.inkFaint, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 },
   notaQuando: { fontSize: 11, color: theme.inkFaint, marginLeft: 'auto', flexShrink: 0 },
 

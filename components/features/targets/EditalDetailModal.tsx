@@ -3,15 +3,17 @@
 // Detalhes de um edital do catálogo — o usuário explora a ficha, as disciplinas
 // e a linha do tempo ANTES de decidir ativar.
 
-import { useEffect, useState, type CSSProperties } from 'react';
+import { useState, type CSSProperties } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
   activateCatalogEdital, getCatalogEditalSubjects, listEditalUpdates,
   type CatalogEdital, type CatalogEditalSubject, type EditalUpdate, type EditalUpdateTipo,
 } from '@/services/editaisCatalog.service';
 import { useToast } from '@/components/ui/ToastProvider';
-import { theme, zIndex } from '@/lib/theme';
+import { theme } from '@/lib/theme';
 import { Button } from '@/components/ui/Button';
+import { Overlay } from '@/components/ui/Overlay';
+import { IconButton } from '@/components/ui/IconButton';
 
 const SITUACAO_LABEL: Record<CatalogEdital['situacao'], string> = {
   vigente: 'Edital vigente',
@@ -62,12 +64,6 @@ export function EditalDetailModal({ edital, isMobile, onClose, onActivated }: Pr
     queryFn: () => listEditalUpdates(edital.id),
   });
 
-  useEffect(() => {
-    function onKey(e: KeyboardEvent) { if (e.key === 'Escape') onClose(); }
-    document.addEventListener('keydown', onKey);
-    return () => document.removeEventListener('keydown', onKey);
-  }, [onClose]);
-
   async function handleActivate() {
     if (activating) return;
     setActivating(true);
@@ -93,12 +89,12 @@ export function EditalDetailModal({ edital, isMobile, onClose, onActivated }: Pr
   ];
 
   return (
-    <div style={s.overlay} onClick={onClose}>
-      <div style={{ ...s.modal, width: isMobile ? '100%' : 'min(640px, 96vw)' }} onClick={(e) => e.stopPropagation()}>
+    <Overlay onClose={onClose} maxWidth={640} labelledBy="edital-detail-title" padding={0} hideClose>
+      <div style={{ width: isMobile ? '100%' : undefined }}>
         <div style={s.head}>
           <div style={{ minWidth: 0 }}>
             <div style={s.titleRow}>
-              <h2 style={s.h2}>{[edital.orgao, edital.cargo].filter(Boolean).join(' · ')}</h2>
+              <h2 id="edital-detail-title" style={s.h2}>{[edital.orgao, edital.cargo].filter(Boolean).join(' · ')}</h2>
               <span style={{
                 ...s.situacaoTag,
                 ...(edital.situacao === 'vigente' ? s.situacaoVigente
@@ -110,7 +106,7 @@ export function EditalDetailModal({ edital, isMobile, onClose, onActivated }: Pr
             </div>
             {edital.areaName && <p style={s.areaLabel}>{edital.areaName}</p>}
           </div>
-          <button style={s.close} onClick={onClose} aria-label="Fechar">✕</button>
+          <IconButton onClick={onClose} aria-label="Fechar" size="sm" style={{ fontSize: 16, flexShrink: 0 }}>✕</IconButton>
         </div>
 
         <div style={s.body}>
@@ -204,23 +200,19 @@ export function EditalDetailModal({ edital, isMobile, onClose, onActivated }: Pr
           )}
         </div>
       </div>
-    </div>
+    </Overlay>
   );
 }
 
 const s: Record<string, CSSProperties> = {
-  overlay: { position: 'fixed', inset: 0, background: 'var(--backdrop)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: zIndex.modal, padding: 16 },
-  modal: { background: theme.card, borderRadius: theme.radius, maxHeight: '92vh', display: 'flex', flexDirection: 'column', boxShadow: theme.shadowModal, fontFamily: theme.font },
-
   head: { display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, padding: '20px 22px 14px', borderBottom: `0.5px solid ${theme.line}` },
   titleRow: { display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' },
   h2: { fontSize: 18, fontWeight: 700, color: theme.ink, margin: 0, overflowWrap: 'break-word' },
-  situacaoTag: { fontSize: 10.5, fontWeight: 700, borderRadius: theme.radiusXs, padding: '3px 9px', flexShrink: 0, letterSpacing: 0.2 },
+  situacaoTag: { fontSize: 11, fontWeight: 700, borderRadius: theme.radiusXs, padding: '3px 9px', flexShrink: 0, letterSpacing: 0.2 },
   situacaoVigente: { color: theme.onTeal, background: theme.teal },
   situacaoExpectativa: { color: theme.warn, background: theme.warnBg },
   situacaoEncerrado: { color: theme.inkFaint, background: theme.muted },
   areaLabel: { fontSize: 12, color: theme.inkFaint, margin: '4px 0 0', fontWeight: 500 },
-  close: { border: 'none', background: 'transparent', color: theme.inkSoft, fontSize: 16, cursor: 'pointer', fontFamily: 'inherit', padding: 4, lineHeight: 1, flexShrink: 0 },
 
   body: { overflowY: 'auto', padding: '16px 22px' },
 
@@ -238,23 +230,23 @@ const s: Record<string, CSSProperties> = {
   subjectList: { display: 'flex', flexDirection: 'column', gap: 6 },
   subjectRow: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 14, padding: '11px 14px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.bg, minWidth: 0 },
   subjectLeft: { display: 'flex', flexDirection: 'column', gap: 2, minWidth: 0, flex: 1 },
-  subjectName: { fontSize: 13.5, color: theme.ink, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
-  subjectSub: { fontSize: 11.5, color: theme.inkFaint, fontVariantNumeric: 'tabular-nums' },
+  subjectName: { fontSize: 14, color: theme.ink, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
+  subjectSub: { fontSize: 12, color: theme.inkFaint, fontVariantNumeric: 'tabular-nums' },
   subjectRight: { display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 },
   weightDots: { display: 'inline-flex', gap: 3, alignItems: 'center' },
   weightDot: { width: 6, height: 6, borderRadius: '50%', display: 'inline-block' },
-  questionBadge: { fontSize: 11.5, fontWeight: 700, color: theme.teal, background: theme.tealBg, borderRadius: theme.radiusXs, padding: '4px 10px', whiteSpace: 'nowrap' },
-  questionBadgeMuted: { fontSize: 11.5, fontWeight: 500, color: theme.inkFaint, whiteSpace: 'nowrap' },
+  questionBadge: { fontSize: 12, fontWeight: 700, color: theme.teal, background: theme.tealBg, borderRadius: theme.radiusXs, padding: '4px 10px', whiteSpace: 'nowrap' },
+  questionBadgeMuted: { fontSize: 12, fontWeight: 500, color: theme.inkFaint, whiteSpace: 'nowrap' },
 
   updateList: { display: 'flex', flexDirection: 'column', gap: 6 },
   updateRow: { display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.bg, minWidth: 0 },
-  updateBadge: { fontSize: 10.5, fontWeight: 700, borderRadius: theme.radiusXs, padding: '2px 8px', flexShrink: 0 },
-  updateTitle: { flex: 1, fontSize: 12.5, color: theme.ink, minWidth: 0, lineHeight: 1.4 },
-  updateDate: { fontSize: 11.5, color: theme.inkFaint, fontVariantNumeric: 'tabular-nums', flexShrink: 0 },
+  updateBadge: { fontSize: 11, fontWeight: 700, borderRadius: theme.radiusXs, padding: '2px 8px', flexShrink: 0 },
+  updateTitle: { flex: 1, fontSize: 13, color: theme.ink, minWidth: 0, lineHeight: 1.4 },
+  updateDate: { fontSize: 12, color: theme.inkFaint, fontVariantNumeric: 'tabular-nums', flexShrink: 0 },
 
   footer: { display: 'flex', alignItems: 'center', gap: 10, padding: '14px 22px', borderTop: `0.5px solid ${theme.line}` },
-  linkBtn: { fontSize: 12.5, fontWeight: 600, color: theme.teal, textDecoration: 'none', padding: '8px 0' },
+  linkBtn: { fontSize: 13, fontWeight: 600, color: theme.teal, textDecoration: 'none', padding: '8px 0' },
   btnGhost: { padding: '10px 14px', borderRadius: theme.radiusSm, border: 'none', background: 'transparent', color: theme.inkFaint, fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' },
-  btnPrimary: { padding: '10px 20px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
+  btnPrimary: { padding: '10px 20px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
   btnOpen: { background: theme.card, color: theme.teal, border: `1px solid ${theme.teal}` },
 };

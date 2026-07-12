@@ -1,6 +1,7 @@
 'use client';
 
 import { memo, useEffect, useMemo, useState } from 'react';
+import { Layers } from 'lucide-react';
 import { theme, kbd } from '@/lib/theme';
 import { Button } from '@/components/ui/Button';
 import type { Jurisprudencia } from '@/services/jurisprudencias.service';
@@ -47,8 +48,8 @@ export const JurisFlashcardPlayer = memo(function JurisFlashcardPlayer({ items, 
 
   // Atalhos de teclado
   useEffect(() => {
-    async function onKey(e: KeyboardEvent) {
-      if (e.key === 'Escape') { await safeClose(); return; }
+    function onKey(e: KeyboardEvent) {
+      // Escape é tratado pelo Overlay (chama o mesmo onClose/safeClose).
       // Espaço/Enter: vira o card (frente ↔ verso)
       if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); setFlipped((v) => !v); }
       // Anterior sempre disponível
@@ -170,12 +171,10 @@ export const JurisFlashcardPlayer = memo(function JurisFlashcardPlayer({ items, 
       {/* Cabeçalho */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
         <span id="flashcard-modal-title" style={{ fontSize: 13, fontWeight: 700, color: theme.teal, display: 'flex', alignItems: 'center', gap: 6 }}>
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-            <path d="m21 12l-9 4l-9-4m18 4l-9 4l-9-4m18-8l-9 4l-9-4l9-4z" />
-          </svg>
+          <Layers size={15} strokeWidth={1.7} />
           Flashcards
         </span>
-        <span style={{ fontSize: 12.5, color: theme.inkFaint }}>
+        <span style={{ fontSize: 13, color: theme.inkFaint }}>
           {idx + 1} / {cards.length}
         </span>
         <button onClick={safeClose} style={{ marginLeft: 'auto', border: 'none', background: 'transparent', color: theme.inkFaint, fontSize: 18, cursor: 'pointer', lineHeight: 1 }} aria-label="Fechar">✕</button>
@@ -187,7 +186,7 @@ export const JurisFlashcardPlayer = memo(function JurisFlashcardPlayer({ items, 
       </div>
 
       {/* Contexto */}
-      <div style={{ fontSize: 11.5, color: theme.inkFaint, marginBottom: 12, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+      <div style={{ fontSize: 12, color: theme.inkFaint, marginBottom: 12, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
         <span style={{ fontWeight: 700, color: theme.tealDeep, background: theme.tealBg, borderRadius: 5, padding: '1px 7px' }}>{card.tribunal}</span>
         <span>{card.disciplina}{card.materia ? ` · ${card.materia}` : ''}</span>
       </div>
@@ -210,7 +209,7 @@ export const JurisFlashcardPlayer = memo(function JurisFlashcardPlayer({ items, 
           marginBottom: 18, outline: 'none',
         }}
       >
-        <span style={{ fontSize: 10.5, fontWeight: 700, color: flipped ? theme.teal : theme.inkFaint, textTransform: 'uppercase', letterSpacing: 0.6 }}>
+        <span style={{ fontSize: 11, fontWeight: 700, color: flipped ? theme.teal : theme.inkFaint, textTransform: 'uppercase', letterSpacing: 0.6 }}>
           {flipped ? 'Verso — Resposta' : 'Frente — Pergunta'}
         </span>
         <p style={{ fontSize: 15, color: theme.ink, margin: 0, lineHeight: 1.7, fontWeight: flipped ? 400 : 600 }}>
@@ -263,7 +262,7 @@ export const JurisFlashcardPlayer = memo(function JurisFlashcardPlayer({ items, 
         )}
       </div>
 
-      <p style={{ fontSize: 11.5, color: theme.inkFaint, textAlign: 'center', margin: '14px 0 0' }}>
+      <p style={{ fontSize: 12, color: theme.inkFaint, textAlign: 'center', margin: '14px 0 0' }}>
         {flipped
           ? <>Atalhos: <kbd style={kbd}>1</kbd> Errei · <kbd style={kbd}>2</kbd> Difícil · <kbd style={kbd}>3</kbd> Ok · <kbd style={kbd}>4</kbd> Dominei · <kbd style={kbd}>←</kbd> anterior · <kbd style={kbd}>Esc</kbd> fechar</>
           : <>Atalhos: <kbd style={kbd}>Espaço</kbd> revelar · <kbd style={kbd}>←</kbd> anterior · <kbd style={kbd}>Esc</kbd> fechar</>

@@ -5,6 +5,7 @@
 
 import { useState, type CSSProperties } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { ChevronRight } from 'lucide-react';
 import { useToast } from '@/components/ui/ToastProvider';
 import {
   listMyTurmas, createTurma, joinTurmaByCode, getTurmaRanking, leaveTurma, removeMember, deleteTurma,
@@ -13,6 +14,7 @@ import {
 import { RankRow } from './SocialUI';
 import { theme } from '@/lib/theme';
 import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
 
 function turmaInviteUrl(code: string): string {
   const origin = typeof window !== 'undefined' ? window.location.origin : '';
@@ -126,11 +128,11 @@ export function TurmasTab() {
       <section style={s.card}>
         <div style={s.cardTitle}>Criar ou entrar numa turma</div>
         <div style={s.formRow}>
-          <input value={nome} onChange={(e) => setNome(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && criar()} placeholder="Nome da nova turma" style={s.input} aria-label="Nome da turma" />
+          <Input style={{ flex: 1 }} value={nome} onChange={(e) => setNome(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && criar()} placeholder="Nome da nova turma" aria-label="Nome da turma" />
           <Button onClick={criar} disabled={busy}>Criar</Button>
         </div>
         <div style={s.formRow}>
-          <input value={code} onChange={(e) => setCode(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && entrar()} placeholder="Entrar com um código" style={s.input} aria-label="Código da turma" />
+          <Input style={{ flex: 1 }} value={code} onChange={(e) => setCode(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && entrar()} placeholder="Entrar com um código" aria-label="Código da turma" />
           <Button variant="outline" onClick={entrar} disabled={busy}>Entrar</Button>
         </div>
       </section>
@@ -147,7 +149,7 @@ export function TurmasTab() {
               <button key={t.id} onClick={() => setSelected(t)} style={s.turmaCard}>
                 <span style={s.turmaCardName}>{t.name}</span>
                 <span style={s.turmaCardMeta}>{t.memberCount} {t.memberCount === 1 ? 'membro' : 'membros'}{t.isOwner ? ' · você é dono' : ''}</span>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={theme.inkFaint} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M9 18l6-6-6-6" /></svg>
+                <ChevronRight size={16} color={theme.inkFaint} strokeWidth={2.2} style={{ flexShrink: 0 }} />
               </button>
             ))}
           </div>
@@ -158,7 +160,7 @@ export function TurmasTab() {
 }
 
 const s: Record<string, CSSProperties> = {
-  back: { border: 'none', background: 'transparent', color: theme.inkSoft, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', padding: '0 2px 12px' },
+  back: { border: 'none', background: 'transparent', color: theme.inkSoft, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', padding: '0 2px 12px' },
   card: { background: theme.card, border: `0.5px solid ${theme.line}`, borderRadius: theme.radius, boxShadow: theme.shadow, padding: 22, marginBottom: 16, minWidth: 0 },
   cardTitle: { fontSize: 12, fontWeight: 600, color: theme.inkFaint, letterSpacing: 1, textTransform: 'uppercase', marginBottom: 14 },
   body: { fontSize: 14, color: theme.inkSoft, lineHeight: 1.6, margin: 0 },
@@ -169,18 +171,18 @@ const s: Record<string, CSSProperties> = {
 
   turmaList: { display: 'flex', flexDirection: 'column', gap: 8 },
   turmaCard: { display: 'flex', alignItems: 'center', gap: 12, width: '100%', textAlign: 'left', padding: '12px 14px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.bg, cursor: 'pointer', fontFamily: 'inherit' },
-  turmaCardName: { fontSize: 14.5, fontWeight: 700, color: theme.ink, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
-  turmaCardMeta: { fontSize: 12.5, color: theme.inkFaint, marginLeft: 'auto', whiteSpace: 'nowrap', flexShrink: 0 },
+  turmaCardName: { fontSize: 15, fontWeight: 700, color: theme.ink, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
+  turmaCardMeta: { fontSize: 13, color: theme.inkFaint, marginLeft: 'auto', whiteSpace: 'nowrap', flexShrink: 0 },
 
   turmaHead: { display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 12, marginBottom: 14 },
   turmaName: { fontSize: 18, fontWeight: 800, color: theme.ink, margin: 0, letterSpacing: -0.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
-  turmaMeta: { fontSize: 12.5, color: theme.inkFaint, flexShrink: 0 },
+  turmaMeta: { fontSize: 13, color: theme.inkFaint, flexShrink: 0 },
   inviteRow: { display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' },
   codeBox: { fontFamily: 'ui-monospace, monospace', fontSize: 16, fontWeight: 700, letterSpacing: 2, color: theme.ink, background: theme.bg, border: `0.5px solid ${theme.line}`, borderRadius: theme.radiusSm, padding: '10px 14px', flex: 1, minWidth: 110, textAlign: 'center' },
 
   rankList: { display: 'flex', flexDirection: 'column', gap: 6 },
 
-  primary: { padding: '10px 18px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
-  secondary: { padding: '10px 16px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.ink, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
+  primary: { padding: '10px 18px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
+  secondary: { padding: '10px 16px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.ink, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
   dangerBtn: { border: 'none', background: 'transparent', color: theme.danger, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', padding: '4px 2px', textDecoration: 'underline' },
 };

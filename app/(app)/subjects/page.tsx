@@ -4,8 +4,9 @@ import dynamic from 'next/dynamic';
 import { useCallback } from 'react';
 import { usePersistedState } from '@/hooks/usePersistedState';
 import { useToast } from '@/components/ui/ToastProvider';
-import { theme, pageWide } from '@/lib/theme';
+import { theme } from '@/lib/theme';
 import { useUI } from '@/components/layout/UIContext';
+import { PageContainer, PageHeader } from '@/components/ui/Page';
 
 type Tab = 'banco' | 'minhas';
 
@@ -54,11 +55,8 @@ export default function SubjectsPage() {
   }, [toast, handleTabChange]);
 
   return (
-    <div style={{ ...pageWide, padding: isMobile ? '20px 16px' : '34px 40px', minWidth: 0 }}>
-      <div style={styles.header}>
-        <h1 style={{ ...styles.h1, fontSize: isMobile ? 24 : 28 }}>Matérias</h1>
-        <p style={styles.sub}>Explore o banco de matérias ou gerencie as suas.</p>
-      </div>
+    <PageContainer width="wide" style={{ minWidth: 0 }}>
+      <PageHeader title="Matérias" subtitle="Explore o banco de matérias ou gerencie as suas." />
 
       <div style={styles.tabs}>
         <button
@@ -83,15 +81,12 @@ export default function SubjectsPage() {
           ? <BancoTab isMobile={isMobile} onError={handleError} onActivated={handleActivated} />
           : <MinhasTab isMobile={isMobile} onError={handleError} />}
       </div>
-    </div>
+    </PageContainer>
   );
 }
 
 const styles: Record<string, React.CSSProperties> = {
-  header: { marginBottom: 24 },
-  h1: { fontSize: 28, fontWeight: 800, color: theme.ink, letterSpacing: -0.6, margin: 0 },
-  sub: { fontSize: 14, color: theme.inkSoft, margin: '6px 0 0', fontWeight: 500 },
-  tabs: { display: 'flex', gap: 4, marginBottom: 20, padding: 3, background: 'rgba(15,23,42,.06)', borderRadius: 12, width: 'fit-content' },
+  tabs: { display: 'flex', gap: 4, marginBottom: 20, padding: 3, background: 'rgba(15,23,42,.06)', borderRadius: theme.radiusSm, width: 'fit-content' },
   tab: {
     padding: '8px 18px', borderRadius: 9, border: 'none', background: 'transparent',
     color: theme.inkSoft, fontSize: 14, fontWeight: 500, cursor: 'pointer',

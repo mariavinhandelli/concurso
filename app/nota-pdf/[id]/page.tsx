@@ -13,6 +13,7 @@ import Highlight from '@tiptap/extension-highlight';
 import Image from '@tiptap/extension-image';
 import { Color, TextStyle } from '@tiptap/extension-text-style';
 import { getStudyNote, NOTA_KINDS, type StudyNote } from '@/services/studyNotes.service';
+import { signNotebookImages } from '@/lib/notebook-images';
 import { theme } from '@/lib/theme';
 
 const EXTENSIONS = [StarterKit, TextStyle, Color, Highlight.configure({ multicolor: true }), Image];
@@ -27,12 +28,15 @@ export default function NotaPdfPage() {
   useEffect(() => {
     let cancelled = false;
     getStudyNote(id)
-      .then((n) => {
+      .then(async (n) => {
         if (cancelled) return;
         if (!n) { setErro('Anotação não encontrada.'); return; }
         setNota(n);
         try {
-          setHtml(n.content ? generateHTML(n.content, EXTENSIONS) : '<p></p>');
+          // bucket privado: troca URLs canônicas das imagens por signed URLs
+          const signed = n.content ? await signNotebookImages(n.content) : null;
+          if (cancelled) return;
+          setHtml(signed ? generateHTML(signed, EXTENSIONS) : '<p></p>');
         } catch {
           setHtml('<p>(não foi possível renderizar o conteúdo)</p>');
         }
@@ -96,10 +100,10 @@ const styles: Record<string, React.CSSProperties> = {
   wrap: { maxWidth: 760, margin: '0 auto', padding: '28px 24px 60px', fontFamily: theme.font, minHeight: '100vh', background: theme.bg },
   toolbar: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, gap: 10, flexWrap: 'wrap' },
   voltarBtn: { border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.inkSoft, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', padding: '9px 14px', borderRadius: theme.radiusSm },
-  printBtn: { border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', padding: '10px 16px', borderRadius: theme.radiusSm },
+  printBtn: { border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', padding: '10px 16px', borderRadius: theme.radiusSm },
   folha: { background: theme.card, borderRadius: theme.radius, padding: '40px 48px', boxShadow: theme.shadow },
-  eyebrow: { fontSize: 11.5, fontWeight: 700, color: theme.teal, letterSpacing: 0.6, textTransform: 'uppercase', margin: '0 0 8px' },
+  eyebrow: { fontSize: 12, fontWeight: 700, color: theme.teal, letterSpacing: 0.6, textTransform: 'uppercase', margin: '0 0 8px' },
   titulo: { fontSize: 26, fontWeight: 800, color: theme.ink, margin: '0 0 6px', letterSpacing: -0.4 },
-  meta: { fontSize: 12.5, color: theme.inkFaint, margin: '0 0 24px', paddingBottom: 20, borderBottom: `0.5px solid ${theme.line}` },
+  meta: { fontSize: 13, color: theme.inkFaint, margin: '0 0 24px', paddingBottom: 20, borderBottom: `0.5px solid ${theme.line}` },
   conteudo: { fontSize: 15, lineHeight: 1.75, color: theme.ink },
 };

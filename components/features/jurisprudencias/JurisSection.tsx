@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { ChevronDown } from 'lucide-react';
 import { theme } from '@/lib/theme';
 
 interface Props {
@@ -51,22 +52,19 @@ export function JurisSection({
         }}
       >
         {icon && <span style={{ color: labelColor, display: 'flex', flexShrink: 0 }}>{icon}</span>}
-        <span style={{ flex: 1, fontSize: 13.5, fontWeight: 600, color: labelColor, textAlign: 'left' }}>
+        <span style={{ flex: 1, fontSize: 14, fontWeight: 600, color: labelColor, textAlign: 'left' }}>
           {title}
         </span>
-        <svg
-          width="16" height="16" viewBox="0 0 24 24" fill="none"
-          stroke={theme.inkFaint} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+        <ChevronDown
+          size={16} color={theme.inkFaint} strokeWidth={2}
           style={{ transform: open ? 'rotate(180deg)' : 'none', transition: 'transform .15s', flexShrink: 0 }}
-        >
-          <path d="M6 9l6 6 6-6" />
-        </svg>
+        />
       </button>
 
       {open && (
         <div style={{ padding: '0 16px 16px', borderTop: `0.5px solid ${theme.line}` }}>
           {empty ? (
-            <p style={{ fontSize: 13.5, color: theme.inkFaint, margin: '12px 0 0', fontStyle: 'italic' }}>
+            <p style={{ fontSize: 14, color: theme.inkFaint, margin: '12px 0 0', fontStyle: 'italic' }}>
               {emptyText ?? 'Não preenchido.'}
             </p>
           ) : (

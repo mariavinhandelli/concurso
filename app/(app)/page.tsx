@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useRouter } from 'next/navigation';
+import { ChevronDown } from 'lucide-react';
 import { theme } from '@/lib/theme';
 import { usePersistedState } from '@/hooks/usePersistedState';
 import { useUI } from '@/components/layout/UIContext';
@@ -59,7 +60,7 @@ function ZoneHeader({
       <span style={zoneStyles.label}>{label}</span>
       {hint && <span style={zoneStyles.hint}>{hint}</span>}
       {collapsible && (
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={theme.inkFaint} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: 'auto', transition: 'transform .2s', transform: open ? 'rotate(180deg)' : 'none' }}><path d="M6 9l6 6 6-6" /></svg>
+        <ChevronDown size={16} color={theme.inkFaint} strokeWidth={2.2} style={{ marginLeft: 'auto', transition: 'transform .2s', transform: open ? 'rotate(180deg)' : 'none' }} />
       )}
     </>
   );
@@ -189,12 +190,12 @@ const styles: Record<string, React.CSSProperties> = {
   h1: { fontSize: 28, fontWeight: 800, color: theme.ink, letterSpacing: -0.6, margin: 0 },
   sub: { fontSize: 14, color: theme.inkSoft, margin: '4px 0 0', fontWeight: 500 },
   countdownSlot: { flexShrink: 0, minWidth: 0 },
-  verTudo: { marginTop: 16, width: '100%', padding: '11px 16px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.inkSoft, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: theme.font },
+  verTudo: { marginTop: 16, width: '100%', padding: '11px 16px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.inkSoft, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: theme.font },
 };
 
 const zoneStyles: Record<string, React.CSSProperties> = {
   header: { display: 'flex', alignItems: 'center', gap: 10, padding: '0 2px 10px' },
   headerBtn: { display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '2px 2px 10px', background: 'transparent', border: 'none', cursor: 'pointer', fontFamily: theme.font, textAlign: 'left' },
   label: { fontSize: 12, fontWeight: 700, letterSpacing: 0.8, textTransform: 'uppercase', color: theme.inkSoft, flexShrink: 0 },
-  hint: { fontSize: 12.5, color: theme.inkFaint, fontWeight: 500, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
+  hint: { fontSize: 13, color: theme.inkFaint, fontWeight: 500, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
 };

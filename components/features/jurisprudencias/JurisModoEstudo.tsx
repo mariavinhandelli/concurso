@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { CircleHelp, Layers } from 'lucide-react';
 import { theme } from '@/lib/theme';
 import type { Jurisprudencia } from '@/services/jurisprudencias.service';
 
@@ -50,10 +51,8 @@ function FlashcardMode({ item }: { item: Jurisprudencia }) {
       boxShadow: theme.shadow, display: 'flex', flexDirection: 'column', gap: 12,
     }}>
       <div style={{ display: 'flex', alignItems: 'center' }}>
-        <span style={{ fontSize: 12.5, fontWeight: 700, color: theme.inkSoft, display: 'flex', alignItems: 'center', gap: 6 }}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-            <path d="m21 12l-9 4l-9-4m18 4l-9 4l-9-4m18-8l-9 4l-9-4l9-4z" />
-          </svg>
+        <span style={{ fontSize: 13, fontWeight: 700, color: theme.inkSoft, display: 'flex', alignItems: 'center', gap: 6 }}>
+          <Layers size={14} strokeWidth={1.7} />
           Flashcard
         </span>
       </div>
@@ -69,10 +68,10 @@ function FlashcardMode({ item }: { item: Jurisprudencia }) {
           display: 'flex', flexDirection: 'column', gap: 8,
         }}
       >
-        <span style={{ fontSize: 10.5, fontWeight: 700, color: flipped ? theme.teal : theme.inkFaint, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+        <span style={{ fontSize: 11, fontWeight: 700, color: flipped ? theme.teal : theme.inkFaint, textTransform: 'uppercase', letterSpacing: 0.5 }}>
           {flipped ? 'Verso (resposta)' : 'Frente (pergunta)'}
         </span>
-        <p style={{ fontSize: 14.5, color: theme.ink, margin: 0, lineHeight: 1.65, fontWeight: flipped ? 400 : 500 }}>
+        <p style={{ fontSize: 15, color: theme.ink, margin: 0, lineHeight: 1.65, fontWeight: flipped ? 400 : 500 }}>
           {flipped ? item.flashcard_verso : item.flashcard_frente}
         </p>
       </div>
@@ -103,10 +102,8 @@ function QuestaoMode({ item }: { item: Jurisprudencia }) {
       boxShadow: theme.shadow, display: 'flex', flexDirection: 'column', gap: 12,
     }}>
       <div style={{ display: 'flex', alignItems: 'center' }}>
-        <span style={{ fontSize: 12.5, fontWeight: 700, color: theme.inkSoft, display: 'flex', alignItems: 'center', gap: 6 }}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="12" cy="12" r="10" /><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01" />
-          </svg>
+        <span style={{ fontSize: 13, fontWeight: 700, color: theme.inkSoft, display: 'flex', alignItems: 'center', gap: 6 }}>
+          <CircleHelp size={14} strokeWidth={1.7} />
           Questão Certo/Errado
         </span>
       </div>
@@ -115,7 +112,7 @@ function QuestaoMode({ item }: { item: Jurisprudencia }) {
         background: theme.bg, borderRadius: theme.radiusSm,
         border: `0.5px solid ${theme.line}`, padding: '16px 18px',
       }}>
-        <p style={{ fontSize: 14.5, color: theme.ink, margin: 0, lineHeight: 1.7 }}>
+        <p style={{ fontSize: 15, color: theme.ink, margin: 0, lineHeight: 1.7 }}>
           {item.questao_enunciado}
         </p>
       </div>
@@ -150,14 +147,14 @@ function QuestaoMode({ item }: { item: Jurisprudencia }) {
             background: acertou ? theme.okTint : theme.dangerTint,
             border: `0.5px solid ${acertou ? theme.ok : theme.danger}`,
           }}>
-            <p style={{ fontSize: 13.5, fontWeight: 700, color: acertou ? theme.okDeep : theme.danger, margin: '0 0 4px' }}>
+            <p style={{ fontSize: 14, fontWeight: 700, color: acertou ? theme.okDeep : theme.danger, margin: '0 0 4px' }}>
               {acertou ? '✓ Correto!' : '✗ Errado!'}
             </p>
             <p style={{ fontSize: 13, color: theme.inkSoft, margin: '0 0 4px' }}>
               Gabarito: <strong style={{ color: theme.ink }}>{gabarito ? 'Certo' : 'Errado'}</strong>
             </p>
             {item.questao_comentario && (
-              <p style={{ fontSize: 13.5, color: theme.ink, margin: '8px 0 0', lineHeight: 1.6 }}>
+              <p style={{ fontSize: 14, color: theme.ink, margin: '8px 0 0', lineHeight: 1.6 }}>
                 {item.questao_comentario}
               </p>
             )}

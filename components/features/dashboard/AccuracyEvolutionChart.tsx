@@ -13,6 +13,7 @@ import {
   type EvolutionPoint, type SubjectOption,
 } from '@/services/accuracyEvolution.service';
 import { theme } from '@/lib/theme';
+import { Select } from '@/components/ui/Select';
 
 export function AccuracyEvolutionChart() {
   const toast = useToast();
@@ -41,10 +42,10 @@ export function AccuracyEvolutionChart() {
           <span style={styles.eyebrow}>Evolução nas questões</span>
           <span style={styles.subtitle}>Taxa de acerto semanal (últimas 12 semanas)</span>
         </div>
-        <select value={selected} onChange={(e) => setSelected(e.target.value)} style={styles.select} aria-label="Filtrar por matéria">
+        <Select value={selected} onChange={(e) => setSelected(e.target.value)} style={{ width: 'min(220px, 100%)', maxWidth: '100%', fontSize: 13 }} aria-label="Filtrar por matéria">
           <option value="">Geral</option>
           {subjects.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
-        </select>
+        </Select>
       </div>
 
       {loading ? (
@@ -67,7 +68,7 @@ export function AccuracyEvolutionChart() {
             <YAxis domain={[0, 100]} tick={{ fontSize: 11, fill: theme.inkFaint }} stroke={theme.line}
               tickLine={false} axisLine={false} tickFormatter={(v) => `${v}%`} />
             <Tooltip
-              contentStyle={{ background: theme.card, border: `0.5px solid ${theme.line}`, borderRadius: 12, fontSize: 12, boxShadow: theme.shadow }}
+              contentStyle={{ background: theme.card, border: `0.5px solid ${theme.line}`, borderRadius: theme.radiusSm, fontSize: 12, boxShadow: theme.shadow }}
               labelStyle={{ color: theme.ink, fontWeight: 600 }}
               formatter={(v, _n, item) => {
                 const total = (item?.payload as EvolutionPoint)?.total ?? 0;
@@ -91,6 +92,5 @@ const styles: Record<string, React.CSSProperties> = {
   header: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20, gap: 12, flexWrap: 'wrap' },
   eyebrow: { display: 'block', fontSize: 11, fontWeight: 500, color: theme.inkFaint, letterSpacing: 1, textTransform: 'uppercase' },
   subtitle: { display: 'block', fontSize: 13, color: theme.inkSoft, marginTop: 6 },
-  select: { width: 'min(220px, 100%)', maxWidth: '100%', minWidth: 0, padding: '9px 12px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.card, fontSize: 13, color: theme.ink, fontFamily: 'inherit', cursor: 'pointer', outline: 'none', textOverflow: 'ellipsis' },
   muted: { color: theme.inkFaint, fontSize: 14, padding: '30px 0', textAlign: 'center' },
 };

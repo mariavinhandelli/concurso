@@ -216,7 +216,7 @@ export default function JurisprudenciaPage() {
                 ↑ {INCIDENCIA_LABEL[item.incidencia_concursos]}
               </span>
             </div>
-            <h1 style={{ fontSize: isMobile ? 18 : 22, fontWeight: 700, color: theme.ink, letterSpacing: -0.4, margin: '0 0 4px', lineHeight: 1.4 }}>
+            <h1 style={{ fontSize: isMobile ? 20 : 24, fontWeight: 700, color: theme.ink, letterSpacing: -0.4, margin: '0 0 4px', lineHeight: 1.4 }}>
               {item.titulo || `${item.disciplina}${item.materia ? ` · ${item.materia}` : ''}`}
             </h1>
             <p style={{ fontSize: 14, color: theme.inkSoft, margin: 0 }}>
@@ -235,7 +235,7 @@ export default function JurisprudenciaPage() {
                 key={key}
                 onClick={() => setTab(key)}
                 style={{
-                  padding: '7px 16px', borderRadius: 8, border: 'none', cursor: 'pointer',
+                  padding: '7px 16px', borderRadius: theme.radiusXs, border: 'none', cursor: 'pointer',
                   fontFamily: theme.font, fontSize: 13, fontWeight: 600,
                   background: tab === key ? theme.card : 'transparent',
                   color: tab === key ? theme.ink : theme.inkSoft,

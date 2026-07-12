@@ -155,30 +155,30 @@ function EditalCard({ edital: e, onOpen }: { edital: CatalogEdital; onOpen: () =
 }
 
 const s: Record<string, CSSProperties> = {
-  muted: { fontSize: 13.5, color: theme.inkSoft, padding: '12px 0' },
+  muted: { fontSize: 14, color: theme.inkSoft, padding: '12px 0' },
   skeleton: { height: 84, borderRadius: theme.radiusSm, background: theme.muted, animation: 'focali-pulse 1.4s ease infinite' },
 
   empty: { textAlign: 'center', padding: '40px 12px' },
   emptyTitle: { fontSize: 15, fontWeight: 600, color: theme.inkSoft, margin: '0 0 6px' },
   emptyHint: { fontSize: 13, color: theme.inkFaint, maxWidth: 360, margin: '0 auto 16px', lineHeight: 1.6 },
-  importBtn: { padding: '10px 20px', borderRadius: theme.radiusSm, border: `1px solid ${theme.teal}`, background: theme.tealBg, color: theme.teal, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+  importBtn: { padding: '10px 20px', borderRadius: theme.radiusSm, border: `1px solid ${theme.teal}`, background: theme.tealBg, color: theme.teal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
 
   chips: { display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 14 },
-  chip: { padding: '6px 14px', borderRadius: 999, border: `1px solid ${theme.line}`, background: 'transparent', color: theme.inkSoft, fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit', transition: 'all .12s' },
+  chip: { padding: '6px 14px', borderRadius: theme.radiusPill, border: `1px solid ${theme.line}`, background: 'transparent', color: theme.inkSoft, fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit', transition: 'all .12s' },
   chipOn: { background: theme.tealBg, border: `1px solid ${theme.teal}`, color: theme.teal, fontWeight: 600 },
 
   list: { display: 'flex', flexDirection: 'column', gap: 10 },
   card: { display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.card, cursor: 'pointer', fontFamily: 'inherit', width: '100%', minWidth: 0, transition: 'border-color .15s, box-shadow .15s' },
   cardTitleRow: { display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', minWidth: 0 },
-  cardTitle: { fontSize: 14.5, fontWeight: 600, color: theme.ink, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
-  situacaoTag: { fontSize: 10.5, fontWeight: 700, borderRadius: theme.radiusXs, padding: '2px 8px', flexShrink: 0, letterSpacing: 0.2 },
+  cardTitle: { fontSize: 15, fontWeight: 600, color: theme.ink, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
+  situacaoTag: { fontSize: 11, fontWeight: 700, borderRadius: theme.radiusXs, padding: '2px 8px', flexShrink: 0, letterSpacing: 0.2 },
   situacaoVigente: { color: theme.onTeal, background: theme.teal },
   situacaoExpectativa: { color: theme.warn, background: theme.warnBg },
   situacaoEncerrado: { color: theme.inkFaint, background: theme.muted },
-  activatedTag: { fontSize: 10.5, fontWeight: 700, color: theme.teal, background: theme.tealBg, borderRadius: theme.radiusXs, padding: '2px 8px', flexShrink: 0 },
-  cardMeta: { fontSize: 12.5, color: theme.inkSoft, marginTop: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
+  activatedTag: { fontSize: 11, fontWeight: 700, color: theme.teal, background: theme.tealBg, borderRadius: theme.radiusXs, padding: '2px 8px', flexShrink: 0 },
+  cardMeta: { fontSize: 13, color: theme.inkSoft, marginTop: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
   cardExtra: { fontSize: 12, color: theme.inkFaint, marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
-  cardArrow: { fontSize: 12.5, fontWeight: 600, flexShrink: 0, whiteSpace: 'nowrap', transition: 'color .15s' },
+  cardArrow: { fontSize: 13, fontWeight: 600, flexShrink: 0, whiteSpace: 'nowrap', transition: 'color .15s' },
 
   footerHint: { fontSize: 13, color: theme.inkFaint, margin: '16px 0 0', textAlign: 'center' },
   footerLink: { background: 'transparent', border: 'none', color: theme.teal, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', padding: 0 },

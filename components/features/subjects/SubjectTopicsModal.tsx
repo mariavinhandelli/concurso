@@ -1,5 +1,7 @@
 'use client';
 
+import { useEffect } from 'react';
+import { Check, X } from 'lucide-react';
 import { type CatalogSubject, type CatalogTopic } from '@/services/catalog.service';
 import { theme } from '@/lib/theme';
 import { Button } from '@/components/ui/Button';
@@ -21,6 +23,12 @@ export function SubjectTopicsModal({ subject, topics, loading, activating, onAct
   }, {});
   const parentIdSet = new Set(parents.map((p) => p.id));
   const orphans = topics.filter((t) => t.parent_id !== null && !parentIdSet.has(t.parent_id));
+
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) { if (e.key === 'Escape' && !activating) onClose(); }
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [onClose, activating]);
 
   return (
     <>
@@ -61,12 +69,10 @@ export function SubjectTopicsModal({ subject, topics, loading, activating, onAct
           </div>
           <button
             onClick={onClose}
-            style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: theme.inkFaint, padding: 6, flexShrink: 0, borderRadius: 8, display: 'grid', placeItems: 'center' }}
+            style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: theme.inkFaint, padding: 6, flexShrink: 0, borderRadius: theme.radiusXs, display: 'grid', placeItems: 'center' }}
             aria-label="Fechar"
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M18 6 6 18M6 6l12 12" />
-            </svg>
+            <X size={16} strokeWidth={2} />
           </button>
         </div>
 
@@ -84,7 +90,7 @@ export function SubjectTopicsModal({ subject, topics, loading, activating, onAct
                   <div key={parent.id} style={{ marginBottom: children.length ? 10 : 0 }}>
                     <div style={{
                       fontSize: 14, fontWeight: 600, color: theme.ink,
-                      padding: '6px 10px', borderRadius: 8,
+                      padding: '6px 10px', borderRadius: theme.radiusXs,
                       background: 'rgba(15,23,42,.05)',
                     }}>
                       {parent.name}
@@ -129,7 +135,7 @@ export function SubjectTopicsModal({ subject, topics, loading, activating, onAct
                 padding: '10px 18px', borderRadius: 10,
                 background: theme.okBg, color: theme.ok, fontSize: 14, fontWeight: 600,
               }}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
+                <Check size={14} strokeWidth={2.5} />
                 Matéria ativa
               </span>
             ) : (

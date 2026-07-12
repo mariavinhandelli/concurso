@@ -10,6 +10,7 @@ import {
 } from '@/services/recurrence.service';
 import { theme } from '@/lib/theme';
 import { useConfirm } from '@/hooks/useConfirm';
+import { Overlay } from '@/components/ui/Overlay';
 
 interface Props {
   onClose: () => void;
@@ -85,12 +86,8 @@ export function RecurrencePanel({ onClose, onChanged, onEdit }: Props) {
   return (
     <>
     {dialog}
-    <div style={styles.overlay} onClick={onClose}>
-      <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
-        <div style={styles.head}>
-          <h2 style={styles.h2}>Minhas recorrências</h2>
-          <button onClick={onClose} style={styles.closeBtn} aria-label="Fechar">✕</button>
-        </div>
+    <Overlay onClose={onClose} maxWidth={460} labelledBy="recurrence-panel-title">
+      <h2 id="recurrence-panel-title" style={{ ...styles.h2, marginBottom: 16 }}>Minhas recorrências</h2>
         {error && <p style={styles.errorMsg}>{error}</p>}
 
         {isPending ? (
@@ -151,19 +148,14 @@ export function RecurrencePanel({ onClose, onChanged, onEdit }: Props) {
         )}
 
         <p style={styles.hint}>”Parar” encerra a recorrência a partir de hoje (o histórico fica). “Apagar” remove tudo, inclusive o passado.</p>
-      </div>
-    </div>
+    </Overlay>
     </>
   );
 }
 
 const styles: Record<string, React.CSSProperties> = {
   errorMsg: { color: theme.danger, fontSize: 13, margin: '0 0 12px' },
-  overlay: { position: 'fixed', inset: 0, background: 'var(--backdrop)', display: 'grid', placeItems: 'center', zIndex: 60, padding: 20 },
-  modal: { background: theme.card, borderRadius: theme.radius, boxShadow: '0 20px 60px rgba(0,0,0,0.18)', padding: 24, width: '100%', maxWidth: 460, maxHeight: '88vh', overflowY: 'auto', fontFamily: theme.font },
-  head: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
   h2: { fontSize: 18, fontWeight: 700, color: theme.ink, margin: 0 },
-  closeBtn: { border: 'none', background: 'transparent', color: theme.inkFaint, fontSize: 16, cursor: 'pointer' },
   muted: { color: theme.inkFaint, fontSize: 14 },
   empty: { color: theme.inkSoft, fontSize: 14, lineHeight: 1.5, padding: '12px 0' },
   list: { display: 'flex', flexDirection: 'column', gap: 12 },
@@ -181,8 +173,8 @@ const styles: Record<string, React.CSSProperties> = {
   ruleFooter: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTopWidth: 0.5, borderTopStyle: 'solid', borderTopColor: theme.line, paddingTop: 10 },
   prazo: { fontSize: 12, color: theme.inkFaint },
   ruleActions: { display: 'flex', gap: 8 },
-  editBtn: { padding: '6px 12px', borderRadius: 7, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.teal, background: theme.card, color: theme.teal, fontSize: 12.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
-  stopBtn: { padding: '6px 12px', borderRadius: 7, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.card, color: theme.inkSoft, fontSize: 12.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
-  delBtn: { padding: '6px 12px', borderRadius: 7, border: 'none', background: 'transparent', color: theme.danger, fontSize: 12.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
-  hint: { fontSize: 11.5, color: theme.inkFaint, marginTop: 16, lineHeight: 1.5 },
+  editBtn: { padding: '6px 12px', borderRadius: 7, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.teal, background: theme.card, color: theme.teal, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+  stopBtn: { padding: '6px 12px', borderRadius: 7, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.card, color: theme.inkSoft, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+  delBtn: { padding: '6px 12px', borderRadius: 7, border: 'none', background: 'transparent', color: theme.danger, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+  hint: { fontSize: 12, color: theme.inkFaint, marginTop: 16, lineHeight: 1.5 },
 };

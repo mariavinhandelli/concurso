@@ -15,6 +15,10 @@ import { useToast } from '@/components/ui/ToastProvider';
 import { refreshHomeAfterSession } from '@/lib/home-refresh';
 import { createSessionId, type PendingSession } from '@/lib/timer-storage';
 import { theme } from '@/lib/theme';
+import { Overlay } from '@/components/ui/Overlay';
+import { Input } from '@/components/ui/Input';
+import { Select } from '@/components/ui/Select';
+import { Button } from '@/components/ui/Button';
 
 interface Props {
   onClose: () => void;
@@ -53,12 +57,6 @@ export function QuickLogModal({ onClose, onSaved, onSwitchToFull }: Props) {
 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
-
-  useEffect(() => {
-    const h = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
-    document.addEventListener('keydown', h);
-    return () => document.removeEventListener('keydown', h);
-  }, [onClose]);
 
   // Matérias + matéria da última sessão, em paralelo. Pré-seleciona a última usada.
   useEffect(() => {
@@ -167,41 +165,41 @@ export function QuickLogModal({ onClose, onSaved, onSwitchToFull }: Props) {
   }
 
   return (
-    <div style={styles.overlay} onClick={onClose}>
-      <div style={styles.modal} onClick={(e) => e.stopPropagation()} onKeyDown={onKeyDown}>
-        <h2 style={styles.h2}>Questões rápidas ⚡</h2>
+    <Overlay onClose={onClose} maxWidth={400} labelledBy="quicklog-modal-title">
+      <div onKeyDown={onKeyDown}>
+        <h2 id="quicklog-modal-title" style={styles.h2}>Questões rápidas ⚡</h2>
         <p style={styles.subtitle}>Resolveu questões em outro lugar? Registre em segundos.</p>
 
         <label style={styles.label}>Matéria</label>
-        <select value={subjectId} onChange={(e) => setSubjectId(e.target.value)} style={styles.input}>
+        <Select value={subjectId} onChange={(e) => setSubjectId(e.target.value)}>
           <option value="">Selecione…</option>
           {subjects.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
-        </select>
+        </Select>
 
         <div style={styles.row2}>
           <div style={styles.col}>
             <label style={styles.label}>Fiz</label>
-            <input
+            <Input
               ref={totalInputRef}
               type="number" min="0" inputMode="numeric" placeholder="30"
-              value={qTotal} onChange={(e) => setQTotal(e.target.value)} style={styles.input}
+              value={qTotal} onChange={(e) => setQTotal(e.target.value)}
             />
           </div>
           <div style={styles.col}>
             <label style={styles.label}>Acertei</label>
-            <input
+            <Input
               type="number" min="0" inputMode="numeric" placeholder="22"
-              value={qCorrect} onChange={(e) => setQCorrect(e.target.value)} style={styles.input}
+              value={qCorrect} onChange={(e) => setQCorrect(e.target.value)}
             />
           </div>
           <div style={styles.colSmall}>
             <label style={styles.label}>Tempo</label>
             <div style={styles.minWrap}>
-              <input
+              <Input
                 type="number" min="0" inputMode="numeric"
                 value={minutes}
                 onChange={(e) => { setMinutesTouched(true); setMinutes(e.target.value); }}
-                style={{ ...styles.input, paddingRight: 34 }}
+                style={{ paddingRight: 34 }}
               />
               <span style={styles.minUnit}>min</span>
             </div>
@@ -236,10 +234,10 @@ export function QuickLogModal({ onClose, onSaved, onSwitchToFull }: Props) {
         ) : (
           <>
             <label style={styles.label}>Tópico <span style={styles.opt}>(opcional)</span></label>
-            <select value={topicId} onChange={(e) => setTopicId(e.target.value)} style={styles.input} disabled={topics.length === 0}>
+            <Select value={topicId} onChange={(e) => setTopicId(e.target.value)} disabled={topics.length === 0}>
               <option value="">— sem tópico específico —</option>
               {topics.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
-            </select>
+            </Select>
           </>
         )}
 
@@ -252,27 +250,24 @@ export function QuickLogModal({ onClose, onSaved, onSwitchToFull }: Props) {
             </button>
           )}
           <div style={{ flex: 1 }} />
-          <button onClick={onClose} style={styles.cancel}>Cancelar</button>
-          <button onClick={handleSave} disabled={saving} style={styles.save}>
+          <Button variant="outline" onClick={onClose}>Cancelar</Button>
+          <Button onClick={handleSave} loading={saving}>
             {saving ? 'Salvando…' : 'Registrar'}
-          </button>
+          </Button>
         </div>
       </div>
-    </div>
+    </Overlay>
   );
 }
 
 const styles: Record<string, React.CSSProperties> = {
-  overlay: { position: 'fixed', inset: 0, background: 'var(--backdrop)', display: 'grid', placeItems: 'center', zIndex: 60, padding: 20 },
-  modal: { background: theme.card, borderRadius: theme.radius, boxShadow: '0 20px 60px rgba(0,0,0,0.18)', padding: 24, width: '100%', maxWidth: 400, maxHeight: '88vh', overflowY: 'auto', fontFamily: theme.font },
   h2: { fontSize: 18, fontWeight: 700, color: theme.ink, margin: 0 },
   subtitle: { fontSize: 13, color: theme.inkSoft, margin: '4px 0 6px' },
   row2: { display: 'flex', gap: 10 },
   col: { flex: 1, minWidth: 0 },
   colSmall: { flexBasis: 108, flexShrink: 0 },
-  label: { display: 'block', fontSize: 12.5, fontWeight: 600, color: theme.inkSoft, margin: '14px 0 6px' },
+  label: { display: 'block', fontSize: 13, fontWeight: 600, color: theme.inkSoft, margin: '14px 0 6px' },
   opt: { fontWeight: 400, color: theme.inkFaint },
-  input: { width: '100%', boxSizing: 'border-box', padding: '10px 12px', borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.card, fontSize: 14, color: theme.ink, fontFamily: 'inherit', outline: 'none' },
   minWrap: { position: 'relative' },
   minUnit: { position: 'absolute', right: 11, top: '50%', transform: 'translateY(-50%)', fontSize: 12, color: theme.inkFaint, pointerEvents: 'none' },
   segment: { display: 'flex', gap: 6 },
@@ -281,7 +276,5 @@ const styles: Record<string, React.CSSProperties> = {
   linkBtn: { display: 'block', marginTop: 14, padding: 0, border: 'none', background: 'transparent', color: theme.teal, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
   error: { color: theme.danger, fontSize: 13, margin: '12px 0 0' },
   actions: { display: 'flex', alignItems: 'center', gap: 10, marginTop: 20 },
-  switchBtn: { padding: 0, border: 'none', background: 'transparent', color: theme.inkFaint, fontSize: 12.5, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit', textDecoration: 'underline' },
-  cancel: { padding: '10px 18px', borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.card, color: theme.inkSoft, fontSize: 14, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' },
-  save: { padding: '10px 18px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+  switchBtn: { padding: 0, border: 'none', background: 'transparent', color: theme.inkFaint, fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit', textDecoration: 'underline' },
 };

@@ -62,7 +62,7 @@ export function EnergiaDesempenho() {
               <BarChart data={dados} margin={{ top: 8, right: 8, bottom: 4, left: -16 }}>
                 <XAxis
                   dataKey="nome"
-                  tick={{ fontSize: 11.5, fill: theme.inkSoft }}
+                  tick={{ fontSize: 12, fill: theme.inkSoft }}
                   axisLine={{ stroke: theme.line }}
                   tickLine={false}
                 />
@@ -79,7 +79,7 @@ export function EnergiaDesempenho() {
                     background: theme.card,
                     border: `0.5px solid ${theme.line}`,
                     borderRadius: 10,
-                    fontSize: 12.5,
+                    fontSize: 13,
                     color: theme.ink,
                     boxShadow: theme.shadow,
                   }}
@@ -126,6 +126,6 @@ const styles: Record<string, React.CSSProperties> = {
   muted: { color: theme.inkFaint, fontSize: 14, lineHeight: 1.5 },
   head: { display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 18, gap: 8, flexWrap: 'wrap' },
   title: { fontSize: 16, fontWeight: 700, color: theme.ink, margin: 0, letterSpacing: -0.3 },
-  hint: { fontSize: 12.5, color: theme.inkFaint, fontWeight: 500 },
+  hint: { fontSize: 13, color: theme.inkFaint, fontWeight: 500 },
   poucos: { fontSize: 12, color: theme.inkFaint, fontStyle: 'italic', margin: '12px 0 0' },
 };

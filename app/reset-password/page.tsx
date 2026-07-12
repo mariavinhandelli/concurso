@@ -4,6 +4,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
+import { Input } from '@/components/ui/Input';
 
 export default function ResetPasswordPage() {
   const router = useRouter();
@@ -109,7 +110,7 @@ export default function ResetPasswordPage() {
         ) : (
           <>
             <label htmlFor="new-password" style={styles.label}>Nova senha</label>
-            <input
+            <Input
               id="new-password"
               name="new-password"
               type="password"
@@ -123,7 +124,7 @@ export default function ResetPasswordPage() {
             />
 
             <label htmlFor="confirm-password" style={styles.label}>Confirmar nova senha</label>
-            <input
+            <Input
               id="confirm-password"
               name="confirm-password"
               type="password"

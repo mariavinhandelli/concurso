@@ -47,8 +47,10 @@ export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const isLoginPage = pathname === '/login' || pathname.startsWith('/login/');
   const isResetPasswordPage = pathname === '/reset-password' || pathname.startsWith('/reset-password/');
+  // Páginas legais são públicas (indexáveis, linkadas do cadastro): não exigem login.
+  const isPublicPage = pathname === '/termos' || pathname === '/privacidade';
 
-  if (!user && !isLoginPage && !isResetPasswordPage) {
+  if (!user && !isLoginPage && !isResetPasswordPage && !isPublicPage) {
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = '/login';
     loginUrl.search = '';

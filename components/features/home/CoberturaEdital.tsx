@@ -102,16 +102,16 @@ const styles: Record<string, React.CSSProperties> = {
   },
   header: { display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 12, marginBottom: 10 },
   eyebrow: { fontSize: 11, fontWeight: 700, color: theme.teal, letterSpacing: 0.6, textTransform: 'uppercase' },
-  targetName: { fontSize: 12.5, fontWeight: 600, color: theme.inkSoft, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 },
+  targetName: { fontSize: 13, fontWeight: 600, color: theme.inkSoft, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 },
 
   heroRow: { display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 12, flexWrap: 'wrap' },
   heroPct: { fontSize: 32, fontWeight: 800, color: theme.ink, letterSpacing: -1, lineHeight: 1 },
   heroLabel: { fontSize: 13, color: theme.inkSoft, fontWeight: 500 },
 
-  bar: { display: 'flex', height: 10, background: theme.muted, borderRadius: 999, overflow: 'hidden', marginBottom: 12 },
+  bar: { display: 'flex', height: 10, background: theme.muted, borderRadius: theme.radiusPill, overflow: 'hidden', marginBottom: 12 },
 
   legend: { display: 'flex', gap: 16, flexWrap: 'wrap' },
-  legendItem: { display: 'flex', alignItems: 'center', gap: 6, fontSize: 12.5, color: theme.inkSoft, fontWeight: 500 },
+  legendItem: { display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: theme.inkSoft, fontWeight: 500 },
   dot: { width: 9, height: 9, borderRadius: '50%', flexShrink: 0 },
 
   emptyMsg: { fontSize: 14, color: theme.inkSoft, margin: '4px 0 0', lineHeight: 1.5 },
@@ -119,7 +119,7 @@ const styles: Record<string, React.CSSProperties> = {
   shareBtn: {
     display: 'flex', alignItems: 'center', gap: 8, marginTop: 14, padding: '10px 14px',
     borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.bg,
-    color: theme.teal, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', width: '100%',
+    color: theme.teal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', width: '100%',
     justifyContent: 'center',
   },
 };

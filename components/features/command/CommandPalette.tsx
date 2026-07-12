@@ -9,6 +9,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { useRouter } from 'next/navigation';
+import { Search } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { listSubjects, type Subject } from '@/services/subjects.service';
 import { listAllTopics, type Topic } from '@/services/topics.service';
@@ -226,7 +227,7 @@ export function CommandPalette() {
     <div style={s.backdrop} onClick={close}>
       <div style={s.panel} onClick={(e) => e.stopPropagation()} role="dialog" aria-label="Busca de comandos">
         <div style={s.inputRow}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={theme.inkFaint} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
+          <Search size={18} color={theme.inkFaint} strokeWidth={2} />
           <input
             ref={inputRef}
             value={q}
@@ -287,18 +288,18 @@ export function CommandPalette() {
 
 const s: Record<string, CSSProperties> = {
   backdrop: { position: 'fixed', inset: 0, zIndex: zIndex.dialog, background: 'var(--backdrop)', backdropFilter: 'blur(2px)', display: 'flex', justifyContent: 'center', alignItems: 'flex-start', padding: '12vh 16px 16px', fontFamily: theme.font },
-  panel: { width: 'min(560px, 100%)', maxHeight: '70vh', background: theme.card, border: `0.5px solid ${theme.line}`, borderRadius: 16, boxShadow: theme.shadowHover, display: 'flex', flexDirection: 'column', overflow: 'hidden' },
+  panel: { width: 'min(560px, 100%)', maxHeight: '70vh', background: theme.card, border: `0.5px solid ${theme.line}`, borderRadius: theme.radius, boxShadow: theme.shadowHover, display: 'flex', flexDirection: 'column', overflow: 'hidden' },
   inputRow: { display: 'flex', alignItems: 'center', gap: 10, padding: '14px 16px', borderBottom: `0.5px solid ${theme.line}` },
-  input: { flex: 1, border: 'none', outline: 'none', background: 'transparent', fontSize: 15.5, color: theme.ink, fontFamily: 'inherit' },
-  esc: { fontSize: 10.5, fontWeight: 600, color: theme.inkFaint, border: `0.5px solid ${theme.line}`, borderRadius: 5, padding: '2px 6px', background: theme.muted },
+  input: { flex: 1, border: 'none', outline: 'none', background: 'transparent', fontSize: 16, color: theme.ink, fontFamily: 'inherit' },
+  esc: { fontSize: 11, fontWeight: 600, color: theme.inkFaint, border: `0.5px solid ${theme.line}`, borderRadius: 5, padding: '2px 6px', background: theme.muted },
   list: { overflowY: 'auto', padding: 6, minHeight: 0 },
-  empty: { padding: '28px 16px', textAlign: 'center', color: theme.inkFaint, fontSize: 13.5 },
-  groupLabel: { fontSize: 10.5, fontWeight: 700, color: theme.inkFaint, letterSpacing: 0.7, textTransform: 'uppercase', padding: '10px 10px 4px' },
+  empty: { padding: '28px 16px', textAlign: 'center', color: theme.inkFaint, fontSize: 14 },
+  groupLabel: { fontSize: 11, fontWeight: 700, color: theme.inkFaint, letterSpacing: 0.7, textTransform: 'uppercase', padding: '10px 10px 4px' },
   item: { display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '9px 10px', border: 'none', borderRadius: 9, cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left', background: 'transparent' },
   swatch: { width: 9, height: 9, borderRadius: 3, flexShrink: 0 },
-  dot: { width: 5, height: 5, borderRadius: 99, background: theme.inkFaint, flexShrink: 0, margin: '0 2px' },
+  dot: { width: 5, height: 5, borderRadius: theme.radiusPill, background: theme.inkFaint, flexShrink: 0, margin: '0 2px' },
   itemLabel: { fontSize: 14, color: theme.ink, fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', flexShrink: 1, minWidth: 0 },
   itemSub: { fontSize: 12, color: theme.inkFaint, marginLeft: 'auto', whiteSpace: 'nowrap', flexShrink: 0, paddingLeft: 8 },
-  footer: { display: 'flex', gap: 16, padding: '8px 14px', borderTop: `0.5px solid ${theme.line}`, fontSize: 11.5, color: theme.inkFaint },
-  k: { fontFamily: 'ui-monospace, monospace', fontSize: 10.5, padding: '1px 5px', borderRadius: 4, border: `0.5px solid ${theme.line}`, background: theme.muted, color: theme.inkSoft, marginRight: 3 },
+  footer: { display: 'flex', gap: 16, padding: '8px 14px', borderTop: `0.5px solid ${theme.line}`, fontSize: 12, color: theme.inkFaint },
+  k: { fontFamily: 'ui-monospace, monospace', fontSize: 11, padding: '1px 5px', borderRadius: 4, border: `0.5px solid ${theme.line}`, background: theme.muted, color: theme.inkSoft, marginRight: 3 },
 };

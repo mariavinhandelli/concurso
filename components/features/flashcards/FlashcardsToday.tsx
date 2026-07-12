@@ -8,7 +8,7 @@ import { theme } from '@/lib/theme';
 
 const SKEL: React.CSSProperties = {
   background: 'rgba(15,23,42,.07)',
-  borderRadius: 8,
+  borderRadius: theme.radiusXs,
   animationName: 'skeleton-pulse',
   animationDuration: '1.5s',
   animationTimingFunction: 'ease-in-out',
@@ -39,7 +39,7 @@ export function FlashcardsToday() {
             <div style={{ ...SKEL, width: 1, height: 28, borderRadius: 1 }} />
             <div style={{ ...SKEL, width: 64, height: 38 }} />
           </div>
-          <div style={{ ...SKEL, width: '100%', height: 44, borderRadius: 12, marginTop: 'auto' }} />
+          <div style={{ ...SKEL, width: '100%', height: 44, borderRadius: theme.radiusSm, marginTop: 'auto' }} />
         </div>
       ) : total === 0 ? (
         <div style={styles.allDone}>
@@ -85,7 +85,7 @@ const styles: Record<string, React.CSSProperties> = {
   num: { fontSize: 36, color: theme.ink, fontWeight: 600, letterSpacing: -1.5, lineHeight: 1, fontVariantNumeric: 'tabular-nums' },
   label: { fontSize: 12, color: theme.inkFaint, fontWeight: 500 },
   startBtn: {
-    width: '100%', padding: '12px 0', borderRadius: 12, border: 'none',
+    width: '100%', padding: '12px 0', borderRadius: theme.radiusSm, border: 'none',
     background: theme.teal, color: theme.onTeal, fontSize: 14, fontWeight: 600,
     cursor: 'pointer', fontFamily: 'inherit', marginTop: 16, transition: 'all .15s',
   },

@@ -101,16 +101,16 @@ export function MapaIncidencia({ lei, onNavigate }: Props) {
 
 const s: Record<string, CSSProperties> = {
   legenda: { display: 'flex', flexWrap: 'wrap', gap: 14, alignItems: 'center', marginBottom: 16 },
-  legItem: { display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12.5, color: theme.inkSoft },
+  legItem: { display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, color: theme.inkSoft },
   legDot: { width: 14, height: 14, borderRadius: 4, borderWidth: 1, borderStyle: 'solid', display: 'inline-block' },
   topBox: { background: theme.card, border: `0.5px solid ${theme.line}`, borderRadius: theme.radius, padding: '14px 16px', marginBottom: 18 },
-  topTitle: { fontSize: 14.5, fontWeight: 700, color: theme.ink, margin: '0 0 10px' },
+  topTitle: { fontSize: 15, fontWeight: 700, color: theme.ink, margin: '0 0 10px' },
   topList: { display: 'flex', flexDirection: 'column', gap: 4 },
   topRow: { display: 'flex', alignItems: 'baseline', gap: 10, textAlign: 'left', border: 'none', background: 'transparent', cursor: 'pointer', fontFamily: 'inherit', padding: '5px 6px', borderRadius: theme.radiusSm },
   topNum: { fontSize: 13, fontWeight: 700, color: '#C03A39', flexShrink: 0, minWidth: 74 },
-  topNota: { fontSize: 12.5, color: theme.inkSoft, lineHeight: 1.5 },
+  topNota: { fontSize: 13, color: theme.inkSoft, lineHeight: 1.5 },
   grupo: { marginBottom: 16 },
   grupoTitulo: { fontSize: 12, fontWeight: 700, color: theme.teal, letterSpacing: 0.4, textTransform: 'uppercase', margin: '0 0 8px' },
   chips: { display: 'flex', flexWrap: 'wrap', gap: 5 },
-  chip: { minWidth: 40, padding: '6px 6px', borderRadius: 8, borderWidth: 1, borderStyle: 'solid', fontSize: 12.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', textAlign: 'center' },
+  chip: { minWidth: 40, padding: '6px 6px', borderRadius: theme.radiusXs, borderWidth: 1, borderStyle: 'solid', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', textAlign: 'center' },
 };

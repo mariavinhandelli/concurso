@@ -3,6 +3,9 @@
 import { useState } from 'react';
 import { theme } from '@/lib/theme';
 import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
+import { Select } from '@/components/ui/Select';
+import { Textarea } from '@/components/ui/Textarea';
 import { EstrelasBadge } from './EstrelasBadge';
 import {
   TRIBUNAIS, TIPOS, STATUS_OPTIONS, INCIDENCIA_OPTIONS,
@@ -127,10 +130,6 @@ export function JurisprudenciaForm({ initial = {}, saving, onSave, onCancel }: P
     });
   }
 
-  const inp = styles.input;
-  const sel = styles.select;
-  const ta = styles.textarea;
-
   return (
     <div className="juris-form" style={{ fontFamily: theme.font, display: 'flex', flexDirection: 'column', gap: 20 }}>
 
@@ -139,38 +138,38 @@ export function JurisprudenciaForm({ initial = {}, saving, onSave, onCancel }: P
         <SectionTitle title="1. Identificação" />
         <div style={styles.grid2}>
           <Field label="Tribunal" required>
-            <select value={tribunal} onChange={(e) => setTribunal(e.target.value)} style={sel}>
+            <Select value={tribunal} onChange={(e) => setTribunal(e.target.value)}>
               <option value="">Selecione…</option>
               {TRIBUNAIS.map((t) => <option key={t} value={t}>{t}</option>)}
-            </select>
+            </Select>
           </Field>
           <Field label="Órgão julgador">
-            <input value={orgaoJulgador} onChange={(e) => setOrgaoJulgador(e.target.value)} placeholder="Ex: Primeira Turma" style={inp} />
+            <Input value={orgaoJulgador} onChange={(e) => setOrgaoJulgador(e.target.value)} placeholder="Ex: Primeira Turma" />
           </Field>
           <Field label="Tipo">
-            <select value={tipo} onChange={(e) => setTipo(e.target.value as Jurisprudencia['tipo'])} style={sel}>
+            <Select value={tipo} onChange={(e) => setTipo(e.target.value as Jurisprudencia['tipo'])}>
               {TIPOS.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
-            </select>
+            </Select>
           </Field>
           <Field label="Informativo / Número">
-            <input value={informativo} onChange={(e) => setInformativo(e.target.value)} placeholder="Ex: Inf. 789 ou Súmula 123" style={inp} />
+            <Input value={informativo} onChange={(e) => setInformativo(e.target.value)} placeholder="Ex: Inf. 789 ou Súmula 123" />
           </Field>
           <Field label="Processo">
-            <input value={processo} onChange={(e) => setProcesso(e.target.value)} placeholder="Ex: RE 123456/SP" style={inp} />
+            <Input value={processo} onChange={(e) => setProcesso(e.target.value)} placeholder="Ex: RE 123456/SP" />
           </Field>
           <Field label="Relator(a)">
-            <input value={relator} onChange={(e) => setRelator(e.target.value)} placeholder="Nome do(a) relator(a)" style={inp} />
+            <Input value={relator} onChange={(e) => setRelator(e.target.value)} placeholder="Nome do(a) relator(a)" />
           </Field>
           <Field label="Data de julgamento">
-            <input type="date" value={dataJulgamento} onChange={(e) => setDataJulgamento(e.target.value)} style={inp} />
+            <Input type="date" value={dataJulgamento} onChange={(e) => setDataJulgamento(e.target.value)} />
           </Field>
           <Field label="Data de publicação">
-            <input type="date" value={dataPublicacao} onChange={(e) => setDataPublicacao(e.target.value)} style={inp} />
+            <Input type="date" value={dataPublicacao} onChange={(e) => setDataPublicacao(e.target.value)} />
           </Field>
           <Field label="Status">
-            <select value={status} onChange={(e) => setStatus(e.target.value as Jurisprudencia['status'])} style={sel}>
+            <Select value={status} onChange={(e) => setStatus(e.target.value as Jurisprudencia['status'])}>
               {STATUS_OPTIONS.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
-            </select>
+            </Select>
           </Field>
         </div>
       </section>
@@ -180,16 +179,16 @@ export function JurisprudenciaForm({ initial = {}, saving, onSave, onCancel }: P
         <SectionTitle title="2. Classificação" />
         <div style={styles.grid2}>
           <Field label="Disciplina" required>
-            <input value={disciplina} onChange={(e) => setDisciplina(e.target.value)} placeholder="Ex: Direito Administrativo" style={inp} />
+            <Input value={disciplina} onChange={(e) => setDisciplina(e.target.value)} placeholder="Ex: Direito Administrativo" />
           </Field>
           <Field label="Matéria">
-            <input value={materia} onChange={(e) => setMateria(e.target.value)} placeholder="Ex: Atos administrativos" style={inp} />
+            <Input value={materia} onChange={(e) => setMateria(e.target.value)} placeholder="Ex: Atos administrativos" />
           </Field>
           <Field label="Assunto">
-            <input value={assunto} onChange={(e) => setAssunto(e.target.value)} placeholder="Ex: Motivação" style={inp} />
+            <Input value={assunto} onChange={(e) => setAssunto(e.target.value)} placeholder="Ex: Motivação" />
           </Field>
           <Field label="Subassunto">
-            <input value={subassunto} onChange={(e) => setSubassunto(e.target.value)} placeholder="Ex: Motivação per relationem" style={inp} />
+            <Input value={subassunto} onChange={(e) => setSubassunto(e.target.value)} placeholder="Ex: Motivação per relationem" />
           </Field>
         </div>
       </section>
@@ -197,98 +196,98 @@ export function JurisprudenciaForm({ initial = {}, saving, onSave, onCancel }: P
       {/* ── 3. DISPOSITIVOS ── */}
       <section>
         <SectionTitle title="3. Dispositivos relacionados" />
-        <textarea value={dispositivos} onChange={(e) => setDispositivos(e.target.value)} rows={3}
-          placeholder="Ex: Art. 37, §6º, CF — Art. 186 do CC" style={ta} />
+        <Textarea value={dispositivos} onChange={(e) => setDispositivos(e.target.value)} rows={3}
+          placeholder="Ex: Art. 37, §6º, CF — Art. 186 do CC" />
       </section>
 
       {/* ── 4. TESE ── */}
       <section>
         <SectionTitle title="4. Tese" />
-        <p style={{ fontSize: 12.5, color: theme.inkFaint, margin: '0 0 8px' }}>
+        <p style={{ fontSize: 13, color: theme.inkFaint, margin: '0 0 8px' }}>
           Escreva a tese do jeito que o tribunal fixou. Este campo é o coração do card.
         </p>
-        <textarea value={tese} onChange={(e) => setTese(e.target.value)} rows={4}
-          placeholder="Tese fixada pelo tribunal…" style={{ ...ta, borderColor: tese ? theme.teal : theme.line }} required />
+        <Textarea value={tese} onChange={(e) => setTese(e.target.value)} rows={4}
+          placeholder="Tese fixada pelo tribunal…" style={{ borderColor: tese ? theme.teal : theme.line }} required />
       </section>
 
       {/* ── 5. RESUMO ── */}
       <section>
         <SectionTitle title="5. Resumo" />
-        <textarea value={resumo} onChange={(e) => setResumo(e.target.value)} rows={4}
-          placeholder="Resumo do caso e da decisão…" style={ta} />
+        <Textarea value={resumo} onChange={(e) => setResumo(e.target.value)} rows={4}
+          placeholder="Resumo do caso e da decisão…" />
       </section>
 
       {/* ── 6. ENTENDA A DIFERENÇA ── */}
       <section>
         <SectionTitle title="6. Entenda a diferença / Explicação comparativa" />
-        <textarea value={explicacao} onChange={(e) => setExplicacao(e.target.value)} rows={4}
-          placeholder="Compare com outras teses similares ou explique a distinção…" style={ta} />
+        <Textarea value={explicacao} onChange={(e) => setExplicacao(e.target.value)} rows={4}
+          placeholder="Compare com outras teses similares ou explique a distinção…" />
       </section>
 
       {/* ── 7. POR QUE SE APLICA ── */}
       <section>
         <SectionTitle title="7. Por que se aplica / não se aplica" />
-        <textarea value={porQueAplica} onChange={(e) => setPorQueAplica(e.target.value)} rows={3}
-          placeholder="Contexto e condições de aplicação…" style={ta} />
+        <Textarea value={porQueAplica} onChange={(e) => setPorQueAplica(e.target.value)} rows={3}
+          placeholder="Contexto e condições de aplicação…" />
       </section>
 
       {/* ── 8. ESQUEMA VISUAL ── */}
       <section>
         <SectionTitle title="8. Esquema visual em bloco" />
-        <p style={{ fontSize: 12.5, color: theme.inkFaint, margin: '0 0 8px' }}>
+        <p style={{ fontSize: 13, color: theme.inkFaint, margin: '0 0 8px' }}>
           Use texto puro com indentação e símbolos (→, ├, └) para criar o esquema.
         </p>
-        <textarea value={esquema} onChange={(e) => setEsquema(e.target.value)} rows={5}
+        <Textarea value={esquema} onChange={(e) => setEsquema(e.target.value)} rows={5}
           placeholder={'Conceito\n├── Requisito 1\n├── Requisito 2\n└── Exceção → caso X'}
-          style={{ ...ta, fontFamily: 'monospace', fontSize: 13 }} />
+          style={{ fontFamily: 'monospace', fontSize: 13 }} />
       </section>
 
       {/* ── 9. EXEMPLO PRÁTICO ── */}
       <section>
         <SectionTitle title="9. Exemplo prático" />
-        <textarea value={exemplo} onChange={(e) => setExemplo(e.target.value)} rows={3}
-          placeholder="Descreva um caso concreto que ilustra a aplicação da tese…" style={ta} />
+        <Textarea value={exemplo} onChange={(e) => setExemplo(e.target.value)} rows={3}
+          placeholder="Descreva um caso concreto que ilustra a aplicação da tese…" />
       </section>
 
       {/* ── 10. PEGADINHAS ── */}
       <section>
         <SectionTitle title="10. Pegadinhas de concurso" />
         <div style={{ borderLeft: `3px solid ${theme.danger}`, paddingLeft: 12 }}>
-          <textarea value={pegadinhas} onChange={(e) => setPegadinhas(e.target.value)} rows={3}
-            placeholder="Quais erros comuns a banca induz? Como o candidato é pego?" style={ta} />
+          <Textarea value={pegadinhas} onChange={(e) => setPegadinhas(e.target.value)} rows={3}
+            placeholder="Quais erros comuns a banca induz? Como o candidato é pego?" />
         </div>
       </section>
 
       {/* ── 11. TESE DA BANCA ── */}
       <section>
         <SectionTitle title="11. Tese da banca" />
-        <textarea value={teseBanca} onChange={(e) => setTeseBanca(e.target.value)} rows={3}
-          placeholder="Como a banca costuma apresentar a tese nas questões?" style={ta} />
+        <Textarea value={teseBanca} onChange={(e) => setTeseBanca(e.target.value)} rows={3}
+          placeholder="Como a banca costuma apresentar a tese nas questões?" />
       </section>
 
       {/* ── 12. COMO A BANCA COBRA ── */}
       <section>
         <SectionTitle title="12. Como a banca cobra" />
         <div style={{ borderLeft: `3px solid ${theme.clay}`, paddingLeft: 12 }}>
-          <textarea value={comoBancaCobra} onChange={(e) => setComoBancaCobra(e.target.value)} rows={3}
-            placeholder="Descreva o padrão de cobrança: assertiva V/F, lacuna, caso concreto…" style={ta} />
+          <Textarea value={comoBancaCobra} onChange={(e) => setComoBancaCobra(e.target.value)} rows={3}
+            placeholder="Descreva o padrão de cobrança: assertiva V/F, lacuna, caso concreto…" />
         </div>
       </section>
 
       {/* ── MODO FLASHCARD (opcional) ── */}
       <section>
         <SectionTitle title="Modo flashcard (opcional)" />
-        <p style={{ fontSize: 12.5, color: theme.inkFaint, margin: '0 0 10px' }}>
+        <p style={{ fontSize: 13, color: theme.inkFaint, margin: '0 0 10px' }}>
           Se preenchido, esta jurisprudência aparecerá no modo flashcard e nas sessões de revisão espaçada.
         </p>
         <div style={styles.grid2}>
           <Field label="Frente (pergunta)">
-            <textarea value={flashcardFrente} onChange={(e) => setFlashcardFrente(e.target.value)} rows={2}
-              placeholder="Ex: O Judiciário pode determinar a implementação de políticas públicas?" style={ta} />
+            <Textarea value={flashcardFrente} onChange={(e) => setFlashcardFrente(e.target.value)} rows={2}
+              placeholder="Ex: O Judiciário pode determinar a implementação de políticas públicas?" />
           </Field>
           <Field label="Verso (resposta)">
-            <textarea value={flashcardVerso} onChange={(e) => setFlashcardVerso(e.target.value)} rows={2}
-              placeholder="Ex: Sim, em casos de omissão estatal que comprometa o mínimo existencial." style={ta} />
+            <Textarea value={flashcardVerso} onChange={(e) => setFlashcardVerso(e.target.value)} rows={2}
+              placeholder="Ex: Sim, em casos de omissão estatal que comprometa o mínimo existencial." />
           </Field>
         </div>
       </section>
@@ -296,12 +295,12 @@ export function JurisprudenciaForm({ initial = {}, saving, onSave, onCancel }: P
       {/* ── MODO QUESTÃO C/E (opcional) ── */}
       <section>
         <SectionTitle title="Modo questão Certo/Errado (opcional)" />
-        <p style={{ fontSize: 12.5, color: theme.inkFaint, margin: '0 0 10px' }}>
+        <p style={{ fontSize: 13, color: theme.inkFaint, margin: '0 0 10px' }}>
           Crie uma mini-assertiva no estilo CESPE/FGV para treinar a aplicação da tese.
         </p>
         <Field label="Enunciado da assertiva">
-          <textarea value={questaoEnunciado} onChange={(e) => setQuestaoEnunciado(e.target.value)} rows={2}
-            placeholder="Ex: Segundo o STF, o Judiciário nunca pode interferir em políticas públicas…" style={{ ...ta, marginBottom: 10 }} />
+          <Textarea value={questaoEnunciado} onChange={(e) => setQuestaoEnunciado(e.target.value)} rows={2}
+            placeholder="Ex: Segundo o STF, o Judiciário nunca pode interferir em políticas públicas…" style={{ marginBottom: 10 }} />
         </Field>
         <Field label="Gabarito">
           <div style={{ display: 'flex', gap: 8 }}>
@@ -317,8 +316,8 @@ export function JurisprudenciaForm({ initial = {}, saving, onSave, onCancel }: P
         </Field>
         <div style={{ marginTop: 10 }}>
           <Field label="Comentário (explicação do gabarito)">
-            <textarea value={questaoComentario} onChange={(e) => setQuestaoComentario(e.target.value)} rows={2}
-              placeholder="Explique por que é certo ou errado…" style={ta} />
+            <Textarea value={questaoComentario} onChange={(e) => setQuestaoComentario(e.target.value)} rows={2}
+              placeholder="Explique por que é certo ou errado…" />
           </Field>
         </div>
       </section>
@@ -326,7 +325,7 @@ export function JurisprudenciaForm({ initial = {}, saving, onSave, onCancel }: P
       {/* ── EVOLUÇÃO JURISPRUDENCIAL (opcional) ── */}
       <section>
         <SectionTitle title="Evolução jurisprudencial (opcional)" />
-        <p style={{ fontSize: 12.5, color: theme.inkFaint, margin: '0 0 10px' }}>
+        <p style={{ fontSize: 13, color: theme.inkFaint, margin: '0 0 10px' }}>
           Marque se este julgado supera um entendimento anterior do tribunal e explique a mudança.
         </p>
         <Field label="Supera entendimento anterior?">
@@ -344,8 +343,8 @@ export function JurisprudenciaForm({ initial = {}, saving, onSave, onCancel }: P
         {superaEntendimento && (
           <div style={{ marginTop: 10 }}>
             <Field label="Observação sobre a evolução">
-              <textarea value={observacaoEvolucao} onChange={(e) => setObservacaoEvolucao(e.target.value)} rows={2}
-                placeholder="Ex: O STJ adequou sua jurisprudência ao entendimento firmado pelo STF no HC 232.254/PE…" style={ta} />
+              <Textarea value={observacaoEvolucao} onChange={(e) => setObservacaoEvolucao(e.target.value)} rows={2}
+                placeholder="Ex: O STJ adequou sua jurisprudência ao entendimento firmado pelo STF no HC 232.254/PE…" />
             </Field>
           </div>
         )}
@@ -362,14 +361,13 @@ export function JurisprudenciaForm({ initial = {}, saving, onSave, onCancel }: P
             </span>
           ))}
         </div>
-        <input
+        <Input
           value={tagInput}
           onChange={(e) => setTagInput(e.target.value)}
           onKeyDown={addTag}
           placeholder="Digite uma tag e pressione Enter…"
-          style={inp}
         />
-        <p style={{ fontSize: 11.5, color: theme.inkFaint, margin: '6px 0 0' }}>
+        <p style={{ fontSize: 12, color: theme.inkFaint, margin: '6px 0 0' }}>
           Pressione Enter ou vírgula para adicionar.
         </p>
       </section>
@@ -384,9 +382,9 @@ export function JurisprudenciaForm({ initial = {}, saving, onSave, onCancel }: P
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
             <span style={{ fontSize: 13, color: theme.inkSoft, minWidth: 130 }}>Incidência</span>
-            <select value={incidencia} onChange={(e) => setIncidencia(e.target.value as Jurisprudencia['incidencia_concursos'])} style={{ ...sel, width: 160, maxWidth: '100%' }}>
+            <Select value={incidencia} onChange={(e) => setIncidencia(e.target.value as Jurisprudencia['incidencia_concursos'])} style={{ width: 160, maxWidth: '100%' }}>
               {INCIDENCIA_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
-            </select>
+            </Select>
           </div>
         </div>
       </section>
@@ -406,16 +404,11 @@ export function JurisprudenciaForm({ initial = {}, saving, onSave, onCancel }: P
 
 const styles: Record<string, React.CSSProperties> = {
   grid2: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '14px 18px' },
-  label: { display: 'block', fontSize: 12.5, fontWeight: 600, color: theme.inkSoft, marginBottom: 6 },
-  input: { width: '100%', boxSizing: 'border-box', padding: '10px 13px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.card, fontSize: 14, color: theme.ink, fontFamily: 'inherit', outline: 'none' },
-  select: { width: '100%', boxSizing: 'border-box', padding: '10px 13px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.card, fontSize: 14, color: theme.ink, fontFamily: 'inherit', cursor: 'pointer', outline: 'none' },
-  textarea: { width: '100%', boxSizing: 'border-box', padding: '10px 13px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.card, fontSize: 14, color: theme.ink, fontFamily: 'inherit', outline: 'none', resize: 'vertical', lineHeight: 1.6 },
+  label: { display: 'block', fontSize: 13, fontWeight: 600, color: theme.inkSoft, marginBottom: 6 },
   sectionTitle: { fontSize: 13, fontWeight: 700, color: theme.teal, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 12, paddingBottom: 8, borderBottom: `0.5px solid ${theme.line}` },
-  tagChip: { display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 12, fontWeight: 500, color: theme.tealDeep, background: theme.tealBg, borderRadius: 999, padding: '3px 10px' },
+  tagChip: { display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 12, fontWeight: 500, color: theme.tealDeep, background: theme.tealBg, borderRadius: theme.radiusPill, padding: '3px 10px' },
   tagRemove: { border: 'none', background: 'transparent', color: theme.tealDeep, cursor: 'pointer', padding: 0, fontSize: 14, lineHeight: 1, fontFamily: 'inherit' },
-  cancelBtn: { padding: '11px 20px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.inkSoft, fontSize: 14, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' },
-  saveBtn: { padding: '11px 24px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
-  gabaritoBtn: { padding: '9px 22px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.inkSoft, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+  gabaritoBtn: { padding: '9px 22px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.inkSoft, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
   gabaritoBtnCerto: { border: `1.5px solid ${theme.ok}`, background: theme.okTint, color: theme.ok },
   gabaritoBtnErrado: { border: `1.5px solid ${theme.danger}`, background: theme.dangerTint, color: theme.danger },
 };

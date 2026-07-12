@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Check, Search } from 'lucide-react';
 import {
   getCatalogAreas, getCatalogSubjects, activateSubject, getCatalogTopics,
   type CatalogArea, type CatalogSubject, type CatalogTopic,
@@ -95,9 +96,7 @@ export function BancoTab({ isMobile, onError, onActivated }: Props) {
     <>
       {/* Busca */}
       <div style={styles.searchBox}>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={theme.inkFaint} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" />
-        </svg>
+        <Search size={16} color={theme.inkFaint} strokeWidth={2} />
         <input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
@@ -161,7 +160,7 @@ export function BancoTab({ isMobile, onError, onActivated }: Props) {
                   <div onClick={(e) => e.stopPropagation()}>
                     {s.is_activated ? (
                       <span style={styles.activeBadge}>
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
+                        <Check size={13} strokeWidth={2.5} />
                         Ativa
                       </span>
                     ) : (
@@ -196,7 +195,7 @@ const styles: Record<string, React.CSSProperties> = {
 
   pills: { display: 'flex', gap: 7, flexWrap: 'wrap', marginBottom: 18 },
   pill: {
-    fontSize: 12.5, padding: '6px 13px', borderRadius: theme.radiusPill, cursor: 'pointer', fontFamily: 'inherit',
+    fontSize: 13, padding: '6px 13px', borderRadius: theme.radiusPill, cursor: 'pointer', fontFamily: 'inherit',
     border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.inkSoft, fontWeight: 500,
   },
   pillActive: {
@@ -215,14 +214,14 @@ const styles: Record<string, React.CSSProperties> = {
     background: theme.card, border: `0.5px solid ${theme.line}`, borderRadius: 14,
     padding: '14px 16px', minWidth: 0, minHeight: 72,
   },
-  catName: { fontSize: 14.5, fontWeight: 600, color: theme.ink },
+  catName: { fontSize: 15, fontWeight: 600, color: theme.ink },
   catMeta: { fontSize: 12, color: theme.inkSoft, marginTop: 4 },
   activateBtn: {
-    fontSize: 12.5, padding: '6px 14px', borderRadius: 999, border: 'none',
+    fontSize: 13, padding: '6px 14px', borderRadius: theme.radiusPill, border: 'none',
     background: theme.primary, color: theme.onTeal, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap', flexShrink: 0,
   },
   activeBadge: {
-    display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 12.5, padding: '6px 12px',
-    borderRadius: 999, background: theme.okBg, color: theme.ok, fontWeight: 600, whiteSpace: 'nowrap', flexShrink: 0,
+    display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 13, padding: '6px 12px',
+    borderRadius: theme.radiusPill, background: theme.okBg, color: theme.ok, fontWeight: 600, whiteSpace: 'nowrap', flexShrink: 0,
   },
 };

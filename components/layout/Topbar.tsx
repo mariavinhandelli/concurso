@@ -7,6 +7,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
+import { Search, Menu } from 'lucide-react';
 import { refreshHomeAfterSession } from '@/lib/home-refresh';
 import Image from 'next/image';
 import { createClient } from '@/lib/supabase/client';
@@ -74,9 +75,7 @@ export function Topbar() {
       {/* Esquerda: hambúrguer renderizado sempre; CSS oculta em desktop (topbar-hamburger). */}
       <div style={styles.left}>
         <button className="topbar-hamburger" onClick={toggleMobile} style={styles.iconBtn} title="Abrir menu" aria-label="Abrir menu">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={theme.inkSoft} strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M3 12h18M3 6h18M3 18h18" />
-          </svg>
+          <Menu size={22} color={theme.inkSoft} strokeWidth={1.9} />
         </button>
       </div>
 
@@ -88,7 +87,7 @@ export function Topbar() {
           title="Buscar (Ctrl+K)"
           aria-label="Buscar"
         >
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke={theme.inkSoft} strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
+          <Search size={17} color={theme.inkSoft} strokeWidth={1.9} />
           <span className="topbar-search-hint" style={styles.searchHint}>Buscar</span>
           <kbd className="topbar-search-hint" style={styles.searchKbd}>Ctrl K</kbd>
         </button>
@@ -228,16 +227,16 @@ const styles: Record<string, React.CSSProperties> = {
     borderRadius: '10px', borderStyle: 'none', background: theme.primary, cursor: 'pointer',
     marginRight: '4px', fontFamily: 'inherit', padding: '0 16px 0 13px',
   },
-  addLabel: { color: theme.onTeal, fontSize: 13.5, fontWeight: 600 },
+  addLabel: { color: theme.onTeal, fontSize: 14, fontWeight: 600 },
   searchBtn: { display: 'flex', alignItems: 'center', gap: 8, height: 44, padding: '0 10px', borderRadius: 10, border: `0.5px solid ${theme.line}`, background: theme.card, cursor: 'pointer', fontFamily: 'inherit', marginRight: 2 },
   searchHint: { fontSize: 13, color: theme.inkFaint, fontWeight: 500 },
-  searchKbd: { fontFamily: 'ui-monospace, monospace', fontSize: 10.5, color: theme.inkFaint, border: `0.5px solid ${theme.line}`, borderRadius: 5, padding: '2px 6px', background: theme.muted },
+  searchKbd: { fontFamily: 'ui-monospace, monospace', fontSize: 11, color: theme.inkFaint, border: `0.5px solid ${theme.line}`, borderRadius: 5, padding: '2px 6px', background: theme.muted },
   addMenu: {
     position: 'absolute', top: '50px', right: 0, width: 'min(250px, calc(100vw - 32px))', background: theme.card,
     border: `0.5px solid ${theme.line}`, borderRadius: '14px', boxShadow: theme.shadowHover,
     padding: '6px', zIndex: 40,
   },
-  menuHint: { display: 'block', fontSize: 11.5, fontWeight: 400, color: theme.inkFaint, marginTop: 1 },
+  menuHint: { display: 'block', fontSize: 12, fontWeight: 400, color: theme.inkFaint, marginTop: 1 },
   iconBtn: {
     position: 'relative', width: '44px', height: '44px', borderRadius: '10px', borderStyle: 'none',
     background: 'transparent', display: 'grid', placeItems: 'center', cursor: 'pointer',
@@ -263,7 +262,7 @@ const styles: Record<string, React.CSSProperties> = {
   menuItem: {
     display: 'flex', alignItems: 'center', gap: '10px', width: '100%', padding: '9px 12px',
     borderRadius: '9px', borderStyle: 'none', background: 'transparent', cursor: 'pointer',
-    fontSize: 13.5, fontWeight: 500, color: theme.inkSoft, textAlign: 'left', fontFamily: 'inherit',
+    fontSize: 14, fontWeight: 500, color: theme.inkSoft, textAlign: 'left', fontFamily: 'inherit',
   },
   menuSep: { height: '0.5px', background: theme.line, margin: '6px 0' },
 };

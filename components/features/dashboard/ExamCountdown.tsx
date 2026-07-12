@@ -2,10 +2,13 @@
 
 import { memo, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import {
   listTargetExams, updateTargetExamDate, createTargetExam, type TargetExam,
 } from '@/services/targetExams.service';
 import { theme } from '@/lib/theme';
+import { Input } from '@/components/ui/Input';
+import { Button } from '@/components/ui/Button';
 import { Skeleton } from '@/components/ui/Skeleton';
 
 function daysUntil(d: string): number {
@@ -109,27 +112,28 @@ export const ExamCountdown = memo(function ExamCountdown() {
           </button>
         </div>
         <div style={styles.addForm}>
-          <input
-            style={styles.inputField}
+          <Input
+            style={{ padding: '8px 10px', fontSize: 13, background: theme.bg }}
             placeholder="Nome do concurso (ex: PRF, TJGO...)"
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
             autoFocus
           />
-          <input
-            style={styles.inputField}
+          <Input
+            style={{ padding: '8px 10px', fontSize: 13, background: theme.bg }}
             type="date"
             value={newDate}
             onChange={(e) => setNewDate(e.target.value)}
           />
           <div style={{ display: 'flex', gap: 8 }}>
-            <button
-              style={{ ...styles.saveBtn, opacity: addExam.isPending ? 0.6 : 1 }}
+            <Button
+              size="sm"
+              style={{ flex: 1 }}
               onClick={() => addExam.mutate()}
-              disabled={addExam.isPending}
+              loading={addExam.isPending}
             >
               {addExam.isPending ? 'Salvando…' : 'Salvar'}
-            </button>
+            </Button>
           </div>
           {addExam.isError && (
             <p style={styles.errorMsg}>{(addExam.error as Error).message}</p>
@@ -177,9 +181,7 @@ export const ExamCountdown = memo(function ExamCountdown() {
           onClick={prev}
           aria-label="Anterior"
         >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M15 18l-6-6 6-6" />
-          </svg>
+          <ChevronLeft size={14} strokeWidth={2.5} />
         </button>
 
         <div style={styles.nameWrap}>
@@ -209,9 +211,7 @@ export const ExamCountdown = memo(function ExamCountdown() {
           onClick={next}
           aria-label="Próximo"
         >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M9 18l6-6-6-6" />
-          </svg>
+          <ChevronRight size={14} strokeWidth={2.5} />
         </button>
       </div>
 
@@ -272,9 +272,9 @@ export const ExamCountdown = memo(function ExamCountdown() {
 const styles: Record<string, React.CSSProperties> = {
   wrap: { fontFamily: theme.font, display: 'flex', flexDirection: 'column', gap: 8, minWidth: 220 },
   header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
-  eyebrow: { fontSize: 10.5, fontWeight: 600, color: theme.inkFaint, letterSpacing: 0.8, textTransform: 'uppercase' },
-  addLink: { border: 'none', background: 'transparent', color: theme.teal, fontSize: 11.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', padding: 0 },
-  cancelLink: { border: 'none', background: 'transparent', color: theme.inkFaint, fontSize: 11.5, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit', padding: 0 },
+  eyebrow: { fontSize: 11, fontWeight: 600, color: theme.inkFaint, letterSpacing: 0.8, textTransform: 'uppercase' },
+  addLink: { border: 'none', background: 'transparent', color: theme.teal, fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', padding: 0 },
+  cancelLink: { border: 'none', background: 'transparent', color: theme.inkFaint, fontSize: 12, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit', padding: 0 },
 
   /* Nav */
   navRow: { display: 'flex', alignItems: 'center', gap: 6 },
@@ -289,25 +289,25 @@ const styles: Record<string, React.CSSProperties> = {
     overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', width: '100%',
   },
   dots: { display: 'flex', gap: 4, alignItems: 'center' },
-  dot: { height: 5, borderRadius: 99, border: 'none', cursor: 'pointer', padding: 0, transition: 'width .2s ease, background .2s ease' },
+  dot: { height: 5, borderRadius: theme.radiusPill, border: 'none', cursor: 'pointer', padding: 0, transition: 'width .2s ease, background .2s ease' },
 
   /* Countdown row */
   countRow: { display: 'flex', alignItems: 'center', gap: 10, justifyContent: 'center', flexWrap: 'wrap' },
   bigNum: { fontSize: 40, fontWeight: 700, letterSpacing: -1.5, fontVariantNumeric: 'tabular-nums', lineHeight: 1 },
   countMeta: { display: 'flex', flexDirection: 'column', gap: 1 },
-  dateStr: { fontSize: 11.5, color: theme.inkFaint, fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap' },
+  dateStr: { fontSize: 12, color: theme.inkFaint, fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap' },
   editDateBtn: { border: 'none', background: 'transparent', color: theme.teal, fontSize: 11, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', padding: 0 },
 
   /* No date */
   noDateRow: { display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'center' },
-  noDateText: { fontSize: 12.5, color: theme.inkFaint },
-  setDateBtn: { border: 'none', background: 'transparent', color: theme.teal, fontSize: 12.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', padding: 0 },
+  noDateText: { fontSize: 13, color: theme.inkFaint },
+  setDateBtn: { border: 'none', background: 'transparent', color: theme.teal, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', padding: 0 },
 
   /* Inline date editor */
   inlineDateEdit: { display: 'flex', alignItems: 'center', gap: 6, justifyContent: 'center' },
   dateInput: {
     border: `0.5px solid ${theme.line}`, borderRadius: 7, padding: '4px 8px',
-    fontSize: 12.5, fontFamily: 'inherit', color: theme.ink, background: theme.bg, outline: 'none',
+    fontSize: 13, fontFamily: 'inherit', color: theme.ink, background: theme.bg, outline: 'none',
   },
   confirmDateBtn: {
     padding: '4px 10px', borderRadius: 6, border: 'none',
@@ -321,16 +321,6 @@ const styles: Record<string, React.CSSProperties> = {
 
   /* Add form */
   addForm: { display: 'flex', flexDirection: 'column', gap: 8 },
-  inputField: {
-    border: `0.5px solid ${theme.line}`, borderRadius: 8, padding: '8px 10px',
-    fontSize: 13, fontFamily: 'inherit', color: theme.ink, background: theme.bg,
-    outline: 'none', width: '100%', boxSizing: 'border-box',
-  },
-  saveBtn: {
-    flex: 1, padding: '8px 0', borderRadius: 8, border: 'none',
-    background: theme.teal, color: theme.onTeal, fontSize: 13, fontWeight: 700,
-    cursor: 'pointer', fontFamily: 'inherit',
-  },
-  errorMsg: { fontSize: 11.5, color: theme.crit, margin: 0, textAlign: 'center' },
+  errorMsg: { fontSize: 12, color: theme.crit, margin: 0, textAlign: 'center' },
   emptyText: { fontSize: 13, color: theme.inkSoft, margin: 0 },
 };

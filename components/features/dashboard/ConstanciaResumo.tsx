@@ -69,7 +69,7 @@ const styles: Record<string, React.CSSProperties> = {
   muted: { color: theme.inkFaint, fontSize: 14 },
   head: { display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 18, gap: 8, flexWrap: 'wrap' },
   title: { fontSize: 16, fontWeight: 700, color: theme.ink, margin: 0, letterSpacing: -0.3 },
-  period: { fontSize: 12.5, color: theme.inkFaint, fontWeight: 500 },
+  period: { fontSize: 13, color: theme.inkFaint, fontWeight: 500 },
   metricsGrid: { display: 'grid', gap: 14, marginBottom: 18 },
   metric: { display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0 },
   metricValue: { fontSize: 24, fontWeight: 800, color: theme.teal, letterSpacing: -0.6 },

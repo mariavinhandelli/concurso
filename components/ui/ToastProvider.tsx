@@ -110,14 +110,14 @@ const s: Record<string, CSSProperties> = {
   },
   toast: {
     display: 'flex', alignItems: 'center', gap: 10,
-    padding: '12px 14px', borderRadius: 12,
+    padding: '12px 14px', borderRadius: theme.radiusSm,
     boxShadow: '0 8px 24px rgba(0,0,0,0.18)',
     fontFamily: theme.font, animation: 'toast-in 0.2s ease',
   },
-  msg: { flex: 1, fontSize: 13.5, fontWeight: 500, color: 'inherit', lineHeight: 1.4 },
+  msg: { flex: 1, fontSize: 14, fontWeight: 500, color: 'inherit', lineHeight: 1.4 },
   actionBtn: {
     background: 'rgba(255,255,255,0.22)', border: 'none', color: 'inherit',
-    cursor: 'pointer', fontSize: 12.5, fontWeight: 700, fontFamily: 'inherit',
+    cursor: 'pointer', fontSize: 13, fontWeight: 700, fontFamily: 'inherit',
     borderRadius: 6, padding: '4px 10px', whiteSpace: 'nowrap', flexShrink: 0,
   },
   close: {

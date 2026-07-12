@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
+import { Input } from '@/components/ui/Input';
 
 type Mode = 'login' | 'signup' | 'recover';
 
@@ -272,13 +273,13 @@ export default function LoginPage() {
         <div style={{ width: '100%', textAlign: 'right', marginBottom: 8 }}>
           {mode !== 'recover' && (
             <>
-              <span style={{ fontSize: 13.5, color: B.inkSoft }}>
+              <span style={{ fontSize: 14, color: B.inkSoft }}>
                 {mode === 'login' ? 'Ainda não tem conta?  ' : 'Já tem conta?  '}
               </span>
               <button
                 type="button"
                 onClick={() => trocarModo(mode === 'login' ? 'signup' : 'login')}
-                style={{ background: 'none', border: 'none', color: B.green, fontWeight: 600, fontSize: 13.5, cursor: 'pointer', padding: 0, fontFamily: 'inherit' }}
+                style={{ background: 'none', border: 'none', color: B.green, fontWeight: 600, fontSize: 14, cursor: 'pointer', padding: 0, fontFamily: 'inherit' }}
               >
                 {mode === 'login' ? 'Criar conta' : 'Entrar'} →
               </button>
@@ -317,7 +318,7 @@ export default function LoginPage() {
             <h2 style={{ margin: '0 0 6px', fontSize: 20, fontWeight: 700, color: B.ink, textAlign: 'center', letterSpacing: -0.5 }}>
               {titulo}
             </h2>
-            <p style={{ margin: '0 0 28px', fontSize: 12.5, color: B.inkSoft, textAlign: 'center' }}>
+            <p style={{ margin: '0 0 28px', fontSize: 13, color: B.inkSoft, textAlign: 'center' }}>
               {subtitulo}
             </p>
 
@@ -325,48 +326,44 @@ export default function LoginPage() {
             {mode === 'signup' && (
               <div style={{ marginBottom: 14 }}>
                 <label htmlFor="signup-name" style={{ display: 'block', fontSize: 13, fontWeight: 500, color: B.inkSoft, marginBottom: 6 }}>Seu nome</label>
-                <div style={{ position: 'relative' }}>
-                  <span style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', display: 'flex' }}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={B.inkMuted} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <Input
+                  id="signup-name"
+                  name="name"
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Como podemos te chamar?"
+                  autoComplete="name"
+                  required
+                  icon={
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
                     </svg>
-                  </span>
-                  <input
-                    id="signup-name"
-                    name="name"
-                    type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Como podemos te chamar?"
-                    autoComplete="name"
-                    required
-                    style={inputStyle('left')}
-                  />
-                </div>
+                  }
+                  style={{ padding: '13px 14px 13px 42px', borderRadius: 12, border: '1.5px solid var(--line-strong)' }}
+                />
               </div>
             )}
 
             {/* E-mail */}
             <div style={{ marginBottom: 14 }}>
               <label htmlFor="auth-email" style={{ display: 'block', fontSize: 13, fontWeight: 500, color: B.inkSoft, marginBottom: 6 }}>E-mail</label>
-              <div style={{ position: 'relative' }}>
-                <span style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', display: 'flex' }}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={B.inkMuted} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <Input
+                id="auth-email"
+                name="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="seu@email.com"
+                autoComplete="email"
+                required
+                icon={
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                     <rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
                   </svg>
-                </span>
-                <input
-                  id="auth-email"
-                  name="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="seu@email.com"
-                  autoComplete="email"
-                  required
-                  style={inputStyle('left')}
-                />
-              </div>
+                }
+                style={{ padding: '13px 14px 13px 42px', borderRadius: 12, border: '1.5px solid var(--line-strong)' }}
+              />
             </div>
 
             {/* Senha */}
@@ -374,12 +371,7 @@ export default function LoginPage() {
               <div style={{ marginBottom: 16 }}>
                 <label htmlFor="auth-password" style={{ display: 'block', fontSize: 13, fontWeight: 500, color: B.inkSoft, marginBottom: 6 }}>Senha</label>
                 <div style={{ position: 'relative' }}>
-                  <span style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', display: 'flex' }}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={B.inkMuted} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                      <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-                    </svg>
-                  </span>
-                  <input
+                  <Input
                     id="auth-password"
                     name="password"
                     type={showPassword ? 'text' : 'password'}
@@ -388,7 +380,12 @@ export default function LoginPage() {
                     placeholder="Digite sua senha"
                     autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
                     required
-                    style={{ ...inputStyle('both'), paddingRight: 44 }}
+                    icon={
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                        <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                      </svg>
+                    }
+                    style={{ padding: '13px 44px 13px 42px', borderRadius: 12, border: '1.5px solid var(--line-strong)' }}
                   />
                   <button
                     type="button"
@@ -409,7 +406,7 @@ export default function LoginPage() {
             {/* Recuperação de senha */}
             {mode === 'login' && (
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginBottom: 24 }}>
-                <button type="button" onClick={() => trocarModo('recover')} style={{ background: 'none', border: 'none', color: B.green, fontSize: 13.5, fontWeight: 500, cursor: 'pointer', padding: 0, fontFamily: 'inherit' }}>
+                <button type="button" onClick={() => trocarModo('recover')} style={{ background: 'none', border: 'none', color: B.green, fontSize: 14, fontWeight: 500, cursor: 'pointer', padding: 0, fontFamily: 'inherit' }}>
                   Esqueci minha senha
                 </button>
               </div>
@@ -417,7 +414,7 @@ export default function LoginPage() {
 
             {mode === 'recover' && (
               <div style={{ marginBottom: 20 }}>
-                <button type="button" onClick={() => trocarModo('login')} style={{ background: 'none', border: 'none', color: B.green, fontSize: 13.5, fontWeight: 500, cursor: 'pointer', padding: 0, fontFamily: 'inherit' }}>
+                <button type="button" onClick={() => trocarModo('login')} style={{ background: 'none', border: 'none', color: B.green, fontSize: 14, fontWeight: 500, cursor: 'pointer', padding: 0, fontFamily: 'inherit' }}>
                   ← Voltar para o login
                 </button>
               </div>
@@ -459,6 +456,16 @@ export default function LoginPage() {
               </p>
             )}
 
+            {/* Aceite dos termos — só no cadastro (o clique em "Criar conta" implica concordância) */}
+            {mode === 'signup' && (
+              <p style={{ fontSize: 12, color: B.inkMuted, textAlign: 'center', marginTop: 14, lineHeight: 1.55 }}>
+                Ao criar conta, você concorda com os{' '}
+                <a href="/termos" target="_blank" rel="noopener noreferrer" style={{ color: B.green, fontWeight: 600 }}>Termos de Uso</a>{' '}
+                e a{' '}
+                <a href="/privacidade" target="_blank" rel="noopener noreferrer" style={{ color: B.green, fontWeight: 600 }}>Política de Privacidade</a>.
+              </p>
+            )}
+
 
             {/* Security badge */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginTop: 32, paddingTop: 24, borderTop: `1px solid ${B.borderLight}` }}>
@@ -470,8 +477,8 @@ export default function LoginPage() {
                 </g>
               </svg>
               <div>
-                <div style={{ fontSize: 12.5, fontWeight: 600, color: B.inkSoft }}>Ambiente seguro</div>
-                <div style={{ fontSize: 11.5, color: B.inkMuted }}>Seus dados estão protegidos.</div>
+                <div style={{ fontSize: 13, fontWeight: 600, color: B.inkSoft }}>Ambiente seguro</div>
+                <div style={{ fontSize: 12, color: B.inkMuted }}>Seus dados estão protegidos.</div>
               </div>
             </div>
 
@@ -508,16 +515,6 @@ function FocaliIcon({ size, idPrefix }: { size: number; idPrefix: string }) {
   );
 }
 
-
-function inputStyle(icons: 'left' | 'both'): React.CSSProperties {
-  return {
-    width: '100%', boxSizing: 'border-box',
-    padding: icons === 'left' ? '13px 14px 13px 42px' : '13px 44px 13px 42px',
-    borderRadius: 12, border: `1.5px solid var(--line-strong)`,
-    background: 'var(--card)', fontSize: 14, color: 'var(--ink)',
-    fontFamily: 'inherit', outline: 'none',
-  };
-}
 
 const FEATURES = [
   {

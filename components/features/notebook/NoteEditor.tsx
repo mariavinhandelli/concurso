@@ -11,6 +11,8 @@ import { getAcertoTopico } from '@/services/metrics.service';
 import { FlashcardModal } from '@/components/features/notebook/FlashcardModal';
 import { theme } from '@/lib/theme';
 import { Button } from '@/components/ui/Button';
+import { Overlay } from '@/components/ui/Overlay';
+import { Select } from '@/components/ui/Select';
 
 interface Props {
   note: ErrorNote | null;
@@ -181,18 +183,18 @@ export function NoteEditor({ note, presetSubjectId = null, presetTopicId = null,
       </div>
 
       <div style={styles.metaRow}>
-        <select value={subjectId} onChange={(e) => { setSubjectId(e.target.value); setTopicId(''); }} style={styles.select}>
+        <Select value={subjectId} onChange={(e) => { setSubjectId(e.target.value); setTopicId(''); }} style={{ flex: '1 1 0', minWidth: 140 }}>
           <option value="">Matéria</option>
           {subjects.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
-        </select>
-        <select value={topicId} onChange={(e) => setTopicId(e.target.value)} disabled={!subjectId} style={styles.select}>
+        </Select>
+        <Select value={topicId} onChange={(e) => setTopicId(e.target.value)} disabled={!subjectId} style={{ flex: '1 1 0', minWidth: 140 }}>
           <option value="">Tópico</option>
           {topics.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
-        </select>
-        <select value={boardId} onChange={(e) => setBoardId(e.target.value)} style={styles.select}>
+        </Select>
+        <Select value={boardId} onChange={(e) => setBoardId(e.target.value)} style={{ flex: '1 1 0', minWidth: 140 }}>
           <option value="">Banca</option>
           {boards.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
-        </select>
+        </Select>
       </div>
 
       {topicId && acerto && (
@@ -232,9 +234,9 @@ export function NoteEditor({ note, presetSubjectId = null, presetTopicId = null,
 
       {/* Card de sugestão de revisão (pós-save, com tópico) */}
       {reviewSuggestion && (
-        <div style={styles.reviewOverlay} onClick={dismissReview}>
-          <div style={styles.reviewCard} onClick={(e) => e.stopPropagation()}>
-            <h3 style={styles.reviewTitle}>Revisar este tópico?</h3>
+        <Overlay onClose={dismissReview} maxWidth={380} labelledBy="review-suggestion-title" hideClose>
+          <div style={{ textAlign: 'center' }}>
+            <h3 id="review-suggestion-title" style={styles.reviewTitle}>Revisar este tópico?</h3>
             <p style={styles.reviewText}>
               Você registrou um erro em <b>{reviewSuggestion.topicName}</b>. Quer agendar uma revisão para fixar?
             </p>
@@ -244,7 +246,7 @@ export function NoteEditor({ note, presetSubjectId = null, presetTopicId = null,
             </div>
             <button onClick={dismissReview} disabled={scheduling} style={styles.reviewDismiss}>Agora não</button>
           </div>
-        </div>
+        </Overlay>
       )}
 
       {flashcardText !== null && note && (
@@ -263,29 +265,23 @@ export function NoteEditor({ note, presetSubjectId = null, presetTopicId = null,
 
 const styles: Record<string, React.CSSProperties> = {
   panel: { display: 'flex', flexDirection: 'column', gap: 12, width: '100%', minWidth: 0, maxWidth: '100%' },
-  titleInput: { width: '100%', boxSizing: 'border-box', padding: '13px 16px', borderRadius: 12, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.card, fontSize: 18, color: theme.ink, fontWeight: 700, fontFamily: theme.font, outline: 'none' },
-  chipsLabel: { fontSize: 12.5, fontWeight: 600, color: theme.inkSoft, margin: '0 0 8px' },
+  titleInput: { width: '100%', boxSizing: 'border-box', padding: '13px 16px', borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.card, fontSize: 18, color: theme.ink, fontWeight: 700, fontFamily: theme.font, outline: 'none' },
+  chipsLabel: { fontSize: 13, fontWeight: 600, color: theme.inkSoft, margin: '0 0 8px' },
   chipsRow: { display: 'flex', flexWrap: 'wrap', gap: 8 },
-  chip: { padding: '8px 14px', borderRadius: 999, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.card, color: theme.inkSoft, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', transition: 'all .12s' },
+  chip: { padding: '8px 14px', borderRadius: theme.radiusPill, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.card, color: theme.inkSoft, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', transition: 'all .12s' },
   chipOn: { background: theme.teal, borderColor: theme.teal, color: theme.onTeal },
   metaRow: { display: 'flex', gap: 12, width: '100%', minWidth: 0, flexWrap: 'wrap' },
-  select: { flex: '1 1 0', minWidth: 140, maxWidth: '100%', boxSizing: 'border-box', padding: '10px 12px', borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.card, fontSize: 14, color: theme.ink, fontFamily: theme.font, cursor: 'pointer', outline: 'none', textOverflow: 'ellipsis' },
   acertoBox: { display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', borderRadius: theme.radiusSm, background: theme.bg, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line },
-  acertoLabel: { fontSize: 12.5, color: theme.inkSoft, fontWeight: 500 },
+  acertoLabel: { fontSize: 13, color: theme.inkSoft, fontWeight: 500 },
   acertoPct: { fontSize: 18, fontWeight: 700, fontVariantNumeric: 'tabular-nums' },
-  acertoMeta: { fontSize: 11.5, color: theme.inkFaint },
-  acertoMuted: { fontSize: 12.5, color: theme.inkFaint },
+  acertoMeta: { fontSize: 12, color: theme.inkFaint },
+  acertoMuted: { fontSize: 13, color: theme.inkFaint },
   error: { color: theme.danger, fontSize: 13 },
   actions: { display: 'flex', gap: 12, justifyContent: 'flex-end', marginTop: 4 },
-  cancelBtn: { padding: '11px 20px', borderRadius: 12, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.card, color: theme.inkSoft, fontSize: 14, fontWeight: 500, cursor: 'pointer', fontFamily: theme.font },
-  saveBtn: { padding: '11px 24px', borderRadius: 12, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: theme.font },
-  saveBtnDisabled: { background: theme.muted, color: theme.inkFaint, cursor: 'not-allowed' },
   hint: { fontSize: 12, color: theme.inkFaint, textAlign: 'right', margin: 0 },
   tip: { fontSize: 12, color: theme.inkFaint, margin: '4px 0 0' },
-  reviewOverlay: { position: 'fixed', inset: 0, background: 'var(--backdrop)', display: 'grid', placeItems: 'center', zIndex: 70, padding: 20 },
-  reviewCard: { background: theme.card, borderRadius: theme.radius, padding: 24, width: '100%', maxWidth: 380, boxShadow: '0 20px 60px rgba(0,0,0,0.18)', fontFamily: theme.font, textAlign: 'center' },
   reviewTitle: { fontSize: 17, fontWeight: 700, color: theme.ink, margin: '0 0 8px' },
-  reviewText: { fontSize: 13.5, color: theme.inkSoft, margin: '0 0 18px', lineHeight: 1.5 },
+  reviewText: { fontSize: 14, color: theme.inkSoft, margin: '0 0 18px', lineHeight: 1.5 },
   reviewBtns: { display: 'flex', gap: 10, justifyContent: 'center' },
   reviewBtn: { flex: 1, padding: '11px 0', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
   reviewDismiss: { marginTop: 12, border: 'none', background: 'transparent', color: theme.inkFaint, fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' },

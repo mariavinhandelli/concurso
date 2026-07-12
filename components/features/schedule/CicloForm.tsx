@@ -5,6 +5,9 @@ import type { Subject } from '@/services/subjects.service';
 import type { RecurrenceItemInput } from '@/services/recurrence.service';
 import type { RuleSummary } from '@/services/recurrence.service';
 import { theme } from '@/lib/theme';
+import { Select } from '@/components/ui/Select';
+import { Input } from '@/components/ui/Input';
+import { IconButton } from '@/components/ui/IconButton';
 
 const toH = (min: number) => String(Math.floor(min / 60));
 const toM = (min: number) => String(min % 60);
@@ -88,16 +91,16 @@ export const CicloForm = forwardRef<CicloFormRef, Props>(function CicloForm(
               <button onClick={() => move(it.uid, 1)} disabled={i === items.length - 1} style={{ ...styles.arrowBtn, ...(i === items.length - 1 ? styles.arrowOff : {}) }} aria-label="Descer">▼</button>
             </div>
             <span style={{ ...styles.colorDot, background: colorOf(it.subjectId) }} />
-            <select value={it.subjectId} onChange={(e) => patch(it.uid, { subjectId: e.target.value })} style={styles.subjectSelect}>
+            <Select value={it.subjectId} onChange={(e) => patch(it.uid, { subjectId: e.target.value })} style={{ flex: 1, minWidth: 0, padding: '8px 32px 8px 10px', borderRadius: theme.radiusXs, fontSize: 14 }}>
               <option value="">Selecione a matéria…</option>
               {subjects.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
-            </select>
-            {items.length > 1 && <button onClick={() => remove(it.uid)} style={styles.removeBtn} aria-label="Remover">✕</button>}
+            </Select>
+            {items.length > 1 && <IconButton size="sm" onClick={() => remove(it.uid)} aria-label="Remover" style={{ color: theme.inkFaint, fontSize: 13 }}>✕</IconButton>}
           </div>
           <div style={styles.timeRow}>
-            <input type="number" min="0" value={it.h} onChange={(e) => patch(it.uid, { h: e.target.value })} style={styles.timeInput} />
+            <Input type="number" min="0" value={it.h} onChange={(e) => patch(it.uid, { h: e.target.value })} style={{ width: 56, padding: 8, borderRadius: theme.radiusXs, fontSize: 14, textAlign: 'center' }} />
             <span style={styles.unit}>h</span>
-            <input type="number" min="0" max="59" value={it.m} onChange={(e) => patch(it.uid, { m: e.target.value })} style={styles.timeInput} />
+            <Input type="number" min="0" max="59" value={it.m} onChange={(e) => patch(it.uid, { m: e.target.value })} style={{ width: 56, padding: 8, borderRadius: theme.radiusXs, fontSize: 14, textAlign: 'center' }} />
             <span style={styles.unit}>min</span>
           </div>
         </div>
@@ -106,9 +109,9 @@ export const CicloForm = forwardRef<CicloFormRef, Props>(function CicloForm(
 
       <label style={styles.sectionLabel}>Meta de estudo por dia</label>
       <div style={styles.timeRow}>
-        <input type="number" min="0" value={metaH} onChange={(e) => setMetaH(e.target.value)} style={styles.timeInput} />
+        <Input type="number" min="0" value={metaH} onChange={(e) => setMetaH(e.target.value)} style={{ width: 56, padding: 8, borderRadius: theme.radiusXs, fontSize: 14, textAlign: 'center' }} />
         <span style={styles.unit}>h</span>
-        <input type="number" min="0" max="59" value={metaM} onChange={(e) => setMetaM(e.target.value)} style={styles.timeInput} />
+        <Input type="number" min="0" max="59" value={metaM} onChange={(e) => setMetaM(e.target.value)} style={{ width: 56, padding: 8, borderRadius: theme.radiusXs, fontSize: 14, textAlign: 'center' }} />
         <span style={styles.unit}>min</span>
       </div>
 
@@ -126,11 +129,8 @@ const styles: Record<string, React.CSSProperties> = {
   arrowOff: { color: theme.line, cursor: 'default' },
   orderNum: { fontSize: 12, fontWeight: 700, color: theme.ink },
   colorDot: { width: 10, height: 10, borderRadius: 3, flexShrink: 0 },
-  subjectSelect: { flex: 1, minWidth: 0, padding: '8px 10px', borderRadius: 8, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.card, fontSize: 13.5, color: theme.ink, fontFamily: 'inherit', outline: 'none' },
   timeRow: { display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 },
-  timeInput: { width: 56, padding: '8px', borderRadius: 8, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.card, fontSize: 13.5, color: theme.ink, fontFamily: 'inherit', outline: 'none', textAlign: 'center' },
   unit: { fontSize: 12, color: theme.inkSoft },
-  removeBtn: { border: 'none', background: 'transparent', color: theme.inkFaint, fontSize: 13, cursor: 'pointer', flexShrink: 0 },
   addBtn: { width: '100%', padding: 10, borderWidth: 1, borderStyle: 'dashed', borderColor: theme.line, borderRadius: theme.radiusSm, background: 'transparent', color: theme.inkSoft, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
   error: { color: theme.danger, fontSize: 13, margin: '8px 0 0' },
 };

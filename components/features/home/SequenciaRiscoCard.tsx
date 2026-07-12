@@ -8,6 +8,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
+import { X } from 'lucide-react';
 import { getStreak, type StreakInfo } from '@/services/streak.service';
 import { getRetomadaStatus, type RetomadaStatus } from '@/services/retomada.service';
 import { usePersistedState } from '@/hooks/usePersistedState';
@@ -44,7 +45,7 @@ export function SequenciaRiscoCard() {
       <div style={s.top}>
         <span style={s.eyebrow}>{viva ? 'Sequência em risco' : 'Hora de voltar'}</span>
         <button onClick={() => setDismissedOn(hoje)} style={s.dismiss} aria-label="Dispensar por hoje">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
+          <X size={14} strokeWidth={2} />
         </button>
       </div>
       {viva ? (
@@ -84,6 +85,6 @@ const s: Record<string, React.CSSProperties> = {
   body: { fontSize: 14, color: theme.inkSoft, lineHeight: 1.55, margin: '0 0 14px', maxWidth: 600 },
   strong: { color: theme.ink, fontWeight: 700 },
   actions: { display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' },
-  primary: { padding: '10px 18px', borderRadius: theme.radiusSm, border: 'none', background: theme.warn, color: theme.onWarn, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+  primary: { padding: '10px 18px', borderRadius: theme.radiusSm, border: 'none', background: theme.warn, color: theme.onWarn, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
   ghost: { padding: '10px 14px', borderRadius: theme.radiusSm, border: 'none', background: 'transparent', color: theme.inkSoft, fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' },
 };

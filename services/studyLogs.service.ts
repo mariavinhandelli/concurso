@@ -7,6 +7,8 @@ import { autoCompleteByTopic } from '@/services/studyBlocks.service';
 import { findCycleItemForSubject, completeCycleSubject } from '@/services/cycleEngine.service';
 import { validateStudyLogInput } from '@/lib/study-log-validation';
 import { track, EV } from '@/lib/analytics';
+import { emitSessionSaved } from '@/lib/session-celebration';
+import { toLocalDateString } from '@/lib/local-date';
 
 export type ErrorCause = 'teoria' | 'interpretacao' | 'tempo';
 
@@ -67,6 +69,13 @@ export async function saveStudyLog(
   }
 
   track(EV.studyCompleted, { minutes: Math.round(session.durationSec / 60), mode: feedback.mode });
+
+  // Momento de recompensa (Tiny Habits): o card de celebração aparece logo após
+  // o save — em todos os pontos de entrada (timer, registro rápido, manual).
+  emitSessionSaved({
+    minutes: Math.round(session.durationSec / 60),
+    dateLocal: toLocalDateString(new Date(session.startedAt)),
+  });
 
   // Aplica a intenção de revisão (só se mudou de estado).
   if (topicId && feedback.reviewIntent) {

@@ -79,7 +79,7 @@ export default function RevisarPage() {
     return (
       <div style={{ maxWidth: 720, margin: '0 auto', padding: isMobile ? '40px 16px' : '80px 40px', textAlign: 'center', fontFamily: theme.font }}>
         <div style={{ fontSize: 56, marginBottom: 20 }}>🎉</div>
-        <h1 style={{ fontSize: 26, fontWeight: 800, color: theme.ink, margin: '0 0 12px' }}>
+        <h1 style={{ fontSize: 22, fontWeight: 700, color: theme.ink, margin: '10px 0 6px' }}>
           {total === 0 ? 'Nada para revisar hoje!' : 'Sessão concluída!'}
         </h1>
         <p style={{ fontSize: 15, color: theme.inkSoft, margin: '0 0 32px' }}>
@@ -117,8 +117,8 @@ export default function RevisarPage() {
       </div>
 
       {/* Barra de progresso */}
-      <div style={{ height: 4, background: theme.line, borderRadius: 99, marginBottom: 28, overflow: 'hidden' }}>
-        <div style={{ height: '100%', background: theme.teal, borderRadius: 99, width: `${((idx + 1) / total) * 100}%`, transition: 'width .3s' }} />
+      <div style={{ height: 4, background: theme.line, borderRadius: theme.radiusPill, marginBottom: 28, overflow: 'hidden' }}>
+        <div style={{ height: '100%', background: theme.teal, borderRadius: theme.radiusPill, width: `${((idx + 1) / total) * 100}%`, transition: 'width .3s' }} />
       </div>
 
       {current && (
@@ -207,7 +207,7 @@ export default function RevisarPage() {
               </p>
               <button
                 onClick={handleSkip}
-                style={{ marginTop: 8, border: 'none', background: 'transparent', color: theme.inkFaint, fontSize: 12.5, cursor: 'pointer', fontFamily: 'inherit' }}
+                style={{ marginTop: 8, border: 'none', background: 'transparent', color: theme.inkFaint, fontSize: 13, cursor: 'pointer', fontFamily: 'inherit' }}
               >
                 Pular por agora →
               </button>
@@ -236,7 +236,7 @@ export default function RevisarPage() {
                     }}
                   >
                     {RATING_LABEL[key]}
-                    <span style={{ fontSize: 10.5, fontWeight: 400, opacity: 0.75 }}>
+                    <span style={{ fontSize: 11, fontWeight: 400, opacity: 0.75 }}>
                       → volta em {nextDays} {nextDays === 1 ? 'dia' : 'dias'}
                     </span>
                   </button>
@@ -246,7 +246,7 @@ export default function RevisarPage() {
               <div style={{ textAlign: 'center', marginTop: 14 }}>
                 <button
                   onClick={() => router.push(`/jurisprudencias/${current.id}`)}
-                  style={{ border: 'none', background: 'transparent', color: theme.teal, fontSize: 12.5, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}
+                  style={{ border: 'none', background: 'transparent', color: theme.teal, fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}
                 >
                   Ver jurisprudência completa →
                 </button>
@@ -267,12 +267,12 @@ const styles = {
   },
   teseBox: {
     background: theme.tealBg, border: `1px solid ${theme.teal}`,
-    borderRadius: 12, padding: '16px 18px',
+    borderRadius: theme.radiusSm, padding: '16px 18px',
   },
   sectionLabel: { fontSize: 11, fontWeight: 700, color: theme.inkFaint, textTransform: 'uppercase' as const, letterSpacing: 0.4, margin: '0 0 5px' },
   sectionText: { fontSize: 14, color: theme.ink, lineHeight: 1.65, margin: 0 },
   badge: (bg: string, color: string): React.CSSProperties => ({
-    fontSize: 11.5, fontWeight: 600, color, background: bg, borderRadius: 6, padding: '3px 10px',
+    fontSize: 12, fontWeight: 600, color, background: bg, borderRadius: 6, padding: '3px 10px',
   }),
   revealBtn: {
     padding: '13px 32px', borderRadius: theme.radiusSm, border: 'none',

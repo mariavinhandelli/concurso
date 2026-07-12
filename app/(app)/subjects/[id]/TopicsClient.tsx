@@ -4,6 +4,7 @@ import dynamic from 'next/dynamic';
 import { useWindowVirtualizer } from '@tanstack/react-virtual';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { X, ChevronRight, Search } from 'lucide-react';
 import { useConfirm } from '@/hooks/useConfirm';
 import { useUI } from '@/components/layout/UIContext';
 import { useTopics } from '@/hooks/useTopics';
@@ -15,6 +16,7 @@ import { theme } from '@/lib/theme';
 import type { Subject } from '@/services/subjects.service';
 import type { Topic } from '@/services/topics.service';
 import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
 import { listEditalPresence, type EditalPresence } from '@/services/targetTopics.service';
 
 const BulkImportModal = dynamic(
@@ -35,7 +37,7 @@ function TopicsSkeleton() {
         <div
           key={i}
           style={{
-            height: h, borderRadius: 12,
+            height: h, borderRadius: theme.radiusSm,
             background: theme.muted,
             animation: 'skeleton-pulse 1.4s ease infinite',
             animationDelay: `${i * 80}ms`,
@@ -189,7 +191,7 @@ export function TopicsClient({ subjectId, initialSubject }: Props) {
           <button onClick={() => router.push('/subjects')} style={styles.breadcrumbLink}>
             Matérias
           </button>
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--ink-faint)', flexShrink: 0 }}><path d="m9 18 6-6-6-6" /></svg>
+          <ChevronRight size={13} strokeWidth={2} style={{ color: 'var(--ink-faint)', flexShrink: 0 }} />
           <span style={styles.breadcrumbCurrent}>{initialSubject.name}</span>
         </nav>
 
@@ -227,12 +229,12 @@ export function TopicsClient({ subjectId, initialSubject }: Props) {
         </div>
 
         <div style={{ ...styles.createRow, flexWrap: isMobile ? 'wrap' : 'nowrap' }}>
-          <input
+          <Input
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleCreateLoose()}
             placeholder="Novo tópico (ex: Controle de Constitucionalidade)"
-            style={{ ...styles.input, flexBasis: isMobile ? '100%' : undefined }}
+            style={{ flexBasis: isMobile ? '100%' : undefined, flexGrow: 1 }}
           />
           <Button onClick={handleCreateLoose} style={{ flex: isMobile ? 1 : undefined }}>
             Adicionar
@@ -259,9 +261,7 @@ export function TopicsClient({ subjectId, initialSubject }: Props) {
         {/* Filtro — visível quando há tópicos */}
         {!loading && topics.length > 0 && (
           <div style={styles.filterRow}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={theme.inkFaint} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" />
-            </svg>
+            <Search size={14} color={theme.inkFaint} strokeWidth={2} aria-hidden="true" />
             <input
               value={filter}
               onChange={(e) => setFilter(e.target.value)}
@@ -271,7 +271,7 @@ export function TopicsClient({ subjectId, initialSubject }: Props) {
             />
             {filter && (
               <button onClick={() => setFilter('')} style={styles.filterClear} aria-label="Limpar filtro">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
+                <X size={13} strokeWidth={2} />
               </button>
             )}
           </div>
@@ -393,11 +393,11 @@ const styles: Record<string, React.CSSProperties> = {
   progressLabel: { fontSize: 13, color: theme.inkSoft, fontWeight: 600 },
   progressPct: { display: 'flex', alignItems: 'baseline', gap: 8, fontSize: 15 },
   progressFrac: { fontSize: 12, color: theme.inkFaint, fontVariantNumeric: 'tabular-nums' },
-  progressTrack: { height: 8, background: theme.muted, borderRadius: 999, overflow: 'hidden' },
-  progressFill: { height: '100%', background: theme.ok, borderRadius: 999, transition: 'width 0.6s cubic-bezier(.2,.7,.3,1)' },
+  progressTrack: { height: 8, background: theme.muted, borderRadius: theme.radiusPill, overflow: 'hidden' },
+  progressFill: { height: '100%', background: theme.ok, borderRadius: theme.radiusPill, transition: 'width 0.6s cubic-bezier(.2,.7,.3,1)' },
   presenceRow: { display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', marginTop: 12 },
   presenceLabel: { fontSize: 12, color: theme.inkFaint, fontWeight: 500, flexShrink: 0 },
-  presenceChip: { display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 10px', borderRadius: 999, border: `1px solid ${theme.line}`, background: theme.card, color: theme.inkSoft, fontSize: 12, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit', maxWidth: 260, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
+  presenceChip: { display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 10px', borderRadius: theme.radiusPill, border: `1px solid ${theme.line}`, background: theme.card, color: theme.inkSoft, fontSize: 12, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit', maxWidth: 260, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
   presenceCount: { fontSize: 11, fontWeight: 700, color: theme.teal },
 
   createRow: { display: 'flex', gap: 10, marginBottom: 14 },
@@ -414,5 +414,5 @@ const styles: Record<string, React.CSSProperties> = {
 
   emptyState: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, padding: '40px 20px', textAlign: 'center' },
   emptyTitle: { fontSize: 15, color: theme.inkSoft, fontWeight: 600, margin: 0 },
-  emptyHint: { fontSize: 13.5, color: theme.inkFaint, margin: 0, maxWidth: 360, lineHeight: 1.6 },
+  emptyHint: { fontSize: 14, color: theme.inkFaint, margin: 0, maxWidth: 360, lineHeight: 1.6 },
 };

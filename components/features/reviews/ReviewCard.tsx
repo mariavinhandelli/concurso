@@ -136,7 +136,7 @@ const s: Record<string, React.CSSProperties> = {
   },
   badge: {
     fontSize: 11, color: '#fff',
-    padding: '3px 10px', borderRadius: 8,
+    padding: '3px 10px', borderRadius: theme.radiusXs,
     fontWeight: 700, letterSpacing: 0.3,
   },
   overdue: {
@@ -153,7 +153,7 @@ const s: Record<string, React.CSSProperties> = {
   ratingBtn: {
     flex: 1,
     display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5,
-    padding: '14px 8px', borderRadius: 12,
+    padding: '14px 8px', borderRadius: theme.radiusSm,
     border: 'none', cursor: 'pointer', fontFamily: 'inherit',
   },
   ratingLabel:    { fontSize: 13, fontWeight: 600 },

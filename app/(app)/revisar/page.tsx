@@ -9,6 +9,7 @@
 import { useCallback, useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
+import { X } from 'lucide-react';
 import { buildFilaUnificada, type UnifiedItem, type UnifiedKind } from '@/services/revisaoUnificada.service';
 import { submitReview, type ReviewRating } from '@/services/reviews.service';
 import { submitCardReview, type ReviewRating as CardRating } from '@/services/flashcards.service';
@@ -221,7 +222,7 @@ export default function RevisarUnificadoPage() {
       {/* Barra superior: sair · progresso · contador */}
       <div style={s.topBar}>
         <button onClick={() => router.push('/')} style={s.exitBtn} className="touch-target">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
+          <X size={14} strokeWidth={2} />
           Sair
         </button>
         <div style={s.progressTrack}>
@@ -471,15 +472,15 @@ const s: Record<string, CSSProperties> = {
   wrap: { maxWidth: 720, margin: '0 auto', fontFamily: theme.font, minWidth: 0 },
   topBar: { display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 },
   exitBtn: { display: 'flex', alignItems: 'center', gap: 5, border: 'none', background: 'transparent', color: theme.inkFaint, fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit', padding: 0, flexShrink: 0 },
-  progressTrack: { flex: 1, height: 5, background: theme.line, borderRadius: 99, overflow: 'hidden' },
-  progressBar: { height: '100%', background: theme.teal, borderRadius: 99, transition: 'width .3s ease' },
-  progressLabel: { fontSize: 12.5, fontWeight: 600, color: theme.inkFaint, flexShrink: 0, fontVariantNumeric: 'tabular-nums' },
+  progressTrack: { flex: 1, height: 5, background: theme.line, borderRadius: theme.radiusPill, overflow: 'hidden' },
+  progressBar: { height: '100%', background: theme.teal, borderRadius: theme.radiusPill, transition: 'width .3s ease' },
+  progressLabel: { fontSize: 13, fontWeight: 600, color: theme.inkFaint, flexShrink: 0, fontVariantNumeric: 'tabular-nums' },
   body: { minWidth: 0 },
   itemHead: { marginBottom: 10 },
-  kindBadge: { display: 'inline-block', fontSize: 11, fontWeight: 700, letterSpacing: 0.4, padding: '4px 11px', borderRadius: 999, textTransform: 'uppercase' },
+  kindBadge: { display: 'inline-block', fontSize: 11, fontWeight: 700, letterSpacing: 0.4, padding: '4px 11px', borderRadius: theme.radiusPill, textTransform: 'uppercase' },
 
   card: { background: theme.card, border: `0.5px solid ${theme.line}`, borderRadius: theme.radius, boxShadow: theme.shadow, padding: '24px', display: 'flex', flexDirection: 'column', gap: 18, minWidth: 0 },
-  subjBadge: { alignSelf: 'flex-start', fontSize: 11, color: '#fff', padding: '3px 10px', borderRadius: 8, fontWeight: 700, letterSpacing: 0.3 },
+  subjBadge: { alignSelf: 'flex-start', fontSize: 11, color: '#fff', padding: '3px 10px', borderRadius: theme.radiusXs, fontWeight: 700, letterSpacing: 0.3 },
 
   // flashcard
   fcContent: { display: 'flex', flexDirection: 'column', justifyContent: 'center', minHeight: 120 },
@@ -490,18 +491,18 @@ const s: Record<string, CSSProperties> = {
   // lei
   leiHead: { display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' },
   leiRotulo: { fontSize: 16, fontWeight: 700, color: theme.ink },
-  leiCaminho: { fontSize: 11.5, color: theme.inkFaint, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
-  leiHint: { fontSize: 12.5, color: theme.inkSoft, margin: 0, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' },
-  revelarTudo: { border: 'none', background: 'transparent', color: theme.teal, fontSize: 12.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', textDecoration: 'underline', padding: 0 },
-  leiTexto: { fontSize: 14.5, lineHeight: 1.9, color: theme.ink },
+  leiCaminho: { fontSize: 12, color: theme.inkFaint, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
+  leiHint: { fontSize: 13, color: theme.inkSoft, margin: 0, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' },
+  revelarTudo: { border: 'none', background: 'transparent', color: theme.teal, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', textDecoration: 'underline', padding: 0 },
+  leiTexto: { fontSize: 15, lineHeight: 1.9, color: theme.ink },
   leiBloco: { margin: '0 0 8px' },
   leiBlocoRotulo: { fontWeight: 600, color: theme.inkSoft },
   lacuna: { background: theme.muted, borderRadius: 4, cursor: 'pointer', borderBottom: `1.5px dashed ${theme.inkFaint}` },
 
   // juris
-  teseBox: { background: theme.tealBg, border: `1px solid ${theme.teal}`, borderRadius: 12, padding: '16px 18px' },
+  teseBox: { background: theme.tealBg, border: `1px solid ${theme.teal}`, borderRadius: theme.radiusSm, padding: '16px 18px' },
   teseLabel: { fontSize: 11, fontWeight: 700, color: theme.teal, textTransform: 'uppercase', letterSpacing: 0.8, margin: '0 0 10px' },
-  teseText: { fontSize: 16.5, color: theme.ink, lineHeight: 1.65, margin: 0, fontWeight: 500 },
+  teseText: { fontSize: 17, color: theme.ink, lineHeight: 1.65, margin: 0, fontWeight: 500 },
   secLabel: { fontSize: 11, fontWeight: 700, color: theme.inkFaint, textTransform: 'uppercase', letterSpacing: 0.4, margin: '0 0 5px' },
   secText: { fontSize: 14, color: theme.ink, lineHeight: 1.65, margin: 0 },
 
@@ -510,7 +511,7 @@ const s: Record<string, CSSProperties> = {
   kbdHint: { fontSize: 12, color: theme.inkFaint, marginTop: 10 },
   kbd: { fontFamily: 'ui-monospace, monospace', fontSize: 11, padding: '1px 6px', borderRadius: 5, border: `0.5px solid ${theme.line}`, background: theme.muted, color: theme.inkSoft },
   ratings3: { display: 'flex', gap: 8 },
-  rating3Btn: { flex: 1, minWidth: 0, padding: '13px 6px 11px', borderRadius: 12, border: 'none', cursor: 'pointer', fontFamily: 'inherit', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 },
+  rating3Btn: { flex: 1, minWidth: 0, padding: '13px 6px 11px', borderRadius: theme.radiusSm, border: 'none', cursor: 'pointer', fontFamily: 'inherit', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 },
   ratings4: { display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 },
   rating4Btn: { padding: '13px 10px', borderRadius: theme.radiusSm, cursor: 'pointer', fontFamily: theme.font, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 },
   ratingKey: { fontSize: 10, opacity: 0.5 },

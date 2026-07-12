@@ -10,6 +10,7 @@
 import { useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
+import { Check } from 'lucide-react';
 import { listTargetExams, type TargetExam } from '@/services/targetExams.service';
 import { getRaioX, NIVEL_LABEL, type RaioX, type NivelProntidao } from '@/services/raiox.service';
 import { daysUntilExam, formatTargetLabel } from '@/lib/targets';
@@ -128,7 +129,7 @@ export function RetaFinalCard() {
             return (
               <button key={i.id} onClick={() => toggle(i.id)} style={s.checkItem}>
                 <span style={{ ...s.checkbox, ...(on ? { background: cor, borderColor: cor } : {}) }}>
-                  {on && <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={critico ? theme.onDanger : theme.onWarn} strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>}
+                  {on && <Check size={12} color={critico ? theme.onDanger : theme.onWarn} strokeWidth={3.2} />}
                 </span>
                 <span style={{ ...s.checkLabel, ...(on ? { color: theme.inkFaint, textDecoration: 'line-through' } : {}) }}>{i.label}</span>
               </button>
@@ -156,15 +157,15 @@ const s: Record<string, React.CSSProperties> = {
   prontidao: { fontSize: 14, color: theme.inkSoft, lineHeight: 1.55, margin: '0 0 16px', maxWidth: 640 },
 
   actions: { display: 'flex', gap: 10, flexWrap: 'wrap' },
-  btn: { padding: '10px 16px', borderRadius: theme.radiusSm, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+  btn: { padding: '10px 16px', borderRadius: theme.radiusSm, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
   btnPrimary: { border: 'none' },
   btnGhost: { border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.inkSoft },
 
   checklist: { marginTop: 18, paddingTop: 16, borderTop: `0.5px solid ${theme.line}` },
   checkHead: { display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 8 },
-  checkTitle: { fontSize: 12.5, fontWeight: 700, color: theme.ink, letterSpacing: 0.3, textTransform: 'uppercase' },
-  checkCount: { fontSize: 12.5, fontWeight: 600, color: theme.inkSoft, fontVariantNumeric: 'tabular-nums' },
+  checkTitle: { fontSize: 13, fontWeight: 700, color: theme.ink, letterSpacing: 0.3, textTransform: 'uppercase' },
+  checkCount: { fontSize: 13, fontWeight: 600, color: theme.inkSoft, fontVariantNumeric: 'tabular-nums' },
   checkItem: { display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '8px 4px', background: 'transparent', border: 'none', cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left' },
   checkbox: { width: 20, height: 20, borderRadius: 6, border: `1.5px solid ${theme.line}`, background: theme.card, display: 'grid', placeItems: 'center', flexShrink: 0 },
-  checkLabel: { fontSize: 13.5, color: theme.ink, fontWeight: 500 },
+  checkLabel: { fontSize: 14, color: theme.ink, fontWeight: 500 },
 };

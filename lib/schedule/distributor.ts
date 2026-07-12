@@ -9,6 +9,7 @@ export function distribuirDiaFixo(
   subjects: GeneratorSubject[],
   diasSemana: number[],
   materiasPorDia: number,
+  floorMin: number = 30,
 ): RecurrenceItemInput[] {
   if (subjects.length === 0 || diasSemana.length === 0) return [];
 
@@ -21,10 +22,11 @@ export function distribuirDiaFixo(
     slots: Math.max(1, Math.round((s.weight / somaPeso) * totalSlots)),
   }));
 
-  // 2) Tempo por aparição: minutesPerCycle dividido pelos slots (piso 30min).
+  // 2) Tempo por aparição: minutesPerCycle dividido pelos slots (piso pessoal,
+  //    vindo de user_features.floor_minutes via GeneratorPreview).
   const tempoPorSlot = (sm: { subject: GeneratorSubject; slots: number }) => {
     const base = Math.round((sm.subject.minutesPerCycle / sm.slots) / 5) * 5;
-    return Math.max(30, base);
+    return Math.max(floorMin, base);
   };
 
   // 3) Monta fila de aparições em round-robin, mais frequentes primeiro.

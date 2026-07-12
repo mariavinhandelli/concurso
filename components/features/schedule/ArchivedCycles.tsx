@@ -92,8 +92,8 @@ const styles: Record<string, React.CSSProperties> = {
   muted: { fontSize: 13, color: theme.inkFaint, margin: 0 },
   empty: { fontSize: 13, color: theme.inkFaint, margin: 0 },
   row: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, padding: '10px 14px', borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, borderRadius: theme.radiusSm, background: theme.card, flexWrap: 'wrap' },
-  date: { fontSize: 13.5, color: theme.ink, fontWeight: 500 },
+  date: { fontSize: 14, color: theme.ink, fontWeight: 500 },
   actions: { display: 'flex', alignItems: 'center', gap: 6 },
-  actionBtn: { padding: '5px 11px', borderRadius: 7, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.card, color: theme.inkSoft, fontSize: 12.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
-  actionDanger: { padding: '5px 11px', borderRadius: 7, border: 'none', background: 'transparent', color: theme.danger, fontSize: 12.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+  actionBtn: { padding: '5px 11px', borderRadius: 7, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.card, color: theme.inkSoft, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+  actionDanger: { padding: '5px 11px', borderRadius: 7, border: 'none', background: 'transparent', color: theme.danger, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
 };

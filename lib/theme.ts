@@ -16,6 +16,7 @@ export const theme = {
   /* primary = botão primário (#143D45). teal = verde sucesso/progresso (#22C55E). */
   primary: 'var(--primary)',
   primaryHover: 'var(--primary-hover)',
+  onPrimary: 'var(--on-primary)',
 
   teal: 'var(--teal)',
   tealDeep: 'var(--teal-deep)',

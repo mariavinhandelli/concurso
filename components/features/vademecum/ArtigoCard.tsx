@@ -20,6 +20,7 @@ import type { LeiQuestao } from '@/services/leiQuestoes.service';
 import { useToast } from '@/components/ui/ToastProvider';
 import { theme } from '@/lib/theme';
 import { Button } from '@/components/ui/Button';
+import { Textarea } from '@/components/ui/Textarea';
 
 const INCIDENCIA_CHIP: Record<string, { label: string; bg: string; ink: string }> = {
   muito_alta: { label: 'incidência muito alta', bg: 'rgba(226,75,74,.12)',  ink: theme.danger },
@@ -312,12 +313,12 @@ export const ArtigoCard = memo(function ArtigoCard({ artigo, interacao, onUpdate
 
       {notasOpen && (
         <div style={s.notaBox}>
-          <textarea
+          <Textarea
             value={notaDraft ?? interacao?.anotacoes ?? ''}
             onChange={(e) => setNotaDraft(e.target.value)}
             rows={3}
             placeholder="Sua anotação sobre este artigo…"
-            style={s.notaInput}
+            style={{ fontSize: 14 }}
           />
           <div style={s.notaActions}>
             <Button variant="outline" size="sm" onClick={() => { setNotasOpen(false); setNotaDraft(null); }}>Fechar</Button>
@@ -390,36 +391,35 @@ const s: Record<string, CSSProperties> = {
   card: { background: theme.card, border: `0.5px solid ${theme.line}`, borderRadius: theme.radius, padding: '16px 18px', marginBottom: 12, position: 'relative' },
   head: { display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 6 },
   rotulo: { fontSize: 15, fontWeight: 700, color: theme.ink },
-  incChip: { fontSize: 11, fontWeight: 600, borderRadius: 999, padding: '3px 9px' },
-  revChip: { fontSize: 11, fontWeight: 600, borderRadius: 999, padding: '3px 9px', background: theme.tealBg, color: theme.tealDeep, marginLeft: 'auto' },
+  incChip: { fontSize: 11, fontWeight: 600, borderRadius: theme.radiusPill, padding: '3px 9px' },
+  revChip: { fontSize: 11, fontWeight: 600, borderRadius: theme.radiusPill, padding: '3px 9px', background: theme.tealBg, color: theme.tealDeep, marginLeft: 'auto' },
   revChipDue: { background: 'rgba(226,75,74,.12)', color: '#C03A39' },
-  incNota: { fontSize: 12.5, color: theme.inkSoft, background: theme.muted, borderRadius: theme.radiusSm, padding: '7px 10px', margin: '0 0 10px', lineHeight: 1.5 },
-  texto: { fontSize: 14.5, lineHeight: 1.85, color: theme.ink },
+  incNota: { fontSize: 13, color: theme.inkSoft, background: theme.muted, borderRadius: theme.radiusSm, padding: '7px 10px', margin: '0 0 10px', lineHeight: 1.5 },
+  texto: { fontSize: 15, lineHeight: 1.85, color: theme.ink },
   bloco: { margin: '0 0 8px' },
   blocoRotulo: { fontWeight: 600, color: theme.inkSoft },
   footer: { display: 'flex', alignItems: 'center', gap: 8, marginTop: 10, paddingTop: 10, borderTop: `0.5px solid ${theme.line}`, flexWrap: 'wrap' },
-  footBtn: { border: `0.5px solid ${theme.line}`, background: 'transparent', color: theme.inkSoft, fontSize: 12.5, fontWeight: 600, borderRadius: 999, padding: '5px 12px', cursor: 'pointer', fontFamily: 'inherit' },
+  footBtn: { border: `0.5px solid ${theme.line}`, background: 'transparent', color: theme.inkSoft, fontSize: 13, fontWeight: 600, borderRadius: theme.radiusPill, padding: '5px 12px', cursor: 'pointer', fontFamily: 'inherit' },
   footBtnOn: { borderColor: theme.teal, color: theme.tealDeep, background: theme.tealBg },
   grifoCount: { fontSize: 12, color: theme.inkFaint, marginLeft: 'auto' },
   notaBox: { marginTop: 10 },
-  notaInput: { width: '100%', boxSizing: 'border-box', padding: '10px 12px', borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.card, fontSize: 13.5, color: theme.ink, fontFamily: 'inherit', outline: 'none', resize: 'vertical' },
   notaActions: { display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 8 },
   notaCancel: { padding: '7px 14px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: 'transparent', color: theme.inkSoft, fontSize: 13, cursor: 'pointer', fontFamily: 'inherit' },
   notaSave: { padding: '7px 14px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
   questaoBox: { marginTop: 10, background: theme.bg, border: `0.5px solid ${theme.line}`, borderRadius: theme.radiusSm, padding: '12px 14px' },
-  questaoEnunciado: { fontSize: 13.5, color: theme.ink, lineHeight: 1.6, margin: '0 0 12px' },
+  questaoEnunciado: { fontSize: 14, color: theme.ink, lineHeight: 1.6, margin: '0 0 12px' },
   questaoBtns: { display: 'flex', gap: 8 },
-  questaoBtnC: { flex: 1, padding: '9px 0', borderRadius: theme.radiusSm, border: `1.5px solid ${theme.ok}`, background: 'transparent', color: theme.ok, fontSize: 13.5, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' },
-  questaoBtnE: { flex: 1, padding: '9px 0', borderRadius: theme.radiusSm, border: `1.5px solid ${theme.danger}`, background: 'transparent', color: theme.danger, fontSize: 13.5, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' },
+  questaoBtnC: { flex: 1, padding: '9px 0', borderRadius: theme.radiusSm, border: `1.5px solid ${theme.ok}`, background: 'transparent', color: theme.ok, fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' },
+  questaoBtnE: { flex: 1, padding: '9px 0', borderRadius: theme.radiusSm, border: `1.5px solid ${theme.danger}`, background: 'transparent', color: theme.danger, fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' },
   questaoResultado: { fontSize: 13, fontWeight: 600, borderRadius: theme.radiusSm, padding: '8px 12px', marginBottom: 8 },
   questaoResultadoOk: { background: theme.okBg, color: theme.okDeep },
   questaoResultadoErro: { background: theme.dangerBg, color: theme.danger },
-  questaoComentario: { fontSize: 12.5, color: theme.inkSoft, lineHeight: 1.55, margin: '0 0 10px' },
-  questaoProxima: { border: 'none', background: 'transparent', color: theme.teal, fontSize: 12.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', padding: 0 },
-  toolbar: { position: 'fixed', zIndex: 70, display: 'flex', alignItems: 'center', gap: 6, background: theme.card, border: `0.5px solid ${theme.line}`, borderRadius: 12, padding: '7px 9px', boxShadow: theme.shadowHover },
+  questaoComentario: { fontSize: 13, color: theme.inkSoft, lineHeight: 1.55, margin: '0 0 10px' },
+  questaoProxima: { border: 'none', background: 'transparent', color: theme.teal, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', padding: 0 },
+  toolbar: { position: 'fixed', zIndex: 70, display: 'flex', alignItems: 'center', gap: 6, background: theme.card, border: `0.5px solid ${theme.line}`, borderRadius: theme.radiusSm, padding: '7px 9px', boxShadow: theme.shadowHover },
   corBtn: { width: 22, height: 22, borderRadius: 7, border: 'none', cursor: 'pointer' },
   toolbarSep: { width: 1, height: 18, background: theme.line },
   subBtn: { border: 'none', background: 'transparent', color: theme.inkSoft, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', padding: '2px 4px' },
-  popLabel: { fontSize: 12.5, fontWeight: 600, color: theme.ink, padding: '0 2px' },
-  popRemove: { border: 'none', background: 'transparent', color: theme.danger, fontSize: 12.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+  popLabel: { fontSize: 13, fontWeight: 600, color: theme.ink, padding: '0 2px' },
+  popRemove: { border: 'none', background: 'transparent', color: theme.danger, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
 };

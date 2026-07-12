@@ -6,6 +6,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { ChevronDown, X } from 'lucide-react';
 import { useTimer } from './TimerContext';
 import { saveStudyLog, type SessionFeedback } from '@/services/studyLogs.service';
 import { getSessionTargetLabel } from '@/services/topics.service';
@@ -104,9 +105,7 @@ export function FloatingTimer() {
           <div style={styles.cardHead}>
             <span style={styles.eyebrow}>Iniciar sessão</span>
             <button className="icon-touch-target" onClick={() => setShowPicker(false)} style={styles.collapseBtn} aria-label="Fechar">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M18 6L6 18M6 6l12 12" />
-              </svg>
+              <X size={16} strokeWidth={2} />
             </button>
           </div>
           <div style={styles.modeGrid}>
@@ -156,9 +155,7 @@ export function FloatingTimer() {
       <div style={styles.cardHead}>
         <span style={styles.eyebrow}>Sessão de estudo</span>
         <button onClick={() => setExpanded(false)} style={styles.collapseBtn} aria-label="Recolher">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M6 9l6 6 6-6" />
-          </svg>
+          <ChevronDown size={16} strokeWidth={2} />
         </button>
       </div>
       <div style={styles.cardTime}>{timer.formatted}</div>
@@ -197,7 +194,7 @@ const styles: Record<string, React.CSSProperties> = {
   pill: {
     position: 'fixed', bottom: 24, right: 24, zIndex: 50,
     display: 'flex', alignItems: 'center', gap: 10,
-    background: theme.teal, border: 'none', borderRadius: 999,
+    background: theme.teal, border: 'none', borderRadius: theme.radiusPill,
     padding: '11px 18px 11px 16px', cursor: 'pointer',
     boxShadow: '0 6px 20px rgba(0,0,0,0.18)', fontFamily: theme.font,
   },
@@ -214,7 +211,7 @@ const styles: Record<string, React.CSSProperties> = {
   modeBtn: {
     padding: '9px 6px', borderRadius: theme.radiusXs, borderWidth: 0.5, borderStyle: 'solid',
     borderColor: theme.line, background: theme.card, color: theme.inkSoft,
-    fontSize: 12.5, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit',
+    fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit',
     transition: 'background .12s, color .12s',
   },
   eyebrow: { fontSize: 10, fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase', color: theme.inkFaint },
@@ -222,7 +219,7 @@ const styles: Record<string, React.CSSProperties> = {
   cardTime: { fontSize: 34, fontWeight: 500, color: theme.ink, fontVariantNumeric: 'tabular-nums', letterSpacing: -1, lineHeight: 1 },
   cardAlvo: { fontSize: 12, fontWeight: 600, color: theme.inkSoft, marginTop: 8, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
   cardStatus: { display: 'flex', alignItems: 'center', gap: 7, fontSize: 12, color: theme.inkSoft, margin: '8px 0 14px' },
-  focusBtn: { display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, width: '100%', padding: '9px 0', marginBottom: 8, borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.card, color: theme.inkSoft, fontSize: 12.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+  focusBtn: { display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, width: '100%', padding: '9px 0', marginBottom: 8, borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.card, color: theme.inkSoft, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
   cardActions: { display: 'flex', gap: 8 },
   secondary: { flex: 1, padding: '9px 0', borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.card, color: theme.inkSoft, fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' },
   primary: { flex: 1, padding: '9px 0', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },

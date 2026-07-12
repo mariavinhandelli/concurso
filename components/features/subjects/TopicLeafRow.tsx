@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { X, Pencil, RefreshCw } from 'lucide-react';
 import type { Topic } from '@/services/topics.service';
 import { HealthBar } from '@/components/features/topics/HealthBar';
 import { theme } from '@/lib/theme';
@@ -83,9 +84,7 @@ function TopicLeafRowInner({
           style={{ ...styles.iconBtn, color: isEditing ? theme.teal : theme.inkSoft }}
           title="Editar nome" aria-label="Editar tópico"
         >
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
-          </svg>
+          <Pencil size={15} strokeWidth={1.8} />
         </button>
 
         {/* "Revisar" como texto quando inativo — torna a função óbvia sem ícone ambíguo */}
@@ -101,9 +100,7 @@ function TopicLeafRowInner({
           aria-label="Alternar revisão espaçada"
         >
           {topic.is_review_active ? (
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M4 12a8 8 0 0114-5l2 2M20 12a8 8 0 01-14 5l-2-2" /><path d="M20 4v5h-5M4 20v-5h5" />
-            </svg>
+            <RefreshCw size={15} strokeWidth={1.8} />
           ) : (
             <span style={{ fontSize: 12, fontWeight: 600, whiteSpace: 'nowrap' }}>Revisar</span>
           )}
@@ -115,9 +112,7 @@ function TopicLeafRowInner({
           title={noteCount > 0 ? `${noteCount} ${noteCount === 1 ? 'anotação' : 'anotações'}` : 'Anotar sobre este tópico'}
           aria-label="Ver anotações do tópico"
         >
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M12 20h9" /><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
-          </svg>
+          <Pencil size={15} strokeWidth={1.8} />
           {noteCount > 0 && <span style={styles.noteBadge}>{noteCount}</span>}
         </button>
 
@@ -130,7 +125,7 @@ function TopicLeafRowInner({
         </button>
 
         <button onClick={() => onDelete(topic.id)} style={styles.deleteBtn} aria-label="Apagar tópico" title="Apagar">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
+          <X size={14} strokeWidth={2} />
         </button>
       </div>
     </div>
@@ -142,7 +137,7 @@ export const TopicLeafRow = React.memo(TopicLeafRowInner);
 const styles: Record<string, React.CSSProperties> = {
   row: {
     display: 'flex', alignItems: 'center', gap: 10,
-    background: theme.card, borderRadius: 12, border: `0.5px solid ${theme.line}`,
+    background: theme.card, borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`,
     padding: '12px 16px', minWidth: 0,
   },
   rowChild: { background: theme.bg, borderRadius: 10 },
@@ -155,25 +150,25 @@ const styles: Record<string, React.CSSProperties> = {
   topicName: { flex: 1, fontSize: 15, color: theme.ink, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' },
   topicNameDone: { color: theme.inkFaint, textDecoration: 'line-through' },
   editInput: {
-    flex: 1, minWidth: 0, width: '100%', padding: '7px 10px', borderRadius: 8,
+    flex: 1, minWidth: 0, width: '100%', padding: '7px 10px', borderRadius: theme.radiusXs,
     border: `1.5px solid ${theme.teal}`, background: theme.card,
     fontSize: 15, color: theme.ink, fontFamily: 'inherit', outline: 'none',
   },
   actions: { display: 'flex', alignItems: 'center', gap: 2, flexShrink: 0 },
   actionsMobile: { width: '100%', justifyContent: 'flex-end', marginTop: 4 },
   iconBtn: {
-    width: 32, height: 32, borderRadius: 8, border: 'none', background: 'transparent',
+    width: 32, height: 32, borderRadius: theme.radiusXs, border: 'none', background: 'transparent',
     display: 'grid', placeItems: 'center', cursor: 'pointer', transition: 'all .15s', flexShrink: 0,
   },
   reviewBtn: {
-    minWidth: 32, height: 32, borderRadius: 8, border: 'none',
+    minWidth: 32, height: 32, borderRadius: theme.radiusXs, border: 'none',
     display: 'flex', alignItems: 'center', justifyContent: 'center',
     padding: '0 8px', cursor: 'pointer', transition: 'all .15s', flexShrink: 0,
   },
-  deleteBtn: { border: 'none', background: 'transparent', color: theme.inkFaint, cursor: 'pointer', opacity: 0.6, width: 30, height: 30, borderRadius: 8, display: 'grid', placeItems: 'center', flexShrink: 0, padding: 0 },
+  deleteBtn: { border: 'none', background: 'transparent', color: theme.inkFaint, cursor: 'pointer', opacity: 0.6, width: 30, height: 30, borderRadius: theme.radiusXs, display: 'grid', placeItems: 'center', flexShrink: 0, padding: 0 },
   noteBadge: {
-    position: 'absolute', top: 2, right: 2, minWidth: 13, height: 13, borderRadius: 999,
-    background: theme.teal, color: theme.onTeal, fontSize: 8.5, fontWeight: 700, lineHeight: '13px',
+    position: 'absolute', top: 2, right: 2, minWidth: 13, height: 13, borderRadius: theme.radiusPill,
+    background: theme.teal, color: theme.onTeal, fontSize: 9, fontWeight: 700, lineHeight: '13px',
     textAlign: 'center', padding: '0 2px',
   },
 };

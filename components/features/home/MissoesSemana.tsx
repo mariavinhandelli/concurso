@@ -6,6 +6,7 @@
 
 import { memo } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { Check } from 'lucide-react';
 import { getMissoesSemana, type MissoesSemana as MissoesSemanaData } from '@/services/missoes.service';
 import { theme } from '@/lib/theme';
 import { Skeleton } from '@/components/ui/Skeleton';
@@ -52,7 +53,7 @@ export const MissoesSemana = memo(function MissoesSemana({ bare = false }: { bar
           <div key={m.id} style={{ ...styles.item, ...(m.concluida ? styles.itemOn : {}) }}>
             <span style={{ ...styles.marker, ...(m.concluida ? styles.markerOn : {}) }}>
               {m.concluida ? (
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={theme.onOk} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
+                <Check size={13} color={theme.onOk} strokeWidth={3} />
               ) : null}
             </span>
             <div style={styles.itemText}>
@@ -81,7 +82,7 @@ const styles: Record<string, React.CSSProperties> = {
   divider: { height: '0.5px', background: theme.line, margin: '16px 0' },
   header: { display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 12, marginBottom: 12 },
   eyebrow: { fontSize: 11, fontWeight: 700, color: theme.teal, letterSpacing: 0.6, textTransform: 'uppercase' },
-  progressText: { fontSize: 12.5, fontWeight: 600, color: theme.inkSoft },
+  progressText: { fontSize: 13, fontWeight: 600, color: theme.inkSoft },
 
   lista: { display: 'flex', flexDirection: 'column', gap: 8 },
   item: { display: 'flex', alignItems: 'center', gap: 12, padding: '9px 10px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.bg },
@@ -89,9 +90,9 @@ const styles: Record<string, React.CSSProperties> = {
   marker: { width: 22, height: 22, borderRadius: '50%', flexShrink: 0, display: 'grid', placeItems: 'center', border: `1.5px solid ${theme.line}`, background: theme.card },
   markerOn: { background: theme.ok, borderColor: theme.ok },
   itemText: { flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 1 },
-  itemLabel: { fontSize: 13.5, fontWeight: 600, color: theme.ink, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
+  itemLabel: { fontSize: 14, fontWeight: 600, color: theme.ink, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
   itemLabelDone: { color: theme.inkSoft },
   itemSub: { fontSize: 12, color: theme.inkFaint },
-  miniBarWrap: { width: 50, height: 5, background: theme.muted, borderRadius: 999, overflow: 'hidden', flexShrink: 0 },
-  miniBarFill: { height: '100%', background: theme.teal, borderRadius: 999 },
+  miniBarWrap: { width: 50, height: 5, background: theme.muted, borderRadius: theme.radiusPill, overflow: 'hidden', flexShrink: 0 },
+  miniBarFill: { height: '100%', background: theme.teal, borderRadius: theme.radiusPill },
 };

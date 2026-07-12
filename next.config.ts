@@ -9,6 +9,12 @@ const nextConfig: NextConfig = {
         hostname: 'krkbzeqwjrrxvdpwyqar.supabase.co',
         pathname: '/storage/v1/object/public/**',
       },
+      {
+        // Supabase Storage — signed URLs (bucket privado notebook-images).
+        protocol: 'https',
+        hostname: 'krkbzeqwjrrxvdpwyqar.supabase.co',
+        pathname: '/storage/v1/object/sign/**',
+      },
     ],
   },
 };

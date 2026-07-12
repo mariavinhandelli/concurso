@@ -56,8 +56,8 @@ const s: Record<string, React.CSSProperties> = {
   },
   icon: { fontSize: 18, flexShrink: 0 },
   info: { display: 'flex', flexDirection: 'column', gap: 1, minWidth: 0, flex: 1 },
-  eyebrow: { fontSize: 10.5, fontWeight: 700, color: theme.inkFaint, letterSpacing: 0.4, textTransform: 'uppercase' },
-  titulo: { fontSize: 13.5, fontWeight: 600, color: theme.ink, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
-  kind: { fontSize: 10, fontWeight: 700, borderRadius: 999, padding: '3px 9px', flexShrink: 0 },
-  quando: { fontSize: 11.5, color: theme.inkFaint, flexShrink: 0, whiteSpace: 'nowrap' },
+  eyebrow: { fontSize: 11, fontWeight: 700, color: theme.inkFaint, letterSpacing: 0.4, textTransform: 'uppercase' },
+  titulo: { fontSize: 14, fontWeight: 600, color: theme.ink, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
+  kind: { fontSize: 10, fontWeight: 700, borderRadius: theme.radiusPill, padding: '3px 9px', flexShrink: 0 },
+  quando: { fontSize: 12, color: theme.inkFaint, flexShrink: 0, whiteSpace: 'nowrap' },
 };

@@ -2,11 +2,16 @@
 
 import { useEffect, useRef } from 'react';
 import { theme, zIndex } from '@/lib/theme';
+import { IconButton } from './IconButton';
 
-export function Overlay({ children, onClose, labelledBy }: {
+export function Overlay({ children, onClose, labelledBy, maxWidth = 680, hideClose = false, closeOnBackdrop = true, padding = '24px 28px' }: {
   children: React.ReactNode;
   onClose: () => void;
   labelledBy?: string;
+  maxWidth?: number;
+  hideClose?: boolean;
+  closeOnBackdrop?: boolean;
+  padding?: number | string;
 }) {
   const dialogRef = useRef<HTMLDivElement>(null);
 
@@ -15,10 +20,16 @@ export function Overlay({ children, onClose, labelledBy }: {
     const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     dialogRef.current?.focus();
+    function handleEscape(e: KeyboardEvent) {
+      if (e.key === 'Escape') onClose();
+    }
+    document.addEventListener('keydown', handleEscape);
     return () => {
       document.body.style.overflow = prevOverflow;
+      document.removeEventListener('keydown', handleEscape);
       prev?.focus();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   function handleTab(e: React.KeyboardEvent) {
@@ -39,6 +50,7 @@ export function Overlay({ children, onClose, labelledBy }: {
 
   return (
     <div
+      onClick={closeOnBackdrop ? (e) => { if (e.target === e.currentTarget) onClose(); } : undefined}
       style={{
         position: 'fixed', inset: 0,
         background: 'var(--backdrop)',
@@ -60,20 +72,23 @@ export function Overlay({ children, onClose, labelledBy }: {
           border: `0.5px solid ${theme.line}`,
           borderRadius: theme.radius,
           boxShadow: theme.shadowModal,
-          width: '100%', maxWidth: 680,
+          width: '100%', maxWidth,
           maxHeight: '90vh', overflowY: 'auto',
-          padding: '24px 28px',
+          padding,
           fontFamily: theme.font,
           zIndex: zIndex.modal,
           outline: 'none',
         }}
       >
-        <button
-          onClick={onClose}
-          aria-label="Fechar"
-          aria-keyshortcuts="Escape"
-          style={{ position: 'absolute', top: 14, right: 16, border: 'none', background: 'transparent', fontSize: 18, color: theme.inkFaint, cursor: 'pointer', lineHeight: 1, padding: 4 }}
-        >✕</button>
+        {!hideClose && (
+          <IconButton
+            onClick={onClose}
+            aria-label="Fechar"
+            aria-keyshortcuts="Escape"
+            size="sm"
+            style={{ position: 'absolute', top: 10, right: 12, fontSize: 16 }}
+          >✕</IconButton>
+        )}
         {children}
       </div>
     </div>

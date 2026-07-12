@@ -7,6 +7,7 @@ import { JurisprudenciaForm } from '@/components/features/jurisprudencias/Jurisp
 import { useToast } from '@/components/ui/ToastProvider';
 import { useUI } from '@/components/layout/UIContext';
 import { theme } from '@/lib/theme';
+import { PageContainer, PageHeader } from '@/components/ui/Page';
 
 export default function NovaJurisprudenciaPage() {
   const router = useRouter();
@@ -28,7 +29,7 @@ export default function NovaJurisprudenciaPage() {
   }
 
   return (
-    <div style={{ maxWidth: 960, margin: '0 auto', padding: isMobile ? '20px 16px' : '34px 40px', fontFamily: theme.font, minWidth: 0 }}>
+    <PageContainer style={{ minWidth: 0 }}>
       <button
         className="touch-target"
         onClick={() => router.push('/jurisprudencias')}
@@ -37,14 +38,7 @@ export default function NovaJurisprudenciaPage() {
         ← Jurisprudências
       </button>
 
-      <div style={{ marginBottom: 24 }}>
-        <h1 style={{ fontSize: isMobile ? 24 : 28, fontWeight: 800, color: theme.ink, letterSpacing: -0.6, margin: 0 }}>
-          Nova jurisprudência
-        </h1>
-        <p style={{ fontSize: 14, color: theme.inkSoft, margin: '6px 0 0' }}>
-          Preencha os campos obrigatórios (Tribunal, Disciplina e Tese). Os demais podem ser preenchidos depois.
-        </p>
-      </div>
+      <PageHeader title="Nova jurisprudência" subtitle="Preencha os campos obrigatórios (Tribunal, Disciplina e Tese). Os demais podem ser preenchidos depois." />
 
       <div style={{ background: theme.card, border: `0.5px solid ${theme.line}`, borderRadius: theme.radius, boxShadow: theme.shadow, padding: isMobile ? 20 : 32 }}>
         <JurisprudenciaForm
@@ -53,6 +47,6 @@ export default function NovaJurisprudenciaPage() {
           onCancel={() => router.push('/jurisprudencias')}
         />
       </div>
-    </div>
+    </PageContainer>
   );
 }

@@ -2,8 +2,10 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { Check } from 'lucide-react';
 import { theme } from '@/lib/theme';
 import { useBreakpoints } from '@/components/layout/UIContext';
+import { PageContainer, PageHeader } from '@/components/ui/Page';
 import {
   getBadgeState,
   type Badge,
@@ -123,23 +125,20 @@ export default function ConquistasPage() {
   if (loading) return <SkeletonPage isMobile={isMobile} pad={pad} />;
 
   if (error || !state) return (
-    <div style={{ ...s.page, padding: pad }}>
-      <h1 style={{ ...s.h1, fontSize: isMobile ? 24 : T.h }}>Conquistas</h1>
-      <p style={s.sub}>
-        {error
+    <PageContainer width="wide" style={{ minWidth: 0 }}>
+      <PageHeader
+        title="Conquistas"
+        subtitle={error
           ? 'Não foi possível carregar suas conquistas. Tente novamente.'
           : 'Você precisa estar logado para ver suas conquistas.'}
-      </p>
-    </div>
+      />
+    </PageContainer>
   );
 
   return (
-    <div style={{ ...s.page, padding: pad }}>
+    <PageContainer width="wide" style={{ minWidth: 0 }}>
 
-      <div style={s.header}>
-        <h1 style={{ ...s.h1, fontSize: isMobile ? 24 : T.h }}>Conquistas</h1>
-        <p style={s.sub}>Marcos da sua preparação — esforço e qualidade, lado a lado.</p>
-      </div>
+      <PageHeader title="Conquistas" subtitle="Marcos da sua preparação — esforço e qualidade, lado a lado." />
 
       <SummaryCard unlockedCount={unlockedCount} totalCount={totalCount} pct={pct} />
 
@@ -176,14 +175,14 @@ export default function ConquistasPage() {
           </p>
         </div>
       )}
-    </div>
+    </PageContainer>
   );
 }
 
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
 
 function SkeletonPage({ isMobile, pad }: { isMobile: boolean; pad: string }) {
-  const r: React.CSSProperties = { background: theme.muted, borderRadius: 8 };
+  const r: React.CSSProperties = { background: theme.muted, borderRadius: theme.radiusXs };
   return (
     <div style={{ ...s.page, padding: pad }}>
       <div style={{ marginBottom: 24 }}>
@@ -193,7 +192,7 @@ function SkeletonPage({ isMobile, pad }: { isMobile: boolean; pad: string }) {
       {/* SummaryCard skeleton — altura calibrada ao conteúdo real (32+16+12+10+16 = ~110px + padding) */}
       <div style={{ ...s.card, marginBottom: 32, padding: '20px 24px' }}>
         <div className="skel" style={{ ...r, height: 36, width: 140, marginBottom: 16 }} />
-        <div className="skel" style={{ ...r, height: 12, width: '100%', borderRadius: 99 }} />
+        <div className="skel" style={{ ...r, height: 12, width: '100%', borderRadius: theme.radiusPill }} />
         <div className="skel" style={{ ...r, height: 13, width: 220, marginTop: 10 }} />
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: 16, marginBottom: 32 }}>
@@ -203,7 +202,7 @@ function SkeletonPage({ isMobile, pad }: { isMobile: boolean; pad: string }) {
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2,1fr)' : 'repeat(4,1fr)', gap: 16 }}>
         {Array.from({ length: 8 }).map((_, i) => (
-          <div key={i} className="skel" style={{ ...r, height: 168, borderRadius: 16 }} />
+          <div key={i} className="skel" style={{ ...r, height: 168, borderRadius: theme.radius }} />
         ))}
       </div>
     </div>
@@ -481,11 +480,7 @@ function BadgeIcon({ family, color }: { family: BadgeFamily; color: string }) {
 
 function CheckIcon({ color }: { color: string }) {
   return (
-    <svg viewBox="0 0 24 24" width="16" height="16" fill="none"
-      aria-hidden="true"
-      stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M20 6L9 17l-5-5" />
-    </svg>
+    <Check size={16} color={color} strokeWidth={2} aria-hidden="true" />
   );
 }
 
@@ -493,12 +488,6 @@ function CheckIcon({ color }: { color: string }) {
 
 const s: Record<string, React.CSSProperties> = {
   page:   { maxWidth: 1080, margin: '0 auto', fontFamily: theme.font, minWidth: 0 },
-
-  header: { marginBottom: 24 },
-  // P0: letterSpacing –0.6 mantido (correto em heading grande)
-  h1:     { fontSize: T.h, fontWeight: 800, color: theme.ink, letterSpacing: -0.6, margin: 0 },
-  // P0: 14px (md) mantido
-  sub:    { fontSize: T.md, color: theme.inkSoft, margin: '6px 0 0', fontWeight: 500 },
 
   card: {
     background:   theme.card,
@@ -514,7 +503,7 @@ const s: Record<string, React.CSSProperties> = {
   summaryLabel: { fontSize: T.sm,   color: theme.inkSoft, fontWeight: 500, marginLeft: 4 },
   summaryPct:   { fontSize: T.sm,   fontWeight: 600, color: theme.inkSoft },
   // P1: 8→12px — barra hero mais proeminente
-  summaryTrack: { height: 12, borderRadius: 99, background: theme.muted, overflow: 'hidden' },
+  summaryTrack: { height: 12, borderRadius: theme.radiusPill, background: theme.muted, overflow: 'hidden' },
   // P1: mensagem contextual
   summaryMsg:   { fontSize: T.sm, color: theme.inkSoft, fontWeight: 500, margin: '10px 0 0' },
 
@@ -533,7 +522,7 @@ const s: Record<string, React.CSSProperties> = {
   nextUpTitle:  { fontSize: T.sm, fontWeight: 700, color: theme.ink, lineHeight: 1.3 },
   nextUpPct:    { fontSize: T.sm, fontWeight: 700, color: theme.inkSoft, flexShrink: 0, marginLeft: 8 },
   // P1: 6→8px
-  nextUpTrack:  { height: 8, borderRadius: 99, background: theme.muted, overflow: 'hidden' },
+  nextUpTrack:  { height: 8, borderRadius: theme.radiusPill, background: theme.muted, overflow: 'hidden' },
   nextUpRemain: { fontSize: T.xs, color: theme.inkSoft, fontWeight: 500 },
   // P0: 11→12px (xs)
   nextUpEta:    { fontSize: T.xs, color: theme.inkFaint, fontWeight: 600, flexShrink: 0, marginLeft: 8 },
@@ -550,7 +539,7 @@ const s: Record<string, React.CSSProperties> = {
   // P1: pill com background — visível, não texto fantasma
   familyPill:   {
     fontSize: T.xs, fontWeight: 700, color: theme.inkSoft,
-    background: theme.muted, padding: '4px 10px', borderRadius: 99,
+    background: theme.muted, padding: '4px 10px', borderRadius: theme.radiusPill,
     flexShrink: 0, whiteSpace: 'nowrap',
   },
   familyPillSep: { color: theme.inkFaint, margin: '0 3px', fontWeight: 400 },
@@ -582,12 +571,12 @@ const s: Record<string, React.CSSProperties> = {
   // P1: 12→13px, padding 5px→6px — mais presença no momento de celebração
   statusPill: {
     display: 'inline-flex', alignItems: 'center', gap: 6, alignSelf: 'flex-start',
-    fontSize: T.sm, fontWeight: 700, padding: '6px 12px', borderRadius: 99,
+    fontSize: T.sm, fontWeight: 700, padding: '6px 12px', borderRadius: theme.radiusPill,
   },
 
   lockedFoot: { display: 'flex', flexDirection: 'column' },
   // P1: 6→8px
-  progTrack:  { height: 8, borderRadius: 99, background: theme.muted, overflow: 'hidden' },
+  progTrack:  { height: 8, borderRadius: theme.radiusPill, background: theme.muted, overflow: 'hidden' },
   // P0: 12.5→13px (sm)
   faltaText:  { fontSize: T.sm, color: theme.inkSoft, fontWeight: 600 },
   progPct:    { fontSize: T.xs, color: theme.inkFaint, fontWeight: 600 },

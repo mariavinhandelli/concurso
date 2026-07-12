@@ -3,6 +3,7 @@
 import { memo, useState } from 'react';
 import { usePersistedState } from '@/hooks/usePersistedState';
 import dynamic from 'next/dynamic';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import {
   getTimeByCategory, type PeriodView, type TimeByCategoryResult,
@@ -81,7 +82,7 @@ export const TimePieCard = memo(function TimePieCard() {
       {view !== 'total' && (
         <div style={styles.nav}>
           <button style={styles.navBtn} onClick={() => setOffset((o) => o - 1)} aria-label="Período anterior">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
+            <ChevronLeft size={16} strokeWidth={2} />
           </button>
           <span style={{ ...styles.navLabel, minWidth: isMobile ? 0 : 120, flex: isMobile ? 1 : undefined }}>{data?.periodLabel ?? '…'}</span>
           <button
@@ -90,7 +91,7 @@ export const TimePieCard = memo(function TimePieCard() {
             disabled={!data?.canGoForward}
             aria-label="Próximo período"
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
+            <ChevronRight size={16} strokeWidth={2} />
           </button>
         </div>
       )}
@@ -124,7 +125,7 @@ const styles: Record<string, React.CSSProperties> = {
   tab: { flex: 1, padding: '7px 10px', border: 'none', background: 'transparent', color: theme.inkSoft, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', borderRadius: theme.radiusSm - 2, whiteSpace: 'nowrap' },
   tabOn: { background: theme.card, color: theme.ink, boxShadow: theme.shadow },
   nav: { display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 16, marginBottom: 6 },
-  navBtn: { width: 30, height: 30, borderRadius: 8, border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.inkSoft, display: 'grid', placeItems: 'center', cursor: 'pointer', flexShrink: 0 },
+  navBtn: { width: 30, height: 30, borderRadius: theme.radiusXs, border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.inkSoft, display: 'grid', placeItems: 'center', cursor: 'pointer', flexShrink: 0 },
   navBtnOff: { opacity: 0.3, cursor: 'not-allowed' },
   navLabel: { fontSize: 14, fontWeight: 600, color: theme.ink, minWidth: 120, textAlign: 'center', textTransform: 'capitalize' },
   emptyWrap: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, padding: '30px 0' },

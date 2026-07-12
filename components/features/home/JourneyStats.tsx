@@ -107,7 +107,7 @@ const styles: Record<string, React.CSSProperties> = {
     lineHeight: 1.2,
   },
   lbl: {
-    fontSize: 11.5,
+    fontSize: 12,
     color: theme.inkFaint,
     fontWeight: 500,
     lineHeight: 1.3,

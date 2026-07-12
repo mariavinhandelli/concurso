@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/Button';
 import { useUI } from '@/components/layout/UIContext';
 import { useUser } from '@/components/layout/UserContext';
 import { AvatarCropper } from '@/components/features/profile/AvatarCropper';
+import { PageContainer, PageHeader } from '@/components/ui/Page';
 
 function isHttpsUrl(url: unknown): url is string {
   if (typeof url !== 'string') return false;
@@ -159,20 +160,19 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div style={{ ...styles.wrap, padding: isMobile ? '20px 16px' : '34px 40px' }} aria-label="Carregando perfil">
-        <Skeleton width={180} height={28} />
-        <Skeleton width={220} height={14} style={{ marginTop: 10, marginBottom: 24 }} />
-        <Skeleton height={280} borderRadius={16} />
-      </div>
+      <PageContainer width="narrow" style={{ minWidth: 0 }}>
+        <div aria-label="Carregando perfil">
+          <Skeleton width={180} height={28} />
+          <Skeleton width={220} height={14} style={{ marginTop: 10, marginBottom: 24 }} />
+          <Skeleton height={280} borderRadius={16} />
+        </div>
+      </PageContainer>
     );
   }
 
   return (
-    <div style={{ ...styles.wrap, padding: isMobile ? '20px 16px' : '34px 40px' }}>
-      <header style={styles.head}>
-        <h1 style={{ ...styles.h1, fontSize: isMobile ? 24 : 28 }}>Meu perfil</h1>
-        <p style={styles.sub}>Sua foto e nome de exibição.</p>
-      </header>
+    <PageContainer width="narrow" style={{ minWidth: 0 }}>
+      <PageHeader title="Meu perfil" subtitle="Sua foto e nome de exibição." />
 
       <div style={{ ...styles.card, padding: isMobile ? 20 : 28 }}>
         {/* Foto */}
@@ -258,15 +258,11 @@ export default function ProfilePage() {
           onConfirm={handleCroppedUpload}
         />
       )}
-    </div>
+    </PageContainer>
   );
 }
 
 const styles: Record<string, React.CSSProperties> = {
-  wrap: { maxWidth: 720, margin: '0 auto', padding: '34px 40px', fontFamily: theme.font, minWidth: 0 },
-  head: { marginBottom: 24 },
-  h1: { fontSize: 28, fontWeight: 800, color: theme.ink, letterSpacing: -0.6, margin: 0 },
-  sub: { fontSize: 14, color: theme.inkSoft, margin: '6px 0 0', fontWeight: 500 },
   card: { background: theme.card, border: `0.5px solid ${theme.line}`, borderRadius: theme.radius, boxShadow: theme.shadow, padding: 28 },
   section: { marginBottom: 4 },
   avatarRow: { display: 'flex', alignItems: 'center', gap: 20 },
@@ -274,8 +270,8 @@ const styles: Record<string, React.CSSProperties> = {
   avatarImg: { width: '100%', height: '100%', objectFit: 'cover' },
   avatarInitial: { color: theme.onTeal, fontWeight: 600, fontSize: 32 },
   label: { display: 'block', fontSize: 13, fontWeight: 600, color: theme.ink, marginBottom: 8 },
-  hint: { fontSize: 12.5, color: theme.inkFaint, marginTop: 6 },
-  input: { width: '100%', boxSizing: 'border-box', padding: '11px 14px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.card, fontSize: 14.5, color: theme.ink, fontFamily: 'inherit', outline: 'none' },
+  hint: { fontSize: 13, color: theme.inkFaint, marginTop: 6 },
+  input: { width: '100%', boxSizing: 'border-box', padding: '11px 14px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.card, fontSize: 15, color: theme.ink, fontFamily: 'inherit', outline: 'none' },
   inputDisabled: { background: theme.bg, color: theme.inkSoft, cursor: 'not-allowed' },
   divider: { height: '0.5px', background: theme.line, margin: '22px 0' },
   footer: { display: 'flex', alignItems: 'center', gap: 12, marginTop: 24, paddingTop: 20, borderTop: `0.5px solid ${theme.line}`, flexWrap: 'wrap' },

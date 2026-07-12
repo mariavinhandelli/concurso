@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useUI } from '@/components/layout/UIContext';
+import { ChevronDown } from 'lucide-react';
 import { useReviews } from '@/hooks/useReviews';
 import { ReviewCard } from '@/components/features/reviews/ReviewCard';
 import { Skeleton } from '@/components/ui/Skeleton';
@@ -11,6 +11,7 @@ import { getNextScheduledDate } from '@/services/reviews.service';
 import { getFlashcardStreak } from '@/services/flashcard-streak.service';
 import { localDateInDays } from '@/lib/local-date';
 import { theme } from '@/lib/theme';
+import { PageContainer, PageHeader } from '@/components/ui/Page';
 import type { ReviewRating } from '@/services/reviews.service';
 import { REVIEWS_DUE_KEY } from '@/hooks/reviews.keys';
 
@@ -62,16 +63,12 @@ function CardDeckIcon() {
 
 function ChevronIcon({ rotated }: { rotated: boolean }) {
   return (
-    <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
-      stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
-      aria-hidden="true"
+    <ChevronDown size={12} strokeWidth={2.5} aria-hidden="true"
       style={{
         transform: rotated ? 'rotate(180deg)' : 'rotate(0deg)',
         transition: 'transform 0.2s ease',
         flexShrink: 0,
-      }}>
-      <path d="M6 9l6 6 6-6"/>
-    </svg>
+      }} />
   );
 }
 
@@ -106,7 +103,7 @@ function FlashcardStreakBadge({ streak }: { streak: { current: number; reviewedT
     <div
       style={{
         display: 'flex', alignItems: 'center', gap: 6,
-        padding: '6px 12px', borderRadius: 99, flexShrink: 0,
+        padding: '6px 12px', borderRadius: theme.radiusPill, flexShrink: 0,
         background: streak?.reviewedToday ? theme.tealBg : theme.muted,
         border: `0.5px solid ${streak?.reviewedToday ? theme.teal : theme.line}`,
         opacity: visible ? 1 : 0,
@@ -136,7 +133,6 @@ function FlashcardStreakBadge({ streak }: { streak: { current: number; reviewedT
 export function ReviewsClient() {
   const router      = useRouter();
   const queryClient = useQueryClient();
-  const { isMobile } = useUI();
   const { items, isLoading, error, dialog, handleRate, handleReschedule, handleRemove } = useReviews();
 
   // ── Sessão: snapshot do total ao primeiro carregamento ───────────────────
@@ -194,8 +190,8 @@ export function ReviewsClient() {
   // ── Skeleton ──────────────────────────────────────────────────────────────
   if (isLoading) {
     return (
-      <div style={page(isMobile)}>
-        <div style={s.header}>
+      <PageContainer width="narrow">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16, marginBottom: 24, flexWrap: 'wrap' }}>
           <Skeleton width={180} height={28} borderRadius={6} />
           <Skeleton width={90} height={28} borderRadius={99} />
         </div>
@@ -210,15 +206,15 @@ export function ReviewsClient() {
             <Skeleton height={70} borderRadius={12} style={{ flex: 1 }} />
           </div>
         </div>
-      </div>
+      </PageContainer>
     );
   }
 
   // ── Error ──────────────────────────────────────────────────────────────────
   if (error) {
     return (
-      <div style={page(isMobile)}>
-        <h1 style={{ ...s.h1, fontSize: isMobile ? 24 : 28 }}>Revisões de hoje</h1>
+      <PageContainer width="narrow">
+        <PageHeader title="Revisões de hoje" />
         <div style={s.errorBox}>
           <WarnIcon />
           <div>
@@ -232,18 +228,15 @@ export function ReviewsClient() {
             </HovBtn>
           </div>
         </div>
-      </div>
+      </PageContainer>
     );
   }
 
   // ── Zero revisões ao entrar ────────────────────────────────────────────────
   if (items.length === 0 && !sessionDone) {
     return (
-      <div style={page(isMobile)}>
-        <div style={s.header}>
-          <h1 style={{ ...s.h1, fontSize: isMobile ? 24 : 28 }}>Revisões de hoje</h1>
-          <FlashcardStreakBadge streak={fcStreak ?? null} />
-        </div>
+      <PageContainer width="narrow">
+        <PageHeader title="Revisões de hoje" actions={<FlashcardStreakBadge streak={fcStreak ?? null} />} />
         <div style={s.emptyWrap}>
           <CheckCircleIcon size={52} />
           <p style={s.emptyTitle}>Tudo em dia!</p>
@@ -256,18 +249,15 @@ export function ReviewsClient() {
             Estudar flashcards →
           </HovBtn>
         </div>
-      </div>
+      </PageContainer>
     );
   }
 
   // ── Sessão concluída ───────────────────────────────────────────────────────
   if (sessionDone) {
     return (
-      <div style={page(isMobile)}>
-        <div style={s.header}>
-          <h1 style={{ ...s.h1, fontSize: isMobile ? 24 : 28 }}>Revisões de hoje</h1>
-          <FlashcardStreakBadge streak={fcStreak ?? null} />
-        </div>
+      <PageContainer width="narrow">
+        <PageHeader title="Revisões de hoje" actions={<FlashcardStreakBadge streak={fcStreak ?? null} />} />
         <div style={s.celebrationWrap}>
           <CheckCircleIcon size={56} />
           <p style={s.celebrationTitle}>Sessão completa!</p>
@@ -294,7 +284,7 @@ export function ReviewsClient() {
             </HovBtn>
           </div>
         </div>
-      </div>
+      </PageContainer>
     );
   }
 
@@ -302,13 +292,10 @@ export function ReviewsClient() {
   return (
     <>
       {dialog}
-      <div style={page(isMobile)}>
+      <PageContainer width="narrow">
 
         {/* Header */}
-        <div style={s.header}>
-          <h1 style={{ ...s.h1, fontSize: isMobile ? 24 : 28 }}>Revisões de hoje</h1>
-          <FlashcardStreakBadge streak={fcStreak ?? null} />
-        </div>
+        <PageHeader title="Revisões de hoje" actions={<FlashcardStreakBadge streak={fcStreak ?? null} />} />
 
         {/* Progresso da sessão */}
         {sessionTotal > 0 && (
@@ -404,35 +391,16 @@ export function ReviewsClient() {
             + {items.length - 1} {items.length - 1 === 1 ? 'tópico restante' : 'tópicos restantes'}
           </p>
         )}
-      </div>
+      </PageContainer>
     </>
   );
 }
 
-// ── Layout base — alinhado com pageList do design system ─────────────────
-function page(isMobile: boolean): React.CSSProperties {
-  return {
-    maxWidth: 760,
-    margin: '0 auto',
-    padding: isMobile ? '20px 16px' : '34px 40px',
-    fontFamily: theme.font,
-  };
-}
-
 // ── Estilos ───────────────────────────────────────────────────────────────
 const s: Record<string, React.CSSProperties> = {
-  header: {
-    display: 'flex', justifyContent: 'space-between',
-    alignItems: 'center', gap: 16, marginBottom: 24, flexWrap: 'wrap',
-  },
-  h1: {
-    fontWeight: 800,
-    color: theme.ink, letterSpacing: -0.6, margin: 0,
-  },
-
   progressWrap:  { display: 'flex', alignItems: 'center', gap: 12, marginBottom: 28 },
-  progressTrack: { flex: 1, height: 6, background: theme.muted, borderRadius: 99, overflow: 'hidden' },
-  progressFill:  { height: '100%', background: theme.ok, borderRadius: 99, transition: 'width 0.4s ease' },
+  progressTrack: { flex: 1, height: 6, background: theme.muted, borderRadius: theme.radiusPill, overflow: 'hidden' },
+  progressFill:  { height: '100%', background: theme.ok, borderRadius: theme.radiusPill, transition: 'width 0.4s ease' },
   progressLabel: {
     fontSize: 12, color: theme.inkFaint, fontWeight: 600,
     whiteSpace: 'nowrap', fontVariantNumeric: 'tabular-nums',
@@ -445,17 +413,17 @@ const s: Record<string, React.CSSProperties> = {
     border: 'none', color: theme.inkSoft,
     fontSize: 13, fontWeight: 500, cursor: 'pointer',
     fontFamily: 'inherit', padding: '6px 10px',
-    borderRadius: 8, transition: 'background 0.15s ease',
+    borderRadius: theme.radiusXs, transition: 'background 0.15s ease',
   },
 
-  reschedBox:   { background: theme.muted, borderRadius: 16, padding: '16px 18px', marginBottom: 12 },
+  reschedBox:   { background: theme.muted, borderRadius: theme.radius, padding: '16px 18px', marginBottom: 12 },
   reschedTitle: {
     fontSize: 11, fontWeight: 700, color: theme.inkFaint,
     textTransform: 'uppercase', letterSpacing: 0.8, margin: '0 0 10px',
   },
   quickRow: { display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 14 },
   quickBtn: {
-    padding: '8px 14px', borderRadius: 8,
+    padding: '8px 14px', borderRadius: theme.radiusXs,
     border: `0.5px solid ${theme.line}`, cursor: 'pointer',
     fontSize: 13, fontFamily: 'inherit', fontWeight: 500,
     color: theme.inkSoft, transition: 'background 0.15s ease',
@@ -463,7 +431,7 @@ const s: Record<string, React.CSSProperties> = {
   dateLabel: { fontSize: 12, color: theme.inkFaint, fontWeight: 500, margin: '0 0 6px' },
   dateInput: {
     width: '100%', boxSizing: 'border-box',
-    padding: '8px 10px', borderRadius: 8,
+    padding: '8px 10px', borderRadius: theme.radiusXs,
     border: `0.5px solid ${theme.line}`,
     background: theme.card, fontSize: 13,
     color: theme.ink, fontFamily: 'inherit',
@@ -474,14 +442,14 @@ const s: Record<string, React.CSSProperties> = {
   errorBox: {
     display: 'flex', alignItems: 'flex-start', gap: 14,
     padding: '20px 24px', marginTop: 24,
-    background: theme.critBg, borderRadius: 16,
+    background: theme.critBg, borderRadius: theme.radius,
     border: `0.5px solid ${theme.crit}`,
   },
   errorMsg: { margin: '0 0 12px', fontSize: 14, color: theme.ink, fontWeight: 500 },
   retryBtn: {
     border: 'none', background: theme.crit, color: theme.onDanger,
     fontSize: 13, fontWeight: 600, padding: '8px 16px',
-    borderRadius: 8, cursor: 'pointer', fontFamily: 'inherit',
+    borderRadius: theme.radiusXs, cursor: 'pointer', fontFamily: 'inherit',
     transition: 'opacity 0.15s ease',
   },
 
@@ -496,13 +464,13 @@ const s: Record<string, React.CSSProperties> = {
 
   ctaRow: { display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' },
   ctaBtn: {
-    padding: '12px 24px', borderRadius: 12, border: 'none',
+    padding: '12px 24px', borderRadius: theme.radiusSm, border: 'none',
     background: theme.primary, color: theme.onTeal,
     fontSize: 14, fontWeight: 600, cursor: 'pointer',
     fontFamily: 'inherit', transition: 'background 0.15s ease',
   },
   ctaBtnSecondary: {
-    padding: '12px 24px', borderRadius: 12,
+    padding: '12px 24px', borderRadius: theme.radiusSm,
     border: `0.5px solid ${theme.line}`,
     background: theme.card, color: theme.inkSoft,
     fontSize: 14, fontWeight: 600, cursor: 'pointer',

@@ -17,6 +17,8 @@ import { NoteEditor } from '@/components/features/notebook/NoteEditor';
 import { theme } from '@/lib/theme';
 import { useUI } from '@/components/layout/UIContext';
 import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
+import { Select } from '@/components/ui/Select';
 
 type Level = 'subjects' | 'topics' | 'notes';
 type ViewMode = 'navegar' | 'recentes' | 'criticos';
@@ -304,12 +306,12 @@ export function ErrosView({ openNoteId }: { openNoteId?: string | null }) {
             </div>
           ) : (
             <>
-              <input value={term} onChange={(e) => setTerm(e.target.value)}
-                placeholder="Buscar em todos os erros…" style={styles.search} />
-              <select value={boardFilter} onChange={(e) => setBoardFilter(e.target.value)} style={styles.search}>
+              <Input value={term} onChange={(e) => setTerm(e.target.value)}
+                placeholder="Buscar em todos os erros…" />
+              <Select value={boardFilter} onChange={(e) => setBoardFilter(e.target.value)}>
                 <option value="">Todas as bancas</option>
                 {boards.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
-              </select>
+              </Select>
 
               {boardFilter && (boardLoading || boardResults !== null) ? (
                 <div style={styles.list}>
@@ -343,7 +345,7 @@ export function ErrosView({ openNoteId }: { openNoteId?: string | null }) {
                       ) : subjects.length === 0 ? (
                         <div>
                           <p style={styles.muted}>Nenhuma matéria cadastrada ainda.</p>
-                          <Link href="/subjects" style={{ display: 'inline-block', marginTop: 10, fontSize: 13.5, color: theme.teal, fontWeight: 600, textDecoration: 'none' }}>Adicionar matéria →</Link>
+                          <Link href="/subjects" style={{ display: 'inline-block', marginTop: 10, fontSize: 14, color: theme.teal, fontWeight: 600, textDecoration: 'none' }}>Adicionar matéria →</Link>
                         </div>
                       ) : subjects.map((sub) => (
                         <div key={sub.id} onClick={() => openSubject(sub)} style={styles.navItem}>
@@ -439,38 +441,37 @@ function NoteItem({ note, active, onClick, onDelete }: {
 const styles: Record<string, React.CSSProperties> = {
   sub: { fontSize: 14, color: theme.inkSoft, margin: 0, fontWeight: 500 },
   actionsRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16, flexWrap: 'wrap', marginBottom: 18 },
-  addTopBtn: { padding: '11px 20px', borderRadius: 12, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap', flexShrink: 0 },
+  addTopBtn: { padding: '11px 20px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap', flexShrink: 0 },
   layout: { display: 'flex', gap: 20, alignItems: 'flex-start', width: '100%', minWidth: 0 },
   sidebar: { width: 300, flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 10, minWidth: 0 },
   tabs: { display: 'flex', gap: 4, background: 'rgba(15,23,42,.06)', borderRadius: theme.radiusSm, padding: 4 },
   tab: { flex: 1, padding: '8px 0', border: 'none', background: 'transparent', color: theme.inkSoft, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', borderRadius: theme.radiusSm - 2 },
   tabOn: { background: theme.card, color: theme.ink, boxShadow: theme.shadow },
   periodRow: { display: 'flex', gap: 6 },
-  periodBtn: { flex: 1, padding: '7px 0', borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.card, color: theme.inkSoft, fontSize: 12.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+  periodBtn: { flex: 1, padding: '7px 0', borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.card, color: theme.inkSoft, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
   periodBtnOn: { background: theme.card, borderColor: theme.teal, color: theme.ink, boxShadow: theme.shadow },
-  search: { width: '100%', padding: '11px 14px', borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.card, fontSize: 14, color: theme.ink, fontFamily: 'inherit', outline: 'none', boxSizing: 'border-box' },
   crumb: { fontSize: 11, color: theme.inkFaint, fontWeight: 600, margin: '4px 0', textTransform: 'uppercase', letterSpacing: 0.6 },
   crumbSubject: { fontSize: 15, color: theme.ink, fontWeight: 700, margin: '6px 0 4px', lineHeight: 1.4 },
   back: { border: 'none', background: 'transparent', color: theme.teal, fontSize: 13, fontWeight: 500, cursor: 'pointer', padding: 0, textAlign: 'left', fontFamily: 'inherit' },
   backToList: { border: 'none', background: 'transparent', color: theme.teal, fontSize: 14, fontWeight: 600, cursor: 'pointer', padding: 0, textAlign: 'left', fontFamily: 'inherit', marginBottom: 14 },
-  newBtn: { padding: '11px 14px', width: '100%', borderRadius: 12, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', marginBottom: 4, fontFamily: 'inherit' },
+  newBtn: { padding: '11px 14px', width: '100%', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', marginBottom: 4, fontFamily: 'inherit' },
   muted: { color: theme.inkFaint, fontSize: 14, lineHeight: 1.5 },
-  pageError: { fontSize: 13, color: theme.danger, background: theme.dangerTint, borderRadius: 8, padding: '8px 14px', marginBottom: 12 },
+  pageError: { fontSize: 13, color: theme.danger, background: theme.dangerTint, borderRadius: theme.radiusXs, padding: '8px 14px', marginBottom: 12 },
   list: { display: 'flex', flexDirection: 'column', gap: 8 },
-  navItem: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, background: theme.card, borderRadius: 12, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, padding: '13px 15px', cursor: 'pointer' },
+  navItem: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, background: theme.card, borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, padding: '13px 15px', cursor: 'pointer' },
   navItemName: { fontSize: 14, color: theme.ink, fontWeight: 500, lineHeight: 1.45 },
   count: { fontSize: 11, color: theme.inkSoft, background: 'rgba(15,23,42,.05)', padding: '2px 8px', borderRadius: 10, fontWeight: 600, flexShrink: 0 },
-  critItem: { display: 'flex', flexDirection: 'column', gap: 3, background: theme.card, borderRadius: 12, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, padding: '13px 15px', cursor: 'pointer' },
+  critItem: { display: 'flex', flexDirection: 'column', gap: 3, background: theme.card, borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, padding: '13px 15px', cursor: 'pointer' },
   critAlert: { borderWidth: 1.5, borderColor: theme.crit, background: theme.bg },
   critTop: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
   critName: { fontSize: 14, color: theme.ink, fontWeight: 600, lineHeight: 1.35 },
   critBadge: { fontSize: 10, fontWeight: 700, color: theme.onDanger, background: theme.crit, padding: '2px 7px', borderRadius: 6, textTransform: 'uppercase', letterSpacing: 0.4, flexShrink: 0 },
   critSubject: { fontSize: 12, color: theme.inkFaint },
-  critStats: { display: 'flex', alignItems: 'center', gap: 6, marginTop: 4, fontSize: 12.5, color: theme.inkSoft },
+  critStats: { display: 'flex', alignItems: 'center', gap: 6, marginTop: 4, fontSize: 13, color: theme.inkSoft },
   critErrors: { fontWeight: 600, color: theme.ink },
   critDot: { color: theme.inkFaint },
   critAcerto: { color: theme.inkSoft },
-  item: { position: 'relative', background: theme.card, borderRadius: 12, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, padding: '13px 15px', cursor: 'pointer', transition: 'border-color .15s' },
+  item: { position: 'relative', background: theme.card, borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, padding: '13px 15px', cursor: 'pointer', transition: 'border-color .15s' },
   itemActive: { borderColor: theme.teal, background: theme.tealBg },
   itemTitle: { fontSize: 14, color: theme.ink, fontWeight: 500, paddingRight: 20, lineHeight: 1.4 },
   itemMeta: { marginTop: 6 },

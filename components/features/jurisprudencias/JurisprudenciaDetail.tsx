@@ -1,5 +1,6 @@
 'use client';
 
+import { FileText, Star, TriangleAlert, LayoutGrid, Lightbulb, Target, Tag } from 'lucide-react';
 import { theme } from '@/lib/theme';
 import { EstrelasBadge } from './EstrelasBadge';
 import { JurisSection } from './JurisSection';
@@ -12,7 +13,7 @@ interface Props {
 
 function Prose({ text }: { text: string }) {
   return (
-    <p style={{ fontSize: 14.5, color: theme.ink, lineHeight: 1.7, margin: 0, whiteSpace: 'pre-wrap' }}>
+    <p style={{ fontSize: 15, color: theme.ink, lineHeight: 1.7, margin: 0, whiteSpace: 'pre-wrap' }}>
       {text}
     </p>
   );
@@ -31,25 +32,25 @@ function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
 }
 
 function IconDoc() {
-  return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8" /></svg>;
+  return <FileText size={16} strokeWidth={1.7} />;
 }
 function IconStar() {
-  return <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="1.7"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z" /></svg>;
+  return <Star size={16} fill="currentColor" strokeWidth={1.7} />;
 }
 function IconAlert() {
-  return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" /><line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" /></svg>;
+  return <TriangleAlert size={16} strokeWidth={1.7} />;
 }
 function IconGrid() {
-  return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="14" y="14" width="7" height="7" /><rect x="3" y="14" width="7" height="7" /></svg>;
+  return <LayoutGrid size={16} strokeWidth={1.7} />;
 }
 function IconLightbulb() {
-  return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1v-2.26A7 7 0 0 1 12 2Z" /></svg>;
+  return <Lightbulb size={16} strokeWidth={1.7} />;
 }
 function IconTarget() {
-  return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><circle cx="12" cy="12" r="6" /><circle cx="12" cy="12" r="2" /></svg>;
+  return <Target size={16} strokeWidth={1.7} />;
 }
 function IconTag() {
-  return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" /><line x1="7" y1="7" x2="7.01" y2="7" /></svg>;
+  return <Tag size={16} strokeWidth={1.7} />;
 }
 
 const TIPO_LABEL: Record<string, string> = {
@@ -101,7 +102,7 @@ export function JurisprudenciaDetail({ item, isMobile }: Props) {
           {item.titulo && (
             <p style={{ fontSize: 14, fontWeight: 700, color: theme.ink, margin: '0 0 8px' }}>{item.titulo}</p>
           )}
-          <p style={{ fontSize: 14.5, color: theme.ink, lineHeight: 1.7, margin: 0, fontStyle: 'italic' }}>
+          <p style={{ fontSize: 15, color: theme.ink, lineHeight: 1.7, margin: 0, fontStyle: 'italic' }}>
             “{item.texto_sumula}”
           </p>
           {(item.origem_publicacao || item.data_aprovacao) && (
@@ -199,7 +200,7 @@ export function JurisprudenciaDetail({ item, isMobile }: Props) {
         {item.esquema_visual && (
           <div style={{
             background: theme.bg, borderRadius: 10, padding: 16,
-            fontFamily: 'monospace', fontSize: 13.5, color: theme.ink,
+            fontFamily: 'monospace', fontSize: 14, color: theme.ink,
             whiteSpace: 'pre-wrap', lineHeight: 1.7,
           }}>
             {item.esquema_visual}
@@ -326,8 +327,8 @@ export function JurisprudenciaDetail({ item, isMobile }: Props) {
                 <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
                   <span style={{ fontSize: 13, fontWeight: 700, color: theme.ink }}>{rel.processo}</span>
                   <span style={{
-                    fontSize: 10.5, fontWeight: 600, color: theme.tealDeep, background: theme.tealBg,
-                    borderRadius: 999, padding: '1px 8px', textTransform: 'capitalize',
+                    fontSize: 11, fontWeight: 600, color: theme.tealDeep, background: theme.tealBg,
+                    borderRadius: theme.radiusPill, padding: '1px 8px', textTransform: 'capitalize',
                   }}>{rel.relacao}</span>
                 </div>
                 <p style={{ fontSize: 13, color: theme.inkSoft, lineHeight: 1.55, margin: 0 }}>{rel.motivo}</p>
@@ -343,7 +344,7 @@ export function JurisprudenciaDetail({ item, isMobile }: Props) {
           {item.palavras_chave.map((k) => (
             <span key={k} style={{
               fontSize: 12, fontWeight: 500, color: theme.tealDeep,
-              background: theme.tealBg, borderRadius: 999, padding: '4px 12px',
+              background: theme.tealBg, borderRadius: theme.radiusPill, padding: '4px 12px',
             }}>{k}</span>
           ))}
         </div>

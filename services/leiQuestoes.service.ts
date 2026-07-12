@@ -39,18 +39,54 @@ export const LEIS_COM_QUESTOES: string[] = Object.keys(QUESTOES_ARQUIVO);
 
 const _cache = new Map<string, Promise<LeiQuestao[]>>();
 
+// IA invisível · Fase 2 — questões geradas em lote (LLM + validação por juiz
+// independente) chegam publicadas em ai_artifacts (artifact_type='questao_ce_lei').
+// Cache global: 1 linha por artigo, servida a todas as usuárias. Se a leitura
+// falhar por qualquer motivo, degrada silenciosamente para só as questões
+// estáticas — geração nunca pode quebrar o banco de questões.
+async function getQuestoesGeradas(slug: string): Promise<LeiQuestao[]> {
+  try {
+    const ctx = await tryGetUser();
+    if (!ctx) return [];
+    const { data } = await ctx.supabase
+      .from('ai_artifacts')
+      .select('id, payload')
+      .eq('artifact_type', 'questao_ce_lei')
+      .eq('status', 'published');
+    return (data ?? [])
+      .filter((row) => (row.payload as { leiSlug?: string })?.leiSlug === slug)
+      .map((row) => {
+        const p = row.payload as { artigoKey: string; enunciado: string; gabarito: boolean; comentario: string; tipo?: LeiQuestaoTipo };
+        return {
+          id: `ai:${row.id}`,
+          artigoKey: p.artigoKey,
+          enunciado: p.enunciado,
+          gabarito: p.gabarito,
+          comentario: p.comentario,
+          tipo: p.tipo,
+        };
+      });
+  } catch {
+    return [];
+  }
+}
+
 export function getQuestoesLei(slug: string): Promise<LeiQuestao[]> {
   const cached = _cache.get(slug);
   if (cached) return cached;
 
   const arquivo = QUESTOES_ARQUIVO[slug];
-  if (!arquivo) return Promise.resolve([]);
 
-  const promise = fetch(arquivo)
-    .then((res) => {
-      if (!res.ok) throw new Error(`Erro ao carregar questões (${res.status})`);
-      return res.json() as Promise<LeiQuestao[]>;
-    })
+  const promise = Promise.all([
+    arquivo
+      ? fetch(arquivo).then((res) => {
+          if (!res.ok) throw new Error(`Erro ao carregar questões (${res.status})`);
+          return res.json() as Promise<LeiQuestao[]>;
+        })
+      : Promise.resolve<LeiQuestao[]>([]),
+    getQuestoesGeradas(slug),
+  ])
+    .then(([estaticas, geradas]) => [...estaticas, ...geradas])
     .catch((e) => {
       _cache.delete(slug);
       throw e;

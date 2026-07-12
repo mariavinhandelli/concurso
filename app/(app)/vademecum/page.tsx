@@ -7,13 +7,14 @@
 
 import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { useRouter } from 'next/navigation';
+import { CircleHelp } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { LEIS_CATALOG, getLei, type LeiMeta } from '@/services/leis.service';
 import { countRevisoesDue, listInteracoesByLei } from '@/services/leiInteracoes.service';
 import { LEIS_COM_QUESTOES } from '@/services/leiQuestoes.service';
 import { VademecumSimuladoModal } from '@/components/features/vademecum/VademecumSimuladoModal';
-import { useUI } from '@/components/layout/UIContext';
 import { theme } from '@/lib/theme';
+import { PageContainer, PageHeader } from '@/components/ui/Page';
 
 function normalizar(s: string): string {
   return s.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();
@@ -53,7 +54,6 @@ function LeiCard({ lei, onOpen }: { lei: LeiMeta; onOpen: () => void }) {
 
 export default function VademecumPage() {
   const router = useRouter();
-  const { isMobile } = useUI();
   const [dueCount, setDueCount] = useState(0);
   const [busca, setBusca] = useState('');
   const [disciplina, setDisciplina] = useState('todas');
@@ -80,9 +80,8 @@ export default function VademecumPage() {
   }, [busca, disciplina]);
 
   return (
-    <div style={{ ...s.wrap, padding: isMobile ? '20px 16px' : '34px 40px' }}>
-      <h1 style={{ ...s.h1, fontSize: isMobile ? 24 : 28 }}>Vade Mecum</h1>
-      <p style={s.sub}>Lei seca para grifar, anotar e revisar — o texto vira estudo ativo.</p>
+    <PageContainer>
+      <PageHeader title="Vade Mecum" subtitle="Lei seca para grifar, anotar e revisar — o texto vira estudo ativo." />
 
       {dueCount > 0 && (
         <button onClick={() => router.push('/vademecum/revisar')} style={s.dueBanner}>
@@ -94,9 +93,7 @@ export default function VademecumPage() {
       {LEIS_COM_QUESTOES.length > 0 && (
         <div style={s.acoesRow}>
           <button onClick={() => setShowSimulado(true)} style={s.simuladoBtn}>
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: 6 }}>
-              <circle cx="12" cy="12" r="10" /><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01" />
-            </svg>
+            <CircleHelp size={13} strokeWidth={1.7} style={{ marginRight: 6 }} />
             Simulado C/E
           </button>
         </div>
@@ -138,33 +135,30 @@ export default function VademecumPage() {
       <p style={s.rodape}>
         Mais leis em breve — a estrutura já aceita qualquer norma (estatutos, leis orgânicas, códigos).
       </p>
-    </div>
+    </PageContainer>
   );
 }
 
 const s: Record<string, CSSProperties> = {
-  wrap: { maxWidth: 960, margin: '0 auto', fontFamily: theme.font },
-  h1: { fontWeight: 800, color: theme.ink, letterSpacing: -0.6, margin: 0 },
-  sub: { fontSize: 14, color: theme.inkSoft, margin: '6px 0 22px', fontWeight: 500 },
-  dueBanner: { display: 'block', width: '100%', textAlign: 'left', background: 'rgba(226,75,74,.10)', color: '#C03A39', border: '0.5px solid rgba(226,75,74,.35)', borderRadius: theme.radius, padding: '12px 16px', fontSize: 13.5, cursor: 'pointer', fontFamily: 'inherit', marginBottom: 18 },
+  dueBanner: { display: 'block', width: '100%', textAlign: 'left', background: 'rgba(226,75,74,.10)', color: '#C03A39', border: '0.5px solid rgba(226,75,74,.35)', borderRadius: theme.radius, padding: '12px 16px', fontSize: 14, cursor: 'pointer', fontFamily: 'inherit', marginBottom: 18 },
 
   acoesRow: { display: 'flex', gap: 10, marginBottom: 18 },
-  simuladoBtn: { display: 'inline-flex', alignItems: 'center', padding: '9px 18px', borderRadius: theme.radiusPill, border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.inkSoft, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+  simuladoBtn: { display: 'inline-flex', alignItems: 'center', padding: '9px 18px', borderRadius: theme.radiusPill, border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.inkSoft, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
 
   buscaRow: { marginBottom: 10 },
-  buscaInput: { width: '100%', boxSizing: 'border-box', padding: '11px 16px', borderRadius: 999, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.card, fontSize: 14, color: theme.ink, fontFamily: 'inherit', outline: 'none' },
+  buscaInput: { width: '100%', boxSizing: 'border-box', padding: '11px 16px', borderRadius: theme.radiusPill, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.card, fontSize: 14, color: theme.ink, fontFamily: 'inherit', outline: 'none' },
   filtroRow: { display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 18 },
-  filtroChip: { fontSize: 12.5, color: theme.inkSoft, background: 'transparent', borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, borderRadius: 999, padding: '5px 13px', cursor: 'pointer', fontFamily: 'inherit' },
+  filtroChip: { fontSize: 13, color: theme.inkSoft, background: 'transparent', borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, borderRadius: theme.radiusPill, padding: '5px 13px', cursor: 'pointer', fontFamily: 'inherit' },
   filtroChipOn: { borderColor: theme.teal, background: theme.tealBg, color: theme.tealDeep, fontWeight: 600 },
-  semResultado: { fontSize: 13.5, color: theme.inkFaint, textAlign: 'center', padding: '30px 0' },
+  semResultado: { fontSize: 14, color: theme.inkFaint, textAlign: 'center', padding: '30px 0' },
 
   grid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 14 },
   card: { textAlign: 'left', background: theme.card, border: `0.5px solid ${theme.line}`, borderRadius: theme.radius, padding: '18px 20px', cursor: 'pointer', fontFamily: 'inherit' },
   cardTop: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
   cardSigla: { fontSize: 13, fontWeight: 700, color: theme.teal },
-  pctChip: { fontSize: 11, fontWeight: 700, color: theme.tealDeep, background: theme.tealBg, borderRadius: 999, padding: '2px 8px' },
-  cardNome: { fontSize: 15.5, fontWeight: 600, color: theme.ink, lineHeight: 1.4, marginTop: 6 },
-  cardMeta: { fontSize: 12.5, color: theme.inkFaint, margin: '6px 0 8px' },
+  pctChip: { fontSize: 11, fontWeight: 700, color: theme.tealDeep, background: theme.tealBg, borderRadius: theme.radiusPill, padding: '2px 8px' },
+  cardNome: { fontSize: 16, fontWeight: 600, color: theme.ink, lineHeight: 1.4, marginTop: 6 },
+  cardMeta: { fontSize: 13, color: theme.inkFaint, margin: '6px 0 8px' },
   cardDesc: { fontSize: 13, color: theme.inkSoft, lineHeight: 1.55 },
-  rodape: { fontSize: 12.5, color: theme.inkFaint, marginTop: 20 },
+  rodape: { fontSize: 13, color: theme.inkFaint, marginTop: 20 },
 };

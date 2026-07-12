@@ -12,6 +12,7 @@ import Highlight from '@tiptap/extension-highlight';
 import Image from '@tiptap/extension-image';
 import { Color, TextStyle } from '@tiptap/extension-text-style';
 import { createClient } from '@/lib/supabase/client';
+import { signNotebookImages, unsignNotebookImages, signedNotebookUrl } from '@/lib/notebook-images';
 import { theme } from '@/lib/theme';
 import { useToast } from '@/components/ui/ToastProvider';
 
@@ -114,8 +115,24 @@ export function RichTextEditor({
         return false;
       },
     },
-    onUpdate: ({ editor }) => onChange?.(editor.getJSON(), editor.getText()),
+    // unsign: o bucket é privado e o editor exibe signed URLs temporárias,
+    // mas o banco guarda sempre a URL canônica (sem token).
+    onUpdate: ({ editor }) => onChange?.(unsignNotebookImages(editor.getJSON()), editor.getText()),
   });
+
+  // Conteúdo salvo chega com URLs canônicas; troca por signed URLs para exibir.
+  useEffect(() => {
+    if (!editor || !initialContent) return;
+    let cancelled = false;
+    signNotebookImages(initialContent).then((signed) => {
+      if (cancelled || editor.isDestroyed || signed === initialContent) return;
+      editor.commands.setContent(signed, { emitUpdate: false });
+    });
+    return () => { cancelled = true; };
+    // initialContent é só o valor de montagem — assinar de novo a cada
+    // digitação do pai causaria loop de setContent.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editor]);
 
   // Sobe a imagem pro Storage e insere no editor.
   async function uploadAndInsert(file: File) {
@@ -137,8 +154,8 @@ export function RichTextEditor({
         .upload(nome, blob, { contentType: 'image/jpeg', upsert: false });
       if (error) throw error;
 
-      const { data: pub } = supabase.storage.from('notebook-images').getPublicUrl(nome);
-      if (!editor.isDestroyed) editor.chain().focus().setImage({ src: pub.publicUrl }).run();
+      const signedUrl = await signedNotebookUrl(nome);
+      if (!editor.isDestroyed) editor.chain().focus().setImage({ src: signedUrl }).run();
     } catch (e) {
       toast.error('Erro ao enviar imagem: ' + (e instanceof Error ? e.message : 'desconhecido'));
     } finally {
@@ -305,16 +322,16 @@ const styles: Record<string, React.CSSProperties> = {
   wrapper: { borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, borderRadius: 14, overflow: 'hidden', background: theme.card, fontFamily: theme.font },
   toolbar: { display: 'flex', alignItems: 'center', gap: 6, padding: 10, borderBottomWidth: 0.5, borderBottomStyle: 'solid', borderBottomColor: theme.line, background: theme.bg, flexWrap: 'wrap', position: 'relative' },
   group: { display: 'flex', alignItems: 'center', gap: 3 },
-  btn: { display: 'inline-flex', alignItems: 'center', justifyContent: 'center', position: 'relative', minWidth: 34, height: 34, padding: '0 8px', borderRadius: 8, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.card, color: theme.ink, fontSize: 13, cursor: 'pointer', fontFamily: 'inherit' },
+  btn: { display: 'inline-flex', alignItems: 'center', justifyContent: 'center', position: 'relative', minWidth: 34, height: 34, padding: '0 8px', borderRadius: theme.radiusXs, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.card, color: theme.ink, fontSize: 13, cursor: 'pointer', fontFamily: 'inherit' },
   btnActive: { background: theme.tealBg, borderColor: theme.teal, color: theme.tealDeep },
   colorUnderline: { position: 'absolute', bottom: 5, left: 9, right: 9, height: 3, borderRadius: 2, background: 'linear-gradient(90deg,#f70000,#00cf61,#185dcc)' },
   divider: { width: 1, height: 22, background: theme.line, margin: '0 2px' },
   paletteWrap: { position: 'relative' },
-  palette: { position: 'absolute', top: 40, right: 0, zIndex: 10, display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 6, padding: 10, background: theme.card, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, borderRadius: 12, boxShadow: theme.shadowHover, width: 200, maxWidth: 'calc(100vw - 48px)' },
+  palette: { position: 'absolute', top: 40, right: 0, zIndex: 10, display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 6, padding: 10, background: theme.card, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, borderRadius: theme.radiusSm, boxShadow: theme.shadowHover, width: 200, maxWidth: 'calc(100vw - 48px)' },
   swatch: { width: 22, height: 22, borderRadius: 6, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, cursor: 'pointer', padding: 0 },
   clearSwatch: { width: 22, height: 22, borderRadius: 6, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.card, cursor: 'pointer', color: theme.inkFaint, fontSize: 12, padding: 0 },
   editorArea: { padding: 16, color: theme.ink, fontSize: 15, lineHeight: 1.7, overflowX: 'hidden' },
-  uploadingNote: { fontSize: 12.5, color: theme.teal, fontWeight: 600, margin: '8px 0 0' },
+  uploadingNote: { fontSize: 13, color: theme.teal, fontWeight: 600, margin: '8px 0 0' },
   bubble: { background: theme.card, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, borderRadius: 10, boxShadow: theme.shadowHover, padding: 4 },
   bubbleBtn: { border: 'none', background: 'transparent', color: theme.teal, fontSize: 13, fontWeight: 600, cursor: 'pointer', padding: '6px 12px', whiteSpace: 'nowrap' },
 };

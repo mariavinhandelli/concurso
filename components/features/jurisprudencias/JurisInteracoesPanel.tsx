@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { Star, RefreshCw } from 'lucide-react';
 import { theme } from '@/lib/theme';
 import {
   getInteracao, toggleFavorito, saveAnotacao, activateRevisao, desativarRevisao,
@@ -9,6 +10,8 @@ import {
 import { INTERVALOS_RAPIDOS } from '@/lib/juris-review';
 import { useToast } from '@/components/ui/ToastProvider';
 import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
+import { Textarea } from '@/components/ui/Textarea';
 
 interface Props {
   jurisId: string;
@@ -171,14 +174,12 @@ export function JurisInteracoesPanel({ jurisId }: Props) {
             fontFamily: theme.font, padding: 0, width: '100%',
           }}
         >
-          <svg width="20" height="20" viewBox="0 0 24 24"
+          <Star size={20}
             fill={favorito ? '#f59e0b' : 'none'}
-            stroke={favorito ? '#f59e0b' : theme.inkFaint}
-            strokeWidth="1.7"
-          >
-            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z" />
-          </svg>
-          <span style={{ fontSize: 13.5, fontWeight: 600, color: favorito ? theme.warnDeep : theme.ink }}>
+            color={favorito ? '#f59e0b' : theme.inkFaint}
+            strokeWidth={1.7}
+          />
+          <span style={{ fontSize: 14, fontWeight: 600, color: favorito ? theme.warnDeep : theme.ink }}>
             {favorito ? 'Nos favoritos' : 'Adicionar aos favoritos'}
           </span>
         </button>
@@ -189,12 +190,12 @@ export function JurisInteracoesPanel({ jurisId }: Props) {
         <div style={styles.panelHead}>
           <span style={styles.panelTitle}>Minhas anotações</span>
         </div>
-        <textarea
+        <Textarea
           value={anotacoes}
           onChange={(e) => setAnotacoes(e.target.value)}
           placeholder="Escreva aqui suas anotações, conexões com outros temas, dicas de memorização…"
           rows={4}
-          style={styles.textarea}
+          style={{ padding: '12px 14px', background: theme.bg, fontSize: 14 }}
         />
 
         {/* Tags pessoais */}
@@ -209,12 +210,12 @@ export function JurisInteracoesPanel({ jurisId }: Props) {
             ))}
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
-            <input
+            <Input
               value={tagInput}
               onChange={(e) => setTagInput(e.target.value)}
               onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addTag(); } }}
               placeholder="ex: FGV, revisão, confundo com X…"
-              style={styles.tagInput}
+              style={{ background: theme.bg, fontSize: 13, flex: 1 }}
             />
             <button onClick={addTag} style={styles.tagAddBtn}>+</button>
           </div>
@@ -234,9 +235,7 @@ export function JurisInteracoesPanel({ jurisId }: Props) {
       <div style={styles.panel}>
         <div style={styles.panelHead}>
           <span style={styles.panelTitle}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M4 12a8 8 0 0113-6.2L20 8M20 4v4h-4M20 12a8 8 0 01-13 6.2L4 16M4 20v-4h4" />
-            </svg>
+            <RefreshCw size={14} strokeWidth={1.7} />
             Revisão espaçada
           </span>
           {interacao?.is_review_active && (
@@ -269,14 +268,14 @@ export function JurisInteracoesPanel({ jurisId }: Props) {
               ))}
             </div>
             <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-              <input
+              <Input
                 type="number"
                 min={1}
                 max={365}
                 value={intervalCustom}
                 onChange={(e) => setIntervalCustom(e.target.value)}
                 placeholder="Personalizado (dias)"
-                style={{ ...styles.tagInput, flex: 1 }}
+                style={{ background: theme.bg, fontSize: 13, flex: 1 }}
               />
               <button
                 onClick={() => {
@@ -305,34 +304,19 @@ const styles: Record<string, React.CSSProperties> = {
   },
   panelHead: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 },
   panelTitle: { fontSize: 13, fontWeight: 700, color: theme.ink, display: 'flex', alignItems: 'center', gap: 6 },
-  subLabel: { fontSize: 11.5, fontWeight: 600, color: theme.inkFaint, margin: '0 0 6px', textTransform: 'uppercase', letterSpacing: 0.4 },
-  textarea: {
-    width: '100%', boxSizing: 'border-box', padding: '12px 14px',
-    borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`,
-    background: theme.bg, fontSize: 13.5, color: theme.ink, fontFamily: theme.font,
-    resize: 'vertical', outline: 'none', lineHeight: 1.6,
-  },
+  subLabel: { fontSize: 12, fontWeight: 600, color: theme.inkFaint, margin: '0 0 6px', textTransform: 'uppercase', letterSpacing: 0.4 },
   tag: {
     display: 'inline-flex', alignItems: 'center', gap: 4,
     fontSize: 12, color: theme.tealDeep, background: theme.tealBg,
-    borderRadius: 999, padding: '3px 10px', fontWeight: 500,
+    borderRadius: theme.radiusPill, padding: '3px 10px', fontWeight: 500,
   },
   tagRemove: { border: 'none', background: 'transparent', cursor: 'pointer', color: theme.tealDeep, fontSize: 14, lineHeight: 1, padding: 0, minWidth: 32, minHeight: 32, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' },
-  tagInput: {
-    padding: '8px 12px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`,
-    background: theme.bg, fontSize: 13, color: theme.ink, fontFamily: theme.font, outline: 'none',
-  },
   tagAddBtn: {
     padding: '8px 14px', borderRadius: theme.radiusSm, border: 'none',
     background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: theme.font,
   },
-  saveBtn: {
-    marginTop: 12, padding: '9px 18px', borderRadius: theme.radiusSm, border: 'none',
-    background: theme.primary, color: theme.onTeal, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: theme.font,
-  },
-  saveBtnOk: { background: theme.ok },
-  activeBadge: { fontSize: 11, fontWeight: 700, color: theme.ok, background: theme.okBg, borderRadius: 999, padding: '2px 8px' },
-  nextReview: { fontSize: 13.5, color: theme.ink, margin: 0 },
+  activeBadge: { fontSize: 11, fontWeight: 700, color: theme.ok, background: theme.okBg, borderRadius: theme.radiusPill, padding: '2px 8px' },
+  nextReview: { fontSize: 14, color: theme.ink, margin: 0 },
   intervalBtn: {
     padding: '8px 14px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`,
     background: theme.card, color: theme.ink, fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: theme.font,

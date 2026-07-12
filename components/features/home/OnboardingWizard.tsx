@@ -7,7 +7,7 @@
 // nenhuma sessão registrada, e respeita o "pular" (localStorage por usuário).
 'use client';
 
-import { useEffect, useMemo, useState, type CSSProperties } from 'react';
+import { useMemo, useState, type CSSProperties } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useUser } from '@/components/layout/UserContext';
@@ -15,7 +15,8 @@ import { getOnboardingStatus } from '@/services/onboarding.service';
 import { listCatalogEditais, activateCatalogEdital, type CatalogEdital } from '@/services/editaisCatalog.service';
 import { buildPreview, type GeneratorPreview } from '@/services/scheduleGenerator.service';
 import { createRule, type RecurrenceItemInput } from '@/services/recurrence.service';
-import { getDailyTarget, setDailyTarget } from '@/services/goals.service';
+import { getDailyTarget, setDailyTarget, setStudyAnchor } from '@/services/goals.service';
+import { ANCORAS_SUGERIDAS } from '@/components/features/home/PactoEstudo';
 import { refreshHomeAfterSession } from '@/lib/home-refresh';
 import { theme, zIndex } from '@/lib/theme';
 import { Button } from '@/components/ui/Button';
@@ -76,6 +77,7 @@ function OnboardingWizard({ userId, onClose }: { userId: string; onClose: (remem
   const [step, setStep] = useState(0);
   const [editalId, setEditalId] = useState('');
   const [horas, setHoras] = useState('3');
+  const [ancora, setAncora] = useState(''); // pacto de estudo (opcional)
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [preview, setPreview] = useState<GeneratorPreview | null>(null);
@@ -123,6 +125,13 @@ function OnboardingWizard({ userId, onClose }: { userId: string; onClose: (remem
         if (metaAtual <= 0) await setDailyTarget(horasNum * 60);
       } catch (e) {
         console.error('Meta diária não definida (plano criado mesmo assim):', e);
+      }
+      // Pacto de estudo (opcional): intenção de implementação — vira o cue
+      // diário do Plano de Hoje. Falha aqui não bloqueia o plano.
+      if (ancora) {
+        try { await setStudyAnchor(ancora); } catch (e) {
+          console.error('Pacto não salvo (plano criado mesmo assim):', e);
+        }
       }
       setPreview(prev);
       refreshHomeAfterSession(queryClient);
@@ -246,6 +255,21 @@ function OnboardingWizard({ userId, onClose }: { userId: string; onClose: (remem
               </div>
             </div>
 
+            {/* Intenção de implementação (Atomic Habits) — opcional, sem fricção */}
+            <div style={s.pactoBlock}>
+              <span style={s.pactoLabel}>E quando você costuma conseguir estudar? <span style={s.pactoOpt}>(opcional)</span></span>
+              <div style={s.pactoChips}>
+                {ANCORAS_SUGERIDAS.map((a) => {
+                  const on = ancora === a;
+                  return (
+                    <button key={a} onClick={() => setAncora(on ? '' : a)} style={{ ...s.chip, ...s.chipSm, ...(on ? s.chipOn : {}) }}>
+                      depois {a}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
             <p style={s.hint}>
               💡 Melhor prometer pouco e cumprir: constância vale mais que um dia heroico.
             </p>
@@ -321,19 +345,19 @@ const s: Record<string, CSSProperties> = {
   head: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 },
   brand: { fontSize: 15, fontWeight: 800, color: theme.teal, letterSpacing: 0.2 },
   dots: { display: 'flex', gap: 6 },
-  dot: { width: 8, height: 8, borderRadius: 999, background: theme.muted },
+  dot: { width: 8, height: 8, borderRadius: theme.radiusPill, background: theme.muted },
   dotOn: { background: theme.teal, width: 22, transition: 'width .2s' },
   dotDone: { background: theme.tealSoft },
 
   h2: { fontSize: 19, fontWeight: 700, color: theme.ink, margin: 0, lineHeight: 1.35 },
-  sub: { fontSize: 13.5, color: theme.inkSoft, margin: '6px 0 14px', lineHeight: 1.55 },
+  sub: { fontSize: 14, color: theme.inkSoft, margin: '6px 0 14px', lineHeight: 1.55 },
 
   listBox: { display: 'flex', flexDirection: 'column', gap: 4, maxHeight: 300, overflowY: 'auto', paddingRight: 4 },
-  muted: { fontSize: 13.5, color: theme.inkSoft, padding: '8px 0' },
+  muted: { fontSize: 14, color: theme.inkSoft, padding: '8px 0' },
   areaTitle: { fontSize: 11, fontWeight: 700, color: theme.teal, letterSpacing: 0.6, textTransform: 'uppercase', margin: '10px 0 6px' },
   editalRow: { display: 'flex', alignItems: 'center', gap: 12, width: '100%', textAlign: 'left', padding: '12px 14px', borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.bg, cursor: 'pointer', fontFamily: 'inherit', marginBottom: 6, minWidth: 0 },
   editalRowOn: { borderColor: theme.teal, background: theme.tealBg },
-  radio: { width: 16, height: 16, borderRadius: 999, border: `1.5px solid ${theme.line}`, flexShrink: 0, boxSizing: 'border-box' },
+  radio: { width: 16, height: 16, borderRadius: theme.radiusPill, border: `1.5px solid ${theme.line}`, flexShrink: 0, boxSizing: 'border-box' },
   radioOn: { borderWidth: 5, borderColor: theme.teal },
   editalInfo: { minWidth: 0, display: 'flex', flexDirection: 'column' },
   editalTitle: { fontSize: 14, fontWeight: 600, color: theme.ink, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
@@ -348,19 +372,25 @@ const s: Record<string, CSSProperties> = {
   customInput: { width: 92, boxSizing: 'border-box', padding: '10px 44px 10px 12px', borderRadius: 10, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.card, fontSize: 14, color: theme.ink, fontFamily: 'inherit', outline: 'none', textAlign: 'center' },
   customUnit: { position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', fontSize: 12, color: theme.inkFaint, pointerEvents: 'none' },
 
-  hint: { fontSize: 12.5, color: theme.tealDeep, background: theme.tealBg, padding: '10px 12px', borderRadius: theme.radiusSm, margin: '14px 0 0', lineHeight: 1.5 },
+  pactoBlock: { marginTop: 16 },
+  pactoLabel: { display: 'block', fontSize: 13, fontWeight: 600, color: theme.inkSoft, marginBottom: 8 },
+  pactoOpt: { fontWeight: 400, color: theme.inkFaint },
+  pactoChips: { display: 'flex', gap: 6, flexWrap: 'wrap' },
+  chipSm: { padding: '7px 13px', fontSize: 13, borderRadius: theme.radiusPill },
+
+  hint: { fontSize: 13, color: theme.tealDeep, background: theme.tealBg, padding: '10px 12px', borderRadius: theme.radiusSm, margin: '14px 0 0', lineHeight: 1.5 },
 
   previewList: { display: 'flex', flexDirection: 'column', gap: 8, margin: '4px 0 0' },
-  cargaAviso: { fontSize: 12.5, color: theme.inkSoft, background: theme.warnBg, padding: '9px 12px', borderRadius: theme.radiusSm, margin: '6px 0 0', lineHeight: 1.5 },
+  cargaAviso: { fontSize: 13, color: theme.inkSoft, background: theme.warnBg, padding: '9px 12px', borderRadius: theme.radiusSm, margin: '6px 0 0', lineHeight: 1.5 },
   previewRow: { display: 'flex', alignItems: 'center', gap: 10 },
   pDot: { width: 10, height: 10, borderRadius: 3, flexShrink: 0 },
   previewName: { fontSize: 13, color: theme.ink, width: 130, flexShrink: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
-  previewBar: { flex: 1, height: 7, background: theme.muted, borderRadius: 999, overflow: 'hidden' },
-  previewFill: { display: 'block', height: '100%', borderRadius: 999 },
-  previewTime: { fontSize: 12.5, fontWeight: 600, color: theme.inkSoft, width: 56, textAlign: 'right', flexShrink: 0, fontVariantNumeric: 'tabular-nums' },
+  previewBar: { flex: 1, height: 7, background: theme.muted, borderRadius: theme.radiusPill, overflow: 'hidden' },
+  previewFill: { display: 'block', height: '100%', borderRadius: theme.radiusPill },
+  previewTime: { fontSize: 13, fontWeight: 600, color: theme.inkSoft, width: 56, textAlign: 'right', flexShrink: 0, fontVariantNumeric: 'tabular-nums' },
 
   error: { color: theme.danger, fontSize: 13, margin: '12px 0 0' },
   actions: { display: 'flex', alignItems: 'center', gap: 10, marginTop: 20 },
-  skip: { padding: '10px 14px', borderRadius: theme.radiusSm, border: 'none', background: 'transparent', color: theme.inkFaint, fontSize: 13.5, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' },
+  skip: { padding: '10px 14px', borderRadius: theme.radiusSm, border: 'none', background: 'transparent', color: theme.inkFaint, fontSize: 14, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' },
   primary: { padding: '11px 22px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
 };

@@ -149,6 +149,32 @@ export async function getGoalsSummary(): Promise<GoalsSummary> {
   };
 }
 
+// ---------- Pacto de estudo (intenção de implementação) ----------
+// Atomic Habits: "Depois de [âncora], eu estudo." Ligar o estudo a um hábito
+// que já existe é o gatilho mais confiável que há. A âncora fica em
+// profiles.settings.studyAnchor e vira o cue diário no Plano de Hoje.
+
+export async function getStudyAnchor(): Promise<string | null> {
+  const supabase = createClient();
+  const user = await getCachedUser();
+  if (!user) return null;
+  const { data } = await supabase.from('profiles').select('settings').eq('id', user.id).maybeSingle();
+  const anchor = ((data?.settings ?? {}) as { studyAnchor?: string }).studyAnchor;
+  return anchor && anchor.trim() ? anchor.trim() : null;
+}
+
+export async function setStudyAnchor(anchor: string | null): Promise<void> {
+  const supabase = createClient();
+  const user = await getCachedUser();
+  if (!user) throw new Error('Você precisa estar logado.');
+  const { error } = await supabase.rpc('merge_profile_settings', {
+    p_user_id: user.id,
+    p_patch: { studyAnchor: anchor?.trim() ?? '' },
+  });
+  if (error) throw new Error('Erro ao salvar o pacto: ' + error.message);
+  track(EV.pactSet, { hasAnchor: !!anchor?.trim() });
+}
+
 // ---------- Meta adaptativa (N3) ----------
 // Sugere uma meta diária ACHIEVABLE a partir do histórico real — a filosofia é
 // "começar pequeno e crescer com a constância": uma meta que a pessoa bate quase

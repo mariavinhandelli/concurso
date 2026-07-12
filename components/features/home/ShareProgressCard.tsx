@@ -6,7 +6,9 @@ import { getEditalCoverage, type EditalCoverage } from '@/services/coverage.serv
 import { getStreak, type StreakInfo } from '@/services/streak.service';
 import { getJourneyStats, type JourneyStats } from '@/services/journey.service';
 import { useUser } from '@/components/layout/UserContext';
-import { theme, zIndex } from '@/lib/theme';
+import { theme } from '@/lib/theme';
+import { Overlay } from '@/components/ui/Overlay';
+import { IconButton } from '@/components/ui/IconButton';
 import { Button } from '@/components/ui/Button';
 
 // Paleta do card exportado — tema claro, no estilo da página de login (a imagem é fixa).
@@ -255,11 +257,10 @@ export function ShareProgressCard({ onClose }: { onClose: () => void }) {
   }
 
   return (
-    <div style={styles.overlay} onClick={onClose}>
-      <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
+    <Overlay onClose={onClose} maxWidth={420} labelledBy="share-progress-title" hideClose>
         <div style={styles.head}>
-          <h2 style={styles.h2}>Compartilhar progresso</h2>
-          <button style={styles.close} onClick={onClose} aria-label="Fechar">✕</button>
+          <h2 id="share-progress-title" style={styles.h2}>Compartilhar progresso</h2>
+          <IconButton onClick={onClose} aria-label="Fechar" size="sm" style={{ fontSize: 16 }}>✕</IconButton>
         </div>
         <p style={styles.subtitle}>Mostre sua evolução — mande no grupo e inspire (ou provoque) a galera.</p>
 
@@ -277,29 +278,18 @@ export function ShareProgressCard({ onClose }: { onClose: () => void }) {
           <Button style={{ flex: 1 }} onClick={baixar} disabled={!ready}>Baixar imagem</Button>
           {canShare && <Button variant="outline" style={{ flex: 1 }} onClick={compartilhar} disabled={!ready}>Compartilhar</Button>}
         </div>
-      </div>
-    </div>
+    </Overlay>
   );
 }
 
 const styles: Record<string, React.CSSProperties> = {
-  overlay: {
-    position: 'fixed', inset: 0, background: 'var(--backdrop)',
-    display: 'grid', placeItems: 'center', padding: 20, zIndex: zIndex.modal,
-  },
-  modal: {
-    background: theme.card, borderRadius: theme.radius, boxShadow: theme.shadowModal,
-    padding: 22, width: '100%', maxWidth: 420, fontFamily: theme.font,
-    maxHeight: '92vh', overflowY: 'auto',
-  },
   head: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
   h2: { fontSize: 18, fontWeight: 700, color: theme.ink, margin: 0 },
-  close: { border: 'none', background: 'transparent', color: theme.inkSoft, fontSize: 16, cursor: 'pointer', fontFamily: 'inherit', padding: 4, lineHeight: 1 },
-  subtitle: { fontSize: 13.5, color: theme.inkSoft, margin: '4px 0 16px', lineHeight: 1.5 },
+  subtitle: { fontSize: 14, color: theme.inkSoft, margin: '4px 0 16px', lineHeight: 1.5 },
 
   canvasWrap: { position: 'relative', display: 'grid', placeItems: 'center', minHeight: 200 },
   canvas: { width: '100%', maxWidth: 300, height: 'auto', borderRadius: 14, display: 'block', border: `0.5px solid ${theme.line}`, boxShadow: theme.shadow, transition: 'opacity .3s' },
-  loading: { position: 'absolute', fontSize: 13.5, color: theme.inkSoft },
+  loading: { position: 'absolute', fontSize: 14, color: theme.inkSoft },
 
   actions: { display: 'flex', gap: 10, marginTop: 18 },
   primary: {

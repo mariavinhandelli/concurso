@@ -1,20 +1,19 @@
 'use client';
 
 import { memo, useEffect, useState, type CSSProperties } from 'react';
+import { X, ChevronRight } from 'lucide-react';
 import { HealthBar } from '@/components/features/topics/HealthBar';
 import { type SubjectTree, pesoEfetivo } from '@/lib/targets';
 import { theme } from '@/lib/theme';
 import { Button } from '@/components/ui/Button';
+import { Select } from '@/components/ui/Select';
 
 const COACH_KEY = 'focali_vert_coach_seen';
 
 function Chevron({ open }: { open: boolean }) {
   return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-      stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-      style={{ transform: open ? 'rotate(90deg)' : 'rotate(0deg)', transition: 'transform .15s', flexShrink: 0 }}>
-      <path d="M9 18l6-6-6-6" />
-    </svg>
+    <ChevronRight size={16} strokeWidth={2}
+      style={{ transform: open ? 'rotate(90deg)' : 'rotate(0deg)', transition: 'transform .15s', flexShrink: 0 }} />
   );
 }
 
@@ -126,9 +125,7 @@ export const VerticalizadoTab = memo(function VerticalizadoTab({
               </p>
             </div>
             <button onClick={dismissCoach} style={s.coachClose} aria-label="Fechar dica">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M18 6L6 18M6 6l12 12" />
-              </svg>
+              <X size={14} strokeWidth={2} />
             </button>
           </div>
         </div>
@@ -186,7 +183,7 @@ export const VerticalizadoTab = memo(function VerticalizadoTab({
                       <span style={{ ...s.libTopicName, ...(t.is_completed ? s.doneText : {}) }}>{t.name}</span>
                       <HealthBar saude={saudeMap[t.id]} />
                       {editando ? (
-                        <select
+                        <Select
                           value={topicWeights[t.id] ?? ''}
                           onChange={(e) => {
                             onChangeTopicWeight(t.id, e.target.value === '' ? null : Number(e.target.value));
@@ -194,11 +191,11 @@ export const VerticalizadoTab = memo(function VerticalizadoTab({
                           }}
                           onBlur={() => setTimeout(() => setEditingWeight(null), 200)}
                           autoFocus
-                          style={s.weightSelect}
+                          style={{ padding: '5px 28px 5px 8px', borderRadius: theme.radiusXs, border: `1.5px solid ${theme.teal}`, fontSize: 13, flexShrink: 0, width: 'auto' }}
                         >
                           <option value="">Herdar ({subjectWeights[node.subject.id] ?? 1})</option>
                           {[1, 2, 3, 4, 5].map((w) => <option key={w} value={w}>Peso {w}</option>)}
-                        </select>
+                        </Select>
                       ) : (
                         <WeightBadge peso={peso} onEdit={() => setEditingWeight(t.id)} />
                       )}
@@ -220,18 +217,18 @@ const s: Record<string, CSSProperties> = {
   emptyState: { display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '48px 20px', textAlign: 'center' },
   emptyTitle: { fontSize: 15, fontWeight: 600, color: theme.inkSoft, margin: '0 0 6px' },
   emptyHint: { fontSize: 13, color: theme.inkFaint, maxWidth: 320, lineHeight: 1.6, margin: '0 0 16px' },
-  emptyBtn: { padding: '10px 20px', borderRadius: theme.radiusSm, border: `1px solid ${theme.teal}`, background: theme.tealBg, color: theme.teal, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+  emptyBtn: { padding: '10px 20px', borderRadius: theme.radiusSm, border: `1px solid ${theme.teal}`, background: theme.tealBg, color: theme.teal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
 
   // Coach mark com SVG (sem emoji)
   coachMark: { background: theme.tealBg, border: `1px solid ${theme.teal}`, borderRadius: theme.radiusSm, padding: '12px 14px', animation: 'focali-slide-down 0.2s ease' },
   coachInner: { display: 'flex', alignItems: 'flex-start', gap: 10 },
   coachTitle: { fontSize: 13, fontWeight: 600, color: theme.ink, margin: '0 0 3px' },
-  coachBody: { fontSize: 12.5, color: theme.inkSoft, margin: 0, lineHeight: 1.55 },
+  coachBody: { fontSize: 13, color: theme.inkSoft, margin: 0, lineHeight: 1.55 },
   coachClose: { background: 'transparent', border: 'none', color: theme.inkFaint, cursor: 'pointer', padding: 2, flexShrink: 0, marginTop: 1, display: 'grid', placeItems: 'center' },
 
   // Chips — padding 6px 14px (antes 5px 12px), fontSize 13 (antes 12.5)
   chips: { display: 'flex', gap: 6, flexWrap: 'wrap' },
-  chip: { padding: '6px 14px', borderRadius: 999, border: `1px solid ${theme.line}`, background: 'transparent', color: theme.inkSoft, fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit', transition: 'all .12s' },
+  chip: { padding: '6px 14px', borderRadius: theme.radiusPill, border: `1px solid ${theme.line}`, background: 'transparent', color: theme.inkSoft, fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit', transition: 'all .12s' },
   chipOn: { background: theme.tealBg, border: `1px solid ${theme.teal}`, color: theme.teal, fontWeight: 600 },
 
   // Blocos de disciplina — radius unificado (radiusSm)
@@ -239,8 +236,8 @@ const s: Record<string, CSSProperties> = {
   vertHead: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8, cursor: 'pointer', gap: 10 },
   vertHeadLeft: { display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 },
   vertProgress: { display: 'flex', alignItems: 'baseline', gap: 8, fontSize: 14, fontWeight: 700, flexShrink: 0 },
-  vertTrack: { height: 6, background: theme.muted, borderRadius: 999, overflow: 'hidden' },
-  vertFill: { height: '100%', background: theme.teal, borderRadius: 999, transition: 'width 0.5s ease' },
+  vertTrack: { height: 6, background: theme.muted, borderRadius: theme.radiusPill, overflow: 'hidden' },
+  vertFill: { height: '100%', background: theme.teal, borderRadius: theme.radiusPill, transition: 'width 0.5s ease' },
   topicList: { display: 'flex', flexDirection: 'column', gap: 6, marginTop: 12 },
 
   // Rows — radius unificado (radiusSm)
@@ -254,5 +251,4 @@ const s: Record<string, CSSProperties> = {
   // Badge de peso com hover state
   weightBadge: { border: `1px solid ${theme.lineStrong}`, background: theme.muted, color: theme.inkSoft, fontSize: 12, fontWeight: 700, borderRadius: theme.radiusXs, padding: '4px 9px', cursor: 'pointer', fontFamily: 'inherit', flexShrink: 0, fontVariantNumeric: 'tabular-nums', transition: 'border-color .12s, background .12s, color .12s' },
   weightBadgeHov: { border: `1px solid ${theme.teal}`, background: theme.tealBg, color: theme.teal },
-  weightSelect: { padding: '5px 8px', borderRadius: theme.radiusXs, border: `1.5px solid ${theme.teal}`, background: theme.card, fontSize: 13, color: theme.ink, fontFamily: 'inherit', cursor: 'pointer', flexShrink: 0, outline: 'none' },
 };

@@ -23,6 +23,7 @@ export interface FlashcardSRStateRow {
   ease_factor: number | null;
   interval_days: number | null;
   repetitions: number | null;
+  subject_id: string | null;
 }
 
 interface SubjectRef { name: string; color: string; }
@@ -72,7 +73,7 @@ export async function fetchCardSRState(
 ): Promise<FlashcardSRStateRow> {
   const { data, error } = await supabase
     .from('flashcards')
-    .select('ease_factor, interval_days, repetitions')
+    .select('ease_factor, interval_days, repetitions, subject_id')
     .eq('id', cardId)
     .eq('user_id', userId)
     .single();

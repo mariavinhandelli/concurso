@@ -18,6 +18,7 @@ import { useConfirm } from '@/hooks/useConfirm';
 import { useToast } from '@/components/ui/ToastProvider';
 import { theme } from '@/lib/theme';
 import { KIND_CORES } from './notaCores';
+import { Select } from '@/components/ui/Select';
 
 type SaveStatus = 'salvo' | 'pendente' | 'salvando' | 'erro';
 
@@ -152,7 +153,7 @@ export function NotaEditor({ nota, subjects, onPatched, onDeleted, onVoltar }: P
       </div>
 
       <div style={s.metaRow}>
-        <select
+        <Select
           value={subjectId}
           onChange={(e) => { setSubjectId(e.target.value); setTopicId(''); queue({ subjectId: e.target.value || null, topicId: null }, 300); }}
           style={s.metaSelect}
@@ -160,9 +161,9 @@ export function NotaEditor({ nota, subjects, onPatched, onDeleted, onVoltar }: P
         >
           <option value="">Sem matéria</option>
           {subjects.map((sub) => <option key={sub.id} value={sub.id}>{sub.name}</option>)}
-        </select>
+        </Select>
 
-        <select
+        <Select
           value={topicId}
           onChange={(e) => { setTopicId(e.target.value); queue({ topicId: e.target.value || null }, 300); }}
           style={s.metaSelect}
@@ -171,7 +172,7 @@ export function NotaEditor({ nota, subjects, onPatched, onDeleted, onVoltar }: P
         >
           <option value="">Sem tópico</option>
           {topics.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
-        </select>
+        </Select>
 
         <div style={s.kindGroup}>
           {NOTA_KINDS.map((k) => {
@@ -240,12 +241,12 @@ const s: Record<string, React.CSSProperties> = {
   headRow: { display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 },
   voltar: { border: 'none', background: 'transparent', color: theme.inkSoft, fontSize: 20, cursor: 'pointer', fontFamily: 'inherit', padding: '0 4px', flexShrink: 0 },
   titleInput: { flex: 1, minWidth: 0, border: 'none', outline: 'none', background: 'transparent', fontSize: 22, fontWeight: 700, color: theme.ink, fontFamily: 'inherit', padding: 0 },
-  status: { fontSize: 11.5, fontWeight: 600, whiteSpace: 'nowrap', flexShrink: 0 },
+  status: { fontSize: 12, fontWeight: 600, whiteSpace: 'nowrap', flexShrink: 0 },
   metaRow: { display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 12 },
-  metaSelect: { maxWidth: 190, padding: '6px 8px', borderRadius: 8, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.card, fontSize: 12.5, color: theme.inkSoft, fontFamily: 'inherit', outline: 'none' },
+  metaSelect: { maxWidth: 190, padding: '6px 28px 6px 8px', borderRadius: theme.radiusXs, fontSize: 13, color: theme.inkSoft },
   kindGroup: { display: 'flex', gap: 4 },
-  kindChip: { padding: '5px 11px', borderRadius: 999, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: 'transparent', color: theme.inkFaint, fontSize: 12, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' },
-  iconBtn: { width: 32, height: 32, borderRadius: 8, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.card, fontSize: 14, cursor: 'pointer', display: 'grid', placeItems: 'center', flexShrink: 0, opacity: 0.75 },
+  kindChip: { padding: '5px 11px', borderRadius: theme.radiusPill, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: 'transparent', color: theme.inkFaint, fontSize: 12, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' },
+  iconBtn: { width: 32, height: 32, borderRadius: theme.radiusXs, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.card, fontSize: 14, cursor: 'pointer', display: 'grid', placeItems: 'center', flexShrink: 0, opacity: 0.75 },
   iconBtnOn: { borderColor: theme.teal, background: theme.tealBg, opacity: 1 },
-  footInfo: { fontSize: 11.5, color: theme.inkFaint, margin: '8px 2px 0', textAlign: 'right' },
+  footInfo: { fontSize: 12, color: theme.inkFaint, margin: '8px 2px 0', textAlign: 'right' },
 };

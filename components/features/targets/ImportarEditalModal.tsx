@@ -5,6 +5,11 @@ import { parseEdital } from '@/lib/parse-edital';
 import { importEditalAsTarget } from '@/services/editalImport.service';
 import { useToast } from '@/components/ui/ToastProvider';
 import { theme } from '@/lib/theme';
+import { Overlay } from '@/components/ui/Overlay';
+import { IconButton } from '@/components/ui/IconButton';
+import { Input } from '@/components/ui/Input';
+import { Textarea } from '@/components/ui/Textarea';
+import { Button } from '@/components/ui/Button';
 
 export function ImportarEditalModal({
   onClose,
@@ -35,27 +40,26 @@ export function ImportarEditalModal({
   }
 
   return (
-    <div style={s.overlay} onClick={onClose}>
-      <div style={s.modal} onClick={(e) => e.stopPropagation()}>
+    <Overlay onClose={onClose} maxWidth={680} labelledBy="importar-edital-title" hideClose>
         <div style={s.head}>
           <div>
-            <h2 style={s.h2}>Importar edital colado</h2>
+            <h2 id="importar-edital-title" style={s.h2}>Importar edital colado</h2>
             <p style={s.sub}>Cole o conteúdo programático. Disciplinas em CAIXA ALTA viram matérias; as linhas abaixo, tópicos.</p>
           </div>
-          <button style={s.close} onClick={onClose} aria-label="Fechar">✕</button>
+          <IconButton onClick={onClose} aria-label="Fechar" size="sm" style={{ fontSize: 16, flexShrink: 0 }}>✕</IconButton>
         </div>
 
         <div style={s.fields}>
-          <input value={cargo} onChange={(e) => setCargo(e.target.value)} placeholder="Cargo (ex: Analista)" style={s.input} />
-          <input value={orgao} onChange={(e) => setOrgao(e.target.value)} placeholder="Órgão (opcional)" style={s.input} />
+          <Input value={cargo} onChange={(e) => setCargo(e.target.value)} placeholder="Cargo (ex: Analista)" style={{ flex: 1, minWidth: 140 }} />
+          <Input value={orgao} onChange={(e) => setOrgao(e.target.value)} placeholder="Órgão (opcional)" style={{ flex: 1, minWidth: 140 }} />
         </div>
 
         <div style={s.split}>
-          <textarea
+          <Textarea
             value={raw}
             onChange={(e) => setRaw(e.target.value)}
             placeholder={'LÍNGUA PORTUGUESA\n1. Interpretação de textos\n2. Ortografia\n\nDIREITO CONSTITUCIONAL\n1. Princípios fundamentais\n2. Direitos e garantias'}
-            style={s.textarea}
+            style={{ flex: 1, minWidth: 240, minHeight: 240, lineHeight: 1.6 }}
             autoFocus
           />
           <div style={s.preview}>
@@ -78,43 +82,30 @@ export function ImportarEditalModal({
         </div>
 
         <div style={s.actions}>
-          <button onClick={onClose} style={s.cancelBtn}>Cancelar</button>
-          <button
-            onClick={handleConfirm}
-            disabled={groups.length === 0 || saving}
-            style={{ ...s.confirmBtn, ...(groups.length === 0 || saving ? s.confirmOff : {}) }}
-          >
+          <Button variant="outline" onClick={onClose}>Cancelar</Button>
+          <Button onClick={handleConfirm} disabled={groups.length === 0} loading={saving}>
             {saving ? 'Criando…' : groups.length === 0 ? 'Criar concurso' : `Criar concurso com ${groups.length} matéria(s)`}
-          </button>
+          </Button>
         </div>
-      </div>
-    </div>
+    </Overlay>
   );
 }
 
 const s: Record<string, CSSProperties> = {
-  overlay: { position: 'fixed', inset: 0, background: 'var(--backdrop)', display: 'grid', placeItems: 'center', zIndex: 60, padding: 16 },
-  modal: { background: theme.card, borderRadius: theme.radius, boxShadow: theme.shadowModal, padding: 24, width: '100%', maxWidth: 680, maxHeight: '92vh', overflowY: 'auto', fontFamily: theme.font },
   head: { display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, marginBottom: 16 },
   h2: { fontSize: 18, fontWeight: 700, color: theme.ink, margin: 0 },
   sub: { fontSize: 13, color: theme.inkSoft, margin: '5px 0 0', lineHeight: 1.5 },
-  close: { border: 'none', background: 'transparent', color: theme.inkSoft, fontSize: 16, cursor: 'pointer', fontFamily: 'inherit', padding: 4, lineHeight: 1, flexShrink: 0 },
 
   fields: { display: 'flex', gap: 10, marginBottom: 14, flexWrap: 'wrap' },
-  input: { flex: 1, minWidth: 140, padding: '10px 14px', borderRadius: theme.radiusSm, border: `1px solid ${theme.lineStrong}`, background: theme.card, fontSize: 14, color: theme.ink, fontFamily: 'inherit', outline: 'none' },
 
   split: { display: 'flex', gap: 14, marginBottom: 18, flexWrap: 'wrap' },
-  textarea: { flex: 1, minWidth: 240, minHeight: 240, padding: 14, borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.card, fontSize: 14, color: theme.ink, fontFamily: 'inherit', resize: 'vertical', outline: 'none', lineHeight: 1.6 },
   preview: { flex: 1, minWidth: 200, minHeight: 240, maxHeight: 320, overflowY: 'auto', padding: 14, borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.muted },
   previewHeader: { fontSize: 12, fontWeight: 700, color: theme.inkSoft, marginBottom: 10, textTransform: 'uppercase', letterSpacing: 0.4 },
   previewEmpty: { fontSize: 13, color: theme.inkFaint, margin: 0 },
   groupList: { display: 'flex', flexDirection: 'column', gap: 6 },
   groupItem: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, padding: '8px 10px', borderRadius: theme.radiusXs, background: theme.card, border: `0.5px solid ${theme.line}` },
-  groupName: { fontSize: 13.5, color: theme.ink, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 },
+  groupName: { fontSize: 14, color: theme.ink, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 },
   groupCount: { fontSize: 12, color: theme.teal, fontWeight: 700, flexShrink: 0 },
 
   actions: { display: 'flex', gap: 12, justifyContent: 'flex-end' },
-  cancelBtn: { padding: '11px 22px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.inkSoft, fontSize: 14, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' },
-  confirmBtn: { padding: '11px 22px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
-  confirmOff: { background: theme.muted, color: theme.inkFaint, cursor: 'not-allowed' },
 };

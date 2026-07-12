@@ -57,18 +57,8 @@
   --primary: #143D45;
   --primary-hover: #194A53;
   --primary-pressed: #0E3137;
+  --on-primary: #FFFFFF;
 
-  /* Design system extras */
-  --radius-xs: 8px;
-  --radius-sm: 12px;
-  --radius-md: 16px;
-  --radius-lg: 24px;
-  --radius-xl: 32px;
-  --radius-pill: 999px;
-  --anim-short: 150ms;
-  --anim-normal: 250ms;
-  --anim-long: 350ms;
-  --easing: cubic-bezier(.4,0,.2,1);
   --info: #3B82F6;
   --info-bg: #DBEAFE;
   --gold: #EAB308;
@@ -117,6 +107,7 @@
   --primary: #4ADE80;
   --primary-hover: #22C55E;
   --primary-pressed: #16a34a;
+  --on-primary: #052e16;
 
   --clay: #818CF8;
   --clay-deep: #6366F1;
@@ -170,6 +161,7 @@
   --primary: #C67D80;
   --primary-hover: #A85F62;
   --primary-pressed: #8A4850;
+  --on-primary: #FFFFFF;
 
   --clay: #9B5C6E;
   --clay-deep: #7A4456;
@@ -216,6 +208,7 @@
   --primary: #D7969A;
   --primary-hover: #C67D80;
   --primary-pressed: #B06065;
+  --on-primary: #FFFFFF;
 
   --clay: #C98A9C;
   --clay-deep: #DDA8B6;
@@ -267,6 +260,7 @@
   --primary: #6366F1;
   --primary-hover: #4338CA;
   --primary-pressed: #3730A3;
+  --on-primary: #FFFFFF;
 
   --clay: #D98C5F;
   --clay-deep: #B26A3F;
@@ -313,6 +307,7 @@
   --primary: #7577F3;
   --primary-hover: #6366F1;
   --primary-pressed: #4338CA;
+  --on-primary: #FFFFFF;
 
   --clay: #E0A07A;
   --clay-deep: #ECB890;
@@ -365,6 +360,7 @@
   --primary: #1b221f;
   --primary-hover: #10140f;
   --primary-pressed: #080b0a;
+  --on-primary: #FFFFFF;
 
   --clay: #4f645a;
   --clay-deep: #3A4A42;
@@ -411,6 +407,7 @@
   --primary: #C8C8C8;
   --primary-hover: #E0E0E0;
   --primary-pressed: #B0B0B0;
+  --on-primary: #131715;
 
   --clay: #7E948A;
   --clay-deep: #9AAAA2;
@@ -727,6 +724,11 @@ img, video, canvas {
 .ui-btn-ghost:hover:not(:disabled) { background: var(--muted) !important; }
 .ui-btn-danger:hover:not(:disabled),
 .ui-btn-dangerSoft:hover:not(:disabled) { filter: brightness(0.94); }
+
+/* ── Primitivo IconButton (components/ui/IconButton.tsx) ── */
+.ui-icon-btn { transition: background .12s ease, border-color .12s ease; }
+.ui-icon-btn-ghost:hover:not(:disabled) { background: var(--muted) !important; }
+.ui-icon-btn-outline:hover:not(:disabled) { background: var(--muted) !important; border-color: var(--line-strong) !important; }
 
 /* CTA do topbar — cromo fica sólido (navy); o gradiente da marca é reservado
    a CTAs full-width de formulário (login, reset, onboarding), onde as duas

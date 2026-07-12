@@ -96,6 +96,6 @@ const styles: Record<string, React.CSSProperties> = {
   name: { fontSize: 14, color: theme.ink, fontWeight: 500 },
   stat: { display: 'flex', alignItems: 'baseline', gap: 8, fontSize: 14 },
   frac: { fontSize: 12, color: theme.inkFaint, fontVariantNumeric: 'tabular-nums' },
-  track: { height: 10, background: theme.muted, borderRadius: 999, overflow: 'hidden' },
-  fill: { height: '100%', borderRadius: 999, transition: 'width 0.4s cubic-bezier(.2,.7,.3,1)' },
+  track: { height: 10, background: theme.muted, borderRadius: theme.radiusPill, overflow: 'hidden' },
+  fill: { height: '100%', borderRadius: theme.radiusPill, transition: 'width 0.4s cubic-bezier(.2,.7,.3,1)' },
 };

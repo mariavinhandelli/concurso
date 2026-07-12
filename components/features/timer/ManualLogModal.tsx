@@ -17,6 +17,11 @@ import {
   type PendingSession,
 } from '@/lib/timer-storage';
 import { theme } from '@/lib/theme';
+import { Overlay } from '@/components/ui/Overlay';
+import { Input } from '@/components/ui/Input';
+import { Select } from '@/components/ui/Select';
+import { Textarea } from '@/components/ui/Textarea';
+import { Button } from '@/components/ui/Button';
 import { toLocalDateString } from '@/lib/local-date';
 
 interface Props {
@@ -61,13 +66,6 @@ export function ManualLogModal({ onClose, onSaved }: Props) {
     }
     onClose();
   }
-
-  useEffect(() => {
-    const h = (e: KeyboardEvent) => { if (e.key === 'Escape') handleOverlayClick(); };
-    document.addEventListener('keydown', h);
-    return () => document.removeEventListener('keydown', h);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isDirty]);
 
   useEffect(() => {
     listSubjects().then(setSubjects).catch(() => setError('Erro ao carregar matérias. Recarregue a página.'));
@@ -150,41 +148,34 @@ export function ManualLogModal({ onClose, onSaved }: Props) {
   return (
     <>
     {discardDialog}
-    <div style={styles.overlay} onClick={handleOverlayClick}>
-      <div style={{ ...styles.modal, position: 'relative' }} onClick={(e) => e.stopPropagation()}>
-        <button
-          onClick={handleOverlayClick}
-          aria-label="Fechar"
-          aria-keyshortcuts="Escape"
-          style={{ position: 'absolute', top: 14, right: 16, border: 'none', background: 'transparent', fontSize: 18, color: theme.inkFaint, cursor: 'pointer', lineHeight: 1, padding: 4 }}
-        >✕</button>
-        <h2 style={styles.h2}>Registrar estudo</h2>
+    <Overlay onClose={handleOverlayClick} maxWidth={420} labelledBy="manuallog-modal-title">
+        <h2 id="manuallog-modal-title" style={styles.h2}>Registrar estudo</h2>
         <p style={styles.subtitle}>Pra quando você estudou sem o cronômetro.</p>
 
         <div style={styles.row2}>
           <div style={styles.col}>
             <label style={styles.label}>Data</label>
-            <input type="date" value={date} max={toLocalDateString()} onChange={(e) => setDate(e.target.value)} style={styles.input} />
+            <Input type="date" value={date} max={toLocalDateString()} onChange={(e) => setDate(e.target.value)} />
           </div>
           <div style={styles.col}>
             <label style={styles.label}>Tipo</label>
-            <select value={mode} onChange={(e) => setMode(e.target.value as LogMode)} style={styles.input}>
+            <Select value={mode} onChange={(e) => setMode(e.target.value as LogMode)}>
               {SESSION_MODES.map((m) => <option key={m.value} value={m.value}>{m.label}</option>)}
-            </select>
+            </Select>
           </div>
         </div>
 
         <label style={styles.label}>Matéria</label>
-        <select value={subjectId} onChange={(e) => setSubjectId(e.target.value)} style={styles.input}>
+        <Select value={subjectId} onChange={(e) => setSubjectId(e.target.value)}>
           <option value="">Selecione…</option>
           {subjects.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
-        </select>
+        </Select>
 
         <label style={styles.label}>Tópico (opcional)</label>
-        <select value={topicId} onChange={(e) => setTopicId(e.target.value)} style={styles.input} disabled={!subjectId || topics.length === 0}>
+        <Select value={topicId} onChange={(e) => setTopicId(e.target.value)} disabled={!subjectId || topics.length === 0}>
           <option value="">— sem tópico específico —</option>
           {topics.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
-        </select>
+        </Select>
 
         {/* Agendar revisão — só com tópico selecionado */}
         {topicId && (
@@ -196,9 +187,9 @@ export function ManualLogModal({ onClose, onSaved }: Props) {
 
         <label style={styles.label}>Duração</label>
         <div style={styles.durRow}>
-          <input type="number" min="0" value={hours} onChange={(e) => setHours(e.target.value)} style={styles.durInput} />
+          <Input type="number" min="0" value={hours} onChange={(e) => setHours(e.target.value)} style={{ width: 64, textAlign: 'center' }} />
           <span style={styles.durUnit}>h</span>
-          <input type="number" min="0" max="59" value={minutes} onChange={(e) => setMinutes(e.target.value)} style={styles.durInput} />
+          <Input type="number" min="0" max="59" value={minutes} onChange={(e) => setMinutes(e.target.value)} style={{ width: 64, textAlign: 'center' }} />
           <span style={styles.durUnit}>min</span>
         </div>
 
@@ -206,11 +197,11 @@ export function ManualLogModal({ onClose, onSaved }: Props) {
           <div style={styles.row2}>
             <div style={styles.col}>
               <label style={styles.label}>Questões feitas</label>
-              <input type="number" min="0" value={qTotal} onChange={(e) => setQTotal(e.target.value)} style={styles.input} />
+              <Input type="number" min="0" value={qTotal} onChange={(e) => setQTotal(e.target.value)} />
             </div>
             <div style={styles.col}>
               <label style={styles.label}>Acertos</label>
-              <input type="number" min="0" value={qCorrect} onChange={(e) => setQCorrect(e.target.value)} style={styles.input} />
+              <Input type="number" min="0" value={qCorrect} onChange={(e) => setQCorrect(e.target.value)} />
             </div>
           </div>
         )}
@@ -237,7 +228,7 @@ export function ManualLogModal({ onClose, onSaved }: Props) {
         )}
 
         <label style={styles.label}>Como foi a sessão? <span style={styles.opt}>(opcional)</span></label>
-        <textarea value={qFeedback} onChange={(e) => setQFeedback(e.target.value)} rows={2} style={styles.textarea} placeholder="O que rendeu, o que travou…" />
+        <Textarea value={qFeedback} onChange={(e) => setQFeedback(e.target.value)} rows={2} placeholder="O que rendeu, o que travou…" />
 
         <label style={styles.label}>Energia: {energy === 0 ? '—' : `${energy}/5`}</label>
         <input type="range" min="0" max="5" value={energy} onChange={(e) => setEnergy(Number(e.target.value))} style={styles.range} />
@@ -245,39 +236,31 @@ export function ManualLogModal({ onClose, onSaved }: Props) {
         {error && <p role="alert" aria-live="polite" style={styles.error}>{error}</p>}
 
         <div style={styles.actions}>
-          <button onClick={onClose} style={styles.cancel}>Cancelar</button>
-          <button onClick={handleSave} disabled={saving} style={styles.save}>
+          <Button variant="outline" onClick={onClose}>Cancelar</Button>
+          <Button onClick={handleSave} loading={saving}>
             {saving ? 'Salvando…' : 'Registrar'}
-          </button>
+          </Button>
         </div>
-      </div>
-    </div>
+    </Overlay>
     </>
   );
 }
 
 const styles: Record<string, React.CSSProperties> = {
-  overlay: { position: 'fixed', inset: 0, background: 'var(--backdrop)', display: 'grid', placeItems: 'center', zIndex: 60, padding: 20 },
-  modal: { background: theme.card, borderRadius: theme.radius, boxShadow: theme.shadowModal, padding: 24, width: '100%', maxWidth: 420, maxHeight: '88vh', overflowY: 'auto', fontFamily: theme.font },
   h2: { fontSize: 18, fontWeight: 700, color: theme.ink, margin: 0 },
   subtitle: { fontSize: 13, color: theme.inkSoft, margin: '4px 0 14px' },
   row2: { display: 'flex', gap: 12 },
   col: { flex: 1 },
-  label: { display: 'block', fontSize: 12.5, fontWeight: 600, color: theme.inkSoft, margin: '14px 0 6px' },
+  label: { display: 'block', fontSize: 13, fontWeight: 600, color: theme.inkSoft, margin: '14px 0 6px' },
   opt: { fontWeight: 400, color: theme.inkFaint },
-  input: { width: '100%', boxSizing: 'border-box', padding: '10px 12px', borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.card, fontSize: 14, color: theme.ink, fontFamily: 'inherit', outline: 'none' },
   checkRow: { display: 'flex', alignItems: 'flex-start', gap: 9, margin: '14px 0 0', fontSize: 13, color: theme.inkSoft, cursor: 'pointer', lineHeight: 1.4 },
   checkbox: { width: 16, height: 16, accentColor: theme.teal, marginTop: 1, flexShrink: 0, cursor: 'pointer' },
   segment: { display: 'flex', gap: 6 },
   segBtn: { flex: 1, padding: '9px 8px', borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.card, color: theme.inkSoft, fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' },
   segBtnActive: { borderColor: theme.teal, background: theme.teal, color: theme.onTeal, fontWeight: 600 },
   durRow: { display: 'flex', alignItems: 'center', gap: 8 },
-  durInput: { width: 64, boxSizing: 'border-box', padding: '10px 12px', borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.card, fontSize: 14, color: theme.ink, fontFamily: 'inherit', outline: 'none', textAlign: 'center' },
   durUnit: { fontSize: 13, color: theme.inkSoft },
-  textarea: { width: '100%', boxSizing: 'border-box', padding: '10px 12px', borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.card, fontSize: 14, color: theme.ink, fontFamily: 'inherit', outline: 'none', resize: 'vertical' },
   range: { width: '100%', accentColor: theme.teal },
   error: { color: theme.danger, fontSize: 13, margin: '12px 0 0' },
   actions: { display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 20 },
-  cancel: { padding: '10px 18px', borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.card, color: theme.inkSoft, fontSize: 14, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' },
-  save: { padding: '10px 18px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
 };

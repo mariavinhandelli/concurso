@@ -8,11 +8,11 @@
 
 import { useEffect, useState, type CSSProperties } from 'react';
 import { usePersistedState } from '@/hooks/usePersistedState';
-import { useUI } from '@/components/layout/UIContext';
 import { AnotacoesView } from '@/components/features/caderno/AnotacoesView';
 import { TudoView } from '@/components/features/caderno/TudoView';
 import { ErrosView } from '@/components/features/notebook/ErrosView';
 import { theme } from '@/lib/theme';
+import { PageContainer, PageHeader } from '@/components/ui/Page';
 
 type Tab = 'tudo' | 'anotacoes' | 'erros';
 
@@ -25,7 +25,6 @@ const TABS: { value: Tab; label: string }[] = [
 ];
 
 export default function CadernoHubPage() {
-  const { isMobile } = useUI();
 
   // Aba preferida persiste; `override` (deep-link ou clique na aba "Tudo") tem
   // prioridade sem gravar preferência — assim um deep-link não muda o padrão.
@@ -67,11 +66,8 @@ export default function CadernoHubPage() {
   }
 
   return (
-    <div style={{ ...s.wrap, padding: isMobile ? '20px 16px' : '34px 40px' }}>
-      <div style={s.head}>
-        <h1 style={{ ...s.h1, fontSize: isMobile ? 24 : 28 }}>Caderno</h1>
-        <p style={s.sub}>Tudo que você escreveu — anotações e erros, num lugar só.</p>
-      </div>
+    <PageContainer width="wide">
+      <PageHeader title="Caderno" subtitle="Tudo que você escreveu — anotações e erros, num lugar só." />
 
       <div style={s.tabs} role="tablist">
         {TABS.map((t) => (
@@ -90,15 +86,11 @@ export default function CadernoHubPage() {
       {tab === 'tudo' && <TudoView onAbrir={abrirDoTudo} />}
       {tab === 'anotacoes' && <AnotacoesView openNotaId={openNotaId} />}
       {tab === 'erros' && <ErrosView openNoteId={openNoteId} />}
-    </div>
+    </PageContainer>
   );
 }
 
 const s: Record<string, CSSProperties> = {
-  wrap: { maxWidth: 1080, margin: '0 auto', fontFamily: theme.font, minWidth: 0 },
-  head: { marginBottom: 14 },
-  h1: { fontWeight: 800, color: theme.ink, letterSpacing: -0.6, margin: 0 },
-  sub: { fontSize: 14, color: theme.inkSoft, margin: '6px 0 0', fontWeight: 500 },
   tabs: { display: 'flex', gap: 4, marginBottom: 18, padding: 3, background: 'rgba(15,23,42,.06)', borderRadius: theme.radiusSm, width: 'fit-content' },
   tab: { padding: '8px 18px', borderRadius: theme.radiusXs, border: 'none', background: 'transparent', color: theme.inkSoft, fontSize: 14, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit', transition: 'all .15s', whiteSpace: 'nowrap' },
   tabOn: { background: theme.card, color: theme.ink, boxShadow: theme.shadow, fontWeight: 600 },

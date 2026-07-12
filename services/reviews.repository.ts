@@ -21,6 +21,7 @@ export interface TopicSRStateRow {
   ease_factor: number | null;
   interval_days: number | null;
   repetitions: number | null;
+  subject_id: string | null;
 }
 
 export interface TopicScheduleRow {
@@ -58,7 +59,7 @@ export async function fetchTopicSRState(
 ): Promise<TopicSRStateRow> {
   const { data, error } = await supabase
     .from('topics')
-    .select('ease_factor, interval_days, repetitions')
+    .select('ease_factor, interval_days, repetitions, subject_id')
     .eq('id', topicId)
     .eq('user_id', userId)
     .single();

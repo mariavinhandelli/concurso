@@ -143,7 +143,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   badge: {
     position: 'absolute', top: 6, right: 6, minWidth: 16, height: 16, padding: '0 4px',
-    borderRadius: 8, background: theme.danger, color: theme.onDanger, fontSize: 10, fontWeight: 700,
+    borderRadius: theme.radiusXs, background: theme.danger, color: theme.onDanger, fontSize: 10, fontWeight: 700,
     display: 'grid', placeItems: 'center', lineHeight: 1, fontFamily: theme.font,
   },
   menu: {
@@ -166,7 +166,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   itemBody: { display: 'flex', flexDirection: 'column', minWidth: 0, gap: 2 },
   itemTitle: {
-    fontSize: 13.5, fontWeight: 600, color: theme.ink,
+    fontSize: 14, fontWeight: 600, color: theme.ink,
     overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
   },
   itemDate: { fontSize: 12, color: theme.inkFaint },

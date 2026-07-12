@@ -192,17 +192,17 @@ export function TudoView({ onAbrir }: { onAbrir: (item: { fonte: 'nota' | 'erro'
 const s: Record<string, CSSProperties> = {
   wrap: { maxWidth: 720, minWidth: 0 },
   tools: { display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 14 },
-  busca: { width: '100%', boxSizing: 'border-box', padding: '11px 14px', borderRadius: 12, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.card, fontSize: 14, color: theme.ink, fontFamily: 'inherit', outline: 'none' },
+  busca: { width: '100%', boxSizing: 'border-box', padding: '11px 14px', borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.card, fontSize: 14, color: theme.ink, fontFamily: 'inherit', outline: 'none' },
   chips: { display: 'flex', gap: 6, flexWrap: 'wrap' },
-  chip: { padding: '6px 13px', borderRadius: 999, border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.inkSoft, fontSize: 12.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+  chip: { padding: '6px 13px', borderRadius: theme.radiusPill, border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.inkSoft, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
   chipOn: { background: theme.tealBg, borderColor: theme.teal, color: theme.tealDeep },
 
   list: { display: 'flex', flexDirection: 'column', gap: 8 },
-  card: { display: 'flex', flexDirection: 'column', gap: 4, width: '100%', textAlign: 'left', padding: '12px 14px', borderRadius: 12, border: `0.5px solid ${theme.line}`, background: theme.card, cursor: 'pointer', fontFamily: 'inherit', minWidth: 0 },
+  card: { display: 'flex', flexDirection: 'column', gap: 4, width: '100%', textAlign: 'left', padding: '12px 14px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.card, cursor: 'pointer', fontFamily: 'inherit', minWidth: 0 },
   titulo: { fontSize: 14, fontWeight: 700, color: theme.ink, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
-  preview: { fontSize: 12.5, color: theme.inkSoft, lineHeight: 1.45, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const, overflow: 'hidden' },
+  preview: { fontSize: 13, color: theme.inkSoft, lineHeight: 1.45, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const, overflow: 'hidden' },
   metaRow: { display: 'flex', alignItems: 'center', gap: 8, marginTop: 2, minWidth: 0 },
-  chipTipo: { fontSize: 10, fontWeight: 700, borderRadius: 999, padding: '2px 8px', flexShrink: 0 },
+  chipTipo: { fontSize: 10, fontWeight: 700, borderRadius: theme.radiusPill, padding: '2px 8px', flexShrink: 0 },
   topico: { fontSize: 11, color: theme.inkFaint, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 },
   quando: { fontSize: 11, color: theme.inkFaint, marginLeft: 'auto', flexShrink: 0 },
 

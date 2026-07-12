@@ -9,8 +9,9 @@ import { useEffect, useState, type CSSProperties } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getEditalCoverage, type EditalCoverage } from '@/services/coverage.service';
 import { ShareProgressCard } from './ShareProgressCard';
-import { theme, zIndex } from '@/lib/theme';
+import { theme } from '@/lib/theme';
 import { Button } from '@/components/ui/Button';
+import { Overlay } from '@/components/ui/Overlay';
 
 const MARCOS = [25, 50, 75, 100];
 
@@ -44,28 +45,28 @@ export function MarcoEditalCelebracao() {
   if (marco === null) return null;
 
   return (
-    <div style={s.overlay} onClick={fechar}>
-      <div style={s.modal} onClick={(e) => e.stopPropagation()}>
-        <div style={s.emoji}>{marco === 100 ? '🏆' : '🎉'}</div>
-        <h2 style={s.h2}>{marco}% do edital coberto!</h2>
-        <p style={s.sub}>
-          {marco === 100
-            ? 'Você cobriu o edital inteiro. Hora de blindar com revisões e simulados.'
-            : `Continue nesse ritmo — faltam ${100 - marco}% para cobrir tudo.`}
-        </p>
-        <div style={s.actions}>
-          <Button variant="outline" onClick={fechar}>Fechar</Button>
-          <Button onClick={() => setSharing(true)}>Compartilhar →</Button>
+    <>
+      <Overlay onClose={fechar} maxWidth={420} labelledBy="marco-edital-title" hideClose>
+        <div style={{ textAlign: 'center' }}>
+          <div style={s.emoji}>{marco === 100 ? '🏆' : '🎉'}</div>
+          <h2 id="marco-edital-title" style={s.h2}>{marco}% do edital coberto!</h2>
+          <p style={s.sub}>
+            {marco === 100
+              ? 'Você cobriu o edital inteiro. Hora de blindar com revisões e simulados.'
+              : `Continue nesse ritmo — faltam ${100 - marco}% para cobrir tudo.`}
+          </p>
+          <div style={s.actions}>
+            <Button variant="outline" onClick={fechar}>Fechar</Button>
+            <Button onClick={() => setSharing(true)}>Compartilhar →</Button>
+          </div>
         </div>
-      </div>
+      </Overlay>
       {sharing && <ShareProgressCard onClose={() => { setSharing(false); fechar(); }} />}
-    </div>
+    </>
   );
 }
 
 const s: Record<string, CSSProperties> = {
-  overlay: { position: 'fixed', inset: 0, background: 'var(--backdrop)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: zIndex.modal, padding: 16 },
-  modal: { background: theme.card, borderRadius: theme.radius, width: 'min(420px, 96vw)', padding: '32px 28px', textAlign: 'center', boxShadow: theme.shadowModal, fontFamily: theme.font },
   emoji: { fontSize: 46, marginBottom: 6 },
   h2: { fontSize: 20, fontWeight: 700, color: theme.ink, margin: '0 0 8px' },
   sub: { fontSize: 14, color: theme.inkSoft, margin: '0 0 22px', lineHeight: 1.55 },

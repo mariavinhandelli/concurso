@@ -83,7 +83,7 @@ export function VademecumSimuladoModal({ onClose }: { onClose: () => void }) {
 
 const s: Record<string, React.CSSProperties> = {
   titulo: { fontSize: 20, fontWeight: 800, color: theme.ink, margin: '0 0 6px' },
-  sub: { fontSize: 13.5, color: theme.inkSoft, margin: '0 0 16px' },
+  sub: { fontSize: 14, color: theme.inkSoft, margin: '0 0 16px' },
   linksRow: { display: 'flex', gap: 12, marginBottom: 12 },
   linkBtn: { fontSize: 12, color: theme.teal, border: 'none', background: 'transparent', cursor: 'pointer', fontFamily: 'inherit', textDecoration: 'underline', padding: 0 },
   checkGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 8, marginBottom: 20 },
@@ -91,7 +91,7 @@ const s: Record<string, React.CSSProperties> = {
   checkRowOn: { borderColor: theme.teal, background: theme.tealBg },
   checkInput: { flexShrink: 0, cursor: 'pointer' },
   checkNome: { fontSize: 13, fontWeight: 600, color: theme.ink, flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
-  checkCount: { fontSize: 11.5, color: theme.inkFaint, flexShrink: 0 },
+  checkCount: { fontSize: 12, color: theme.inkFaint, flexShrink: 0 },
   iniciarBtn: { width: '100%', padding: '12px 0', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' },
   iniciarBtnOff: { background: theme.line, color: theme.inkFaint, cursor: 'not-allowed' },
 };

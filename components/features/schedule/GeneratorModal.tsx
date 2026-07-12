@@ -12,6 +12,10 @@ import { distribuirDiaFixo } from '@/lib/schedule/distributor';
 import { theme } from '@/lib/theme';
 import { toLocalDateString } from '@/lib/local-date';
 import { Button } from '@/components/ui/Button';
+import { Overlay } from '@/components/ui/Overlay';
+import { Input } from '@/components/ui/Input';
+import { Select } from '@/components/ui/Select';
+import { SegmentedControl } from '@/components/ui/SegmentedControl';
 
 interface Props {
   onClose: () => void;
@@ -39,12 +43,6 @@ export function GeneratorModal({ onClose, onGenerated, presetExamId }: Props) {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
-
-  useEffect(() => {
-    const h = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
-    document.addEventListener('keydown', h);
-    return () => document.removeEventListener('keydown', h);
-  }, [onClose]);
 
   useEffect(() => {
     listTargetExams().then((list) => {
@@ -111,7 +109,7 @@ export function GeneratorModal({ onClose, onGenerated, presetExamId }: Props) {
       const dias = Array.from(diasSemana).sort();
       if (dias.length === 0) { setError('Escolha ao menos um dia da semana.'); setSaving(false); return; }
       const mpd = Math.max(1, Number(materiasPorDia) || 1);
-      items = distribuirDiaFixo(preview.subjects, dias, mpd);
+      items = distribuirDiaFixo(preview.subjects, dias, mpd, preview.floorMinutes);
     }
 
     try {
@@ -147,22 +145,22 @@ export function GeneratorModal({ onClose, onGenerated, presetExamId }: Props) {
   const voltaExcede = voltaMinutos > cargaMinutos && cargaMinutos > 0;
 
   return (
-    <div style={styles.overlay} onClick={onClose}>
-      <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
-        <h2 style={styles.h2}>Gerar cronograma do edital</h2>
+    <Overlay onClose={onClose} maxWidth={460} labelledBy="generator-modal-title">
+      <h2 id="generator-modal-title" style={styles.h2}>Gerar cronograma do edital</h2>
         <p style={styles.subtitle}>Distribui o tempo entre as matérias conforme o peso de cada uma na prova. Você pode editar depois.</p>
 
         <label style={styles.label}>Edital</label>
-        <select value={examId} onChange={(e) => setExamId(e.target.value)} style={styles.input}>
+        <Select value={examId} onChange={(e) => setExamId(e.target.value)}>
           <option value="">Selecione…</option>
           {exams.map((ex) => <option key={ex.id} value={ex.id}>{ex.label}</option>)}
-        </select>
+        </Select>
 
         <label style={styles.label}>Tipo de cronograma</label>
-        <div style={styles.modeToggle}>
-          <button onClick={() => setMode('ciclo')} style={{ ...styles.modeBtn, ...(mode === 'ciclo' ? styles.modeBtnOn : {}) }}>Ciclo</button>
-          <button onClick={() => setMode('dia_fixo')} style={{ ...styles.modeBtn, ...(mode === 'dia_fixo' ? styles.modeBtnOn : {}) }}>Dia fixo</button>
-        </div>
+        <SegmentedControl
+          options={[{ value: 'ciclo', label: 'Ciclo' }, { value: 'dia_fixo', label: 'Dia fixo' }]}
+          value={mode}
+          onChange={setMode}
+        />
         <p style={styles.modeHint}>
           {mode === 'ciclo'
             ? 'As matérias formam uma fila que gira — naturalmente variado.'
@@ -175,14 +173,14 @@ export function GeneratorModal({ onClose, onGenerated, presetExamId }: Props) {
         </label>
         {temData && (
           <>
-            <input type="date" value={examDate} min={toLocalDateString()} onChange={(e) => setExamDate(e.target.value)} style={styles.input} />
+            <Input type="date" value={examDate} min={toLocalDateString()} onChange={(e) => setExamDate(e.target.value)} />
             {dias !== null && <p style={styles.daysInfo}>Faltam <b>{dias} dias</b> para a prova. O cronograma terminará na véspera.</p>}
           </>
         )}
 
         <label style={styles.label}>{mode === 'ciclo' ? 'Carga de estudo por dia' : 'Tempo-base por dia'}</label>
         <div style={styles.durRow}>
-          <input type="number" min="1" step="1" value={horasDia} onChange={(e) => setHorasDia(e.target.value)} style={styles.durInput} />
+          <Input type="number" min="1" step="1" value={horasDia} onChange={(e) => setHorasDia(e.target.value)} style={{ width: 70, textAlign: 'center' }} />
           <span style={styles.durUnit}>horas</span>
         </div>
 
@@ -190,7 +188,7 @@ export function GeneratorModal({ onClose, onGenerated, presetExamId }: Props) {
           <>
             <label style={styles.label}>Matérias por dia</label>
             <div style={styles.durRow}>
-              <input type="number" min="1" max="6" value={materiasPorDia} onChange={(e) => setMateriasPorDia(e.target.value)} style={styles.durInput} />
+              <Input type="number" min="1" max="6" value={materiasPorDia} onChange={(e) => setMateriasPorDia(e.target.value)} style={{ width: 70, textAlign: 'center' }} />
               <span style={styles.durUnit}>matérias em cada dia</span>
             </div>
 
@@ -240,41 +238,33 @@ export function GeneratorModal({ onClose, onGenerated, presetExamId }: Props) {
             {saving ? 'Gerando…' : 'Gerar cronograma'}
           </Button>
         </div>
-      </div>
-    </div>
+    </Overlay>
   );
 }
 
 const styles: Record<string, React.CSSProperties> = {
-  overlay: { position: 'fixed', inset: 0, background: 'var(--backdrop)', display: 'grid', placeItems: 'center', zIndex: 60, padding: 20 },
-  modal: { background: theme.card, borderRadius: theme.radius, boxShadow: '0 20px 60px rgba(0,0,0,0.18)', padding: 24, width: '100%', maxWidth: 460, maxHeight: '88vh', overflowY: 'auto', fontFamily: theme.font },
   h2: { fontSize: 18, fontWeight: 700, color: theme.ink, margin: 0 },
   subtitle: { fontSize: 13, color: theme.inkSoft, margin: '4px 0 16px', lineHeight: 1.5 },
-  label: { display: 'block', fontSize: 12.5, fontWeight: 600, color: theme.inkSoft, margin: '14px 0 6px' },
-  input: { width: '100%', boxSizing: 'border-box', padding: '10px 12px', borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.card, fontSize: 14, color: theme.ink, fontFamily: 'inherit', outline: 'none' },
-  modeToggle: { display: 'flex', gap: 4, background: 'rgba(15,23,42,.06)', borderRadius: theme.radiusSm, padding: 4 },
-  modeBtn: { flex: 1, padding: '9px 0', border: 'none', background: 'transparent', color: theme.inkSoft, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', borderRadius: theme.radiusSm - 2 },
-  modeBtnOn: { background: theme.card, color: theme.teal, boxShadow: theme.shadow },
+  label: { display: 'block', fontSize: 13, fontWeight: 600, color: theme.inkSoft, margin: '14px 0 6px' },
   modeHint: { fontSize: 12, color: theme.inkFaint, margin: '8px 0 0', lineHeight: 1.5 },
-  checkRow: { display: 'flex', alignItems: 'center', gap: 9, fontSize: 13.5, color: theme.ink, cursor: 'pointer', margin: '14px 0 8px' },
+  checkRow: { display: 'flex', alignItems: 'center', gap: 9, fontSize: 14, color: theme.ink, cursor: 'pointer', margin: '14px 0 8px' },
   checkbox: { width: 16, height: 16, accentColor: theme.teal, cursor: 'pointer' },
-  daysInfo: { fontSize: 12.5, color: theme.tealDeep, background: theme.tealBg, padding: '8px 12px', borderRadius: theme.radiusSm, margin: '8px 0 0', lineHeight: 1.4 },
+  daysInfo: { fontSize: 13, color: theme.tealDeep, background: theme.tealBg, padding: '8px 12px', borderRadius: theme.radiusSm, margin: '8px 0 0', lineHeight: 1.4 },
   durRow: { display: 'flex', alignItems: 'center', gap: 8 },
-  durInput: { width: 70, padding: '9px 10px', borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.card, fontSize: 14, color: theme.ink, fontFamily: 'inherit', outline: 'none', textAlign: 'center' },
   durUnit: { fontSize: 13, color: theme.inkSoft },
   daysRow: { display: 'flex', gap: 5 },
-  dayBtn: { flex: 1, textAlign: 'center', fontSize: 12.5, fontWeight: 600, padding: '8px 0', borderRadius: 6, borderWidth: 0, background: theme.muted, color: theme.inkFaint, cursor: 'pointer', fontFamily: 'inherit' },
+  dayBtn: { flex: 1, textAlign: 'center', fontSize: 13, fontWeight: 600, padding: '8px 0', borderRadius: 6, borderWidth: 0, background: theme.muted, color: theme.inkFaint, cursor: 'pointer', fontFamily: 'inherit' },
   dayBtnOn: { background: theme.teal, color: theme.onTeal },
   muted: { color: theme.inkFaint, fontSize: 13 },
   previewList: { display: 'flex', flexDirection: 'column', gap: 8 },
   previewRow: { display: 'flex', alignItems: 'center', gap: 10 },
   dot: { width: 10, height: 10, borderRadius: 3, flexShrink: 0 },
   previewName: { fontSize: 13, color: theme.ink, width: 120, flexShrink: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
-  previewBar: { flex: 1, height: 7, background: theme.muted, borderRadius: 999, overflow: 'hidden' },
-  previewFill: { display: 'block', height: '100%', borderRadius: 999 },
-  previewTime: { fontSize: 12.5, fontWeight: 600, color: theme.inkSoft, width: 56, textAlign: 'right', flexShrink: 0, fontVariantNumeric: 'tabular-nums' },
-  previewNote: { fontSize: 11.5, color: theme.inkFaint, marginTop: 6, lineHeight: 1.4 },
-  cargaAviso: { fontSize: 12.5, color: theme.inkSoft, background: theme.warnBg, padding: '9px 12px', borderRadius: theme.radiusSm, margin: '10px 0 0', lineHeight: 1.5 },
+  previewBar: { flex: 1, height: 7, background: theme.muted, borderRadius: theme.radiusPill, overflow: 'hidden' },
+  previewFill: { display: 'block', height: '100%', borderRadius: theme.radiusPill },
+  previewTime: { fontSize: 13, fontWeight: 600, color: theme.inkSoft, width: 56, textAlign: 'right', flexShrink: 0, fontVariantNumeric: 'tabular-nums' },
+  previewNote: { fontSize: 12, color: theme.inkFaint, marginTop: 6, lineHeight: 1.4 },
+  cargaAviso: { fontSize: 13, color: theme.inkSoft, background: theme.warnBg, padding: '9px 12px', borderRadius: theme.radiusSm, margin: '10px 0 0', lineHeight: 1.5 },
   error: { color: theme.danger, fontSize: 13, margin: '12px 0 0' },
   actions: { display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 20 },
   cancel: { padding: '10px 18px', borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.card, color: theme.inkSoft, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },

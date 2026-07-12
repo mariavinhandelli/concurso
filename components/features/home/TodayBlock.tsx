@@ -2,6 +2,7 @@
 
 import { memo, useEffect, useRef, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { ChevronDown } from 'lucide-react';
 import { useToast } from '@/components/ui/ToastProvider';
 import {
   getGoalsSummary, setDailyTarget, type GoalsSummary,
@@ -97,14 +98,8 @@ export const TodayBlock = memo(function TodayBlock() {
     ? Math.min(100, Math.round((qGoals.todayQuestions / qGoals.targetQuestionsPerDay) * 100))
     : 0;
 
-  // P15 — celebrar quando a meta de horas passa de <100% para 100%
-  const prevHoursPct = useRef(metaHoursPct);
-  useEffect(() => {
-    if (prevHoursPct.current < 100 && metaHoursPct >= 100) {
-      toast.success('Meta de horas atingida! 🎉');
-    }
-    prevHoursPct.current = metaHoursPct;
-  }, [metaHoursPct]);
+  // (P15 removido) A meta batida agora é celebrada pelo SessionCelebration no
+  // momento do save — o toast daqui duplicava o mesmo aviso.
 
   const hoursTotal = (Number(hours) || 0) * 60 + (Number(mins) || 0);
 
@@ -137,7 +132,7 @@ export const TodayBlock = memo(function TodayBlock() {
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={theme.inkSoft} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>
             H. Estudo{' '}
             <b style={styles.stripVal}>{goals ? `${fmtMin(goals.todayMinutes)} / ${fmtMin(goals.targetMinutesPerDay)}` : '…'}</b>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={theme.inkFaint} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ transform: editingHours ? 'rotate(180deg)' : 'none', transition: 'transform .15s' }}><path d="M6 9l6 6 6-6" /></svg>
+            <ChevronDown size={12} color={theme.inkFaint} strokeWidth={2} style={{ transform: editingHours ? 'rotate(180deg)' : 'none', transition: 'transform .15s' }} />
           </button>
 
           {editingHours && (
@@ -181,7 +176,7 @@ export const TodayBlock = memo(function TodayBlock() {
             <b style={styles.stripVal}>
               {qGoals ? `${qGoals.todayQuestions} / ${qGoals.targetQuestionsPerDay || '—'}` : '…'}
             </b>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={theme.inkFaint} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ transform: editingQ ? 'rotate(180deg)' : 'none', transition: 'transform .15s' }}><path d="M6 9l6 6 6-6" /></svg>
+            <ChevronDown size={12} color={theme.inkFaint} strokeWidth={2} style={{ transform: editingQ ? 'rotate(180deg)' : 'none', transition: 'transform .15s' }} />
           </button>
 
           {editingQ && (
@@ -208,7 +203,7 @@ export const TodayBlock = memo(function TodayBlock() {
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={theme.inkSoft} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12h3m14 0h3M12 2v3m0 14v3"/><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></svg>
           Acerto <b style={{ ...styles.stripVal, color: acertoColor }}>{qGoals?.todayAcerto == null ? '—' : `${qGoals.todayAcerto}%`}</b>
           {acrDelta != null && acrDelta !== 0 && (
-            <span style={{ fontSize: 11.5, fontWeight: 600, color: deltaColor }}>
+            <span style={{ fontSize: 12, fontWeight: 600, color: deltaColor }}>
               {acrDelta > 0 ? '↑' : '↓'}&nbsp;{acrDelta > 0 ? '+' : ''}{acrDelta}%
             </span>
           )}
@@ -222,12 +217,12 @@ const styles: Record<string, React.CSSProperties> = {
   wrap: { fontFamily: theme.font, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 0 },
   strip: { display: 'flex', alignItems: 'center', gap: 16, padding: '4px 4px' },
   metaWrap: { position: 'relative', flexShrink: 0 },
-  stripBtn: { display: 'flex', alignItems: 'center', gap: 7, fontSize: 13.5, color: theme.inkSoft, whiteSpace: 'nowrap', background: 'transparent', border: 'none', cursor: 'pointer', fontFamily: 'inherit', padding: 0 },
-  stripItem: { display: 'flex', alignItems: 'center', gap: 7, fontSize: 13.5, color: theme.inkSoft, whiteSpace: 'nowrap', flexShrink: 0 },
+  stripBtn: { display: 'flex', alignItems: 'center', gap: 7, fontSize: 14, color: theme.inkSoft, whiteSpace: 'nowrap', background: 'transparent', border: 'none', cursor: 'pointer', fontFamily: 'inherit', padding: 0 },
+  stripItem: { display: 'flex', alignItems: 'center', gap: 7, fontSize: 14, color: theme.inkSoft, whiteSpace: 'nowrap', flexShrink: 0 },
   stripVal: { color: theme.ink, fontWeight: 600 },
-  bar: { flex: 1, height: 6, background: theme.muted, borderRadius: 999, overflow: 'hidden', minWidth: 40 },
-  barFill: { height: '100%', background: theme.teal, borderRadius: 999, transition: 'width .4s ease' },
+  bar: { flex: 1, height: 6, background: theme.muted, borderRadius: theme.radiusPill, overflow: 'hidden', minWidth: 40 },
+  barFill: { height: '100%', background: theme.teal, borderRadius: theme.radiusPill, transition: 'width .4s ease' },
   popRow: { display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12 },
-  popInput: { width: 48, padding: '7px 8px', borderRadius: 8, border: `0.5px solid ${theme.line}`, background: theme.card, fontSize: 14, color: theme.ink, fontFamily: 'inherit', outline: 'none', textAlign: 'center' },
+  popInput: { width: 48, padding: '7px 8px', borderRadius: theme.radiusXs, border: `0.5px solid ${theme.line}`, background: theme.card, fontSize: 14, color: theme.ink, fontFamily: 'inherit', outline: 'none', textAlign: 'center' },
   popUnit: { fontSize: 13, color: theme.inkSoft },
 };

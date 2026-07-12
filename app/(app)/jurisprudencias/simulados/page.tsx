@@ -6,6 +6,7 @@ import { listSimuladoSessions, type SimuladoSession } from '@/services/jurisInte
 import { useUI } from '@/components/layout/UIContext';
 import { theme } from '@/lib/theme';
 import { Button } from '@/components/ui/Button';
+import { PageContainer, PageHeader } from '@/components/ui/Page';
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
   LineChart, Line, CartesianGrid,
@@ -27,8 +28,8 @@ function ScoreBar({ certas, total }: { certas: number; total: number }) {
   const bg = pct >= 70 ? theme.okTint : pct >= 50 ? theme.warnTint : theme.dangerTint;
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-      <div style={{ flex: 1, height: 6, background: theme.line, borderRadius: 99, overflow: 'hidden' }}>
-        <div style={{ height: '100%', width: `${pct}%`, background: color, borderRadius: 99, transition: 'width .4s' }} />
+      <div style={{ flex: 1, height: 6, background: theme.line, borderRadius: theme.radiusPill, overflow: 'hidden' }}>
+        <div style={{ height: '100%', width: `${pct}%`, background: color, borderRadius: theme.radiusPill, transition: 'width .4s' }} />
       </div>
       <span style={{ fontSize: 12, fontWeight: 700, color, background: bg, borderRadius: 6, padding: '2px 8px', whiteSpace: 'nowrap' }}>
         {certas}/{total} · {pct}%
@@ -80,7 +81,7 @@ function SimuladoAnalytics({ sessions }: { sessions: SimuladoSession[] }) {
         ].map(({ label, value, color }) => (
           <div key={label} style={{ background: theme.card, border: `0.5px solid ${theme.line}`, borderRadius: theme.radius, padding: '14px 16px', textAlign: 'center' }}>
             <p style={{ fontSize: 22, fontWeight: 800, color, margin: '0 0 2px' }}>{value}</p>
-            <p style={{ fontSize: 11.5, color: theme.inkFaint, margin: 0, fontWeight: 500 }}>{label}</p>
+            <p style={{ fontSize: 12, color: theme.inkFaint, margin: 0, fontWeight: 500 }}>{label}</p>
           </div>
         ))}
       </div>
@@ -102,7 +103,7 @@ function SimuladoAnalytics({ sessions }: { sessions: SimuladoSession[] }) {
             <CartesianGrid strokeDasharray="3 3" stroke={theme.line} />
             <XAxis dataKey="label" tick={{ fontSize: 11, fill: theme.inkFaint }} axisLine={false} tickLine={false} />
             <YAxis domain={[0, 100]} tick={{ fontSize: 11, fill: theme.inkFaint }} axisLine={false} tickLine={false} tickFormatter={(v) => `${v}%`} />
-            <Tooltip formatter={(v) => [`${v}%`, 'Acerto']} contentStyle={{ background: theme.card, border: `0.5px solid ${theme.line}`, borderRadius: 8, fontSize: 12 }} />
+            <Tooltip formatter={(v) => [`${v}%`, 'Acerto']} contentStyle={{ background: theme.card, border: `0.5px solid ${theme.line}`, borderRadius: theme.radiusXs, fontSize: 12 }} />
             <Line type="monotone" dataKey="pct" stroke={theme.teal} strokeWidth={2} dot={{ r: 3, fill: theme.teal }} activeDot={{ r: 5 }} />
           </LineChart>
         </ResponsiveContainer>
@@ -118,7 +119,7 @@ function SimuladoAnalytics({ sessions }: { sessions: SimuladoSession[] }) {
             <BarChart layout="vertical" data={disciplinas} margin={{ top: 0, right: 40, left: 10, bottom: 0 }}>
               <XAxis type="number" domain={[0, 100]} tick={{ fontSize: 10, fill: theme.inkFaint }} axisLine={false} tickLine={false} tickFormatter={(v) => `${v}%`} />
               <YAxis type="category" dataKey="name" tick={{ fontSize: 11, fill: theme.ink }} axisLine={false} tickLine={false} width={110} />
-              <Tooltip formatter={(v) => [`${v}%`, 'Acerto']} contentStyle={{ background: theme.card, border: `0.5px solid ${theme.line}`, borderRadius: 8, fontSize: 12 }} />
+              <Tooltip formatter={(v) => [`${v}%`, 'Acerto']} contentStyle={{ background: theme.card, border: `0.5px solid ${theme.line}`, borderRadius: theme.radiusXs, fontSize: 12 }} />
               <Bar dataKey="pct" radius={[0, 4, 4, 0]}
                 fill={theme.teal}
                 label={{ position: 'right', formatter: (v: unknown) => `${v}%`, style: { fontSize: 11, fill: theme.inkSoft } }}
@@ -144,7 +145,7 @@ export default function SimuladosPage() {
   }, []);
 
   return (
-    <div style={{ maxWidth: 960, margin: '0 auto', padding: isMobile ? '20px 16px' : '34px 40px', fontFamily: theme.font }}>
+    <PageContainer>
       <button
         onClick={() => router.push('/jurisprudencias')}
         style={{ border: 'none', background: 'transparent', color: theme.teal, fontSize: 13, fontWeight: 500, cursor: 'pointer', padding: 0, fontFamily: 'inherit', marginBottom: 8 }}
@@ -152,14 +153,10 @@ export default function SimuladosPage() {
         ← Jurisprudências
       </button>
 
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, marginBottom: 28 }}>
-        <h1 style={{ fontSize: isMobile ? 24 : 28, fontWeight: 800, color: theme.ink, letterSpacing: -0.6, margin: 0 }}>
-          Histórico de Simulados
-        </h1>
-        <Button size="sm" onClick={() => router.push('/jurisprudencias/lista')}>
-          Novo simulado
-        </Button>
-      </div>
+      <PageHeader
+        title="Histórico de Simulados"
+        actions={<Button size="sm" onClick={() => router.push('/jurisprudencias/lista')}>Novo simulado</Button>}
+      />
 
       {sessions && sessions.length >= 2 && <SimuladoAnalytics sessions={sessions} />}
 
@@ -223,7 +220,7 @@ export default function SimuladosPage() {
                           {idx + 1}. {r.acertou ? '✓' : '✗'}
                         </span>
                         <div style={{ flex: 1, minWidth: 0 }}>
-                          <p style={{ fontSize: 12.5, color: theme.ink, margin: '0 0 4px', lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                          <p style={{ fontSize: 13, color: theme.ink, margin: '0 0 4px', lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                             {r.enunciado}
                           </p>
                           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
@@ -254,6 +251,6 @@ export default function SimuladosPage() {
           })}
         </div>
       )}
-    </div>
+    </PageContainer>
   );
 }

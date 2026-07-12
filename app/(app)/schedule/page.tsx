@@ -5,11 +5,13 @@
 
 import { memo, useState, useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
+import { ChevronLeft, ChevronRight, Menu } from 'lucide-react';
 import { useSchedulePage } from '@/hooks/useSchedulePage';
 import { usePersistedState } from '@/hooks/usePersistedState';
 import { CalendarView } from '@/components/features/calendar/CalendarView';
 import { BlockMenu } from '@/components/features/schedule/BlockMenu';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { PageContainer, PageHeader } from '@/components/ui/Page';
 import { theme } from '@/lib/theme';
 import { toLocalDateString as localDateStr } from '@/lib/local-date';
 import {
@@ -103,10 +105,8 @@ export default function SchedulePage() {
   return (
     <>
       {dialog}
-      <div style={{ ...styles.container, padding: isMobile ? '20px 16px' : '34px 40px' }}>
-        <div style={styles.header}>
-          <h1 style={{ ...styles.h1, fontSize: isMobile ? 24 : 28 }}>Agenda</h1>
-        </div>
+      <PageContainer width="wide">
+        <PageHeader title="Agenda" />
 
         {/* ── Toolbar ── */}
         <div style={styles.toolbar}>
@@ -116,7 +116,7 @@ export default function SchedulePage() {
             {!calendarOn && (
             <div style={{ ...styles.nav, width: isMobile ? '100%' : undefined, gap: isMobile ? 6 : 10 }}>
               <button className="icon-touch-target" style={styles.navBtn} onClick={() => navWeek(-1)} aria-label="Semana anterior">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
+                <ChevronLeft size={16} strokeWidth={2} />
               </button>
               <button
                 type="button"
@@ -136,7 +136,7 @@ export default function SchedulePage() {
                 />
               </button>
               <button className="icon-touch-target" style={styles.navBtn} onClick={() => navWeek(1)} aria-label="Próxima semana">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
+                <ChevronRight size={16} strokeWidth={2} />
               </button>
               <button
                 className="touch-target"
@@ -202,9 +202,7 @@ export default function SchedulePage() {
                 Recorrência
               </button>
               <button className="touch-target" onClick={() => setPanelOpen(true)} style={{ ...styles.recBtnGhost, justifyContent: 'center', minWidth: 0, padding: isMobile ? '8px 6px' : '8px 12px' }}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={theme.teal} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ verticalAlign: '-2px', marginRight: 6 }}>
-                  <path d="M3 6h18M3 12h18M3 18h18" />
-                </svg>
+                <Menu size={14} color={theme.teal} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 6 }} />
                 Gerenciar
               </button>
             </div>
@@ -230,7 +228,7 @@ export default function SchedulePage() {
                 </div>
                 <div style={{ ...styles.progressWrap, opacity: 0.4 }}>
                   <div className="skel" style={{ ...styles.skelLine, marginBottom: 5 }} />
-                  <div className="skel" style={{ ...styles.skelLine, height: 5, borderRadius: 999 }} />
+                  <div className="skel" style={{ ...styles.skelLine, height: 5, borderRadius: theme.radiusPill }} />
                 </div>
                 <div style={{ ...styles.dayBody, minHeight: 180 }}>
                   {[44, i % 2 === 0 ? 56 : 0].filter(Boolean).map((h, j) => (
@@ -485,7 +483,7 @@ export default function SchedulePage() {
             onClose={() => setReplanModalOpen(false)}
           />
         )}
-      </div>
+      </PageContainer>
     </>
   );
 }
@@ -566,9 +564,6 @@ const BlockCard = memo(function BlockCard({ block, onToggle, onDelete, onEdit, o
 
 // ── Styles ────────────────────────────────────────────────────────────────────
 const styles: Record<string, React.CSSProperties> = {
-  container: { maxWidth: 1080, margin: '0 auto', fontFamily: theme.font, minWidth: 0 },
-  header: { marginBottom: 24 },
-  h1: { fontWeight: 800, color: theme.ink, letterSpacing: -0.6, margin: 0 },
   toolbar: { display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 18 },
   toolbarRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap', rowGap: 10 },
   toolbarActions: { display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', paddingTop: 12, borderTopWidth: 0.5, borderTopStyle: 'solid', borderTopColor: theme.line },
@@ -577,9 +572,9 @@ const styles: Record<string, React.CSSProperties> = {
   weekLabel: { position: 'relative', fontSize: 15, fontWeight: 700, color: theme.ink, minWidth: 150, textAlign: 'center', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', fontFamily: 'inherit' },
   datePicker: { position: 'absolute', opacity: 0, width: '100%', height: '100%', left: 0, top: 0, cursor: 'pointer' },
   todayBtn: { padding: '8px 16px', borderRadius: 10, border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.ink, fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit', flexShrink: 0 },
-  recBtn: { display: 'inline-flex', alignItems: 'center', padding: '8px 12px', borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.teal, background: theme.card, color: theme.inkSoft, fontSize: 12.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
-  recBtnGhost: { display: 'inline-flex', alignItems: 'center', padding: '8px 12px', borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.teal, background: theme.card, color: theme.inkSoft, fontSize: 12.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
-  cycleBtn: { display: 'inline-flex', alignItems: 'center', padding: '8px 12px', borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.teal, background: theme.card, color: theme.inkSoft, fontSize: 12.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
+  recBtn: { display: 'inline-flex', alignItems: 'center', padding: '8px 12px', borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.teal, background: theme.card, color: theme.inkSoft, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
+  recBtnGhost: { display: 'inline-flex', alignItems: 'center', padding: '8px 12px', borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.teal, background: theme.card, color: theme.inkSoft, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
+  cycleBtn: { display: 'inline-flex', alignItems: 'center', padding: '8px 12px', borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.teal, background: theme.card, color: theme.inkSoft, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
   genBtn: { display: 'inline-flex', alignItems: 'center', padding: '8px 14px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
   viewToggle: { display: 'flex', gap: 3, background: 'rgba(15,23,42,.06)', borderRadius: theme.radiusSm, padding: 3 },
   viewBtn: { padding: '7px 14px', border: 'none', background: 'transparent', color: theme.inkSoft, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', borderRadius: theme.radiusSm - 2 },
@@ -590,23 +585,23 @@ const styles: Record<string, React.CSSProperties> = {
 
   // Skeleton
   skelLine: { height: 8, background: theme.muted, borderRadius: 4, width: '60%' },
-  skelBlock: { borderRadius: 8, background: theme.muted },
+  skelBlock: { borderRadius: theme.radiusXs, background: theme.muted },
 
   // Resumo semanal
   weekSummary: { display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px', background: theme.card, borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, marginBottom: 14 },
   weekSummaryLabel: { fontSize: 13, fontWeight: 600, color: theme.ink, whiteSpace: 'nowrap', minWidth: 0 },
-  weekSummaryTrack: { flex: 1, height: 8, background: 'rgba(15,23,42,.08)', borderRadius: 999, overflow: 'hidden' },
-  weekSummaryFill: { height: '100%', borderRadius: 999, transition: 'width .5s ease' },
+  weekSummaryTrack: { flex: 1, height: 8, background: 'rgba(15,23,42,.08)', borderRadius: theme.radiusPill, overflow: 'hidden' },
+  weekSummaryFill: { height: '100%', borderRadius: theme.radiusPill, transition: 'width .5s ease' },
   weekSummaryPct: { fontSize: 13, fontWeight: 700, whiteSpace: 'nowrap', minWidth: 36, textAlign: 'right' },
 
   // Cronograma vivo — banner de replanejamento
   replanBanner: { display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', background: theme.warnBg, borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.warn, marginBottom: 14 },
-  replanMsg: { fontSize: 13.5, color: theme.ink },
+  replanMsg: { fontSize: 14, color: theme.ink },
   replanBtn: { padding: '8px 14px', borderRadius: theme.radiusSm, border: 'none', background: theme.warn, color: theme.onWarn, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
 
   // Callout semana vazia
   emptyCallout: { display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', background: theme.card, borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, marginBottom: 14 },
-  emptyCalloutMsg: { fontSize: 13.5, color: theme.ink, margin: 0, lineHeight: 1.5, flex: 1, minWidth: 200 },
+  emptyCalloutMsg: { fontSize: 14, color: theme.ink, margin: 0, lineHeight: 1.5, flex: 1, minWidth: 200 },
   emptyCalloutActions: { display: 'flex', gap: 8, flexShrink: 0 },
 
   // Grade
@@ -621,8 +616,8 @@ const styles: Record<string, React.CSSProperties> = {
   progressLabels: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 },
   progressText: { fontSize: 10, color: theme.inkFaint, fontVariantNumeric: 'tabular-nums' },
   progressPct: { fontSize: 10, fontWeight: 700, fontVariantNumeric: 'tabular-nums' },
-  progressTrack: { height: 6, background: 'rgba(15,23,42,.08)', borderRadius: 999, overflow: 'hidden' },
-  progressFill: { height: '100%', borderRadius: 999, transition: 'width .4s ease' },
+  progressTrack: { height: 6, background: 'rgba(15,23,42,.08)', borderRadius: theme.radiusPill, overflow: 'hidden' },
+  progressFill: { height: '100%', borderRadius: theme.radiusPill, transition: 'width .4s ease' },
   progressEmpty: { fontSize: 10, color: theme.inkFaint, textAlign: 'center' },
   dayBody: { flex: 1, display: 'flex', flexDirection: 'column', gap: 6, padding: 6, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, borderRadius: '0 0 10px 10px', minHeight: 180, background: theme.bg },
   addBtn: { marginTop: 'auto', padding: '7px', borderRadius: 7, border: 'none', background: 'transparent', color: theme.inkFaint, fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
@@ -635,18 +630,18 @@ const styles: Record<string, React.CSSProperties> = {
   listDayName: { fontSize: 15, fontWeight: 700, color: theme.ink },
   listDayRight: { display: 'flex', alignItems: 'center', gap: 12 },
   listDayLoad: { fontSize: 12, color: theme.inkFaint, fontVariantNumeric: 'tabular-nums' },
-  addBtnSm: { padding: '5px 12px', borderRadius: 7, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.teal, background: 'transparent', color: theme.teal, fontSize: 12.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+  addBtnSm: { padding: '5px 12px', borderRadius: 7, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.teal, background: 'transparent', color: theme.teal, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
   listEmpty: { fontSize: 13, color: theme.inkFaint, margin: 0 },
   listBlocks: { display: 'flex', flexDirection: 'column', gap: 8 },
 };
 
 const blockStyles: Record<string, React.CSSProperties> = {
-  card: { display: 'flex', alignItems: 'flex-start', gap: 6, padding: '6px 8px', borderRadius: 8, minWidth: 0, boxShadow: '0 1px 3px rgba(15,23,42,.06)' },
+  card: { display: 'flex', alignItems: 'flex-start', gap: 6, padding: '6px 8px', borderRadius: theme.radiusXs, minWidth: 0, boxShadow: '0 1px 3px rgba(15,23,42,.06)' },
   cardGrid: { gap: 6, padding: '6px 8px' },
   cardList: { gap: 8, padding: '10px 14px' },
   check: { width: 18, height: 18, borderRadius: '50%', borderWidth: 1.5, borderStyle: 'solid', fontSize: 10, fontWeight: 700, cursor: 'pointer', display: 'grid', placeItems: 'center', flexShrink: 0, marginTop: 2 },
   checkSm: { width: 15, height: 15, fontSize: 9 },
   info: { flex: 1, minWidth: 0 },
-  name: { fontSize: 12.5, fontWeight: 600, lineHeight: 1.35, color: 'var(--ink)', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const, overflow: 'hidden', wordBreak: 'break-word' },
+  name: { fontSize: 13, fontWeight: 600, lineHeight: 1.35, color: 'var(--ink)', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const, overflow: 'hidden', wordBreak: 'break-word' },
   sub: { fontSize: 11, marginTop: 2, color: 'var(--ink-faint)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
 };

@@ -2,6 +2,7 @@
 
 import { usePathname, useRouter } from 'next/navigation';
 import { useState, type CSSProperties } from 'react';
+import { X, ChevronLeft } from 'lucide-react';
 import { useUI } from './UIContext';
 import { zIndex } from '@/lib/theme';
 
@@ -159,16 +160,12 @@ export function Sidebar() {
         )}
         {isMobile ? (
           <button onClick={() => setMobileOpen(false)} style={styles.collapseBtn} aria-label="Fechar menu">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={SB.iconIdle} strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M18 6L6 18M6 6l12 12" />
-            </svg>
+            <X size={20} color={SB.iconIdle} strokeWidth={1.9} />
           </button>
         ) : (
           // sidebar-collapse-btn: oculto em tablet via CSS (auto-colapso por CSS já faz o trabalho)
           <button className="sidebar-collapse-btn" onClick={toggleCollapsed} style={styles.collapseBtn} aria-label="Recolher menu">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={SB.iconIdle} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ transform: collapsed ? 'rotate(180deg)' : 'none', transition: 'transform .2s' }}>
-              <path d="M15 18l-6-6 6-6" />
-            </svg>
+            <ChevronLeft size={18} color={SB.iconIdle} strokeWidth={1.8} style={{ transform: collapsed ? 'rotate(180deg)' : 'none', transition: 'transform .2s' }} />
           </button>
         )}
       </div>

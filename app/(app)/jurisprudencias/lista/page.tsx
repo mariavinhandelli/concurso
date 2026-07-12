@@ -2,6 +2,7 @@
 
 import { Suspense, useCallback, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { CircleHelp, Layers } from 'lucide-react';
 import {
   listJurisprudencias, deleteJurisprudencia, listDistinct, getJurisprudenciaById,
   JURIS_PAGE_LIMIT,
@@ -19,6 +20,7 @@ import { useUI } from '@/components/layout/UIContext';
 import { createClient } from '@/lib/supabase/client';
 import { theme } from '@/lib/theme';
 import { Button } from '@/components/ui/Button';
+import { PageContainer } from '@/components/ui/Page';
 
 function ListaSkeleton() {
   return (
@@ -175,13 +177,13 @@ function ListaContent() {
         <JurisSimulado items={items} onClose={() => setShowSimulado(false)} />
       )}
 
-      <div style={{ maxWidth: 1080, margin: '0 auto', padding: isMobile ? '20px 16px' : '34px 40px', fontFamily: theme.font, minWidth: 0 }}>
+      <PageContainer width="wide" style={{ minWidth: 0 }}>
 
         {/* Cabeçalho */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16, flexWrap: 'wrap', marginBottom: 20 }}>
           <div>
             <button className="touch-target" onClick={() => router.push('/jurisprudencias')} style={styles.backBtn}>← Jurisprudências</button>
-            <h1 style={{ fontSize: isMobile ? 22 : 26, fontWeight: 800, color: theme.ink, letterSpacing: -0.6, margin: '8px 0 0' }}>
+            <h1 style={{ fontSize: isMobile ? 24 : 28, fontWeight: 800, color: theme.ink, letterSpacing: -0.6, margin: '8px 0 0' }}>
               {isFavoritasView ? '★ Favoritas' : (filters.disciplina || 'Todas as jurisprudências')}
             </h1>
           </div>
@@ -278,17 +280,13 @@ function ListaContent() {
                   {/* Botões de modo de estudo */}
                   {countFlash > 0 && (
                     <button onClick={() => setShowFlashcards(true)} style={styles.studyBtn}>
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: 6 }}>
-                        <path d="m21 12l-9 4l-9-4m18 4l-9 4l-9-4m18-8l-9 4l-9-4l9-4z" />
-                      </svg>
+                      <Layers size={13} strokeWidth={1.7} style={{ marginRight: 6 }} />
                       Flashcards ({countFlash})
                     </button>
                   )}
                   {countQuestao > 0 && (
                     <button onClick={() => setShowSimulado(true)} style={styles.simuladoBtn}>
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: 6 }}>
-                        <circle cx="12" cy="12" r="10" /><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01" />
-                      </svg>
+                      <CircleHelp size={13} strokeWidth={1.7} style={{ marginRight: 6 }} />
                       Simular ({countQuestao})
                     </button>
                   )}
@@ -330,7 +328,7 @@ function ListaContent() {
           </div>
         </div>
 
-      </div>
+      </PageContainer>
     </>
   );
 }
@@ -340,7 +338,7 @@ function CoverageChip({ active, total, label, color, bg }: {
 }) {
   const pct = total > 0 ? Math.round((active / total) * 100) : 0;
   return (
-    <span style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 11.5 }}>
+    <span style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12 }}>
       <span style={{
         display: 'inline-block', width: 28, height: 5, borderRadius: 3,
         background: `linear-gradient(to right, ${color} ${pct}%, ${bg} ${pct}%)`,

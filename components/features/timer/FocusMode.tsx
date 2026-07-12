@@ -128,7 +128,7 @@ const s: Record<string, CSSProperties> = {
   exit: {
     alignSelf: 'flex-start', display: 'flex', alignItems: 'center', gap: 7,
     border: 'none', background: 'transparent', color: theme.inkFaint,
-    fontSize: 13.5, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit', padding: '6px 4px',
+    fontSize: 14, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit', padding: '6px 4px',
   },
   center: {
     flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
@@ -140,11 +140,11 @@ const s: Record<string, CSSProperties> = {
   title: { fontSize: 30, fontWeight: 800, color: theme.ink, letterSpacing: -0.6, margin: '0 0 2px', lineHeight: 1.25, overflowWrap: 'break-word' },
   subject: { fontSize: 15, color: theme.inkSoft, margin: '0 0 8px', fontWeight: 500 },
   time: { fontSize: 'clamp(56px, 14vw, 104px)', fontWeight: 300, fontVariantNumeric: 'tabular-nums', letterSpacing: -2, lineHeight: 1.05, margin: '18px 0 4px' },
-  state: { display: 'flex', alignItems: 'center', gap: 8, fontSize: 13.5, color: theme.inkSoft, marginBottom: 26 },
-  dot: { width: 8, height: 8, borderRadius: 99 },
+  state: { display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, color: theme.inkSoft, marginBottom: 26 },
+  dot: { width: 8, height: 8, borderRadius: theme.radiusPill },
   actions: { display: 'flex', gap: 12 },
-  secondary: { minWidth: 130, padding: '13px 22px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.inkSoft, fontSize: 14.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
-  primary: { minWidth: 130, padding: '13px 22px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 14.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+  secondary: { minWidth: 130, padding: '13px 22px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.inkSoft, fontSize: 15, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+  primary: { minWidth: 130, padding: '13px 22px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 15, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
   hint: { fontSize: 12, color: theme.inkFaint, marginTop: 22 },
   kbd: { fontFamily: 'ui-monospace, monospace', fontSize: 11, padding: '1px 6px', borderRadius: 5, border: `0.5px solid ${theme.line}`, background: theme.muted, color: theme.inkSoft, margin: '0 2px' },
 };
