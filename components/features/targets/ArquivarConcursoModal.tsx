@@ -6,7 +6,7 @@
 
 import { useState, type CSSProperties } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Check as CheckIcon } from 'lucide-react';
+import { Check as CheckIcon, Info } from 'lucide-react';
 import { getConcursoArchivePreview, archiveConcurso, type ConcursoArchivePreview } from '@/services/concursoArchive.service';
 import { useToast } from '@/components/ui/ToastProvider';
 import { theme } from '@/lib/theme';
@@ -86,7 +86,7 @@ export function ArquivarConcursoModal({
 
             {preview.sharedCount > 0 && (
               <p style={s.info}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={theme.teal} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><circle cx="12" cy="12" r="9" /><path d="M12 16v-4M12 8h.01" /></svg>
+                <Info size={14} color={theme.teal} strokeWidth={2} style={{ flexShrink: 0 }} />
                 {preview.sharedCount} {preview.sharedCount === 1 ? 'matéria compartilhada' : 'matérias compartilhadas'} com outros concursos {preview.sharedCount === 1 ? 'continua ativa' : 'continuam ativas'}.
               </p>
             )}

@@ -6,6 +6,7 @@
 import { memo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
+import { Pencil } from 'lucide-react';
 import { getLastEditedNote, NOTA_KINDS, type StudyNoteMeta } from '@/services/studyNotes.service';
 import { KIND_CORES } from '@/components/features/caderno/notaCores';
 import { theme } from '@/lib/theme';
@@ -37,7 +38,7 @@ export const UltimaNotaCard = memo(function UltimaNotaCard() {
 
   return (
     <button onClick={() => router.push(`/caderno?nota=${data.id}`)} style={s.card}>
-      <span style={s.icon}>✎</span>
+      <span style={s.icon}><Pencil size={16} strokeWidth={1.8} /></span>
       <div style={s.info}>
         <span style={s.eyebrow}>Continue de onde parou</span>
         <span style={s.titulo}>{data.title || 'Sem título'}</span>

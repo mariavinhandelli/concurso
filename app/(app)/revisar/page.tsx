@@ -514,7 +514,7 @@ const s: Record<string, CSSProperties> = {
   rating3Btn: { flex: 1, minWidth: 0, padding: '13px 6px 11px', borderRadius: theme.radiusSm, border: 'none', cursor: 'pointer', fontFamily: 'inherit', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 },
   ratings4: { display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 },
   rating4Btn: { padding: '13px 10px', borderRadius: theme.radiusSm, cursor: 'pointer', fontFamily: theme.font, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 },
-  ratingKey: { fontSize: 10, opacity: 0.5 },
+  ratingKey: { fontSize: 11, opacity: 0.65 },
   ratingLbl: { fontWeight: 700, fontSize: 14 },
 
   // done

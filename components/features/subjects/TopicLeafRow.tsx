@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { X, Pencil, RefreshCw } from 'lucide-react';
+import { X, Pencil, RefreshCw, Play, Check } from 'lucide-react';
 import type { Topic } from '@/services/topics.service';
 import { HealthBar } from '@/components/features/topics/HealthBar';
 import { theme } from '@/lib/theme';
@@ -51,7 +51,7 @@ function TopicLeafRowInner({
         style={{ ...styles.checkbox, ...(topic.is_completed ? styles.checkboxOn : {}) }}
         aria-label={topic.is_completed ? 'Concluído — clique para desmarcar' : 'Marcar como concluído'}
       >
-        {topic.is_completed ? '✓' : ''}
+        {topic.is_completed && <Check size={13} strokeWidth={2.5} />}
       </button>
 
       {isEditing ? (
@@ -121,7 +121,7 @@ function TopicLeafRowInner({
           style={{ ...styles.iconBtn, color: theme.teal }}
           title="Estudar este tópico" aria-label="Estudar"
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z" /></svg>
+          <Play size={16} fill="currentColor" stroke="none" />
         </button>
 
         <button onClick={() => onDelete(topic.id)} style={styles.deleteBtn} aria-label="Apagar tópico" title="Apagar">

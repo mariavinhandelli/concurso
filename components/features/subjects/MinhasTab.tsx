@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { Search, Pencil } from 'lucide-react';
+import { Search, Pencil, Archive, X } from 'lucide-react';
 import { useConfirm } from '@/hooks/useConfirm';
 import { createSubject, updateSubject, deleteSubject } from '@/services/subjects.service';
 import { SUBJECT_COLORS } from '@/lib/subject-colors';
@@ -172,7 +172,7 @@ export function MinhasTab({ isMobile, onError }: Props) {
               style={{ padding: '8px 11px 8px 32px', fontSize: 14, paddingRight: search ? 30 : 11 }}
             />
             {search && (
-              <button onClick={() => setSearch('')} style={styles.searchClear} aria-label="Limpar busca">✕</button>
+              <button onClick={() => setSearch('')} style={styles.searchClear} aria-label="Limpar busca"><X size={13} strokeWidth={2} /></button>
             )}
           </div>
           <Select
@@ -266,15 +266,13 @@ export function MinhasTab({ isMobile, onError }: Props) {
                         <Pencil size={15} color={theme.inkSoft} strokeWidth={1.8} />
                       </button>
                       <button onClick={() => handleArchive(s.id)} disabled={processingId === s.id} style={{ ...styles.iconBtn, opacity: processingId === s.id ? 0.4 : 1 }} aria-label={`Arquivar ${s.name}`} title="Arquivar">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={theme.inkSoft} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                          <rect x="3" y="4" width="18" height="4" rx="1" /><path d="M5 8v11a1 1 0 001 1h12a1 1 0 001-1V8" /><path d="M10 12h4" />
-                        </svg>
+                        <Archive size={15} color={theme.inkSoft} strokeWidth={1.8} />
                       </button>
                     </>
                   ) : (
                     <>
                       <button onClick={() => handleUnarchive(s.id)} disabled={processingId === s.id} style={{ ...styles.unarchiveBtn, opacity: processingId === s.id ? 0.4 : 1 }} title="Reativar">{processingId === s.id ? '…' : 'Reativar'}</button>
-                      <button onClick={() => handleDelete(s.id, s.name)} disabled={processingId === s.id} style={{ ...styles.deleteBtn, opacity: processingId === s.id ? 0.4 : 1 }} aria-label={`Apagar ${s.name}`} title="Apagar">✕</button>
+                      <button onClick={() => handleDelete(s.id, s.name)} disabled={processingId === s.id} style={{ ...styles.deleteBtn, opacity: processingId === s.id ? 0.4 : 1 }} aria-label={`Apagar ${s.name}`} title="Apagar"><X size={13} strokeWidth={2} /></button>
                     </>
                   )}
                 </div>

@@ -9,6 +9,7 @@
 'use client';
 
 import { useEffect, useMemo, useState, type CSSProperties } from 'react';
+import { Check, X, TriangleAlert } from 'lucide-react';
 import type { Lei } from '@/services/leis.service';
 import { artigoNumeroFromKey } from '@/services/leis.service';
 import {
@@ -197,8 +198,9 @@ function QuestaoCard({ questao: q, resposta, onResponder, onReabrir, onVerArtigo
       <div style={s.cardHead}>
         <button onClick={onVerArtigo} style={s.artChip} title="Ver o artigo na aba Texto">Art. {numero} →</button>
         {respondida && (
-          <span style={{ ...s.resultado, color: resposta.acertou ? '#2B9B78' : '#C03A39' }}>
-            {resposta.acertou ? '✓ acertou' : '✗ errou'}
+          <span style={{ ...s.resultado, color: resposta.acertou ? '#2B9B78' : '#C03A39', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+            {resposta.acertou ? <Check size={13} strokeWidth={2.5} /> : <X size={13} strokeWidth={2.5} />}
+            {resposta.acertou ? 'acertou' : 'errou'}
           </span>
         )}
       </div>
@@ -216,7 +218,7 @@ function QuestaoCard({ questao: q, resposta, onResponder, onReabrir, onVerArtigo
             <b style={{ color: resposta.acertou ? '#2B9B78' : '#C03A39' }}>
               Gabarito: {q.gabarito ? 'Certo' : 'Errado'}
             </b>
-            {q.tipo === 'pegadinha' && <span style={s.tagPegadinha}>⚠ pegadinha</span>}
+            {q.tipo === 'pegadinha' && <span style={{ ...s.tagPegadinha, display: 'inline-flex', alignItems: 'center', gap: 4 }}><TriangleAlert size={12} strokeWidth={2} />pegadinha</span>}
             <button onClick={() => onReabrir(q.id)} style={s.deNovoBtn}>tentar de novo</button>
           </div>
           <p style={s.comentario}>{q.comentario}</p>

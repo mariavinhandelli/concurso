@@ -11,9 +11,10 @@
 [data-palette="petroleo"][data-mode="light"] {
   --topbar-h: 60px;
   --bg:  #F8FAFC;
-  /* Marca — gradiente do CTA (verde→índigo do login, pontas escurecidas p/ AA),
+  /* Marca — gradiente do CTA (verde→índigo do login, pontas escurecidas p/ AA:
+     #15803D dá 4,6:1 com texto branco; #16A34A dava só 3,3:1),
      acento de destaque e backdrop único de modais. */
-  --gradient-cta: linear-gradient(135deg, #16A34A 0%, #4F46E5 100%);
+  --gradient-cta: linear-gradient(135deg, #15803D 0%, #4F46E5 100%);
   --gradient-cta-hover: linear-gradient(135deg, #15803D 0%, #4338CA 100%);
   --on-cta: #FFFFFF;
   --brand-accent: #16A34A;
@@ -28,7 +29,8 @@
   --line-strong: rgba(15,23,42,.16);
   --ink: #0F172A;
   --ink-soft: #475569;
-  --ink-faint: #94A3B8;
+  /* 4,6:1 sobre --bg (era #94A3B8, 2,6:1 — reprovava AA em hints de 11-12px) */
+  --ink-faint: #64748B;
 
   /* teal = cor primária dos botões CTA (dark petróleo, mesma do sidebar) */
   --teal: #143D45;
@@ -76,12 +78,17 @@
   --danger-tint: rgba(239,68,68,.08);
   --ok-tint: rgba(34,197,94,.08);
   --warn-tint: rgba(245,158,11,.08);
+
+  /* Texto sobre --info sólido (badge "solid info") — passa AA nos dois modos. */
+  --on-info: #0F172A;
+  /* Anel de foco — no light o teal-soft era quase invisível (1,3:1). */
+  --focus-ring: var(--clay-deep);
 }
 
 /* ---- Focali escuro ---- */
 [data-palette="petroleo"][data-mode="dark"] {
   --bg: #0A0F1A;
-  --gradient-cta: linear-gradient(135deg, #16A34A 0%, #4F46E5 100%);
+  --gradient-cta: linear-gradient(135deg, #15803D 0%, #4F46E5 100%);
   --gradient-cta-hover: linear-gradient(135deg, #22C55E 0%, #6366F1 100%);
   --on-cta: #FFFFFF;
   --brand-accent: #4ADE80;
@@ -150,7 +157,7 @@
   --line-strong: rgba(60,40,40,.18);
   --ink: #2E2422;
   --ink-soft: #7A6B66;
-  --ink-faint: #B6A8A3;
+  --ink-faint: #80716D;
 
   --teal: #C67D80;
   --teal-deep: #A85F62;
@@ -249,7 +256,7 @@
   --line-strong: rgba(30,55,45,.18);
   --ink: #1E2B26;
   --ink-soft: #5E7268;
-  --ink-faint: #A6B5AC;
+  --ink-faint: #697A70;
 
   --teal: #6366F1;
   --teal-deep: #b3a7f5;
@@ -349,7 +356,7 @@
   --line-strong: rgba(27,34,31,.32);
   --ink: #1b221f;
   --ink-soft: #4f645a;
-  --ink-faint: #97A39D;
+  --ink-faint: #68746E;
 
   --teal: #1b221f;
   --teal-deep: #10140f;
@@ -590,7 +597,9 @@ img, video, canvas {
   min-width: 0;
 }
 
-@media (max-width: 768px) {
+/* 767px, não 768: em 768px exato o app já está no modo tablet
+   (sidebar 72px) — 768 aqui criava um híbrido mobile+tablet. */
+@media (max-width: 767px) {
   .grid-cards {
     grid-template-columns: 1fr;   /* uma coluna no celular */
     gap: 12px;
@@ -613,9 +622,18 @@ img, video, canvas {
   50%       { opacity: 0.45; }
 }
 
+/* No dark mode e sobre o sidebar dark navy, o anel claro é o que contrasta. */
+[data-mode="dark"] {
+  --focus-ring: var(--teal-soft);
+}
+
 :where(a, button, input, select, textarea, [tabindex]):focus-visible {
-  outline: 3px solid var(--teal-soft) !important;
+  outline: 3px solid var(--focus-ring, var(--clay-deep)) !important;
   outline-offset: 2px;
+}
+
+.app-sidebar :where(a, button):focus-visible {
+  outline-color: var(--teal-soft) !important;
 }
 
 @keyframes toast-in {
@@ -651,6 +669,11 @@ img, video, canvas {
 .topic-row .topic-actions { opacity: 0; transition: opacity .12s ease; }
 .topic-row:hover .topic-actions,
 .topic-row:focus-within .topic-actions { opacity: 1; }
+/* Touch (tablet/híbrido): não existe hover — ações sempre visíveis,
+   senão ficam invisíveis porém tocáveis. */
+@media (hover: none) {
+  .topic-row .topic-actions { opacity: 1; }
+}
 .topic-row { transition: border-color .12s ease; }
 .topic-row:hover { border-color: var(--line-strong) !important; }
 
@@ -718,7 +741,9 @@ img, video, canvas {
 
 /* ── Primitivo Button (components/ui/Button.tsx) — hovers por variante.
    !important vence o background inline do componente. ── */
-.ui-btn { transition: background .15s ease, border-color .15s ease, opacity .15s ease, filter .15s ease; }
+.ui-btn { transition: background .15s ease, border-color .15s ease, opacity .15s ease, filter .15s ease, transform .1s ease; }
+/* Feedback de toque — em tablet não há hover; pressed é o único feedback possível. */
+.ui-btn:active:not(:disabled) { filter: brightness(.94); transform: scale(.98); }
 .ui-btn-primary:hover:not(:disabled) { background: var(--primary-hover) !important; }
 .ui-btn-outline:hover:not(:disabled) { background: var(--muted) !important; border-color: var(--line-strong) !important; }
 .ui-btn-ghost:hover:not(:disabled) { background: var(--muted) !important; }
@@ -967,4 +992,11 @@ textarea:focus-visible {
 .conquistas-filter-tab:focus-visible {
   outline: 2px solid var(--teal);
   outline-offset: 2px;
+}
+/* Touch: 33px de altura não bastam como alvo de toque.
+   .touch-target também vale aqui — a regra do bloco mobile (767px) não
+   cobre tablets, que são touch do mesmo jeito. */
+@media (pointer: coarse) {
+  .conquistas-filter-tab { min-height: 44px; }
+  .touch-target { min-height: 44px; }
 }

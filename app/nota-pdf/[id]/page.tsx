@@ -7,6 +7,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { Printer } from 'lucide-react';
 import { generateHTML } from '@tiptap/core';
 import StarterKit from '@tiptap/starter-kit';
 import Highlight from '@tiptap/extension-highlight';
@@ -79,7 +80,7 @@ export default function NotaPdfPage() {
 
       <div className="no-print" style={styles.toolbar}>
         <button onClick={() => router.push('/caderno')} style={styles.voltarBtn}>← Voltar ao Caderno</button>
-        <button onClick={() => window.print()} style={styles.printBtn}>🖨 Baixar / Imprimir PDF</button>
+        <button onClick={() => window.print()} style={styles.printBtn}><Printer size={14} strokeWidth={2} /> Baixar / Imprimir PDF</button>
       </div>
 
       <div style={styles.folha}>

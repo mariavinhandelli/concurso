@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useCallback, useMemo, useState } from 'react';
-import { X, CheckCircle2, ChevronDown } from 'lucide-react';
+import { X, CheckCircle2, ChevronDown, Undo2 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { useStudySession } from '@/hooks/useStudySession';
 import { useToast } from '@/components/ui/ToastProvider';
@@ -266,10 +266,10 @@ export function FlashcardEngine({ queue, onFinish, onExit }: Props) {
         </>
       ) : (
         ghostRating ? (
-          <p style={{ ...styles.ghostFeedback, ...(ghostRating.days < 0 ? { color: theme.danger } : {}) }}>
+          <p style={{ ...styles.ghostFeedback, ...(ghostRating.days < 0 ? { color: theme.danger } : {}), display: 'flex', alignItems: 'center', gap: 6 }}>
             {ghostRating.days < 0
-              ? '↩ Errei — o card volta no fim desta sessão'
-              : `✓ ${ghostRating.label} — próxima revisão em ${formatDays(ghostRating.days)}`}
+              ? <><Undo2 size={13} strokeWidth={2} />Errei — o card volta no fim desta sessão</>
+              : <><CheckCircle2 size={13} strokeWidth={2} />{ghostRating.label} — próxima revisão em {formatDays(ghostRating.days)}</>}
           </p>
         ) : (
           <p style={styles.remainingHint}>

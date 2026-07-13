@@ -9,6 +9,7 @@
 import { useEffect, useState, type CSSProperties } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
+import { ClipboardList, X } from 'lucide-react';
 import { getCoachSemanal, type CoachResumo } from '@/services/coach.service';
 import { theme } from '@/lib/theme';
 import { Button } from '@/components/ui/Button';
@@ -110,18 +111,18 @@ export function CoachSemanal({ variant = 'banner' }: { variant?: 'banner' | 'row
     <>
       <div style={s.rowDivider} />
       <button style={s.row} onClick={() => setModalOpen(true)}>
-        <span style={s.rowMsg}>📋 Seu resumo {data.isCurrentWeek ? 'da semana' : 'da semana passada'} está pronto</span>
+        <span style={s.rowMsg}><ClipboardList size={14} strokeWidth={2} style={{ marginRight: 5, verticalAlign: -2 }} />Seu resumo {data.isCurrentWeek ? 'da semana' : 'da semana passada'} está pronto</span>
         <span style={s.rowCta}>Ver →</span>
       </button>
     </>
   ) : (
     <div style={s.banner}>
       <span style={s.bannerMsg}>
-        📋 Seu resumo {data.isCurrentWeek ? 'da semana' : 'da semana passada'} está pronto.
+        <ClipboardList size={14} strokeWidth={2} style={{ marginRight: 5, verticalAlign: -2 }} />Seu resumo {data.isCurrentWeek ? 'da semana' : 'da semana passada'} está pronto.
       </span>
       <div style={s.bannerActions}>
         <button onClick={() => setModalOpen(true)} style={s.bannerBtn}>Ver resumo →</button>
-        <button onClick={fecharModal} style={s.bannerDismiss} aria-label="Dispensar">✕</button>
+        <button onClick={fecharModal} style={s.bannerDismiss} aria-label="Dispensar"><X size={14} strokeWidth={2} /></button>
       </div>
     </div>
   );
@@ -137,7 +138,7 @@ export function CoachSemanal({ variant = 'banner' }: { variant?: 'banner' | 'row
                 <span style={s.eyebrow}>Seu coach semanal</span>
                 <h2 id="coach-semanal-title" style={s.h2}>{fmtPeriodo(data.weekStart, data.weekEnd)}</h2>
               </div>
-              <IconButton onClick={() => setModalOpen(false)} aria-label="Fechar" size="sm" style={{ fontSize: 16, flexShrink: 0 }}>✕</IconButton>
+              <IconButton onClick={() => setModalOpen(false)} aria-label="Fechar" size="sm" style={{ flexShrink: 0 }}><X size={16} strokeWidth={2} /></IconButton>
             </div>
 
             <div style={s.body}>

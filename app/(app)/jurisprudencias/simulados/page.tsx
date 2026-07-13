@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { Check, X, ClipboardList } from 'lucide-react';
 import { listSimuladoSessions, type SimuladoSession } from '@/services/jurisInteracoes.service';
 import { useUI } from '@/components/layout/UIContext';
 import { theme } from '@/lib/theme';
@@ -147,6 +148,7 @@ export default function SimuladosPage() {
   return (
     <PageContainer>
       <button
+        className="touch-target"
         onClick={() => router.push('/jurisprudencias')}
         style={{ border: 'none', background: 'transparent', color: theme.teal, fontSize: 13, fontWeight: 500, cursor: 'pointer', padding: 0, fontFamily: 'inherit', marginBottom: 8 }}
       >
@@ -168,7 +170,7 @@ export default function SimuladosPage() {
         </div>
       ) : sessions.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '60px 20px', background: theme.card, borderRadius: theme.radius, border: `0.5px solid ${theme.line}` }}>
-          <div style={{ fontSize: 38, marginBottom: 12 }}>📋</div>
+          <ClipboardList size={38} color={theme.inkFaint} strokeWidth={1.3} style={{ marginBottom: 12 }} />
           <p style={{ fontSize: 15, fontWeight: 600, color: theme.ink, margin: '0 0 8px' }}>Nenhum simulado ainda</p>
           <p style={{ fontSize: 13, color: theme.inkFaint, margin: '0 0 20px' }}>
             Complete um simulado na lista de jurisprudências para ver o histórico aqui.
@@ -216,8 +218,8 @@ export default function SimuladosPage() {
                           border: `0.5px solid ${r.acertou ? 'rgba(34,197,94,.2)' : 'rgba(239,68,68,.2)'}`,
                         }}
                       >
-                        <span style={{ fontSize: 11, fontWeight: 700, color: r.acertou ? theme.okDeep : theme.danger, flexShrink: 0, marginTop: 1 }}>
-                          {idx + 1}. {r.acertou ? '✓' : '✗'}
+                        <span style={{ fontSize: 11, fontWeight: 700, color: r.acertou ? theme.okDeep : theme.danger, flexShrink: 0, marginTop: 1, display: 'inline-flex', alignItems: 'center', gap: 3 }}>
+                          {idx + 1}. {r.acertou ? <Check size={11} strokeWidth={2.5} /> : <X size={11} strokeWidth={2.5} />}
                         </span>
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <p style={{ fontSize: 13, color: theme.ink, margin: '0 0 4px', lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>

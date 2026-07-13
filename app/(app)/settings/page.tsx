@@ -3,7 +3,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Check, Pencil } from 'lucide-react';
+import { Check, Pencil, X } from 'lucide-react';
 import { useConfirm } from '@/hooks/useConfirm';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
@@ -258,8 +258,8 @@ export default function SettingsPage() {
                     <IconButton size="sm" onClick={() => startEdit(b)} aria-label={`Renomear ${b.name}`}>
                       <Pencil size={15} strokeWidth={1.8} />
                     </IconButton>
-                    <IconButton size="sm" onClick={() => handleDeleteBoard(b.id, b.name)} aria-label={`Apagar ${b.name}`} style={{ color: theme.inkFaint, fontSize: 13 }}>
-                      ✕
+                    <IconButton size="sm" onClick={() => handleDeleteBoard(b.id, b.name)} aria-label={`Apagar ${b.name}`} style={{ color: theme.inkFaint }}>
+                      <X size={13} strokeWidth={2} />
                     </IconButton>
                   </>
                 )}

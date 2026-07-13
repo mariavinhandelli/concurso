@@ -8,7 +8,7 @@
 
 import { useMemo, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { X, Trash2 } from 'lucide-react';
+import { X, Trash2, Clock, FileText, Layers, Bell, RefreshCw, Plus, type LucideIcon } from 'lucide-react';
 import { useConfirm } from '@/hooks/useConfirm';
 import { useToast } from '@/components/ui/ToastProvider';
 import { listEvents, type CalendarEvent } from '@/services/calendar.service';
@@ -44,51 +44,14 @@ function chipBg(type: EvType, color: string): string {
   return `rgba(${r},${g},${b},0.10)`;
 }
 
+const EVENT_ICON: Record<EvType, LucideIcon> = {
+  block: Clock, exam: FileText, flashcard: Layers, reminder: Bell, topic: RefreshCw,
+};
+
 function EventIcon({ type, color, size = 11 }: { type: EvType; color: string; size?: number }) {
   const sw = size >= 16 ? 1.8 : 2;
-  const common = {
-    width: size, height: size, viewBox: '0 0 24 24', fill: 'none',
-    stroke: color, strokeWidth: sw, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const,
-    style: { flexShrink: 0 },
-  };
-  if (type === 'block') {
-    return (
-      <svg {...common}>
-        <circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" />
-      </svg>
-    );
-  }
-  if (type === 'exam') {
-    return (
-      <svg {...common}>
-        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-        <path d="M14 2v6h6M9 13h6M9 17h4" />
-      </svg>
-    );
-  }
-  if (type === 'flashcard') {
-    return (
-      <svg {...common}>
-        <rect x="2" y="7" width="20" height="14" rx="2" />
-        <path d="M16 3H8a2 2 0 0 0-2 2v2h12V5a2 2 0 0 0-2-2z" />
-      </svg>
-    );
-  }
-  if (type === 'reminder') {
-    return (
-      <svg {...common}>
-        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-        <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-      </svg>
-    );
-  }
-  return (
-    <svg {...common}>
-      <path d="M1 4v6h6" />
-      <path d="M23 20v-6h-6" />
-      <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4-4.64 4.36A9 9 0 0 1 3.51 15" />
-    </svg>
-  );
+  const Icon = EVENT_ICON[type] ?? RefreshCw;
+  return <Icon width={size} height={size} color={color} strokeWidth={sw} style={{ flexShrink: 0 }} />;
 }
 
 function tipoLabel(type: EvType): string {
@@ -350,9 +313,7 @@ export function CalendarView() {
               </div>
             ) : (
               <button onClick={() => setAdding(true)} style={styles.addTrigger}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: 8 }}>
-                  <path d="M12 5v14M5 12h14" />
-                </svg>
+                <Plus size={16} strokeWidth={2} style={{ marginRight: 8 }} />
                 Adicionar lembrete neste dia
               </button>
             )}

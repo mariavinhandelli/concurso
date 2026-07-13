@@ -2,7 +2,7 @@
 
 import { memo, useEffect, useRef, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, Clock, CircleCheckBig, ClipboardCheck, Crosshair } from 'lucide-react';
 import { useToast } from '@/components/ui/ToastProvider';
 import {
   getGoalsSummary, setDailyTarget, type GoalsSummary,
@@ -129,7 +129,7 @@ export const TodayBlock = memo(function TodayBlock() {
             onClick={() => { setEditingHours((v) => !v); setEditingQ(false); }}
             title="Ajustar meta de horas"
           >
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={theme.inkSoft} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>
+            <Clock size={15} color={theme.inkSoft} strokeWidth={1.8} />
             H. Estudo{' '}
             <b style={styles.stripVal}>{goals ? `${fmtMin(goals.todayMinutes)} / ${fmtMin(goals.targetMinutesPerDay)}` : '…'}</b>
             <ChevronDown size={12} color={theme.inkFaint} strokeWidth={2} style={{ transform: editingHours ? 'rotate(180deg)' : 'none', transition: 'transform .15s' }} />
@@ -158,7 +158,7 @@ export const TodayBlock = memo(function TodayBlock() {
         </div>
 
         <span style={styles.stripItem}>
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={theme.inkSoft} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
+          <CircleCheckBig size={15} color={theme.inkSoft} strokeWidth={1.8} />
           Progresso <b style={styles.stripVal}>{metaHoursPct}%</b>
         </span>
       </div>
@@ -171,7 +171,7 @@ export const TodayBlock = memo(function TodayBlock() {
             onClick={() => { setEditingQ((v) => !v); setEditingHours(false); }}
             title="Ajustar meta de questões"
           >
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={theme.inkSoft} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2m-6 9 2 2 4-4"/></svg>
+            <ClipboardCheck size={15} color={theme.inkSoft} strokeWidth={1.8} />
             Questões{' '}
             <b style={styles.stripVal}>
               {qGoals ? `${qGoals.todayQuestions} / ${qGoals.targetQuestionsPerDay || '—'}` : '…'}
@@ -200,7 +200,7 @@ export const TodayBlock = memo(function TodayBlock() {
         </div>
 
         <span style={styles.stripItem}>
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={theme.inkSoft} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12h3m14 0h3M12 2v3m0 14v3"/><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></svg>
+          <Crosshair size={15} color={theme.inkSoft} strokeWidth={1.8} />
           Acerto <b style={{ ...styles.stripVal, color: acertoColor }}>{qGoals?.todayAcerto == null ? '—' : `${qGoals.todayAcerto}%`}</b>
           {acrDelta != null && acrDelta !== 0 && (
             <span style={{ fontSize: 12, fontWeight: 600, color: deltaColor }}>

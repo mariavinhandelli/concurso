@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, memo } from 'react';
+import { TriangleAlert } from 'lucide-react';
 import { theme } from '@/lib/theme';
 import type { ReviewItem, ReviewRating } from '@/services/reviews.service';
 
@@ -33,18 +34,6 @@ const RATINGS: {
   { key: 'facil',         label: 'Fácil',         fg: theme.ok,   pressedBg: 'var(--review-easy)',   pressedFg: 'var(--review-easy-text)'   },
 ];
 
-function WarnIcon({ size = 12 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none"
-      stroke={theme.crit} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-      aria-hidden="true" style={{ flexShrink: 0 }}>
-      <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
-      <line x1="12" y1="9" x2="12" y2="13"/>
-      <line x1="12" y1="17" x2="12.01" y2="17"/>
-    </svg>
-  );
-}
-
 export const ReviewCard = memo(function ReviewCard({ item, isExiting, onRate }: ReviewCardProps) {
   // Entrada: monta invisível, transiciona após 10ms para evitar flash.
   const [visible, setVisible] = useState(false);
@@ -73,7 +62,7 @@ export const ReviewCard = memo(function ReviewCard({ item, isExiting, onRate }: 
             style={s.overdue}
             title={`Esta revisão venceu há ${item.overdueDays} ${item.overdueDays === 1 ? 'dia' : 'dias'}. Avalie como Difícil para reiniciar o intervalo.`}
           >
-            <WarnIcon size={12} />
+            <TriangleAlert size={12} color={theme.crit} strokeWidth={2} aria-hidden="true" style={{ flexShrink: 0 }} />
             {item.overdueDays} {item.overdueDays === 1 ? 'dia' : 'dias'} atrasada
           </span>
         )}

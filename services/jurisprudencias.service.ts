@@ -5,6 +5,7 @@
 
 import { createClient } from '@/lib/supabase/client';
 import { jurisprudencias as ALL } from '@/data/jurisprudencias';
+import { normalizeDisciplina } from '@/lib/juris-disciplinas';
 
 export type JurisTipo = 'sumula' | 'sumula_vinculante' | 'acordao' | 'decisao_monocratica' | 'informativo' | 'outro';
 
@@ -138,13 +139,10 @@ export const INCIDENCIA_OPTIONS: { value: JurisIncidencia; label: string }[] = [
   { value: 'muito_alta', label: 'Muito Alta' },
 ];
 
-// Disciplinas-padrão do hub (cards principais). Mesmo que o usuário cadastre
-// outras, estas sempre aparecem como atalho de navegação.
-export const DISCIPLINAS_HUB = [
-  'Constitucional', 'Administrativo', 'Controle Externo', 'Penal', 'Processo Penal',
-  'Civil', 'Processo Civil', 'Trabalho', 'Eleitoral',
-  'Tributário', 'Previdenciário', 'Penal e Proc. Penal Militar',
-];
+// Taxonomia (DISCIPLINAS_HUB + normalizeDisciplina) mora em lib/juris-disciplinas
+// para que consumidores fora do módulo não arrastem o dataset para o bundle.
+// Re-exportada aqui por compatibilidade com os imports existentes.
+export { DISCIPLINAS_HUB, normalizeDisciplina } from '@/lib/juris-disciplinas';
 
 const INCIDENCIA_ORDER: Record<JurisIncidencia, number> = {
   muito_alta: 4, alta: 3, media: 2, baixa: 1,
@@ -331,41 +329,6 @@ export async function listDistinct(field: 'tribunal' | 'disciplina' | 'materia')
     ? merged.flatMap((j) => disciplinasNormalizadas(j))
     : merged.map((j) => j[field]).filter((v): v is string => v != null && v !== '');
   return [...new Set(values)].sort();
-}
-
-const DISCIPLINA_ALIAS: Record<string, string> = {
-  // Penal Militar
-  'Penal Militar': 'Penal e Proc. Penal Militar',
-  'Processual Penal Militar': 'Penal e Proc. Penal Militar',
-  'Direito Penal Militar': 'Penal e Proc. Penal Militar',
-  'Direito Processual Penal Militar': 'Penal e Proc. Penal Militar',
-  'Direito Penal e Processual Penal Militar': 'Penal e Proc. Penal Militar',
-  'Penal e Processual Penal Militar': 'Penal e Proc. Penal Militar',
-  // Processo Penal
-  'Direito Processual Penal': 'Processo Penal',
-  'Processual Penal': 'Processo Penal',
-  // Processo Civil
-  'Direito Processual Civil': 'Processo Civil',
-  'Processual Civil': 'Processo Civil',
-  // Trabalho
-  'Direito do Trabalho': 'Trabalho',
-  'do Trabalho': 'Trabalho',
-  'Direito Trabalhista': 'Trabalho',
-  'Trabalhista': 'Trabalho',
-};
-
-// Normaliza "Direito Penal" → "Penal", "Direito Civil" → "Civil", etc.
-// para bater com as chaves do DISCIPLINAS_HUB.
-// Exportada: outros módulos (ex. hub de Targets) usam para saber sob qual
-// disciplina filtrar jurisprudências relacionadas a uma matéria da Focali —
-// os nomes das matérias não usam a mesma taxonomia (ver DISCIPLINA_ALIAS).
-export function normalizeDisciplina(disciplina: string): string {
-  if (DISCIPLINA_ALIAS[disciplina]) return DISCIPLINA_ALIAS[disciplina];
-  const stripped = disciplina.replace(/^Direito\s+/i, '');
-  if (DISCIPLINA_ALIAS[stripped]) return DISCIPLINA_ALIAS[stripped];
-  if (DISCIPLINAS_HUB.includes(stripped)) return stripped;
-  if (DISCIPLINAS_HUB.includes(disciplina)) return disciplina;
-  return disciplina;
 }
 
 // Disciplinas (normalizadas, sem repetição) sob as quais um julgado deve ser

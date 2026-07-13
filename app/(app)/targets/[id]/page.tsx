@@ -6,6 +6,7 @@
 import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
+import { Sparkles } from 'lucide-react';
 import { useTargetDetail } from '@/hooks/useTargetDetail';
 import { formatTargetLabel } from '@/lib/targets';
 import { updateTargetExamDate, promoteToPos } from '@/services/targetExams.service';
@@ -168,9 +169,7 @@ export default function TargetDetailPage() {
             style={{ ...s.genBtn, ...(canGenerate ? {} : s.genBtnDisabled) }}
             aria-disabled={!canGenerate}
           >
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: 7 }}>
-              <path d="M5 3v4M3 5h4M6 17v4M4 19h4M13 3l2.5 6.5L22 12l-6.5 2.5L13 21l-2.5-6.5L4 12l6.5-2.5L13 3z" />
-            </svg>
+            <Sparkles size={15} strokeWidth={2} style={{ marginRight: 7 }} />
             Gerar cronograma
           </button>
         </div>

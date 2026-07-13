@@ -6,8 +6,8 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { ChevronDown, X } from 'lucide-react';
-import { useTimer } from './TimerContext';
+import { ChevronDown, X, Play, Expand } from 'lucide-react';
+import { useTimer, useTimerTick } from './TimerContext';
 import { saveStudyLog, type SessionFeedback } from '@/services/studyLogs.service';
 import { getSessionTargetLabel } from '@/services/topics.service';
 import { refreshHomeAfterSession } from '@/lib/home-refresh';
@@ -20,6 +20,7 @@ import type { LogMode } from '@/lib/timer-storage';
 
 export function FloatingTimer() {
   const timer = useTimer();
+  const { formatted } = useTimerTick();
   const queryClient = useQueryClient();
   const { isMobile, mobileOpen } = useUI();
   const toast = useToast();
@@ -132,9 +133,7 @@ export function FloatingTimer() {
         title="Iniciar sessão de estudo"
       >
         {/* fill explícito (não currentColor) — garante contraste em todas as paletas, inclusive grafite */}
-        <svg width="22" height="22" viewBox="0 0 24 24" fill={theme.onTeal}>
-          <path d="M8 5v14l11-7z" />
-        </svg>
+        <Play size={22} fill={theme.onTeal} stroke="none" />
       </button>
     );
   }
@@ -144,7 +143,7 @@ export function FloatingTimer() {
     return (
       <button onClick={() => setExpanded(true)} style={{ ...styles.pill, ...pos }} aria-label="Abrir cronômetro">
         <span style={{ ...styles.pillDot, background: timer.isRunning ? theme.tealSoft : theme.clay }} />
-        <span style={styles.pillTime}>{timer.formatted}</span>
+        <span style={styles.pillTime}>{formatted}</span>
       </button>
     );
   }
@@ -158,7 +157,7 @@ export function FloatingTimer() {
           <ChevronDown size={16} strokeWidth={2} />
         </button>
       </div>
-      <div style={styles.cardTime}>{timer.formatted}</div>
+      <div style={styles.cardTime}>{formatted}</div>
       {alvoLabel && <div style={styles.cardAlvo} title={alvoLabel}>{alvoLabel}</div>}
       <div style={styles.cardStatus}>
         <span style={{ ...styles.pillDot, background: timer.isRunning ? theme.tealSoft : theme.clay }} />
@@ -168,7 +167,7 @@ export function FloatingTimer() {
         onClick={() => window.dispatchEvent(new CustomEvent('focali:open-focus'))}
         style={styles.focusBtn}
       >
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2" /></svg>
+        <Expand size={14} strokeWidth={1.9} />
         Modo foco
       </button>
       <div style={styles.cardActions}>

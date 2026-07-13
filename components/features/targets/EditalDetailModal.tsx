@@ -5,6 +5,7 @@
 
 import { useState, type CSSProperties } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { X } from 'lucide-react';
 import {
   activateCatalogEdital, getCatalogEditalSubjects, listEditalUpdates,
   type CatalogEdital, type CatalogEditalSubject, type EditalUpdate, type EditalUpdateTipo,
@@ -106,7 +107,7 @@ export function EditalDetailModal({ edital, isMobile, onClose, onActivated }: Pr
             </div>
             {edital.areaName && <p style={s.areaLabel}>{edital.areaName}</p>}
           </div>
-          <IconButton onClick={onClose} aria-label="Fechar" size="sm" style={{ fontSize: 16, flexShrink: 0 }}>✕</IconButton>
+          <IconButton onClick={onClose} aria-label="Fechar" size="sm" style={{ flexShrink: 0 }}><X size={16} strokeWidth={2} /></IconButton>
         </div>
 
         <div style={s.body}>

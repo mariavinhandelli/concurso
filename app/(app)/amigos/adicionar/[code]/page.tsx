@@ -7,6 +7,7 @@
 import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
+import { Search } from 'lucide-react';
 import { useToast } from '@/components/ui/ToastProvider';
 import {
   findProfileByCode, getMySocialProfile, enableSocial, sendFriendRequest, type SocialProfile,
@@ -53,7 +54,7 @@ export default function AdicionarAmigoPage() {
           <p style={s.muted}>Procurando o convite…</p>
         ) : !prof ? (
           <>
-            <div style={s.emoji}>🔍</div>
+            <Search size={32} color={theme.inkFaint} strokeWidth={1.5} style={{ marginBottom: 8 }} />
             <h1 style={s.h1}>Convite não encontrado</h1>
             <p style={s.body}>O código <code style={s.code}>{code}</code> não corresponde a nenhum perfil ativo. Confira o link com quem te enviou.</p>
             <Button onClick={() => router.push('/amigos')}>Ir para Amigos</Button>

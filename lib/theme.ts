@@ -36,6 +36,7 @@ export const theme = {
   crit: 'var(--crit)', critBg: 'var(--crit-bg)',
 
   info: 'var(--info)',    infoBg: 'var(--info-bg)',
+  onInfo: 'var(--on-info)',
 
   /* Marca — gradiente de CTA (1 por tela, no topbar e momentos-chave),
      acento de destaque (links/palavras) e backdrop único de modais. */
@@ -122,5 +123,5 @@ export const btnOutline: React.CSSProperties = {
 
 export const kbd: React.CSSProperties = {
   background: theme.muted, border: `0.5px solid ${theme.line}`,
-  borderRadius: 4, padding: '0px 5px', fontSize: 10.5, fontFamily: 'monospace',
+  borderRadius: 4, padding: '0px 5px', fontSize: 11, fontFamily: 'monospace',
 };

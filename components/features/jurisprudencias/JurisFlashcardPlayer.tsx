@@ -1,7 +1,7 @@
 'use client';
 
 import { memo, useEffect, useMemo, useState } from 'react';
-import { Layers } from 'lucide-react';
+import { Layers, X } from 'lucide-react';
 import { theme, kbd } from '@/lib/theme';
 import { Button } from '@/components/ui/Button';
 import type { Jurisprudencia } from '@/services/jurisprudencias.service';
@@ -177,7 +177,7 @@ export const JurisFlashcardPlayer = memo(function JurisFlashcardPlayer({ items, 
         <span style={{ fontSize: 13, color: theme.inkFaint }}>
           {idx + 1} / {cards.length}
         </span>
-        <button onClick={safeClose} style={{ marginLeft: 'auto', border: 'none', background: 'transparent', color: theme.inkFaint, fontSize: 18, cursor: 'pointer', lineHeight: 1 }} aria-label="Fechar">✕</button>
+        <button onClick={safeClose} style={{ marginLeft: 'auto', border: 'none', background: 'transparent', color: theme.inkFaint, cursor: 'pointer', lineHeight: 1, display: 'flex' }} aria-label="Fechar"><X size={18} strokeWidth={2} /></button>
       </div>
 
       {/* Barra de progresso */}

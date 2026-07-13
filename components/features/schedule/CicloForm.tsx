@@ -1,6 +1,7 @@
 'use client';
 
 import { useImperativeHandle, forwardRef, useState } from 'react';
+import { X } from 'lucide-react';
 import type { Subject } from '@/services/subjects.service';
 import type { RecurrenceItemInput } from '@/services/recurrence.service';
 import type { RuleSummary } from '@/services/recurrence.service';
@@ -95,7 +96,7 @@ export const CicloForm = forwardRef<CicloFormRef, Props>(function CicloForm(
               <option value="">Selecione a matéria…</option>
               {subjects.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
             </Select>
-            {items.length > 1 && <IconButton size="sm" onClick={() => remove(it.uid)} aria-label="Remover" style={{ color: theme.inkFaint, fontSize: 13 }}>✕</IconButton>}
+            {items.length > 1 && <IconButton size="sm" onClick={() => remove(it.uid)} aria-label="Remover" style={{ color: theme.inkFaint }}><X size={13} strokeWidth={2} /></IconButton>}
           </div>
           <div style={styles.timeRow}>
             <Input type="number" min="0" value={it.h} onChange={(e) => patch(it.uid, { h: e.target.value })} style={{ width: 56, padding: 8, borderRadius: theme.radiusXs, fontSize: 14, textAlign: 'center' }} />

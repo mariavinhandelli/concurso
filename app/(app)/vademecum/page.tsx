@@ -7,7 +7,7 @@
 
 import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { useRouter } from 'next/navigation';
-import { CircleHelp } from 'lucide-react';
+import { CircleHelp, AlarmClock } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { LEIS_CATALOG, getLei, type LeiMeta } from '@/services/leis.service';
 import { countRevisoesDue, listInteracoesByLei } from '@/services/leiInteracoes.service';
@@ -84,8 +84,9 @@ export default function VademecumPage() {
       <PageHeader title="Vade Mecum" subtitle="Lei seca para grifar, anotar e revisar — o texto vira estudo ativo." />
 
       {dueCount > 0 && (
-        <button onClick={() => router.push('/vademecum/revisar')} style={s.dueBanner}>
-          ⏰ <b>{dueCount} artigo{dueCount === 1 ? '' : 's'}</b> com revisão vencida — revisar agora →
+        <button onClick={() => router.push('/vademecum/revisar')} style={{ ...s.dueBanner, display: 'flex', alignItems: 'center', gap: 6 }}>
+          <AlarmClock size={14} strokeWidth={2} />
+          <b>{dueCount} artigo{dueCount === 1 ? '' : 's'}</b> com revisão vencida — revisar agora →
         </button>
       )}
 

@@ -7,6 +7,7 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react';
 import Link from 'next/link';
+import { X } from 'lucide-react';
 import { useConfirm } from '@/hooks/useConfirm';
 import { useToast } from '@/components/ui/ToastProvider';
 import { searchNotes, listNotes, getNote, deleteNote, countNotesBySubject, listNotesByBoard, listRecentNotes, listCriticalTopics, listBoards, type ErrorNote, type CriticalTopic } from '@/services/notebook.service';
@@ -433,7 +434,7 @@ function NoteItem({ note, active, onClick, onDelete }: {
     <div onClick={onClick} style={{ ...styles.item, ...(active ? styles.itemActive : {}) }}>
       <div style={styles.itemTitle}>{note.title || '(sem título)'}</div>
       {note.error_type && <div style={styles.itemMeta}><span style={styles.tag}>{note.error_type}</span></div>}
-      <button onClick={onDelete} style={styles.delBtn} aria-label="Apagar erro">✕</button>
+      <button onClick={onDelete} style={styles.delBtn} aria-label="Apagar erro"><X size={13} strokeWidth={2} /></button>
     </div>
   );
 }

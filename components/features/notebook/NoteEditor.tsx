@@ -2,8 +2,14 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import dynamic from 'next/dynamic';
 import { useToast } from '@/components/ui/ToastProvider';
-import { RichTextEditor } from '@/components/editor/RichTextEditor';
+
+// Tiptap (~400KB) só carrega quando o editor abre — fora do bundle da rota.
+const RichTextEditor = dynamic(
+  () => import('@/components/editor/RichTextEditor').then((m) => ({ default: m.RichTextEditor })),
+  { ssr: false, loading: () => <div className="skel" style={{ minHeight: 220, borderRadius: 12 }} /> },
+);
 import { ERROR_TYPES, createNote, updateNote, listBoards, type ErrorNote, type NoteInput } from '@/services/notebook.service';
 import { listActive as listSubjectOptions } from '@/services/subjects.service';
 import { listLeaves as listTopicOptions, type PickerOption } from '@/services/topics.service';
@@ -265,10 +271,10 @@ export function NoteEditor({ note, presetSubjectId = null, presetTopicId = null,
 
 const styles: Record<string, React.CSSProperties> = {
   panel: { display: 'flex', flexDirection: 'column', gap: 12, width: '100%', minWidth: 0, maxWidth: '100%' },
-  titleInput: { width: '100%', boxSizing: 'border-box', padding: '13px 16px', borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.card, fontSize: 18, color: theme.ink, fontWeight: 700, fontFamily: theme.font, outline: 'none' },
+  titleInput: { width: '100%', border: 'none', outline: 'none', background: 'transparent', fontSize: 22, fontWeight: 700, color: theme.ink, fontFamily: 'inherit', padding: 0 },
   chipsLabel: { fontSize: 13, fontWeight: 600, color: theme.inkSoft, margin: '0 0 8px' },
   chipsRow: { display: 'flex', flexWrap: 'wrap', gap: 8 },
-  chip: { padding: '8px 14px', borderRadius: theme.radiusPill, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.card, color: theme.inkSoft, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', transition: 'all .12s' },
+  chip: { padding: '7px 13px', borderRadius: theme.radiusPill, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.card, color: theme.inkSoft, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', transition: 'all .12s' },
   chipOn: { background: theme.teal, borderColor: theme.teal, color: theme.onTeal },
   metaRow: { display: 'flex', gap: 12, width: '100%', minWidth: 0, flexWrap: 'wrap' },
   acertoBox: { display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', borderRadius: theme.radiusSm, background: theme.bg, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line },

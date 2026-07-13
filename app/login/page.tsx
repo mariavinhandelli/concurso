@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { User, Mail, Lock, Eye, EyeOff, ArrowRight, ShieldCheck, CalendarClock, ChartLine, Goal } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { Input } from '@/components/ui/Input';
 
@@ -335,11 +336,7 @@ export default function LoginPage() {
                   placeholder="Como podemos te chamar?"
                   autoComplete="name"
                   required
-                  icon={
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
-                    </svg>
-                  }
+                  icon={<User size={16} strokeWidth={1.8} />}
                   style={{ padding: '13px 14px 13px 42px', borderRadius: 12, border: '1.5px solid var(--line-strong)' }}
                 />
               </div>
@@ -357,11 +354,7 @@ export default function LoginPage() {
                 placeholder="seu@email.com"
                 autoComplete="email"
                 required
-                icon={
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                    <rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
-                  </svg>
-                }
+                icon={<Mail size={16} strokeWidth={1.8} />}
                 style={{ padding: '13px 14px 13px 42px', borderRadius: 12, border: '1.5px solid var(--line-strong)' }}
               />
             </div>
@@ -380,11 +373,7 @@ export default function LoginPage() {
                     placeholder="Digite sua senha"
                     autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
                     required
-                    icon={
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                        <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-                      </svg>
-                    }
+                    icon={<Lock size={16} strokeWidth={1.8} />}
                     style={{ padding: '13px 44px 13px 42px', borderRadius: 12, border: '1.5px solid var(--line-strong)' }}
                   />
                   <button
@@ -395,8 +384,8 @@ export default function LoginPage() {
                     style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: B.inkMuted, display: 'flex' }}
                   >
                     {showPassword
-                      ? <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" x2="23" y1="1" y2="23"/></svg>
-                      : <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                      ? <EyeOff size={16} strokeWidth={1.8} />
+                      : <Eye size={16} strokeWidth={1.8} />
                     }
                   </button>
                 </div>
@@ -442,9 +431,7 @@ export default function LoginPage() {
               {loading ? 'Aguarde…' : (
                 <>
                   {textoBotao}
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M5 12h14M12 5l7 7-7 7"/>
-                  </svg>
+                  <ArrowRight size={16} strokeWidth={2.2} />
                 </>
               )}
             </button>
@@ -469,13 +456,7 @@ export default function LoginPage() {
 
             {/* Security badge */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginTop: 32, paddingTop: 24, borderTop: `1px solid ${B.borderLight}` }}>
-              <svg width="1em" height="1em" viewBox="0 0 48 48">
-                <path d="M0 0h48v48H0z" fill="none" />
-                <g fill="none" stroke="currentColor" strokeLinejoin="round" strokeWidth="4">
-                  <path d="M6 9.256L24.009 4L42 9.256v10.778A26.32 26.32 0 0 1 24.003 45A26.32 26.32 0 0 1 6 20.029z" />
-                  <path strokeLinecap="round" d="m15 23l7 7l12-12" />
-                </g>
-              </svg>
+              <ShieldCheck size="1em" strokeWidth={1.8} />
               <div>
                 <div style={{ fontSize: 13, fontWeight: 600, color: B.inkSoft }}>Ambiente seguro</div>
                 <div style={{ fontSize: 12, color: B.inkMuted }}>Seus dados estão protegidos.</div>
@@ -520,39 +501,16 @@ const FEATURES = [
   {
     title: 'Organize seus estudos',
     desc: 'Sua rotina sob controle, do planejamento à execução.',
-    icon: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--ok)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        
-      <>
-        <path d="M11 21H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v7" />
-        <path strokeLinejoin="round" d="M2 7h20M5 5.01l.01-.011M8 5.01l.01-.011M11 5.01l.01-.011m10.657 11.668C21.047 15.097 19.635 14 17.99 14c-1.758 0-3.252 1.255-3.793 3" />
-        <path strokeLinejoin="round" d="M19.995 16.772H21.4a.6.6 0 0 0 .6-.6V14.55m-7.666 4.783C14.953 20.903 16.366 22 18.01 22c1.758 0 3.252-1.255 3.793-3" />
-        <path strokeLinejoin="round" d="M16.005 19.228H14.6a.6.6 0 0 0-.6.6v1.622" />
-      </>
-      </svg>
-      
-    ),
+    icon: <CalendarClock size={18} color="var(--ok)" strokeWidth={2} />,
   },
   {
     title: 'Enxergue sua evolução',
     desc: 'Dados precisos para decisões mais assertivas.',
-    icon: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--ok)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M20 20H4V4"></path>
-    <path d="M4 16.5L12 9l3 3l4.5-4.5"></path>
-      </svg>
-    ),
+    icon: <ChartLine size={18} color="var(--ok)" strokeWidth={2} />,
   },
   {
     title: 'Estude com propósito',
     desc: 'Direcionamento claro para ir muito mais longe.',
-    icon: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--ok)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M10.66 10.66A1.9 1.9 0 0 0 10.1 12a1.9 1.9 0 0 0 1.9 1.9a1.9 1.9 0 0 0 1.34-.56"></path>
-    <path d="M12 6.3a5.7 5.7 0 1 0 5.7 5.7"></path>
-    <path d="M12 2.5a9.5 9.5 0 1 0 9.5 9.5m-5.975-3.524L12.95 11.05"></path>
-    <path d="M20.94 5.844L17.7 6.3l.456-3.24a.19.19 0 0 0-.313-.161l-2.148 2.137a1.9 1.9 0 0 0-.513 1.72l.342 1.72l1.72.341a1.9 1.9 0 0 0 1.72-.513L21.1 6.157a.19.19 0 0 0-.162-.313"></path>
-      </svg>
-    ),
+    icon: <Goal size={18} color="var(--ok)" strokeWidth={2} />,
   },
 ];

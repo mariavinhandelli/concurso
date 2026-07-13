@@ -1,7 +1,7 @@
 'use client';
 
 import { memo, useEffect, useState } from 'react';
-import { Star } from 'lucide-react';
+import { Star, X } from 'lucide-react';
 import { theme } from '@/lib/theme';
 import { EstrelasBadge } from './EstrelasBadge';
 import { getInteracao, toggleFavorito } from '@/services/jurisInteracoes.service';
@@ -135,7 +135,7 @@ export const JurisprudenciaCard = memo(function JurisprudenciaCard({ item, onCli
             onClick={(e) => { e.stopPropagation(); onDelete(); }}
             style={styles.deleteBtn}
             aria-label="Apagar"
-          >✕</button>
+          ><X size={13} strokeWidth={2} /></button>
         )}
       </div>
     </div>

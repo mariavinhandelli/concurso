@@ -4,6 +4,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { Sparkles } from 'lucide-react';
 import { createFlashcard } from '@/services/flashcards.service';
 import { theme } from '@/lib/theme';
 import { Button } from '@/components/ui/Button';
@@ -56,7 +57,9 @@ export function FlashcardModal({ frontText, sourceErrorId, subjectId, topicId, o
 
   return (
     <Overlay onClose={saving ? () => {} : onClose} maxWidth={480} labelledBy="flashcard-modal-title">
-      <h2 id="flashcard-modal-title" style={styles.title}>✦ Novo flashcard</h2>
+      <h2 id="flashcard-modal-title" style={{ ...styles.title, display: 'flex', alignItems: 'center', gap: 6 }}>
+        <Sparkles size={16} strokeWidth={2} />Novo flashcard
+      </h2>
 
         <label style={styles.label}>Frente (pergunta)</label>
         <Textarea value={front} onChange={(e) => setFront(e.target.value)} rows={3} />

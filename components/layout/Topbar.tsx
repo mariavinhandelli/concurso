@@ -7,7 +7,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
-import { Search, Menu } from 'lucide-react';
+import { Search, Menu, Plus, Zap, Clock, Moon, Sun, User, Settings, LogOut } from 'lucide-react';
 import { refreshHomeAfterSession } from '@/lib/home-refresh';
 import Image from 'next/image';
 import { createClient } from '@/lib/supabase/client';
@@ -104,9 +104,7 @@ export function Topbar() {
             aria-haspopup="menu"
             aria-expanded={addMenuOpen}
           >
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke={theme.onTeal} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12 5v14M5 12h14" />
-            </svg>
+            <Plus size={17} color={theme.onTeal} strokeWidth={2.2} />
             <span className="topbar-add-label" style={styles.addLabel}>Registrar estudo</span>
           </button>
 
@@ -117,7 +115,7 @@ export function Topbar() {
                 role="menuitem"
                 onClick={() => { setAddMenuOpen(false); setQuickOpen(true); }}
               >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={theme.warn} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z" /></svg>
+                <Zap size={16} color={theme.warn} strokeWidth={1.8} />
                 <span>
                   Questões rápidas
                   <span style={styles.menuHint}>total + acertos, em segundos</span>
@@ -128,7 +126,7 @@ export function Topbar() {
                 role="menuitem"
                 onClick={() => { setAddMenuOpen(false); setLogOpen(true); }}
               >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={theme.inkSoft} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 3" /></svg>
+                <Clock size={16} color={theme.inkSoft} strokeWidth={1.8} />
                 <span>
                   Sessão completa
                   <span style={styles.menuHint}>data, duração, feedback</span>
@@ -144,16 +142,9 @@ export function Topbar() {
         {/* Tema (dark) */}
         <button onClick={toggleTheme} style={styles.iconBtn} title="Alternar tema" aria-label="Alternar tema">
           {mode === 'light' ? (
-            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke={theme.inkSoft}
-              strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M21 12.8A9 9 0 1111.2 3 7 7 0 0021 12.8z" />
-            </svg>
+            <Moon size={19} color={theme.inkSoft} strokeWidth={1.8} />
           ) : (
-            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke={theme.warn}
-              strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="4" />
-              <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
-            </svg>
+            <Sun size={19} color={theme.warn} strokeWidth={1.8} />
           )}
         </button>
 
@@ -178,16 +169,16 @@ export function Topbar() {
                 <div style={styles.menuEmail}>{email ?? '—'}</div>
               </div>
               <button style={styles.menuItem} onClick={() => { setMenuOpen(false); router.push('/profile'); }}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={theme.inkSoft} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0116 0" /></svg>
+                <User size={16} color={theme.inkSoft} strokeWidth={1.8} />
                 Meu perfil
               </button>
               <button style={styles.menuItem} onClick={() => { setMenuOpen(false); router.push('/settings'); }}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={theme.inkSoft} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3" /><path d="M19 12a7 7 0 00-.1-1l2-1.5-2-3.4-2.3 1a7 7 0 00-1.7-1l-.3-2.5h-4l-.3 2.5a7 7 0 00-1.7 1l-2.3-1-2 3.4 2 1.5a7 7 0 000 2l-2 1.5 2 3.4 2.3-1a7 7 0 001.7 1l.3 2.5h4l.3-2.5a7 7 0 001.7-1l2.3 1 2-3.4-2-1.5a7 7 0 00.1-1z" /></svg>
+                <Settings size={16} color={theme.inkSoft} strokeWidth={1.8} />
                 Configurações
               </button>
               <div style={styles.menuSep} />
               <button style={{ ...styles.menuItem, color: theme.danger }} onClick={handleLogout}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={theme.danger} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M16 17l5-5-5-5M21 12H9M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" /></svg>
+                <LogOut size={16} color={theme.danger} strokeWidth={1.8} />
                 Sair
               </button>
             </div>

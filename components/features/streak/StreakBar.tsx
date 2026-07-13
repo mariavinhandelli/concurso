@@ -2,6 +2,7 @@
 
 import { memo } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { Shield } from 'lucide-react';
 import { getStreak, type StreakInfo } from '@/services/streak.service';
 import { theme } from '@/lib/theme';
 import { useUI } from '@/components/layout/UIContext';
@@ -100,7 +101,7 @@ export const StreakBar = memo(function StreakBar() {
             <span style={styles.warn}> Estude hoje para manter.</span>
           )}
           {info.shieldUsed && (
-            <span style={styles.shield}> 🛡️ uma folga foi perdoada — sua ofensiva continua de pé.</span>
+            <span style={{ ...styles.shield, display: 'inline-flex', alignItems: 'center', gap: 4 }}> <Shield size={13} strokeWidth={2} />uma folga foi perdoada — sua ofensiva continua de pé.</span>
           )}
         </span>
         {novoRecorde ? (

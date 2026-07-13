@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { CircleHelp, Layers } from 'lucide-react';
+import { CircleHelp, Layers, Check, X } from 'lucide-react';
 import { theme } from '@/lib/theme';
 import type { Jurisprudencia } from '@/services/jurisprudencias.service';
 
@@ -20,9 +20,7 @@ export function JurisModoEstudo({ item }: Props) {
         background: theme.card, border: `0.5px solid ${theme.line}`,
         borderRadius: theme.radius, boxShadow: theme.shadow,
       }}>
-        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke={theme.inkFaint} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" style={{ marginBottom: 12 }}>
-          <rect x="2" y="5" width="20" height="14" rx="2" /><path d="M2 10h20" />
-        </svg>
+        <Layers size={36} color={theme.inkFaint} strokeWidth={1.7} style={{ marginBottom: 12 }} />
         <p style={{ fontSize: 14, color: theme.inkSoft, margin: '0 0 4px', fontWeight: 600 }}>
           Nenhum material de estudo ainda
         </p>
@@ -147,8 +145,9 @@ function QuestaoMode({ item }: { item: Jurisprudencia }) {
             background: acertou ? theme.okTint : theme.dangerTint,
             border: `0.5px solid ${acertou ? theme.ok : theme.danger}`,
           }}>
-            <p style={{ fontSize: 14, fontWeight: 700, color: acertou ? theme.okDeep : theme.danger, margin: '0 0 4px' }}>
-              {acertou ? '✓ Correto!' : '✗ Errado!'}
+            <p style={{ fontSize: 14, fontWeight: 700, color: acertou ? theme.okDeep : theme.danger, margin: '0 0 4px', display: 'flex', alignItems: 'center', gap: 6 }}>
+              {acertou ? <Check size={15} strokeWidth={2.5} /> : <X size={15} strokeWidth={2.5} />}
+              {acertou ? 'Correto!' : 'Errado!'}
             </p>
             <p style={{ fontSize: 13, color: theme.inkSoft, margin: '0 0 4px' }}>
               Gabarito: <strong style={{ color: theme.ink }}>{gabarito ? 'Certo' : 'Errado'}</strong>

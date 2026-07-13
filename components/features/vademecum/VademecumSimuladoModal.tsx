@@ -8,6 +8,7 @@
 import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
+import { CircleHelp } from 'lucide-react';
 import { Overlay } from '@/components/ui/Overlay';
 import { LEIS_CATALOG, type LeiMeta } from '@/services/leis.service';
 import { getQuestoesLei, LEIS_COM_QUESTOES } from '@/services/leiQuestoes.service';
@@ -58,7 +59,9 @@ export function VademecumSimuladoModal({ onClose }: { onClose: () => void }) {
 
   return (
     <Overlay onClose={onClose} labelledBy="vademecum-simulado-title">
-      <h2 id="vademecum-simulado-title" style={s.titulo}>✓ Simulado C/E</h2>
+      <h2 id="vademecum-simulado-title" style={{ ...s.titulo, display: 'flex', alignItems: 'center', gap: 6 }}>
+        <CircleHelp size={16} strokeWidth={1.7} />Simulado C/E
+      </h2>
       <p style={s.sub}>Escolha uma ou mais leis para montar o simulado.</p>
 
       <div style={s.linksRow}>

@@ -5,6 +5,7 @@
 
 import { Suspense, useState, type CSSProperties } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { Check, X } from 'lucide-react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/components/ui/ToastProvider';
 import {
@@ -95,10 +96,10 @@ function AmigosContent() {
             estuda, seus erros ou anotações. Você pode desativar quando quiser.
           </p>
           <div style={s.privacyRow}>
-            <span style={s.pillOk}>✓ sequência</span>
-            <span style={s.pillOk}>✓ minutos da semana</span>
-            <span style={s.pillOk}>✓ % do edital</span>
-            <span style={s.pillNo}>✕ conteúdo · erros · anotações</span>
+            <span style={s.pillOk}><Check size={12} strokeWidth={2.5} style={{ marginRight: 4, verticalAlign: -1 }} />sequência</span>
+            <span style={s.pillOk}><Check size={12} strokeWidth={2.5} style={{ marginRight: 4, verticalAlign: -1 }} />minutos da semana</span>
+            <span style={s.pillOk}><Check size={12} strokeWidth={2.5} style={{ marginRight: 4, verticalAlign: -1 }} />% do edital</span>
+            <span style={s.pillNo}><X size={12} strokeWidth={2.5} style={{ marginRight: 4, verticalAlign: -1 }} />conteúdo · erros · anotações</span>
           </div>
           <button onClick={ativar} disabled={busy} style={{ ...s.primary, marginTop: 18, opacity: busy ? 0.6 : 1 }}>
             {busy ? 'Ativando…' : 'Ativar perfil social'}

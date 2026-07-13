@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { CircleHelp } from 'lucide-react';
+import { CircleHelp, X, Check, Timer } from 'lucide-react';
 import { theme, perfColor, kbd } from '@/lib/theme';
 import { Button } from '@/components/ui/Button';
 import { Overlay } from '@/components/ui/Overlay';
@@ -275,7 +275,7 @@ export function JurisSimulado({ items, onClose }: Props) {
                     background: theme.dangerTint, border: `0.5px solid rgba(239,68,68,.2)`,
                     display: 'flex', alignItems: 'flex-start', gap: 8,
                   }}>
-                    <span style={{ fontSize: 13, fontWeight: 800, color: theme.danger, flexShrink: 0, marginTop: 1 }}>✗</span>
+                    <X size={13} strokeWidth={2.5} color={theme.danger} style={{ flexShrink: 0, marginTop: 1 }} />
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <p style={{ fontSize: 12, color: theme.ink, margin: '0 0 3px', lineHeight: 1.4,
                         overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
@@ -304,9 +304,9 @@ export function JurisSimulado({ items, onClose }: Props) {
                   background: acertos[i] ? theme.okTint : theme.dangerTint,
                   border: `0.5px solid ${acertos[i] ? '#22c55e40' : '#ef444440'}`,
                 }}>
-                  <span style={{ fontSize: 13, fontWeight: 800, color: acertos[i] ? theme.okDeep : theme.danger, flexShrink: 0, marginTop: 1 }}>
-                    {acertos[i] ? '✓' : '✗'}
-                  </span>
+                  {acertos[i]
+                    ? <Check size={13} strokeWidth={2.5} color={theme.okDeep} style={{ flexShrink: 0, marginTop: 1 }} />
+                    : <X size={13} strokeWidth={2.5} color={theme.danger} style={{ flexShrink: 0, marginTop: 1 }} />}
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <p style={{ fontSize: 13, color: theme.ink, margin: '0 0 2px', lineHeight: 1.45,
                       overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
@@ -343,10 +343,10 @@ export function JurisSimulado({ items, onClose }: Props) {
         </span>
         <span style={{ fontSize: 13, color: theme.inkFaint }}>Questão {idx + 1} de {questoes.length}</span>
         {/* Timer */}
-        <span style={{ marginLeft: 'auto', fontSize: 13, fontWeight: 600, color: elapsed >= 3600 ? theme.danger : theme.inkSoft, fontVariantNumeric: 'tabular-nums' }}>
-          ⏱ {formatTime(elapsed)}
+        <span style={{ marginLeft: 'auto', fontSize: 13, fontWeight: 600, color: elapsed >= 3600 ? theme.danger : theme.inkSoft, fontVariantNumeric: 'tabular-nums', display: 'flex', alignItems: 'center', gap: 5 }}>
+          <Timer size={13} strokeWidth={2} />{formatTime(elapsed)}
         </span>
-        <button onClick={safeClose} aria-label="Fechar" style={{ border: 'none', background: 'transparent', color: theme.inkFaint, fontSize: 18, cursor: 'pointer', lineHeight: 1, paddingLeft: 8 }}>✕</button>
+        <button onClick={safeClose} aria-label="Fechar" style={{ border: 'none', background: 'transparent', color: theme.inkFaint, cursor: 'pointer', lineHeight: 1, paddingLeft: 8, display: 'flex' }}><X size={18} strokeWidth={2} /></button>
       </div>
 
       {/* Barra de progresso */}
@@ -379,14 +379,14 @@ export function JurisSimulado({ items, onClose }: Props) {
               aria-keyshortcuts="c"
               style={{ flex: 1, padding: '14px', borderRadius: theme.radiusSm, border: `1.5px solid ${theme.ok}`, background: theme.okTint, color: theme.okDeep, fontSize: 15, fontWeight: 700, cursor: 'pointer', fontFamily: theme.font, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}
             >
-              <span aria-hidden="true">✓</span> Certo
+              <Check aria-hidden="true" size={16} strokeWidth={2.5} /> Certo
             </button>
             <button
               onClick={() => responder(false)}
               aria-keyshortcuts="e"
               style={{ flex: 1, padding: '14px', borderRadius: theme.radiusSm, border: `1.5px solid ${theme.danger}`, background: theme.dangerTint, color: theme.danger, fontSize: 15, fontWeight: 700, cursor: 'pointer', fontFamily: theme.font, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}
             >
-              <span aria-hidden="true">✗</span> Errado
+              <X aria-hidden="true" size={16} strokeWidth={2.5} /> Errado
             </button>
           </div>
           <p style={{ fontSize: 12, color: theme.inkFaint, textAlign: 'center', margin: 0 }}>
@@ -400,8 +400,9 @@ export function JurisSimulado({ items, onClose }: Props) {
             background: acertou ? theme.okTint : theme.dangerTint,
             border: `1.5px solid ${acertou ? theme.ok : theme.danger}`,
           }}>
-            <p style={{ fontSize: 14, fontWeight: 800, color: acertou ? theme.okDeep : theme.danger, margin: '0 0 6px' }}>
-              {acertou ? '✓ Correto!' : '✗ Errado!'}
+            <p style={{ fontSize: 14, fontWeight: 800, color: acertou ? theme.okDeep : theme.danger, margin: '0 0 6px', display: 'flex', alignItems: 'center', gap: 6 }}>
+              {acertou ? <Check size={16} strokeWidth={2.5} /> : <X size={16} strokeWidth={2.5} />}
+              {acertou ? 'Correto!' : 'Errado!'}
             </p>
             <p style={{ fontSize: 13, color: theme.inkSoft, margin: '0 0 8px' }}>
               Gabarito: <strong style={{ color: theme.ink }}>{gabarito ? 'Certo' : 'Errado'}</strong>

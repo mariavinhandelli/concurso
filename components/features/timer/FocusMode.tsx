@@ -8,7 +8,8 @@
 
 import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { useTimer } from './TimerContext';
+import { Shrink } from 'lucide-react';
+import { useTimer, useTimerTick } from './TimerContext';
 import { listSubjects, type Subject } from '@/services/subjects.service';
 import { listAllTopics, type Topic } from '@/services/topics.service';
 import { SESSION_MODES } from '@/lib/session-modes';
@@ -22,6 +23,7 @@ function modeLabel(mode: string): string {
 
 export function FocusMode() {
   const timer = useTimer();
+  const { formatted } = useTimerTick();
   const [open, setOpen] = useState(false);
 
   const hasSession = timer.status === 'running' || timer.status === 'paused';
@@ -84,7 +86,7 @@ export function FocusMode() {
   return (
     <div style={s.overlay}>
       <button onClick={() => setOpen(false)} style={s.exit} title="Sair do foco (Esc)">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><path d="M9 9l6 6M15 9l-6 6" /><rect x="3" y="3" width="18" height="18" rx="3" /></svg>
+        <Shrink size={16} strokeWidth={1.9} />
         Sair do foco
       </button>
 
@@ -97,7 +99,7 @@ export function FocusMode() {
         <h1 style={s.title}>{title}</h1>
         {showSubjectLine && <p style={s.subject}>{ctx!.subjectName}</p>}
 
-        <div style={{ ...s.time, color: timer.isRunning ? theme.ink : theme.inkSoft }}>{timer.formatted}</div>
+        <div style={{ ...s.time, color: timer.isRunning ? theme.ink : theme.inkSoft }}>{formatted}</div>
         <div style={s.state}>
           <span style={{ ...s.dot, background: timer.isRunning ? theme.teal : theme.clay }} />
           {timer.isRunning ? 'em andamento' : 'pausado'}

@@ -9,6 +9,7 @@
 
 import { useMemo, useState, type CSSProperties } from 'react';
 import { useRouter } from 'next/navigation';
+import { Info } from 'lucide-react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useUser } from '@/components/layout/UserContext';
 import { getOnboardingStatus } from '@/services/onboarding.service';
@@ -270,8 +271,9 @@ function OnboardingWizard({ userId, onClose }: { userId: string; onClose: (remem
               </div>
             </div>
 
-            <p style={s.hint}>
-              💡 Melhor prometer pouco e cumprir: constância vale mais que um dia heroico.
+            <p style={{ ...s.hint, display: 'flex', alignItems: 'flex-start', gap: 6 }}>
+              <Info size={13} strokeWidth={2} style={{ flexShrink: 0, marginTop: 2 }} />
+              Melhor prometer pouco e cumprir: constância vale mais que um dia heroico.
             </p>
 
             {error && <p style={s.error}>{error}</p>}

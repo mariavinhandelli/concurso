@@ -4,7 +4,7 @@ import dynamic from 'next/dynamic';
 import { useWindowVirtualizer } from '@tanstack/react-virtual';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { X, ChevronRight, Search } from 'lucide-react';
+import { X, ChevronRight, Search, FilePlus } from 'lucide-react';
 import { useConfirm } from '@/hooks/useConfirm';
 import { useUI } from '@/components/layout/UIContext';
 import { useTopics } from '@/hooks/useTopics';
@@ -281,10 +281,7 @@ export function TopicsClient({ subjectId, initialSubject }: Props) {
           <TopicsSkeleton />
         ) : topics.length === 0 ? (
           <div style={styles.emptyState}>
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke={theme.inkFaint} strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/>
-              <line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/>
-            </svg>
+            <FilePlus size={40} color={theme.inkFaint} strokeWidth={1.2} aria-hidden="true"/>
             <p style={styles.emptyTitle}>Nenhum tópico ainda</p>
             <p style={styles.emptyHint}>
               Dica: use <b>Importar lista</b> para colar o conteúdo programático do edital de uma só vez.

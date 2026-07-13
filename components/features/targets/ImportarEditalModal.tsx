@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useState, type CSSProperties } from 'react';
+import { X } from 'lucide-react';
 import { parseEdital } from '@/lib/parse-edital';
 import { importEditalAsTarget } from '@/services/editalImport.service';
 import { useToast } from '@/components/ui/ToastProvider';
@@ -46,7 +47,7 @@ export function ImportarEditalModal({
             <h2 id="importar-edital-title" style={s.h2}>Importar edital colado</h2>
             <p style={s.sub}>Cole o conteúdo programático. Disciplinas em CAIXA ALTA viram matérias; as linhas abaixo, tópicos.</p>
           </div>
-          <IconButton onClick={onClose} aria-label="Fechar" size="sm" style={{ fontSize: 16, flexShrink: 0 }}>✕</IconButton>
+          <IconButton onClick={onClose} aria-label="Fechar" size="sm" style={{ flexShrink: 0 }}><X size={16} strokeWidth={2} /></IconButton>
         </div>
 
         <div style={s.fields}>

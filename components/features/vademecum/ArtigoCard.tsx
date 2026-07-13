@@ -5,6 +5,7 @@
 'use client';
 
 import { memo, useEffect, useRef, useState, type CSSProperties } from 'react';
+import { AlarmClock, RefreshCw, Info, Pencil, Check, X } from 'lucide-react';
 import type { LeiArtigo } from '@/services/leis.service';
 import {
   addGrifo, removeGrifo, saveAnotacaoArtigo,
@@ -237,14 +238,18 @@ export const ArtigoCard = memo(function ArtigoCard({ artigo, interacao, onUpdate
         <span style={s.rotulo}>{artigo.rotulo}</span>
         {incChip && <span style={{ ...s.incChip, background: incChip.bg, color: incChip.ink }}>{incChip.label}</span>}
         {emRevisao && (
-          <span style={{ ...s.revChip, ...(revisaoVencida ? s.revChipDue : {}) }}>
-            {revisaoVencida ? '⏰ revisão vencida' : `🔁 ${diasAteRevisao()}`}
+          <span style={{ ...s.revChip, ...(revisaoVencida ? s.revChipDue : {}), display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+            {revisaoVencida
+              ? <><AlarmClock size={12} strokeWidth={2} />revisão vencida</>
+              : <><RefreshCw size={12} strokeWidth={2} />{diasAteRevisao()}</>}
           </span>
         )}
       </div>
 
       {artigo.incidenciaNota && (
-        <p style={s.incNota}>💡 {artigo.incidenciaNota}</p>
+        <p style={{ ...s.incNota, display: 'flex', alignItems: 'flex-start', gap: 6 }}>
+          <Info size={14} strokeWidth={2} style={{ flexShrink: 0, marginTop: 1 }} />{artigo.incidenciaNota}
+        </p>
       )}
 
       <div style={s.texto}>
@@ -295,17 +300,17 @@ export const ArtigoCard = memo(function ArtigoCard({ artigo, interacao, onUpdate
           onClick={() => { setNotasOpen((v) => !v); setNotaDraft(null); }}
           style={{ ...s.footBtn, ...(temNota ? s.footBtnOn : {}) }}
         >
-          ✎ {temNota ? 'Anotações' : 'Anotar'}
+          <Pencil size={13} strokeWidth={2} /> {temNota ? 'Anotações' : 'Anotar'}
         </button>
         <button onClick={toggleRevisao} style={{ ...s.footBtn, ...(emRevisao ? s.footBtnOn : {}) }}>
-          🔁 {emRevisao ? 'Em revisão' : 'Revisar'}
+          <RefreshCw size={13} strokeWidth={2} /> {emRevisao ? 'Em revisão' : 'Revisar'}
         </button>
         {temQuestoes && (
           <button
             onClick={() => { setQuestaoOpen((v) => !v); setResposta(null); }}
             style={{ ...s.footBtn, ...(questaoOpen ? s.footBtnOn : {}) }}
           >
-            ✓ Questão C/E {questoes!.length > 1 ? `(${questoes!.length})` : ''}
+            <Check size={13} strokeWidth={2} /> Questão C/E {questoes!.length > 1 ? `(${questoes!.length})` : ''}
           </button>
         )}
         {temGrifos && <span style={s.grifoCount}>{grifos.length} marca{grifos.length === 1 ? '' : 'ções'}</span>}
@@ -342,8 +347,10 @@ export const ArtigoCard = memo(function ArtigoCard({ artigo, interacao, onUpdate
               <div style={{
                 ...s.questaoResultado,
                 ...(resposta === questaoAtual.gabarito ? s.questaoResultadoOk : s.questaoResultadoErro),
+                display: 'flex', alignItems: 'center', gap: 6,
               }}>
-                {resposta === questaoAtual.gabarito ? '✓ Você acertou — ' : '✗ Você errou — '}
+                {resposta === questaoAtual.gabarito ? <Check size={14} strokeWidth={2.5} /> : <X size={14} strokeWidth={2.5} />}
+                {resposta === questaoAtual.gabarito ? 'Você acertou — ' : 'Você errou — '}
                 gabarito: <b>{questaoAtual.gabarito ? 'Certo' : 'Errado'}</b>
               </div>
               <p style={s.questaoComentario}>{questaoAtual.comentario}</p>
@@ -369,7 +376,7 @@ export const ArtigoCard = memo(function ArtigoCard({ artigo, interacao, onUpdate
           ))}
           <span style={s.toolbarSep} />
           <button title="Sublinhar" aria-label="Sublinhar" onClick={() => aplicarGrifo(null, 'sublinhado')} style={s.subBtn}>S̲</button>
-          <button title="Cancelar" aria-label="Cancelar" onClick={() => setPendingSel(null)} style={s.subBtn}>✕</button>
+          <button title="Cancelar" aria-label="Cancelar" onClick={() => setPendingSel(null)} style={s.subBtn}><X size={14} strokeWidth={2} /></button>
         </div>
       )}
 
@@ -380,7 +387,7 @@ export const ArtigoCard = memo(function ArtigoCard({ artigo, interacao, onUpdate
             {popover.grifo.estilo === 'sublinhado' ? 'Sublinhado' : GRIFO_CORES[popover.grifo.cor ?? 'regra'].label}
           </span>
           <button onClick={() => handleRemoverGrifo(popover.grifo)} style={s.popRemove}>Remover</button>
-          <button onClick={() => setPopover(null)} style={s.subBtn}>✕</button>
+          <button onClick={() => setPopover(null)} style={s.subBtn}><X size={14} strokeWidth={2} /></button>
         </div>
       )}
     </div>
@@ -399,7 +406,7 @@ const s: Record<string, CSSProperties> = {
   bloco: { margin: '0 0 8px' },
   blocoRotulo: { fontWeight: 600, color: theme.inkSoft },
   footer: { display: 'flex', alignItems: 'center', gap: 8, marginTop: 10, paddingTop: 10, borderTop: `0.5px solid ${theme.line}`, flexWrap: 'wrap' },
-  footBtn: { border: `0.5px solid ${theme.line}`, background: 'transparent', color: theme.inkSoft, fontSize: 13, fontWeight: 600, borderRadius: theme.radiusPill, padding: '5px 12px', cursor: 'pointer', fontFamily: 'inherit' },
+  footBtn: { border: `0.5px solid ${theme.line}`, background: 'transparent', color: theme.inkSoft, fontSize: 13, fontWeight: 600, borderRadius: theme.radiusPill, padding: '5px 12px', cursor: 'pointer', fontFamily: 'inherit', display: 'inline-flex', alignItems: 'center', gap: 5 },
   footBtnOn: { borderColor: theme.teal, color: theme.tealDeep, background: theme.tealBg },
   grifoCount: { fontSize: 12, color: theme.inkFaint, marginLeft: 'auto' },
   notaBox: { marginTop: 10 },

@@ -4,6 +4,7 @@
 
 import { useEffect, useState, useCallback, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { X, Check } from 'lucide-react';
 import { useToast } from '@/components/ui/ToastProvider';
 import { useUI } from '@/components/layout/UIContext';
 import { buildDailyQueue, buildTargetQueue, type QueueCard } from '@/services/flashcards.service';
@@ -80,8 +81,8 @@ function FlashcardsContent() {
         <div style={styles.focusContainer}>
           {session.length === 0 ? (
             <div style={styles.empty}>
-              <button onClick={() => setSession(null)} style={styles.exitFocus}>✕ Sair</button>
-              <span style={styles.emptyIcon}>✓</span>
+              <button onClick={() => setSession(null)} style={styles.exitFocus}><X size={14} strokeWidth={2} style={{ marginRight: 6, verticalAlign: -2 }} />Sair</button>
+              <span style={styles.emptyIcon}><Check size={28} strokeWidth={2.2} /></span>
               <p style={styles.muted}>Nada para estudar agora. Tudo em dia!</p>
               <Button style={{ marginTop: 8, padding: '12px 28px' }} onClick={() => setSession(null)}>Voltar</Button>
             </div>

@@ -5,7 +5,7 @@
 
 import { memo, useState, useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
-import { ChevronLeft, ChevronRight, Menu } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Menu, Repeat, RefreshCw, Sparkles, Check } from 'lucide-react';
 import { useSchedulePage } from '@/hooks/useSchedulePage';
 import { usePersistedState } from '@/hooks/usePersistedState';
 import { CalendarView } from '@/components/features/calendar/CalendarView';
@@ -46,15 +46,11 @@ const ReplanModal = dynamic(
 );
 
 const RepeatIcon = ({ size = 11, color = 'currentColor', mr = 4 }: { size?: number; color?: string; mr?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ verticalAlign: '-1px', marginRight: mr }} aria-hidden="true">
-    <path d="M17 2l4 4-4 4" /><path d="M3 11V9a4 4 0 014-4h14" /><path d="M7 22l-4-4 4-4" /><path d="M21 13v2a4 4 0 01-4 4H3" />
-  </svg>
+  <Repeat size={size} color={color} strokeWidth={2.2} style={{ verticalAlign: '-1px', marginRight: mr }} aria-hidden="true" />
 );
 
 const CycleIcon = ({ size = 14, color = 'currentColor', mr = 6 }: { size?: number; color?: string; mr?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ verticalAlign: '-2px', marginRight: mr }} aria-hidden="true">
-    <path d="M21 12a9 9 0 11-3-6.7" /><path d="M21 3v5h-5" />
-  </svg>
+  <RefreshCw size={size} color={color} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: mr }} aria-hidden="true" />
 );
 
 export default function SchedulePage() {
@@ -186,9 +182,7 @@ export default function SchedulePage() {
               style={{ ...styles.genBtn, justifyContent: 'center', width: isMobile ? '100%' : undefined }}
               title="Gera blocos automáticos a partir das matérias do seu edital"
             >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ verticalAlign: '-2px', marginRight: 6 }}>
-                <path d="M5 3v4M3 5h4M6 17v4M4 19h4M13 3l2.5 6.5L22 12l-6.5 2.5L13 21l-2.5-6.5L4 12l6.5-2.5L13 3z" />
-              </svg>
+              <Sparkles size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 6 }} />
               Gerar do edital
             </button>
 
@@ -321,7 +315,7 @@ export default function SchedulePage() {
                       Criar recorrência
                     </button>
                     <button onClick={() => setGeneratorOpen(true)} style={styles.genBtn}>
-                      ✦ Gerar do edital
+                      <Sparkles size={13} strokeWidth={2} /> Gerar do edital
                     </button>
                   </div>
                 </div>
@@ -537,7 +531,7 @@ const BlockCard = memo(function BlockCard({ block, onToggle, onDelete, onEdit, o
         }}
         aria-label="Concluir"
       >
-        {block.is_done ? '✓' : ''}
+        {block.is_done && <Check size={13} strokeWidth={2.5} />}
       </button>
       <div style={blockStyles.info}>
         <div
@@ -609,16 +603,16 @@ const styles: Record<string, React.CSSProperties> = {
   dayCol: { display: 'flex', flexDirection: 'column', minWidth: 0 },
   dayHead: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1, padding: '8px 4px', borderRadius: '10px 10px 0 0', borderTopWidth: 0.5, borderTopStyle: 'solid', borderTopColor: theme.line, borderLeftWidth: 0.5, borderLeftStyle: 'solid', borderLeftColor: theme.line, borderRightWidth: 0.5, borderRightStyle: 'solid', borderRightColor: theme.line, background: theme.card },
   dayHeadToday: { borderTopWidth: 2, borderTopStyle: 'solid', borderTopColor: theme.teal },
-  dayName: { fontSize: 10, fontWeight: 700, color: theme.inkFaint, textTransform: 'uppercase', letterSpacing: '0.08em' },
+  dayName: { fontSize: 11, fontWeight: 700, color: theme.inkFaint, textTransform: 'uppercase', letterSpacing: '0.08em' },
   dayNum: { fontSize: 18, fontWeight: 700, color: theme.ink, lineHeight: 1 },
   dayNumToday: { background: theme.teal, color: theme.onTeal, borderRadius: '50%', width: 30, height: 30, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15 },
   progressWrap: { padding: '6px 10px 8px', borderLeftWidth: 0.5, borderLeftStyle: 'solid', borderLeftColor: theme.line, borderRightWidth: 0.5, borderRightStyle: 'solid', borderRightColor: theme.line, background: theme.card },
   progressLabels: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 },
-  progressText: { fontSize: 10, color: theme.inkFaint, fontVariantNumeric: 'tabular-nums' },
-  progressPct: { fontSize: 10, fontWeight: 700, fontVariantNumeric: 'tabular-nums' },
+  progressText: { fontSize: 11, color: theme.inkFaint, fontVariantNumeric: 'tabular-nums' },
+  progressPct: { fontSize: 11, fontWeight: 700, fontVariantNumeric: 'tabular-nums' },
   progressTrack: { height: 6, background: 'rgba(15,23,42,.08)', borderRadius: theme.radiusPill, overflow: 'hidden' },
   progressFill: { height: '100%', borderRadius: theme.radiusPill, transition: 'width .4s ease' },
-  progressEmpty: { fontSize: 10, color: theme.inkFaint, textAlign: 'center' },
+  progressEmpty: { fontSize: 11, color: theme.inkFaint, textAlign: 'center' },
   dayBody: { flex: 1, display: 'flex', flexDirection: 'column', gap: 6, padding: 6, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, borderRadius: '0 0 10px 10px', minHeight: 180, background: theme.bg },
   addBtn: { marginTop: 'auto', padding: '7px', borderRadius: 7, border: 'none', background: 'transparent', color: theme.inkFaint, fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
 
@@ -640,7 +634,7 @@ const blockStyles: Record<string, React.CSSProperties> = {
   cardGrid: { gap: 6, padding: '6px 8px' },
   cardList: { gap: 8, padding: '10px 14px' },
   check: { width: 18, height: 18, borderRadius: '50%', borderWidth: 1.5, borderStyle: 'solid', fontSize: 10, fontWeight: 700, cursor: 'pointer', display: 'grid', placeItems: 'center', flexShrink: 0, marginTop: 2 },
-  checkSm: { width: 15, height: 15, fontSize: 9 },
+  checkSm: { width: 16, height: 16, fontSize: 10 },
   info: { flex: 1, minWidth: 0 },
   name: { fontSize: 13, fontWeight: 600, lineHeight: 1.35, color: 'var(--ink)', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const, overflow: 'hidden', wordBreak: 'break-word' },
   sub: { fontSize: 11, marginTop: 2, color: 'var(--ink-faint)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },

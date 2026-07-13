@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, TriangleAlert, CircleCheckBig, Layers } from 'lucide-react';
 import { useReviews } from '@/hooks/useReviews';
 import { ReviewCard } from '@/components/features/reviews/ReviewCard';
 import { Skeleton } from '@/components/ui/Skeleton';
@@ -30,35 +30,18 @@ function fmtDate(dateStr: string): string {
 // ── Ícones SVG inline — mesma linguagem visual do Topbar ─────────────────
 
 function WarnIcon({ color = theme.crit }: { color?: string }) {
-  return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={color}
-      strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"
-      aria-hidden="true" style={{ flexShrink: 0, marginTop: 1 }}>
-      <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
-      <line x1="12" y1="9" x2="12" y2="13"/>
-      <line x1="12" y1="17" x2="12.01" y2="17"/>
-    </svg>
-  );
+  return <TriangleAlert size={22} color={color} strokeWidth={1.8} aria-hidden="true" style={{ flexShrink: 0, marginTop: 1 }} />;
 }
 
 function CheckCircleIcon({ size = 52 }: { size?: number }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none"
-      aria-hidden="true" style={{ display: 'block', margin: '0 auto 16px' }}>
-      <circle cx="12" cy="12" r="10" fill={theme.okBg} stroke={theme.ok} strokeWidth="1.5"/>
-      <path d="M8 12.5l2.5 2.5 5-5" stroke={theme.ok} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-    </svg>
+    <CircleCheckBig size={size} fill={theme.okBg} color={theme.ok} strokeWidth={1.5}
+      aria-hidden="true" style={{ display: 'block', margin: '0 auto 16px' }} />
   );
 }
 
 function CardDeckIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-      strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <rect x="2" y="7" width="16" height="13" rx="2"/>
-      <path d="M6 7V5a2 2 0 012-2h12a2 2 0 012 2v13a2 2 0 01-2 2"/>
-    </svg>
-  );
+  return <Layers size={14} strokeWidth={2} aria-hidden="true" />;
 }
 
 function ChevronIcon({ rotated }: { rotated: boolean }) {

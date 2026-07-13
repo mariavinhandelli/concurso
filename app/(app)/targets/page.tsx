@@ -7,7 +7,7 @@
 import { memo, useCallback, useEffect, useRef, useState, type CSSProperties } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { ChevronDown, Star, Trash2 } from 'lucide-react';
+import { ChevronDown, Star, Trash2, TriangleAlert, ExternalLink, Archive, Check, X, Calendar } from 'lucide-react';
 import { useTargetList } from '@/hooks/useTargetList';
 import { usePersistedState } from '@/hooks/usePersistedState';
 import { formatTargetLabel, daysUntilExam, countdownInfo } from '@/lib/targets';
@@ -452,11 +452,7 @@ const TargetRow = memo(function TargetRow({
           {formatTargetLabel(t)}
           {!t.board_id && (
             <span title="Banca não definida" style={{ marginLeft: 6, verticalAlign: 'middle' }}>
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={theme.warn} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
-                <line x1="12" y1="9" x2="12" y2="13" />
-                <line x1="12" y1="17" x2="12.01" y2="17" />
-              </svg>
+              <TriangleAlert size={13} color={theme.warn} strokeWidth={2} />
             </span>
           )}
         </span>
@@ -480,8 +476,8 @@ const TargetRow = memo(function TargetRow({
                 style={s.dateInput}
                 onKeyDown={(e) => { if (e.key === 'Enter') handleSaveDate(); if (e.key === 'Escape') setEditing(false); }}
               />
-              <button onClick={handleSaveDate} style={s.dateSaveBtn}>✓</button>
-              <button onClick={() => setEditing(false)} style={s.dateCancelBtn}>✕</button>
+              <button onClick={handleSaveDate} style={s.dateSaveBtn}><Check size={14} strokeWidth={2.2} /></button>
+              <button onClick={() => setEditing(false)} style={s.dateCancelBtn}><X size={14} strokeWidth={2} /></button>
             </div>
           ) : (
             <button
@@ -490,7 +486,7 @@ const TargetRow = memo(function TargetRow({
               title="Definir data da prova"
             >
               {t.exam_date
-                ? `📅 ${new Date(t.exam_date + 'T00:00:00').toLocaleDateString('pt-BR')}`
+                ? <><Calendar size={13} strokeWidth={2} style={{ marginRight: 5, verticalAlign: -2 }} />{new Date(t.exam_date + 'T00:00:00').toLocaleDateString('pt-BR')}</>
                 : '+ data da prova'}
             </button>
           )}
@@ -509,10 +505,7 @@ const TargetRow = memo(function TargetRow({
           title="Abrir concurso"
           aria-label="Abrir concurso"
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={theme.inkSoft} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" />
-            <path d="M15 3h6v6M10 14L21 3" />
-          </svg>
+          <ExternalLink size={16} color={theme.inkSoft} strokeWidth={1.8} />
         </button>
         <button
           onClick={onArchive}
@@ -522,9 +515,7 @@ const TargetRow = memo(function TargetRow({
           title="Arquivar concurso"
           aria-label="Arquivar concurso"
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={theme.inkSoft} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-            <rect x="3" y="4" width="18" height="4" rx="1" /><path d="M5 8v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8M10 12h4" />
-          </svg>
+          <Archive size={16} color={theme.inkSoft} strokeWidth={1.8} />
         </button>
         <button
           onClick={onDelete}

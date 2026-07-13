@@ -8,9 +8,10 @@
 import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
+import { Check, X } from 'lucide-react';
 import { type TargetExam } from '@/services/targetExams.service';
 import { type CatalogEditalInfo, type EditalUpdate, type EditalUpdateTipo } from '@/services/editaisCatalog.service';
-import { countByDisciplina, normalizeDisciplina } from '@/services/jurisprudencias.service';
+import { normalizeDisciplina } from '@/lib/juris-disciplinas';
 import { type SubjectTree, daysUntilExam, countdownInfo } from '@/lib/targets';
 import { theme } from '@/lib/theme';
 import { Button } from '@/components/ui/Button';
@@ -147,7 +148,9 @@ export function HubOverviewTab({
   // em vez de levar o usuário a uma tela vazia.
   const { data: jurisCounts } = useQuery({
     queryKey: ['juris-count-by-disciplina'],
-    queryFn: countByDisciplina,
+    // Import dinâmico: o service arrasta os ~800KB de data/jurisprudencias —
+    // o Hub só precisa das contagens, então o chunk carrega fora do caminho crítico.
+    queryFn: async () => (await import('@/services/jurisprudencias.service')).countByDisciplina(),
     staleTime: 5 * 60_000,
   });
   const topDisciplina = useMemo(() => {
@@ -226,8 +229,8 @@ export function HubOverviewTab({
                 style={s.dateInput}
                 onKeyDown={(e) => { if (e.key === 'Enter') handleSaveDate(); if (e.key === 'Escape') setEditingDate(false); }}
               />
-              <button onClick={handleSaveDate} style={s.dateSaveBtn}>✓</button>
-              <button onClick={() => setEditingDate(false)} style={s.dateCancelBtn}>✕</button>
+              <button onClick={handleSaveDate} style={s.dateSaveBtn}><Check size={14} strokeWidth={2.2} /></button>
+              <button onClick={() => setEditingDate(false)} style={s.dateCancelBtn}><X size={14} strokeWidth={2} /></button>
             </div>
           ) : days !== null && cd ? (
             <button
@@ -375,7 +378,7 @@ export function HubOverviewTab({
                         : undefined
                     }
                   >
-                    <span style={{ ...s.prepCheck, ...(checked ? s.prepCheckOn : {}) }}>{checked ? '✓' : ''}</span>
+                    <span style={{ ...s.prepCheck, ...(checked ? s.prepCheckOn : {}) }}>{checked && <Check size={13} strokeWidth={2.5} />}</span>
                     <span style={{ ...s.prepLabel, ...(checked ? s.prepLabelDone : {}), ...(item.disabled ? s.prepLabelDisabled : {}) }}>
                       {item.label}
                     </span>

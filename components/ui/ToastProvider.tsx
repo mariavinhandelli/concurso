@@ -1,6 +1,7 @@
 'use client';
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react';
+import { X } from 'lucide-react';
 import { theme, zIndex } from '@/lib/theme';
 import { useUI } from '@/components/layout/UIContext';
 
@@ -87,7 +88,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
                   {t.action.label}
                 </button>
               )}
-              <button onClick={() => dismiss(t.id)} style={s.close} aria-label="Fechar">✕</button>
+              <button onClick={() => dismiss(t.id)} style={s.close} aria-label="Fechar"><X size={14} strokeWidth={2} /></button>
             </div>
           ))}
         </div>

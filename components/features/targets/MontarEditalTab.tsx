@@ -1,7 +1,7 @@
 'use client';
 
 import { memo, useEffect, useMemo, useState, type CSSProperties } from 'react';
-import { ChevronRight, Search, Pencil } from 'lucide-react';
+import { ChevronRight, Search, Pencil, X, Check } from 'lucide-react';
 import { type Blueprint } from '@/services/blueprints.service';
 import { type SubjectTree } from '@/lib/targets';
 import { theme } from '@/lib/theme';
@@ -145,7 +145,7 @@ export const MontarEditalTab = memo(function MontarEditalTab({
           <div style={s.searchWrap}>
             <Search size={14} color={theme.inkFaint} strokeWidth={2} style={{ flexShrink: 0 }} />
             <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar tópico…" style={s.searchInput} />
-            {search && <button onClick={() => setSearch('')} style={s.searchClear} aria-label="Limpar busca">✕</button>}
+            {search && <button onClick={() => setSearch('')} style={s.searchClear} aria-label="Limpar busca"><X size={13} strokeWidth={2} /></button>}
           </div>
 
           {filteredTree.length === 0 && (
@@ -256,7 +256,7 @@ function TopicRow({ name, on, loading, onToggle }: { name: string; on: boolean; 
       onMouseLeave={() => setHov(false)}
     >
       <span style={{ ...s.libCheck, ...(on ? s.libCheckOn : {}) }}>
-        {loading ? <Spinner /> : on ? '✓' : ''}
+        {loading ? <Spinner /> : on ? <Check size={13} strokeWidth={2.5} /> : ''}
       </span>
       <span style={s.libTopicName}>{name}</span>
     </button>

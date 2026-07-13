@@ -5,8 +5,15 @@
 // IMPORTANTE: montar com key={nota.id} — o Tiptap só lê initialContent no mount.
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
-import { RichTextEditor } from '@/components/editor/RichTextEditor';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
+import dynamic from 'next/dynamic';
+import { Download, Pin, Trash2, Check, TriangleAlert } from 'lucide-react';
+
+// Tiptap (~400KB) só carrega quando uma nota é aberta — fora do bundle da rota.
+const RichTextEditor = dynamic(
+  () => import('@/components/editor/RichTextEditor').then((m) => ({ default: m.RichTextEditor })),
+  { ssr: false, loading: () => <div className="skel" style={{ minHeight: 220, borderRadius: 12 }} /> },
+);
 import { FlashcardModal } from '@/components/features/notebook/FlashcardModal';
 import {
   updateStudyNote, deleteStudyNote, NOTA_KINDS,
@@ -19,6 +26,7 @@ import { useToast } from '@/components/ui/ToastProvider';
 import { theme } from '@/lib/theme';
 import { KIND_CORES } from './notaCores';
 import { Select } from '@/components/ui/Select';
+import { IconButton } from '@/components/ui/IconButton';
 
 type SaveStatus = 'salvo' | 'pendente' | 'salvando' | 'erro';
 
@@ -127,11 +135,11 @@ export function NotaEditor({ nota, subjects, onPatched, onDeleted, onVoltar }: P
     }
   }
 
-  const statusInfo: Record<SaveStatus, { label: string; color: string }> = {
-    salvo:    { label: '✓ salvo', color: theme.ok },
+  const statusInfo: Record<SaveStatus, { label: ReactNode; color: string }> = {
+    salvo:    { label: <><Check size={12} strokeWidth={2.5} style={{ verticalAlign: -2 }} /> salvo</>, color: theme.ok },
     pendente: { label: '· editando…', color: theme.inkFaint },
     salvando: { label: 'salvando…', color: theme.inkFaint },
-    erro:     { label: '⚠ erro ao salvar — tentando de novo', color: theme.danger },
+    erro:     { label: <><TriangleAlert size={12} strokeWidth={2} style={{ verticalAlign: -2 }} /> erro ao salvar — tentando de novo</>, color: theme.danger },
   };
 
   return (
@@ -192,23 +200,26 @@ export function NotaEditor({ nota, subjects, onPatched, onDeleted, onVoltar }: P
 
         <div style={{ flex: 1 }} />
 
-        <button
+        <IconButton
+          size="sm" variant="outline"
           onClick={async () => { await saveNow(); window.open(`/nota-pdf/${nota.id}`, '_blank'); }}
-          style={s.iconBtn}
           title="Exportar em PDF"
           aria-label="Exportar em PDF"
         >
-          ⭳
-        </button>
-        <button
+          <Download size={14} />
+        </IconButton>
+        <IconButton
+          size="sm" variant="outline"
           onClick={() => { const v = !isPinned; setIsPinned(v); queue({ isPinned: v }, 300); }}
-          style={{ ...s.iconBtn, ...(isPinned ? s.iconBtnOn : {}) }}
+          style={isPinned ? { borderColor: theme.teal, background: theme.tealBg, color: theme.teal } : undefined}
           title={isPinned ? 'Desafixar' : 'Fixar no topo'}
           aria-label={isPinned ? 'Desafixar' : 'Fixar no topo'}
         >
-          📌
-        </button>
-        <button onClick={handleDelete} style={s.iconBtn} title="Excluir anotação" aria-label="Excluir anotação">🗑</button>
+          <Pin size={14} fill={isPinned ? 'currentColor' : 'none'} />
+        </IconButton>
+        <IconButton size="sm" variant="outline" onClick={handleDelete} title="Excluir anotação" aria-label="Excluir anotação">
+          <Trash2 size={14} />
+        </IconButton>
       </div>
 
       <RichTextEditor
@@ -245,8 +256,6 @@ const s: Record<string, React.CSSProperties> = {
   metaRow: { display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 12 },
   metaSelect: { maxWidth: 190, padding: '6px 28px 6px 8px', borderRadius: theme.radiusXs, fontSize: 13, color: theme.inkSoft },
   kindGroup: { display: 'flex', gap: 4 },
-  kindChip: { padding: '5px 11px', borderRadius: theme.radiusPill, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: 'transparent', color: theme.inkFaint, fontSize: 12, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' },
-  iconBtn: { width: 32, height: 32, borderRadius: theme.radiusXs, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.card, fontSize: 14, cursor: 'pointer', display: 'grid', placeItems: 'center', flexShrink: 0, opacity: 0.75 },
-  iconBtnOn: { borderColor: theme.teal, background: theme.tealBg, opacity: 1 },
+  kindChip: { padding: '7px 13px', borderRadius: theme.radiusPill, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: 'transparent', color: theme.inkFaint, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', transition: 'all .12s' },
   footInfo: { fontSize: 12, color: theme.inkFaint, margin: '8px 2px 0', textAlign: 'right' },
 };

@@ -6,6 +6,7 @@
 
 import { useEffect, useState, type CSSProperties } from 'react';
 import { useRouter } from 'next/navigation';
+import { X } from 'lucide-react';
 import {
   listNotesByTopic, createStudyNote, NOTA_KINDS,
   type StudyNoteMeta,
@@ -63,7 +64,7 @@ export function TopicNotesPopover({ topic, subjectId, onClose, onChanged }: Prop
             <span style={s.eyebrow}>Anotações do tópico</span>
             <h2 id="topic-notes-title" style={s.h2}>{topic.name}</h2>
           </div>
-          <IconButton onClick={onClose} aria-label="Fechar" size="sm" style={{ fontSize: 15, flexShrink: 0 }}>✕</IconButton>
+          <IconButton onClick={onClose} aria-label="Fechar" size="sm" style={{ flexShrink: 0 }}><X size={15} strokeWidth={2} /></IconButton>
         </div>
 
         <div style={s.body}>

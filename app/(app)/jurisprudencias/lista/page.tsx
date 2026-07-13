@@ -2,7 +2,8 @@
 
 import { Suspense, useCallback, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { CircleHelp, Layers } from 'lucide-react';
+import { CircleHelp, Layers, TriangleAlert, Star } from 'lucide-react';
+import { Spinner } from '@/components/ui/Spinner';
 import {
   listJurisprudencias, deleteJurisprudencia, listDistinct, getJurisprudenciaById,
   JURIS_PAGE_LIMIT,
@@ -43,7 +44,7 @@ export default function JurisprudenciasListaPage() {
 function ListaContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { isMobile } = useUI();
+  const { isMobile, isTablet } = useUI();
   const toast = useToast();
   const { confirm, dialog } = useConfirm();
 
@@ -183,8 +184,8 @@ function ListaContent() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16, flexWrap: 'wrap', marginBottom: 20 }}>
           <div>
             <button className="touch-target" onClick={() => router.push('/jurisprudencias')} style={styles.backBtn}>← Jurisprudências</button>
-            <h1 style={{ fontSize: isMobile ? 24 : 28, fontWeight: 800, color: theme.ink, letterSpacing: -0.6, margin: '8px 0 0' }}>
-              {isFavoritasView ? '★ Favoritas' : (filters.disciplina || 'Todas as jurisprudências')}
+            <h1 style={{ fontSize: isMobile ? 24 : 28, fontWeight: 800, color: theme.ink, letterSpacing: -0.6, margin: '8px 0 0', display: 'flex', alignItems: 'center', gap: 8 }}>
+              {isFavoritasView ? <><Star size={isMobile ? 20 : 24} fill={theme.ink} strokeWidth={1.7} />Favoritas</> : (filters.disciplina || 'Todas as jurisprudências')}
             </h1>
           </div>
           <Button onClick={() => router.push('/jurisprudencias/nova')}>
@@ -204,10 +205,7 @@ function ListaContent() {
               />
               {loading && (
                 <span aria-hidden="true" style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', display: 'flex', alignItems: 'center' }}>
-                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" strokeWidth="2.5" strokeLinecap="round" style={{ animation: 'focali-spin 0.7s linear infinite' }}>
-                    <circle cx="12" cy="12" r="9" stroke={theme.line} />
-                    <path d="M12 3a9 9 0 0 1 9 9" stroke={theme.inkFaint} />
-                  </svg>
+                  <Spinner size={17} color={theme.inkFaint} />
                 </span>
               )}
             </div>
@@ -233,10 +231,10 @@ function ListaContent() {
               <div style={{ textAlign: 'center', padding: '60px 20px', background: theme.card, borderRadius: theme.radius, border: `0.5px solid ${theme.line}` }}>
                 {isFavoritasView ? (
                   <>
-                    <div style={{ fontSize: 38, marginBottom: 12, color: theme.inkFaint }}>★</div>
+                    <Star size={38} color={theme.inkFaint} strokeWidth={1.3} style={{ marginBottom: 12 }} />
                     <p style={{ fontSize: 15, fontWeight: 600, color: theme.ink, margin: '0 0 8px' }}>Nenhum favorito ainda</p>
                     <p style={{ fontSize: 13, color: theme.inkFaint, margin: '0 0 20px', maxWidth: 340, marginLeft: 'auto', marginRight: 'auto' }}>
-                      Clique na ★ em qualquer card para guardar as jurisprudências mais importantes.
+                      Clique na <Star size={13} strokeWidth={2} style={{ verticalAlign: -2 }} /> em qualquer card para guardar as jurisprudências mais importantes.
                     </p>
                     <Button onClick={() => router.push('/jurisprudencias/lista')}>
                       Explorar jurisprudências
@@ -310,9 +308,7 @@ function ListaContent() {
                     background: theme.warnBg, border: `1px solid ${theme.warn}`,
                     display: 'flex', alignItems: 'center', gap: 10,
                   }}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={theme.warn} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
-                      <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" /><line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" />
-                    </svg>
+                    <TriangleAlert size={16} color={theme.warn} strokeWidth={2} style={{ flexShrink: 0 }} />
                     <span style={{ fontSize: 13, color: theme.warn, fontWeight: 500 }}>
                       Mostrando apenas os primeiros {JURIS_PAGE_LIMIT} resultados. Use filtros para refinar a busca e ver mais itens.
                     </span>
@@ -323,7 +319,7 @@ function ListaContent() {
           </div>
 
           {/* Sidebar de widgets — no mobile vem DEPOIS da lista (resultado primeiro) */}
-          <div style={{ width: isMobile ? '100%' : 260, flexShrink: 0 }}>
+          <div style={{ width: isMobile ? '100%' : isTablet ? 220 : 260, flexShrink: 0 }}>
             <JurisSidebarWidgets />
           </div>
         </div>

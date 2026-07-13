@@ -10,7 +10,6 @@ import {
 } from '@/lib/juris-review';
 import { localDateInDays, toLocalDateString } from '@/lib/local-date';
 import type { Jurisprudencia } from '@/services/jurisprudencias.service';
-import { getJurisprudenciaById } from '@/services/jurisprudencias.service';
 
 export interface Destaque {
   id: string;
@@ -357,6 +356,11 @@ export async function listSimuladoSessions(): Promise<SimuladoSession[]> {
 
 async function hydrateInteracoes(rows: JurisInteracao[]): Promise<JurisComInteracao[]> {
   if (rows.length === 0) return [];
+  // Import dinâmico proposital: jurisprudencias.service arrasta os ~800KB de
+  // data/jurisprudencias para o bundle. As rotas que só precisam das
+  // interações (/caderno, /revisar) não devem pagar esse parse — o chunk só
+  // é baixado quando de fato há interações para hidratar.
+  const { getJurisprudenciaById } = await import('@/services/jurisprudencias.service');
   const missingIds = rows
     .map((r) => r.jurisprudencia_id)
     .filter((id) => !getJurisprudenciaById(id));

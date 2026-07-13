@@ -2,7 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Star, RefreshCw, Search, CircleHelp } from 'lucide-react';
+import {
+  Star, RefreshCw, Search, CircleHelp, Scale, Landmark, FileSearch, Gavel, Lock, Users,
+  FileText, Briefcase, Vote, Percent, ShieldCheck, Medal, CalendarClock, ChartNoAxesColumn,
+  TriangleAlert, type LucideIcon,
+} from 'lucide-react';
 import { DISCIPLINAS_HUB, countByDisciplina } from '@/services/jurisprudencias.service';
 import { getSimuladoInsights, type SimuladoInsights } from '@/services/jurisInteracoes.service';
 import { countRevisoesHoje } from '@/services/jurisRevisao.service';
@@ -11,83 +15,19 @@ import { theme } from '@/lib/theme';
 import { Button } from '@/components/ui/Button';
 import { PageContainer, PageHeader } from '@/components/ui/Page';
 
-const DISCIPLINA_ICON: Record<string, React.ReactNode> = {
-  // Balança da justiça → CF/CRFB
-  Constitucional: <>
-    <line x1="12" y1="3" x2="12" y2="21" />
-    <line x1="3"  y1="21" x2="21" y2="21" />
-    <line x1="4"  y1="8"  x2="20" y2="8"  />
-    <path d="M6 8L3.5 14h5L6 8z" />
-    <path d="M18 8l2.5 6h-5L18 8z" />
-  </>,
-  // Prédio com janelas → órgão público / Administração
-  Administrativo: <>
-    <rect x="5" y="3" width="14" height="18" rx="1" />
-    <path d="M9 7h2M13 7h2M9 11h2M13 11h2M9 15h2M13 15h2" />
-    <path d="M10 21v-3h4v3" />
-  </>,
-  // Lupa sobre documento → fiscalização / Tribunais de Contas
-  'Controle Externo': <>
-    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h6" />
-    <path d="M14 2v6h6" />
-    <path d="M9 13h2M9 9h1" />
-    <circle cx="16.5" cy="16.5" r="3.5" />
-    <path d="m19 19 3 3" />
-  </>,
-  // Martelo do juiz → sanção penal
-  Penal: <>
-    <path d="m14 13-7.5 7.5a2.12 2.12 0 0 1-3-3L11 10" />
-    <path d="m16 16 6-6" />
-    <path d="m8 8 6-6" />
-    <path d="m9 7 8 8" />
-    <path d="m21 11-8-8" />
-  </>,
-  // Algemas/cadeado → persecução penal
-  'Processo Penal': <>
-    <rect x="5" y="11" width="14" height="10" rx="2" />
-    <path d="M8 11V7a4 4 0 0 1 8 0v4" />
-    <circle cx="12" cy="16" r="1" />
-  </>,
-  // Pessoas → relações privadas (contratos, família, obrigações)
-  Civil: <>
-    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-    <circle cx="9" cy="7" r="4" />
-    <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-  </>,
-  // Documento com linhas → rito processual civil
-  'Processo Civil': <>
-    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-    <path d="M14 2v6h6" />
-    <path d="M16 13H8M16 17H8M10 9H8" />
-  </>,
-  // Maleta → relação de trabalho / CLT
-  Trabalho: <>
-    <rect x="2" y="7" width="20" height="14" rx="2" />
-    <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
-  </>,
-  // Urna com voto → eleitoral
-  Eleitoral: <>
-    <path d="m9 12 2 2 4-4" />
-    <path d="M5 7c0-1.1.9-2 2-2h10a2 2 0 0 1 2 2v12H5V7Z" />
-    <path d="M22 19H2" />
-  </>,
-  // Percentual → tributos, impostos
-  Tributário: <>
-    <line x1="19" y1="5" x2="5" y2="19" />
-    <circle cx="6.5" cy="6.5" r="2.5" />
-    <circle cx="17.5" cy="17.5" r="2.5" />
-  </>,
-  // Escudo com check → proteção social / previdência
-  Previdenciário: <>
-    <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" />
-    <path d="m9 12 2 2 4-4" />
-  </>,
-  // Estrela de militar → Direito Penal e Processual Penal Militar
-  'Penal e Proc. Penal Militar': <>
-    <path d="M12 2l2.4 4.86 5.4.74-3.9 3.8.92 5.36L12 14.24l-4.82 2.52.92-5.36-3.9-3.8 5.4-.74z" />
-    <path d="M8 21h8" />
-  </>,
+const DISCIPLINA_ICON: Record<string, LucideIcon> = {
+  Constitucional: Scale,
+  Administrativo: Landmark,
+  'Controle Externo': FileSearch,
+  Penal: Gavel,
+  'Processo Penal': Lock,
+  Civil: Users,
+  'Processo Civil': FileText,
+  Trabalho: Briefcase,
+  Eleitoral: Vote,
+  Tributário: Percent,
+  Previdenciário: ShieldCheck,
+  'Penal e Proc. Penal Militar': Medal,
 };
 
 const DISCIPLINA_COLOR: Record<string, string> = {
@@ -175,7 +115,7 @@ export default function JurisprudenciasHubPage() {
               onClick={() => router.push('/jurisprudencias/revisar')}
               style={{ ...styles.insightCard, borderColor: theme.warn, background: theme.warnTint }}
             >
-              <span style={{ fontSize: 18 }}>📅</span>
+              <CalendarClock size={18} color={theme.warnDeep} strokeWidth={1.8} />
               <div style={{ textAlign: 'left', minWidth: 0 }}>
                 <p style={{ fontSize: 13, fontWeight: 700, color: theme.warnDeep, margin: 0 }}>
                   {revisoesHoje} revisão{revisoesHoje > 1 ? 'ões' : ''} pendente{revisoesHoje > 1 ? 's' : ''}
@@ -189,7 +129,7 @@ export default function JurisprudenciasHubPage() {
               onClick={() => router.push('/jurisprudencias/simulados')}
               style={{ ...styles.insightCard, borderColor: insights.ultimoScore >= 70 ? theme.ok : insights.ultimoScore >= 50 ? theme.warn : theme.danger }}
             >
-              <span style={{ fontSize: 18 }}>📊</span>
+              <ChartNoAxesColumn size={18} color={theme.ink} strokeWidth={1.8} />
               <div style={{ textAlign: 'left', minWidth: 0 }}>
                 <p style={{ fontSize: 13, fontWeight: 700, color: theme.ink, margin: 0 }}>
                   Último simulado: <span style={{ color: insights.ultimoScore >= 70 ? theme.okDeep : insights.ultimoScore >= 50 ? theme.warnDeep : theme.danger }}>{insights.ultimoScore}%</span>
@@ -203,7 +143,7 @@ export default function JurisprudenciasHubPage() {
               onClick={() => router.push(`/jurisprudencias/lista?disciplina=${encodeURIComponent(insights.disciplinaMaisFraga!)}`)}
               style={{ ...styles.insightCard, borderColor: theme.danger }}
             >
-              <span style={{ fontSize: 18 }}>⚠️</span>
+              <TriangleAlert size={18} color={theme.danger} strokeWidth={1.8} />
               <div style={{ textAlign: 'left', minWidth: 0 }}>
                 <p style={{ fontSize: 13, fontWeight: 700, color: theme.ink, margin: 0 }}>
                   Ponto fraco: <span style={{ color: theme.danger }}>{insights.disciplinaMaisFraga}</span>
@@ -235,9 +175,7 @@ export default function JurisprudenciasHubPage() {
             onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.borderColor = theme.line; (e.currentTarget as HTMLButtonElement).style.transform = 'none'; }}
           >
             <div style={{ ...styles.discIcon, background: `${DISCIPLINA_COLOR[d]}1a`, color: DISCIPLINA_COLOR[d] }}>
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-                {DISCIPLINA_ICON[d]}
-              </svg>
+              {(() => { const Icon = DISCIPLINA_ICON[d]; return <Icon size={22} strokeWidth={1.7} />; })()}
             </div>
             <span style={styles.discLabel}>{d}</span>
             <span style={styles.discCount}>{vazia ? 'em breve' : counts[d] ?? 0}</span>

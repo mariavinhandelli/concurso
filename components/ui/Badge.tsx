@@ -21,7 +21,7 @@ const SOLID: Record<BadgeVariant, CSSProperties> = {
   ok:      { background: theme.ok, color: theme.onOk },
   warn:    { background: theme.warn, color: theme.onWarn },
   danger:  { background: theme.danger, color: theme.onDanger },
-  info:    { background: theme.info, color: '#FFFFFF' },
+  info:    { background: theme.info, color: theme.onInfo },
   brand:   { background: theme.primary, color: theme.onPrimary },
 };
 

@@ -7,6 +7,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
+import { Zap } from 'lucide-react';
 import { listSubjects, type Subject } from '@/services/subjects.service';
 import { listTopics, type Topic } from '@/services/topics.service';
 import { saveStudyLog, type ErrorCause } from '@/services/studyLogs.service';
@@ -167,7 +168,9 @@ export function QuickLogModal({ onClose, onSaved, onSwitchToFull }: Props) {
   return (
     <Overlay onClose={onClose} maxWidth={400} labelledBy="quicklog-modal-title">
       <div onKeyDown={onKeyDown}>
-        <h2 id="quicklog-modal-title" style={styles.h2}>Questões rápidas ⚡</h2>
+        <h2 id="quicklog-modal-title" style={{ ...styles.h2, display: 'flex', alignItems: 'center', gap: 6 }}>
+          Questões rápidas <Zap size={16} strokeWidth={2} />
+        </h2>
         <p style={styles.subtitle}>Resolveu questões em outro lugar? Registre em segundos.</p>
 
         <label style={styles.label}>Matéria</label>

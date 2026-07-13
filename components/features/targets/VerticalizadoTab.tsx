@@ -1,7 +1,7 @@
 'use client';
 
 import { memo, useEffect, useState, type CSSProperties } from 'react';
-import { X, ChevronRight } from 'lucide-react';
+import { X, ChevronRight, Info, ChartNoAxesColumn } from 'lucide-react';
 import { HealthBar } from '@/components/features/topics/HealthBar';
 import { type SubjectTree, pesoEfetivo } from '@/lib/targets';
 import { theme } from '@/lib/theme';
@@ -14,18 +14,6 @@ function Chevron({ open }: { open: boolean }) {
   return (
     <ChevronRight size={16} strokeWidth={2}
       style={{ transform: open ? 'rotate(90deg)' : 'rotate(0deg)', transition: 'transform .15s', flexShrink: 0 }} />
-  );
-}
-
-// Ícone SVG de info — substitui o emoji 💡 (consistente com o sistema de ícones da plataforma)
-function InfoIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={theme.teal}
-      strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 1 }}>
-      <circle cx="12" cy="12" r="10" />
-      <line x1="12" y1="8" x2="12" y2="8" strokeWidth="3" />
-      <line x1="12" y1="12" x2="12" y2="16" />
-    </svg>
   );
 }
 
@@ -91,9 +79,7 @@ export const VerticalizadoTab = memo(function VerticalizadoTab({
   if (linked.size === 0) {
     return (
       <div style={s.emptyState}>
-        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke={theme.inkFaint} strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" style={{ marginBottom: 10 }}>
-          <path d="M18 20V10M12 20V4M6 20v-6" />
-        </svg>
+        <ChartNoAxesColumn size={36} color={theme.inkFaint} strokeWidth={1.2} style={{ marginBottom: 10 }} />
         <p style={s.emptyTitle}>Nada aqui ainda</p>
         <p style={s.emptyHint}>Vincule tópicos na aba &quot;Montar edital&quot; para ver o progresso aqui.</p>
         <Button variant="outline" style={{ borderColor: theme.teal, background: theme.tealBg, color: theme.teal }} onClick={onSwitchToTopics}>Ir para Montar edital →</Button>
@@ -114,7 +100,7 @@ export const VerticalizadoTab = memo(function VerticalizadoTab({
       {showCoach && (
         <div style={s.coachMark}>
           <div style={s.coachInner}>
-            <InfoIcon />
+            <Info size={16} color={theme.teal} strokeWidth={2} style={{ flexShrink: 0, marginTop: 1 }} />
             <div style={{ flex: 1 }}>
               <p style={s.coachTitle}>Como ler a barra de saúde</p>
               <p style={s.coachBody}>

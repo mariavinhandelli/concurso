@@ -7,6 +7,7 @@
 import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
+import { Search, Users } from 'lucide-react';
 import { useToast } from '@/components/ui/ToastProvider';
 import { findTurmaByCode, joinTurmaByCode } from '@/services/turmas.service';
 import { getMySocialProfile, type SocialProfile } from '@/services/social.service';
@@ -50,14 +51,14 @@ export default function EntrarTurmaPage() {
           <p style={s.muted}>Procurando a turma…</p>
         ) : !turma ? (
           <>
-            <div style={s.emoji}>🔍</div>
+            <Search size={32} color={theme.inkFaint} strokeWidth={1.5} style={{ marginBottom: 8 }} />
             <h1 style={s.h1}>Turma não encontrada</h1>
             <p style={s.body}>O código <code style={s.code}>{code}</code> não corresponde a nenhuma turma. Confira o link com quem te enviou.</p>
             <Button onClick={() => router.push('/amigos?tab=turmas')}>Ir para Turmas</Button>
           </>
         ) : (
           <>
-            <div style={s.emoji}>👥</div>
+            <Users size={32} color={theme.teal} strokeWidth={1.5} style={{ marginBottom: 8 }} />
             <h1 style={s.h1}>{turma.name}</h1>
             <p style={s.body}>{turma.memberCount} {turma.memberCount === 1 ? 'membro' : 'membros'}. Entrar nesta turma?</p>
             {!jaAtivo && (

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { X } from 'lucide-react';
 import { getEditalCoverage, type EditalCoverage } from '@/services/coverage.service';
 import { getStreak, type StreakInfo } from '@/services/streak.service';
 import { getJourneyStats, type JourneyStats } from '@/services/journey.service';
@@ -260,7 +261,7 @@ export function ShareProgressCard({ onClose }: { onClose: () => void }) {
     <Overlay onClose={onClose} maxWidth={420} labelledBy="share-progress-title" hideClose>
         <div style={styles.head}>
           <h2 id="share-progress-title" style={styles.h2}>Compartilhar progresso</h2>
-          <IconButton onClick={onClose} aria-label="Fechar" size="sm" style={{ fontSize: 16 }}>✕</IconButton>
+          <IconButton onClick={onClose} aria-label="Fechar" size="sm"><X size={16} strokeWidth={2} /></IconButton>
         </div>
         <p style={styles.subtitle}>Mostre sua evolução — mande no grupo e inspire (ou provoque) a galera.</p>
 

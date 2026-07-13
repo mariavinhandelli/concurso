@@ -9,6 +9,7 @@
 
 import { Suspense, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { Check, X } from 'lucide-react';
 import { LEIS_CATALOG, artigoNumeroFromKey, type LeiMeta } from '@/services/leis.service';
 import {
   getQuestoesLei, embaralhar, saveLeiSimuladoSession, listLeiSimuladoSessions,
@@ -226,8 +227,9 @@ function SimuladoContent() {
             </div>
           ) : (
             <>
-              <div style={{ ...s.resultado, ...(resposta === atual.gabarito ? s.resultadoOk : s.resultadoErro) }}>
-                {resposta === atual.gabarito ? '✓ Você acertou — ' : '✗ Você errou — '}
+              <div style={{ ...s.resultado, ...(resposta === atual.gabarito ? s.resultadoOk : s.resultadoErro), display: 'flex', alignItems: 'center', gap: 6 }}>
+                {resposta === atual.gabarito ? <Check size={14} strokeWidth={2.5} /> : <X size={14} strokeWidth={2.5} />}
+                {resposta === atual.gabarito ? 'Você acertou — ' : 'Você errou — '}
                 gabarito: <b>{atual.gabarito ? 'Certo' : 'Errado'}</b>
               </div>
               <p style={s.comentario}>{atual.comentario}</p>

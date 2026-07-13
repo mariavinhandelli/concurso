@@ -3,6 +3,7 @@
 'use client';
 
 import type { CSSProperties, ReactNode } from 'react';
+import { X } from 'lucide-react';
 import { fmtMin } from '@/lib/format/time';
 import { theme } from '@/lib/theme';
 
@@ -45,7 +46,7 @@ export function RankRow({
       </div>
       <span style={s.min}>{fmtMin(weekMinutes)}</span>
       {onRemove && (
-        <button onClick={onRemove} style={s.remove} title="Remover" aria-label="Remover">✕</button>
+        <button onClick={onRemove} style={s.remove} title="Remover" aria-label="Remover"><X size={13} strokeWidth={2} /></button>
       )}
     </div>
   );

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import { X } from 'lucide-react';
 import { theme, zIndex } from '@/lib/theme';
 import { IconButton } from './IconButton';
 
@@ -73,7 +74,7 @@ export function Overlay({ children, onClose, labelledBy, maxWidth = 680, hideClo
           borderRadius: theme.radius,
           boxShadow: theme.shadowModal,
           width: '100%', maxWidth,
-          maxHeight: '90vh', overflowY: 'auto',
+          maxHeight: '90dvh', overflowY: 'auto',
           padding,
           fontFamily: theme.font,
           zIndex: zIndex.modal,
@@ -86,8 +87,8 @@ export function Overlay({ children, onClose, labelledBy, maxWidth = 680, hideClo
             aria-label="Fechar"
             aria-keyshortcuts="Escape"
             size="sm"
-            style={{ position: 'absolute', top: 10, right: 12, fontSize: 16 }}
-          >✕</IconButton>
+            style={{ position: 'absolute', top: 10, right: 12 }}
+          ><X size={16} strokeWidth={2} /></IconButton>
         )}
         {children}
       </div>

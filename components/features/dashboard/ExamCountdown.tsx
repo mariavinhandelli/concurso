@@ -2,7 +2,7 @@
 
 import { memo, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 import {
   listTargetExams, updateTargetExamDate, createTargetExam, type TargetExam,
 } from '@/services/targetExams.service';
@@ -238,7 +238,7 @@ export const ExamCountdown = memo(function ExamCountdown() {
               <button style={styles.confirmDateBtn}
                 onClick={() => pendingDate && updateDate.mutate({ id: current.id, date: pendingDate })}
                 disabled={!pendingDate || updateDate.isPending}>ok</button>
-              <button style={styles.cancelDateBtn} onClick={() => { setEditingDate(false); setPendingDate(''); }}>✕</button>
+              <button style={styles.cancelDateBtn} onClick={() => { setEditingDate(false); setPendingDate(''); }}><X size={14} strokeWidth={2} /></button>
             </div>
           ) : (
             <button style={styles.editDateBtn}
@@ -256,7 +256,7 @@ export const ExamCountdown = memo(function ExamCountdown() {
             <button style={styles.confirmDateBtn}
               onClick={() => pendingDate && updateDate.mutate({ id: current!.id, date: pendingDate })}
               disabled={!pendingDate || updateDate.isPending}>ok</button>
-            <button style={styles.cancelDateBtn} onClick={() => { setEditingDate(false); setPendingDate(''); }}>✕</button>
+            <button style={styles.cancelDateBtn} onClick={() => { setEditingDate(false); setPendingDate(''); }}><X size={14} strokeWidth={2} /></button>
           </div>
         ) : (
           <div style={styles.noDateRow}>

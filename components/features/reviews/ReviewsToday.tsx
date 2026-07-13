@@ -5,6 +5,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
+import { Check } from 'lucide-react';
 import { listDueReviews } from '@/services/reviews.service';
 import { REVIEWS_DUE_KEY } from '@/hooks/reviews.keys';
 import { theme } from '@/lib/theme';
@@ -31,7 +32,7 @@ export function ReviewsToday() {
         <p style={styles.muted}>Carregando…</p>
       ) : count === 0 ? (
         <div style={styles.allDone}>
-          <span style={styles.checkDot}>✓</span> Nenhuma revisão pendente
+          <span style={styles.checkDot}><Check size={12} strokeWidth={3} /></span> Nenhuma revisão pendente
         </div>
       ) : (
         <div style={styles.body}>

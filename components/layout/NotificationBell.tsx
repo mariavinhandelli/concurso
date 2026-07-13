@@ -5,6 +5,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { Bell } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { theme } from '@/lib/theme';
 
@@ -88,11 +89,7 @@ export function NotificationBell() {
         title="Notificações"
         aria-label="Notificações"
       >
-        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke={theme.inkSoft}
-          strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" />
-          <path d="M13.7 21a2 2 0 01-3.4 0" />
-        </svg>
+        <Bell size={19} color={theme.inkSoft} strokeWidth={1.8} />
         {count > 0 && (
           <span style={styles.badge}>{count > 9 ? '9+' : count}</span>
         )}

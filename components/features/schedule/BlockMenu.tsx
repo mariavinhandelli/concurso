@@ -4,6 +4,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { EllipsisVertical } from 'lucide-react';
 import type { ScheduleBlock } from '@/services/scheduleEngine.service';
 import { theme } from '@/lib/theme';
 
@@ -46,9 +47,7 @@ export function BlockMenu({ block, onEditManual, onDeleteManual, onSkipRecurrenc
         style={styles.dotsBtn}
         aria-label="Ações"
       >
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-          <circle cx="12" cy="5" r="1.6" /><circle cx="12" cy="12" r="1.6" /><circle cx="12" cy="19" r="1.6" />
-        </svg>
+        <EllipsisVertical size={14} fill="currentColor" stroke="none" />
       </button>
 
       {open && (

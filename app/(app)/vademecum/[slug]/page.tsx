@@ -6,6 +6,7 @@
 
 import { useCallback, useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { Book } from 'lucide-react';
 import { getLei, type Lei, type LeiArtigo } from '@/services/leis.service';
 import { listInteracoesByLei, type LeiInteracao, type GrifoCor } from '@/services/leiInteracoes.service';
 import { getQuestoesLei, agruparPorArtigo, type LeiQuestao } from '@/services/leiQuestoes.service';
@@ -141,7 +142,7 @@ export default function LeiReaderPage() {
     return (
       <div style={{ ...s.wrap, padding: 40 }}>
         <EmptyState
-          icon={<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke={theme.teal} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" /></svg>}
+          icon={<Book size={26} color={theme.teal} strokeWidth={1.8} />}
           title="Não encontramos essa lei"
           body="O endereço pode ter mudado ou a lei ainda não está no Vade Mecum. Volte à lista para escolher uma das leis disponíveis."
           action={{ label: '← Voltar ao Vade Mecum', onClick: () => router.push('/vademecum') }}

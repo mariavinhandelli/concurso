@@ -3,6 +3,7 @@
 import { memo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
+import { Share } from 'lucide-react';
 import { getEditalCoverage, type EditalCoverage } from '@/services/coverage.service';
 import { ShareProgressCard } from './ShareProgressCard';
 import { theme } from '@/lib/theme';
@@ -81,7 +82,7 @@ export const CoberturaEdital = memo(function CoberturaEdital() {
       </div>
 
       <button style={styles.shareBtn} onClick={() => setSharing(true)}>
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={theme.teal} strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" /><polyline points="16 6 12 2 8 6" /><line x1="12" y1="2" x2="12" y2="15" /></svg>
+        <Share size={15} color={theme.teal} strokeWidth={1.9} />
         Compartilhar meu progresso
       </button>
 

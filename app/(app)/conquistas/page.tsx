@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Check } from 'lucide-react';
+import { Check, List, Clock, Flame, Star } from 'lucide-react';
 import { theme } from '@/lib/theme';
 import { useBreakpoints } from '@/components/layout/UIContext';
 import { PageContainer, PageHeader } from '@/components/ui/Page';
@@ -182,6 +182,7 @@ export default function ConquistasPage() {
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
 
 function SkeletonPage({ isMobile, pad }: { isMobile: boolean; pad: string }) {
+  const { isTablet } = useBreakpoints();
   const r: React.CSSProperties = { background: theme.muted, borderRadius: theme.radiusXs };
   return (
     <div style={{ ...s.page, padding: pad }}>
@@ -200,7 +201,7 @@ function SkeletonPage({ isMobile, pad }: { isMobile: boolean; pad: string }) {
           <div key={i} className="skel" style={{ ...r, height: 96, borderRadius: 14 }} />
         ))}
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2,1fr)' : 'repeat(4,1fr)', gap: 16 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2,1fr)' : isTablet ? 'repeat(3,1fr)' : 'repeat(4,1fr)', gap: 16 }}>
         {Array.from({ length: 8 }).map((_, i) => (
           <div key={i} className="skel" style={{ ...r, height: 168, borderRadius: theme.radius }} />
         ))}
@@ -247,7 +248,7 @@ function NextUpSection({ badges, isMobile }: { badges: Badge[]; isMobile: boolea
       <p style={s.sectionLabel}>Próximas conquistas</p>
       <div style={{
         display: 'grid',
-        gridTemplateColumns: isMobile ? '1fr' : `repeat(${badges.length}, 1fr)`,
+        gridTemplateColumns: isMobile ? '1fr' : `repeat(auto-fit, minmax(200px, 1fr))`,
         gap: 16,
       }}>
         {badges.map((b, i) => <NextUpCard key={b.id} badge={b} index={i} />)}
@@ -330,6 +331,7 @@ function FamilySection({
 }) {
   const unlockedInFamily = allBadgesInFamily.filter(b => b.unlocked).length;
   const { title, subtitle } = FAMILY_LABELS[family];
+  const { isTablet } = useBreakpoints();
 
   return (
     <section style={s.section}>
@@ -347,7 +349,7 @@ function FamilySection({
       </div>
       <div style={{
         display: 'grid',
-        gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)',
+        gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : isTablet ? 'repeat(3, 1fr)' : 'repeat(4, 1fr)',
         gap: 16,
       }}>
         {badges.map((b, i) => (
@@ -449,33 +451,12 @@ function BadgeCard({ badge, isNew, cardIndex }: {
 function BadgeIcon({ family, color }: { family: BadgeFamily; color: string }) {
   // P1: 22→28px (58% fill de container 48px — dentro do sweet spot 55-67%)
   // P1: strokeWidth 1.8→2 (consistência em telas 1x/2x)
-  const c = {
-    width: 28, height: 28, fill: 'none', stroke: color,
-    strokeWidth: 2, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const,
-  };
-  if (family === 'volume') return (
-    <svg viewBox="0 0 24 24" aria-hidden="true" {...c}>
-      <path d="M9 5h10M9 12h10M9 19h10" />
-      <path d="M4 5h.01M4 12h.01M4 19h.01" />
-    </svg>
-  );
-  if (family === 'tempo') return (
-    <svg viewBox="0 0 24 24" aria-hidden="true" {...c}>
-      <circle cx="12" cy="12" r="8.5" />
-      <path d="M12 8v4l2.5 2.5" />
-    </svg>
-  );
-  if (family === 'consistencia') return (
-    <svg viewBox="0 0 24 24" aria-hidden="true" {...c}>
-      <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5" />
-    </svg>
-  );
-  // Maestria — versão simplificada para 28px (path complexo anterior sumia em tamanho pequeno)
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true" {...c}>
-      <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z" />
-    </svg>
-  );
+  const c = { size: 28, color, strokeWidth: 2, 'aria-hidden': true as const };
+  if (family === 'volume') return <List {...c} />;
+  if (family === 'tempo') return <Clock {...c} />;
+  if (family === 'consistencia') return <Flame {...c} />;
+  // Maestria
+  return <Star {...c} />;
 }
 
 function CheckIcon({ color }: { color: string }) {

@@ -2,7 +2,10 @@
 
 import { usePathname, useRouter } from 'next/navigation';
 import { useState, type CSSProperties } from 'react';
-import { X, ChevronLeft } from 'lucide-react';
+import {
+  X, ChevronLeft, House, RefreshCw, Layers, CalendarClock, FolderOpen, List,
+  Gavel, Book, Pencil, ChartNoAxesColumn, Trophy, Users, History, type LucideIcon,
+} from 'lucide-react';
 import { useUI } from './UIContext';
 import { zIndex } from '@/lib/theme';
 
@@ -19,72 +22,32 @@ const SB = {
   logoInk: 'var(--sidebar-logo-ink)',
 };
 
-// Componente para padronizar os SVGs
-const IconWrapper = ({ children, color }: { children: React.ReactNode; color: string }) => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-    {children}
-  </svg>
-);
-
 type NavItem =
-  | { type?: 'item'; href: string; label: string; icon: React.ReactNode }
+  | { type?: 'item'; href: string; label: string; icon: LucideIcon }
   | { type: 'sep'; label: string };
 
 const NAV: NavItem[] = [
-  { href: '/', label: 'Home', icon: <path d="m2 8l9.732-4.866a.6.6 0 0 1 .536 0L22 8m-2 3v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8" /> },
+  { href: '/', label: 'Home', icon: House },
 
   { type: 'sep', label: 'Estudar hoje' },
-  { href: '/revisar', label: 'Revisões', icon: <path d="M4 12a8 8 0 0113-6.2L20 8M20 4v4h-4M20 12a8 8 0 01-13 6.2L4 16M4 20v-4h4" /> },
-  { href: '/flashcards', label: 'Flashcards', icon: <path d="m21 12l-9 4l-9-4m18 4l-9 4l-9-4m18-8l-9 4l-9-4l9-4z" /> },
+  { href: '/revisar', label: 'Revisões', icon: RefreshCw },
+  { href: '/flashcards', label: 'Flashcards', icon: Layers },
 
   { type: 'sep', label: 'Organizar' },
-  {
-    href: '/schedule',
-    label: 'Agenda',
-    icon: (
-      <>
-        <path d="M11 21H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v7" />
-        <path strokeLinejoin="round" d="M2 7h20M5 5.01l.01-.011M8 5.01l.01-.011M11 5.01l.01-.011m10.657 11.668C21.047 15.097 19.635 14 17.99 14c-1.758 0-3.252 1.255-3.793 3" />
-        <path strokeLinejoin="round" d="M19.995 16.772H21.4a.6.6 0 0 0 .6-.6V14.55m-7.666 4.783C14.953 20.903 16.366 22 18.01 22c1.758 0 3.252-1.255 3.793-3" />
-        <path strokeLinejoin="round" d="M16.005 19.228H14.6a.6.6 0 0 0-.6.6v1.622" />
-      </>
-    )
-  },
-  {
-    href: '/subjects',
-    label: 'Matérias',
-    icon: <path d="m3.882 18.043l4.041-5.623a4 4 0 0 1 3.249-1.665h8.752M3.882 18.043a3.65 3.65 0 0 0 2.777 1.277h8.343a4 4 0 0 0 3.405-1.9l2.918-4.734a1.287 1.287 0 0 0-1.115-1.931h-.286M3.882 18.043A3.65 3.65 0 0 1 3 15.661V7.424A2.744 2.744 0 0 1 5.744 4.68h2.653c.607 0 1.189.24 1.618.67l.911.91a1.83 1.83 0 0 0 1.294.537l4.044-.001a3.66 3.66 0 0 1 3.66 3.66v.299" />
-  },
-  { href: '/targets', label: 'Concursos', icon: <path d="M8 6.5h12M8 12h12M8 17.5h12M4 6.5h1M4 12h1m-1 5.5h1" /> },
+  { href: '/schedule', label: 'Agenda', icon: CalendarClock },
+  { href: '/subjects', label: 'Matérias', icon: FolderOpen },
+  { href: '/targets', label: 'Concursos', icon: List },
 
   { type: 'sep', label: 'Conteúdo' },
-  { href: '/jurisprudencias', label: 'Jurisprudências', icon: <><path d="M3 6h18M3 12h18M3 18h12" /><circle cx="19" cy="18" r="3" /><path d="M21 20.5L22.5 22" /></> },
-  { href: '/vademecum', label: 'Vade Mecum', icon: <><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" /><path d="M9 7h6M9 10.5h4" /></> },
-  { href: '/caderno', label: 'Caderno', icon: <><path d="M12 20h9" /><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" /></> },
+  { href: '/jurisprudencias', label: 'Jurisprudências', icon: Gavel },
+  { href: '/vademecum', label: 'Vade Mecum', icon: Book },
+  { href: '/caderno', label: 'Caderno', icon: Pencil },
 
   { type: 'sep', label: 'Progresso' },
-  { href: '/performance', label: 'Performance', icon: <path d="M15 9.429V5a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v8.286m6-3.857V21m0-11.571h4a2 2 0 0 1 2 2V19a2 2 0 0 1-2 2h-4m0 0H9m0 0v-7.714M9 21H5a2 2 0 0 1-2-2v-3.714a2 2 0 0 1 2-2h4" /> },
-  {
-    href: '/conquistas',
-    label: 'Conquistas',
-    icon: (
-      <>
-        <path d="M12 17c-1.674 0-3.13 1.265-3.882 3.131c-.36.892.156 1.869.84 1.869h6.083c.685 0 1.2-.977.841-1.869C15.13 18.265 13.674 17 12 17Z" />
-        <path strokeLinejoin="round" d="M18.5 5h1.202c1.201 0 1.801 0 2.115.377c.313.378.183.944-.078 2.077l-.39 1.7C20.76 11.708 18.61 13.608 16 14M5.5 5H4.298c-1.201 0-1.802 0-2.115.377c-.313.378-.183.944.078 2.077l.39 1.7C3.24 11.708 5.39 13.608 8 14" />
-        <path d="M12 17c3.02 0 5.565-4.662 6.33-11.01c.211-1.754.317-2.632-.243-3.311S16.622 2 14.813 2H9.187c-1.81 0-2.714 0-3.274.679S5.46 4.236 5.67 5.991C6.435 12.338 8.98 17 12 17Z" />
-      </>
-    )
-  },
-  { href: '/amigos', label: 'Amigos', icon: <><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" /></> },
-  { href: '/historico',
-    label: 'Histórico',
-    icon: (
-      <>
-        <path d="M4.281 14.385a8.25 8.25 0 1 0 .824-6.26l-.477.88m-.523-4.63v3.75a1 1 0 0 0 .523.88m4.227.12h-3.75a1 1 0 0 1-.477-.12"></path>
-        <path d="M12.25 8v4.25l3.685 2.117"></path>
-      </>
-  )
-},
+  { href: '/performance', label: 'Performance', icon: ChartNoAxesColumn },
+  { href: '/conquistas', label: 'Conquistas', icon: Trophy },
+  { href: '/amigos', label: 'Amigos', icon: Users },
+  { href: '/historico', label: 'Histórico', icon: History },
 ];
 
 export function Sidebar() {
@@ -201,9 +164,7 @@ export function Sidebar() {
                 fontWeight: active ? 600 : 500,
               }}
             >
-              <IconWrapper color={active ? SB.textActive : SB.iconIdle}>
-                {n.icon}
-              </IconWrapper>
+              <n.icon size={18} color={active ? SB.textActive : SB.iconIdle} strokeWidth={1.7} />
               {!isCollapsed && <span className="sidebar-label">{n.label}</span>}
             </button>
           );

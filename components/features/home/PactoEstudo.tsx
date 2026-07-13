@@ -8,6 +8,7 @@
 
 import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { Pencil } from 'lucide-react';
 import { getStudyAnchor, setStudyAnchor } from '@/services/goals.service';
 import { useToast } from '@/components/ui/ToastProvider';
 import { theme } from '@/lib/theme';
@@ -99,7 +100,7 @@ export function PactoEstudo({ diaComecou }: { diaComecou: boolean }) {
       <span style={s.linhaText}>
         Seu pacto: depois <b style={s.linhaHi}>{anchor}</b>, o primeiro passo do plano.
       </span>
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={theme.inkFaint} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" /></svg>
+      <Pencil size={13} color={theme.inkFaint} strokeWidth={2} style={{ flexShrink: 0 }} />
     </button>
   );
 }

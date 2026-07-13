@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { Check } from 'lucide-react';
 import { countDailyQueue } from '@/services/flashcards.service';
 import { theme } from '@/lib/theme';
 
@@ -43,7 +44,7 @@ export function FlashcardsToday() {
         </div>
       ) : total === 0 ? (
         <div style={styles.allDone}>
-          <span style={styles.checkDot}>✓</span> Nenhum card pendente hoje
+          <span style={styles.checkDot}><Check size={12} strokeWidth={3} /></span> Nenhum card pendente hoje
         </div>
       ) : (
         <div style={styles.body}>

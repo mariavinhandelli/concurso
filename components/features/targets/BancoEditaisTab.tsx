@@ -6,6 +6,7 @@
 
 import { useMemo, useState, type CSSProperties } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { Check } from 'lucide-react';
 import { listCatalogEditais, type CatalogEdital } from '@/services/editaisCatalog.service';
 import { EditalDetailModal } from '@/components/features/targets/EditalDetailModal';
 import { theme } from '@/lib/theme';
@@ -142,7 +143,7 @@ function EditalCard({ edital: e, onOpen }: { edital: CatalogEdital; onOpen: () =
           }}>
             {SITUACAO_LABEL[e.situacao]}
           </span>
-          {e.isActivated && <span style={s.activatedTag}>Ativado ✓</span>}
+          {e.isActivated && <span style={{ ...s.activatedTag, display: 'inline-flex', alignItems: 'center', gap: 4 }}>Ativado <Check size={12} strokeWidth={2.5} /></span>}
         </div>
         <div style={s.cardMeta}>{meta}</div>
         {extra && <div style={s.cardExtra}>{extra}</div>}

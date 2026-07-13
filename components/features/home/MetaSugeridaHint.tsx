@@ -10,7 +10,7 @@
 'use client';
 
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { X } from 'lucide-react';
+import { X, Zap } from 'lucide-react';
 import {
   getGoalsSummary, getSuggestedDailyTarget, setDailyTarget,
   type GoalsSummary, type SuggestedTarget,
@@ -73,7 +73,7 @@ export function MetaSugeridaHint() {
     const pct = Math.min(100, Math.round((BLOCO_MIN / target) * 100));
     return (
       <div style={s.proj}>
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={theme.teal} strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M13 2 3 14h7l-1 8 10-12h-7l1-8z" /></svg>
+        <Zap size={15} color={theme.teal} strokeWidth={1.9} style={{ flexShrink: 0 }} />
         <span style={s.projText}>
           {pct >= 100
             ? <>Ainda não estudou hoje — <b style={s.strong}>1 bloco de {BLOCO_MIN} min já bate a meta.</b> Todo começo conta.</>

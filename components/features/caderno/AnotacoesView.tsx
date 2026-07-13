@@ -6,6 +6,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
+import { Pencil, Pin } from 'lucide-react';
 import { listSubjects, type Subject } from '@/services/subjects.service';
 import {
   listStudyNotes, getStudyNote, createStudyNote,
@@ -43,7 +44,7 @@ function ordena(notas: StudyNoteMeta[]): StudyNoteMeta[] {
 type Filtro = 'all' | 'none' | string;
 
 export function AnotacoesView({ openNotaId }: { openNotaId?: string | null }) {
-  const { isMobile } = useUI();
+  const { isMobile, isTablet } = useUI();
   const toast = useToast();
 
   const [subjects, setSubjects] = useState<Subject[]>([]);
@@ -128,8 +129,12 @@ export function AnotacoesView({ openNotaId }: { openNotaId?: string | null }) {
   const mostrarEditorMobile = isMobile && notaAberta !== null;
   const totalNotas = notas?.length ?? 0;
 
+  // Em tablet o painel vertical de matérias não cabe (208+300px deixariam o
+  // editor com ~80px em 768px) — usa as pills horizontais do mobile.
+  const materiasHorizontal = isMobile || isTablet;
+
   const painelMaterias = (
-    <div style={{ ...s.painelMaterias, ...(isMobile ? s.painelMateriasMobile : {}) }}>
+    <div style={{ ...s.painelMaterias, ...(materiasHorizontal ? s.painelMateriasMobile : {}) }}>
       <button
         className="touch-target"
         onClick={() => setFiltro('all')}
@@ -155,6 +160,7 @@ export function AnotacoesView({ openNotaId }: { openNotaId?: string | null }) {
       })}
       {(countPorMateria.get('none') ?? 0) > 0 && (
         <button
+          className="touch-target"
           onClick={() => setFiltro('none')}
           style={{ ...s.materiaItem, ...(filtro === 'none' ? s.materiaItemOn : {}) }}
         >
@@ -199,7 +205,7 @@ export function AnotacoesView({ openNotaId }: { openNotaId?: string | null }) {
               style={{ ...s.notaCard, ...(ativa ? s.notaCardOn : {}) }}
             >
               <span style={s.notaTitulo}>
-                {n.is_pinned && <span title="Fixada">📌 </span>}
+                {n.is_pinned && <Pin size={12} strokeWidth={2} style={{ marginRight: 3, verticalAlign: -1 }} aria-label="Fixada" />}
                 {n.title || 'Sem título'}
               </span>
               {preview && <span style={s.notaPreview}>{preview}</span>}
@@ -226,7 +232,7 @@ export function AnotacoesView({ openNotaId }: { openNotaId?: string | null }) {
     />
   ) : (
     <div style={s.editorVazio}>
-      <div style={{ fontSize: 34, marginBottom: 8 }}>✎</div>
+      <Pencil size={34} strokeWidth={1.3} style={{ marginBottom: 8 }} />
       <p style={s.vazioTitulo}>Seu caderno, do seu jeito.</p>
       <p style={s.vazioSub}>
         Escolha uma anotação ao lado — ou crie uma nova. Selecione qualquer trecho
@@ -247,6 +253,17 @@ export function AnotacoesView({ openNotaId }: { openNotaId?: string | null }) {
     );
   }
 
+  if (isTablet) {
+    // 2 painéis + pills no topo: notas à esquerda, editor com largura de verdade.
+    return (
+      <div style={s.gridTablet}>
+        <div style={s.gridTabletTopo}>{painelMaterias}</div>
+        {painelNotas}
+        <div style={s.painelEditor}>{painelEditor}</div>
+      </div>
+    );
+  }
+
   return (
     <div style={s.grid}>
       {painelMaterias}
@@ -261,6 +278,12 @@ const s: Record<string, CSSProperties> = {
     display: 'grid', gridTemplateColumns: '208px 300px minmax(0, 1fr)', gap: 14,
     height: 'calc(100vh - 258px)', minHeight: 460,
   },
+  gridTablet: {
+    display: 'grid', gridTemplateColumns: '272px minmax(0, 1fr)',
+    gridTemplateRows: 'auto minmax(0, 1fr)', gap: 14,
+    height: 'calc(100vh - 258px)', minHeight: 460,
+  },
+  gridTabletTopo: { gridColumn: '1 / -1', minWidth: 0 },
 
   painelMaterias: { display: 'flex', flexDirection: 'column', gap: 2, overflowY: 'auto', paddingRight: 2 },
   painelMateriasMobile: { flexDirection: 'row', overflowX: 'auto', overflowY: 'visible', gap: 6, paddingBottom: 4 },

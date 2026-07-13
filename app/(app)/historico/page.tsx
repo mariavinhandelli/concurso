@@ -5,7 +5,7 @@
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, Search, X } from 'lucide-react';
 import { theme } from '@/lib/theme';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { useConfirm } from '@/hooks/useConfirm';
@@ -127,14 +127,12 @@ export default function HistoricoPage() {
             onChange={(e) => setBusca(e.target.value)}
             placeholder="Buscar em anotações e matérias…"
             icon={
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="11" cy="11" r="7" /><path d="M21 21l-4.3-4.3" />
-              </svg>
+              <Search size={16} strokeWidth={1.9} />
             }
             style={{ borderRadius: 10, paddingRight: busca ? 34 : undefined }}
           />
           {busca && (
-            <button onClick={() => setBusca('')} style={styles.clearBtn} aria-label="Limpar busca">✕</button>
+            <button onClick={() => setBusca('')} style={styles.clearBtn} aria-label="Limpar busca"><X size={14} strokeWidth={2} /></button>
           )}
         </div>
       </div>

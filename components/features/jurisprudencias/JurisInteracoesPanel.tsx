@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { Star, RefreshCw } from 'lucide-react';
+import { Star, RefreshCw, Check } from 'lucide-react';
 import { theme } from '@/lib/theme';
 import {
   getInteracao, toggleFavorito, saveAnotacao, activateRevisao, desativarRevisao,
@@ -227,7 +227,7 @@ export function JurisInteracoesPanel({ jurisId }: Props) {
           onClick={handleSaveAnotacao}
           disabled={savingAnot}
         >
-          {savedAnot ? '✓ Salvo' : savingAnot ? 'Salvando…' : 'Salvar anotação'}
+          {savedAnot ? <><Check size={14} strokeWidth={2.5} /> Salvo</> : savingAnot ? 'Salvando…' : 'Salvar anotação'}
         </Button>
       </div>
 
