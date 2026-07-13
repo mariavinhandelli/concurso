@@ -61,8 +61,10 @@ function SimuladoContent() {
   const [resposta, setResposta] = useState<boolean | null>(null);
   const [historico, setHistorico] = useState<Resposta[]>([]);
   const [sessoesAnteriores, setSessoesAnteriores] = useState<LeiSimuladoSession[]>([]);
-  const startedAtRef = useRef<number>(Date.now());
+  const startedAtRef = useRef<number>(0);
   const salvoRef = useRef(false);
+
+  useEffect(() => { startedAtRef.current = Date.now(); }, []);
 
   useEffect(() => {
     if (leis.length === 0) { setFila([]); return; }

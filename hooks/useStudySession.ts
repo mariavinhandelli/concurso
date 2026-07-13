@@ -32,6 +32,10 @@ export function useStudySession(
   // Fila interna: "Errei" re-enfileira o card no fim da sessão (rever ainda hoje),
   // então a fila da sessão pode crescer além da fila recebida.
   const [cards, setCards] = useState<QueueCard[]>(queue);
+  const [index, setIndex] = useState(0);
+  const [flipped, setFlipped] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [newLearned, setNewLearned] = useState(0);
   const queuePropRef = useRef(queue);
   useEffect(() => {
     if (queuePropRef.current !== queue) {
@@ -43,10 +47,6 @@ export function useStudySession(
     }
   }, [queue]);
 
-  const [index, setIndex] = useState(0);
-  const [flipped, setFlipped] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [newLearned, setNewLearned] = useState(0);
   const savingRef = useRef(false);
   const onErrorRef = useRef(onError);
   useEffect(() => { onErrorRef.current = onError; }, [onError]);
