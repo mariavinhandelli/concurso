@@ -1,0 +1,1620 @@
+{
+ "slug": "lei-11079",
+ "nome": "Lei nº 11.079, de 30 de dezembro de 2004 — Normas Gerais para Licitação e Contratação de Parceria Público-Privada",
+ "nomeCurto": "Lei 11.079/04 (PPP)",
+ "ano": 2004,
+ "disciplina": "Direito Administrativo",
+ "descricao": "Institui as modalidades de PPP (concessão patrocinada e administrativa). Texto compilado e atualizado (fonte: Planalto).",
+ "fonteUrl": "https://www.planalto.gov.br/ccivil_03/_ato2004-2006/2004/lei/l11079.htm",
+ "geradoEm": "2026-07-13",
+ "artigos": [
+  {
+   "key": "lei-11079:1",
+   "ordem": 1,
+   "numero": "1",
+   "rotulo": "Art. 1º",
+   "caminho": "Capítulo I — DISPOSIÇÕES PRELIMINARES",
+   "incidencia": "alta",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "Esta Lei institui normas gerais para licitação e contratação de parceria público-privada no âmbito dos Poderes da União, dos Estados, do Distrito Federal e dos Municípios.",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "Parágrafo único.",
+     "texto": "Esta Lei aplica-se aos órgãos da administração pública direta dos Poderes Executivo e Legislativo, aos fundos especiais, às autarquias, às fundações públicas, às empresas públicas, às sociedades de economia mista e às demais entidades controladas direta ou indiretamente pela União, Estados, Distrito Federal e Municípios.",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lei-11079:2",
+   "ordem": 2,
+   "numero": "2",
+   "rotulo": "Art. 2º",
+   "caminho": "Capítulo I — DISPOSIÇÕES PRELIMINARES",
+   "incidencia": "muito_alta",
+   "incidenciaNota": "Conceito central: PPP é sempre contrato de CONCESSÃO (patrocinada = envolve tarifa do usuário + contraprestação pecuniária do parceiro público; administrativa = Administração é usuária direta/indireta), e a concessão comum da Lei 8.987/95 (sem contraprestação pecuniária do parceiro público) NÃO é PPP (§ 3º) — é a distinção mais cobrada da lei. As 3 vedações do § 4º (valor mínimo R$ 10.000.000,00, prazo mínimo de 5 anos, objeto único vedado) são o texto vigente conferido diretamente no Planalto — valores citados em fontes antigas podem estar desatualizados; sem estatística numérica pública disponível sobre frequência em provas.",
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "Parceria público-privada é o contrato administrativo de concessão, na modalidade patrocinada ou administrativa.",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "§ 1º",
+     "texto": "Concessão patrocinada é a concessão de serviços públicos ou de obras públicas de que trata a Lei nº 8.987, de 13 de fevereiro de 1995, quando envolver, adicionalmente à tarifa cobrada dos usuários contraprestação pecuniária do parceiro público ao parceiro privado.",
+     "nivel": 1
+    },
+    {
+     "id": "b3",
+     "rotulo": "§ 2º",
+     "texto": "Concessão administrativa é o contrato de prestação de serviços de que a Administração Pública seja a usuária direta ou indireta, ainda que envolva execução de obra ou fornecimento e instalação de bens.",
+     "nivel": 1
+    },
+    {
+     "id": "b4",
+     "rotulo": "§ 3º",
+     "texto": "Não constitui parceria público-privada a concessão comum, assim entendida a concessão de serviços públicos ou de obras públicas de que trata a Lei nº 8.987, de 13 de fevereiro de 1995, quando não envolver contraprestação pecuniária do parceiro público ao parceiro privado.",
+     "nivel": 1
+    },
+    {
+     "id": "b5",
+     "rotulo": "§ 4º",
+     "texto": "É vedada a celebração de contrato de parceria público-privada:",
+     "nivel": 1
+    },
+    {
+     "id": "b6",
+     "rotulo": "I –",
+     "texto": "cujo valor do contrato seja inferior a R$ 10.000.000,00 (dez milhões de reais);",
+     "nivel": 1
+    },
+    {
+     "id": "b7",
+     "rotulo": "II –",
+     "texto": "cujo período de prestação do serviço seja inferior a 5 (cinco) anos; ou",
+     "nivel": 1
+    },
+    {
+     "id": "b8",
+     "rotulo": "III –",
+     "texto": "que tenha como objeto único o fornecimento de mão-de-obra, o fornecimento e instalação de equipamentos ou a execução de obra pública.",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lei-11079:3",
+   "ordem": 3,
+   "numero": "3",
+   "rotulo": "Art. 3º",
+   "caminho": "Capítulo I — DISPOSIÇÕES PRELIMINARES",
+   "incidencia": "alta",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "As concessões administrativas regem-se por esta Lei, aplicando-se-lhes adicionalmente o disposto nos arts. 21, 23, 25 e 27 a 39 da Lei nº 8.987, de 13 de fevereiro de 1995, e no art. 31 da Lei nº 9.074, de 7 de julho de 1995. ( Regulamento )",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "§ 1º",
+     "texto": "As concessões patrocinadas regem-se por esta Lei, aplicando-se-lhes subsidiariamente o disposto na Lei nº 8.987, de 13 de fevereiro de 1995, e nas leis que lhe são correlatas. ( Regulamento )",
+     "nivel": 1
+    },
+    {
+     "id": "b3",
+     "rotulo": "§ 2º",
+     "texto": "As concessões comuns continuam regidas pela Lei nº 8.987, de 13 de fevereiro de 1995, e pelas leis que lhe são correlatas, não se lhes aplicando o disposto nesta Lei.",
+     "nivel": 1
+    },
+    {
+     "id": "b4",
+     "rotulo": "§ 3º",
+     "texto": "Continuam regidos exclusivamente pela Lei nº 8.666, de 21 de junho de 1993, e pelas leis que lhe são correlatas os contratos administrativos que não caracterizem concessão comum, patrocinada ou administrativa.",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lei-11079:4",
+   "ordem": 4,
+   "numero": "4",
+   "rotulo": "Art. 4º",
+   "caminho": "Capítulo I — DISPOSIÇÕES PRELIMINARES",
+   "incidencia": "muito_alta",
+   "incidenciaNota": "Diretrizes da PPP — a INDELEGABILIDADE das funções de regulação, jurisdicional, do exercício do poder de polícia e de outras atividades exclusivas do Estado (inciso III) é a mais cobrada, geralmente testando se algum desses núcleos pode ser objeto de PPP; sem estatística numérica pública disponível.",
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "Na contratação de parceria público-privada serão observadas as seguintes diretrizes:",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "I –",
+     "texto": "eficiência no cumprimento das missões de Estado e no emprego dos recursos da sociedade;",
+     "nivel": 1
+    },
+    {
+     "id": "b3",
+     "rotulo": "II –",
+     "texto": "respeito aos interesses e direitos dos destinatários dos serviços e dos entes privados incumbidos da sua execução;",
+     "nivel": 1
+    },
+    {
+     "id": "b4",
+     "rotulo": "III –",
+     "texto": "indelegabilidade das funções de regulação, jurisdicional, do exercício do poder de polícia e de outras atividades exclusivas do Estado;",
+     "nivel": 1
+    },
+    {
+     "id": "b5",
+     "rotulo": "IV –",
+     "texto": "responsabilidade fiscal na celebração e execução das parcerias;",
+     "nivel": 1
+    },
+    {
+     "id": "b6",
+     "rotulo": "V –",
+     "texto": "transparência dos procedimentos e das decisões;",
+     "nivel": 1
+    },
+    {
+     "id": "b7",
+     "rotulo": "VI –",
+     "texto": "repartição objetiva de riscos entre as partes;",
+     "nivel": 1
+    },
+    {
+     "id": "b8",
+     "rotulo": "VII –",
+     "texto": "sustentabilidade financeira e vantagens socioeconômicas dos projetos de parceria.",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lei-11079:5",
+   "ordem": 5,
+   "numero": "5",
+   "rotulo": "Art. 5º",
+   "caminho": "Capítulo II — DOS CONTRATOS DE PARCERIA PÚBLICO-PRIVADA",
+   "incidencia": "muito_alta",
+   "incidenciaNota": "Prazo de vigência do contrato de PPP: não inferior a 5 (cinco) nem superior a 35 (trinta e cinco) anos, incluindo eventual prorrogação (inciso I) — valor conferido no texto vigente do Planalto; também cobrada a repartição objetiva de riscos, inclusive caso fortuito, força maior, fato do príncipe e álea econômica extraordinária (inciso III); sem estatística numérica pública disponível.",
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "As cláusulas dos contratos de parceria público-privada atenderão ao disposto no art. 23 da Lei nº 8.987, de 13 de fevereiro de 1995, no que couber, devendo também prever:",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "I –",
+     "texto": "o prazo de vigência do contrato, compatível com a amortização dos investimentos realizados, não inferior a 5 (cinco), nem superior a 35 (trinta e cinco) anos, incluindo eventual prorrogação;",
+     "nivel": 1
+    },
+    {
+     "id": "b3",
+     "rotulo": "II –",
+     "texto": "as penalidades aplicáveis à Administração Pública e ao parceiro privado em caso de inadimplemento contratual, fixadas sempre de forma proporcional à gravidade da falta cometida, e às obrigações assumidas;",
+     "nivel": 1
+    },
+    {
+     "id": "b4",
+     "rotulo": "III –",
+     "texto": "a repartição de riscos entre as partes, inclusive os referentes a caso fortuito, força maior, fato do príncipe e álea econômica extraordinária;",
+     "nivel": 1
+    },
+    {
+     "id": "b5",
+     "rotulo": "IV –",
+     "texto": "as formas de remuneração e de atualização dos valores contratuais;",
+     "nivel": 1
+    },
+    {
+     "id": "b6",
+     "rotulo": "V –",
+     "texto": "os mecanismos para a preservação da atualidade da prestação dos serviços;",
+     "nivel": 1
+    },
+    {
+     "id": "b7",
+     "rotulo": "VI –",
+     "texto": "os fatos que caracterizem a inadimplência pecuniária do parceiro público, os modos e o prazo de regularização e, quando houver, a forma de acionamento da garantia;",
+     "nivel": 1
+    },
+    {
+     "id": "b8",
+     "rotulo": "VII –",
+     "texto": "os critérios objetivos de avaliação do desempenho do parceiro privado;",
+     "nivel": 1
+    },
+    {
+     "id": "b9",
+     "rotulo": "VIII –",
+     "texto": "a prestação, pelo parceiro privado, de garantias de execução suficientes e compatíveis com os ônus e riscos envolvidos, observados os limites dos §§ 3º e 5º do art. 56 da Lei nº 8.666, de 21 de junho de 1993, e, no que se refere às concessões patrocinadas, o disposto no inciso XV do art. 18 da Lei nº 8.987, de 13 de fevereiro de 1995 ;",
+     "nivel": 1
+    },
+    {
+     "id": "b10",
+     "rotulo": "IX –",
+     "texto": "o compartilhamento com a Administração Pública de ganhos econômicos efetivos do parceiro privado decorrentes da redução do risco de crédito dos financiamentos utilizados pelo parceiro privado;",
+     "nivel": 1
+    },
+    {
+     "id": "b11",
+     "rotulo": "X –",
+     "texto": "a realização de vistoria dos bens reversíveis, podendo o parceiro público reter os pagamentos ao parceiro privado, no valor necessário para reparar as irregularidades eventualmente detectadas.",
+     "nivel": 1
+    },
+    {
+     "id": "b12",
+     "rotulo": "XI –",
+     "texto": "o cronograma e os marcos para o repasse ao parceiro privado das parcelas do aporte de recursos, na fase de investimentos do projeto e/ou após a disponibilização dos serviços, sempre que verificada a hipótese do § 2º do art. 6º desta Lei.",
+     "nivel": 1
+    },
+    {
+     "id": "b13",
+     "rotulo": "§ 1º",
+     "texto": "As cláusulas contratuais de atualização automática de valores baseadas em índices e fórmulas matemáticas, quando houver, serão aplicadas sem necessidade de homologação pela Administração Pública, exceto se esta publicar, na imprensa oficial, onde houver, até o prazo de 15 (quinze) dias após apresentação da fatura, razões fundamentadas nesta Lei ou no contrato para a rejeição da atualização.",
+     "nivel": 1
+    },
+    {
+     "id": "b14",
+     "rotulo": "§ 2º",
+     "texto": "Os contratos poderão prever adicionalmente:",
+     "nivel": 1
+    },
+    {
+     "id": "b15",
+     "rotulo": "I –",
+     "texto": "os requisitos e condições em que o parceiro público autorizará a transferência do controle ou a administração temporária da sociedade de propósito específico aos seus financiadores e garantidores com quem não mantenha vínculo societário direto, com o objetivo de promover a sua reestruturação financeira e assegurar a continuidade da prestação dos serviços, não se aplicando para este efeito o previsto no inciso I do parágrafo único do art. 27 da Lei nº 8.987, de 13 de fevereiro de 1995 ;",
+     "nivel": 1
+    },
+    {
+     "id": "b16",
+     "rotulo": "II –",
+     "texto": "a possibilidade de emissão de empenho em nome dos financiadores do projeto em relação às obrigações pecuniárias da Administração Pública;",
+     "nivel": 1
+    },
+    {
+     "id": "b17",
+     "rotulo": "III –",
+     "texto": "a legitimidade dos financiadores do projeto para receber indenizações por extinção antecipada do contrato, bem como pagamentos efetuados pelos fundos e empresas estatais garantidores de parcerias público-privadas.",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lei-11079:5-A",
+   "ordem": 6,
+   "numero": "5-A",
+   "rotulo": "Art. 5-A",
+   "caminho": "Capítulo II — DOS CONTRATOS DE PARCERIA PÚBLICO-PRIVADA",
+   "incidencia": "media",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "Para fins do inciso I do § 2º do art. 5º , considera-se:",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "I –",
+     "texto": "o controle da sociedade de propósito específico a propriedade resolúvel de ações ou quotas por seus financiadores e garantidores que atendam os requisitos do art. 116 da Lei nº 6.404, de 15 de dezembro de 1976 ;",
+     "nivel": 1
+    },
+    {
+     "id": "b3",
+     "rotulo": "II –",
+     "texto": "A administração temporária da sociedade de propósito específico, pelos financiadores e garantidores quando, sem a transferência da propriedade de ações ou quotas, forem outorgados os seguintes poderes:",
+     "nivel": 1
+    },
+    {
+     "id": "b4",
+     "rotulo": "a)",
+     "texto": "indicar os membros do Conselho de Administração, a serem eleitos em Assembleia Geral pelos acionistas, nas sociedades regidas pela Lei 6.404, de 15 de dezembro de 1976; ou administradores, a serem eleitos pelos quotistas, nas demais sociedades;",
+     "nivel": 2
+    },
+    {
+     "id": "b5",
+     "rotulo": "b)",
+     "texto": "indicar os membros do Conselho Fiscal, a serem eleitos pelos acionistas ou quotistas controladores em Assembleia Geral;",
+     "nivel": 2
+    },
+    {
+     "id": "b6",
+     "rotulo": "c)",
+     "texto": "exercer poder de veto sobre qualquer proposta submetida à votação dos acionistas ou quotistas da concessionária, que representem, ou possam representar, prejuízos aos fins previstos no caput deste artigo;",
+     "nivel": 2
+    },
+    {
+     "id": "b7",
+     "rotulo": "d)",
+     "texto": "outros poderes necessários ao alcance dos fins previstos no caput deste artigo;",
+     "nivel": 2
+    },
+    {
+     "id": "b8",
+     "rotulo": "§ 1º",
+     "texto": "A administração temporária autorizada pelo poder concedente não acarretará responsabilidade aos financiadores e garantidores em relação à tributação, encargos, ônus, sanções, obrigações ou compromissos com terceiros, inclusive com o poder concedente ou empregados.",
+     "nivel": 1
+    },
+    {
+     "id": "b9",
+     "rotulo": "§ 2º",
+     "texto": "O Poder Concedente disciplinará sobre o prazo da administração temporária.",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lei-11079:6",
+   "ordem": 7,
+   "numero": "6",
+   "rotulo": "Art. 6º",
+   "caminho": "Capítulo II — DOS CONTRATOS DE PARCERIA PÚBLICO-PRIVADA",
+   "incidencia": "muito_alta",
+   "incidenciaNota": "As 5 formas de contraprestação da Administração Pública (ordem bancária, cessão de créditos não tributários, outorga de direitos face à Administração, outorga de direitos sobre bens públicos dominicais, outros meios admitidos em lei) — rol literal frequentemente cobrado; sem estatística numérica pública disponível.",
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "A contraprestação da Administração Pública nos contratos de parceria público-privada poderá ser feita por:",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "I –",
+     "texto": "ordem bancária;",
+     "nivel": 1
+    },
+    {
+     "id": "b3",
+     "rotulo": "II –",
+     "texto": "cessão de créditos não tributários;",
+     "nivel": 1
+    },
+    {
+     "id": "b4",
+     "rotulo": "III –",
+     "texto": "outorga de direitos em face da Administração Pública;",
+     "nivel": 1
+    },
+    {
+     "id": "b5",
+     "rotulo": "IV –",
+     "texto": "outorga de direitos sobre bens públicos dominicais;",
+     "nivel": 1
+    },
+    {
+     "id": "b6",
+     "rotulo": "V –",
+     "texto": "outros meios admitidos em lei.",
+     "nivel": 1
+    },
+    {
+     "id": "b7",
+     "rotulo": "§ 1º",
+     "texto": "O contrato poderá prever o pagamento ao parceiro privado de remuneração variável vinculada ao seu desempenho, conforme metas e padrões de qualidade e disponibilidade definidos no contrato.",
+     "nivel": 1
+    },
+    {
+     "id": "b8",
+     "rotulo": "§ 2º",
+     "texto": "O contrato poderá prever o aporte de recursos em favor do parceiro privado para a realização de obras e aquisição de bens reversíveis, nos termos dos incisos X e XI do caput do art. 18 da Lei nº 8.987, de 13 de fevereiro de 1995, desde que autorizado no edital de licitação, se contratos novos, ou em lei específica, se contratos celebrados até 8 de agosto de 2012.",
+     "nivel": 1
+    },
+    {
+     "id": "b9",
+     "rotulo": "§ 3º",
+     "texto": "O valor do aporte de recursos realizado nos termos do § 2º poderá ser excluído da determinação:",
+     "nivel": 1
+    },
+    {
+     "id": "b10",
+     "rotulo": "I –",
+     "texto": "do lucro líquido para fins de apuração do lucro real e da base de cálculo da Contribuição Social sobre o Lucro Líquido - CSLL; e",
+     "nivel": 1
+    },
+    {
+     "id": "b11",
+     "rotulo": "II –",
+     "texto": "da base de cálculo da Contribuição para o PIS/Pasep e da Contribuição para o Financiamento da Seguridade Social - COFINS. Produção de efeitos",
+     "nivel": 1
+    },
+    {
+     "id": "b12",
+     "rotulo": "III –",
+     "texto": "da base de cálculo da Contribuição Previdenciária sobre a Receita Bruta - CPRB devida pelas empresas referidas nos arts. 7º e 8º da Lei nº 12.546, de 14 de dezembro de 2011, a partir de 1º de janeiro de 2015. Vigência",
+     "nivel": 1
+    },
+    {
+     "id": "b13",
+     "rotulo": "§ 4º",
+     "texto": "Até 31 de dezembro de 2013, para os optantes conforme o art. 75 da Lei nº 12.973, de 13 de maio de 2014, e até 31 de dezembro de 2014, para os não optantes, a parcela excluída nos termos do § 3º deverá ser computada na determinação do lucro líquido para fins de apuração do lucro real, da base de cálculo da CSLL e da base de cálculo da Contribuição para o PIS/Pasep e da Cofins, na proporção em que o custo para a realização de obras e aquisição de bens a que se refere o § 2º deste artigo for realizado, inclusive mediante depreciação ou extinção da concessão, nos termos do art. 35 da Lei nº 8.987, de 13 de fevereiro de 1995. Vigência",
+     "nivel": 1
+    },
+    {
+     "id": "b14",
+     "rotulo": "§ 5º",
+     "texto": "Por ocasião da extinção do contrato, o parceiro privado não receberá indenização pelas parcelas de investimentos vinculados a bens reversíveis ainda não amortizadas ou depreciadas, quando tais investimentos houverem sido realizados com valores provenientes do aporte de recursos de que trata o § 2º .",
+     "nivel": 1
+    },
+    {
+     "id": "b15",
+     "rotulo": "§ 6º",
+     "texto": "A partir de 1º de janeiro de 2014, para os optantes conforme o art. 75 da Lei nº 12.973, de 13 de maio de 2014, e de 1º de janeiro de 2015, para os não optantes, a parcela excluída nos termos do § 3º deverá ser computada na determinação do lucro líquido para fins de apuração do lucro real, da base de cálculo da CSLL e da base de cálculo da Contribuição para o PIS/Pasep e da Cofins em cada período de apuração durante o prazo restante do contrato, considerado a partir do início da prestação dos serviços públicos. Vigência",
+     "nivel": 1
+    },
+    {
+     "id": "b16",
+     "rotulo": "§ 7º",
+     "texto": "No caso do § 6º , o valor a ser adicionado em cada período de apuração deve ser o valor da parcela excluída dividida pela quantidade de períodos de apuração contidos no prazo restante do contrato. Vigência",
+     "nivel": 1
+    },
+    {
+     "id": "b17",
+     "rotulo": "§ 8º",
+     "texto": "Para os contratos de concessão em que a concessionária já tenha iniciado a prestação dos serviços públicos nas datas referidas no § 6º , as adições subsequentes serão realizadas em cada período de apuração durante o prazo restante do contrato, considerando o saldo remanescente ainda não adicionado. Vigência",
+     "nivel": 1
+    },
+    {
+     "id": "b18",
+     "rotulo": "§ 9º",
+     "texto": "A parcela excluída nos termos do inciso III do § 3º deverá ser computada na determinação da base de cálculo da contribuição previdenciária de que trata o inciso III do § 3º em cada período de apuração durante o prazo restante previsto no contrato para construção, recuperação, reforma, ampliação ou melhoramento da infraestrutura que será utilizada na prestação de serviços públicos. Vigência",
+     "nivel": 1
+    },
+    {
+     "id": "b19",
+     "rotulo": "§ 10º",
+     "texto": "No caso do § 9º , o valor a ser adicionado em cada período de apuração deve ser o valor da parcela excluída dividida pela quantidade de períodos de apuração contidos no prazo restante previsto no contrato para construção, recuperação, reforma, ampliação ou melhoramento da infraestrutura que será utilizada na prestação de serviços públicos. Vigência",
+     "nivel": 1
+    },
+    {
+     "id": "b20",
+     "rotulo": "§ 11º",
+     "texto": "Ocorrendo a extinção da concessão antes do advento do termo contratual, o saldo da parcela excluída nos termos do § 3º, ainda não adicionado, deverá ser computado na determinação do lucro líquido para fins de apuração do lucro real, da base de cálculo da CSLL e da contribuição previdenciária de que trata o inciso III do § 3º no período de apuração da extinção. Produção de efeitos",
+     "nivel": 1
+    },
+    {
+     "id": "b21",
+     "rotulo": "§ 12º",
+     "texto": "Aplicam-se às receitas auferidas pelo parceiro privado nos termos do § 6º o regime de apuração e as alíquotas da Contribuição para o PIS/Pasep e da Cofins aplicáveis às suas receitas decorrentes da prestação dos serviços públicos. Vigência Produção de efeitos",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lei-11079:7",
+   "ordem": 8,
+   "numero": "7",
+   "rotulo": "Art. 7º",
+   "caminho": "Capítulo II — DOS CONTRATOS DE PARCERIA PÚBLICO-PRIVADA",
+   "incidencia": "muito_alta",
+   "incidenciaNota": "A contraprestação da Administração só pode ocorrer APÓS a disponibilização do serviço (regra geral que veda pagamento antecipado por obra ainda não entregue), facultado o pagamento por parcela fruível (§ 1º) — ponto clássico de pegadinha; sem estatística numérica pública disponível.",
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "A contraprestação da Administração Pública será obrigatoriamente precedida da disponibilização do serviço objeto do contrato de parceria público-privada.",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "§ 1º",
+     "texto": "É facultado à administração pública, nos termos do contrato, efetuar o pagamento da contraprestação relativa a parcela fruível do serviço objeto do contrato de parceria público-privada.",
+     "nivel": 1
+    },
+    {
+     "id": "b3",
+     "rotulo": "§ 2º",
+     "texto": "O aporte de recursos de que trata o § 2º do art. 6º , quando realizado durante a fase dos investimentos a cargo do parceiro privado, deverá guardar proporcionalidade com as etapas efetivamente executadas.",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lei-11079:8",
+   "ordem": 9,
+   "numero": "8",
+   "rotulo": "Art. 8º",
+   "caminho": "Capítulo III — DAS GARANTIAS",
+   "incidencia": "muito_alta",
+   "incidenciaNota": "Rol de mecanismos de garantia das obrigações pecuniárias da Administração (vinculação de receitas, fundos especiais, seguro-garantia, garantia de organismo internacional/instituição financeira, fundo garantidor ou empresa estatal) — é o dispositivo que sustenta a viabilidade financeira da PPP para o parceiro privado; sem estatística numérica pública disponível.",
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "As obrigações pecuniárias contraídas pela Administração Pública em contrato de parceria público-privada poderão ser garantidas mediante:",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "I –",
+     "texto": "vinculação de receitas, observado o disposto no inciso IV do art. 167 da Constituição Federal ;",
+     "nivel": 1
+    },
+    {
+     "id": "b3",
+     "rotulo": "II –",
+     "texto": "instituição ou utilização de fundos especiais previstos em lei;",
+     "nivel": 1
+    },
+    {
+     "id": "b4",
+     "rotulo": "III –",
+     "texto": "contratação de seguro-garantia com as companhias seguradoras que não sejam controladas pelo Poder Público;",
+     "nivel": 1
+    },
+    {
+     "id": "b5",
+     "rotulo": "IV –",
+     "texto": "garantia prestada por organismos internacionais ou instituições financeiras;",
+     "nivel": 1
+    },
+    {
+     "id": "b6",
+     "rotulo": "V –",
+     "texto": "garantias prestadas por fundo garantidor ou empresa estatal criada para essa finalidade;",
+     "nivel": 1
+    },
+    {
+     "id": "b7",
+     "rotulo": "VI –",
+     "texto": "outros mecanismos admitidos em lei.",
+     "nivel": 1
+    },
+    {
+     "id": "b8",
+     "rotulo": "Parágrafo único.",
+     "texto": "(VETADO). Vigência",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lei-11079:9",
+   "ordem": 10,
+   "numero": "9",
+   "rotulo": "Art. 9º",
+   "caminho": "Capítulo IV — DA SOCIEDADE DE PROPÓSITO ESPECÍFICO",
+   "incidencia": "muito_alta",
+   "incidenciaNota": "Sociedade de Propósito Específico (SPE): deve ser constituída ANTES da celebração do contrato; é VEDADO à Administração Pública ser titular da MAIORIA do capital votante (§ 4º), salvo aquisição por instituição financeira controlada pelo Poder Público em caso de inadimplemento de financiamento (§ 5º) — pegadinha clássica dizer que a Administração pode deter o controle da SPE; sem estatística numérica pública disponível.",
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "Antes da celebração do contrato, deverá ser constituída sociedade de propósito específico, incumbida de implantar e gerir o objeto da parceria.",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "§ 1º",
+     "texto": "A transferência do controle da sociedade de propósito específico estará condicionada à autorização expressa da Administração Pública, nos termos do edital e do contrato, observado o disposto no parágrafo único do art. 27 da Lei nº 8.987, de 13 de fevereiro de 1995.",
+     "nivel": 1
+    },
+    {
+     "id": "b3",
+     "rotulo": "§ 2º",
+     "texto": "A sociedade de propósito específico poderá assumir a forma de companhia aberta, com valores mobiliários admitidos a negociação no mercado.",
+     "nivel": 1
+    },
+    {
+     "id": "b4",
+     "rotulo": "§ 3º",
+     "texto": "A sociedade de propósito específico deverá obedecer a padrões de governança corporativa e adotar contabilidade e demonstrações financeiras padronizadas, conforme regulamento.",
+     "nivel": 1
+    },
+    {
+     "id": "b5",
+     "rotulo": "§ 4º",
+     "texto": "Fica vedado à Administração Pública ser titular da maioria do capital votante das sociedades de que trata este Capítulo.",
+     "nivel": 1
+    },
+    {
+     "id": "b6",
+     "rotulo": "§ 5º",
+     "texto": "A vedação prevista no § 4º deste artigo não se aplica à eventual aquisição da maioria do capital votante da sociedade de propósito específico por instituição financeira controlada pelo Poder Público em caso de inadimplemento de contratos de financiamento.",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lei-11079:10",
+   "ordem": 11,
+   "numero": "10",
+   "rotulo": "Art. 10",
+   "caminho": "Capítulo V — DA LICITAÇÃO",
+   "incidencia": "muito_alta",
+   "incidenciaNota": "Condições para abertura da licitação de PPP: autorização da autoridade competente com estudo técnico, submissão da minuta de edital/contrato à CONSULTA PÚBLICA (inciso VI) e a regra do § 3º — concessões patrocinadas em que MAIS DE 70% da remuneração do parceiro privado vier da Administração Pública dependem de autorização legislativa específica; sem estatística numérica pública disponível.",
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "A contratação de parceria público-privada será precedida de licitação na modalidade concorrência ou diálogo competitivo, estando a abertura do processo licitatório condicionada a:",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "I –",
+     "texto": "autorização da autoridade competente, fundamentada em estudo técnico que demonstre:",
+     "nivel": 1
+    },
+    {
+     "id": "b3",
+     "rotulo": "a)",
+     "texto": "a conveniência e a oportunidade da contratação, mediante identificação das razões que justifiquem a opção pela forma de parceria público-privada;",
+     "nivel": 2
+    },
+    {
+     "id": "b4",
+     "rotulo": "b)",
+     "texto": "que as despesas criadas ou aumentadas não afetarão as metas de resultados fiscais previstas no Anexo referido no § 1º do art. 4º da Lei Complementar nº 101, de 4 de maio de 2000, devendo seus efeitos financeiros, nos períodos seguintes, ser compensados pelo aumento permanente de receita ou pela redução permanente de despesa; e",
+     "nivel": 2
+    },
+    {
+     "id": "b5",
+     "rotulo": "c)",
+     "texto": "quando for o caso, conforme as normas editadas na forma do art. 25 desta Lei, a observância dos limites e condições decorrentes da aplicação dos arts. 29, 30 e 32 da Lei Complementar nº 101, de 4 de maio de 2000, pelas obrigações contraídas pela Administração Pública relativas ao objeto do contrato;",
+     "nivel": 2
+    },
+    {
+     "id": "b6",
+     "rotulo": "II –",
+     "texto": "elaboração de estimativa do impacto orçamentário-financeiro nos exercícios em que deva vigorar o contrato de parceria público-privada;",
+     "nivel": 1
+    },
+    {
+     "id": "b7",
+     "rotulo": "III –",
+     "texto": "declaração do ordenador da despesa de que as obrigações contraídas pela Administração Pública no decorrer do contrato são compatíveis com a lei de diretrizes orçamentárias e estão previstas na lei orçamentária anual;",
+     "nivel": 1
+    },
+    {
+     "id": "b8",
+     "rotulo": "IV –",
+     "texto": "estimativa do fluxo de recursos públicos suficientes para o cumprimento, durante a vigência do contrato e por exercício financeiro, das obrigações contraídas pela Administração Pública;",
+     "nivel": 1
+    },
+    {
+     "id": "b9",
+     "rotulo": "V –",
+     "texto": "seu objeto estar previsto no plano plurianual em vigor no âmbito onde o contrato será celebrado;",
+     "nivel": 1
+    },
+    {
+     "id": "b10",
+     "rotulo": "VI –",
+     "texto": "submissão da minuta de edital e de contrato à consulta pública, mediante publicação na imprensa oficial, em jornais de grande circulação e por meio eletrônico, que deverá informar a justificativa para a contratação, a identificação do objeto, o prazo de duração do contrato, seu valor estimado, fixando-se prazo mínimo de 30 (trinta) dias para recebimento de sugestões, cujo termo dar-se-á pelo menos 7 (sete) dias antes da data prevista para a publicação do edital; e",
+     "nivel": 1
+    },
+    {
+     "id": "b11",
+     "rotulo": "VII –",
+     "texto": "licença ambiental prévia ou expedição das diretrizes para o licenciamento ambiental do empreendimento, na forma do regulamento, sempre que o objeto do contrato exigir.",
+     "nivel": 1
+    },
+    {
+     "id": "b12",
+     "rotulo": "§ 1º",
+     "texto": "A comprovação referida nas alíneas b e c do inciso I do caput deste artigo conterá as premissas e metodologia de cálculo utilizadas, observadas as normas gerais para consolidação das contas públicas, sem prejuízo do exame de compatibilidade das despesas com as demais normas do plano plurianual e da lei de diretrizes orçamentárias.",
+     "nivel": 1
+    },
+    {
+     "id": "b13",
+     "rotulo": "§ 2º",
+     "texto": "Sempre que a assinatura do contrato ocorrer em exercício diverso daquele em que for publicado o edital, deverá ser precedida da atualização dos estudos e demonstrações a que se referem os incisos I a IV do caput deste artigo.",
+     "nivel": 1
+    },
+    {
+     "id": "b14",
+     "rotulo": "§ 3º",
+     "texto": "As concessões patrocinadas em que mais de 70% (setenta por cento) da remuneração do parceiro privado for paga pela Administração Pública dependerão de autorização legislativa específica.",
+     "nivel": 1
+    },
+    {
+     "id": "b15",
+     "rotulo": "§ 4º",
+     "texto": "Os estudos de engenharia para a definição do valor do investimento da PPP deverão ter nível de detalhamento de anteprojeto, e o valor dos investimentos para definição do preço de referência para a licitação será calculado com base em valores de mercado considerando o custo global de obras semelhantes no Brasil ou no exterior ou com base em sistemas de custos que utilizem como insumo valores de mercado do setor específico do projeto, aferidos, em qualquer caso, mediante orçamento sintético, elaborado por meio de metodologia expedita ou paramétrica.",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lei-11079:11",
+   "ordem": 12,
+   "numero": "11",
+   "rotulo": "Art. 11",
+   "caminho": "Capítulo V — DA LICITAÇÃO",
+   "incidencia": "alta",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "O instrumento convocatório conterá minuta do contrato, indicará expressamente a submissão da licitação às normas desta Lei e observará, no que couber, os §§ 3º e 4º do art. 15, os arts. 18, 19 e 21 da Lei nº 8.987, de 13 de fevereiro de 1995, podendo ainda prever:",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "I –",
+     "texto": "exigência de garantia de proposta do licitante, observado o limite do inciso III do art. 31 da Lei nº 8.666, de 21 de junho de 1993 ;",
+     "nivel": 1
+    },
+    {
+     "id": "b3",
+     "rotulo": "II –",
+     "texto": "(VETADO)",
+     "nivel": 1
+    },
+    {
+     "id": "b4",
+     "rotulo": "III –",
+     "texto": "o emprego dos mecanismos privados de resolução de disputas, inclusive a arbitragem, a ser realizada no Brasil e em língua portuguesa, nos termos da Lei nº 9.307, de 23 de setembro de 1996, para dirimir conflitos decorrentes ou relacionados ao contrato.",
+     "nivel": 1
+    },
+    {
+     "id": "b5",
+     "rotulo": "Parágrafo único.",
+     "texto": "O edital deverá especificar, quando houver, as garantias da contraprestação do parceiro público a serem concedidas ao parceiro privado.",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lei-11079:12",
+   "ordem": 13,
+   "numero": "12",
+   "rotulo": "Art. 12",
+   "caminho": "Capítulo V — DA LICITAÇÃO",
+   "incidencia": "alta",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "O certame para a contratação de parcerias público-privadas obedecerá ao procedimento previsto na legislação vigente sobre licitações e contratos administrativos e também ao seguinte:",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "I –",
+     "texto": "o julgamento poderá ser precedido de etapa de qualificação de propostas técnicas, desclassificando-se os licitantes que não alcançarem a pontuação mínima, os quais não participarão das etapas seguintes;",
+     "nivel": 1
+    },
+    {
+     "id": "b3",
+     "rotulo": "II –",
+     "texto": "o julgamento poderá adotar como critérios, além dos previstos nos incisos I e V do art. 15 da Lei nº 8.987, de 13 de fevereiro de 1995, os seguintes:",
+     "nivel": 1
+    },
+    {
+     "id": "b4",
+     "rotulo": "a)",
+     "texto": "menor valor da contraprestação a ser paga pela Administração Pública;",
+     "nivel": 2
+    },
+    {
+     "id": "b5",
+     "rotulo": "b)",
+     "texto": "melhor proposta em razão da combinação do critério da alínea a com o de melhor técnica, de acordo com os pesos estabelecidos no edital;",
+     "nivel": 2
+    },
+    {
+     "id": "b6",
+     "rotulo": "III –",
+     "texto": "o edital definirá a forma de apresentação das propostas econômicas, admitindo-se:",
+     "nivel": 1
+    },
+    {
+     "id": "b7",
+     "rotulo": "a)",
+     "texto": "propostas escritas em envelopes lacrados; ou",
+     "nivel": 2
+    },
+    {
+     "id": "b8",
+     "rotulo": "b)",
+     "texto": "propostas escritas, seguidas de lances em viva voz;",
+     "nivel": 2
+    },
+    {
+     "id": "b9",
+     "rotulo": "IV –",
+     "texto": "o edital poderá prever a possibilidade de saneamento de falhas, de complementação de insuficiências ou ainda de correções de caráter formal no curso do procedimento, desde que o licitante possa satisfazer as exigências dentro do prazo fixado no instrumento convocatório.",
+     "nivel": 1
+    },
+    {
+     "id": "b10",
+     "rotulo": "§ 1º",
+     "texto": "Na hipótese da alínea b do inciso III do caput deste artigo:",
+     "nivel": 1
+    },
+    {
+     "id": "b11",
+     "rotulo": "I –",
+     "texto": "os lances em viva voz serão sempre oferecidos na ordem inversa da classificação das propostas escritas, sendo vedado ao edital limitar a quantidade de lances;",
+     "nivel": 1
+    },
+    {
+     "id": "b12",
+     "rotulo": "II –",
+     "texto": "o edital poderá restringir a apresentação de lances em viva voz aos licitantes cuja proposta escrita for no máximo 20% (vinte por cento) maior que o valor da melhor proposta.",
+     "nivel": 1
+    },
+    {
+     "id": "b13",
+     "rotulo": "§ 2º",
+     "texto": "O exame de propostas técnicas, para fins de qualificação ou julgamento, será feito por ato motivado, com base em exigências, parâmetros e indicadores de resultado pertinentes ao objeto, definidos com clareza e objetividade no edital.",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lei-11079:13",
+   "ordem": 14,
+   "numero": "13",
+   "rotulo": "Art. 13",
+   "caminho": "Capítulo V — DA LICITAÇÃO",
+   "incidencia": "media",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "O edital poderá prever a inversão da ordem das fases de habilitação e julgamento, hipótese em que:",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "I –",
+     "texto": "encerrada a fase de classificação das propostas ou o oferecimento de lances, será aberto o invólucro com os documentos de habilitação do licitante mais bem classificado, para verificação do atendimento das condições fixadas no edital;",
+     "nivel": 1
+    },
+    {
+     "id": "b3",
+     "rotulo": "II –",
+     "texto": "verificado o atendimento das exigências do edital, o licitante será declarado vencedor;",
+     "nivel": 1
+    },
+    {
+     "id": "b4",
+     "rotulo": "III –",
+     "texto": "inabilitado o licitante melhor classificado, serão analisados os documentos habilitatórios do licitante com a proposta classificada em 2º (segundo) lugar, e assim, sucessivamente, até que um licitante classificado atenda às condições fixadas no edital;",
+     "nivel": 1
+    },
+    {
+     "id": "b5",
+     "rotulo": "IV –",
+     "texto": "proclamado o resultado final do certame, o objeto será adjudicado ao vencedor nas condições técnicas e econômicas por ele ofertadas.",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lei-11079:14",
+   "ordem": 15,
+   "numero": "14",
+   "rotulo": "Art. 14",
+   "caminho": "Capítulo VI — DISPOSIÇÕES APLICÁVEIS À UNIÃO",
+   "incidencia": "alta",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "Será instituído, por decreto, órgão gestor de parcerias público-privadas federais, com competência para:",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "I –",
+     "texto": "definir os serviços prioritários para execução no regime de parceria público-privada;",
+     "nivel": 1
+    },
+    {
+     "id": "b3",
+     "rotulo": "II –",
+     "texto": "disciplinar os procedimentos para celebração desses contratos;",
+     "nivel": 1
+    },
+    {
+     "id": "b4",
+     "rotulo": "III –",
+     "texto": "autorizar a abertura da licitação e aprovar seu edital;",
+     "nivel": 1
+    },
+    {
+     "id": "b5",
+     "rotulo": "IV –",
+     "texto": "apreciar os relatórios de execução dos contratos.",
+     "nivel": 1
+    },
+    {
+     "id": "b6",
+     "rotulo": "§ 1º",
+     "texto": "O órgão mencionado no caput deste artigo será composto por indicação nominal de um representante titular e respectivo suplente de cada um dos seguintes órgãos:",
+     "nivel": 1
+    },
+    {
+     "id": "b7",
+     "rotulo": "I –",
+     "texto": "Ministério do Planejamento, Orçamento e Gestão, ao qual cumprirá a tarefa de coordenação das respectivas atividades;",
+     "nivel": 1
+    },
+    {
+     "id": "b8",
+     "rotulo": "II –",
+     "texto": "Ministério da Fazenda;",
+     "nivel": 1
+    },
+    {
+     "id": "b9",
+     "rotulo": "III –",
+     "texto": "Casa Civil da Presidência da República.",
+     "nivel": 1
+    },
+    {
+     "id": "b10",
+     "rotulo": "§ 2º",
+     "texto": "Das reuniões do órgão a que se refere o caput deste artigo para examinar projetos de parceria público-privada participará um representante do órgão da Administração Pública direta cuja área de competência seja pertinente ao objeto do contrato em análise.",
+     "nivel": 1
+    },
+    {
+     "id": "b11",
+     "rotulo": "§ 3º",
+     "texto": "Para deliberação do órgão gestor sobre a contratação de parceria público-privada, o expediente deverá estar instruído com pronunciamento prévio e fundamentado:",
+     "nivel": 1
+    },
+    {
+     "id": "b12",
+     "rotulo": "I –",
+     "texto": "do Ministério do Planejamento, Orçamento e Gestão, sobre o mérito do projeto;",
+     "nivel": 1
+    },
+    {
+     "id": "b13",
+     "rotulo": "II –",
+     "texto": "do Ministério da Fazenda, quanto à viabilidade da concessão da garantia e à sua forma, relativamente aos riscos para o Tesouro Nacional e ao cumprimento do limite de que trata o art. 22 desta Lei.",
+     "nivel": 1
+    },
+    {
+     "id": "b14",
+     "rotulo": "§ 4º",
+     "texto": "Para o desempenho de suas funções, o órgão citado no caput deste artigo poderá criar estrutura de apoio técnico com a presença de representantes de instituições públicas.",
+     "nivel": 1
+    },
+    {
+     "id": "b15",
+     "rotulo": "§ 5º",
+     "texto": "O órgão de que trata o caput deste artigo remeterá ao Congresso Nacional e ao Tribunal de Contas da União, com periodicidade anual, relatórios de desempenho dos contratos de parceria público-privada.",
+     "nivel": 1
+    },
+    {
+     "id": "b16",
+     "rotulo": "§ 6º",
+     "texto": "Para fins do atendimento do disposto no inciso V do art. 4º desta Lei, ressalvadas as informações classificadas como sigilosas, os relatórios de que trata o § 5º deste artigo serão disponibilizados ao público, por meio de rede pública de transmissão de dados.",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lei-11079:14-A",
+   "ordem": 16,
+   "numero": "14-A",
+   "rotulo": "Art. 14-A",
+   "caminho": "Capítulo VI — DISPOSIÇÕES APLICÁVEIS À UNIÃO",
+   "incidencia": "media",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "A Câmara dos Deputados e o Senado Federal, por meio de atos das respectivas Mesas, poderão dispor sobre a matéria de que trata o art. 14 no caso de parcerias público-privadas por eles realizadas, mantida a competência do Ministério da Fazenda descrita no inciso II do § 3º do referido artigo.",
+     "nivel": 0
+    }
+   ]
+  },
+  {
+   "key": "lei-11079:15",
+   "ordem": 17,
+   "numero": "15",
+   "rotulo": "Art. 15",
+   "caminho": "Capítulo VI — DISPOSIÇÕES APLICÁVEIS À UNIÃO",
+   "incidencia": "media",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "Compete aos Ministérios e às Agências Reguladoras, nas suas respectivas áreas de competência, submeter o edital de licitação ao órgão gestor, proceder à licitação, acompanhar e fiscalizar os contratos de parceria público-privada.",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "Parágrafo único.",
+     "texto": "Os Ministérios e Agências Reguladoras encaminharão ao órgão a que se refere o caput do art. 14 desta Lei, com periodicidade semestral, relatórios circunstanciados acerca da execução dos contratos de parceria público-privada, na forma definida em regulamento.",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lei-11079:16",
+   "ordem": 18,
+   "numero": "16",
+   "rotulo": "Art. 16",
+   "caminho": "Capítulo VI — DISPOSIÇÕES APLICÁVEIS À UNIÃO",
+   "incidencia": "muito_alta",
+   "incidenciaNota": "Fundo Garantidor de Parcerias Público-Privadas (FGP): limite global de R$ 6.000.000.000,00 (seis bilhões de reais) — valor conferido no texto vigente do Planalto; natureza privada, patrimônio próprio separado do patrimônio dos cotistas (§ 1º); sem estatística numérica pública disponível.",
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "Ficam a União, seus fundos especiais, suas autarquias, suas fundações públicas e suas empresas estatais dependentes autorizadas a participar, no limite global de R$ 6.000.000.000,00 (seis bilhões de reais), em Fundo Garantidor de Parcerias Público-Privadas - FGP que terá por finalidade prestar garantia de pagamento de obrigações pecuniárias assumidas pelos parceiros públicos federais, distritais, estaduais ou municipais em virtude das parcerias de que trata esta Lei.",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "§ 1º",
+     "texto": "O FGP terá natureza privada e patrimônio próprio separado do patrimônio dos cotistas, e será sujeito a direitos e obrigações próprios.",
+     "nivel": 1
+    },
+    {
+     "id": "b3",
+     "rotulo": "§ 2º",
+     "texto": "O patrimônio do Fundo será formado pelo aporte de bens e direitos realizado pelos cotistas, por meio da integralização de cotas e pelos rendimentos obtidos com sua administração.",
+     "nivel": 1
+    },
+    {
+     "id": "b4",
+     "rotulo": "§ 3º",
+     "texto": "Os bens e direitos transferidos ao Fundo serão avaliados por empresa especializada, que deverá apresentar laudo fundamentado, com indicação dos critérios de avaliação adotados e instruído com os documentos relativos aos bens avaliados.",
+     "nivel": 1
+    },
+    {
+     "id": "b5",
+     "rotulo": "§ 4º",
+     "texto": "A integralização das cotas poderá ser realizada em dinheiro, títulos da dívida pública, bens imóveis dominicais, bens móveis, inclusive ações de sociedade de economia mista federal excedentes ao necessário para manutenção de seu controle pela União, ou outros direitos com valor patrimonial.",
+     "nivel": 1
+    },
+    {
+     "id": "b6",
+     "rotulo": "§ 5º",
+     "texto": "O FGP responderá por suas obrigações com os bens e direitos integrantes de seu patrimônio, não respondendo os cotistas por qualquer obrigação do Fundo, salvo pela integralização das cotas que subscreverem.",
+     "nivel": 1
+    },
+    {
+     "id": "b7",
+     "rotulo": "§ 6º",
+     "texto": "A integralização com bens a que se refere o § 4º deste artigo será feita independentemente de licitação, mediante prévia avaliação e autorização específica do Presidente da República, por proposta do Ministro da Fazenda.",
+     "nivel": 1
+    },
+    {
+     "id": "b8",
+     "rotulo": "§ 7º",
+     "texto": "O aporte de bens de uso especial ou de uso comum no FGP será condicionado a sua desafetação de forma individualizada.",
+     "nivel": 1
+    },
+    {
+     "id": "b9",
+     "rotulo": "§ 8º",
+     "texto": "A capitalização do FGP, quando realizada por meio de recursos orçamentários, dar-se-á por ação orçamentária específica para esta finalidade, no âmbito de Encargos Financeiros da União.",
+     "nivel": 1
+    },
+    {
+     "id": "b10",
+     "rotulo": "§ 9º",
+     "texto": "(VETADO).",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lei-11079:17",
+   "ordem": 19,
+   "numero": "17",
+   "rotulo": "Art. 17",
+   "caminho": "Capítulo VI — DISPOSIÇÕES APLICÁVEIS À UNIÃO",
+   "incidencia": "alta",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "O FGP será criado, administrado, gerido e representado judicial e extrajudicialmente por instituição financeira controlada, direta ou indiretamente, pela União, com observância das normas a que se refere o inciso XXII do art. 4º da Lei nº 4.595, de 31 de dezembro de 1964.",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "§ 1º",
+     "texto": "O estatuto e o regulamento do FGP serão aprovados em assembléia dos cotistas.",
+     "nivel": 1
+    },
+    {
+     "id": "b3",
+     "rotulo": "§ 2º",
+     "texto": "A representação da União na assembléia dos cotistas dar-se-á na forma do inciso V do art. 10 do Decreto-Lei nº 147, de 3 de fevereiro de 1967.",
+     "nivel": 1
+    },
+    {
+     "id": "b4",
+     "rotulo": "§ 3º",
+     "texto": "Caberá à instituição financeira deliberar sobre a gestão e alienação dos bens e direitos do FGP, zelando pela manutenção de sua rentabilidade e liquidez.",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lei-11079:18",
+   "ordem": 20,
+   "numero": "18",
+   "rotulo": "Art. 18",
+   "caminho": "Capítulo VI — DISPOSIÇÕES APLICÁVEIS À UNIÃO",
+   "incidencia": "alta",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "O estatuto e o regulamento do FGP devem deliberar sobre a política de concessão de garantias, inclusive no que se refere à relação entre ativos e passivos do Fundo.",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "§ 1º",
+     "texto": "A garantia será prestada na forma aprovada pela assembléia dos cotistas, nas seguintes modalidades:",
+     "nivel": 1
+    },
+    {
+     "id": "b3",
+     "rotulo": "I –",
+     "texto": "fiança, sem benefício de ordem para o fiador;",
+     "nivel": 1
+    },
+    {
+     "id": "b4",
+     "rotulo": "II –",
+     "texto": "penhor de bens móveis ou de direitos integrantes do patrimônio do FGP, sem transferência da posse da coisa empenhada antes da execução da garantia;",
+     "nivel": 1
+    },
+    {
+     "id": "b5",
+     "rotulo": "III –",
+     "texto": "hipoteca de bens imóveis do patrimônio do FGP;",
+     "nivel": 1
+    },
+    {
+     "id": "b6",
+     "rotulo": "IV –",
+     "texto": "alienação fiduciária, permanecendo a posse direta dos bens com o FGP ou com agente fiduciário por ele contratado antes da execução da garantia;",
+     "nivel": 1
+    },
+    {
+     "id": "b7",
+     "rotulo": "V –",
+     "texto": "outros contratos que produzam efeito de garantia, desde que não transfiram a titularidade ou posse direta dos bens ao parceiro privado antes da execução da garantia;",
+     "nivel": 1
+    },
+    {
+     "id": "b8",
+     "rotulo": "VI –",
+     "texto": "garantia, real ou pessoal, vinculada a um patrimônio de afetação constituído em decorrência da separação de bens e direitos pertencentes ao FGP.",
+     "nivel": 1
+    },
+    {
+     "id": "b9",
+     "rotulo": "§ 2º",
+     "texto": "O FGP poderá prestar contra-garantias a seguradoras, instituições financeiras e organismos internacionais que garantirem o cumprimento das obrigações pecuniárias dos cotistas em contratos de parceria público-privadas.",
+     "nivel": 1
+    },
+    {
+     "id": "b10",
+     "rotulo": "§ 3º",
+     "texto": "A quitação pelo parceiro público de cada parcela de débito garantido pelo FGP importará exoneração proporcional da garantia.",
+     "nivel": 1
+    },
+    {
+     "id": "b11",
+     "rotulo": "§ 4º",
+     "texto": "O FGP poderá prestar garantia mediante contratação de instrumentos disponíveis em mercado, inclusive para complementação das modalidades previstas no § 1º .",
+     "nivel": 1
+    },
+    {
+     "id": "b12",
+     "rotulo": "§ 5º",
+     "texto": "O parceiro privado poderá acionar o FGP nos casos de:",
+     "nivel": 1
+    },
+    {
+     "id": "b13",
+     "rotulo": "I –",
+     "texto": "crédito líquido e certo, constante de título exigível aceito e não pago pelo parceiro público após 15 (quinze) dias contados da data de vencimento; e",
+     "nivel": 1
+    },
+    {
+     "id": "b14",
+     "rotulo": "II –",
+     "texto": "débitos constantes de faturas emitidas e não aceitas pelo parceiro público após 45 (quarenta e cinco) dias contados da data de vencimento, desde que não tenha havido rejeição expressa por ato motivado.",
+     "nivel": 1
+    },
+    {
+     "id": "b15",
+     "rotulo": "§ 6º",
+     "texto": "A quitação de débito pelo FGP importará sua subrogação nos direitos do parceiro privado.",
+     "nivel": 1
+    },
+    {
+     "id": "b16",
+     "rotulo": "§ 7º",
+     "texto": "Em caso de inadimplemento, os bens e direitos do Fundo poderão ser objeto de constrição judicial e alienação para satisfazer as obrigações garantidas.",
+     "nivel": 1
+    },
+    {
+     "id": "b17",
+     "rotulo": "§ 8º",
+     "texto": "O FGP poderá usar parcela da cota da União para prestar garantia aos seus fundos especiais, às suas autarquias, às suas fundações públicas e às suas empresas estatais dependentes.",
+     "nivel": 1
+    },
+    {
+     "id": "b18",
+     "rotulo": "§ 9º",
+     "texto": "O FGP é obrigado a honrar faturas aceitas e não pagas pelo parceiro público.",
+     "nivel": 1
+    },
+    {
+     "id": "b19",
+     "rotulo": "§ 10º",
+     "texto": "O FGP é proibido de pagar faturas rejeitadas expressamente por ato motivado.",
+     "nivel": 1
+    },
+    {
+     "id": "b20",
+     "rotulo": "§ 11º",
+     "texto": "O parceiro público deverá informar o FGP sobre qualquer fatura rejeitada e sobre os motivos da rejeição no prazo de 40 (quarenta) dias contado da data de vencimento.",
+     "nivel": 1
+    },
+    {
+     "id": "b21",
+     "rotulo": "§ 12º",
+     "texto": "A ausência de aceite ou rejeição expressa de fatura por parte do parceiro público no prazo de 40 (quarenta) dias contado da data de vencimento implicará aceitação tácita.",
+     "nivel": 1
+    },
+    {
+     "id": "b22",
+     "rotulo": "§ 13º",
+     "texto": "O agente público que contribuir por ação ou omissão para a aceitação tácita de que trata o § 12 ou que rejeitar fatura sem motivação será responsabilizado pelos danos que causar, em conformidade com a legislação civil, administrativa e penal em vigor.",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lei-11079:19",
+   "ordem": 21,
+   "numero": "19",
+   "rotulo": "Art. 19",
+   "caminho": "Capítulo VI — DISPOSIÇÕES APLICÁVEIS À UNIÃO",
+   "incidencia": "media",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "O FGP não pagará rendimentos a seus cotistas, assegurando-se a qualquer deles o direito de requerer o resgate total ou parcial de suas cotas, correspondente ao patrimônio ainda não utilizado para a concessão de garantias, fazendo-se a liquidação com base na situação patrimonial do Fundo.",
+     "nivel": 0
+    }
+   ]
+  },
+  {
+   "key": "lei-11079:20",
+   "ordem": 22,
+   "numero": "20",
+   "rotulo": "Art. 20",
+   "caminho": "Capítulo VI — DISPOSIÇÕES APLICÁVEIS À UNIÃO",
+   "incidencia": "media",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "A dissolução do FGP, deliberada pela assembléia dos cotistas, ficará condicionada à prévia quitação da totalidade dos débitos garantidos ou liberação das garantias pelos credores.",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "Parágrafo único.",
+     "texto": "Dissolvido o FGP, o seu patrimônio será rateado entre os cotistas, com base na situação patrimonial à data da dissolução.",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lei-11079:21",
+   "ordem": 23,
+   "numero": "21",
+   "rotulo": "Art. 21",
+   "caminho": "Capítulo VI — DISPOSIÇÕES APLICÁVEIS À UNIÃO",
+   "incidencia": "media",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "É facultada a constituição de patrimônio de afetação que não se comunicará com o restante do patrimônio do FGP, ficando vinculado exclusivamente à garantia em virtude da qual tiver sido constituído, não podendo ser objeto de penhora, arresto, seqüestro, busca e apreensão ou qualquer ato de constrição judicial decorrente de outras obrigações do FGP.",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "Parágrafo único.",
+     "texto": "A constituição do patrimônio de afetação será feita por registro em Cartório de Registro de Títulos e Documentos ou, no caso de bem imóvel, no Cartório de Registro Imobiliário correspondente.",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lei-11079:22",
+   "ordem": 24,
+   "numero": "22",
+   "rotulo": "Art. 22",
+   "caminho": "Capítulo VI — DISPOSIÇÕES APLICÁVEIS À UNIÃO",
+   "incidencia": "alta",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "A União somente poderá contratar parceria público-privada quando a soma das despesas de caráter continuado derivadas do conjunto das parcerias já contratadas não tiver excedido, no ano anterior, a 1% (um por cento) da receita corrente líquida do exercício, e as despesas anuais dos contratos vigentes, nos 10 (dez) anos subseqüentes, não excedam a 1% (um por cento) da receita corrente líquida projetada para os respectivos exercícios.",
+     "nivel": 0
+    }
+   ]
+  },
+  {
+   "key": "lei-11079:23",
+   "ordem": 25,
+   "numero": "23",
+   "rotulo": "Art. 23",
+   "caminho": "Capítulo VII — DISPOSIÇÕES FINAIS",
+   "incidencia": "media",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "Fica a União autorizada a conceder incentivo, nos termos do Programa de Incentivo à Implementação de Projetos de Interesse Social – PIPS, instituído pela Lei nº 10.735, de 11 de setembro de 2003, às aplicações em fundos de investimento, criados por instituições financeiras, em direitos creditórios provenientes dos contratos de parcerias público-privadas.",
+     "nivel": 0
+    }
+   ]
+  },
+  {
+   "key": "lei-11079:24",
+   "ordem": 26,
+   "numero": "24",
+   "rotulo": "Art. 24",
+   "caminho": "Capítulo VII — DISPOSIÇÕES FINAIS",
+   "incidencia": "media",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "O Conselho Monetário Nacional estabelecerá, na forma da legislação pertinente, as diretrizes para a concessão de crédito destinado ao financiamento de contratos de parcerias público-privadas, bem como para participação de entidades fechadas de previdência complementar.",
+     "nivel": 0
+    }
+   ]
+  },
+  {
+   "key": "lei-11079:25",
+   "ordem": 27,
+   "numero": "25",
+   "rotulo": "Art. 25",
+   "caminho": "Capítulo VII — DISPOSIÇÕES FINAIS",
+   "incidencia": "media",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "A Secretaria do Tesouro Nacional editará, na forma da legislação pertinente, normas gerais relativas à consolidação das contas públicas aplicáveis aos contratos de parceria público-privada.",
+     "nivel": 0
+    }
+   ]
+  },
+  {
+   "key": "lei-11079:26",
+   "ordem": 28,
+   "numero": "26",
+   "rotulo": "Art. 26",
+   "caminho": "Capítulo VII — DISPOSIÇÕES FINAIS",
+   "incidencia": "media",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "O inciso I do § 1º do art. 56 da Lei nº 8.666, de 21 de junho de 1993, passa a vigorar com a seguinte redação:",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": null,
+     "texto": "\"Art. 56 ....................................................................................",
+     "nivel": 0
+    },
+    {
+     "id": "b3",
+     "rotulo": "§ 1º",
+     "texto": "........................................................................................",
+     "nivel": 1
+    },
+    {
+     "id": "b4",
+     "rotulo": "I –",
+     "texto": "caução em dinheiro ou em títulos da dívida pública, devendo estes ter sido emitidos sob a forma escritural, mediante registro em sistema centralizado de liquidação e de custódia autorizado pelo Banco Central do Brasil e avaliados pelos seus valores econômicos, conforme definido pelo Ministério da Fazenda;",
+     "nivel": 1
+    },
+    {
+     "id": "b5",
+     "rotulo": null,
+     "texto": ".........................................................................................\" (NR)",
+     "nivel": 0
+    }
+   ]
+  },
+  {
+   "key": "lei-11079:27",
+   "ordem": 29,
+   "numero": "27",
+   "rotulo": "Art. 27",
+   "caminho": "Capítulo VII — DISPOSIÇÕES FINAIS",
+   "incidencia": "alta",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "As operações de crédito efetuadas por empresas públicas ou sociedades de economia mista controladas pela União não poderão exceder a 70% (setenta por cento) do total das fontes de recursos financeiros da sociedade de propósito específico, sendo que para as áreas das regiões Norte, Nordeste e Centro-Oeste, onde o Índice de Desenvolvimento Humano – IDH seja inferior à média nacional, essa participação não poderá exceder a 80% (oitenta por cento).",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "§ 1º",
+     "texto": "Não poderão exceder a 80% (oitenta por cento) do total das fontes de recursos financeiros da sociedade de propósito específico ou 90% (noventa por cento) nas áreas das regiões Norte, Nordeste e Centro-Oeste, onde o Índice de Desenvolvimento Humano – IDH seja inferior à média nacional, as operações de crédito ou contribuições de capital realizadas cumulativamente por:",
+     "nivel": 1
+    },
+    {
+     "id": "b3",
+     "rotulo": "I –",
+     "texto": "entidades fechadas de previdência complementar;",
+     "nivel": 1
+    },
+    {
+     "id": "b4",
+     "rotulo": "II –",
+     "texto": "empresas públicas ou sociedades de economia mista controladas pela União.",
+     "nivel": 1
+    },
+    {
+     "id": "b5",
+     "rotulo": "§ 2º",
+     "texto": "Para fins do disposto neste artigo, entende-se por fonte de recursos financeiros as operações de crédito e contribuições de capital à sociedade de propósito específico.",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lei-11079:28",
+   "ordem": 30,
+   "numero": "28",
+   "rotulo": "Art. 28",
+   "caminho": "Capítulo VII — DISPOSIÇÕES FINAIS",
+   "incidencia": "alta",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "A União não poderá conceder garantia ou realizar transferência voluntária aos Estados, Distrito Federal e Municípios se a soma das despesas de caráter continuado derivadas do conjunto das parcerias já contratadas por esses entes tiver excedido, no ano anterior, a 5% (cinco por cento) da receita corrente líquida do exercício ou se as despesas anuais dos contratos vigentes nos 10 (dez) anos subsequentes excederem a 5% (cinco por cento) da receita corrente líquida projetada para os respectivos exercícios.",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "§ 1º",
+     "texto": "Os Estados, o Distrito Federal e os Municípios que contratarem empreendimentos por intermédio de parcerias público-privadas deverão encaminhar ao Senado Federal e à Secretaria do Tesouro Nacional, previamente à contratação, as informações necessárias para cumprimento do previsto no caput deste artigo.",
+     "nivel": 1
+    },
+    {
+     "id": "b3",
+     "rotulo": "§ 2º",
+     "texto": "Na aplicação do limite previsto no caput deste artigo, serão computadas as despesas derivadas de contratos de parceria celebrados pela administração pública direta, autarquias, fundações públicas, empresas públicas, sociedades de economia mista e demais entidades controladas, direta ou indiretamente, pelo respectivo ente, excluídas as empresas estatais não dependentes.",
+     "nivel": 1
+    },
+    {
+     "id": "b4",
+     "rotulo": "§ 3º",
+     "texto": "(VETADO)",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lei-11079:29",
+   "ordem": 31,
+   "numero": "29",
+   "rotulo": "Art. 29",
+   "caminho": "Capítulo VII — DISPOSIÇÕES FINAIS",
+   "incidencia": "media",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "Serão aplicáveis, no que couber, as penalidades previstas no Decreto-Lei nº 2.848, de 7 de dezembro de 1940 - Código Penal, na Lei nº 8.429, de 2 de junho de 1992 – Lei de Improbidade Administrativa, na Lei nº 10.028, de 19 de outubro de 2000 - Lei dos Crimes Fiscais, no Decreto-Lei nº 201, de 27 de fevereiro de 1967, e na Lei nº 1.079, de 10 de abril de 1950, sem prejuízo das penalidades financeiras previstas contratualmente.",
+     "nivel": 0
+    }
+   ]
+  },
+  {
+   "key": "lei-11079:30",
+   "ordem": 32,
+   "numero": "30",
+   "rotulo": "Art. 30",
+   "caminho": "Capítulo VII — DISPOSIÇÕES FINAIS",
+   "incidencia": "media",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "Esta Lei entra em vigor na data de sua publicação.",
+     "nivel": 0
+    }
+   ]
+  }
+ ]
+}

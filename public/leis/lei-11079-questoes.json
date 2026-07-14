@@ -1,0 +1,202 @@
+[
+  {
+    "id": "l11079-q1",
+    "artigoKey": "lei-11079:1",
+    "enunciado": "Esta Lei institui normas gerais para licitação e contratação de parceria público-privada no âmbito dos Poderes da União, dos Estados, do Distrito Federal e dos Municípios.",
+    "gabarito": true,
+    "comentario": "Literal do art. 1º, caput.",
+    "tipo": "literal"
+  },
+  {
+    "id": "l11079-q2",
+    "artigoKey": "lei-11079:2",
+    "enunciado": "Parceria público-privada é o contrato administrativo de concessão, na modalidade patrocinada ou administrativa.",
+    "gabarito": true,
+    "comentario": "Literal do art. 2º, caput.",
+    "tipo": "literal"
+  },
+  {
+    "id": "l11079-q3",
+    "artigoKey": "lei-11079:2",
+    "enunciado": "Concessão administrativa é o contrato de prestação de serviços de que a Administração Pública seja a usuária direta ou indireta, ainda que envolva execução de obra ou fornecimento e instalação de bens.",
+    "gabarito": true,
+    "comentario": "Literal do art. 2º, § 2º.",
+    "tipo": "literal"
+  },
+  {
+    "id": "l11079-q4",
+    "artigoKey": "lei-11079:2",
+    "enunciado": "Não constitui parceria público-privada a concessão de serviços públicos que envolva, adicionalmente à tarifa cobrada dos usuários, contraprestação pecuniária do parceiro público ao parceiro privado.",
+    "gabarito": false,
+    "comentario": "Essa é exatamente a definição de concessão PATROCINADA (art. 2º, § 1º), que É modalidade de PPP. A concessão comum que NÃO é PPP (§ 3º) é a que NÃO envolve contraprestação pecuniária do parceiro público.",
+    "tipo": "pegadinha"
+  },
+  {
+    "id": "l11079-q5",
+    "artigoKey": "lei-11079:2",
+    "enunciado": "É vedada a celebração de contrato de parceria público-privada cujo valor do contrato seja inferior a R$ 10.000.000,00 (dez milhões de reais).",
+    "gabarito": true,
+    "comentario": "Literal do art. 2º, § 4º, inciso I.",
+    "tipo": "literal"
+  },
+  {
+    "id": "l11079-q6",
+    "artigoKey": "lei-11079:2",
+    "enunciado": "É vedada a celebração de parceria público-privada cujo período de prestação do serviço seja inferior a 10 (dez) anos.",
+    "gabarito": false,
+    "comentario": "Art. 2º, § 4º, inciso II: o período mínimo de prestação do serviço é de 5 (cinco) anos, não 10.",
+    "tipo": "pegadinha"
+  },
+  {
+    "id": "l11079-q7",
+    "artigoKey": "lei-11079:2",
+    "enunciado": "É vedada a celebração de parceria público-privada que tenha como objeto único o fornecimento de mão de obra, o fornecimento e instalação de equipamentos ou a execução de obra pública.",
+    "gabarito": true,
+    "comentario": "Literal do art. 2º, § 4º, inciso III.",
+    "tipo": "literal"
+  },
+  {
+    "id": "l11079-q8",
+    "artigoKey": "lei-11079:3",
+    "enunciado": "As concessões comuns continuam regidas pela Lei nº 8.987/95 e pelas leis que lhe são correlatas, não se lhes aplicando o disposto na Lei das PPPs.",
+    "gabarito": true,
+    "comentario": "Literal do art. 3º, § 2º.",
+    "tipo": "literal"
+  },
+  {
+    "id": "l11079-q9",
+    "artigoKey": "lei-11079:4",
+    "enunciado": "Na contratação de parceria público-privada será observada, entre outras diretrizes, a indelegabilidade das funções de regulação, jurisdicional, do exercício do poder de polícia e de outras atividades exclusivas do Estado.",
+    "gabarito": true,
+    "comentario": "Literal do art. 4º, inciso III.",
+    "tipo": "literal"
+  },
+  {
+    "id": "l11079-q10",
+    "artigoKey": "lei-11079:5",
+    "enunciado": "O contrato de PPP deverá prever prazo de vigência compatível com a amortização dos investimentos realizados, não inferior a 5 (cinco) nem superior a 35 (trinta e cinco) anos, incluindo eventual prorrogação.",
+    "gabarito": true,
+    "comentario": "Literal do art. 5º, inciso I.",
+    "tipo": "literal"
+  },
+  {
+    "id": "l11079-q11",
+    "artigoKey": "lei-11079:6",
+    "enunciado": "A contraprestação da Administração Pública nos contratos de PPP poderá ser feita, entre outras formas, por ordem bancária, cessão de créditos não tributários, ou outorga de direitos sobre bens públicos dominicais.",
+    "gabarito": true,
+    "comentario": "Literal do art. 6º, incisos I, II e IV.",
+    "tipo": "literal"
+  },
+  {
+    "id": "l11079-q12",
+    "artigoKey": "lei-11079:7",
+    "enunciado": "A contraprestação da Administração Pública será obrigatoriamente precedida da disponibilização do serviço objeto do contrato de PPP.",
+    "gabarito": true,
+    "comentario": "Literal do art. 7º, caput.",
+    "tipo": "literal"
+  },
+  {
+    "id": "l11079-q13",
+    "artigoKey": "lei-11079:7",
+    "enunciado": "É vedado à Administração Pública, em qualquer hipótese, efetuar o pagamento da contraprestação relativa a parcela apenas fruível do serviço objeto da PPP.",
+    "gabarito": false,
+    "comentario": "Art. 7º, § 1º: é FACULTADO à Administração, nos termos do contrato, efetuar esse pagamento.",
+    "tipo": "pegadinha"
+  },
+  {
+    "id": "l11079-q14",
+    "artigoKey": "lei-11079:8",
+    "enunciado": "As obrigações pecuniárias contraídas pela Administração Pública em contrato de PPP poderão ser garantidas, entre outras formas, mediante vinculação de receitas, instituição de fundos especiais previstos em lei, ou contratação de seguro-garantia com companhias seguradoras que não sejam controladas pelo Poder Público.",
+    "gabarito": true,
+    "comentario": "Literal do art. 8º, incisos I, II e III.",
+    "tipo": "literal"
+  },
+  {
+    "id": "l11079-q15",
+    "artigoKey": "lei-11079:9",
+    "enunciado": "Antes da celebração do contrato de PPP, deverá ser constituída sociedade de propósito específico, incumbida de implantar e gerir o objeto da parceria.",
+    "gabarito": true,
+    "comentario": "Literal do art. 9º, caput.",
+    "tipo": "literal"
+  },
+  {
+    "id": "l11079-q16",
+    "artigoKey": "lei-11079:9",
+    "enunciado": "É permitido à Administração Pública deter a maioria do capital votante da sociedade de propósito específico constituída para a execução do contrato de PPP.",
+    "gabarito": false,
+    "comentario": "Art. 9º, § 4º: é vedado à Administração Pública ser titular da maioria do capital votante da SPE, salvo a exceção do § 5º (aquisição por instituição financeira controlada pelo Poder Público em caso de inadimplemento de financiamento).",
+    "tipo": "pegadinha"
+  },
+  {
+    "id": "l11079-q17",
+    "artigoKey": "lei-11079:10",
+    "enunciado": "A contratação de parceria público-privada será precedida de licitação na modalidade concorrência ou diálogo competitivo.",
+    "gabarito": true,
+    "comentario": "Literal do art. 10, caput.",
+    "tipo": "literal"
+  },
+  {
+    "id": "l11079-q18",
+    "artigoKey": "lei-11079:10",
+    "enunciado": "As concessões patrocinadas em que mais de 70% (setenta por cento) da remuneração do parceiro privado for paga pela Administração Pública dependerão de autorização legislativa específica.",
+    "gabarito": true,
+    "comentario": "Literal do art. 10, § 3º.",
+    "tipo": "literal"
+  },
+  {
+    "id": "l11079-q19",
+    "artigoKey": "lei-11079:10",
+    "enunciado": "A abertura do processo licitatório de PPP dispensa a submissão da minuta de edital e de contrato à consulta pública.",
+    "gabarito": false,
+    "comentario": "Art. 10, inciso VI: a submissão da minuta de edital e de contrato à consulta pública é uma das condições exigidas para a abertura do processo licitatório.",
+    "tipo": "pegadinha"
+  },
+  {
+    "id": "l11079-q20",
+    "artigoKey": "lei-11079:16",
+    "enunciado": "Fica a União autorizada a participar do Fundo Garantidor de Parcerias Público-Privadas – FGP, no limite global de R$ 6.000.000.000,00 (seis bilhões de reais).",
+    "gabarito": true,
+    "comentario": "Literal do art. 16, caput.",
+    "tipo": "literal"
+  },
+  {
+    "id": "l11079-q21",
+    "artigoKey": "lei-11079:16",
+    "enunciado": "O Fundo Garantidor de Parcerias Público-Privadas (FGP) tem natureza pública, integrando o patrimônio da União.",
+    "gabarito": false,
+    "comentario": "Art. 16, § 1º: o FGP terá natureza PRIVADA e patrimônio próprio SEPARADO do patrimônio dos cotistas.",
+    "tipo": "pegadinha"
+  },
+  {
+    "id": "l11079-q22",
+    "artigoKey": "lei-11079:17",
+    "enunciado": "O FGP será criado, administrado, gerido e representado judicial e extrajudicialmente por instituição financeira controlada, direta ou indiretamente, pela União.",
+    "gabarito": true,
+    "comentario": "Literal do art. 17, caput.",
+    "tipo": "literal"
+  },
+  {
+    "id": "l11079-q23",
+    "artigoKey": "lei-11079:22",
+    "enunciado": "A União somente poderá contratar parceria público-privada quando a soma das despesas de caráter continuado derivadas do conjunto das parcerias já contratadas não tiver excedido, no ano anterior, a 1% (um por cento) da receita corrente líquida do exercício.",
+    "gabarito": true,
+    "comentario": "Literal do art. 22.",
+    "tipo": "literal"
+  },
+  {
+    "id": "l11079-q24",
+    "artigoKey": "lei-11079:28",
+    "enunciado": "A União não poderá conceder garantia ou realizar transferência voluntária aos Estados, Distrito Federal e Municípios se a soma das despesas de caráter continuado derivadas do conjunto das parcerias já contratadas por esses entes tiver excedido, no ano anterior, a 5% (cinco por cento) da receita corrente líquida do exercício.",
+    "gabarito": true,
+    "comentario": "Literal do art. 28, caput.",
+    "tipo": "literal"
+  },
+  {
+    "id": "l11079-q25",
+    "artigoKey": "lei-11079:28",
+    "enunciado": "O limite de comprometimento da receita corrente líquida para a própria União contratar parceria público-privada (art. 22) é o mesmo limite aplicável para a União conceder garantia ou transferência voluntária a Estados, Distrito Federal e Municípios (art. 28).",
+    "gabarito": false,
+    "comentario": "São limites diferentes: 1% da receita corrente líquida para a União contratar PPP em nome próprio (art. 22) e 5% para conceder garantia ou transferência voluntária a entes subnacionais (art. 28).",
+    "tipo": "pegadinha"
+  }
+]

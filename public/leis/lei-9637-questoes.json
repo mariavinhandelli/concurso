@@ -1,0 +1,162 @@
+[
+  {
+    "id": "l9637-q1",
+    "artigoKey": "lei-9637:1",
+    "enunciado": "O Poder Executivo poderá qualificar como organizações sociais pessoas jurídicas de direito privado, sem fins lucrativos, cujas atividades sejam dirigidas ao ensino, à pesquisa científica, ao desenvolvimento tecnológico, à proteção e preservação do meio ambiente, à cultura e à saúde.",
+    "gabarito": true,
+    "comentario": "Literal do art. 1º.",
+    "tipo": "literal"
+  },
+  {
+    "id": "l9637-q2",
+    "artigoKey": "lei-9637:1",
+    "enunciado": "A qualificação de uma entidade como organização social é ato vinculado do Poder Executivo, bastando o cumprimento dos requisitos legais para que a qualificação seja concedida.",
+    "gabarito": false,
+    "comentario": "Art. 1º usa \"poderá qualificar\": é ato DISCRICIONÁRIO do Poder Executivo. O ato vinculado é o da OSCIP (Lei 9.790/99, art. 1º, § 2º) — pegadinha clássica de comparação OS x OSCIP.",
+    "tipo": "pegadinha"
+  },
+  {
+    "id": "l9637-q3",
+    "artigoKey": "lei-9637:2",
+    "enunciado": "É requisito para a qualificação como organização social a previsão estatutária de conselho de administração e diretoria como órgãos de deliberação superior e de direção da entidade.",
+    "gabarito": true,
+    "comentario": "Literal do art. 2º, inciso I, alínea \"c\".",
+    "tipo": "literal"
+  },
+  {
+    "id": "l9637-q4",
+    "artigoKey": "lei-9637:2",
+    "enunciado": "A qualificação como organização social depende apenas da aprovação do Ministro de Estado da Administração Federal e Reforma do Estado, sendo dispensada a manifestação do Ministro ou titular do órgão supervisor da área de atividade correspondente ao objeto social da entidade.",
+    "gabarito": false,
+    "comentario": "Art. 2º, inciso II: exige aprovação CUMULATIVA de ambos — do Ministro/titular do órgão supervisor da área E do Ministro da Administração Federal e Reforma do Estado.",
+    "tipo": "pegadinha"
+  },
+  {
+    "id": "l9637-q5",
+    "artigoKey": "lei-9637:3",
+    "enunciado": "O conselho de administração da organização social deve ser composto, entre outros, por 20 a 40% de membros natos representantes do Poder Público e por 20 a 30% de membros natos representantes de entidades da sociedade civil.",
+    "gabarito": true,
+    "comentario": "Literal do art. 3º, inciso I, alíneas \"a\" e \"b\".",
+    "tipo": "literal"
+  },
+  {
+    "id": "l9637-q6",
+    "artigoKey": "lei-9637:3",
+    "enunciado": "Os representantes do Poder Público e das entidades da sociedade civil, somados, devem corresponder a até 50% da composição do conselho de administração da organização social.",
+    "gabarito": false,
+    "comentario": "Art. 3º, inciso III: esses representantes devem corresponder a MAIS de 50% do Conselho, não \"até 50%\".",
+    "tipo": "pegadinha"
+  },
+  {
+    "id": "l9637-q7",
+    "artigoKey": "lei-9637:3",
+    "enunciado": "Os membros eleitos ou indicados para compor o conselho de administração da organização social têm mandato de quatro anos, admitida uma recondução.",
+    "gabarito": true,
+    "comentario": "Literal do art. 3º, inciso II.",
+    "tipo": "literal"
+  },
+  {
+    "id": "l9637-q8",
+    "artigoKey": "lei-9637:3",
+    "enunciado": "Os conselheiros da organização social podem receber remuneração regular pelos serviços que prestarem à entidade nessa condição, além da ajuda de custo por reunião.",
+    "gabarito": false,
+    "comentario": "Art. 3º, inciso VII: os conselheiros NÃO devem receber remuneração pelos serviços prestados nessa condição, ressalvada apenas a ajuda de custo por reunião.",
+    "tipo": "pegadinha"
+  },
+  {
+    "id": "l9637-q9",
+    "artigoKey": "lei-9637:4",
+    "enunciado": "É atribuição privativa do Conselho de Administração da organização social aprovar a proposta de contrato de gestão da entidade.",
+    "gabarito": true,
+    "comentario": "Literal do art. 4º, inciso II.",
+    "tipo": "literal"
+  },
+  {
+    "id": "l9637-q10",
+    "artigoKey": "lei-9637:5",
+    "enunciado": "Contrato de gestão é o instrumento firmado entre o Poder Público e a entidade qualificada como organização social, com vistas à formação de parceria para fomento e execução de atividades relativas às áreas do art. 1º da Lei 9.637/98.",
+    "gabarito": true,
+    "comentario": "Literal do art. 5º.",
+    "tipo": "literal"
+  },
+  {
+    "id": "l9637-q11",
+    "artigoKey": "lei-9637:5",
+    "enunciado": "O termo de parceria é o instrumento previsto na Lei nº 9.637/98 para formalizar a relação entre o Poder Público e a organização social.",
+    "gabarito": false,
+    "comentario": "O instrumento próprio da OS é o contrato de gestão (art. 5º). Termo de parceria é da OSCIP (Lei 9.790/99, art. 9º) — pegadinha clássica de comparação OS x OSCIP.",
+    "tipo": "pegadinha"
+  },
+  {
+    "id": "l9637-q12",
+    "artigoKey": "lei-9637:6",
+    "enunciado": "O contrato de gestão, após aprovação pelo Conselho de Administração da entidade, deve ser submetido ao Ministro de Estado ou autoridade supervisora da área correspondente à atividade fomentada.",
+    "gabarito": true,
+    "comentario": "Literal do art. 6º, parágrafo único.",
+    "tipo": "literal"
+  },
+  {
+    "id": "l9637-q13",
+    "artigoKey": "lei-9637:7",
+    "enunciado": "Na elaboração do contrato de gestão devem ser observados os princípios da legalidade, impessoalidade, moralidade, publicidade e economicidade, além da especificação do programa de trabalho, das metas e dos prazos de execução, com critérios objetivos de avaliação de desempenho mediante indicadores de qualidade e produtividade.",
+    "gabarito": true,
+    "comentario": "Literal do art. 7º, caput e inciso I.",
+    "tipo": "literal"
+  },
+  {
+    "id": "l9637-q14",
+    "artigoKey": "lei-9637:8",
+    "enunciado": "A execução do contrato de gestão celebrado por organização social será fiscalizada pelo órgão ou entidade supervisora da área de atuação correspondente à atividade fomentada.",
+    "gabarito": true,
+    "comentario": "Literal do art. 8º, caput.",
+    "tipo": "literal"
+  },
+  {
+    "id": "l9637-q15",
+    "artigoKey": "lei-9637:9",
+    "enunciado": "Os responsáveis pela fiscalização da execução do contrato de gestão, ao tomarem conhecimento de irregularidade na utilização de recursos públicos por organização social, darão ciência ao Tribunal de Contas do ente federativo correspondente à origem dos recursos.",
+    "gabarito": false,
+    "comentario": "Art. 9º: a lei fala especificamente em dar ciência ao Tribunal de Contas da UNIÃO (não \"do ente federativo correspondente\"), sob pena de responsabilidade solidária.",
+    "tipo": "pegadinha"
+  },
+  {
+    "id": "l9637-q16",
+    "artigoKey": "lei-9637:11",
+    "enunciado": "As entidades qualificadas como organizações sociais são declaradas como entidades de interesse social e utilidade pública, para todos os efeitos legais.",
+    "gabarito": true,
+    "comentario": "Literal do art. 11.",
+    "tipo": "literal"
+  },
+  {
+    "id": "l9637-q17",
+    "artigoKey": "lei-9637:12",
+    "enunciado": "Às organizações sociais poderão ser destinados recursos orçamentários e bens públicos necessários ao cumprimento do contrato de gestão, sendo os bens destinados mediante permissão de uso, dispensada licitação.",
+    "gabarito": true,
+    "comentario": "Literal do art. 12, caput e § 3º.",
+    "tipo": "literal"
+  },
+  {
+    "id": "l9637-q18",
+    "artigoKey": "lei-9637:14",
+    "enunciado": "É permitido incorporar aos vencimentos ou à remuneração de origem do servidor público cedido, com ônus para a origem, qualquer vantagem pecuniária que vier a ser paga pela organização social.",
+    "gabarito": false,
+    "comentario": "Art. 14, § 1º: veda expressamente essa incorporação — a vantagem paga pela OS não se incorpora aos vencimentos de origem do servidor cedido.",
+    "tipo": "pegadinha"
+  },
+  {
+    "id": "l9637-q19",
+    "artigoKey": "lei-9637:16",
+    "enunciado": "A desqualificação da organização social será precedida de processo administrativo, assegurado o direito de ampla defesa, respondendo os dirigentes individual e solidariamente pelos danos ou prejuízos decorrentes de sua ação ou omissão.",
+    "gabarito": true,
+    "comentario": "Literal do art. 16, § 1º.",
+    "tipo": "literal"
+  },
+  {
+    "id": "l9637-q20",
+    "artigoKey": "lei-9637:16",
+    "enunciado": "A desqualificação da organização social importa a reversão dos bens permitidos e dos valores entregues à sua utilização, sem prejuízo de outras sanções cabíveis.",
+    "gabarito": true,
+    "comentario": "Literal do art. 16, § 2º.",
+    "tipo": "literal"
+  }
+]

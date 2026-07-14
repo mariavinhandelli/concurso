@@ -1,0 +1,242 @@
+[
+  {
+    "id": "lindb-q1",
+    "artigoKey": "lindb:1",
+    "enunciado": "Salvo disposição contrária, a lei brasileira começa a vigorar em todo o país quarenta e cinco dias depois de oficialmente publicada.",
+    "gabarito": true,
+    "comentario": "Literal do art. 1º, caput.",
+    "tipo": "literal"
+  },
+  {
+    "id": "lindb-q2",
+    "artigoKey": "lindb:1",
+    "enunciado": "Se, antes de entrar a lei em vigor, ocorrer nova publicação de seu texto destinada a correção, essa correção é considerada lei nova, aplicando-se o mesmo regime da correção feita após a lei já estar vigente.",
+    "gabarito": false,
+    "comentario": "Art. 1º, §§ 3º e 4º: se a correção ocorrer ANTES da entrada em vigor, apenas reinicia a contagem do prazo de vacatio legis (§ 3º); só a correção feita a texto de lei JÁ EM VIGOR é que se considera lei nova (§ 4º). Os dois momentos são frequentemente trocados.",
+    "tipo": "pegadinha"
+  },
+  {
+    "id": "lindb-q3",
+    "artigoKey": "lindb:1",
+    "enunciado": "Nos Estados estrangeiros, a obrigatoriedade da lei brasileira, quando admitida, inicia-se três meses depois de oficialmente publicada.",
+    "gabarito": true,
+    "comentario": "Literal do art. 1º, § 1º.",
+    "tipo": "literal"
+  },
+  {
+    "id": "lindb-q4",
+    "artigoKey": "lindb:2",
+    "enunciado": "A lei posterior revoga a anterior quando expressamente o declare, quando seja com ela incompatível, ou quando regule inteiramente a matéria de que tratava a lei anterior.",
+    "gabarito": true,
+    "comentario": "Literal do art. 2º, § 1º. As três hipóteses são alternativas — basta uma delas.",
+    "tipo": "literal"
+  },
+  {
+    "id": "lindb-q5",
+    "artigoKey": "lindb:2",
+    "enunciado": "Segundo a LINDB, a lei revogada se restaura automaticamente quando a lei revogadora perder a vigência, ainda que não haja disposição expressa nesse sentido.",
+    "gabarito": false,
+    "comentario": "Art. 2º, § 3º: a repristinação NÃO é automática — a lei revogada só se restaura se houver disposição expressa em contrário. Pegadinha mais clássica da LINDB.",
+    "tipo": "pegadinha"
+  },
+  {
+    "id": "lindb-q6",
+    "artigoKey": "lindb:2",
+    "enunciado": "A lei nova que estabeleça disposições gerais ou especiais a par das já existentes revoga tacitamente a lei anterior, ainda que com ela seja compatível.",
+    "gabarito": false,
+    "comentario": "Art. 2º, § 2º: a lei nova que estabelece disposições gerais ou especiais a par das já existentes NÃO revoga nem modifica a lei anterior.",
+    "tipo": "pegadinha"
+  },
+  {
+    "id": "lindb-q7",
+    "artigoKey": "lindb:3",
+    "enunciado": "Ninguém se escusa de cumprir a lei, alegando que não a conhece.",
+    "gabarito": true,
+    "comentario": "Literal do art. 3º.",
+    "tipo": "literal"
+  },
+  {
+    "id": "lindb-q8",
+    "artigoKey": "lindb:4",
+    "enunciado": "Quando a lei for omissa, o juiz decidirá o caso de acordo com a analogia, os costumes e os princípios gerais de direito.",
+    "gabarito": true,
+    "comentario": "Literal do art. 4º.",
+    "tipo": "literal"
+  },
+  {
+    "id": "lindb-q9",
+    "artigoKey": "lindb:4",
+    "enunciado": "O rol de mecanismos de integração previsto no art. 4º da LINDB inclui a equidade, além da analogia, dos costumes e dos princípios gerais de direito.",
+    "gabarito": false,
+    "comentario": "O art. 4º da LINDB lista apenas analogia, costumes e princípios gerais de direito — a equidade não integra esse rol.",
+    "tipo": "pegadinha"
+  },
+  {
+    "id": "lindb-q10",
+    "artigoKey": "lindb:5",
+    "enunciado": "Na aplicação da lei, o juiz atenderá aos fins sociais a que ela se dirige e às exigências do bem comum.",
+    "gabarito": true,
+    "comentario": "Literal do art. 5º.",
+    "tipo": "literal"
+  },
+  {
+    "id": "lindb-q11",
+    "artigoKey": "lindb:6",
+    "enunciado": "A lei em vigor terá efeito imediato e geral, respeitados o ato jurídico perfeito, o direito adquirido e a coisa julgada.",
+    "gabarito": true,
+    "comentario": "Literal do art. 6º, caput.",
+    "tipo": "literal"
+  },
+  {
+    "id": "lindb-q12",
+    "artigoKey": "lindb:6",
+    "enunciado": "Reputa-se ato jurídico perfeito o já consumado segundo a lei vigente ao tempo em que se efetuou.",
+    "gabarito": true,
+    "comentario": "Literal do art. 6º, § 1º.",
+    "tipo": "literal"
+  },
+  {
+    "id": "lindb-q13",
+    "artigoKey": "lindb:6",
+    "enunciado": "Chama-se coisa julgada a decisão judicial da qual ainda caiba recurso, mas que já tenha sido proferida em primeira instância.",
+    "gabarito": false,
+    "comentario": "Art. 6º, § 3º: coisa julgada é a decisão judicial de que JÁ NÃO caiba recurso — o oposto do que a assertiva afirma.",
+    "tipo": "pegadinha"
+  },
+  {
+    "id": "lindb-q14",
+    "artigoKey": "lindb:7",
+    "enunciado": "A lei do país em que domiciliada a pessoa determina as regras sobre o começo e o fim da personalidade, o nome, a capacidade e os direitos de família.",
+    "gabarito": true,
+    "comentario": "Literal do art. 7º, caput.",
+    "tipo": "literal"
+  },
+  {
+    "id": "lindb-q15",
+    "artigoKey": "lindb:7",
+    "enunciado": "Ainda que o casamento seja realizado no Brasil entre estrangeiros, aplica-se sempre a lei nacional de ambos os nubentes quanto aos impedimentos dirimentes e às formalidades da celebração.",
+    "gabarito": false,
+    "comentario": "Art. 7º, § 1º: realizando-se o casamento no Brasil, aplica-se a lei BRASILEIRA quanto aos impedimentos dirimentes e às formalidades da celebração, não a lei nacional dos nubentes.",
+    "tipo": "pegadinha"
+  },
+  {
+    "id": "lindb-q16",
+    "artigoKey": "lindb:9",
+    "enunciado": "Para qualificar e reger as obrigações, aplicar-se-á a lei do país em que se constituírem.",
+    "gabarito": true,
+    "comentario": "Literal do art. 9º, caput.",
+    "tipo": "literal"
+  },
+  {
+    "id": "lindb-q17",
+    "artigoKey": "lindb:9",
+    "enunciado": "A obrigação resultante do contrato reputa-se constituída no lugar em que residir o proponente.",
+    "gabarito": true,
+    "comentario": "Literal do art. 9º, § 2º.",
+    "tipo": "literal"
+  },
+  {
+    "id": "lindb-q18",
+    "artigoKey": "lindb:10",
+    "enunciado": "A sucessão por morte obedece sempre à lei brasileira quando o falecido for domiciliado no exterior e possuir bens situados no Brasil.",
+    "gabarito": false,
+    "comentario": "Art. 10, caput: a sucessão obedece à lei do país em que domiciliado o defunto, qualquer que seja a natureza e a situação dos bens — a lei brasileira só se aplica na exceção do § 1º (em benefício de cônjuge/filhos brasileiros, quando mais favorável), não \"sempre\".",
+    "tipo": "pegadinha"
+  },
+  {
+    "id": "lindb-q19",
+    "artigoKey": "lindb:17",
+    "enunciado": "As leis, atos e sentenças de outro país, bem como quaisquer declarações de vontade, não terão eficácia no Brasil quando ofenderem a soberania nacional, a ordem pública e os bons costumes.",
+    "gabarito": true,
+    "comentario": "Literal do art. 17.",
+    "tipo": "literal"
+  },
+  {
+    "id": "lindb-q20",
+    "artigoKey": "lindb:20",
+    "enunciado": "Nas esferas administrativa, controladora e judicial, não se decidirá com base em valores jurídicos abstratos sem que sejam consideradas as consequências práticas da decisão.",
+    "gabarito": true,
+    "comentario": "Literal do art. 20, caput.",
+    "tipo": "literal"
+  },
+  {
+    "id": "lindb-q21",
+    "artigoKey": "lindb:21",
+    "enunciado": "A decisão que, nas esferas administrativa, controladora ou judicial, decretar a invalidação de ato, contrato, ajuste, processo ou norma administrativa deverá indicar de modo expresso suas consequências jurídicas e administrativas.",
+    "gabarito": true,
+    "comentario": "Literal do art. 21, caput.",
+    "tipo": "literal"
+  },
+  {
+    "id": "lindb-q22",
+    "artigoKey": "lindb:22",
+    "enunciado": "Na interpretação de normas sobre gestão pública, serão considerados os obstáculos e as dificuldades reais do gestor e as exigências das políticas públicas a seu cargo, sem prejuízo dos direitos dos administrados.",
+    "gabarito": true,
+    "comentario": "Literal do art. 22, caput.",
+    "tipo": "literal"
+  },
+  {
+    "id": "lindb-q23",
+    "artigoKey": "lindb:23",
+    "enunciado": "A decisão administrativa, controladora ou judicial que estabelecer interpretação ou orientação nova sobre norma de conteúdo indeterminado, impondo novo dever, deverá prever regime de transição quando indispensável para que o cumprimento seja proporcional, equânime e eficiente.",
+    "gabarito": true,
+    "comentario": "Literal do art. 23, caput.",
+    "tipo": "literal"
+  },
+  {
+    "id": "lindb-q24",
+    "artigoKey": "lindb:24",
+    "enunciado": "A revisão, nas esferas administrativa, controladora ou judicial, sobre a validade de ato já completado levará em conta as orientações gerais da época, sendo vedado invalidar, com base em mudança posterior de orientação geral, situações plenamente constituídas.",
+    "gabarito": true,
+    "comentario": "Literal do art. 24, caput.",
+    "tipo": "literal"
+  },
+  {
+    "id": "lindb-q25",
+    "artigoKey": "lindb:24",
+    "enunciado": "A mudança posterior de orientação geral de um órgão de controle permite, por si só, a invalidação retroativa de atos administrativos praticados sob a orientação anterior, ainda que plenamente constituídos.",
+    "gabarito": false,
+    "comentario": "Art. 24 veda exatamente isso: não se declaram inválidas, com base em mudança posterior de orientação geral, situações plenamente constituídas.",
+    "tipo": "pegadinha"
+  },
+  {
+    "id": "lindb-q26",
+    "artigoKey": "lindb:26",
+    "enunciado": "Para eliminar irregularidade, incerteza jurídica ou situação contenciosa na aplicação do direito público, a autoridade administrativa poderá, após oitiva do órgão jurídico e presentes razões de relevante interesse geral, celebrar compromisso com os interessados, que só produzirá efeitos a partir de sua publicação oficial.",
+    "gabarito": true,
+    "comentario": "Literal do art. 26, caput.",
+    "tipo": "literal"
+  },
+  {
+    "id": "lindb-q27",
+    "artigoKey": "lindb:28",
+    "enunciado": "O agente público responderá pessoalmente por suas decisões ou opiniões técnicas em caso de dolo ou erro grosseiro.",
+    "gabarito": true,
+    "comentario": "Literal do art. 28.",
+    "tipo": "literal"
+  },
+  {
+    "id": "lindb-q28",
+    "artigoKey": "lindb:28",
+    "enunciado": "Segundo a LINDB, o agente público responde pessoalmente por suas decisões ou opiniões técnicas em caso de culpa simples, ainda que não caracterizado dolo ou erro grosseiro.",
+    "gabarito": false,
+    "comentario": "Art. 28 exige DOLO ou ERRO GROSSEIRO — a mera culpa simples/leve não gera responsabilização pessoal do agente.",
+    "tipo": "pegadinha"
+  },
+  {
+    "id": "lindb-q29",
+    "artigoKey": "lindb:29",
+    "enunciado": "A edição de atos normativos por autoridade administrativa, salvo os de mera organização interna, poderá ser precedida de consulta pública para manifestação de interessados, a qual será considerada na decisão.",
+    "gabarito": true,
+    "comentario": "Literal do art. 29, caput.",
+    "tipo": "literal"
+  },
+  {
+    "id": "lindb-q30",
+    "artigoKey": "lindb:30",
+    "enunciado": "Os regulamentos, súmulas administrativas e respostas a consultas editados pelas autoridades públicas para aumentar a segurança jurídica na aplicação das normas terão caráter vinculante em relação ao órgão ou entidade a que se destinam, até ulterior revisão.",
+    "gabarito": true,
+    "comentario": "Literal do art. 30, caput e parágrafo único.",
+    "tipo": "literal"
+  }
+]

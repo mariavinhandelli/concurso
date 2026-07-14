@@ -1,0 +1,162 @@
+[
+  {
+    "id": "l9790-q1",
+    "artigoKey": "lei-9790:1",
+    "enunciado": "A outorga da qualificação como Organização da Sociedade Civil de Interesse Público (OSCIP) é ato vinculado ao cumprimento dos requisitos instituídos pela Lei nº 9.790/99.",
+    "gabarito": true,
+    "comentario": "Literal do art. 1º, § 2º. Diferente da Organização Social (Lei 9.637/98), cuja qualificação é ato discricionário.",
+    "tipo": "literal"
+  },
+  {
+    "id": "l9790-q2",
+    "artigoKey": "lei-9790:1",
+    "enunciado": "Para se qualificar como OSCIP, a pessoa jurídica de direito privado sem fins lucrativos deve estar constituída e em funcionamento regular há, no mínimo, 5 (cinco) anos.",
+    "gabarito": false,
+    "comentario": "Art. 1º, caput: o prazo mínimo é de 3 (três) anos, não 5.",
+    "tipo": "pegadinha"
+  },
+  {
+    "id": "l9790-q3",
+    "artigoKey": "lei-9790:2",
+    "enunciado": "As organizações sociais, qualificadas nos termos da Lei nº 9.637/98, não podem ser qualificadas como Organizações da Sociedade Civil de Interesse Público.",
+    "gabarito": true,
+    "comentario": "Art. 2º, inciso IX. OS e OSCIP são qualificações mutuamente excludentes.",
+    "tipo": "literal"
+  },
+  {
+    "id": "l9790-q4",
+    "artigoKey": "lei-9790:2",
+    "enunciado": "O rol de entidades que não podem se qualificar como OSCIP, previsto no art. 2º da Lei 9.790/99, é meramente exemplificativo, admitindo-se a qualificação de sociedades comerciais desde que atendam às finalidades do art. 3º.",
+    "gabarito": false,
+    "comentario": "O rol do art. 2º é taxativo. As sociedades comerciais (inciso I) estão vedadas independentemente de atenderem às finalidades do art. 3º.",
+    "tipo": "pegadinha"
+  },
+  {
+    "id": "l9790-q5",
+    "artigoKey": "lei-9790:2",
+    "enunciado": "Os sindicatos, as associações de classe e as instituições religiosas estão entre as entidades que não podem se qualificar como OSCIP.",
+    "gabarito": true,
+    "comentario": "Literal dos incisos II e III do art. 2º.",
+    "tipo": "literal"
+  },
+  {
+    "id": "l9790-q6",
+    "artigoKey": "lei-9790:3",
+    "enunciado": "Para se qualificar como OSCIP, a entidade deve necessariamente cumular, entre seus objetivos sociais, a promoção gratuita da saúde e da promoção gratuita da educação.",
+    "gabarito": false,
+    "comentario": "Art. 3º, caput: basta que os objetivos sociais tenham \"pelo menos uma\" das finalidades listadas nos incisos — não é exigida cumulação.",
+    "tipo": "pegadinha"
+  },
+  {
+    "id": "l9790-q7",
+    "artigoKey": "lei-9790:4",
+    "enunciado": "O estatuto da entidade candidata a OSCIP deve prever a constituição de conselho fiscal ou órgão equivalente, com competência para opinar sobre os relatórios de desempenho financeiro e contábil da entidade.",
+    "gabarito": true,
+    "comentario": "Literal do art. 4º, inciso III.",
+    "tipo": "literal"
+  },
+  {
+    "id": "l9790-q8",
+    "artigoKey": "lei-9790:4",
+    "enunciado": "É permitida a participação de servidores públicos na composição de conselho ou diretoria de Organização da Sociedade Civil de Interesse Público.",
+    "gabarito": true,
+    "comentario": "Literal do art. 4º, parágrafo único.",
+    "tipo": "literal"
+  },
+  {
+    "id": "l9790-q9",
+    "artigoKey": "lei-9790:4",
+    "enunciado": "É vedada, em qualquer hipótese, a remuneração de dirigentes de OSCIP que atuem efetivamente na gestão executiva da entidade.",
+    "gabarito": false,
+    "comentario": "Art. 4º, inciso VI: o estatuto pode prever remuneração para dirigentes que atuem na gestão executiva, respeitados os valores de mercado da região.",
+    "tipo": "pegadinha"
+  },
+  {
+    "id": "l9790-q10",
+    "artigoKey": "lei-9790:5",
+    "enunciado": "O requerimento de qualificação como OSCIP deve ser formulado por escrito ao Ministério da Justiça, instruído com cópia autenticada do estatuto registrado em cartório, entre outros documentos.",
+    "gabarito": true,
+    "comentario": "Literal do art. 5º, caput e inciso I.",
+    "tipo": "literal"
+  },
+  {
+    "id": "l9790-q11",
+    "artigoKey": "lei-9790:6",
+    "enunciado": "O Ministério da Justiça tem o prazo de trinta dias, a contar do recebimento do requerimento, para decidir sobre a qualificação da entidade como OSCIP.",
+    "gabarito": true,
+    "comentario": "Literal do art. 6º, caput.",
+    "tipo": "literal"
+  },
+  {
+    "id": "l9790-q12",
+    "artigoKey": "lei-9790:6",
+    "enunciado": "O pedido de qualificação como OSCIP pode ser indeferido por juízo de conveniência e oportunidade do Ministério da Justiça, ainda que a entidade preencha todos os requisitos legais.",
+    "gabarito": false,
+    "comentario": "Art. 6º, § 3º: o indeferimento só pode ocorrer nas 3 hipóteses taxativas (enquadramento no art. 2º, não atendimento dos arts. 3º/4º, ou documentação incompleta) — é ato vinculado, coerente com o art. 1º, § 2º.",
+    "tipo": "pegadinha"
+  },
+  {
+    "id": "l9790-q13",
+    "artigoKey": "lei-9790:7",
+    "enunciado": "A perda da qualificação de OSCIP pode ocorrer a pedido ou mediante decisão em processo administrativo ou judicial, de iniciativa popular ou do Ministério Público, assegurados a ampla defesa e o contraditório.",
+    "gabarito": true,
+    "comentario": "Literal do art. 7º.",
+    "tipo": "literal"
+  },
+  {
+    "id": "l9790-q14",
+    "artigoKey": "lei-9790:8",
+    "enunciado": "É vedado o anonimato na representação para requerer a perda da qualificação de OSCIP, mas qualquer cidadão é parte legítima para fazê-lo, respeitadas as prerrogativas do Ministério Público.",
+    "gabarito": true,
+    "comentario": "Literal do art. 8º.",
+    "tipo": "literal"
+  },
+  {
+    "id": "l9790-q15",
+    "artigoKey": "lei-9790:9",
+    "enunciado": "O Termo de Parceria é o instrumento firmado entre o Poder Público e as OSCIP destinado à formação de vínculo de cooperação para o fomento e a execução das atividades de interesse público.",
+    "gabarito": true,
+    "comentario": "Literal do art. 9º.",
+    "tipo": "literal"
+  },
+  {
+    "id": "l9790-q16",
+    "artigoKey": "lei-9790:9",
+    "enunciado": "O contrato de gestão é o instrumento jurídico previsto na Lei nº 9.790/99 para formalizar a parceria entre o Poder Público e a OSCIP.",
+    "gabarito": false,
+    "comentario": "O instrumento próprio da OSCIP é o Termo de Parceria (art. 9º). Contrato de gestão é da Organização Social (Lei 9.637/98) — pegadinha clássica de comparação OS x OSCIP.",
+    "tipo": "pegadinha"
+  },
+  {
+    "id": "l9790-q17",
+    "artigoKey": "lei-9790:10",
+    "enunciado": "São cláusulas essenciais do Termo de Parceria, entre outras, a especificação do objeto, a estipulação de metas e resultados com os respectivos prazos, e a previsão expressa de critérios objetivos de avaliação de desempenho mediante indicadores de resultado.",
+    "gabarito": true,
+    "comentario": "Literal do art. 10, § 2º, incisos I a III.",
+    "tipo": "literal"
+  },
+  {
+    "id": "l9790-q18",
+    "artigoKey": "lei-9790:10",
+    "enunciado": "A celebração do Termo de Parceria independe de qualquer consulta prévia aos Conselhos de Políticas Públicas das áreas correspondentes de atuação.",
+    "gabarito": false,
+    "comentario": "Art. 10, § 1º: a celebração será precedida de consulta aos Conselhos de Políticas Públicas das áreas correspondentes, nos respectivos níveis de governo.",
+    "tipo": "pegadinha"
+  },
+  {
+    "id": "l9790-q19",
+    "artigoKey": "lei-9790:12",
+    "enunciado": "Os responsáveis pela fiscalização do Termo de Parceria que tomarem conhecimento de irregularidade na utilização de recursos públicos pela OSCIP devem dar ciência imediata ao Tribunal de Contas respectivo e ao Ministério Público, sob pena de responsabilidade solidária.",
+    "gabarito": true,
+    "comentario": "Literal do art. 12.",
+    "tipo": "literal"
+  },
+  {
+    "id": "l9790-q20",
+    "artigoKey": "lei-9790:16",
+    "enunciado": "É vedada às entidades qualificadas como OSCIP a participação em campanhas de interesse político-partidário ou eleitorais, sob quaisquer meios ou formas.",
+    "gabarito": true,
+    "comentario": "Literal do art. 16.",
+    "tipo": "literal"
+  }
+]

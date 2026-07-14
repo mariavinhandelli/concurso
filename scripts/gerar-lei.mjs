@@ -54,6 +54,51 @@ const LEIS = {
     descricao: 'Texto compilado e atualizado (fonte: Planalto), sem redações revogadas.',
     fonteUrl: 'https://www.planalto.gov.br/ccivil_03/decreto-lei/del1002compilado.htm',
   },
+  'lei-8987': {
+    slug: 'lei-8987',
+    nome: 'Lei nº 8.987, de 13 de fevereiro de 1995 — Regime de Concessão e Permissão da Prestação de Serviços Públicos',
+    nomeCurto: 'Lei 8.987/95',
+    ano: 1995,
+    disciplina: 'Direito Administrativo',
+    descricao: 'Lei das Concessões e Permissões de serviços públicos (art. 175 da CF/88). Texto compilado e atualizado (fonte: Planalto).',
+    fonteUrl: 'https://www.planalto.gov.br/ccivil_03/leis/l8987cons.htm',
+  },
+  'lei-11079': {
+    slug: 'lei-11079',
+    nome: 'Lei nº 11.079, de 30 de dezembro de 2004 — Normas Gerais para Licitação e Contratação de Parceria Público-Privada',
+    nomeCurto: 'Lei 11.079/04 (PPP)',
+    ano: 2004,
+    disciplina: 'Direito Administrativo',
+    descricao: 'Institui as modalidades de PPP (concessão patrocinada e administrativa). Texto compilado e atualizado (fonte: Planalto).',
+    fonteUrl: 'https://www.planalto.gov.br/ccivil_03/_ato2004-2006/2004/lei/l11079.htm',
+  },
+  lindb: {
+    slug: 'lindb',
+    nome: 'Decreto-Lei nº 4.657, de 4 de setembro de 1942 — Lei de Introdução às Normas do Direito Brasileiro (LINDB)',
+    nomeCurto: 'LINDB',
+    ano: 1942,
+    disciplina: 'Direito Administrativo',
+    descricao: 'Normas sobre vigência, aplicação e interpretação das leis, incluindo os arts. 20-30 (segurança jurídica na gestão pública, Lei 13.655/2018). Texto compilado e atualizado (fonte: Planalto).',
+    fonteUrl: 'https://www.planalto.gov.br/ccivil_03/decreto-lei/del4657compilado.htm',
+  },
+  'lei-9637': {
+    slug: 'lei-9637',
+    nome: 'Lei nº 9.637, de 15 de maio de 1998 — Qualificação de Organizações Sociais (OS)',
+    nomeCurto: 'Lei 9.637/98 (OS)',
+    ano: 1998,
+    disciplina: 'Direito Administrativo',
+    descricao: 'Dispõe sobre a qualificação de entidades como Organizações Sociais e o contrato de gestão. Texto compilado e atualizado (fonte: Planalto).',
+    fonteUrl: 'https://www.planalto.gov.br/ccivil_03/leis/l9637.htm',
+  },
+  'lei-9790': {
+    slug: 'lei-9790',
+    nome: 'Lei nº 9.790, de 23 de março de 1999 — Qualificação de Organizações da Sociedade Civil de Interesse Público (OSCIP)',
+    nomeCurto: 'Lei 9.790/99 (OSCIP)',
+    ano: 1999,
+    disciplina: 'Direito Administrativo',
+    descricao: 'Dispõe sobre a qualificação de pessoas jurídicas de direito privado sem fins lucrativos como OSCIP e institui o termo de parceria. Texto compilado e atualizado (fonte: Planalto).',
+    fonteUrl: 'https://www.planalto.gov.br/ccivil_03/leis/l9790.htm',
+  },
 };
 
 // ─── Entrada ─────────────────────────────────────────────────────────────────
@@ -114,7 +159,10 @@ function headingLevel(text) {
 
 function parseLei(html) {
   // 1. Redações antigas ficam em <strike>/<del> — fora do texto vigente.
+  //    Em compilados mais recentes, o Planalto às vezes marca o trecho revogado
+  //    com <span style="text-decoration:line-through"> em vez de <strike>.
   let body = html.replace(/<(strike|del)\b[\s\S]*?<\/\1>/gi, ' ');
+  body = body.replace(/<span\b[^>]*style\s*=\s*"[^"]*text-decoration\s*:\s*line-through[^"]*"[^>]*>[\s\S]*?<\/span>/gi, ' ');
 
   // 2. Divide em parágrafos pela abertura de <p ...> ou <h1..h6 ...> —
   //    o CPM/CPPM usam <h1>/<h2> para PARTE/LIVRO/TÍTULO.

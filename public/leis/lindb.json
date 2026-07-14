@@ -1,0 +1,906 @@
+{
+ "slug": "lindb",
+ "nome": "Decreto-Lei nº 4.657, de 4 de setembro de 1942 — Lei de Introdução às Normas do Direito Brasileiro (LINDB)",
+ "nomeCurto": "LINDB",
+ "ano": 1942,
+ "disciplina": "Direito Administrativo",
+ "descricao": "Normas sobre vigência, aplicação e interpretação das leis, incluindo os arts. 20-30 (segurança jurídica na gestão pública, Lei 13.655/2018). Texto compilado e atualizado (fonte: Planalto).",
+ "fonteUrl": "https://www.planalto.gov.br/ccivil_03/decreto-lei/del4657compilado.htm",
+ "geradoEm": "2026-07-13",
+ "artigos": [
+  {
+   "key": "lindb:1",
+   "ordem": 1,
+   "numero": "1",
+   "rotulo": "Art. 1º",
+   "caminho": null,
+   "incidencia": "muito_alta",
+   "incidenciaNota": "Vigência da lei (vacatio legis): regra geral de 45 dias, salvo disposição contrária. Pegadinha clássica: se a CORREÇÃO de texto ocorrer ANTES da lei entrar em vigor, o prazo reinicia da nova publicação (§ 3º); se ocorrer DEPOIS de já vigente, a correção é considerada LEI NOVA (§ 4º) — os dois momentos são frequentemente trocados nas provas; sem estatística numérica pública disponível.",
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "Salvo disposição contrária, a lei começa a vigorar em todo o país quarenta e cinco dias depois de oficialmente publicada.",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "§ 1º",
+     "texto": "Nos Estados estrangeiros, a obrigatoriedade da lei brasileira, quando admitida, se inicia três meses depois de oficialmente publicada.",
+     "nivel": 1
+    },
+    {
+     "id": "b3",
+     "rotulo": "§ 2º",
+     "texto": "(Revogado)",
+     "nivel": 1
+    },
+    {
+     "id": "b4",
+     "rotulo": "§ 3º",
+     "texto": "Se, antes de entrar a lei em vigor, ocorrer nova publicação de seu texto, destinada a correção, o prazo deste artigo e dos parágrafos anteriores começará a correr da nova publicação.",
+     "nivel": 1
+    },
+    {
+     "id": "b5",
+     "rotulo": "§ 4º",
+     "texto": "As correções a texto de lei já em vigor consideram-se lei nova.",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lindb:2",
+   "ordem": 2,
+   "numero": "2",
+   "rotulo": "Art. 2º",
+   "caminho": null,
+   "incidencia": "muito_alta",
+   "incidenciaNota": "Talvez o artigo mais cobrado da LINDB: os 3 casos de revogação do § 1º (declaração expressa, incompatibilidade OU regulação inteira da matéria) são ALTERNATIVOS, bastando um; e o § 3º veda a REPRISTINAÇÃO AUTOMÁTICA — a lei revogada não se restaura pela perda de vigência da lei revogadora, salvo disposição expressa em sentido contrário — pegadinha mais repetida da lei; sem estatística numérica pública disponível.",
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "Não se destinando à vigência temporária, a lei terá vigor até que outra a modifique ou revogue.",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "§ 1º",
+     "texto": "A lei posterior revoga a anterior quando expressamente o declare, quando seja com ela incompatível ou quando regule inteiramente a matéria de que tratava a lei anterior.",
+     "nivel": 1
+    },
+    {
+     "id": "b3",
+     "rotulo": "§ 2º",
+     "texto": "A lei nova, que estabeleça disposições gerais ou especiais a par das já existentes, não revoga nem modifica a lei anterior.",
+     "nivel": 1
+    },
+    {
+     "id": "b4",
+     "rotulo": "§ 3º",
+     "texto": "Salvo disposição em contrário, a lei revogada não se restaura por ter a lei revogadora perdido a vigência.",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lindb:3",
+   "ordem": 3,
+   "numero": "3",
+   "rotulo": "Art. 3º",
+   "caminho": null,
+   "incidencia": "muito_alta",
+   "incidenciaNota": "Princípio da obrigatoriedade da lei (\"ignorantia legis neminem excusat\") — literalidade curta e recorrente em provas de nível básico e intermediário; sem estatística numérica pública disponível.",
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "Ninguém se escusa de cumprir a lei, alegando que não a conhece.",
+     "nivel": 0
+    }
+   ]
+  },
+  {
+   "key": "lindb:4",
+   "ordem": 4,
+   "numero": "4",
+   "rotulo": "Art. 4º",
+   "caminho": null,
+   "incidencia": "muito_alta",
+   "incidenciaNota": "Mecanismos de integração da norma quando a lei é omissa: analogia, costumes e princípios gerais de direito — cobrado tanto na ordem literal do rol quanto trocando um desses 3 mecanismos por outro (equidade e doutrina NÃO estão no rol do art. 4º); sem estatística numérica pública disponível.",
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "Quando a lei for omissa, o juiz decidirá o caso de acordo com a analogia, os costumes e os princípios gerais de direito.",
+     "nivel": 0
+    }
+   ]
+  },
+  {
+   "key": "lindb:5",
+   "ordem": 5,
+   "numero": "5",
+   "rotulo": "Art. 5º",
+   "caminho": null,
+   "incidencia": "alta",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "Na aplicação da lei, o juiz atenderá aos fins sociais a que ela se dirige e às exigências do bem comum.",
+     "nivel": 0
+    }
+   ]
+  },
+  {
+   "key": "lindb:6",
+   "ordem": 6,
+   "numero": "6",
+   "rotulo": "Art. 6º",
+   "caminho": null,
+   "incidencia": "muito_alta",
+   "incidenciaNota": "Aplicação da lei no tempo (irretroatividade): a lei nova respeita ato jurídico perfeito, direito adquirido e coisa julgada — cobrado tanto na literalidade do caput quanto nas 3 definições dos §§ 1º a 3º; sem estatística numérica pública disponível.",
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "A Lei em vigor terá efeito imediato e geral, respeitados o ato jurídico perfeito, o direito adquirido e a coisa julgada.",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "§ 1º",
+     "texto": "Reputa-se ato jurídico perfeito o já consumado segundo a lei vigente ao tempo em que se efetuou.",
+     "nivel": 1
+    },
+    {
+     "id": "b3",
+     "rotulo": "§ 2º",
+     "texto": "Consideram-se adquiridos assim os direitos que o seu titular, ou alguém por êle, possa exercer, como aquêles cujo comêço do exercício tenha têrmo pré-fixo, ou condição pré-estabelecida inalterável, a arbítrio de outrem.",
+     "nivel": 1
+    },
+    {
+     "id": "b4",
+     "rotulo": "§ 3º",
+     "texto": "Chama-se coisa julgada ou caso julgado a decisão judicial de que já não caiba recurso.",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lindb:7",
+   "ordem": 7,
+   "numero": "7",
+   "rotulo": "Art. 7º",
+   "caminho": null,
+   "incidencia": "alta",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "A lei do país em que domiciliada a pessoa determina as regras sobre o começo e o fim da personalidade, o nome, a capacidade e os direitos de família.",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "§ 1º",
+     "texto": "Realizando-se o casamento no Brasil, será aplicada a lei brasileira quanto aos impedimentos dirimentes e às formalidades da celebração.",
+     "nivel": 1
+    },
+    {
+     "id": "b3",
+     "rotulo": "§ 2º",
+     "texto": "O casamento de estrangeiros poderá celebrar-se perante autoridades diplomáticas ou consulares do país de ambos os nubentes.",
+     "nivel": 1
+    },
+    {
+     "id": "b4",
+     "rotulo": "§ 3º",
+     "texto": "Tendo os nubentes domicílio diverso, regerá os casos de invalidade do matrimônio a lei do primeiro domicílio conjugal.",
+     "nivel": 1
+    },
+    {
+     "id": "b5",
+     "rotulo": "§ 4º",
+     "texto": "O regime de bens, legal ou convencional, obedece à lei do país em que tiverem os nubentes domicílio, e, se este for diverso, a do primeiro domicílio conjugal.",
+     "nivel": 1
+    },
+    {
+     "id": "b6",
+     "rotulo": "§ 5º",
+     "texto": "O estrangeiro casado, que se naturalizar brasileiro, pode, mediante expressa anuência de seu cônjuge, requerer ao juiz, no ato de entrega do decreto de naturalização, se apostile ao mesmo a adoção do regime de comunhão parcial de bens, respeitados os direitos de terceiros e dada esta adoção ao competente registro.",
+     "nivel": 1
+    },
+    {
+     "id": "b7",
+     "rotulo": "§ 6º",
+     "texto": "O divórcio realizado no estrangeiro, se um ou ambos os cônjuges forem brasileiros, só será reconhecido no Brasil depois de 1 (um) ano da data da sentença, salvo se houver sido antecedida de separação judicial por igual prazo, caso em que a homologação produzirá efeito imediato, obedecidas as condições estabelecidas para a eficácia das sentenças estrangeiras no país. O Superior Tribunal de Justiça, na forma de seu regimento interno, poderá reexaminar, a requerimento do interessado, decisões já proferidas em pedidos de homologação de sentenças estrangeiras de divórcio de brasileiros, a fim de que passem a produzir todos os efeitos legais.",
+     "nivel": 1
+    },
+    {
+     "id": "b8",
+     "rotulo": "§ 7º",
+     "texto": "Salvo o caso de abandono, o domicílio do chefe da família estende-se ao outro cônjuge e aos filhos não emancipados, e o do tutor ou curador aos incapazes sob sua guarda.",
+     "nivel": 1
+    },
+    {
+     "id": "b9",
+     "rotulo": "§ 8º",
+     "texto": "Quando a pessoa não tiver domicílio, considerar-se-á domiciliada no lugar de sua residência ou naquele em que se encontre.",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lindb:8",
+   "ordem": 8,
+   "numero": "8",
+   "rotulo": "Art. 8º",
+   "caminho": null,
+   "incidencia": "media",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "Para qualificar os bens e regular as relações a eles concernentes, aplicar-se-á a lei do país em que estiverem situados.",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "§ 1º",
+     "texto": "Aplicar-se-á a lei do país em que for domiciliado o proprietário, quanto aos bens moveis que ele trouxer ou se destinarem a transporte para outros lugares.",
+     "nivel": 1
+    },
+    {
+     "id": "b3",
+     "rotulo": "§ 2º",
+     "texto": "O penhor regula-se pela lei do domicílio que tiver a pessoa, em cuja posse se encontre a coisa apenhada.",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lindb:9",
+   "ordem": 9,
+   "numero": "9",
+   "rotulo": "Art. 9º",
+   "caminho": null,
+   "incidencia": "alta",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "Para qualificar e reger as obrigações, aplicar-se-á a lei do país em que se constituirem.",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "§ 1º",
+     "texto": "Destinando-se a obrigação a ser executada no Brasil e dependendo de forma essencial, será esta observada, admitidas as peculiaridades da lei estrangeira quanto aos requisitos extrínsecos do ato.",
+     "nivel": 1
+    },
+    {
+     "id": "b3",
+     "rotulo": "§ 2º",
+     "texto": "A obrigação resultante do contrato reputa-se constituida no lugar em que residir o proponente.",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lindb:10",
+   "ordem": 10,
+   "numero": "10",
+   "rotulo": "Art. 10",
+   "caminho": null,
+   "incidencia": "alta",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "A sucessão por morte ou por ausência obedece à lei do país em que domiciliado o defunto ou o desaparecido, qualquer que seja a natureza e a situação dos bens.",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "§ 1º",
+     "texto": "A sucessão de bens de estrangeiros, situados no País, será regulada pela lei brasileira em benefício do cônjuge ou dos filhos brasileiros, ou de quem os represente, sempre que não lhes seja mais favorável a lei pessoal do de cujus.",
+     "nivel": 1
+    },
+    {
+     "id": "b3",
+     "rotulo": "§ 2º",
+     "texto": "A lei do domicílio do herdeiro ou legatário regula a capacidade para suceder.",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lindb:11",
+   "ordem": 11,
+   "numero": "11",
+   "rotulo": "Art. 11",
+   "caminho": null,
+   "incidencia": "media",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "As organizações destinadas a fins de interesse coletivo, como as sociedades e as fundações, obedecem à lei do Estado em que se constituirem.",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "§ 1º",
+     "texto": "Não poderão, entretanto ter no Brasil filiais, agências ou estabelecimentos antes de serem os atos constitutivos aprovados pelo Governo brasileiro, ficando sujeitas à lei brasileira.",
+     "nivel": 1
+    },
+    {
+     "id": "b3",
+     "rotulo": "§ 2º",
+     "texto": "Os Governos estrangeiros, bem como as organizações de qualquer natureza, que eles tenham constituido, dirijam ou hajam investido de funções públicas, não poderão adquirir no Brasil bens imóveis ou susceptiveis de desapropriação.",
+     "nivel": 1
+    },
+    {
+     "id": "b4",
+     "rotulo": "§ 3º",
+     "texto": "Os Governos estrangeiros podem adquirir a propriedade dos prédios necessários à sede dos representantes diplomáticos ou dos agentes consulares.",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lindb:12",
+   "ordem": 12,
+   "numero": "12",
+   "rotulo": "Art. 12",
+   "caminho": null,
+   "incidencia": "media",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "É competente a autoridade judiciária brasileira, quando for o réu domiciliado no Brasil ou aqui tiver de ser cumprida a obrigação.",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "§ 1º",
+     "texto": "Só à autoridade judiciária brasileira compete conhecer das ações relativas a imóveis situados no Brasil.",
+     "nivel": 1
+    },
+    {
+     "id": "b3",
+     "rotulo": "§ 2º",
+     "texto": "A autoridade judiciária brasileira cumprirá, concedido o exequatur e segundo a forma estabelecida pela lei brasileira, as diligências deprecadas por autoridade estrangeira competente, observando a lei desta, quanto ao objeto das diligências.",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lindb:13",
+   "ordem": 13,
+   "numero": "13",
+   "rotulo": "Art. 13",
+   "caminho": null,
+   "incidencia": "media",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "A prova dos fatos ocorridos em país estrangeiro rege-se pela lei que nele vigorar, quanto ao ônus e aos meios de produzir-se, não admitindo os tribunais brasileiros provas que a lei brasileira desconheça.",
+     "nivel": 0
+    }
+   ]
+  },
+  {
+   "key": "lindb:14",
+   "ordem": 14,
+   "numero": "14",
+   "rotulo": "Art. 14",
+   "caminho": null,
+   "incidencia": "media",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "Não conhecendo a lei estrangeira, poderá o juiz exigir de quem a invoca prova do texto e da vigência.",
+     "nivel": 0
+    }
+   ]
+  },
+  {
+   "key": "lindb:15",
+   "ordem": 15,
+   "numero": "15",
+   "rotulo": "Art. 15",
+   "caminho": null,
+   "incidencia": "media",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "Será executada no Brasil a sentença proferida no estrangeiro, que reuna os seguintes requisitos:",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "a)",
+     "texto": "haver sido proferida por juiz competente;",
+     "nivel": 2
+    },
+    {
+     "id": "b3",
+     "rotulo": "b)",
+     "texto": "terem sido os partes citadas ou haver-se legalmente verificado à revelia;",
+     "nivel": 2
+    },
+    {
+     "id": "b4",
+     "rotulo": "c)",
+     "texto": "ter passado em julgado e estar revestida das formalidades necessárias para a execução no lugar em que foi proferida;",
+     "nivel": 2
+    },
+    {
+     "id": "b5",
+     "rotulo": "d)",
+     "texto": "estar traduzida por intérprete autorizado;",
+     "nivel": 2
+    },
+    {
+     "id": "b6",
+     "rotulo": "e)",
+     "texto": "ter sido homologada pelo Supremo Tribunal Federal.",
+     "nivel": 2
+    },
+    {
+     "id": "b7",
+     "rotulo": "Parágrafo único.",
+     "texto": "(Revogado)",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lindb:16",
+   "ordem": 16,
+   "numero": "16",
+   "rotulo": "Art. 16",
+   "caminho": null,
+   "incidencia": "media",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "Quando, nos termos dos artigos precedentes, se houver de aplicar a lei estrangeira, ter-se-á em vista a disposição desta, sem considerar-se qualquer remissão por ela feita a outra lei.",
+     "nivel": 0
+    }
+   ]
+  },
+  {
+   "key": "lindb:17",
+   "ordem": 17,
+   "numero": "17",
+   "rotulo": "Art. 17",
+   "caminho": null,
+   "incidencia": "media",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "As leis, atos e sentenças de outro país, bem como quaisquer declarações de vontade, não terão eficácia no Brasil, quando ofenderem a soberania nacional, a ordem pública e os bons costumes.",
+     "nivel": 0
+    }
+   ]
+  },
+  {
+   "key": "lindb:18",
+   "ordem": 18,
+   "numero": "18",
+   "rotulo": "Art. 18",
+   "caminho": null,
+   "incidencia": "media",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "Tratando-se de brasileiros, são competentes as autoridades consulares brasileiras para lhes celebrar o casamento e os mais atos de Registro Civil e de tabelionato, inclusive o registro de nascimento e de óbito dos filhos de brasileiro ou brasileira nascido no país da sede do Consulado.",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "§ 1º",
+     "texto": "As autoridades consulares brasileiras também poderão celebrar a separação consensual e o divórcio consensual de brasileiros, não havendo filhos menores ou incapazes do casal e observados os requisitos legais quanto aos prazos, devendo constar da respectiva escritura pública as disposições relativas à descrição e à partilha dos bens comuns e à pensão alimentícia e, ainda, ao acordo quanto à retomada pelo cônjuge de seu nome de solteiro ou à manutenção do nome adotado quando se deu o casamento.",
+     "nivel": 1
+    },
+    {
+     "id": "b3",
+     "rotulo": "§ 2º",
+     "texto": "É indispensável a assistência de advogado, devidamente constituído, que se dará mediante a subscrição de petição, juntamente com ambas as partes, ou com apenas uma delas, caso a outra constitua advogado próprio, não se fazendo necessário que a assinatura do advogado conste da escritura pública.",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lindb:19",
+   "ordem": 19,
+   "numero": "19",
+   "rotulo": "Art. 19",
+   "caminho": null,
+   "incidencia": "media",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "Reputam-se válidos todos os atos indicados no artigo anterior e celebrados pelos cônsules brasileiros na vigência do Decreto-lei nº 4.657, de 4 de setembro de 1942, desde que satisfaçam todos os requisitos legais.",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "Parágrafo único.",
+     "texto": "No caso em que a celebração dêsses atos tiver sido recusada pelas autoridades consulares, com fundamento no artigo 18 do mesmo Decreto-lei, ao interessado é facultado renovar o pedido dentro em 90 (noventa) dias contados da data da publicação desta lei.",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lindb:20",
+   "ordem": 20,
+   "numero": "20",
+   "rotulo": "Art. 20",
+   "caminho": null,
+   "incidencia": "muito_alta",
+   "incidenciaNota": "Abre o bloco da Lei 13.655/2018 (segurança jurídica na gestão pública) — veda decisão baseada em valores jurídicos abstratos SEM considerar as consequências práticas, nas esferas administrativa, CONTROLADORA e judicial (as 3 esferas, ponto cobrado); consenso qualitativo de que este bloco (arts. 20-30) é hoje um dos mais cobrados da LINDB em concursos administrativos (TEC Concursos); sem estatística numérica pública própria deste artigo.",
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "Nas esferas administrativa, controladora e judicial, não se decidirá com base em valores jurídicos abstratos sem que sejam consideradas as consequências práticas da decisão.",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "Parágrafo único.",
+     "texto": "A motivação demonstrará a necessidade e a adequação da medida imposta ou da invalidação de ato, contrato, ajuste, processo ou norma administrativa, inclusive em face das possíveis alternativas.",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lindb:21",
+   "ordem": 21,
+   "numero": "21",
+   "rotulo": "Art. 21",
+   "caminho": null,
+   "incidencia": "muito_alta",
+   "incidenciaNota": "Decisão que invalida ato/contrato/norma deve indicar expressamente as consequências jurídicas e administrativas e, quando cabível, condições de regularização proporcional e equânime, vedados ônus anormais ou excessivos — bloco de segurança jurídica de 2018; sem estatística numérica pública disponível.",
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "A decisão que, nas esferas administrativa, controladora ou judicial, decretar a invalidação de ato, contrato, ajuste, processo ou norma administrativa deverá indicar de modo expresso suas consequências jurídicas e administrativas.",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "Parágrafo único.",
+     "texto": "A decisão a que se refere o caput deste artigo deverá, quando for o caso, indicar as condições para que a regularização ocorra de modo proporcional e equânime e sem prejuízo aos interesses gerais, não se podendo impor aos sujeitos atingidos ônus ou perdas que, em função das peculiaridades do caso, sejam anormais ou excessivos.",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lindb:22",
+   "ordem": 22,
+   "numero": "22",
+   "rotulo": "Art. 22",
+   "caminho": null,
+   "incidencia": "muito_alta",
+   "incidenciaNota": "Interpretação de normas de gestão pública deve considerar os obstáculos e dificuldades reais do gestor; na aplicação de sanções (§ 2º), consideram-se natureza/gravidade da infração, danos, agravantes/atenuantes e antecedentes do agente — bloco de segurança jurídica de 2018; sem estatística numérica pública disponível.",
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "Na interpretação de normas sobre gestão pública, serão considerados os obstáculos e as dificuldades reais do gestor e as exigências das políticas públicas a seu cargo, sem prejuízo dos direitos dos administrados.",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "§ 1º",
+     "texto": "Em decisão sobre regularidade de conduta ou validade de ato, contrato, ajuste, processo ou norma administrativa, serão consideradas as circunstâncias práticas que houverem imposto, limitado ou condicionado a ação do agente.",
+     "nivel": 1
+    },
+    {
+     "id": "b3",
+     "rotulo": "§ 2º",
+     "texto": "Na aplicação de sanções, serão consideradas a natureza e a gravidade da infração cometida, os danos que dela provierem para a administração pública, as circunstâncias agravantes ou atenuantes e os antecedentes do agente.",
+     "nivel": 1
+    },
+    {
+     "id": "b4",
+     "rotulo": "§ 3º",
+     "texto": "As sanções aplicadas ao agente serão levadas em conta na dosimetria das demais sanções de mesma natureza e relativas ao mesmo fato.",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lindb:23",
+   "ordem": 23,
+   "numero": "23",
+   "rotulo": "Art. 23",
+   "caminho": null,
+   "incidencia": "alta",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "A decisão administrativa, controladora ou judicial que estabelecer interpretação ou orientação nova sobre norma de conteúdo indeterminado, impondo novo dever ou novo condicionamento de direito, deverá prever regime de transição quando indispensável para que o novo dever ou condicionamento de direito seja cumprido de modo proporcional, equânime e eficiente e sem prejuízo aos interesses gerais.",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "Parágrafo único.",
+     "texto": "(VETADO).",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lindb:24",
+   "ordem": 24,
+   "numero": "24",
+   "rotulo": "Art. 24",
+   "caminho": null,
+   "incidencia": "muito_alta",
+   "incidenciaNota": "Proteção da confiança legítima: veda invalidar, com base em mudança POSTERIOR de orientação geral, situações plenamente constituídas — a revisão deve levar em conta as orientações gerais da ÉPOCA do ato; bloco de segurança jurídica de 2018, tema recorrente sobre mudança de jurisprudência/entendimento de tribunais de contas; sem estatística numérica pública disponível.",
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "A revisão, nas esferas administrativa, controladora ou judicial, quanto à validade de ato, contrato, ajuste, processo ou norma administrativa cuja produção já se houver completado levará em conta as orientações gerais da época, sendo vedado que, com base em mudança posterior de orientação geral, se declarem inválidas situações plenamente constituídas.",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "Parágrafo único.",
+     "texto": "Consideram-se orientações gerais as interpretações e especificações contidas em atos públicos de caráter geral ou em jurisprudência judicial ou administrativa majoritária, e ainda as adotadas por prática administrativa reiterada e de amplo conhecimento público.",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lindb:25",
+   "ordem": 25,
+   "numero": "25",
+   "rotulo": "Art. 25",
+   "caminho": null,
+   "incidencia": "alta",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "(VETADO).",
+     "nivel": 0
+    }
+   ]
+  },
+  {
+   "key": "lindb:26",
+   "ordem": 26,
+   "numero": "26",
+   "rotulo": "Art. 26",
+   "caminho": null,
+   "incidencia": "alta",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "Para eliminar irregularidade, incerteza jurídica ou situação contenciosa na aplicação do direito público, inclusive no caso de expedição de licença, a autoridade administrativa poderá, após oitiva do órgão jurídico e, quando for o caso, após realização de consulta pública, e presentes razões de relevante interesse geral, celebrar compromisso com os interessados, observada a legislação aplicável, o qual só produzirá efeitos a partir de sua publicação oficial.",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "§ 1º",
+     "texto": "O compromisso referido no caput deste artigo:",
+     "nivel": 1
+    },
+    {
+     "id": "b3",
+     "rotulo": "I –",
+     "texto": "buscará solução jurídica proporcional, equânime, eficiente e compatível com os interesses gerais;",
+     "nivel": 1
+    },
+    {
+     "id": "b4",
+     "rotulo": "II –",
+     "texto": "(VETADO);",
+     "nivel": 1
+    },
+    {
+     "id": "b5",
+     "rotulo": "III –",
+     "texto": "não poderá conferir desoneração permanente de dever ou condicionamento de direito reconhecidos por orientação geral;",
+     "nivel": 1
+    },
+    {
+     "id": "b6",
+     "rotulo": "IV –",
+     "texto": "deverá prever com clareza as obrigações das partes, o prazo para seu cumprimento e as sanções aplicáveis em caso de descumprimento.",
+     "nivel": 1
+    },
+    {
+     "id": "b7",
+     "rotulo": "§ 2º",
+     "texto": "(VETADO).",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lindb:27",
+   "ordem": 27,
+   "numero": "27",
+   "rotulo": "Art. 27",
+   "caminho": null,
+   "incidencia": "alta",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "A decisão do processo, nas esferas administrativa, controladora ou judicial, poderá impor compensação por benefícios indevidos ou prejuízos anormais ou injustos resultantes do processo ou da conduta dos envolvidos.",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "§ 1º",
+     "texto": "A decisão sobre a compensação será motivada, ouvidas previamente as partes sobre seu cabimento, sua forma e, se for o caso, seu valor.",
+     "nivel": 1
+    },
+    {
+     "id": "b3",
+     "rotulo": "§ 2º",
+     "texto": "Para prevenir ou regular a compensação, poderá ser celebrado compromisso processual entre os envolvidos.",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lindb:28",
+   "ordem": 28,
+   "numero": "28",
+   "rotulo": "Art. 28",
+   "caminho": null,
+   "incidencia": "muito_alta",
+   "incidenciaNota": "Provavelmente o artigo mais citado do bloco 2018: o agente público só responde PESSOALMENTE por suas decisões/opiniões técnicas em caso de DOLO ou ERRO GROSSEIRO — não por mera culpa simples/negligência leve; os §§ 1º a 3º originais foram VETADOS, restando só o caput em vigor; sem estatística numérica pública disponível.",
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "O agente público responderá pessoalmente por suas decisões ou opiniões técnicas em caso de dolo ou erro grosseiro.",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "§ 1º",
+     "texto": "(VETADO).",
+     "nivel": 1
+    },
+    {
+     "id": "b3",
+     "rotulo": "§ 2º",
+     "texto": "(VETADO).",
+     "nivel": 1
+    },
+    {
+     "id": "b4",
+     "rotulo": "§ 3º",
+     "texto": "(VETADO).",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lindb:29",
+   "ordem": 29,
+   "numero": "29",
+   "rotulo": "Art. 29",
+   "caminho": null,
+   "incidencia": "alta",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "Em qualquer órgão ou Poder, a edição de atos normativos por autoridade administrativa, salvo os de mera organização interna, poderá ser precedida de consulta pública para manifestação de interessados, preferencialmente por meio eletrônico, a qual será considerada na decisão.",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "§ 1º",
+     "texto": "A convocação conterá a minuta do ato normativo e fixará o prazo e demais condições da consulta pública, observadas as normas legais e regulamentares específicas, se houver.",
+     "nivel": 1
+    },
+    {
+     "id": "b3",
+     "rotulo": "§ 2º",
+     "texto": "(VETADO).",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lindb:30",
+   "ordem": 30,
+   "numero": "30",
+   "rotulo": "Art. 30",
+   "caminho": null,
+   "incidencia": "alta",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "As autoridades públicas devem atuar para aumentar a segurança jurídica na aplicação das normas, inclusive por meio de regulamentos, súmulas administrativas e respostas a consultas.",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "Parágrafo único.",
+     "texto": "Os instrumentos previstos no caput deste artigo terão caráter vinculante em relação ao órgão ou entidade a que se destinam, até ulterior revisão.",
+     "nivel": 1
+    }
+   ]
+  }
+ ]
+}

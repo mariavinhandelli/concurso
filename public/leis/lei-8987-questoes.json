@@ -1,0 +1,226 @@
+[
+  {
+    "id": "l8987-q1",
+    "artigoKey": "lei-8987:2",
+    "enunciado": "Concessão de serviço público é a delegação de sua prestação, feita pelo poder concedente mediante licitação, na modalidade concorrência ou diálogo competitivo, a pessoa jurídica ou consórcio de empresas que demonstre capacidade para seu desempenho, por sua conta e risco e por prazo determinado.",
+    "gabarito": true,
+    "comentario": "Literal do art. 2º, inciso II.",
+    "tipo": "literal"
+  },
+  {
+    "id": "l8987-q2",
+    "artigoKey": "lei-8987:2",
+    "enunciado": "A permissão de serviço público, assim como a concessão, somente pode ser outorgada a pessoa jurídica ou consórcio de empresas, sendo vedada sua delegação a pessoa física.",
+    "gabarito": false,
+    "comentario": "Art. 2º, inciso IV: a permissão pode ser feita à pessoa FÍSICA ou jurídica que demonstre capacidade para seu desempenho — diferente da concessão, restrita a pessoa jurídica ou consórcio.",
+    "tipo": "pegadinha"
+  },
+  {
+    "id": "l8987-q3",
+    "artigoKey": "lei-8987:2",
+    "enunciado": "A concessão de serviço público constitui delegação em caráter precário, podendo ser revogada unilateralmente pelo poder concedente a qualquer tempo, sem necessidade de motivação.",
+    "gabarito": false,
+    "comentario": "A precariedade e a revogabilidade unilateral são características da PERMISSÃO (art. 40), não da concessão, que é outorgada por prazo determinado (art. 2º, II).",
+    "tipo": "pegadinha"
+  },
+  {
+    "id": "l8987-q4",
+    "artigoKey": "lei-8987:6",
+    "enunciado": "Serviço adequado é o que satisfaz as condições de regularidade, continuidade, eficiência, segurança, atualidade, generalidade, cortesia na sua prestação e modicidade das tarifas.",
+    "gabarito": true,
+    "comentario": "Literal do art. 6º, § 1º.",
+    "tipo": "literal"
+  },
+  {
+    "id": "l8987-q5",
+    "artigoKey": "lei-8987:6",
+    "enunciado": "A interrupção do serviço por inadimplemento do usuário pode iniciar-se em qualquer dia da semana, inclusive na véspera de feriado, desde que precedida de aviso prévio.",
+    "gabarito": false,
+    "comentario": "Art. 6º, § 4º: a interrupção por inadimplemento não pode iniciar-se na sexta-feira, no sábado, no domingo, em feriado ou no dia anterior a feriado.",
+    "tipo": "pegadinha"
+  },
+  {
+    "id": "l8987-q6",
+    "artigoKey": "lei-8987:6",
+    "enunciado": "Não se caracteriza como descontinuidade do serviço a sua interrupção em situação de emergência ou após prévio aviso, quando motivada por razões técnicas ou de segurança das instalações, ou por inadimplemento do usuário, considerado o interesse da coletividade.",
+    "gabarito": true,
+    "comentario": "Literal do art. 6º, § 3º.",
+    "tipo": "literal"
+  },
+  {
+    "id": "l8987-q7",
+    "artigoKey": "lei-8987:7",
+    "enunciado": "São direitos dos usuários, entre outros, receber serviço adequado e receber do poder concedente e da concessionária informações para a defesa de interesses individuais ou coletivos.",
+    "gabarito": true,
+    "comentario": "Literal do art. 7º, incisos I e II.",
+    "tipo": "literal"
+  },
+  {
+    "id": "l8987-q8",
+    "artigoKey": "lei-8987:9",
+    "enunciado": "A tarifa do serviço público concedido será fixada pelo preço da proposta vencedora da licitação e preservada pelas regras de revisão previstas na lei, no edital e no contrato.",
+    "gabarito": true,
+    "comentario": "Literal do art. 9º, caput.",
+    "tipo": "literal"
+  },
+  {
+    "id": "l8987-q9",
+    "artigoKey": "lei-8987:9",
+    "enunciado": "A criação do imposto sobre a renda, após a apresentação da proposta, quando comprovado seu impacto, implica a revisão da tarifa do serviço público concedido.",
+    "gabarito": false,
+    "comentario": "Art. 9º, § 3º: a revisão tarifária por criação/alteração/extinção de tributos RESSALVA expressamente os impostos sobre a renda.",
+    "tipo": "pegadinha"
+  },
+  {
+    "id": "l8987-q10",
+    "artigoKey": "lei-8987:9",
+    "enunciado": "Havendo alteração unilateral do contrato de concessão que afete seu inicial equilíbrio econômico-financeiro, o poder concedente deverá restabelecê-lo concomitantemente à alteração.",
+    "gabarito": true,
+    "comentario": "Literal do art. 9º, § 4º.",
+    "tipo": "literal"
+  },
+  {
+    "id": "l8987-q11",
+    "artigoKey": "lei-8987:14",
+    "enunciado": "Toda concessão de serviço público, precedida ou não da execução de obra pública, será objeto de prévia licitação, nos termos da legislação própria.",
+    "gabarito": true,
+    "comentario": "Literal do art. 14, caput.",
+    "tipo": "literal"
+  },
+  {
+    "id": "l8987-q12",
+    "artigoKey": "lei-8987:15",
+    "enunciado": "No julgamento da licitação de concessão poderá ser considerado, entre outros critérios, o menor valor da tarifa do serviço público a ser prestado ou a maior oferta de pagamento pela outorga da concessão.",
+    "gabarito": true,
+    "comentario": "Literal do art. 15, incisos I e II.",
+    "tipo": "literal"
+  },
+  {
+    "id": "l8987-q13",
+    "artigoKey": "lei-8987:16",
+    "enunciado": "A outorga de concessão ou permissão não terá caráter de exclusividade, salvo no caso de inviabilidade técnica ou econômica justificada no ato que caracteriza o objeto, área e prazo da outorga.",
+    "gabarito": true,
+    "comentario": "Literal do art. 16.",
+    "tipo": "literal"
+  },
+  {
+    "id": "l8987-q14",
+    "artigoKey": "lei-8987:23",
+    "enunciado": "São cláusulas essenciais do contrato de concessão, entre outras, as relativas ao objeto, à área e ao prazo da concessão, e aos casos de extinção da concessão.",
+    "gabarito": true,
+    "comentario": "Literal do art. 23, incisos I e IX.",
+    "tipo": "literal"
+  },
+  {
+    "id": "l8987-q15",
+    "artigoKey": "lei-8987:25",
+    "enunciado": "Incumbe à concessionária a execução do serviço concedido, cabendo-lhe responder por todos os prejuízos causados ao poder concedente, aos usuários ou a terceiros, sem que a fiscalização exercida pelo órgão competente exclua ou atenue essa responsabilidade.",
+    "gabarito": true,
+    "comentario": "Literal do art. 25, caput.",
+    "tipo": "literal"
+  },
+  {
+    "id": "l8987-q16",
+    "artigoKey": "lei-8987:26",
+    "enunciado": "É admitida a subconcessão, nos termos previstos no contrato de concessão, desde que expressamente autorizada pelo poder concedente, sendo a outorga de subconcessão sempre precedida de concorrência.",
+    "gabarito": true,
+    "comentario": "Literal do art. 26, caput e § 1º.",
+    "tipo": "literal"
+  },
+  {
+    "id": "l8987-q17",
+    "artigoKey": "lei-8987:27",
+    "enunciado": "A transferência de concessão ou do controle societário da concessionária sem prévia anuência do poder concedente implicará a caducidade da concessão.",
+    "gabarito": true,
+    "comentario": "Literal do art. 27, caput.",
+    "tipo": "literal"
+  },
+  {
+    "id": "l8987-q18",
+    "artigoKey": "lei-8987:27",
+    "enunciado": "A transferência do controle societário da concessionária, ainda que sem prévia anuência do poder concedente, é válida e eficaz, gerando apenas o dever de comunicação posterior ao poder concedente.",
+    "gabarito": false,
+    "comentario": "Art. 27, caput: a transferência sem prévia anuência do poder concedente gera CADUCIDADE da concessão, não mera comunicação posterior.",
+    "tipo": "pegadinha"
+  },
+  {
+    "id": "l8987-q19",
+    "artigoKey": "lei-8987:32",
+    "enunciado": "O poder concedente poderá intervir na concessão, com o fim de assegurar a adequação na prestação do serviço, bem como o fiel cumprimento das normas contratuais, regulamentares e legais pertinentes.",
+    "gabarito": true,
+    "comentario": "Literal do art. 32, caput.",
+    "tipo": "literal"
+  },
+  {
+    "id": "l8987-q20",
+    "artigoKey": "lei-8987:33",
+    "enunciado": "Declarada a intervenção, o poder concedente deverá, no prazo de trinta dias, instaurar procedimento administrativo para comprovar as causas determinantes da medida e apurar responsabilidades, assegurado o direito de ampla defesa.",
+    "gabarito": true,
+    "comentario": "Literal do art. 33, caput.",
+    "tipo": "literal"
+  },
+  {
+    "id": "l8987-q21",
+    "artigoKey": "lei-8987:33",
+    "enunciado": "O procedimento administrativo instaurado em razão da intervenção deverá ser concluído no prazo de até 90 (noventa) dias, sob pena de considerar-se inválida a intervenção.",
+    "gabarito": false,
+    "comentario": "Art. 33, § 2º: o prazo é de até 180 (cento e oitenta) dias, não 90.",
+    "tipo": "pegadinha"
+  },
+  {
+    "id": "l8987-q22",
+    "artigoKey": "lei-8987:35",
+    "enunciado": "A concessão extingue-se por advento do termo contratual, encampação, caducidade, rescisão, anulação, ou falência ou extinção da empresa concessionária.",
+    "gabarito": true,
+    "comentario": "Literal do art. 35, incisos I a VI.",
+    "tipo": "literal"
+  },
+  {
+    "id": "l8987-q23",
+    "artigoKey": "lei-8987:37",
+    "enunciado": "Considera-se encampação a retomada do serviço pelo poder concedente durante o prazo da concessão, por motivo de interesse público, mediante lei autorizativa específica e após prévio pagamento da indenização.",
+    "gabarito": true,
+    "comentario": "Literal do art. 37.",
+    "tipo": "literal"
+  },
+  {
+    "id": "l8987-q24",
+    "artigoKey": "lei-8987:38",
+    "enunciado": "A caducidade da concessão pode ser declarada de plano pelo poder concedente, independentemente de processo administrativo, sempre que verificado o descumprimento de cláusulas contratuais pela concessionária.",
+    "gabarito": false,
+    "comentario": "Art. 38, § 2º: a declaração de caducidade deve ser precedida de processo administrativo, assegurado o direito de ampla defesa.",
+    "tipo": "pegadinha"
+  },
+  {
+    "id": "l8987-q25",
+    "artigoKey": "lei-8987:38",
+    "enunciado": "Declarada a caducidade da concessão, esta será feita por decreto do poder concedente, independentemente de indenização prévia, calculada no decurso do processo.",
+    "gabarito": true,
+    "comentario": "Literal do art. 38, § 4º — ao contrário da encampação (art. 37), que exige indenização PRÉVIA.",
+    "tipo": "literal"
+  },
+  {
+    "id": "l8987-q26",
+    "artigoKey": "lei-8987:39",
+    "enunciado": "O contrato de concessão poderá ser rescindido por iniciativa da concessionária, no caso de descumprimento das normas contratuais pelo poder concedente, mediante ação judicial especialmente intentada para esse fim, não podendo os serviços prestados pela concessionária ser interrompidos ou paralisados até a decisão judicial transitada em julgado.",
+    "gabarito": true,
+    "comentario": "Literal do art. 39, caput e parágrafo único.",
+    "tipo": "literal"
+  },
+  {
+    "id": "l8987-q27",
+    "artigoKey": "lei-8987:40",
+    "enunciado": "A permissão de serviço público será formalizada mediante contrato de adesão, observada a precariedade e a revogabilidade unilateral do contrato pelo poder concedente.",
+    "gabarito": true,
+    "comentario": "Literal do art. 40, caput.",
+    "tipo": "literal"
+  },
+  {
+    "id": "l8987-q28",
+    "artigoKey": "lei-8987:41",
+    "enunciado": "O disposto na Lei nº 8.987/95 não se aplica à concessão, permissão e autorização para o serviço de radiodifusão sonora e de sons e imagens.",
+    "gabarito": true,
+    "comentario": "Literal do art. 41.",
+    "tipo": "literal"
+  }
+]
