@@ -5,7 +5,7 @@ import { listAllTopics, type Topic } from '@/services/topics.service';
 import { getTargetExam, type TargetExam } from '@/services/targetExams.service';
 import {
   listLinkedTopicIds, linkTopic, unlinkTopic,
-  linkTopicsBulk, unlinkTopicsBulk,
+  linkTopicsBulk, unlinkTopicsBulk, listTopicIncidencia,
 } from '@/services/targetTopics.service';
 import { listTopicWeights, setTopicWeight } from '@/services/targetWeights.service';
 import { listBlueprints, upsertBlueprint, type Blueprint } from '@/services/blueprints.service';
@@ -25,6 +25,7 @@ export function useTargetDetail(targetId: string) {
   const [tree, setTree] = useState<SubjectTree[]>([]);
   const [linked, setLinked] = useState<Set<string>>(new Set());
   const [saudeMap, setSaudeMap] = useState<Record<string, number>>({});
+  const [incidencias, setIncidencias] = useState<Record<string, number>>({});
   const [topicWeights, setTopicWeights] = useState<Record<string, number | null>>({});
   const [subjectWeights, setSubjectWeights] = useState<Record<string, number>>({});
   const [blueprints, setBlueprints] = useState<Record<string, Blueprint>>({});
@@ -40,18 +41,22 @@ export function useTargetDetail(targetId: string) {
   const load = useCallback(async () => {
     try {
       setError('');
-      const [target, subjects, allTopics, linkedIds, tWeights, blueprintsList] = await Promise.all([
+      const [target, subjects, allTopics, linkedIds, tWeights, blueprintsList, incidenciaMap] = await Promise.all([
         getTargetExam(targetId),
         listSubjects(),
         listAllTopics(),
         listLinkedTopicIds(targetId),
         listTopicWeights(targetId),
         listBlueprints(targetId),
+        // Incidência curada (copiada do catálogo na ativação) — best-effort:
+        // sem dado real, o mapa fica vazio e a UI não mostra nada.
+        listTopicIncidencia(targetId).catch(() => ({} as Record<string, number>)),
       ]);
 
       setTarget(target);
       setLinked(linkedIds);
       setTopicWeights(tWeights);
+      setIncidencias(incidenciaMap);
 
       // Ficha do catálogo (última edição, banca, vagas…) — em background,
       // o hub renderiza sem ela e o card "Sobre o concurso" aparece quando chegar.
@@ -168,7 +173,7 @@ export function useTargetDetail(targetId: string) {
   }, [targetId, load, toast]);
 
   return {
-    target, catalogInfo, updates, tree, linked, saudeMap, topicWeights, subjectWeights, blueprints, nQInputs,
+    target, catalogInfo, updates, tree, linked, saudeMap, incidencias, topicWeights, subjectWeights, blueprints, nQInputs,
     loading, error, inFlightTopics,
     load, toggleTopic, toggleAllOfSubject, changeTopicWeight, changeSubjectWeight, setNQInputs,
   };

@@ -15,6 +15,7 @@ import { type TargetExam, listArchivedTargetExams } from '@/services/targetExams
 import { unarchiveConcurso } from '@/services/concursoArchive.service';
 import { BancoEditaisTab } from '@/components/features/targets/BancoEditaisTab';
 import { ImportarEditalModal } from '@/components/features/targets/ImportarEditalModal';
+import { ImportarEditalPdfModal } from '@/components/features/targets/ImportarEditalPdfModal';
 import { ArquivarConcursoModal } from '@/components/features/targets/ArquivarConcursoModal';
 import { useToast } from '@/components/ui/ToastProvider';
 import { theme } from '@/lib/theme';
@@ -50,6 +51,7 @@ export default function TargetsPage() {
   const [tab, setTab] = usePersistedState<Tab>('targets_tab', 'meus', parseTab);
   const [showCreate, setShowCreate] = useState(false);
   const [importarOpen, setImportarOpen] = useState(false);
+  const [importarPdfOpen, setImportarPdfOpen] = useState(false);
 
   const [boardId, setBoardId] = useState('');
   const [orgao, setOrgao] = useState('');
@@ -179,9 +181,8 @@ export default function TargetsPage() {
 
         {tab === 'banco' && (
           <BancoEditaisTab
-            isMobile={isMobile}
-            onActivated={(targetId) => router.push(`/targets/${targetId}`)}
             onImportar={() => setImportarOpen(true)}
+            onImportarPdf={() => setImportarPdfOpen(true)}
           />
         )}
 
@@ -199,6 +200,9 @@ export default function TargetsPage() {
               </Button>
               <button onClick={() => setImportarOpen(true)} style={s.importarLink}>
                 importar edital colado →
+              </button>
+              <button onClick={() => setImportarPdfOpen(true)} style={s.importarLink}>
+                importar edital em PDF →
               </button>
             </div>
 
@@ -354,6 +358,13 @@ export default function TargetsPage() {
         <ImportarEditalModal
           onClose={() => setImportarOpen(false)}
           onImported={(targetId) => { setImportarOpen(false); router.push(`/targets/${targetId}`); }}
+        />
+      )}
+
+      {importarPdfOpen && (
+        <ImportarEditalPdfModal
+          onClose={() => setImportarPdfOpen(false)}
+          onImported={(targetId) => { setImportarPdfOpen(false); router.push(`/targets/${targetId}`); }}
         />
       )}
 

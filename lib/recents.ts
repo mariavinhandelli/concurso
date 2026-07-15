@@ -3,7 +3,7 @@
 // para o Command Palette oferecer "voltar rápido" sem depender da hierarquia.
 // 100% localStorage — não toca no banco. SSR-safe (guarda typeof window).
 
-export type RecentKind = 'subject' | 'lei' | 'juris';
+export type RecentKind = 'subject' | 'lei' | 'juris' | 'edital';
 
 export interface RecentItem {
   kind: RecentKind;

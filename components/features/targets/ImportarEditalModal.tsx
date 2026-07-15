@@ -1,9 +1,14 @@
 'use client';
 
 import { useMemo, useState, type CSSProperties } from 'react';
-import { X } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { X, Sparkles } from 'lucide-react';
 import { parseEdital } from '@/lib/parse-edital';
 import { importEditalAsTarget } from '@/services/editalImport.service';
+import {
+  activateCatalogEdital, listCatalogEditais, matchCatalogEdital, type CatalogEdital,
+} from '@/services/editaisCatalog.service';
+import { track, EV } from '@/lib/analytics';
 import { useToast } from '@/components/ui/ToastProvider';
 import { theme } from '@/lib/theme';
 import { Overlay } from '@/components/ui/Overlay';
@@ -27,6 +32,32 @@ export function ImportarEditalModal({
 
   const groups = useMemo(() => parseEdital(raw), [raw]);
   const totalTopics = groups.reduce((acc, g) => acc + g.topics.length, 0);
+
+  // Fase 3: se órgão+cargo casam com um edital do banco, oferecer a ativação
+  // completa em vez de criar um target órfão (sem ficha nem linha do tempo).
+  const [activatingMatch, setActivatingMatch] = useState(false);
+  const { data: catalogEditais } = useQuery<CatalogEdital[]>({
+    queryKey: ['catalog-editais'],
+    queryFn: listCatalogEditais,
+    staleTime: 60_000,
+  });
+  const catalogMatch = useMemo(
+    () => matchCatalogEdital(catalogEditais ?? [], orgao, cargo),
+    [catalogEditais, orgao, cargo],
+  );
+
+  async function handleActivateMatch() {
+    if (!catalogMatch || activatingMatch) return;
+    setActivatingMatch(true);
+    try {
+      const targetId = await activateCatalogEdital(catalogMatch.id);
+      track(EV.editalActivated, { slug: catalogMatch.slug, via: 'import_paste_match' });
+      onImported(targetId);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'Erro ao ativar edital do banco.');
+      setActivatingMatch(false);
+    }
+  }
 
   async function handleConfirm() {
     if (groups.length === 0) return;
@@ -54,6 +85,22 @@ export function ImportarEditalModal({
           <Input value={cargo} onChange={(e) => setCargo(e.target.value)} placeholder="Cargo (ex: Analista)" style={{ flex: 1, minWidth: 140 }} />
           <Input value={orgao} onChange={(e) => setOrgao(e.target.value)} placeholder="Órgão (opcional)" style={{ flex: 1, minWidth: 140 }} />
         </div>
+
+        {catalogMatch && (
+          <div style={s.matchBanner}>
+            <Sparkles size={16} color={theme.teal} strokeWidth={2} style={{ flexShrink: 0, marginTop: 2 }} />
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <p style={s.matchTitle}>Este concurso já está no Banco de Editais</p>
+              <p style={s.matchHint}>
+                <strong>{[catalogMatch.orgao, catalogMatch.cargo].filter(Boolean).join(' · ')}</strong> — ativar a
+                versão completa traz pesos das disciplinas, ficha, linha do tempo e notícias.
+              </p>
+            </div>
+            <Button size="sm" onClick={handleActivateMatch} loading={activatingMatch} style={{ flexShrink: 0 }}>
+              {catalogMatch.isActivated ? 'Abrir concurso' : 'Ativar edital do banco'}
+            </Button>
+          </div>
+        )}
 
         <div style={s.split}>
           <Textarea
@@ -98,6 +145,10 @@ const s: Record<string, CSSProperties> = {
   sub: { fontSize: 13, color: theme.inkSoft, margin: '5px 0 0', lineHeight: 1.5 },
 
   fields: { display: 'flex', gap: 10, marginBottom: 14, flexWrap: 'wrap' },
+
+  matchBanner: { display: 'flex', alignItems: 'flex-start', gap: 10, padding: '12px 14px', borderRadius: theme.radiusSm, border: `1px solid ${theme.teal}`, background: theme.tealBg, marginBottom: 14, flexWrap: 'wrap' },
+  matchTitle: { fontSize: 13, fontWeight: 700, color: theme.ink, margin: 0 },
+  matchHint: { fontSize: 12, color: theme.inkSoft, margin: '3px 0 0', lineHeight: 1.5 },
 
   split: { display: 'flex', gap: 14, marginBottom: 18, flexWrap: 'wrap' },
   preview: { flex: 1, minWidth: 200, minHeight: 240, maxHeight: 320, overflowY: 'auto', padding: 14, borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.muted },

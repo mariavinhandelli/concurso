@@ -1,16 +1,20 @@
 'use client';
 
-// Banco de editais prontos, navegável direto na página (sem modal escondido).
-// Clique num edital abre os detalhes completos — a ativação é uma decisão
+// Banco de editais: catálogo navegável com busca textual e filtros avançados
+// (área, banca, UF, escolaridade, situação). Clique num edital abre a página
+// /editais/[slug] — o Dashboard do Edital — onde a ativação é uma decisão
 // informada, nunca o primeiro clique.
 
 import { useMemo, useState, type CSSProperties } from 'react';
+import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
-import { Check } from 'lucide-react';
+import { Check, ChevronDown, Funnel, Search } from 'lucide-react';
 import { listCatalogEditais, type CatalogEdital } from '@/services/editaisCatalog.service';
-import { EditalDetailModal } from '@/components/features/targets/EditalDetailModal';
 import { theme } from '@/lib/theme';
 import { Button } from '@/components/ui/Button';
+import { Badge } from '@/components/ui/Badge';
+import { Input } from '@/components/ui/Input';
+import { Select } from '@/components/ui/Select';
 
 const SITUACAO_LABEL: Record<CatalogEdital['situacao'], string> = {
   vigente: 'Edital vigente',
@@ -18,15 +22,31 @@ const SITUACAO_LABEL: Record<CatalogEdital['situacao'], string> = {
   encerrado: 'Encerrado',
 };
 
-interface Props {
-  isMobile: boolean;
-  onActivated: (targetId: string) => void;
-  onImportar: () => void;
+// Remove acentos e caixa para casar "tecnico" com "Técnico".
+function norm(v: string): string {
+  return v.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();
 }
 
-export function BancoEditaisTab({ isMobile, onActivated, onImportar }: Props) {
+interface FilterValues {
+  banca: string;
+  uf: string;
+  nivel: string;
+  situacao: string;
+}
+
+const EMPTY_FILTERS: FilterValues = { banca: '', uf: '', nivel: '', situacao: '' };
+
+interface Props {
+  onImportar: () => void;
+  onImportarPdf: () => void;
+}
+
+export function BancoEditaisTab({ onImportar, onImportarPdf }: Props) {
+  const router = useRouter();
   const [area, setArea] = useState<string>('todas');
-  const [detail, setDetail] = useState<CatalogEdital | null>(null);
+  const [q, setQ] = useState('');
+  const [filters, setFilters] = useState<FilterValues>(EMPTY_FILTERS);
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   const { data: editais, isLoading, isError } = useQuery<CatalogEdital[]>({
     queryKey: ['catalog-editais'],
@@ -39,10 +59,43 @@ export function BancoEditaisTab({ isMobile, onActivated, onImportar }: Props) {
     return [...set];
   }, [editais]);
 
+  const options = useMemo(() => {
+    const bancas = new Set<string>();
+    const ufs = new Set<string>();
+    const niveis = new Set<string>();
+    for (const e of editais ?? []) {
+      if (e.banca) bancas.add(e.banca);
+      if (e.uf) ufs.add(e.uf);
+      if (e.nivel) niveis.add(e.nivel);
+    }
+    return {
+      bancas: [...bancas].sort(),
+      ufs: [...ufs].sort(),
+      niveis: [...niveis].sort(),
+    };
+  }, [editais]);
+
+  const activeCount = Object.values(filters).filter(Boolean).length;
+
   const filtered = useMemo(() => {
-    if (area === 'todas') return editais ?? [];
-    return (editais ?? []).filter((e) => (e.areaName ?? 'Outros') === area);
-  }, [editais, area]);
+    const nq = norm(q.trim());
+    return (editais ?? []).filter((e) => {
+      if (area !== 'todas' && (e.areaName ?? 'Outros') !== area) return false;
+      if (filters.banca && e.banca !== filters.banca) return false;
+      if (filters.uf && e.uf !== filters.uf) return false;
+      if (filters.nivel && e.nivel !== filters.nivel) return false;
+      if (filters.situacao && e.situacao !== filters.situacao) return false;
+      if (nq) {
+        const hay = norm([e.orgao, e.cargo, e.banca ?? ''].join(' '));
+        if (!hay.includes(nq)) return false;
+      }
+      return true;
+    });
+  }, [editais, area, q, filters]);
+
+  function set<K extends keyof FilterValues>(key: K, value: string) {
+    setFilters((prev) => ({ ...prev, [key]: value }));
+  }
 
   if (isLoading) {
     return (
@@ -62,14 +115,88 @@ export function BancoEditaisTab({ isMobile, onActivated, onImportar }: Props) {
     return (
       <div style={s.empty}>
         <p style={s.emptyTitle}>Banco de editais em construção</p>
-        <p style={s.emptyHint}>Em breve, concursos prontos aqui. Por ora, crie seu concurso manualmente ou importe um edital colado.</p>
-        <Button variant="outline" style={{ borderColor: theme.teal, background: theme.tealBg, color: theme.teal }} onClick={onImportar}>Importar edital colado →</Button>
+        <p style={s.emptyHint}>Em breve, concursos prontos aqui. Por ora, crie seu concurso manualmente, importe um PDF ou cole o edital.</p>
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', justifyContent: 'center' }}>
+          <Button variant="outline" style={{ borderColor: theme.teal, background: theme.tealBg, color: theme.teal }} onClick={onImportarPdf}>Importar edital em PDF →</Button>
+          <Button variant="outline" style={{ borderColor: theme.teal, background: theme.tealBg, color: theme.teal }} onClick={onImportar}>Importar edital colado →</Button>
+        </div>
       </div>
     );
   }
 
   return (
     <>
+      {/* Busca textual — órgão, cargo ou banca */}
+      <div style={{ marginBottom: 10 }}>
+        <Input
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          placeholder="Buscar por órgão, cargo ou banca…"
+          icon={<Search size={15} color={theme.inkFaint} strokeWidth={2} />}
+          aria-label="Buscar editais"
+        />
+      </div>
+
+      {/* Filtros avançados — mesmo padrão colapsível das jurisprudências */}
+      <div style={s.filterCard}>
+        <div
+          role="button"
+          tabIndex={0}
+          onClick={() => setFiltersOpen((v) => !v)}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setFiltersOpen((v) => !v); }}
+          style={s.filterHead}
+        >
+          <Funnel size={15} color={theme.inkSoft} strokeWidth={1.7} />
+          <span style={s.filterTitle}>Filtros</span>
+          {activeCount > 0 && <Badge variant="brand" tone="solid">{activeCount}</Badge>}
+          {activeCount > 0 && (
+            <button
+              onClick={(e) => { e.stopPropagation(); setFilters(EMPTY_FILTERS); }}
+              style={s.clearBtn}
+            >Limpar</button>
+          )}
+          <ChevronDown size={14} color={theme.inkFaint} strokeWidth={1.7}
+            style={{ marginLeft: 'auto', transform: filtersOpen ? 'rotate(180deg)' : 'none', transition: 'transform .15s' }} />
+        </div>
+
+        {filtersOpen && (
+          <div style={s.filterBody}>
+            <div style={s.filterGrid}>
+              <div>
+                <label style={s.filterLabel}>Banca</label>
+                <Select value={filters.banca} onChange={(e) => set('banca', e.target.value)}>
+                  <option value="">Todas</option>
+                  {options.bancas.map((b) => <option key={b} value={b}>{b}</option>)}
+                </Select>
+              </div>
+              <div>
+                <label style={s.filterLabel}>Estado (UF)</label>
+                <Select value={filters.uf} onChange={(e) => set('uf', e.target.value)}>
+                  <option value="">Todos</option>
+                  {options.ufs.map((u) => <option key={u} value={u}>{u}</option>)}
+                </Select>
+              </div>
+              <div>
+                <label style={s.filterLabel}>Escolaridade</label>
+                <Select value={filters.nivel} onChange={(e) => set('nivel', e.target.value)}>
+                  <option value="">Todas</option>
+                  {options.niveis.map((n) => <option key={n} value={n}>Nível {n}</option>)}
+                </Select>
+              </div>
+              <div>
+                <label style={s.filterLabel}>Situação</label>
+                <Select value={filters.situacao} onChange={(e) => set('situacao', e.target.value)}>
+                  <option value="">Todas</option>
+                  <option value="vigente">Edital vigente</option>
+                  <option value="em_expectativa">Em expectativa</option>
+                  <option value="encerrado">Encerrado</option>
+                </Select>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
       {/* Filtro por área */}
       {areas.length > 1 && (
         <div style={s.chips}>
@@ -84,25 +211,22 @@ export function BancoEditaisTab({ isMobile, onActivated, onImportar }: Props) {
         </div>
       )}
 
-      <div style={s.list}>
-        {filtered.map((e) => (
-          <EditalCard key={e.id} edital={e} onOpen={() => setDetail(e)} />
-        ))}
-      </div>
+      {filtered.length === 0 ? (
+        <p style={s.muted}>Nenhum edital encontrado com esses filtros.</p>
+      ) : (
+        <div style={s.list}>
+          {filtered.map((e) => (
+            <EditalCard key={e.id} edital={e} onOpen={() => router.push(`/editais/${e.slug}`)} />
+          ))}
+        </div>
+      )}
 
       <p style={s.footerHint}>
         Não achou seu concurso?{' '}
-        <button onClick={onImportar} style={s.footerLink}>Importe um edital colado →</button>
+        <button onClick={onImportarPdf} style={s.footerLink}>Importe um PDF →</button>
+        {' ou '}
+        <button onClick={onImportar} style={s.footerLink}>cole o edital →</button>
       </p>
-
-      {detail && (
-        <EditalDetailModal
-          edital={detail}
-          isMobile={isMobile}
-          onClose={() => setDetail(null)}
-          onActivated={onActivated}
-        />
-      )}
     </>
   );
 }
@@ -111,6 +235,7 @@ function EditalCard({ edital: e, onOpen }: { edital: CatalogEdital; onOpen: () =
   const [hov, setHov] = useState(false);
   const meta = [
     e.banca,
+    e.uf,
     e.situacao === 'em_expectativa' && e.ultimaEdicao ? `última edição ${e.ultimaEdicao}` : e.ano ? String(e.ano) : null,
     `${e.subjectCount} matéria${e.subjectCount === 1 ? '' : 's'}`,
     `${e.topicCount} tópicos`,
@@ -162,7 +287,14 @@ const s: Record<string, CSSProperties> = {
   empty: { textAlign: 'center', padding: '40px 12px' },
   emptyTitle: { fontSize: 15, fontWeight: 600, color: theme.inkSoft, margin: '0 0 6px' },
   emptyHint: { fontSize: 13, color: theme.inkFaint, maxWidth: 360, margin: '0 auto 16px', lineHeight: 1.6 },
-  importBtn: { padding: '10px 20px', borderRadius: theme.radiusSm, border: `1px solid ${theme.teal}`, background: theme.tealBg, color: theme.teal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+
+  filterCard: { background: theme.card, border: `0.5px solid ${theme.line}`, borderRadius: theme.radius, boxShadow: theme.shadow, overflow: 'hidden', marginBottom: 12 },
+  filterHead: { display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '11px 16px', cursor: 'pointer', userSelect: 'none' },
+  filterTitle: { fontSize: 14, fontWeight: 600, color: theme.ink },
+  clearBtn: { fontSize: 12, fontWeight: 600, color: theme.teal, border: 'none', background: 'transparent', cursor: 'pointer', fontFamily: 'inherit' },
+  filterBody: { padding: '4px 16px 16px', borderTop: `0.5px solid ${theme.line}` },
+  filterGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '10px 14px', marginTop: 10 },
+  filterLabel: { display: 'block', fontSize: 11, fontWeight: 600, color: theme.inkFaint, textTransform: 'uppercase', letterSpacing: 0.4, marginBottom: 5 },
 
   chips: { display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 14 },
   chip: { padding: '6px 14px', borderRadius: theme.radiusPill, border: `1px solid ${theme.line}`, background: 'transparent', color: theme.inkSoft, fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit', transition: 'all .12s' },

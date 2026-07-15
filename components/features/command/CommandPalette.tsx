@@ -15,6 +15,7 @@ import { listSubjects, type Subject } from '@/services/subjects.service';
 import { listAllTopics, type Topic } from '@/services/topics.service';
 import { listNotes, type ErrorNote } from '@/services/notebook.service';
 import { LEIS_CATALOG } from '@/services/leis.service';
+import { listCatalogEditais, type CatalogEdital } from '@/services/editaisCatalog.service';
 import { type JurisComInteracao } from '@/services/jurisInteracoes.service';
 import { listFavoriteLeiArtigos } from '@/services/leiInteracoes.service';
 import { getRecents } from '@/lib/recents';
@@ -23,7 +24,7 @@ import { theme, zIndex } from '@/lib/theme';
 export const OPEN_COMMAND_EVENT = 'focali:open-command';
 export const OPEN_QUICKLOG_EVENT = 'focali:open-quicklog';
 
-type Group = 'Recentes' | 'Favoritos' | 'Ações' | 'Ir para' | 'Matérias' | 'Tópicos' | 'Leis' | 'Erros';
+type Group = 'Recentes' | 'Favoritos' | 'Ações' | 'Ir para' | 'Matérias' | 'Tópicos' | 'Leis' | 'Erros' | 'Editais';
 
 interface CmdItem {
   key: string;
@@ -103,6 +104,10 @@ export function CommandPalette() {
   const { data: erros } = useQuery<ErrorNote[]>({
     queryKey: ['cmd-erros'], queryFn: () => listNotes(), enabled: open, staleTime: 60_000,
   });
+  // Editais do banco — "PM-GO" precisa achar a página do edital.
+  const { data: catalogEditais } = useQuery<CatalogEdital[]>({
+    queryKey: ['catalog-editais'], queryFn: listCatalogEditais, enabled: open, staleTime: 60_000,
+  });
 
   // M12: Recentes (client-side, lidos a cada abertura) + Favoritos (juris + lei).
   const recents = useMemo(() => (open ? getRecents() : []), [open]);
@@ -156,8 +161,14 @@ export function CommandPalette() {
         run: () => go(`/caderno?erro=${e.id}`),
       };
     });
-    return [...subs, ...tops, ...errs];
-  }, [subjects, topics, erros, subjById, go]);
+    const edits = (catalogEditais ?? []).map((e): CmdItem => ({
+      key: `edital-${e.id}`, group: 'Editais',
+      label: [e.orgao, e.cargo].filter(Boolean).join(' · '),
+      sublabel: e.banca ?? e.areaName ?? undefined,
+      run: () => go(`/editais/${e.slug}`),
+    }));
+    return [...subs, ...tops, ...errs, ...edits];
+  }, [subjects, topics, erros, catalogEditais, subjById, go]);
 
   const recentItems: CmdItem[] = useMemo(() => recents.map((r): CmdItem => ({
     key: `rec-${r.kind}-${r.id}`, group: 'Recentes', label: r.label, sublabel: r.sublabel, run: () => go(r.href),
@@ -192,8 +203,8 @@ export function CommandPalette() {
       || (i.searchText ? norm(i.searchText).includes(nq) : false),
     );
     // Ordena por grupo e limita os grupos "grandes" para manter a lista navegável.
-    const order: Group[] = ['Ações', 'Ir para', 'Matérias', 'Tópicos', 'Erros', 'Leis'];
-    const caps: Record<Group, number> = { 'Recentes': 8, 'Favoritos': 8, 'Ações': 5, 'Ir para': 8, 'Matérias': 6, 'Tópicos': 8, 'Erros': 6, 'Leis': 5 };
+    const order: Group[] = ['Ações', 'Ir para', 'Matérias', 'Tópicos', 'Erros', 'Editais', 'Leis'];
+    const caps: Record<Group, number> = { 'Recentes': 8, 'Favoritos': 8, 'Ações': 5, 'Ir para': 8, 'Matérias': 6, 'Tópicos': 8, 'Erros': 6, 'Editais': 5, 'Leis': 5 };
     const out: CmdItem[] = [];
     for (const g of order) out.push(...all.filter((i) => i.group === g).slice(0, caps[g]));
     return out;
@@ -221,7 +232,7 @@ export function CommandPalette() {
 
   // Agrupa para render com cabeçalhos, mantendo o índice global para o teclado.
   let runningIdx = -1;
-  const groupsInOrder: Group[] = ['Recentes', 'Favoritos', 'Ações', 'Ir para', 'Matérias', 'Tópicos', 'Erros', 'Leis'];
+  const groupsInOrder: Group[] = ['Recentes', 'Favoritos', 'Ações', 'Ir para', 'Matérias', 'Tópicos', 'Erros', 'Editais', 'Leis'];
 
   return (
     <div style={s.backdrop} onClick={close}>

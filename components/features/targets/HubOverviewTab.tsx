@@ -12,6 +12,7 @@ import { Check, X } from 'lucide-react';
 import { type TargetExam } from '@/services/targetExams.service';
 import { type CatalogEditalInfo, type EditalUpdate, type EditalUpdateTipo } from '@/services/editaisCatalog.service';
 import { normalizeDisciplina } from '@/lib/juris-disciplinas';
+import { leiDisciplinaForSubject } from '@/services/leis.service';
 import { type SubjectTree, daysUntilExam, countdownInfo } from '@/lib/targets';
 import { theme } from '@/lib/theme';
 import { Button } from '@/components/ui/Button';
@@ -20,16 +21,17 @@ const PREP_KEY_PREFIX = 'focali_prep_';
 
 // Checklist de preparação pré-edital.
 // - auto: derivado de estado real da plataforma (não é autorrelato).
-// - disabled: a ação depende de uma feature que a Focali ainda não tem
-//   (banco de provas anteriores, comparador de editais, mapa de incidência,
-//   perfil de banca). Mostrado como "em breve" e excluído do cálculo de %
-//   para não fingir progresso automatizado que não existe.
-const PREP_ITEMS: { key: string; label: string; auto?: boolean; disabled?: boolean }[] = [
+// - catalog: a ação vive na página do edital (/editais/[slug]) — comparador,
+//   estatística de disciplinas, histórico do concurso, provas anteriores.
+//   Só fica disponível quando o concurso está vinculado a um edital do banco;
+//   sem vínculo, aparece como "em breve" e sai do cálculo de % para não
+//   fingir progresso que não depende da usuária.
+const PREP_ITEMS: { key: string; label: string; auto?: boolean; catalog?: boolean; anchor?: string }[] = [
   { key: 'prova-ultima', label: 'Resolver a última prova aplicada neste concurso' },
   { key: 'estudar-edital', label: 'Estudar o último edital publicado' },
-  { key: 'comparar-editais', label: 'Comparar o último edital com o anterior', disabled: true },
-  { key: 'mapa-incidencia', label: 'Mapear disciplinas e assuntos mais cobrados', disabled: true },
-  { key: 'estilo-banca', label: 'Estudar o estilo da banca provável', disabled: true },
+  { key: 'comparar-editais', label: 'Comparar o último edital com o anterior', catalog: true, anchor: '#comparar' },
+  { key: 'mapa-incidencia', label: 'Mapear disciplinas e assuntos mais cobrados', catalog: true, anchor: '#disciplinas' },
+  { key: 'estilo-banca', label: 'Estudar o estilo da banca provável', catalog: true, anchor: '#historico' },
   { key: 'montar-edital', label: 'Montar o edital verticalizado na Focali', auto: true },
   { key: 'pesos', label: 'Definir os pesos das disciplinas', auto: true },
   { key: 'cronograma', label: 'Gerar o cronograma de estudos' },
@@ -126,10 +128,12 @@ export function HubOverviewTab({
     ? { danger: theme.danger, warn: theme.warn, ok: theme.teal, past: theme.inkFaint }[cd.tone]
     : theme.inkFaint;
 
-  // Itens "disabled" (sem feature real por trás) ficam de fora do cálculo de
-  // %: do contrário o checklist nunca chegaria a 100% por motivos que não
-  // dependem do usuário.
-  const countableItems = PREP_ITEMS.filter((i) => !i.disabled);
+  // Itens que dependem da página do edital só contam quando o concurso está
+  // vinculado ao catálogo; do contrário o checklist nunca chegaria a 100% por
+  // motivos que não dependem do usuário.
+  const catalogSlug = catalogInfo?.slug ?? null;
+  const isItemDisabled = (item: (typeof PREP_ITEMS)[number]): boolean => Boolean(item.catalog) && !catalogSlug;
+  const countableItems = PREP_ITEMS.filter((i) => !isItemDisabled(i));
   function isChecked(item: (typeof PREP_ITEMS)[number]): boolean {
     if (item.key === 'pesos') return Object.keys(subjectWeights).length > 0;
     if (item.auto) return linked.size > 0;
@@ -166,15 +170,40 @@ export function HubOverviewTab({
   // escopar a sessão de flashcards ao invés de puxar todas as matérias do usuário.
   const linkedSubjectIds = useMemo(() => stats.porDisciplina.map((d) => d.id), [stats.porDisciplina]);
 
+  // Lei seca escopada pelo edital (Fase 3): a primeira matéria do concurso
+  // (por volume de tópicos) que tenha lei correspondente no Vade Mecum define
+  // o filtro — mesmo racional do topDisciplina das jurisprudências.
+  const topLeiDisciplina = useMemo(() => {
+    for (const d of stats.porDisciplina) {
+      const match = leiDisciplinaForSubject(d.name);
+      if (match) return match;
+    }
+    return null;
+  }, [stats.porDisciplina]);
+  const vademecumHref = topLeiDisciplina
+    ? `/vademecum?disciplina=${encodeURIComponent(topLeiDisciplina)}`
+    : '/vademecum';
+
   function handlePrepClick(item: (typeof PREP_ITEMS)[number]) {
-    if (item.disabled) return;
+    if (isItemDisabled(item)) return;
+    // Ações que vivem na página do edital: marca a etapa e leva à seção certa.
+    if (item.catalog && catalogSlug) {
+      togglePrep(item.key);
+      router.push(`/editais/${catalogSlug}${item.anchor ?? ''}`);
+      return;
+    }
+    if (item.key === 'prova-ultima' && catalogSlug) {
+      togglePrep(item.key);
+      router.push(`/editais/${catalogSlug}#provas`);
+      return;
+    }
     if (item.key === 'montar-edital' || item.key === 'pesos') { onGoMontar(); return; }
     if (item.key === 'cronograma') { onGenerate(); togglePrep(item.key); return; }
     if (item.key === 'juris') {
       router.push(topDisciplina ? `/jurisprudencias/lista?disciplina=${encodeURIComponent(topDisciplina)}` : '/jurisprudencias');
       return;
     }
-    if (item.key === 'lei-seca') { router.push('/vademecum'); return; }
+    if (item.key === 'lei-seca') { router.push(vademecumHref); return; }
     togglePrep(item.key);
   }
 
@@ -262,11 +291,16 @@ export function HubOverviewTab({
         <div style={s.card}>
           <div style={s.cardHead}>
             <h3 style={s.cardTitle}>Sobre o concurso</h3>
-            {catalogInfo.editalUrl && (
-              <a href={catalogInfo.editalUrl} target="_blank" rel="noopener noreferrer" style={s.downloadBtn}>
-                Baixar edital ↓
-              </a>
-            )}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0, flexWrap: 'wrap' }}>
+              <button onClick={() => router.push(`/editais/${catalogInfo.slug}`)} style={s.editalPageLink}>
+                Página do edital →
+              </button>
+              {catalogInfo.editalUrl && (
+                <a href={catalogInfo.editalUrl} target="_blank" rel="noopener noreferrer" style={s.downloadBtn}>
+                  Baixar edital ↓
+                </a>
+              )}
+            </div>
           </div>
           <div style={{ ...s.factGrid, gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(3, 1fr)' }}>
             <div style={s.fact}>
@@ -361,29 +395,31 @@ export function HubOverviewTab({
           {prepOpen && (
             <div style={s.prepList}>
               {PREP_ITEMS.map((item) => {
-                const checked = !item.disabled && isChecked(item);
+                const itemDisabled = isItemDisabled(item);
+                const checked = !itemDisabled && isChecked(item);
                 return (
                   <button
                     key={item.key}
                     onClick={() => handlePrepClick(item)}
-                    disabled={item.disabled}
+                    disabled={itemDisabled}
                     style={{
                       ...s.prepRow,
                       ...(checked ? s.prepRowDone : {}),
-                      ...(item.disabled ? s.prepRowDisabled : {}),
+                      ...(itemDisabled ? s.prepRowDisabled : {}),
                     }}
                     title={
-                      item.disabled ? 'Ainda não disponível na Focali'
+                      itemDisabled ? 'Disponível quando o concurso estiver vinculado a um edital do banco'
                         : item.auto ? 'Marcado automaticamente com base no que você já configurou'
+                        : item.catalog ? 'Abre a seção correspondente na página do edital'
                         : undefined
                     }
                   >
                     <span style={{ ...s.prepCheck, ...(checked ? s.prepCheckOn : {}) }}>{checked && <Check size={13} strokeWidth={2.5} />}</span>
-                    <span style={{ ...s.prepLabel, ...(checked ? s.prepLabelDone : {}), ...(item.disabled ? s.prepLabelDisabled : {}) }}>
+                    <span style={{ ...s.prepLabel, ...(checked ? s.prepLabelDone : {}), ...(itemDisabled ? s.prepLabelDisabled : {}) }}>
                       {item.label}
                     </span>
                     {item.auto && <span style={s.autoTag}>auto</span>}
-                    {item.disabled && <span style={s.embreveTag}>em breve</span>}
+                    {itemDisabled && <span style={s.embreveTag}>em breve</span>}
                   </button>
                 );
               })}
@@ -465,7 +501,7 @@ export function HubOverviewTab({
           >
             Jurisprudências
           </Button>
-          <Button variant="outline" onClick={() => router.push('/vademecum')}>Vade Mecum</Button>
+          <Button variant="outline" onClick={() => router.push(vademecumHref)}>Vade Mecum</Button>
         </div>
       </div>
     </div>
@@ -515,6 +551,7 @@ const s: Record<string, CSSProperties> = {
   prepLabelDisabled: { color: theme.inkFaint },
 
   downloadBtn: { display: 'inline-flex', alignItems: 'center', gap: 4, padding: '6px 12px', borderRadius: theme.radiusSm, border: `1px solid ${theme.teal}`, background: theme.tealBg, color: theme.teal, fontSize: 13, fontWeight: 600, textDecoration: 'none', fontFamily: 'inherit', flexShrink: 0 },
+  editalPageLink: { background: 'transparent', border: 'none', color: theme.teal, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', padding: '6px 0' },
   factGrid: { display: 'grid', gap: 12, marginTop: 14 },
   fact: { display: 'flex', flexDirection: 'column', gap: 2, minWidth: 0 },
   factLabel: { fontSize: 11, fontWeight: 600, color: theme.inkFaint, textTransform: 'uppercase', letterSpacing: 0.4 },

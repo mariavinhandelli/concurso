@@ -99,6 +99,69 @@ const LEIS = {
     descricao: 'Dispõe sobre a qualificação de pessoas jurídicas de direito privado sem fins lucrativos como OSCIP e institui o termo de parceria. Texto compilado e atualizado (fonte: Planalto).',
     fonteUrl: 'https://www.planalto.gov.br/ccivil_03/leis/l9790.htm',
   },
+  'lei-8112': {
+    slug: 'lei-8112',
+    nome: 'Lei nº 8.112, de 11 de dezembro de 1990 — Regime Jurídico dos Servidores Públicos Civis da União',
+    nomeCurto: 'Lei 8.112/90',
+    ano: 1990,
+    disciplina: 'Direito Administrativo',
+    descricao: 'Estatuto dos servidores públicos federais: provimento, vacância, direitos e vantagens, regime disciplinar, processo administrativo disciplinar. Texto compilado e atualizado (fonte: Planalto).',
+    fonteUrl: 'https://www.planalto.gov.br/ccivil_03/leis/l8112cons.htm',
+  },
+  'lei-12846': {
+    slug: 'lei-12846',
+    nome: 'Lei nº 12.846, de 1º de agosto de 2013 — Lei Anticorrupção (Responsabilização de Pessoas Jurídicas)',
+    nomeCurto: 'Lei 12.846/13',
+    ano: 2013,
+    disciplina: 'Direito Administrativo',
+    descricao: 'Responsabilização administrativa e civil de pessoas jurídicas por atos contra a administração pública, nacional ou estrangeira. Texto compilado e atualizado (fonte: Planalto).',
+    fonteUrl: 'https://www.planalto.gov.br/ccivil_03/_ato2011-2014/2013/lei/l12846.htm',
+  },
+  cdc: {
+    slug: 'cdc',
+    nome: 'Lei nº 8.078, de 11 de setembro de 1990 — Código de Defesa do Consumidor',
+    nomeCurto: 'CDC',
+    ano: 1990,
+    disciplina: 'Direito do Consumidor',
+    descricao: 'Texto compilado e atualizado (fonte: Planalto).',
+    fonteUrl: 'https://www.planalto.gov.br/ccivil_03/leis/l8078compilado.htm',
+  },
+  ctn: {
+    slug: 'ctn',
+    nome: 'Lei nº 5.172, de 25 de outubro de 1966 — Código Tributário Nacional',
+    nomeCurto: 'CTN',
+    ano: 1966,
+    disciplina: 'Direito Tributário',
+    descricao: 'Texto compilado e atualizado (fonte: Planalto).',
+    fonteUrl: 'https://www.planalto.gov.br/ccivil_03/leis/l5172compilado.htm',
+  },
+  cc: {
+    slug: 'cc',
+    nome: 'Lei nº 10.406, de 10 de janeiro de 2002 — Código Civil',
+    nomeCurto: 'Código Civil',
+    ano: 2002,
+    disciplina: 'Direito Civil',
+    descricao: 'Texto compilado e atualizado (fonte: Planalto).',
+    fonteUrl: 'https://www.planalto.gov.br/ccivil_03/leis/2002/l10406compilada.htm',
+  },
+  cpc: {
+    slug: 'cpc',
+    nome: 'Lei nº 13.105, de 16 de março de 2015 — Código de Processo Civil',
+    nomeCurto: 'CPC',
+    ano: 2015,
+    disciplina: 'Direito Processual Civil',
+    descricao: 'Texto compilado e atualizado (fonte: Planalto).',
+    fonteUrl: 'https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2015/lei/l13105.htm',
+  },
+  clt: {
+    slug: 'clt',
+    nome: 'Decreto-Lei nº 5.452, de 1º de maio de 1943 — Consolidação das Leis do Trabalho (CLT)',
+    nomeCurto: 'CLT',
+    ano: 1943,
+    disciplina: 'Direito do Trabalho',
+    descricao: 'Texto compilado e atualizado (fonte: Planalto), com a Reforma Trabalhista (Lei 13.467/2017).',
+    fonteUrl: 'https://www.planalto.gov.br/ccivil_03/decreto-lei/del5452compilado.htm',
+  },
 };
 
 // ─── Entrada ─────────────────────────────────────────────────────────────────
@@ -127,8 +190,13 @@ function decodeEntities(s) {
     .replace(/&([a-zA-Z]+);/g, (_, name) => ENTITIES[name] ?? `&${name};`);
 }
 
+// Tags puramente cosméticas (fonte/tamanho/negrito) que o Planalto às vezes usa
+// PARTEADAS no meio de um número de artigo ("Art. 21<font>7</font>." = 217) —
+// removidas sem inserir espaço, ao contrário das demais tags (ver abaixo).
+const INLINE_COSMETIC = /<\/?(?:font|b|i|em|u|sup|sub|small|big|strong)\b[^>]*>/gi;
+
 function stripTags(s) {
-  return s.replace(/<[^>]*>/g, ' ');
+  return s.replace(INLINE_COSMETIC, '').replace(/<[^>]*>/g, ' ');
 }
 
 function collapse(s) {
@@ -189,8 +257,12 @@ function parseLei(html) {
     let text = collapse(decodeEntities(stripTags(comQuebras)));
     if (!text) continue;
 
-    // Fim do texto legal (assinatura/rodapé do Planalto).
-    if (/^Bras[íi]lia,\s*\d/.test(text.split(BR_MARK)[0]) || /Este texto n[ãa]o substitui/i.test(text)) break;
+    // Fim do texto legal (assinatura/rodapé do Planalto). Em decretos-lei que
+    // aprovam um anexo (ex.: CLT — 2 artigos de decreto + o texto anexo, que
+    // reinicia a numeração em "Art. 1º"), esse aviso aparece cedo, no meio do
+    // documento — só tratamos como fim de verdade depois de já termos um corpo
+    // substancial de artigos (nenhuma lei do catálogo tem menos de ~20).
+    if (/^Bras[íi]lia,\s*\d/.test(text.split(BR_MARK)[0]) || (artigos.length > 15 && /Este texto n[ãa]o substitui/i.test(text))) break;
 
     if (centered) {
       const parts = text.split(BR_MARK).map((p) => collapse(p)).filter(Boolean);
@@ -326,6 +398,13 @@ async function main() {
     if (!res.ok) throw new Error(`HTTP ${res.status} ao baixar o compilado.`);
     html = new TextDecoder('windows-1252').decode(await res.arrayBuffer());
   }
+
+  // Documentos mais antigos (ex.: CLT) às vezes grafam o sufixo de letra COLADO
+  // ao número sem hífen ("Art. 401A." em vez de "Art. 401-A.") — insere o hífen
+  // antes de parsear para cair no mesmo caminho de "121-A". Padrão raro o
+  // bastante (letras maiúsculas coladas direto num ponto, sem espaço, logo após
+  // dígitos de "Art.") para não gerar falso positivo em texto corrido normal.
+  html = html.replace(/(Art\.?\s*\d+)([A-Z]{1,2})(\.)/g, '$1-$2$3');
 
   const { artigos, warnings } = parseLei(html);
   if (artigos.length === 0) throw new Error('Nenhum artigo extraído — o layout do Planalto mudou?');

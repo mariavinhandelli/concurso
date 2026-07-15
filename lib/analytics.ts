@@ -24,6 +24,11 @@ export const EV = {
   friendAccepted: 'friend_accepted',
   turmaCreated: 'turma_created',
   turmaJoined: 'turma_joined',
+  editalViewed: 'edital_viewed',
+  editalActivated: 'edital_activated',
+  editalCompared: 'edital_compared',
+  editalPdfDownloaded: 'edital_pdf_downloaded',
+  pastPaperOpened: 'past_paper_opened',
 } as const;
 
 export type EventName = typeof EV[keyof typeof EV];

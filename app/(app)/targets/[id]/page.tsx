@@ -61,7 +61,7 @@ export default function TargetDetailPage() {
   const targetId = params.id as string;
 
   const {
-    target, catalogInfo, updates, tree, linked, saudeMap, topicWeights, subjectWeights, blueprints, nQInputs,
+    target, catalogInfo, updates, tree, linked, saudeMap, incidencias, topicWeights, subjectWeights, blueprints, nQInputs,
     loading, error, inFlightTopics,
     load, toggleTopic, toggleAllOfSubject, changeTopicWeight, changeSubjectWeight, setNQInputs,
   } = useTargetDetail(targetId);
@@ -222,6 +222,7 @@ export default function TargetDetailPage() {
           tree={tree}
           linked={linked}
           saudeMap={saudeMap}
+          incidencias={incidencias}
           topicWeights={topicWeights}
           subjectWeights={subjectWeights}
           isMobile={isMobile}

@@ -58,6 +58,38 @@ export async function countLinkedByTarget(targetIds: string[]): Promise<Record<s
   return counts;
 }
 
+// Incidência curada por tópico (copiada do catálogo na ativação do edital).
+// 0 = sem dado real de banca — a UI não mostra nada nesse caso.
+export async function listTopicIncidencia(targetExamId: string): Promise<Record<string, number>> {
+  const { supabase } = await requireUser();
+  const { data, error } = await supabase
+    .from('topic_target_exams')
+    .select('topic_id, incidencia')
+    .eq('target_exam_id', targetExamId)
+    .gt('incidencia', 0);
+  if (error) throw new Error('Erro ao carregar incidência: ' + error.message);
+  const map: Record<string, number> = {};
+  for (const r of data ?? []) map[r.topic_id] = r.incidencia;
+  return map;
+}
+
+// Progresso do edital de um alvo (tópicos concluídos / vinculados) — alimenta
+// o bloco "seu progresso" na página do edital sem carregar a árvore inteira.
+export async function getTargetTopicProgress(targetExamId: string): Promise<{ done: number; total: number }> {
+  const { supabase } = await requireUser();
+  const { data, error } = await supabase
+    .from('topic_target_exams')
+    .select('topic_id, topics(is_completed)')
+    .eq('target_exam_id', targetExamId);
+  if (error) throw new Error('Erro ao carregar progresso do edital: ' + error.message);
+  let done = 0;
+  for (const r of data ?? []) {
+    const t = Array.isArray(r.topics) ? r.topics[0] : r.topics;
+    if ((t as { is_completed: boolean } | null)?.is_completed) done += 1;
+  }
+  return { done, total: (data ?? []).length };
+}
+
 export async function linkTopic(topicId: string, targetExamId: string): Promise<void> {
   const { supabase } = await requireUser();
   const { error } = await supabase

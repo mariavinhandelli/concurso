@@ -5,8 +5,8 @@
 // fixa ocupando a página).
 'use client';
 
-import { useEffect, useMemo, useState, type CSSProperties } from 'react';
-import { useRouter } from 'next/navigation';
+import { Suspense, useEffect, useMemo, useState, type CSSProperties } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { CircleHelp, AlarmClock } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { LEIS_CATALOG, getLei, type LeiMeta } from '@/services/leis.service';
@@ -52,11 +52,17 @@ function LeiCard({ lei, onOpen }: { lei: LeiMeta; onOpen: () => void }) {
   );
 }
 
-export default function VademecumPage() {
+function VademecumContent() {
   const router = useRouter();
+  // ?disciplina= — deep-link vindo do Hub do Concurso ("revisar a lei seca
+  // relacionada" chega já filtrado pela disciplina do edital).
+  const searchParams = useSearchParams();
   const [dueCount, setDueCount] = useState(0);
   const [busca, setBusca] = useState('');
-  const [disciplina, setDisciplina] = useState('todas');
+  const [disciplina, setDisciplina] = useState(() => {
+    const d = searchParams.get('disciplina');
+    return d && LEIS_CATALOG.some((l) => l.disciplina === d) ? d : 'todas';
+  });
   const [showSimulado, setShowSimulado] = useState(false);
 
   useEffect(() => {
@@ -137,6 +143,15 @@ export default function VademecumPage() {
         Mais leis em breve — a estrutura já aceita qualquer norma (estatutos, leis orgânicas, códigos).
       </p>
     </PageContainer>
+  );
+}
+
+// useSearchParams exige Suspense no App Router — mesmo padrão da lista de juris.
+export default function VademecumPage() {
+  return (
+    <Suspense fallback={null}>
+      <VademecumContent />
+    </Suspense>
   );
 }
 

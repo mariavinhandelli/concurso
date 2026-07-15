@@ -129,7 +129,7 @@ export const LEIS_CATALOG: LeiMeta[] = [
     disciplina: 'Direito Penal',
     descricao: 'Texto compilado e atualizado (fonte: Planalto), gerado direto do compilado vigente — inclui os arts. 121-A (feminicídio) e 359-M-A/M-B.',
     arquivo: '/leis/cp.json',
-    totalArtigos: 423,
+    totalArtigos: 424,
   },
   {
     slug: 'cpp',
@@ -149,7 +149,7 @@ export const LEIS_CATALOG: LeiMeta[] = [
     disciplina: 'Direito Penal Militar',
     descricao: 'Texto compilado e atualizado (fonte: Planalto), com a reforma da Lei 14.688/2023.',
     arquivo: '/leis/cpm.json',
-    totalArtigos: 410,
+    totalArtigos: 411,
   },
   {
     slug: 'cppm',
@@ -211,6 +211,76 @@ export const LEIS_CATALOG: LeiMeta[] = [
     arquivo: '/leis/lei-9790.json',
     totalArtigos: 22,
   },
+  {
+    slug: 'lei-8112',
+    nome: 'Lei nº 8.112, de 11 de dezembro de 1990 — Regime Jurídico dos Servidores Públicos Civis da União',
+    nomeCurto: 'Lei 8.112/90',
+    ano: 1990,
+    disciplina: 'Direito Administrativo',
+    descricao: 'Estatuto dos servidores públicos federais: provimento, vacância, direitos e vantagens, regime disciplinar, processo administrativo disciplinar. Texto compilado e atualizado (fonte: Planalto).',
+    arquivo: '/leis/lei-8112.json',
+    totalArtigos: 262,
+  },
+  {
+    slug: 'lei-12846',
+    nome: 'Lei nº 12.846, de 1º de agosto de 2013 — Lei Anticorrupção (Responsabilização de Pessoas Jurídicas)',
+    nomeCurto: 'Lei 12.846/13',
+    ano: 2013,
+    disciplina: 'Direito Administrativo',
+    descricao: 'Responsabilização administrativa e civil de pessoas jurídicas por atos contra a administração pública, nacional ou estrangeira. Texto compilado e atualizado (fonte: Planalto).',
+    arquivo: '/leis/lei-12846.json',
+    totalArtigos: 31,
+  },
+  {
+    slug: 'cdc',
+    nome: 'Lei nº 8.078, de 11 de setembro de 1990 — Código de Defesa do Consumidor',
+    nomeCurto: 'CDC',
+    ano: 1990,
+    disciplina: 'Direito do Consumidor',
+    descricao: 'Texto compilado e atualizado (fonte: Planalto).',
+    arquivo: '/leis/cdc.json',
+    totalArtigos: 130,
+  },
+  {
+    slug: 'ctn',
+    nome: 'Lei nº 5.172, de 25 de outubro de 1966 — Código Tributário Nacional',
+    nomeCurto: 'CTN',
+    ano: 1966,
+    disciplina: 'Direito Tributário',
+    descricao: 'Texto compilado e atualizado (fonte: Planalto).',
+    arquivo: '/leis/ctn.json',
+    totalArtigos: 211,
+  },
+  {
+    slug: 'cc',
+    nome: 'Lei nº 10.406, de 10 de janeiro de 2002 — Código Civil',
+    nomeCurto: 'Código Civil',
+    ano: 2002,
+    disciplina: 'Direito Civil',
+    descricao: 'Texto compilado e atualizado (fonte: Planalto).',
+    arquivo: '/leis/cc.json',
+    totalArtigos: 2092,
+  },
+  {
+    slug: 'cpc',
+    nome: 'Lei nº 13.105, de 16 de março de 2015 — Código de Processo Civil',
+    nomeCurto: 'CPC',
+    ano: 2015,
+    disciplina: 'Direito Processual Civil',
+    descricao: 'Texto compilado e atualizado (fonte: Planalto).',
+    arquivo: '/leis/cpc.json',
+    totalArtigos: 1073,
+  },
+  {
+    slug: 'clt',
+    nome: 'Decreto-Lei nº 5.452, de 1º de maio de 1943 — Consolidação das Leis do Trabalho (CLT)',
+    nomeCurto: 'CLT',
+    ano: 1943,
+    disciplina: 'Direito do Trabalho',
+    descricao: 'Texto compilado e atualizado (fonte: Planalto), com a Reforma Trabalhista (Lei 13.467/2017).',
+    arquivo: '/leis/clt.json',
+    totalArtigos: 1027,
+  },
 ];
 
 const _cache = new Map<string, Promise<Lei>>();
@@ -239,6 +309,20 @@ export function getLei(slug: string): Promise<Lei> {
 // Índice do artigo dentro da chave "slug:numero" (para navegação/deep-link).
 export function artigoNumeroFromKey(key: string): string {
   return key.slice(key.indexOf(':') + 1);
+}
+
+// Hub de Editais (Fase 3): dado o nome de uma matéria da Focali, encontra a
+// disciplina correspondente no catálogo de leis — as taxonomias diferem
+// ("Administrativo" na matéria vs "Direito Administrativo" aqui). Retorna a
+// string EXATA de LeiMeta.disciplina (é o que o filtro do Vade Mecum compara),
+// ou null quando a matéria não tem lei seca no catálogo (ex.: Língua Portuguesa).
+export function leiDisciplinaForSubject(subjectName: string): string | null {
+  const norm = (v: string) =>
+    v.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase().replace(/^direito\s+/, '').trim();
+  const alvo = norm(subjectName);
+  if (!alvo) return null;
+  const hit = LEIS_CATALOG.find((l) => norm(l.disciplina) === alvo);
+  return hit?.disciplina ?? null;
 }
 
 export const INCIDENCIA_LABEL: Record<LeiIncidencia, string> = {

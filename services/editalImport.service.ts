@@ -14,12 +14,22 @@ export async function importEditalAsTarget(input: {
   orgao?: string | null;
   cargo?: string | null;
   groups: EditalGroup[];
+  ano_alvo?: number | null;
+  exam_date?: string | null;
+  board_id?: string | null;
 }): Promise<string> {
   const orgao = input.orgao?.trim() || null;
   let cargo = input.cargo?.trim() || null;
   if (!orgao && !cargo) cargo = 'Edital importado'; // garante um slug não-vazio
 
-  const target = await createTargetExam({ orgao, cargo, phase: 'pre' });
+  const target = await createTargetExam({
+    orgao,
+    cargo,
+    phase: 'pre',
+    ano_alvo: input.ano_alvo ?? null,
+    exam_date: input.exam_date ?? null,
+    board_id: input.board_id ?? null,
+  });
 
   let i = 0;
   for (const g of input.groups) {

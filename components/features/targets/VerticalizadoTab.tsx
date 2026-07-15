@@ -38,6 +38,7 @@ interface Props {
   tree: SubjectTree[];
   linked: Set<string>;
   saudeMap: Record<string, number>;
+  incidencias: Record<string, number>;
   topicWeights: Record<string, number | null>;
   subjectWeights: Record<string, number>;
   isMobile: boolean;
@@ -46,7 +47,7 @@ interface Props {
 }
 
 export const VerticalizadoTab = memo(function VerticalizadoTab({
-  tree, linked, saudeMap, topicWeights, subjectWeights,
+  tree, linked, saudeMap, incidencias, topicWeights, subjectWeights,
   onChangeTopicWeight, onSwitchToTopics,
 }: Props) {
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
@@ -167,6 +168,12 @@ export const VerticalizadoTab = memo(function VerticalizadoTab({
                   return (
                     <div key={t.id} style={s.vertRow}>
                       <span style={{ ...s.libTopicName, ...(t.is_completed ? s.doneText : {}) }}>{t.name}</span>
+                      {/* Incidência curada do catálogo — só aparece com dado real de banca */}
+                      {(incidencias[t.id] ?? 0) > 0 && (
+                        <span style={s.incidenciaTag} title={`Cobrado ${incidencias[t.id]}x em provas reais deste concurso`}>
+                          {incidencias[t.id]}× em provas
+                        </span>
+                      )}
                       <HealthBar saude={saudeMap[t.id]} />
                       {editando ? (
                         <Select
@@ -233,6 +240,8 @@ const s: Record<string, CSSProperties> = {
   subjectCount: { fontSize: 12, color: theme.inkFaint, fontVariantNumeric: 'tabular-nums', flexShrink: 0 },
   libTopicName: { flex: 1, fontSize: 13, color: theme.ink, minWidth: 0 },
   doneText: { color: theme.inkFaint, textDecoration: 'line-through' },
+
+  incidenciaTag: { fontSize: 11, fontWeight: 700, color: theme.clay, background: theme.clayBg, borderRadius: theme.radiusXs, padding: '3px 8px', whiteSpace: 'nowrap', flexShrink: 0, fontVariantNumeric: 'tabular-nums' },
 
   // Badge de peso com hover state
   weightBadge: { border: `1px solid ${theme.lineStrong}`, background: theme.muted, color: theme.inkSoft, fontSize: 12, fontWeight: 700, borderRadius: theme.radiusXs, padding: '4px 9px', cursor: 'pointer', fontFamily: 'inherit', flexShrink: 0, fontVariantNumeric: 'tabular-nums', transition: 'border-color .12s, background .12s, color .12s' },
