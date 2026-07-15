@@ -1,0 +1,194 @@
+[
+ {
+  "id": "l12016-q1",
+  "artigoKey": "lei-12016:1",
+  "enunciado": "O mandado de segurança é cabível para proteger direito líquido e certo, não amparado por habeas corpus ou habeas data, sempre que o impetrante sofrer violação ou tiver justo receio de sofrê-la por ato ilegal ou abusivo de autoridade, seja qual for sua categoria ou função.",
+  "gabarito": true,
+  "comentario": "Literal do art. 1º, caput.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l12016-q2",
+  "artigoKey": "lei-12016:1",
+  "enunciado": "Os dirigentes de pessoas jurídicas privadas equiparam-se a autoridade, para fins de mandado de segurança, em quaisquer de seus atos, inclusive os de natureza estritamente privada.",
+  "gabarito": false,
+  "comentario": "Art. 1º, § 1º: a equiparação alcança dirigentes de pessoas jurídicas (e pessoas naturais) apenas \"no exercício de atribuições do poder público\" e \"somente no que disser respeito a essas atribuições\" — não em atos de natureza privada.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l12016-q3",
+  "artigoKey": "lei-12016:1",
+  "enunciado": "Cabe mandado de segurança contra atos de gestão comercial praticados pelos administradores de empresas públicas, sociedades de economia mista e concessionárias de serviço público.",
+  "gabarito": false,
+  "comentario": "Art. 1º, § 2º: não cabe mandado de segurança contra atos de gestão comercial desses administradores.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l12016-q4",
+  "artigoKey": "lei-12016:2",
+  "enunciado": "Considera-se federal a autoridade coatora quando as consequências patrimoniais do ato impugnado houverem de ser suportadas pela União ou entidade por ela controlada.",
+  "gabarito": true,
+  "comentario": "Literal do art. 2º.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l12016-q5",
+  "artigoKey": "lei-12016:3",
+  "enunciado": "O terceiro pode impetrar mandado de segurança em defesa de direito originário de outra pessoa em condições idênticas, independentemente de qualquer notificação prévia ao titular do direito.",
+  "gabarito": false,
+  "comentario": "Art. 3º, caput: só cabe se o titular do direito originário, notificado judicialmente, não impetrar no prazo de 30 dias.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l12016-q6",
+  "artigoKey": "lei-12016:3",
+  "enunciado": "O exercício do direito de impetrar mandado de segurança em defesa de direito originário de terceiro submete-se ao prazo decadencial de 120 dias previsto no art. 23, contado da notificação judicial.",
+  "gabarito": true,
+  "comentario": "Literal do art. 3º, parágrafo único.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l12016-q7",
+  "artigoKey": "lei-12016:5",
+  "enunciado": "Não se concederá mandado de segurança quando se tratar de ato do qual caiba recurso administrativo com efeito suspensivo, independentemente de caução.",
+  "gabarito": true,
+  "comentario": "Literal do art. 5º, I.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l12016-q8",
+  "artigoKey": "lei-12016:5",
+  "enunciado": "Não cabe mandado de segurança contra decisão judicial da qual caiba recurso, mesmo que esse recurso não tenha efeito suspensivo.",
+  "gabarito": false,
+  "comentario": "Art. 5º, II veda o MS apenas quando o recurso cabível contra a decisão judicial tiver efeito suspensivo; se o recurso não tem efeito suspensivo, o MS é cabível.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l12016-q9",
+  "artigoKey": "lei-12016:5",
+  "enunciado": "É cabível mandado de segurança contra decisão judicial já transitada em julgado, desde que impetrado dentro do prazo decadencial de 120 dias.",
+  "gabarito": false,
+  "comentario": "Art. 5º, III veda o MS contra decisão transitada em julgado de forma absoluta, independentemente de prazo — o instrumento cabível nesse caso é a ação rescisória.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l12016-q10",
+  "artigoKey": "lei-12016:6",
+  "enunciado": "Considera-se autoridade coatora, para fins de mandado de segurança, aquela que praticou o ato impugnado ou da qual emane a ordem para a sua prática.",
+  "gabarito": true,
+  "comentario": "Literal do art. 6º, § 3º.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l12016-q11",
+  "artigoKey": "lei-12016:6",
+  "enunciado": "O pedido de mandado de segurança pode ser renovado dentro do prazo decadencial, caso a decisão denegatória anterior não tenha apreciado o mérito.",
+  "gabarito": true,
+  "comentario": "Literal do art. 6º, § 6º.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l12016-q12",
+  "artigoKey": "lei-12016:7",
+  "enunciado": "Não será concedida medida liminar em mandado de segurança que tenha por objeto a compensação de créditos tributários.",
+  "gabarito": true,
+  "comentario": "Literal do art. 7º, § 2º (rol de vedações objetivas à liminar).",
+  "tipo": "literal"
+ },
+ {
+  "id": "l12016-q13",
+  "artigoKey": "lei-12016:7",
+  "enunciado": "Da decisão do juiz de primeiro grau que conceder ou denegar liminar em mandado de segurança cabe apelação.",
+  "gabarito": false,
+  "comentario": "Art. 7º, § 1º: da decisão sobre a liminar cabe agravo de instrumento, e não apelação (esta é cabível da sentença final, art. 14).",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l12016-q14",
+  "artigoKey": "lei-12016:10",
+  "enunciado": "A petição inicial de mandado de segurança será desde logo indeferida, por decisão motivada, quando decorrido o prazo legal para a impetração.",
+  "gabarito": true,
+  "comentario": "Literal do art. 10, caput.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l12016-q15",
+  "artigoKey": "lei-12016:10",
+  "enunciado": "É admitido o ingresso de litisconsorte ativo no mandado de segurança a qualquer tempo, inclusive após o despacho da petição inicial.",
+  "gabarito": false,
+  "comentario": "Art. 10, § 2º: o ingresso de litisconsorte ativo não é admitido após o despacho da petição inicial.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l12016-q16",
+  "artigoKey": "lei-12016:14",
+  "enunciado": "A sentença que concede a segurança está sujeita obrigatoriamente ao duplo grau de jurisdição.",
+  "gabarito": true,
+  "comentario": "Literal do art. 14, § 1º (reexame necessário).",
+  "tipo": "literal"
+ },
+ {
+  "id": "l12016-q17",
+  "artigoKey": "lei-12016:14",
+  "enunciado": "Concedida a segurança que assegura vencimentos e vantagens pecuniárias a servidor público, o pagamento retroage à data do ato impugnado, abrangendo todo o período anterior ao ajuizamento da ação.",
+  "gabarito": false,
+  "comentario": "Art. 14, § 4º: o pagamento somente é devido quanto às prestações que se vencerem a contar da data do ajuizamento da inicial, não retroagindo ao ato impugnado.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l12016-q18",
+  "artigoKey": "lei-12016:15",
+  "enunciado": "A suspensão de liminar ou sentença em mandado de segurança pode ser requerida por pessoa jurídica de direito público interessada ou pelo Ministério Público, para evitar grave lesão à ordem, à saúde, à segurança e à economia públicas.",
+  "gabarito": true,
+  "comentario": "Literal do art. 15, caput.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l12016-q19",
+  "artigoKey": "lei-12016:18",
+  "enunciado": "Das decisões em mandado de segurança proferidas em única instância pelos tribunais cabe recurso ordinário quando a ordem for concedida.",
+  "gabarito": false,
+  "comentario": "Art. 18: o recurso ordinário cabe quando a ordem for DENEGADA, não quando for concedida (nesse caso cabem recurso especial/extraordinário, se presentes os requisitos).",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l12016-q20",
+  "artigoKey": "lei-12016:19",
+  "enunciado": "A denegação do mandado de segurança sem decisão de mérito não impede que o interessado pleiteie seus direitos e os respectivos efeitos patrimoniais por ação própria.",
+  "gabarito": true,
+  "comentario": "Literal do art. 19.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l12016-q21",
+  "artigoKey": "lei-12016:21",
+  "enunciado": "Qualquer associação, independentemente do tempo de constituição e funcionamento, pode impetrar mandado de segurança coletivo em defesa de seus associados.",
+  "gabarito": false,
+  "comentario": "Art. 21, caput: associação e entidade de classe precisam estar legalmente constituídas e em funcionamento há pelo menos 1 (um) ano — exigência que não se aplica ao partido político com representação no Congresso Nacional.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l12016-q22",
+  "artigoKey": "lei-12016:22",
+  "enunciado": "A impetração de mandado de segurança coletivo induz litispendência em relação a ações individuais em curso sobre o mesmo direito.",
+  "gabarito": false,
+  "comentario": "Art. 22, § 1º: o mandado de segurança coletivo NÃO induz litispendência para as ações individuais.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l12016-q23",
+  "artigoKey": "lei-12016:23",
+  "enunciado": "O direito de requerer mandado de segurança extingue-se decorridos 120 dias, contados da ciência, pelo interessado, do ato impugnado.",
+  "gabarito": true,
+  "comentario": "Literal do art. 23. O STF reconheceu a constitucionalidade desse prazo decadencial (Súmula 632/STF).",
+  "tipo": "literal"
+ },
+ {
+  "id": "l12016-q24",
+  "artigoKey": "lei-12016:25",
+  "enunciado": "No processo de mandado de segurança não cabem embargos infringentes nem condenação ao pagamento de honorários advocatícios, ressalvada a aplicação de sanções em caso de litigância de má-fé.",
+  "gabarito": true,
+  "comentario": "Literal do art. 25.",
+  "tipo": "literal"
+ }
+]

@@ -42,6 +42,10 @@ const QUESTOES_ARQUIVO: Record<string, string> = {
   'ctn': '/leis/ctn-questoes.json',
   'cpc': '/leis/cpc-questoes.json',
   'clt': '/leis/clt-questoes.json',
+  'cc': '/leis/cc-questoes.json',
+  'lei-12016': '/leis/lei-12016-questoes.json',
+  'lei-7347': '/leis/lei-7347-questoes.json',
+  'eca': '/leis/eca-questoes.json',
 };
 
 // Slugs que têm banco de questões — usado para montar o composer de simulado

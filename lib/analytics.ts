@@ -28,6 +28,8 @@ export const EV = {
   editalActivated: 'edital_activated',
   editalCompared: 'edital_compared',
   editalPdfDownloaded: 'edital_pdf_downloaded',
+  editalFollowed: 'edital_followed',
+  editalUnfollowed: 'edital_unfollowed',
   pastPaperOpened: 'past_paper_opened',
 } as const;
 

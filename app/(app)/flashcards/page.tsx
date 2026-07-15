@@ -15,11 +15,12 @@ const FlashcardEngine = dynamic(
 );
 import { ReviewTab } from '@/components/features/flashcards/ReviewTab';
 import { CardsTab } from '@/components/features/flashcards/CardsTab';
+import { BancoFlashcardsTab } from '@/components/features/flashcards/BancoFlashcardsTab';
 import { theme } from '@/lib/theme';
 import { Button } from '@/components/ui/Button';
 import { PageContainer, PageHeader } from '@/components/ui/Page';
 
-type Tab = 'cards' | 'review';
+type Tab = 'cards' | 'review' | 'banco';
 
 export default function FlashcardsPage() {
   return (
@@ -107,11 +108,15 @@ function FlashcardsContent() {
           style={{ ...styles.tab, ...(tab === 'cards' ? styles.tabActive : {}) }}>Meus Cards</button>
         <button className="touch-target" onClick={() => setTab('review')}
           style={{ ...styles.tab, ...(tab === 'review' ? styles.tabActive : {}) }}>Revisar</button>
+        <button className="touch-target" onClick={() => setTab('banco')}
+          style={{ ...styles.tab, ...(tab === 'banco' ? styles.tabActive : {}) }}>Banco</button>
       </div>
 
       {tab === 'cards'
         ? <CardsTab onStudy={q => setSession(q)} />
-        : <ReviewTab key={reviewKey} onStart={startDaily} loading={starting} />}
+        : tab === 'review'
+        ? <ReviewTab key={reviewKey} onStart={startDaily} loading={starting} />
+        : <BancoFlashcardsTab />}
     </PageContainer>
   );
 }

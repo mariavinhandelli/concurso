@@ -47,8 +47,14 @@ export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const isLoginPage = pathname === '/login' || pathname.startsWith('/login/');
   const isResetPasswordPage = pathname === '/reset-password' || pathname.startsWith('/reset-password/');
-  // Páginas legais são públicas (indexáveis, linkadas do cadastro): não exigem login.
-  const isPublicPage = pathname === '/termos' || pathname === '/privacidade';
+  // Páginas públicas (indexáveis, não exigem login): legais + Hub de Editais
+  // (/editais/** é o conteúdo de aquisição/SEO — ações como ativar e seguir
+  // continuam gateadas por sessão dentro das páginas).
+  const isPublicPage =
+    pathname === '/termos' ||
+    pathname === '/privacidade' ||
+    pathname === '/editais' ||
+    pathname.startsWith('/editais/');
 
   if (!user && !isLoginPage && !isResetPasswordPage && !isPublicPage) {
     const loginUrl = request.nextUrl.clone();
@@ -69,6 +75,6 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon\\.ico|sw\\.js|manifest\\.json|offline\\.html|.*\\.svg|.*\\.png|.*\\.webp|.*\\.ico).*)',
+    '/((?!_next/static|_next/image|favicon\\.ico|sw\\.js|manifest\\.json|offline\\.html|sitemap\\.xml|robots\\.txt|.*\\.svg|.*\\.png|.*\\.webp|.*\\.ico).*)',
   ],
 };

@@ -1,0 +1,636 @@
+{
+ "slug": "lei-7347",
+ "nome": "Lei nº 7.347, de 24 de julho de 1985 — Ação Civil Pública",
+ "nomeCurto": "Lei 7.347/85 (ACP)",
+ "ano": 1985,
+ "disciplina": "Direito Processual Civil",
+ "descricao": "Disciplina a ação civil pública de responsabilidade por danos ao meio ambiente, consumidor e outros interesses difusos/coletivos. Texto compilado e atualizado (fonte: Planalto).",
+ "fonteUrl": "https://www.planalto.gov.br/ccivil_03/leis/l7347compilada.htm",
+ "geradoEm": "2026-07-15",
+ "artigos": [
+  {
+   "key": "lei-7347:1",
+   "ordem": 1,
+   "numero": "1",
+   "rotulo": "Art. 1º",
+   "caminho": null,
+   "incidencia": "muito_alta",
+   "incidenciaNota": "Delimita o objeto da ACP: rol dos incisos (meio ambiente, consumidor, patrimônio artístico/estético/histórico/turístico/paisagístico, qualquer interesse difuso ou coletivo, ordem econômica, ordem urbanística, honra e dignidade de grupos raciais — Lei 12.966/2014, e patrimônio público e social — Lei 13.004/2014) e a vedação do parágrafo único a tributos, contribuições previdenciárias e FGTS. Tema recorrente em provas de MP, Magistratura e Defensoria; sem estatística numérica pública consolidada disponível para este artigo específico.",
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "Regem-se pelas disposições desta Lei, sem prejuízo da ação popular, as ações de responsabilidade por danos morais e patrimoniais causados:",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "I –",
+     "texto": "ao meio-ambiente;",
+     "nivel": 1
+    },
+    {
+     "id": "b3",
+     "rotulo": "II –",
+     "texto": "ao consumidor;",
+     "nivel": 1
+    },
+    {
+     "id": "b4",
+     "rotulo": "III –",
+     "texto": "a bens e direitos de valor artístico, estético, histórico, turístico e paisagístico;",
+     "nivel": 1
+    },
+    {
+     "id": "b5",
+     "rotulo": "IV –",
+     "texto": "a qualquer outro interesse difuso ou coletivo.",
+     "nivel": 1
+    },
+    {
+     "id": "b6",
+     "rotulo": "V –",
+     "texto": "por infração da ordem econômica;",
+     "nivel": 1
+    },
+    {
+     "id": "b7",
+     "rotulo": "VI –",
+     "texto": "à ordem urbanística.",
+     "nivel": 1
+    },
+    {
+     "id": "b8",
+     "rotulo": "VII –",
+     "texto": "à honra e à dignidade de grupos raciais, étnicos ou religiosos.",
+     "nivel": 1
+    },
+    {
+     "id": "b9",
+     "rotulo": "VIII –",
+     "texto": "ao patrimônio público e social.",
+     "nivel": 1
+    },
+    {
+     "id": "b10",
+     "rotulo": "Parágrafo único.",
+     "texto": "Não será cabível ação civil pública para veicular pretensões que envolvam tributos, contribuições previdenciárias, o Fundo de Garantia do Tempo de Serviço - FGTS ou outros fundos de natureza institucional cujos beneficiários podem ser individualmente determinados.",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lei-7347:2",
+   "ordem": 2,
+   "numero": "2",
+   "rotulo": "Art. 2º",
+   "caminho": null,
+   "incidencia": "alta",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "As ações previstas nesta Lei serão propostas no foro do local onde ocorrer o dano, cujo juízo terá competência funcional para processar e julgar a causa.",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "Parágrafo único.",
+     "texto": "A propositura da ação prevenirá a jurisdição do juízo para todas as ações posteriormente intentadas que possuam a mesma causa de pedir ou o mesmo objeto.",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lei-7347:3",
+   "ordem": 3,
+   "numero": "3",
+   "rotulo": "Art. 3º",
+   "caminho": null,
+   "incidencia": "muito_alta",
+   "incidenciaNota": "Define o objeto da ACP (condenação em dinheiro ou cumprimento de obrigação de fazer/não fazer). Pegadinha clássica: doutrina e STJ admitem a cumulação dessas tutelas na mesma ação, apesar de a literalidade do artigo usar a conjunção 'ou' — recorrente em provas de MP e Magistratura.",
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "A ação civil poderá ter por objeto a condenação em dinheiro ou o cumprimento de obrigação de fazer ou não fazer.",
+     "nivel": 0
+    }
+   ]
+  },
+  {
+   "key": "lei-7347:4",
+   "ordem": 4,
+   "numero": "4",
+   "rotulo": "Art. 4º",
+   "caminho": null,
+   "incidencia": "alta",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "Poderá ser ajuizada ação cautelar para os fins desta Lei, objetivando, inclusive, evitar dano ao patrimônio público e social, ao meio ambiente, ao consumidor, à honra e à dignidade de grupos raciais, étnicos ou religiosos, à ordem urbanística ou aos bens e direitos de valor artístico, estético, histórico, turístico e paisagístico.",
+     "nivel": 0
+    }
+   ]
+  },
+  {
+   "key": "lei-7347:5",
+   "ordem": 5,
+   "numero": "5",
+   "rotulo": "Art. 5º",
+   "caminho": null,
+   "incidencia": "muito_alta",
+   "incidenciaNota": "Artigo mais extenso e mais cobrado da lei: rol de legitimados ativos (MP, Defensoria Pública, entes federados, autarquias/empresas públicas/fundações/sociedades de economia mista e associações pré-constituídas há 1 ano), legitimidade concorrente e disjuntiva, atuação do MP como fiscal da lei quando não é autor (§1º), e assunção da titularidade ativa pelo MP em caso de desistência infundada ou abandono por associação legitimada (§3º). Recorrente em provas de MP, Magistratura, Defensoria e OAB.",
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "Têm legitimidade para propor a ação principal e a ação cautelar:",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "I –",
+     "texto": "o Ministério Público;",
+     "nivel": 1
+    },
+    {
+     "id": "b3",
+     "rotulo": "II –",
+     "texto": "a Defensoria Pública;",
+     "nivel": 1
+    },
+    {
+     "id": "b4",
+     "rotulo": "III –",
+     "texto": "a União, os Estados, o Distrito Federal e os Municípios;",
+     "nivel": 1
+    },
+    {
+     "id": "b5",
+     "rotulo": "IV –",
+     "texto": "a autarquia, empresa pública, fundação ou sociedade de economia mista;",
+     "nivel": 1
+    },
+    {
+     "id": "b6",
+     "rotulo": "V –",
+     "texto": "a associação que, concomitantemente:",
+     "nivel": 1
+    },
+    {
+     "id": "b7",
+     "rotulo": "a)",
+     "texto": "esteja constituída há pelo menos 1 (um) ano nos termos da lei civil;",
+     "nivel": 2
+    },
+    {
+     "id": "b8",
+     "rotulo": "b)",
+     "texto": "inclua, entre suas finalidades institucionais, a proteção ao patrimônio público e social, ao meio ambiente, ao consumidor, à ordem econômica, à livre concorrência, aos direitos de grupos raciais, étnicos ou religiosos ou ao patrimônio artístico, estético, histórico, turístico e paisagístico.",
+     "nivel": 2
+    },
+    {
+     "id": "b9",
+     "rotulo": "§ 1º",
+     "texto": "O Ministério Público, se não intervier no processo como parte, atuará obrigatoriamente como fiscal da lei.",
+     "nivel": 1
+    },
+    {
+     "id": "b10",
+     "rotulo": "§ 2º",
+     "texto": "Fica facultado ao Poder Público e a outras associações legitimadas nos termos deste artigo habilitar-se como litisconsortes de qualquer das partes.",
+     "nivel": 1
+    },
+    {
+     "id": "b11",
+     "rotulo": "§ 3º",
+     "texto": "Em caso de desistência infundada ou abandono da ação por associação legitimada, o Ministério Público ou outro legitimado assumirá a titularidade ativa.",
+     "nivel": 1
+    },
+    {
+     "id": "b12",
+     "rotulo": "§ 4º",
+     "texto": "O requisito da pré-constituição poderá ser dispensado pelo juiz, quando haja manifesto interesse social evidenciado pela dimensão ou característica do dano, ou pela relevância do bem jurídico a ser protegido.",
+     "nivel": 1
+    },
+    {
+     "id": "b13",
+     "rotulo": "§ 5º",
+     "texto": "Admitir-se-á o litisconsórcio facultativo entre os Ministérios Públicos da União, do Distrito Federal e dos Estados na defesa dos interesses e direitos de que cuida esta lei.",
+     "nivel": 1
+    },
+    {
+     "id": "b14",
+     "rotulo": "§ 6º",
+     "texto": "Os órgãos públicos legitimados poderão tomar dos interessados compromisso de ajustamento de sua conduta às exigências legais, mediante cominações, que terá eficácia de título executivo extrajudicial.",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lei-7347:6",
+   "ordem": 6,
+   "numero": "6",
+   "rotulo": "Art. 6º",
+   "caminho": null,
+   "incidencia": "alta",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "Qualquer pessoa poderá e o servidor público deverá provocar a iniciativa do Ministério Público, ministrando-lhe informações sobre fatos que constituam objeto da ação civil e indicando-lhe os elementos de convicção.",
+     "nivel": 0
+    }
+   ]
+  },
+  {
+   "key": "lei-7347:7",
+   "ordem": 7,
+   "numero": "7",
+   "rotulo": "Art. 7º",
+   "caminho": null,
+   "incidencia": "media",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "Se, no exercício de suas funções, os juízes e tribunais tiverem conhecimento de fatos que possam ensejar a propositura da ação civil, remeterão peças ao Ministério Público para as providências cabíveis.",
+     "nivel": 0
+    }
+   ]
+  },
+  {
+   "key": "lei-7347:8",
+   "ordem": 8,
+   "numero": "8",
+   "rotulo": "Art. 8º",
+   "caminho": null,
+   "incidencia": "muito_alta",
+   "incidenciaNota": "Regula o inquérito civil, instrumento investigatório presidido exclusivamente pelo MP para instruir a ACP, e os prazos de resposta às requisições de certidões, informações, exames e perícias (mínimo de 10 dias úteis). Tema clássico em provas de MP sobre poderes investigatórios extrajudiciais do órgão.",
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "Para instruir a inicial, o interessado poderá requerer às autoridades competentes as certidões e informações que julgar necessárias, a serem fornecidas no prazo de 15 (quinze) dias.",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "§ 1º",
+     "texto": "O Ministério Público poderá instaurar, sob sua presidência, inquérito civil, ou requisitar, de qualquer organismo público ou particular, certidões, informações, exames ou perícias, no prazo que assinalar, o qual não poderá ser inferior a 10 (dez) dias úteis.",
+     "nivel": 1
+    },
+    {
+     "id": "b3",
+     "rotulo": "§ 2º",
+     "texto": "Somente nos casos em que a lei impuser sigilo, poderá ser negada certidão ou informação, hipótese em que a ação poderá ser proposta desacompanhada daqueles documentos, cabendo ao juiz requisitá-los.",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lei-7347:9",
+   "ordem": 9,
+   "numero": "9",
+   "rotulo": "Art. 9º",
+   "caminho": null,
+   "incidencia": "alta",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "Se o órgão do Ministério Público, esgotadas todas as diligências, se convencer da inexistência de fundamento para a propositura da ação civil, promoverá o arquivamento dos autos do inquérito civil ou das peças informativas, fazendo-o fundamentadamente.",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "§ 1º",
+     "texto": "Os autos do inquérito civil ou das peças de informação arquivadas serão remetidos, sob pena de se incorrer em falta grave, no prazo de 3 (três) dias, ao Conselho Superior do Ministério Público.",
+     "nivel": 1
+    },
+    {
+     "id": "b3",
+     "rotulo": "§ 2º",
+     "texto": "Até que, em sessão do Conselho Superior do Ministério Público, seja homologada ou rejeitada a promoção de arquivamento, poderão as associações legitimadas apresentar razões escritas ou documentos, que serão juntados aos autos do inquérito ou anexados às peças de informação.",
+     "nivel": 1
+    },
+    {
+     "id": "b4",
+     "rotulo": "§ 3º",
+     "texto": "A promoção de arquivamento será submetida a exame e deliberação do Conselho Superior do Ministério Público, conforme dispuser o seu Regimento.",
+     "nivel": 1
+    },
+    {
+     "id": "b5",
+     "rotulo": "§ 4º",
+     "texto": "Deixando o Conselho Superior de homologar a promoção de arquivamento, designará, desde logo, outro órgão do Ministério Público para o ajuizamento da ação.",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lei-7347:10",
+   "ordem": 10,
+   "numero": "10",
+   "rotulo": "Art. 10",
+   "caminho": null,
+   "incidencia": "media",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "Constitui crime, punido com pena de reclusão de 1 (um) a 3 (três) anos, mais multa de 10 (dez) a 1.000 (mil) Obrigações Reajustáveis do Tesouro Nacional - ORTN, a recusa, o retardamento ou a omissão de dados técnicos indispensáveis à propositura da ação civil, quando requisitados pelo Ministério Público.",
+     "nivel": 0
+    }
+   ]
+  },
+  {
+   "key": "lei-7347:11",
+   "ordem": 11,
+   "numero": "11",
+   "rotulo": "Art. 11",
+   "caminho": null,
+   "incidencia": "alta",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "Na ação que tenha por objeto o cumprimento de obrigação de fazer ou não fazer, o juiz determinará o cumprimento da prestação da atividade devida ou a cessação da atividade nociva, sob pena de execução específica, ou de cominação de multa diária, se esta for suficiente ou compatível, independentemente de requerimento do autor.",
+     "nivel": 0
+    }
+   ]
+  },
+  {
+   "key": "lei-7347:12",
+   "ordem": 12,
+   "numero": "12",
+   "rotulo": "Art. 12",
+   "caminho": null,
+   "incidencia": "muito_alta",
+   "incidenciaNota": "Disciplina a liminar em ACP (concessão com ou sem justificação prévia, decisão sujeita a agravo) e o pedido de suspensão de liminar pelo Presidente do Tribunal a requerimento de pessoa jurídica de direito público, para evitar grave lesão à ordem, saúde, segurança e economia públicas (§1º) — mecanismo processual frequentemente cobrado junto com a Lei nº 8.437/1992 (suspensão de liminar contra o Poder Público).",
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "Poderá o juiz conceder mandado liminar, com ou sem justificação prévia, em decisão sujeita a agravo.",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "§ 1º",
+     "texto": "A requerimento de pessoa jurídica de direito público interessada, e para evitar grave lesão à ordem, à saúde, à segurança e à economia pública, poderá o Presidente do Tribunal a que competir o conhecimento do respectivo recurso suspender a execução da liminar, em decisão fundamentada, da qual caberá agravo para uma das turmas julgadoras, no prazo de 5 (cinco) dias a partir da publicação do ato.",
+     "nivel": 1
+    },
+    {
+     "id": "b3",
+     "rotulo": "§ 2º",
+     "texto": "A multa cominada liminarmente só será exigível do réu após o trânsito em julgado da decisão favorável ao autor, mas será devida desde o dia em que se houver configurado o descumprimento.",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lei-7347:13",
+   "ordem": 13,
+   "numero": "13",
+   "rotulo": "Art. 13",
+   "caminho": null,
+   "incidencia": "muito_alta",
+   "incidenciaNota": "Trata do fundo de reparação dos direitos difusos lesados (Fundo de Defesa de Direitos Difusos, regulamentado pela Lei nº 9.008/1995 e pelo Decreto nº 1.306/1994), do destino da indenização em dinheiro e da regra especial do §2º para danos causados por ato de discriminação étnica (incluído pela Lei nº 12.288/2010, Estatuto da Igualdade Racial).",
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "Havendo condenação em dinheiro, a indenização pelo dano causado reverterá a um fundo gerido por um Conselho Federal ou por Conselhos Estaduais de que participarão necessariamente o Ministério Público e representantes da comunidade, sendo seus recursos destinados à reconstituição dos bens lesados.",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "§ 1º",
+     "texto": "Enquanto o fundo não for regulamentado, o dinheiro ficará depositado em estabelecimento oficial de crédito, em conta com correção monetária.",
+     "nivel": 1
+    },
+    {
+     "id": "b3",
+     "rotulo": "§ 2º",
+     "texto": "Havendo acordo ou condenação com fundamento em dano causado por ato de discriminação étnica nos termos do disposto no art. 1º desta Lei, a prestação em dinheiro reverterá diretamente ao fundo de que trata o caput e será utilizada para ações de promoção da igualdade étnica, conforme definição do Conselho Nacional de Promoção da Igualdade Racial, na hipótese de extensão nacional, ou dos Conselhos de Promoção de Igualdade Racial estaduais ou locais, nas hipóteses de danos com extensão regional ou local, respectivamente.",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lei-7347:14",
+   "ordem": 14,
+   "numero": "14",
+   "rotulo": "Art. 14",
+   "caminho": null,
+   "incidencia": "media",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "O juiz poderá conferir efeito suspensivo aos recursos, para evitar dano irreparável à parte.",
+     "nivel": 0
+    }
+   ]
+  },
+  {
+   "key": "lei-7347:15",
+   "ordem": 15,
+   "numero": "15",
+   "rotulo": "Art. 15",
+   "caminho": null,
+   "incidencia": "alta",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "Decorridos sessenta dias do trânsito em julgado da sentença condenatória, sem que a associação autora lhe promova a execução, deverá fazê-lo o Ministério Público, facultada igual iniciativa aos demais legitimados.",
+     "nivel": 0
+    }
+   ]
+  },
+  {
+   "key": "lei-7347:16",
+   "ordem": 16,
+   "numero": "16",
+   "rotulo": "Art. 16",
+   "caminho": null,
+   "incidencia": "muito_alta",
+   "incidenciaNota": "ATENÇÃO — literalidade x jurisprudência: a redação (dada pela Lei nº 9.494/1997) restringe a coisa julgada erga omnes aos limites da competência territorial do órgão prolator, mas o STF, no RE 1.101.937 (Tema 1075 de repercussão geral, julgado em 2021), declarou essa limitação territorial inconstitucional. Um dos temas mais polêmicos da lei: bancas cobram tanto o texto literal do artigo quanto o entendimento do STF — leia o enunciado com atenção para saber qual está sendo exigido.",
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "A sentença civil fará coisa julgada erga omnes, nos limites da competência territorial do órgão prolator, exceto se o pedido for julgado improcedente por insuficiência de provas, hipótese em que qualquer legitimado poderá intentar outra ação com idêntico fundamento, valendo-se de nova prova.",
+     "nivel": 0
+    }
+   ]
+  },
+  {
+   "key": "lei-7347:17",
+   "ordem": 17,
+   "numero": "17",
+   "rotulo": "Art. 17",
+   "caminho": null,
+   "incidencia": "alta",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "Em caso de litigância de má-fé, a associação autora e os diretores responsáveis pela propositura da ação serão solidariamente condenados em honorários advocatícios e ao décuplo das custas, sem prejuízo da responsabilidade por perdas e danos.",
+     "nivel": 0
+    }
+   ]
+  },
+  {
+   "key": "lei-7347:18",
+   "ordem": 18,
+   "numero": "18",
+   "rotulo": "Art. 18",
+   "caminho": null,
+   "incidencia": "muito_alta",
+   "incidenciaNota": "Isenta o MP e as associações autoras de adiantamento de custas, emolumentos e honorários periciais, e afasta a condenação da associação autora em honorários e custas, exceto comprovada má-fé. Pegadinha clássica: a isenção não é absoluta — cabe condenação se houver má-fé demonstrada, tema frequente em provas de MP e Magistratura.",
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "Nas ações de que trata esta lei, não haverá adiantamento de custas, emolumentos, honorários periciais e quaisquer outras despesas, nem condenação da associação autora, salvo comprovada má-fé, em honorários de advogado, custas e despesas processuais.",
+     "nivel": 0
+    }
+   ]
+  },
+  {
+   "key": "lei-7347:19",
+   "ordem": 19,
+   "numero": "19",
+   "rotulo": "Art. 19",
+   "caminho": null,
+   "incidencia": "alta",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "Aplica-se à ação civil pública, prevista nesta Lei, o Código de Processo Civil, aprovado pela Lei nº 5.869, de 11 de janeiro de 1973, naquilo em que não contrarie suas disposições.",
+     "nivel": 0
+    }
+   ]
+  },
+  {
+   "key": "lei-7347:20",
+   "ordem": 20,
+   "numero": "20",
+   "rotulo": "Art. 20",
+   "caminho": null,
+   "incidencia": "media",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "O fundo de que trata o art. 13 desta Lei será regulamentado pelo Poder Executivo no prazo de 90 (noventa) dias.",
+     "nivel": 0
+    }
+   ]
+  },
+  {
+   "key": "lei-7347:21",
+   "ordem": 21,
+   "numero": "21",
+   "rotulo": "Art. 21",
+   "caminho": null,
+   "incidencia": "muito_alta",
+   "incidenciaNota": "Prevê a aplicação subsidiária do Título III do Código de Defesa do Consumidor (arts. 81 a 104, incluído pela Lei nº 8.078/1990) à defesa dos direitos difusos, coletivos e individuais homogêneos — base do chamado 'microssistema processual coletivo' (a LACP e o Título III do CDC se interpenetram e se completam). Tema estrutural muito cobrado em provas de MP e Magistratura sobre teoria geral do processo coletivo.",
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "Aplicam-se à defesa dos direitos e interesses difusos, coletivos e individuais, no que for cabível, os dispositivos do Título III da lei que instituiu o Código de Defesa do Consumidor.",
+     "nivel": 0
+    }
+   ]
+  },
+  {
+   "key": "lei-7347:22",
+   "ordem": 22,
+   "numero": "22",
+   "rotulo": "Art. 22",
+   "caminho": null,
+   "incidencia": "media",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "Esta lei entra em vigor na data de sua publicação.",
+     "nivel": 0
+    }
+   ]
+  },
+  {
+   "key": "lei-7347:23",
+   "ordem": 23,
+   "numero": "23",
+   "rotulo": "Art. 23",
+   "caminho": null,
+   "incidencia": "media",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "Revogam-se as disposições em contrário.",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": null,
+     "texto": "Brasília, em 24 de julho de 1985; 164º da Independência e 97º da República.",
+     "nivel": 0
+    },
+    {
+     "id": "b3",
+     "rotulo": null,
+     "texto": "JOSÉ SARNEY Fernando Lyra",
+     "nivel": 0
+    }
+   ]
+  }
+ ]
+}

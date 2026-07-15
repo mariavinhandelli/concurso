@@ -9,14 +9,16 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Download } from 'lucide-react';
+import { Bell, BellRing, Download } from 'lucide-react';
 import {
-  activateCatalogEdital, getCatalogEditalBySlug, getCatalogEditalSubjects,
-  listCatalogEditais, listConcursoStats, listEdicoes, listEditalUpdates, listPastPapers,
+  activateCatalogEdital, followEdital, getCatalogEditalBySlug, getCatalogEditalSubjects,
+  isFollowingEdital, listCatalogEditais, listConcursoStats, listEdicoes, listEditalUpdates,
+  listPastPapers, unfollowEdital,
   type CatalogEdital, type CatalogEditalDetail, type CatalogEditalSubject,
   type ConcursoStat, type EditalEdicao, type EditalUpdate, type PastPaper,
 } from '@/services/editaisCatalog.service';
 import { getTargetTopicProgress } from '@/services/targetTopics.service';
+import { tryGetUser } from '@/lib/supabase/requireUser';
 import { daysUntilExam, countdownInfo } from '@/lib/targets';
 import { pushRecent } from '@/lib/recents';
 import { track, EV } from '@/lib/analytics';
@@ -27,14 +29,9 @@ import { Button } from '@/components/ui/Button';
 import { PageContainer } from '@/components/ui/Page';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { EditalTimeline } from '@/components/features/editais/EditalTimeline';
+import { SITUACAO_LABEL, SituacaoTag } from '@/components/features/editais/EditalCard';
 import { EditalComparador, type ComparadorOption } from '@/components/features/editais/EditalComparador';
 import { ConcursoStatsTable, PastPapersList } from '@/components/features/editais/EditalHistorico';
-
-const SITUACAO_LABEL: Record<CatalogEdital['situacao'], string> = {
-  vigente: 'Edital vigente',
-  em_expectativa: 'Em expectativa',
-  encerrado: 'Encerrado',
-};
 
 function formatDateBR(iso: string): string {
   return new Date(iso + 'T00:00:00').toLocaleDateString('pt-BR');
@@ -105,6 +102,40 @@ export default function EditalDetailPage() {
     queryFn: () => getTargetTopicProgress(edital!.targetId!),
     enabled: Boolean(edital?.targetId),
   });
+  // Seguir novidades — quem ativou o concurso já é seguidor implícito.
+  const { data: following } = useQuery<boolean>({
+    queryKey: ['edital-follow', editalId],
+    queryFn: () => isFollowingEdital(editalId!),
+    enabled: Boolean(editalId) && !edital?.targetId,
+  });
+  const [togglingFollow, setTogglingFollow] = useState(false);
+
+  async function handleToggleFollow() {
+    if (!edital || togglingFollow) return;
+    // Página pública: seguir exige conta — visitante vai para o login e volta.
+    if (!(await tryGetUser())) {
+      router.push(`/login?returnTo=/editais/${slug}`);
+      return;
+    }
+    setTogglingFollow(true);
+    const next = !following;
+    queryClient.setQueryData(['edital-follow', edital.id], next);
+    try {
+      if (next) {
+        await followEdital(edital.id);
+        track(EV.editalFollowed, { slug: edital.slug });
+        toast.success('Você será avisada quando sair novidade deste concurso.');
+      } else {
+        await unfollowEdital(edital.id);
+        track(EV.editalUnfollowed, { slug: edital.slug });
+      }
+    } catch (err) {
+      queryClient.setQueryData(['edital-follow', edital.id], !next);
+      toast.error(err instanceof Error ? err.message : 'Erro ao atualizar acompanhamento.');
+    } finally {
+      setTogglingFollow(false);
+    }
+  }
 
   // Rastro para o Command Palette (Recentes) + instrumentação.
   // O ref evita evento duplicado quando o React Query refaz o fetch.
@@ -122,6 +153,12 @@ export default function EditalDetailPage() {
     track(EV.editalViewed, { slug: edital.slug });
   }, [edital]);
 
+  // Outros cargos do mesmo órgão — derivado uma única vez do catálogo cacheado.
+  const outrosCargos = useMemo(
+    () => (todosEditais ?? []).filter((e) => edital != null && e.orgaoSlug === edital.orgaoSlug && e.id !== edital.id),
+    [todosEditais, edital],
+  );
+
   const comparadorOptions = useMemo<ComparadorOption[]>(() => {
     if (!edital) return [];
     const edicaoOpts: ComparadorOption[] = (edicoes ?? [])
@@ -132,7 +169,9 @@ export default function EditalDetailPage() {
         mesmoConcurso: true,
       }));
     const outroOpts: ComparadorOption[] = (todosEditais ?? [])
-      .filter((e) => e.id !== edital.id && (e.concursoKey == null || e.concursoKey !== edital.concursoKey))
+      // Sem conteúdo programático curado não há o que comparar — o diff sairia
+      // "tudo adicionado", que é enganoso.
+      .filter((e) => e.id !== edital.id && e.subjectCount > 0 && (e.concursoKey == null || e.concursoKey !== edital.concursoKey))
       .map((e) => ({
         id: e.id,
         label: [e.orgao, e.cargo].filter(Boolean).join(' · '),
@@ -147,6 +186,11 @@ export default function EditalDetailPage() {
       router.push(`/targets/${edital.targetId}`);
       return;
     }
+    // Página pública: ativar exige conta — visitante vai para o login e volta.
+    if (!(await tryGetUser())) {
+      router.push(`/login?returnTo=/editais/${slug}`);
+      return;
+    }
     setActivating(true);
     try {
       const targetId = await activateCatalogEdital(edital.id);
@@ -154,7 +198,9 @@ export default function EditalDetailPage() {
       for (const key of [['catalog-editais'], ['target-exams'], ['edital', slug], ['edital-coverage'], ['raiox']]) {
         queryClient.invalidateQueries({ queryKey: key });
       }
-      toast.success('Edital ativado — seu concurso está pronto.');
+      toast.success(edital.subjectCount > 0
+        ? 'Edital ativado — seu concurso está pronto.'
+        : 'Concurso criado — monte a grade na aba "Montar edital" ou importe o PDF.');
       router.push(`/targets/${targetId}`);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Erro ao ativar edital.');
@@ -217,15 +263,17 @@ export default function EditalDetailPage() {
             {[edital.orgao, edital.cargo].filter(Boolean).join(' · ')}
           </h1>
           <div style={s.tagRow}>
-            <span style={{
-              ...s.situacaoTag,
-              ...(edital.situacao === 'vigente' ? s.situacaoVigente
-                : edital.situacao === 'em_expectativa' ? s.situacaoExpectativa
-                : s.situacaoEncerrado),
-            }}>
-              {SITUACAO_LABEL[edital.situacao]}
-            </span>
+            <SituacaoTag situacao={edital.situacao} />
             {edital.isActivated && <span style={s.activatedTag}>Ativado ✓</span>}
+            {edital.orgaoSlug && (
+              <button
+                onClick={() => router.push(`/editais/orgao/${edital.orgaoSlug}`)}
+                style={s.orgaoChip}
+                title="Ver todos os cargos deste órgão"
+              >
+                {edital.orgao} →
+              </button>
+            )}
             {edital.areaName && <span style={s.metaChip}>{edital.areaName}</span>}
             {edital.uf && <span style={s.metaChip}>{edital.uf}</span>}
             {edital.nivel && <span style={s.metaChip}>Nível {edital.nivel}</span>}
@@ -244,15 +292,16 @@ export default function EditalDetailPage() {
 
       {/* ── Ações principais ── */}
       <div style={s.actionsRow}>
-        {edital.subjectCount === 0 && !edital.isActivated ? (
-          <Button disabled title="Conteúdo programático em preparação — acompanhe as notícias por aqui.">
-            Conteúdo em preparação
-          </Button>
-        ) : (
-          <Button onClick={handleActivate} disabled={activating} loading={activating}>
-            {edital.isActivated ? 'Abrir meu concurso →' : 'Ativar edital'}
-          </Button>
-        )}
+        <Button
+          onClick={handleActivate}
+          disabled={activating}
+          loading={activating}
+          title={edital.subjectCount === 0 && !edital.isActivated
+            ? 'A grade desta edição ainda está em curadoria — você monta o edital depois de ativar'
+            : undefined}
+        >
+          {edital.isActivated ? 'Abrir meu concurso →' : 'Ativar edital'}
+        </Button>
         {edital.editalUrl && (
           <a
             href={edital.editalUrl} target="_blank" rel="noopener noreferrer"
@@ -263,7 +312,36 @@ export default function EditalDetailPage() {
             Baixar edital (PDF)
           </a>
         )}
+        {edital.targetId ? (
+          <span style={s.followingHint} title="Você ativou este concurso — novidades chegam por notificação.">
+            <BellRing size={14} strokeWidth={2} style={{ marginRight: 6, verticalAlign: -2 }} />
+            Acompanhando
+          </span>
+        ) : (
+          <Button
+            variant="outline"
+            onClick={handleToggleFollow}
+            disabled={togglingFollow}
+            style={following ? { borderColor: theme.teal, background: theme.tealBg, color: theme.teal } : undefined}
+            title="Receba uma notificação quando sair retificação, notícia ou resultado deste concurso"
+          >
+            {following ? (
+              <><BellRing size={15} strokeWidth={2} style={{ marginRight: 6 }} />Acompanhando ✓</>
+            ) : (
+              <><Bell size={15} strokeWidth={2} style={{ marginRight: 6 }} />Acompanhar novidades</>
+            )}
+          </Button>
+        )}
       </div>
+
+      {/* Ativação parcial: sem grade curada, o concurso nasce com ficha,
+          linha do tempo e notificações — a grade é montada pela usuária. */}
+      {edital.subjectCount === 0 && !edital.isActivated && (
+        <p style={s.semGradeHint}>
+          A grade desta edição ainda está em curadoria. Ao ativar, seu concurso já nasce com ficha,
+          linha do tempo e notificações — e você monta o edital na aba &quot;Montar edital&quot; ou importando o PDF.
+        </p>
+      )}
 
       <div style={s.sections}>
         {/* ── Seu progresso (só quando ativado) ── */}
@@ -297,6 +375,11 @@ export default function EditalDetailPage() {
             ))}
           </div>
           {edital.aviso && <p style={s.avisoText}>{edital.aviso}</p>}
+          {edital.verificadoEm && (
+            <p style={s.verificadoText}>
+              Informações verificadas em {formatDateBR(edital.verificadoEm)} — fontes oficiais e portais especializados.
+            </p>
+          )}
         </section>
 
         {/* ── Conteúdo programático + estatística de disciplinas ── */}
@@ -311,7 +394,9 @@ export default function EditalDetailPage() {
           {!subjects ? (
             <div style={{ marginTop: 12 }}><Skeleton height={120} borderRadius={theme.radiusSm} /></div>
           ) : subjects.length === 0 ? (
-            <p style={s.mutedText}>Conteúdo programático em preparação.</p>
+            <p style={s.mutedText}>
+              Conteúdo programático em preparação — ative o edital para montar sua própria grade enquanto isso.
+            </p>
           ) : (
             <div style={s.subjectList}>
               {subjects.map((sub) => {
@@ -386,6 +471,26 @@ export default function EditalDetailPage() {
           </section>
         )}
 
+        {/* ── Outros cargos deste órgão ── */}
+        {edital.orgaoSlug && outrosCargos.length > 0 && (
+          <section style={s.card}>
+            <div style={s.cardHead}>
+              <h2 style={s.cardTitle}>Outros cargos de {edital.orgao}</h2>
+              <button onClick={() => router.push(`/editais/orgao/${edital.orgaoSlug}`)} style={s.orgaoPageLink}>
+                Ver órgão →
+              </button>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 12 }}>
+              {outrosCargos.map((e) => (
+                <button key={e.id} onClick={() => router.push(`/editais/${e.slug}`)} style={s.cargoRow}>
+                  <span style={s.edicaoLabel}>{e.cargo || e.orgao}</span>
+                  <SituacaoTag situacao={e.situacao} />
+                </button>
+              ))}
+            </div>
+          </section>
+        )}
+
         {/* ── Histórico do concurso (só com dado real curado) ── */}
         {(stats?.length ?? 0) > 0 && (
           <section id="historico" style={s.card}>
@@ -415,12 +520,11 @@ const s: Record<string, CSSProperties> = {
   headerRow: { display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, marginBottom: 16, flexWrap: 'wrap' },
   h1: { fontWeight: 800, color: theme.ink, letterSpacing: -0.6, margin: '0 0 10px', overflowWrap: 'break-word' },
   tagRow: { display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' },
-  situacaoTag: { fontSize: 11, fontWeight: 700, borderRadius: theme.radiusXs, padding: '3px 9px', flexShrink: 0, letterSpacing: 0.2 },
-  situacaoVigente: { color: theme.onTeal, background: theme.teal },
-  situacaoExpectativa: { color: theme.warn, background: theme.warnBg },
-  situacaoEncerrado: { color: theme.inkFaint, background: theme.muted },
   activatedTag: { fontSize: 11, fontWeight: 700, color: theme.teal, background: theme.tealBg, borderRadius: theme.radiusXs, padding: '3px 9px', flexShrink: 0 },
   metaChip: { fontSize: 12, fontWeight: 500, color: theme.inkSoft, background: theme.bg, border: `0.5px solid ${theme.line}`, borderRadius: theme.radiusXs, padding: '3px 8px' },
+  orgaoChip: { fontSize: 12, fontWeight: 600, color: theme.teal, background: theme.tealBg, border: `0.5px solid ${theme.teal}`, borderRadius: theme.radiusXs, padding: '3px 8px', cursor: 'pointer', fontFamily: 'inherit' },
+  orgaoPageLink: { background: 'transparent', border: 'none', color: theme.teal, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', padding: 0, flexShrink: 0 },
+  cargoRow: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, padding: '10px 12px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.bg, minWidth: 0, cursor: 'pointer', fontFamily: 'inherit', width: '100%' },
 
   countdownBox: { display: 'flex', flexDirection: 'column', alignItems: 'flex-end', flexShrink: 0 },
   countdownBig: { fontSize: 34, fontWeight: 700, lineHeight: 1, fontVariantNumeric: 'tabular-nums' },
@@ -428,7 +532,9 @@ const s: Record<string, CSSProperties> = {
   countdownDate: { fontSize: 12, color: theme.inkFaint, marginTop: 2 },
 
   actionsRow: { display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20, flexWrap: 'wrap' },
+  semGradeHint: { fontSize: 12, color: theme.inkFaint, lineHeight: 1.55, margin: '-10px 0 20px', maxWidth: 560 },
   downloadBtn: { display: 'inline-flex', alignItems: 'center', padding: '9px 16px', borderRadius: theme.radiusSm, border: `1px solid ${theme.teal}`, background: theme.tealBg, color: theme.teal, fontSize: 13, fontWeight: 600, textDecoration: 'none', whiteSpace: 'nowrap' },
+  followingHint: { display: 'inline-flex', alignItems: 'center', fontSize: 13, fontWeight: 600, color: theme.teal, whiteSpace: 'nowrap' },
 
   sections: { display: 'flex', flexDirection: 'column', gap: 12 },
   card: { background: theme.card, border: `0.5px solid ${theme.line}`, borderRadius: theme.radiusSm, boxShadow: theme.shadow, padding: 18, minWidth: 0 },
@@ -447,6 +553,7 @@ const s: Record<string, CSSProperties> = {
   factLabel: { fontSize: 11, fontWeight: 600, color: theme.inkFaint, textTransform: 'uppercase', letterSpacing: 0.4 },
   factValue: { fontSize: 14, fontWeight: 600, color: theme.ink, overflowWrap: 'break-word' },
   avisoText: { fontSize: 12, color: theme.inkFaint, margin: '12px 0 0', lineHeight: 1.5, fontStyle: 'italic' },
+  verificadoText: { fontSize: 11, color: theme.inkFaint, margin: '10px 0 0', paddingTop: 10, borderTop: `0.5px solid ${theme.line}` },
 
   subjectList: { display: 'flex', flexDirection: 'column', gap: 8, marginTop: 12 },
   subjectRow: { padding: '11px 14px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.bg, minWidth: 0 },

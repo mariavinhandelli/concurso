@@ -1,9 +1,26 @@
 // app/(app)/editais/page.tsx
-// O acesso principal ao banco de editais é a aba "Banco de editais" em
-// /targets (decisão de navegação do Hub de Editais). Esta rota existe só
-// para que /editais seja linkável e leve ao lugar certo.
-import { redirect } from 'next/navigation';
+// Banco de Editais — versão PÚBLICA e linkável do catálogo (SEO/aquisição).
+// Logada, a usuária costuma chegar pela aba "Banco de editais" em /targets;
+// esta página reusa exatamente o mesmo componente. As ações de importação
+// levam para /targets (que exige login).
+'use client';
 
-export default function EditaisIndexPage() {
-  redirect('/targets');
+import { useRouter } from 'next/navigation';
+import { BancoEditaisTab } from '@/components/features/targets/BancoEditaisTab';
+import { PageContainer, PageHeader } from '@/components/ui/Page';
+
+export default function EditaisPage() {
+  const router = useRouter();
+  return (
+    <PageContainer width="narrow">
+      <PageHeader
+        title="Banco de Editais"
+        subtitle="Concursos organizados por órgão, com grade verticalizada, pesos por disciplina, linha do tempo e provas anteriores."
+      />
+      <BancoEditaisTab
+        onImportar={() => router.push('/targets')}
+        onImportarPdf={() => router.push('/targets')}
+      />
+    </PageContainer>
+  );
 }

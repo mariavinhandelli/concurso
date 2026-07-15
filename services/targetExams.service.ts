@@ -85,6 +85,9 @@ export async function createTargetExam(input: {
   ano_alvo?: number | null;
   exam_date?: string | null;
   phase?: 'pre' | 'pos';
+  // Vínculo com o Banco de Editais: dá ficha, linha do tempo e notificações
+  // ao concurso mesmo quando a grade vem de importação manual/PDF.
+  catalog_edital_id?: string | null;
 }): Promise<TargetExam> {
   const { supabase, userId } = await requireUser();
   const phase = input.phase ?? 'pre';
@@ -106,6 +109,7 @@ export async function createTargetExam(input: {
       exam_date: input.exam_date ?? null,
       phase,
       slug,
+      catalog_edital_id: input.catalog_edital_id ?? null,
     })
     .select('id, user_id, board_id, orgao, cargo, ano_alvo, exam_date, slug, is_primary, phase, catalog_edital_id, created_at')
     .single();

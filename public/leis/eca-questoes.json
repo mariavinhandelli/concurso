@@ -1,0 +1,466 @@
+[
+ {
+  "id": "eca-q1",
+  "artigoKey": "eca:2",
+  "enunciado": "Para os efeitos do ECA, considera-se criança a pessoa até doze anos de idade incompletos, e adolescente aquela entre doze e dezoito anos de idade.",
+  "gabarito": true,
+  "comentario": "Literal do art. 2º, caput.",
+  "tipo": "literal"
+ },
+ {
+  "id": "eca-q2",
+  "artigoKey": "eca:2",
+  "enunciado": "O Estatuto da Criança e do Adolescente nunca se aplica a pessoas maiores de dezoito anos, ainda que em casos expressos em outras leis.",
+  "gabarito": false,
+  "comentario": "O parágrafo único do art. 2º admite aplicação excepcional do ECA a pessoas entre 18 e 21 anos, em casos expressos em lei.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "eca-q3",
+  "artigoKey": "eca:4",
+  "enunciado": "A garantia de prioridade absoluta compreende a primazia de receber proteção e socorro em quaisquer circunstâncias e a precedência de atendimento nos serviços públicos ou de relevância pública.",
+  "gabarito": true,
+  "comentario": "Literal do art. 4º, § 1º, alíneas a e b.",
+  "tipo": "literal"
+ },
+ {
+  "id": "eca-q4",
+  "artigoKey": "eca:4",
+  "enunciado": "Para os fins do ECA, a assistência afetiva devida pelos pais aos filhos limita-se à presença física periódica, independentemente de ser solicitada pela criança.",
+  "gabarito": false,
+  "comentario": "O art. 4º, § 3º, III, exige que a presença física seja \"espontaneamente solicitada pela criança ou adolescente quando possível de ser atendida\" — não é incondicional.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "eca-q5",
+  "artigoKey": "eca:5",
+  "enunciado": "É considerada conduta ilícita, sujeita a reparação de danos, a ação ou omissão que ofenda direito fundamental de criança ou adolescente, incluídos os casos de abandono afetivo.",
+  "gabarito": true,
+  "comentario": "Literal do art. 5º, parágrafo único.",
+  "tipo": "literal"
+ },
+ {
+  "id": "eca-q6",
+  "artigoKey": "eca:13",
+  "enunciado": "Os casos de suspeita ou confirmação de castigo físico, tratamento cruel ou degradante e de maus-tratos contra criança ou adolescente devem ser obrigatoriamente comunicados ao Conselho Tutelar, sem prejuízo de outras providências legais.",
+  "gabarito": true,
+  "comentario": "Literal do art. 13, caput.",
+  "tipo": "literal"
+ },
+ {
+  "id": "eca-q7",
+  "artigoKey": "eca:13",
+  "enunciado": "A comunicação ao Conselho Tutelar dos casos de suspeita de maus-tratos contra criança ou adolescente é facultativa, cabendo a quem toma conhecimento do fato avaliar a conveniência de informar.",
+  "gabarito": false,
+  "comentario": "O art. 13, caput, torna a comunicação OBRIGATÓRIA, sem prejuízo de outras providências legais — não é uma faculdade de quem toma conhecimento do fato.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "eca-q8",
+  "artigoKey": "eca:18-A",
+  "enunciado": "A criança e o adolescente têm o direito de ser educados e cuidados sem o uso de castigo físico ou de tratamento cruel ou degradante, ainda que a título de correção ou disciplina, pelos pais ou por qualquer pessoa encarregada de cuidá-los.",
+  "gabarito": true,
+  "comentario": "Literal do art. 18-A, caput (Lei 13.010/2014).",
+  "tipo": "literal"
+ },
+ {
+  "id": "eca-q9",
+  "artigoKey": "eca:18-B",
+  "enunciado": "Constatado o uso de castigo físico ou tratamento cruel ou degradante contra criança ou adolescente, a única medida cabível contra os pais é a destituição imediata do poder familiar.",
+  "gabarito": false,
+  "comentario": "O art. 18-B prevê um rol de medidas graduais (encaminhamento a programa de proteção à família, tratamento psicológico, cursos de orientação etc.), aplicadas de acordo com a gravidade do caso — a destituição do poder familiar não é automática nem a única opção.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "eca-q10",
+  "artigoKey": "eca:19",
+  "enunciado": "Toda criança ou adolescente inserido em programa de acolhimento familiar ou institucional terá sua situação reavaliada, no máximo, a cada 3 (três) meses.",
+  "gabarito": true,
+  "comentario": "Literal do art. 19, § 1º.",
+  "tipo": "literal"
+ },
+ {
+  "id": "eca-q11",
+  "artigoKey": "eca:19",
+  "enunciado": "A permanência de criança ou adolescente em acolhimento institucional pode se prolongar indefinidamente, sem qualquer limite temporal, desde que autorizada verbalmente pelo Conselho Tutelar.",
+  "gabarito": false,
+  "comentario": "O art. 19, § 2º, fixa o limite de 18 meses, salvo comprovada necessidade que atenda ao superior interesse, devidamente FUNDAMENTADA PELA AUTORIDADE JUDICIÁRIA (não pelo Conselho Tutelar e não verbalmente).",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "eca-q12",
+  "artigoKey": "eca:24",
+  "enunciado": "A perda e a suspensão do poder familiar podem ser decretadas diretamente pelo Conselho Tutelar, dispensado o procedimento judicial contraditório.",
+  "gabarito": false,
+  "comentario": "O art. 24 exige decretação JUDICIAL, em procedimento contraditório — o Conselho Tutelar não tem competência para decretar perda ou suspensão do poder familiar.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "eca-q13",
+  "artigoKey": "eca:25",
+  "enunciado": "Família extensa ou ampliada é a mesma coisa que família natural, sendo os dois termos sinônimos no ECA.",
+  "gabarito": false,
+  "comentario": "São conceitos distintos: família natural (art. 25, caput) é a comunidade formada pelos pais ou qualquer deles e seus descendentes; família extensa ou ampliada (parágrafo único) se estende para além dessa unidade, alcançando parentes próximos com quem a criança convive e mantém vínculos de afinidade e afetividade.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "eca-q14",
+  "artigoKey": "eca:28",
+  "enunciado": "A colocação em família substituta far-se-á mediante guarda, tutela ou adoção, independentemente da situação jurídica da criança ou adolescente, nos termos do ECA.",
+  "gabarito": true,
+  "comentario": "Literal do art. 28, caput.",
+  "tipo": "literal"
+ },
+ {
+  "id": "eca-q15",
+  "artigoKey": "eca:33",
+  "enunciado": "A guarda obriga a prestação de assistência material, moral e educacional à criança ou adolescente, conferindo a seu detentor o direito de opor-se a terceiros, inclusive aos pais.",
+  "gabarito": true,
+  "comentario": "Literal do art. 33, caput.",
+  "tipo": "literal"
+ },
+ {
+  "id": "eca-q16",
+  "artigoKey": "eca:35",
+  "enunciado": "Uma vez deferida, a guarda é irrevogável, permanecendo válida até a maioridade do guardado independentemente de qualquer formalidade posterior.",
+  "gabarito": false,
+  "comentario": "O art. 35 permite a revogação da guarda a qualquer tempo, mediante ato judicial fundamentado, ouvido o Ministério Público — não é irrevogável.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "eca-q17",
+  "artigoKey": "eca:36",
+  "enunciado": "A tutela será deferida, nos termos da lei civil, a pessoa de até 18 (dezoito) anos incompletos.",
+  "gabarito": true,
+  "comentario": "Literal do art. 36, caput.",
+  "tipo": "literal"
+ },
+ {
+  "id": "eca-q18",
+  "artigoKey": "eca:39",
+  "enunciado": "A adoção é medida excepcional e irrevogável, à qual só se deve recorrer quando esgotados os recursos de manutenção da criança ou adolescente na família natural ou extensa.",
+  "gabarito": true,
+  "comentario": "Literal do art. 39, § 1º.",
+  "tipo": "literal"
+ },
+ {
+  "id": "eca-q19",
+  "artigoKey": "eca:39",
+  "enunciado": "É admitida a adoção por procuração, desde que o instrumento de mandato tenha poderes especiais e específicos para o ato.",
+  "gabarito": false,
+  "comentario": "O art. 39, § 2º, veda expressamente a adoção por procuração, sem exceções.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "eca-q20",
+  "artigoKey": "eca:40",
+  "enunciado": "O adotando pode ter mais de dezoito anos à data do pedido de adoção, desde que já estivesse sob guarda ou tutela dos adotantes antes de completar a maioridade.",
+  "gabarito": true,
+  "comentario": "Literal do art. 40 — a regra geral (máximo 18 anos) tem a exceção justamente para quem já estava sob guarda ou tutela dos adotantes.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "eca-q21",
+  "artigoKey": "eca:42",
+  "enunciado": "Podem adotar os maiores de 18 (dezoito) anos, independentemente do estado civil.",
+  "gabarito": true,
+  "comentario": "Literal do art. 42, caput.",
+  "tipo": "literal"
+ },
+ {
+  "id": "eca-q22",
+  "artigoKey": "eca:42",
+  "enunciado": "A diferença mínima de idade exigida entre adotante e adotando é de dezoito anos.",
+  "gabarito": false,
+  "comentario": "O art. 42, § 3º, exige que o adotante seja pelo menos DEZESSEIS anos mais velho que o adotando, não dezoito.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "eca-q23",
+  "artigoKey": "eca:49",
+  "enunciado": "A morte dos adotantes restabelece automaticamente o poder familiar dos pais naturais sobre o adotado.",
+  "gabarito": false,
+  "comentario": "O art. 49 estabelece exatamente o contrário: a morte dos adotantes NÃO restabelece o poder familiar dos pais naturais — a adoção é irrevogável.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "eca-q24",
+  "artigoKey": "eca:53",
+  "enunciado": "É direito da criança e do adolescente, no acesso à escola pública e gratuita mais próxima de sua residência, ter garantida vaga no mesmo estabelecimento para irmãos que frequentem a mesma etapa ou ciclo de ensino da educação básica.",
+  "gabarito": true,
+  "comentario": "Literal do art. 53, V.",
+  "tipo": "literal"
+ },
+ {
+  "id": "eca-q25",
+  "artigoKey": "eca:60",
+  "enunciado": "É proibido qualquer trabalho a menores de quatorze anos de idade, salvo na condição de aprendiz.",
+  "gabarito": true,
+  "comentario": "Literal do art. 60.",
+  "tipo": "literal"
+ },
+ {
+  "id": "eca-q26",
+  "artigoKey": "eca:60",
+  "enunciado": "É proibido qualquer trabalho a menores de dezesseis anos de idade, sem exceção.",
+  "gabarito": false,
+  "comentario": "O art. 60 proíbe trabalho a menores de QUATORZE anos (não dezesseis), ressalvada a condição de aprendiz.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "eca-q27",
+  "artigoKey": "eca:98",
+  "enunciado": "As medidas de proteção previstas no ECA são aplicáveis sempre que os direitos da criança ou adolescente forem ameaçados ou violados por ação ou omissão da sociedade ou do Estado, por falta, omissão ou abuso dos pais ou responsável, ou em razão de sua própria conduta.",
+  "gabarito": true,
+  "comentario": "Síntese literal das hipóteses do art. 98, I a III.",
+  "tipo": "literal"
+ },
+ {
+  "id": "eca-q28",
+  "artigoKey": "eca:98",
+  "enunciado": "As medidas de proteção do ECA somente podem ser aplicadas em razão de conduta do próprio adolescente, não alcançando situações de omissão do Estado ou dos pais.",
+  "gabarito": false,
+  "comentario": "O art. 98 prevê três hipóteses distintas: ação/omissão do Estado ou da sociedade, falta/omissão/abuso dos pais ou responsável, OU conduta da própria criança/adolescente — não se restringe a esta última.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "eca-q29",
+  "artigoKey": "eca:100",
+  "enunciado": "Na aplicação das medidas de proteção, deve-se preferir aquelas que visem ao fortalecimento dos vínculos familiares e comunitários.",
+  "gabarito": true,
+  "comentario": "Literal do art. 100, caput.",
+  "tipo": "literal"
+ },
+ {
+  "id": "eca-q30",
+  "artigoKey": "eca:101",
+  "enunciado": "Entre as medidas específicas de proteção previstas no art. 101 do ECA estão o encaminhamento aos pais mediante termo de responsabilidade e a inclusão em programa oficial de auxílio a alcoólatras e toxicômanos.",
+  "gabarito": true,
+  "comentario": "Literal do art. 101, I e VI.",
+  "tipo": "literal"
+ },
+ {
+  "id": "eca-q31",
+  "artigoKey": "eca:101",
+  "enunciado": "O Conselho Tutelar pode, por deliberação própria, determinar a colocação de uma criança em família substituta, dispensada a intervenção da autoridade judiciária.",
+  "gabarito": false,
+  "comentario": "O art. 101, § 2º, estabelece que o afastamento da criança/adolescente do convívio familiar é de COMPETÊNCIA EXCLUSIVA DA AUTORIDADE JUDICIÁRIA, mediante procedimento contencioso com contraditório e ampla defesa.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "eca-q32",
+  "artigoKey": "eca:103",
+  "enunciado": "Considera-se ato infracional a conduta descrita como crime ou contravenção penal.",
+  "gabarito": true,
+  "comentario": "Literal do art. 103.",
+  "tipo": "literal"
+ },
+ {
+  "id": "eca-q33",
+  "artigoKey": "eca:104",
+  "enunciado": "São penalmente inimputáveis os menores de dezoito anos, sujeitos às medidas previstas no ECA.",
+  "gabarito": true,
+  "comentario": "Literal do art. 104, caput.",
+  "tipo": "literal"
+ },
+ {
+  "id": "eca-q34",
+  "artigoKey": "eca:105",
+  "enunciado": "Uma criança de 10 anos que pratique conduta equivalente a furto pode receber medida socioeducativa de prestação de serviços à comunidade.",
+  "gabarito": false,
+  "comentario": "Pelo art. 105, ao ato infracional praticado por CRIANÇA correspondem apenas as medidas de PROTEÇÃO do art. 101 — nunca medida socioeducativa, que é exclusiva de adolescentes.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "eca-q35",
+  "artigoKey": "eca:106",
+  "enunciado": "Nenhum adolescente será privado de sua liberdade senão em flagrante de ato infracional ou por ordem escrita e fundamentada da autoridade judiciária competente.",
+  "gabarito": true,
+  "comentario": "Literal do art. 106, caput.",
+  "tipo": "literal"
+ },
+ {
+  "id": "eca-q36",
+  "artigoKey": "eca:108",
+  "enunciado": "A internação do adolescente, antes da sentença, pode ser determinada pelo prazo máximo de quarenta e cinco dias.",
+  "gabarito": true,
+  "comentario": "Literal do art. 108, caput (internação PROVISÓRIA).",
+  "tipo": "literal"
+ },
+ {
+  "id": "eca-q37",
+  "artigoKey": "eca:108",
+  "enunciado": "O prazo máximo de internação provisória do adolescente, antes da sentença, é de três anos, podendo ser prorrogado mediante decisão fundamentada.",
+  "gabarito": false,
+  "comentario": "Três anos é o prazo máximo da internação DEFINITIVA (art. 121, § 3º). A internação PROVISÓRIA, antes da sentença, tem prazo máximo de 45 dias (art. 108).",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "eca-q38",
+  "artigoKey": "eca:112",
+  "enunciado": "O rol de medidas socioeducativas do art. 112 do ECA vai da advertência à internação em estabelecimento educacional, podendo ainda ser aplicada qualquer das medidas de proteção previstas nos incisos I a VI do art. 101.",
+  "gabarito": true,
+  "comentario": "Literal do art. 112, I a VII (o inciso VII remete ao art. 101, I a VI).",
+  "tipo": "literal"
+ },
+ {
+  "id": "eca-q39",
+  "artigoKey": "eca:112",
+  "enunciado": "Ao adolescente a quem se aplica medida socioeducativa pode ser cumulada a medida de proteção de acolhimento institucional prevista no art. 101, VII.",
+  "gabarito": false,
+  "comentario": "O art. 112, VII, remete apenas às medidas do art. 101, incisos I A VI — o acolhimento institucional (inciso VII do art. 101) não está incluído nessa remissão.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "eca-q40",
+  "artigoKey": "eca:121",
+  "enunciado": "Em nenhuma hipótese o período máximo de internação do adolescente excederá a três anos.",
+  "gabarito": true,
+  "comentario": "Literal do art. 121, § 3º.",
+  "tipo": "literal"
+ },
+ {
+  "id": "eca-q41",
+  "artigoKey": "eca:121",
+  "enunciado": "A manutenção da medida de internação deve ser reavaliada, mediante decisão fundamentada, no máximo a cada três meses.",
+  "gabarito": false,
+  "comentario": "O art. 121, § 2º, exige reavaliação no máximo a cada SEIS meses, não três — três meses é o sublimite do art. 122, § 1º, para a internação por descumprimento reiterado de medida (inciso III).",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "eca-q42",
+  "artigoKey": "eca:121",
+  "enunciado": "A liberação do adolescente internado será compulsória aos vinte e um anos de idade.",
+  "gabarito": true,
+  "comentario": "Literal do art. 121, § 5º.",
+  "tipo": "literal"
+ },
+ {
+  "id": "eca-q43",
+  "artigoKey": "eca:122",
+  "enunciado": "A medida de internação só poderá ser aplicada quando se tratar de ato infracional cometido mediante grave ameaça ou violência a pessoa, por reiteração no cometimento de outras infrações graves, ou por descumprimento reiterado e injustificável de medida anteriormente imposta.",
+  "gabarito": true,
+  "comentario": "Literal do art. 122, I a III — rol taxativo.",
+  "tipo": "literal"
+ },
+ {
+  "id": "eca-q44",
+  "artigoKey": "eca:122",
+  "enunciado": "Na hipótese de internação por descumprimento reiterado e injustificável de medida anteriormente imposta (art. 122, III), o prazo não poderá ser superior a três anos, o mesmo prazo máximo geral de internação.",
+  "gabarito": false,
+  "comentario": "O art. 122, § 1º, fixa um sublimite ESPECÍFICO de no máximo 3 (três) MESES para essa hipótese — bem menor que o teto geral de 3 anos do art. 121, § 3º.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "eca-q45",
+  "artigoKey": "eca:126",
+  "enunciado": "Antes de iniciado o procedimento judicial para apuração de ato infracional, o representante do Ministério Público poderá conceder a remissão, como forma de exclusão do processo.",
+  "gabarito": true,
+  "comentario": "Síntese literal do art. 126, caput.",
+  "tipo": "literal"
+ },
+ {
+  "id": "eca-q46",
+  "artigoKey": "eca:126",
+  "enunciado": "A remissão só pode ser concedida pelo Ministério Público após o oferecimento da representação e a instauração do procedimento judicial.",
+  "gabarito": false,
+  "comentario": "O art. 126, caput, prevê justamente o contrário: a remissão pelo Ministério Público ocorre ANTES de iniciado o procedimento judicial, como forma de exclusão do processo.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "eca-q47",
+  "artigoKey": "eca:130",
+  "enunciado": "Verificada a hipótese de maus-tratos, negligência, opressão ou abuso sexual impostos pelos pais ou responsável, a autoridade judiciária pode determinar, como medida cautelar, o afastamento do agressor da moradia comum.",
+  "gabarito": true,
+  "comentario": "Literal do art. 130, caput — é a criança/adolescente que permanece no lar, e o agressor quem é afastado.",
+  "tipo": "literal"
+ },
+ {
+  "id": "eca-q48",
+  "artigoKey": "eca:131",
+  "enunciado": "O Conselho Tutelar é órgão permanente e autônomo, de natureza jurisdicional, encarregado de julgar o cumprimento dos direitos da criança e do adolescente.",
+  "gabarito": false,
+  "comentario": "O art. 131 é expresso: o Conselho Tutelar é órgão permanente e autônomo, mas NÃO jurisdicional — não julga, apenas zela pelo cumprimento dos direitos.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "eca-q49",
+  "artigoKey": "eca:132",
+  "enunciado": "Em cada Município haverá, no mínimo, um Conselho Tutelar composto de 5 (cinco) membros, escolhidos pela população local para mandato de 4 (quatro) anos, permitida recondução.",
+  "gabarito": true,
+  "comentario": "Literal do art. 132.",
+  "tipo": "literal"
+ },
+ {
+  "id": "eca-q50",
+  "artigoKey": "eca:132",
+  "enunciado": "O mandato dos membros do Conselho Tutelar é de 3 (três) anos, vedada a recondução.",
+  "gabarito": false,
+  "comentario": "O art. 132 fixa mandato de 4 (quatro) anos, e PERMITE a recondução por novos processos de escolha.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "eca-q51",
+  "artigoKey": "eca:136",
+  "enunciado": "O Conselho Tutelar pode aplicar, entre as medidas de proteção do art. 101, a de acolhimento institucional (inciso VII), mas não pode, por deliberação própria, determinar a colocação da criança em família substituta (inciso IX).",
+  "gabarito": true,
+  "comentario": "O art. 136, I, autoriza o Conselho Tutelar a aplicar as medidas do art. 101, I a VII (o que inclui o acolhimento institucional); a colocação em família substituta (inciso IX) fica fora dessa remissão e é reservada à autoridade judiciária, nos termos do art. 101, § 2º.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "eca-q52",
+  "artigoKey": "eca:148",
+  "enunciado": "A Justiça da Infância e da Juventude é competente para conceder a remissão como forma de suspensão ou extinção do processo, e para conhecer de pedidos de adoção e seus incidentes.",
+  "gabarito": true,
+  "comentario": "Literal do art. 148, II e III.",
+  "tipo": "literal"
+ },
+ {
+  "id": "eca-q53",
+  "artigoKey": "eca:227",
+  "enunciado": "Os crimes definidos no ECA são de ação penal pública condicionada à representação da vítima ou de seu representante legal.",
+  "gabarito": false,
+  "comentario": "O art. 227 estabelece que os crimes do ECA são de ação pública INCONDICIONADA — não dependem de representação.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "eca-q54",
+  "artigoKey": "eca:240",
+  "enunciado": "Produzir, fotografar ou filmar, por qualquer meio, cena de sexo explícito ou pornográfica envolvendo criança ou adolescente é crime com pena de reclusão de 4 (quatro) a 8 (oito) anos, e multa.",
+  "gabarito": true,
+  "comentario": "Literal do art. 240, caput.",
+  "tipo": "literal"
+ },
+ {
+  "id": "eca-q55",
+  "artigoKey": "eca:241-A",
+  "enunciado": "Oferecer, transmitir, distribuir ou divulgar por qualquer meio, inclusive pela internet, material de pornografia infantil é crime com pena de reclusão de 3 (três) a 6 (seis) anos, e multa — pena inferior à cominada para quem produz o material (art. 240).",
+  "gabarito": true,
+  "comentario": "Literal do art. 241-A, caput; a comparação com a pena do art. 240 (4 a 8 anos) está correta.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "eca-q56",
+  "artigoKey": "eca:244-A",
+  "enunciado": "Submeter criança ou adolescente à prostituição ou à exploração sexual é crime com pena de reclusão de 4 (quatro) a 10 (dez) anos, e multa.",
+  "gabarito": true,
+  "comentario": "Literal do art. 244-A, caput.",
+  "tipo": "literal"
+ },
+ {
+  "id": "eca-q57",
+  "artigoKey": "eca:244-B",
+  "enunciado": "A configuração do crime de corrupção de menores (art. 244-B do ECA) exige prova de que o adolescente foi efetivamente corrompido pelo agente maior de idade.",
+  "gabarito": false,
+  "comentario": "Segundo a Súmula 500 do STJ, o crime do art. 244-B é FORMAL: sua configuração independe de prova da efetiva corrupção do menor, bastando a participação do adolescente na prática da infração penal com o agente.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "eca-q58",
+  "artigoKey": "eca:244-B",
+  "enunciado": "Corromper ou facilitar a corrupção de menor de 18 anos, com ele praticando infração penal ou induzindo-o a praticá-la, é crime com pena de reclusão de 1 (um) a 4 (quatro) anos.",
+  "gabarito": true,
+  "comentario": "Literal do art. 244-B, caput.",
+  "tipo": "literal"
+ }
+]

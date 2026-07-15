@@ -1,0 +1,162 @@
+[
+ {
+  "id": "l7347-q1",
+  "artigoKey": "lei-7347:1",
+  "enunciado": "Não será cabível ação civil pública para veicular pretensões que envolvam tributos, contribuições previdenciárias, o FGTS ou outros fundos de natureza institucional cujos beneficiários podem ser individualmente determinados.",
+  "gabarito": true,
+  "comentario": "Literal do art. 1º, parágrafo único, da Lei 7.347/85.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l7347-q2",
+  "artigoKey": "lei-7347:1",
+  "enunciado": "A Lei 7.347/85 não abrange, em seu rol de interesses tuteláveis por ação civil pública, danos causados ao patrimônio público e social, por se tratar de matéria reservada exclusivamente à ação popular.",
+  "gabarito": false,
+  "comentario": "O inciso VIII do art. 1º (incluído pela Lei nº 13.004/2014) inclui expressamente o patrimônio público e social entre os interesses tuteláveis por ACP, sem prejuízo da ação popular (o próprio caput ressalva 'sem prejuízo da ação popular').",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l7347-q3",
+  "artigoKey": "lei-7347:3",
+  "enunciado": "Embora o art. 3º da Lei 7.347/85 utilize a conjunção 'ou' ao dispor que a ação civil poderá ter por objeto a condenação em dinheiro ou o cumprimento de obrigação de fazer ou não fazer, doutrina e jurisprudência do STJ admitem a cumulação dessas duas tutelas em uma mesma ação civil pública.",
+  "gabarito": true,
+  "comentario": "Pegadinha de literalidade x interpretação: o texto literal do art. 3º sugere alternatividade ('ou'), mas o STJ admite a cumulação da tutela condenatória em dinheiro com a obrigação de fazer/não fazer na mesma ACP, quando necessário à efetiva reparação do dano.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l7347-q4",
+  "artigoKey": "lei-7347:5",
+  "enunciado": "O Ministério Público tem legitimidade para propor tanto a ação civil pública principal quanto a ação cautelar de que trata a Lei 7.347/85.",
+  "gabarito": true,
+  "comentario": "Literal do art. 5º, caput e inciso I.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l7347-q5",
+  "artigoKey": "lei-7347:5",
+  "enunciado": "A Defensoria Pública não possui legitimidade ativa para propor ação civil pública, pois sua atuação institucional está restrita à assistência jurídica individual de pessoas hipossuficientes.",
+  "gabarito": false,
+  "comentario": "O art. 5º, inciso II, inclui expressamente a Defensoria Pública entre os legitimados para propor a ação principal e a ação cautelar da Lei 7.347/85.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l7347-q6",
+  "artigoKey": "lei-7347:5",
+  "enunciado": "Para ter legitimidade ativa em ação civil pública, a associação deve estar constituída há pelo menos 1 (um) ano nos termos da lei civil e incluir, entre suas finalidades institucionais, a proteção a algum dos interesses listados no art. 5º, V, 'b', da Lei 7.347/85.",
+  "gabarito": true,
+  "comentario": "Literal do art. 5º, V, 'a' e 'b' — os dois requisitos (pré-constituição de 1 ano e pertinência temática) são cumulativos ('concomitantemente').",
+  "tipo": "literal"
+ },
+ {
+  "id": "l7347-q7",
+  "artigoKey": "lei-7347:5",
+  "enunciado": "Em caso de desistência infundada ou abandono da ação por associação legitimada, o processo é necessariamente extinto sem resolução do mérito, não havendo previsão legal de sucessão processual.",
+  "gabarito": false,
+  "comentario": "O art. 5º, § 3º, dispõe que, nessa hipótese, o Ministério Público ou outro legitimado assumirá a titularidade ativa da ação, e não a extinção do processo.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l7347-q8",
+  "artigoKey": "lei-7347:5",
+  "enunciado": "O requisito da pré-constituição da associação poderá ser dispensado pelo juiz quando haja manifesto interesse social evidenciado pela dimensão ou característica do dano, ou pela relevância do bem jurídico a ser protegido.",
+  "gabarito": true,
+  "comentario": "Literal do art. 5º, § 4º.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l7347-q9",
+  "artigoKey": "lei-7347:6",
+  "enunciado": "Qualquer pessoa pode provocar a iniciativa do Ministério Público informando fatos que constituam objeto de ação civil, mas apenas o servidor público tem o dever legal de fazê-lo.",
+  "gabarito": true,
+  "comentario": "Literal do art. 6º: 'Qualquer pessoa poderá e o servidor público deverá provocar a iniciativa do Ministério Público' — para o cidadão comum é faculdade, para o servidor público é dever.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l7347-q10",
+  "artigoKey": "lei-7347:8",
+  "enunciado": "Ao requisitar certidões, informações, exames ou perícias no âmbito do inquérito civil, o Ministério Público deve assinalar prazo que não poderá ser inferior a 15 (quinze) dias úteis.",
+  "gabarito": false,
+  "comentario": "Pegadinha numérica: o art. 8º, § 1º, fixa prazo mínimo de 10 (dez) dias úteis, e não 15. O prazo de 15 dias (corridos, não úteis) aparece no caput do art. 8º, para resposta a certidões e informações requeridas por qualquer interessado que queira instruir a inicial.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l7347-q11",
+  "artigoKey": "lei-7347:9",
+  "enunciado": "A promoção de arquivamento do inquérito civil pelo membro do Ministério Público é decisão definitiva e não se sujeita a nenhum controle interno da instituição.",
+  "gabarito": false,
+  "comentario": "O art. 9º e seus parágrafos preveem controle interno: os autos são remetidos ao Conselho Superior do Ministério Público (§ 1º), que pode homologar ou rejeitar o arquivamento (§ 2º a § 4º), designando outro órgão para o ajuizamento da ação se não homologar.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l7347-q12",
+  "artigoKey": "lei-7347:12",
+  "enunciado": "A multa cominada liminarmente em ação civil pública só será exigível do réu após o trânsito em julgado da decisão favorável ao autor, mas será devida desde o dia em que se houver configurado o descumprimento.",
+  "gabarito": true,
+  "comentario": "Literal do art. 12, § 2º.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l7347-q13",
+  "artigoKey": "lei-7347:13",
+  "enunciado": "Havendo condenação em dinheiro em ação civil pública, a indenização reverterá a um fundo gerido por Conselho Federal ou Conselhos Estaduais, do qual participarão necessariamente o Ministério Público e representantes da comunidade.",
+  "gabarito": true,
+  "comentario": "Literal do art. 13, caput.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l7347-q14",
+  "artigoKey": "lei-7347:15",
+  "enunciado": "Decorridos sessenta dias do trânsito em julgado da sentença condenatória sem que a associação autora promova a execução, apenas o Ministério Público pode fazê-lo, sendo vedada a iniciativa dos demais legitimados.",
+  "gabarito": false,
+  "comentario": "O art. 15 determina que o Ministério Público deverá promover a execução nesse caso, mas 'facultada igual iniciativa aos demais legitimados' — ou seja, qualquer outro colegitimado também pode executar a sentença.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l7347-q15",
+  "artigoKey": "lei-7347:16",
+  "enunciado": "Pela redação literal do art. 16 da Lei 7.347/85, a sentença civil fará coisa julgada erga omnes nos limites da competência territorial do órgão prolator, exceto se o pedido for julgado improcedente por insuficiência de provas.",
+  "gabarito": true,
+  "comentario": "Literal do art. 16 (redação dada pela Lei nº 9.494/1997). Atenção: essa limitação territorial foi declarada inconstitucional pelo STF no RE 1.101.937 (Tema 1075, 2021) — esta questão testa apenas a literalidade do dispositivo, não o entendimento jurisprudencial atual.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l7347-q16",
+  "artigoKey": "lei-7347:16",
+  "enunciado": "O STF, em sede de repercussão geral, confirmou a constitucionalidade da limitação territorial da coisa julgada prevista no art. 16 da Lei 7.347/85.",
+  "gabarito": false,
+  "comentario": "O STF fez o oposto: no RE 1.101.937 (Tema 1075, julgado em 2021), declarou inconstitucional a limitação territorial da coisa julgada trazida pela Lei nº 9.494/1997 ao art. 16. A literalidade do artigo, porém, continua trazendo essa limitação — daí a importância de identificar o que a questão está exigindo.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l7347-q17",
+  "artigoKey": "lei-7347:18",
+  "enunciado": "A associação autora de ação civil pública jamais poderá ser condenada em honorários de advogado, custas e despesas processuais, ainda que tenha litigado de má-fé.",
+  "gabarito": false,
+  "comentario": "O art. 18 ressalva expressamente a hipótese de má-fé comprovada: 'nem condenação da associação autora, salvo comprovada má-fé, em honorários de advogado, custas e despesas processuais'. A isenção não é absoluta.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l7347-q18",
+  "artigoKey": "lei-7347:19",
+  "enunciado": "Aplica-se à ação civil pública o Código de Processo Civil, naquilo em que não contrariar as disposições da Lei 7.347/85.",
+  "gabarito": true,
+  "comentario": "Literal do art. 19 — aplicação subsidiária do CPC ao rito da ação civil pública.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l7347-q19",
+  "artigoKey": "lei-7347:21",
+  "enunciado": "Aplicam-se à defesa dos direitos e interesses difusos, coletivos e individuais, no que for cabível, os dispositivos do Título III da lei que instituiu o Código de Defesa do Consumidor.",
+  "gabarito": true,
+  "comentario": "Literal do art. 21 (incluído pela Lei nº 8.078/1990) — é a base normativa da integração entre a Lei 7.347/85 e o CDC, formando o chamado microssistema processual coletivo.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l7347-q20",
+  "artigoKey": "lei-7347:9",
+  "enunciado": "Os autos do inquérito civil ou as peças de informação arquivadas pelo Ministério Público devem ser remetidos ao Conselho Superior do Ministério Público no prazo de 3 (três) dias, sob pena de falta grave.",
+  "gabarito": true,
+  "comentario": "Literal do art. 9º, § 1º.",
+  "tipo": "literal"
+ }
+]

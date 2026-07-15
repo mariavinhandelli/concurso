@@ -17,6 +17,9 @@ export async function importEditalAsTarget(input: {
   ano_alvo?: number | null;
   exam_date?: string | null;
   board_id?: string | null;
+  // Match com o Banco de Editais (Fase 3): a importação carrega o vínculo
+  // com o catálogo — o concurso nasce com ficha, linha do tempo e push.
+  catalog_edital_id?: string | null;
 }): Promise<string> {
   const orgao = input.orgao?.trim() || null;
   let cargo = input.cargo?.trim() || null;
@@ -29,6 +32,7 @@ export async function importEditalAsTarget(input: {
     ano_alvo: input.ano_alvo ?? null,
     exam_date: input.exam_date ?? null,
     board_id: input.board_id ?? null,
+    catalog_edital_id: input.catalog_edital_id ?? null,
   });
 
   let i = 0;

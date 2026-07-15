@@ -17,6 +17,8 @@ export interface CatalogEdital {
   uf: string | null;
   nivel: string | null;          // escolaridade (texto curado: "superior", "médio"…)
   concursoKey: string | null;    // agrupa edições do mesmo concurso
+  orgaoSlug: string | null;      // órgão do catálogo (rota /editais/orgao/[slug])
+  verificadoEm: string | null;   // data em que a ficha foi conferida contra as fontes
   areaName: string | null;
   situacao: EditalSituacao;
   ultimaEdicao: number | null;
@@ -50,9 +52,16 @@ interface EditalRow {
   inscricoes_ate: string | null;
   edital_url: string | null;
   aviso: string | null;
+  verificado_em: string | null;
   catalog_areas: { name: string } | { name: string }[] | null;
+  orgaos_catalog: { slug: string } | { slug: string }[] | null;
   edital_catalog_subjects: EmbeddedCount;
   edital_catalog_topics: EmbeddedCount;
+}
+
+function orgaoSlugOf(rel: EditalRow['orgaos_catalog']): string | null {
+  const o = Array.isArray(rel) ? rel[0] : rel;
+  return o?.slug ?? null;
 }
 
 function countOf(rel: EmbeddedCount): number {
@@ -66,7 +75,7 @@ export async function listCatalogEditais(): Promise<CatalogEdital[]> {
   const [editaisRes, minhasRes] = await Promise.all([
     supabase
       .from('editais_catalog')
-      .select('id, slug, orgao, cargo, banca, ano, uf, nivel, concurso_key, situacao, ultima_edicao, vagas, remuneracao, exam_date, inscricoes_ate, edital_url, aviso, catalog_areas(name), edital_catalog_subjects(count), edital_catalog_topics(count)')
+      .select('id, slug, orgao, cargo, banca, ano, uf, nivel, concurso_key, situacao, ultima_edicao, vagas, remuneracao, exam_date, inscricoes_ate, edital_url, aviso, verificado_em, catalog_areas(name), orgaos_catalog(slug), edital_catalog_subjects(count), edital_catalog_topics(count)')
       .eq('is_active', true)
       .order('position', { ascending: true }),
     user
@@ -94,6 +103,8 @@ export async function listCatalogEditais(): Promise<CatalogEdital[]> {
         uf: e.uf,
         nivel: e.nivel,
         concursoKey: e.concurso_key,
+        orgaoSlug: orgaoSlugOf(e.orgaos_catalog),
+        verificadoEm: e.verificado_em,
         areaName: area?.name ?? null,
         situacao: e.situacao,
         ultimaEdicao: e.ultima_edicao,
@@ -232,6 +243,106 @@ export async function activateCatalogEdital(editalId: string): Promise<string> {
   return data as string;
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Órgãos do catálogo — a hierarquia é órgão → cargos (editais) → especificações
+// ─────────────────────────────────────────────────────────────────────────────
+
+export interface OrgaoCatalog {
+  id: string;
+  slug: string;
+  sigla: string;
+  nome: string;
+  uf: string | null;
+  esfera: string | null;   // 'estadual' | 'federal' | 'municipal'
+  poder: string | null;    // 'executivo' | 'judiciario' | 'legislativo' | 'controle'
+  siteUrl: string | null;
+  descricao: string | null;
+  editalCount: number;
+}
+
+interface OrgaoRow {
+  id: string;
+  slug: string;
+  sigla: string;
+  nome: string;
+  uf: string | null;
+  esfera: string | null;
+  poder: string | null;
+  site_url: string | null;
+  descricao: string | null;
+  editais_catalog: EmbeddedCount;
+}
+
+function mapOrgao(o: OrgaoRow): OrgaoCatalog {
+  return {
+    id: o.id, slug: o.slug, sigla: o.sigla, nome: o.nome, uf: o.uf,
+    esfera: o.esfera, poder: o.poder, siteUrl: o.site_url, descricao: o.descricao,
+    editalCount: countOf(o.editais_catalog),
+  };
+}
+
+export async function listOrgaos(): Promise<OrgaoCatalog[]> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from('orgaos_catalog')
+    .select('id, slug, sigla, nome, uf, esfera, poder, site_url, descricao, editais_catalog(count)')
+    .order('position', { ascending: true });
+  if (error) throw new Error('Erro ao listar órgãos: ' + error.message);
+  return ((data ?? []) as unknown as OrgaoRow[]).map(mapOrgao);
+}
+
+export async function getOrgaoBySlug(slug: string): Promise<OrgaoCatalog | null> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from('orgaos_catalog')
+    .select('id, slug, sigla, nome, uf, esfera, poder, site_url, descricao, editais_catalog(count)')
+    .eq('slug', slug)
+    .maybeSingle();
+  if (error) throw new Error('Erro ao carregar órgão: ' + error.message);
+  return data ? mapOrgao(data as unknown as OrgaoRow) : null;
+}
+
+// ── Seguir concurso (push de novidades) ──
+// Seguidor explícito recebe web push quando sai edital_update novo. Quem
+// ativou o concurso é seguidor implícito (a Edge Function notify-edital-updates
+// une os dois conjuntos) — o follow explícito serve para acompanhar sem ativar.
+
+export async function isFollowingEdital(editalId: string): Promise<boolean> {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return false;
+  const { data, error } = await supabase
+    .from('edital_follows')
+    .select('edital_catalog_id')
+    .eq('user_id', user.id)
+    .eq('edital_catalog_id', editalId)
+    .maybeSingle();
+  if (error) return false;
+  return data != null;
+}
+
+export async function followEdital(editalId: string): Promise<void> {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('Sessão expirada — entre de novo.');
+  const { error } = await supabase
+    .from('edital_follows')
+    .insert({ user_id: user.id, edital_catalog_id: editalId });
+  if (error && error.code !== '23505') throw new Error('Erro ao seguir edital: ' + error.message);
+}
+
+export async function unfollowEdital(editalId: string): Promise<void> {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('Sessão expirada — entre de novo.');
+  const { error } = await supabase
+    .from('edital_follows')
+    .delete()
+    .eq('user_id', user.id)
+    .eq('edital_catalog_id', editalId);
+  if (error) throw new Error('Erro ao deixar de seguir edital: ' + error.message);
+}
+
 // ── Match de importação com o catálogo (Fase 3) ──
 // Evita concursos "órfãos": se a usuária importa (PDF/texto) um edital que já
 // existe no banco, os modais oferecem a ativação completa (ficha, pesos,
@@ -250,10 +361,11 @@ export function matchCatalogEdital(
   const nOrgao = normalizeMatch(orgao);
   const nCargo = normalizeMatch(cargo);
   // Conservador: exige órgão idêntico E cargo compatível — melhor não sugerir
-  // do que sugerir o concurso errado.
+  // do que sugerir o concurso errado. Editais sem grade também casam: nesse
+  // caso os modais vinculam a importação ao catálogo em vez de oferecer a
+  // ativação (que criaria um concurso vazio, perdendo a grade importada).
   if (!nOrgao || !nCargo) return null;
   return editais.find((e) => {
-    if (e.subjectCount === 0) return false; // ativar criaria um concurso vazio
     const eOrgao = normalizeMatch(e.orgao);
     const eCargo = normalizeMatch(e.cargo);
     return eOrgao === nOrgao && (eCargo === nCargo || eCargo.includes(nCargo) || nCargo.includes(eCargo));
@@ -276,7 +388,7 @@ export async function getCatalogEditalBySlug(slug: string): Promise<CatalogEdita
   const [editalRes, targetRes] = await Promise.all([
     supabase
       .from('editais_catalog')
-      .select('id, slug, orgao, cargo, banca, ano, uf, nivel, concurso_key, situacao, ultima_edicao, vagas, remuneracao, exam_date, inscricoes_ate, edital_url, aviso, catalog_areas(name), edital_catalog_subjects(count), edital_catalog_topics(count)')
+      .select('id, slug, orgao, cargo, banca, ano, uf, nivel, concurso_key, situacao, ultima_edicao, vagas, remuneracao, exam_date, inscricoes_ate, edital_url, aviso, verificado_em, catalog_areas(name), orgaos_catalog(slug), edital_catalog_subjects(count), edital_catalog_topics(count)')
       .eq('slug', slug)
       .maybeSingle(),
     user
@@ -300,6 +412,8 @@ export async function getCatalogEditalBySlug(slug: string): Promise<CatalogEdita
     uf: e.uf,
     nivel: e.nivel,
     concursoKey: e.concurso_key,
+    orgaoSlug: orgaoSlugOf(e.orgaos_catalog),
+    verificadoEm: e.verificado_em,
     areaName: area?.name ?? null,
     situacao: e.situacao,
     ultimaEdicao: e.ultima_edicao,

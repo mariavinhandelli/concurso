@@ -127,6 +127,9 @@ export function ImportarEditalPdfModal({
         ano_alvo: ano ? Number(ano) : null,
         exam_date: examDate || null,
         board_id: boardId,
+        // Match com o banco: o concurso importado nasce vinculado ao catálogo
+        // (ficha, linha do tempo e notificações), mantendo a grade do PDF.
+        catalog_edital_id: catalogMatch?.id ?? null,
       });
       onImported(targetId);
     } catch (e) {
@@ -169,13 +172,25 @@ export function ImportarEditalPdfModal({
               <div style={{ flex: 1, minWidth: 0 }}>
                 <p style={s.matchTitle}>Este concurso já está no Banco de Editais</p>
                 <p style={s.matchHint}>
-                  <strong>{[catalogMatch.orgao, catalogMatch.cargo].filter(Boolean).join(' · ')}</strong> — ativar a
-                  versão completa traz pesos das disciplinas, ficha, linha do tempo e notícias.
+                  {catalogMatch.subjectCount > 0 ? (
+                    <>
+                      <strong>{[catalogMatch.orgao, catalogMatch.cargo].filter(Boolean).join(' · ')}</strong> — ativar a
+                      versão completa traz pesos das disciplinas, ficha, linha do tempo e notícias.
+                    </>
+                  ) : (
+                    <>
+                      <strong>{[catalogMatch.orgao, catalogMatch.cargo].filter(Boolean).join(' · ')}</strong> — sua
+                      importação será vinculada a ele: o concurso nasce com ficha, linha do tempo e notificações,
+                      mantendo a grade extraída do PDF.
+                    </>
+                  )}
                 </p>
               </div>
-              <Button size="sm" onClick={handleActivateMatch} loading={activatingMatch} style={{ flexShrink: 0 }}>
-                {catalogMatch.isActivated ? 'Abrir concurso' : 'Ativar edital do banco'}
-              </Button>
+              {catalogMatch.subjectCount > 0 && (
+                <Button size="sm" onClick={handleActivateMatch} loading={activatingMatch} style={{ flexShrink: 0 }}>
+                  {catalogMatch.isActivated ? 'Abrir concurso' : 'Ativar edital do banco'}
+                </Button>
+              )}
             </div>
           )}
 

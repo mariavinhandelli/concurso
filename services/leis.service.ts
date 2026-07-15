@@ -281,6 +281,36 @@ export const LEIS_CATALOG: LeiMeta[] = [
     arquivo: '/leis/clt.json',
     totalArtigos: 1027,
   },
+  {
+    slug: 'eca',
+    nome: 'Lei nº 8.069, de 13 de julho de 1990 — Estatuto da Criança e do Adolescente (ECA)',
+    nomeCurto: 'ECA',
+    ano: 1990,
+    disciplina: 'Direito da Criança e do Adolescente',
+    descricao: 'Texto compilado e atualizado (fonte: Planalto).',
+    arquivo: '/leis/eca.json',
+    totalArtigos: 325,
+  },
+  {
+    slug: 'lei-12016',
+    nome: 'Lei nº 12.016, de 7 de agosto de 2009 — Mandado de Segurança',
+    nomeCurto: 'Lei 12.016/09 (MS)',
+    ano: 2009,
+    disciplina: 'Direito Processual Civil',
+    descricao: 'Disciplina o mandado de segurança individual e coletivo. Texto compilado e atualizado (fonte: Planalto).',
+    arquivo: '/leis/lei-12016.json',
+    totalArtigos: 29,
+  },
+  {
+    slug: 'lei-7347',
+    nome: 'Lei nº 7.347, de 24 de julho de 1985 — Ação Civil Pública',
+    nomeCurto: 'Lei 7.347/85 (ACP)',
+    ano: 1985,
+    disciplina: 'Direito Processual Civil',
+    descricao: 'Disciplina a ação civil pública de responsabilidade por danos ao meio ambiente, consumidor e outros interesses difusos/coletivos. Texto compilado e atualizado (fonte: Planalto).',
+    arquivo: '/leis/lei-7347.json',
+    totalArtigos: 23,
+  },
 ];
 
 const _cache = new Map<string, Promise<Lei>>();

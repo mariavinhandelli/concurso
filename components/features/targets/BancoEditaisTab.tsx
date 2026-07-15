@@ -1,26 +1,26 @@
 'use client';
 
-// Banco de editais: catálogo navegável com busca textual e filtros avançados
-// (área, banca, UF, escolaridade, situação). Clique num edital abre a página
-// /editais/[slug] — o Dashboard do Edital — onde a ativação é uma decisão
-// informada, nunca o primeiro clique.
+// Banco de editais organizado por ÓRGÃO: cada órgão (PM-GO, PC-GO, TJ-GO…)
+// agrupa os editais dos seus cargos. Busca textual e filtros avançados
+// (área, banca, UF, escolaridade, situação) cortam transversalmente os
+// grupos. Clique num cargo abre /editais/[slug]; o header do grupo abre a
+// página do órgão (/editais/orgao/[slug]).
 
 import { useMemo, useState, type CSSProperties } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
-import { Check, ChevronDown, Funnel, Search } from 'lucide-react';
-import { listCatalogEditais, type CatalogEdital } from '@/services/editaisCatalog.service';
+import { usePersistedState } from '@/hooks/usePersistedState';
+import { ChevronDown, ChevronRight, Funnel, Landmark, Search } from 'lucide-react';
+import {
+  listCatalogEditais, listOrgaos,
+  type CatalogEdital, type OrgaoCatalog,
+} from '@/services/editaisCatalog.service';
+import { EditalCard } from '@/components/features/editais/EditalCard';
 import { theme } from '@/lib/theme';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
-
-const SITUACAO_LABEL: Record<CatalogEdital['situacao'], string> = {
-  vigente: 'Edital vigente',
-  em_expectativa: 'Em expectativa',
-  encerrado: 'Encerrado',
-};
 
 // Remove acentos e caixa para casar "tecnico" com "Técnico".
 function norm(v: string): string {
@@ -36,6 +36,11 @@ interface FilterValues {
 
 const EMPTY_FILTERS: FilterValues = { banca: '', uf: '', nivel: '', situacao: '' };
 
+const SITUACAO_ORDER: Record<CatalogEdital['situacao'], number> = { vigente: 0, em_expectativa: 1, encerrado: 2 };
+
+// Grupos abertos persistem como CSV ("pc-go|tj-go") — SSR-safe via usePersistedState.
+const parseExpandedGroups = (v: string | null): string => v ?? '';
+
 interface Props {
   onImportar: () => void;
   onImportarPdf: () => void;
@@ -47,11 +52,27 @@ export function BancoEditaisTab({ onImportar, onImportarPdf }: Props) {
   const [q, setQ] = useState('');
   const [filters, setFilters] = useState<FilterValues>(EMPTY_FILTERS);
   const [filtersOpen, setFiltersOpen] = useState(false);
+  // Grupos de órgão são recolhidos por padrão e o estado aberto/fechado
+  // PERSISTE entre visitas; busca/filtro ativos forçam tudo aberto (senão o
+  // resultado ficaria escondido atrás dos acordeões).
+  const [expandedRaw, setExpandedRaw] = usePersistedState<string>('editais_grupos_abertos', '', parseExpandedGroups);
+  const expanded = useMemo(() => new Set(expandedRaw.split('|').filter(Boolean)), [expandedRaw]);
 
   const { data: editais, isLoading, isError } = useQuery<CatalogEdital[]>({
     queryKey: ['catalog-editais'],
     queryFn: listCatalogEditais,
   });
+  const { data: orgaos } = useQuery<OrgaoCatalog[]>({
+    queryKey: ['orgaos'],
+    queryFn: listOrgaos,
+    staleTime: 60_000,
+  });
+
+  const orgaoBySlug = useMemo(() => {
+    const m = new Map<string, OrgaoCatalog>();
+    for (const o of orgaos ?? []) m.set(o.slug, o);
+    return m;
+  }, [orgaos]);
 
   const areas = useMemo(() => {
     const set = new Set<string>();
@@ -93,8 +114,33 @@ export function BancoEditaisTab({ onImportar, onImportarPdf }: Props) {
     });
   }, [editais, area, q, filters]);
 
+  // Agrupa por órgão (fallback: texto do órgão, para editais sem vínculo).
+  // Grupos ordenados pela melhor situação interna (vigente primeiro).
+  const grupos = useMemo(() => {
+    const map = new Map<string, { key: string; sigla: string; orgaoSlug: string | null; editais: CatalogEdital[] }>();
+    for (const e of filtered) {
+      const key = e.orgaoSlug ?? `txt:${e.orgao}`;
+      const g = map.get(key);
+      if (g) g.editais.push(e);
+      else map.set(key, { key, sigla: e.orgao, orgaoSlug: e.orgaoSlug, editais: [e] });
+    }
+    return [...map.values()].sort((a, b) => {
+      const sa = Math.min(...a.editais.map((e) => SITUACAO_ORDER[e.situacao]));
+      const sb = Math.min(...b.editais.map((e) => SITUACAO_ORDER[e.situacao]));
+      return sa - sb || a.sigla.localeCompare(b.sigla);
+    });
+  }, [filtered]);
+
   function set<K extends keyof FilterValues>(key: K, value: string) {
     setFilters((prev) => ({ ...prev, [key]: value }));
+  }
+
+  const forceOpen = q.trim() !== '' || activeCount > 0 || area !== 'todas';
+
+  function toggleGroup(key: string) {
+    const next = new Set(expanded);
+    if (next.has(key)) next.delete(key); else next.add(key);
+    setExpandedRaw([...next].join('|'));
   }
 
   if (isLoading) {
@@ -211,13 +257,58 @@ export function BancoEditaisTab({ onImportar, onImportarPdf }: Props) {
         </div>
       )}
 
-      {filtered.length === 0 ? (
+      {grupos.length === 0 ? (
         <p style={s.muted}>Nenhum edital encontrado com esses filtros.</p>
       ) : (
-        <div style={s.list}>
-          {filtered.map((e) => (
-            <EditalCard key={e.id} edital={e} onOpen={() => router.push(`/editais/${e.slug}`)} />
-          ))}
+        <div style={s.groupList}>
+          {grupos.map((g) => {
+            const orgaoInfo = g.orgaoSlug ? orgaoBySlug.get(g.orgaoSlug) : undefined;
+            const open = forceOpen || expanded.has(g.key);
+            const temVigente = g.editais.some((e) => e.situacao === 'vigente');
+            return (
+              <div key={g.key} style={s.group}>
+                <button
+                  onClick={() => toggleGroup(g.key)}
+                  style={s.groupHead}
+                  aria-expanded={open}
+                >
+                  <ChevronRight size={15} color={theme.inkSoft} strokeWidth={2}
+                    style={{ transform: open ? 'rotate(90deg)' : 'rotate(0deg)', transition: 'transform .15s', flexShrink: 0 }} />
+                  <Landmark size={15} color={theme.inkSoft} strokeWidth={1.8} style={{ flexShrink: 0 }} />
+                  <span style={s.groupSigla}>{orgaoInfo?.sigla ?? g.sigla}</span>
+                  {orgaoInfo && <span style={s.groupNome}>{orgaoInfo.nome}</span>}
+                  <span style={s.groupCount}>
+                    {g.editais.length} {g.editais.length === 1 ? 'cargo' : 'cargos'}
+                  </span>
+                  {/* Fechado, o grupo ainda avisa que há edital publicado lá dentro. */}
+                  {!open && temVigente && <span style={s.groupVigente}>Edital vigente</span>}
+                  {g.orgaoSlug && (
+                    <span
+                      role="link"
+                      tabIndex={0}
+                      onClick={(ev) => { ev.stopPropagation(); router.push(`/editais/orgao/${g.orgaoSlug}`); }}
+                      onKeyDown={(ev) => {
+                        if (ev.key === 'Enter' || ev.key === ' ') {
+                          ev.preventDefault(); ev.stopPropagation();
+                          router.push(`/editais/orgao/${g.orgaoSlug}`);
+                        }
+                      }}
+                      style={s.groupArrow}
+                    >
+                      Ver órgão →
+                    </span>
+                  )}
+                </button>
+                {open && (
+                  <div style={{ ...s.list, animation: 'focali-slide-down 0.18s ease' }}>
+                    {g.editais.map((e) => (
+                      <EditalCard key={e.id} edital={e} hideOrgao onOpen={() => router.push(`/editais/${e.slug}`)} />
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       )}
 
@@ -228,55 +319,6 @@ export function BancoEditaisTab({ onImportar, onImportarPdf }: Props) {
         <button onClick={onImportar} style={s.footerLink}>cole o edital →</button>
       </p>
     </>
-  );
-}
-
-function EditalCard({ edital: e, onOpen }: { edital: CatalogEdital; onOpen: () => void }) {
-  const [hov, setHov] = useState(false);
-  const meta = [
-    e.banca,
-    e.uf,
-    e.situacao === 'em_expectativa' && e.ultimaEdicao ? `última edição ${e.ultimaEdicao}` : e.ano ? String(e.ano) : null,
-    `${e.subjectCount} matéria${e.subjectCount === 1 ? '' : 's'}`,
-    `${e.topicCount} tópicos`,
-  ].filter(Boolean).join(' · ');
-
-  const extra = [
-    e.vagas != null ? `${e.vagas.toLocaleString('pt-BR')} vagas` : null,
-    e.examDate ? `prova em ${new Date(e.examDate + 'T00:00:00').toLocaleDateString('pt-BR')}` : null,
-  ].filter(Boolean).join(' · ');
-
-  return (
-    <button
-      onClick={onOpen}
-      onMouseEnter={() => setHov(true)}
-      onMouseLeave={() => setHov(false)}
-      style={{
-        ...s.card,
-        borderColor: hov ? theme.teal : theme.line,
-        boxShadow: hov ? theme.shadowHover : theme.shadow,
-      }}
-    >
-      <div style={{ flex: 1, minWidth: 0, textAlign: 'left' }}>
-        <div style={s.cardTitleRow}>
-          <span style={s.cardTitle}>{[e.orgao, e.cargo].filter(Boolean).join(' · ')}</span>
-          <span style={{
-            ...s.situacaoTag,
-            ...(e.situacao === 'vigente' ? s.situacaoVigente
-              : e.situacao === 'em_expectativa' ? s.situacaoExpectativa
-              : s.situacaoEncerrado),
-          }}>
-            {SITUACAO_LABEL[e.situacao]}
-          </span>
-          {e.isActivated && <span style={{ ...s.activatedTag, display: 'inline-flex', alignItems: 'center', gap: 4 }}>Ativado <Check size={12} strokeWidth={2.5} /></span>}
-        </div>
-        <div style={s.cardMeta}>{meta}</div>
-        {extra && <div style={s.cardExtra}>{extra}</div>}
-      </div>
-      <span style={{ ...s.cardArrow, color: hov ? theme.teal : theme.inkFaint }}>
-        Ver detalhes →
-      </span>
-    </button>
   );
 }
 
@@ -300,18 +342,16 @@ const s: Record<string, CSSProperties> = {
   chip: { padding: '6px 14px', borderRadius: theme.radiusPill, border: `1px solid ${theme.line}`, background: 'transparent', color: theme.inkSoft, fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit', transition: 'all .12s' },
   chipOn: { background: theme.tealBg, border: `1px solid ${theme.teal}`, color: theme.teal, fontWeight: 600 },
 
+  groupList: { display: 'flex', flexDirection: 'column', gap: 10 },
+  group: { minWidth: 0 },
+  groupHead: { display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '12px 14px', border: `0.5px solid ${theme.line}`, borderRadius: theme.radiusSm, background: theme.card, boxShadow: theme.shadow, cursor: 'pointer', fontFamily: 'inherit', minWidth: 0, textAlign: 'left', marginBottom: 8, minHeight: 44 },
+  groupVigente: { fontSize: 11, fontWeight: 700, color: theme.onTeal, background: theme.teal, borderRadius: theme.radiusXs, padding: '2px 8px', flexShrink: 0, letterSpacing: 0.2 },
+  groupSigla: { fontSize: 15, fontWeight: 800, color: theme.ink, letterSpacing: -0.2, flexShrink: 0 },
+  groupNome: { fontSize: 13, color: theme.inkFaint, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
+  groupCount: { fontSize: 12, fontWeight: 600, color: theme.inkSoft, background: theme.muted, borderRadius: theme.radiusPill, padding: '2px 9px', flexShrink: 0, fontVariantNumeric: 'tabular-nums' },
+  groupArrow: { fontSize: 12, fontWeight: 600, color: theme.teal, marginLeft: 'auto', flexShrink: 0, whiteSpace: 'nowrap' },
+
   list: { display: 'flex', flexDirection: 'column', gap: 10 },
-  card: { display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.card, cursor: 'pointer', fontFamily: 'inherit', width: '100%', minWidth: 0, transition: 'border-color .15s, box-shadow .15s' },
-  cardTitleRow: { display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', minWidth: 0 },
-  cardTitle: { fontSize: 15, fontWeight: 600, color: theme.ink, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
-  situacaoTag: { fontSize: 11, fontWeight: 700, borderRadius: theme.radiusXs, padding: '2px 8px', flexShrink: 0, letterSpacing: 0.2 },
-  situacaoVigente: { color: theme.onTeal, background: theme.teal },
-  situacaoExpectativa: { color: theme.warn, background: theme.warnBg },
-  situacaoEncerrado: { color: theme.inkFaint, background: theme.muted },
-  activatedTag: { fontSize: 11, fontWeight: 700, color: theme.teal, background: theme.tealBg, borderRadius: theme.radiusXs, padding: '2px 8px', flexShrink: 0 },
-  cardMeta: { fontSize: 13, color: theme.inkSoft, marginTop: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
-  cardExtra: { fontSize: 12, color: theme.inkFaint, marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
-  cardArrow: { fontSize: 13, fontWeight: 600, flexShrink: 0, whiteSpace: 'nowrap', transition: 'color .15s' },
 
   footerHint: { fontSize: 13, color: theme.inkFaint, margin: '16px 0 0', textAlign: 'center' },
   footerLink: { background: 'transparent', border: 'none', color: theme.teal, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', padding: 0 },

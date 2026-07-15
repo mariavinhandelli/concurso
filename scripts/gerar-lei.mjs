@@ -162,6 +162,33 @@ const LEIS = {
     descricao: 'Texto compilado e atualizado (fonte: Planalto), com a Reforma Trabalhista (Lei 13.467/2017).',
     fonteUrl: 'https://www.planalto.gov.br/ccivil_03/decreto-lei/del5452compilado.htm',
   },
+  eca: {
+    slug: 'eca',
+    nome: 'Lei nº 8.069, de 13 de julho de 1990 — Estatuto da Criança e do Adolescente (ECA)',
+    nomeCurto: 'ECA',
+    ano: 1990,
+    disciplina: 'Direito da Criança e do Adolescente',
+    descricao: 'Texto compilado e atualizado (fonte: Planalto).',
+    fonteUrl: 'https://www.planalto.gov.br/ccivil_03/leis/l8069compilado.htm',
+  },
+  'lei-12016': {
+    slug: 'lei-12016',
+    nome: 'Lei nº 12.016, de 7 de agosto de 2009 — Mandado de Segurança',
+    nomeCurto: 'Lei 12.016/09 (MS)',
+    ano: 2009,
+    disciplina: 'Direito Processual Civil',
+    descricao: 'Disciplina o mandado de segurança individual e coletivo. Texto compilado e atualizado (fonte: Planalto).',
+    fonteUrl: 'https://www.planalto.gov.br/ccivil_03/_ato2007-2010/2009/lei/l12016.htm',
+  },
+  'lei-7347': {
+    slug: 'lei-7347',
+    nome: 'Lei nº 7.347, de 24 de julho de 1985 — Ação Civil Pública',
+    nomeCurto: 'Lei 7.347/85 (ACP)',
+    ano: 1985,
+    disciplina: 'Direito Processual Civil',
+    descricao: 'Disciplina a ação civil pública de responsabilidade por danos ao meio ambiente, consumidor e outros interesses difusos/coletivos. Texto compilado e atualizado (fonte: Planalto).',
+    fonteUrl: 'https://www.planalto.gov.br/ccivil_03/leis/l7347compilada.htm',
+  },
 };
 
 // ─── Entrada ─────────────────────────────────────────────────────────────────
@@ -200,7 +227,7 @@ function stripTags(s) {
 }
 
 function collapse(s) {
-  return s.replace(/[\s ]+/g, ' ').trim();
+  return s.replace(/[\s ]+/g, ' ').replace(/ +([.,;:])/g, '$1').trim();
 }
 
 // Anotações de compilação que não são texto de lei. "(VETADO)" e "(Revogado...)"
@@ -211,6 +238,20 @@ function limparAnotacoes(s) {
   let out = s;
   for (let i = 0; i < 4; i++) out = out.replace(ANOTACAO, ' '); // aninhadas/repetidas
   return collapse(out);
+}
+
+// Em compilados mais recentes (ex.: ECA), o Planalto marca dispositivo
+// alterado/incluído com um link sobrescrito "Vigência" (SEM parênteses, ao
+// contrário de "(Vigência)" tratado por ANOTACAO) que fica dentro do MESMO
+// <p>/<br> do texto, não em um próprio — então sobra como token solto
+// "Vigência" (sempre com V maiúsculo) colado ao HTML depois do stripTags,
+// seja no final de uma frase ("...comprovado: Vigência") seja como um
+// fragmento isolado entre pedaços de um heading partido por <br>
+// ("Seção VIII" + "Vigência" + "Da Habilitação..."). Removido por palavra
+// inteira com V maiúsculo para não afetar "vigência" (minúsculo) usado como
+// palavra comum no meio de frases (ex.: "prova de vigência").
+function limparVigenciaResidual(s) {
+  return collapse(s.replace(/\bVig[êe]ncia\b/g, ' '));
 }
 
 // ─── Parser ──────────────────────────────────────────────────────────────────
@@ -265,7 +306,7 @@ function parseLei(html) {
     if (/^Bras[íi]lia,\s*\d/.test(text.split(BR_MARK)[0]) || (artigos.length > 15 && /Este texto n[ãa]o substitui/i.test(text))) break;
 
     if (centered) {
-      const parts = text.split(BR_MARK).map((p) => collapse(p)).filter(Boolean);
+      const parts = text.split(BR_MARK).map((p) => limparVigenciaResidual(collapse(p))).filter(Boolean);
       const joined = parts.length > 1 ? `${parts[0]} — ${parts.slice(1).join(' ')}` : (parts[0] ?? '');
       const lvl = headingLevel(joined);
       if (lvl >= 0) {
@@ -286,7 +327,7 @@ function parseLei(html) {
     }
     lastHeadingLevel = null;
 
-    text = collapse(text.split(BR_MARK).join(' '));
+    text = limparVigenciaResidual(collapse(text.split(BR_MARK).join(' ')));
 
     // Novo artigo: "Art. 121." / "Art. 121-A" / "Art. 359-M-A" / "Art 1º".
     // Sufixo de letra: hífen COLADO ao número ("121-A") e sem letra minúscula
