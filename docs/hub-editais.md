@@ -180,6 +180,28 @@ Edge Function `notify-edital-updates`, cron horário `15 * * * *`):
   Escrivão 48,27 de 90 pts — fonte Direção Concursos). Nota de corte de 2022
   não foi publicada pelos portais → permanece vazia.
 
+## Auditoria de dados + health check de URLs (15/07/2026)
+
+Migrações `20260715160000` e `20260715170000`. Preenchido com fonte verificada:
+inscritos 2022 da PM-GO (Soldado 52.746, Cadete 9.935 — Direção) e do TJ-GO
+Juiz (5.111 — Magistrar/TJGO); provas anteriores da PM-GO (Soldado e
+Aspirante/CFO, prova+gabarito) e do TJ-GO Juiz 2026; gabaritos do Agente e
+Papiloscopista; resultado definitivo da objetiva do Juiz na linha do tempo
+(PDF FGV, 11/05/2026); aviso do TCE-GO atualizado ao Contrato 14/2026 (a
+remuneração diverge entre fontes — R$ 5,1 mil base vs R$ 11,4–12,4 mil com
+gratificações — então vive no aviso, nunca no campo numérico).
+
+Double-check executado: **27 URLs do catálogo testadas via HTTP — todas as
+finais retornam 200** (páginas HTML do Qconcursos davam 403 anti-bot e foram
+trocadas por PDFs diretos de arquivos.qconcursos.com). Falso-alarme
+investigado e refutado: a remuneração do Soldado PM-GO (R$ 6.353,13) é
+correta — Goiás alinhou os iniciais de PC/PM em 2022 (Direção).
+
+Lacunas HONESTAS que permanecem (dado não publicado de forma verificável):
+nota de corte 2022 da PC-GO e 2026 do TJ-GO Juiz; prova do Escrivão PC-GO
+(conteúdo era idêntico à de Agente); remuneração numérica do TCE-GO (sai no
+edital); ficha do TJ-GO Analista (banca a definir).
+
 ## Superfícies
 
 - **`/editais/[slug]`** (`app/(app)/editais/[slug]/page.tsx`) — Dashboard do
