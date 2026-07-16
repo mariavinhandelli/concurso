@@ -86,7 +86,7 @@ export default function SubjectsPage() {
 }
 
 const styles: Record<string, React.CSSProperties> = {
-  tabs: { display: 'flex', gap: 4, marginBottom: 20, padding: 3, background: 'rgba(15,23,42,.06)', borderRadius: theme.radiusSm, width: 'fit-content' },
+  tabs: { display: 'flex', gap: 4, marginBottom: 20, padding: 3, background: 'rgba(15,23,42,.06)', borderRadius: theme.radiusSm, width: 'fit-content', maxWidth: '100%', overflowX: 'auto' },
   tab: {
     padding: '8px 18px', borderRadius: 9, border: 'none', background: 'transparent',
     color: theme.inkSoft, fontSize: 14, fontWeight: 500, cursor: 'pointer',

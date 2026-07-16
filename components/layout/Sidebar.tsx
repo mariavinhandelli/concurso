@@ -133,7 +133,11 @@ export function Sidebar() {
         )}
       </div>
 
-      <nav className="sidebar-nav" style={styles.nav} aria-label="Navegação principal">
+      <nav
+        className="sidebar-nav"
+        style={{ ...styles.nav, ...(isCollapsed ? { scrollbarGutter: 'auto' } : {}) }}
+        aria-label="Navegação principal"
+      >
         {NAV.map((n, i) => {
           if (n.type === 'sep') {
             if (isCollapsed) {
@@ -164,7 +168,7 @@ export function Sidebar() {
                 fontWeight: active ? 600 : 500,
               }}
             >
-              <n.icon size={18} color={active ? SB.textActive : SB.iconIdle} strokeWidth={1.7} />
+              <n.icon size={18} color={active ? SB.textActive : SB.iconIdle} strokeWidth={1.7} style={{ flexShrink: 0, width: 18, maxWidth: 18 }} />
               {!isCollapsed && <span className="sidebar-label">{n.label}</span>}
             </button>
           );

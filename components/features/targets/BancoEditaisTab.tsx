@@ -344,7 +344,7 @@ const s: Record<string, CSSProperties> = {
 
   groupList: { display: 'flex', flexDirection: 'column', gap: 10 },
   group: { minWidth: 0 },
-  groupHead: { display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '12px 14px', border: `0.5px solid ${theme.line}`, borderRadius: theme.radiusSm, background: theme.card, boxShadow: theme.shadow, cursor: 'pointer', fontFamily: 'inherit', minWidth: 0, textAlign: 'left', marginBottom: 8, minHeight: 44 },
+  groupHead: { display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 8, width: '100%', padding: '12px 14px', border: `0.5px solid ${theme.line}`, borderRadius: theme.radiusSm, background: theme.card, boxShadow: theme.shadow, cursor: 'pointer', fontFamily: 'inherit', minWidth: 0, textAlign: 'left', marginBottom: 8, minHeight: 44 },
   groupVigente: { fontSize: 11, fontWeight: 700, color: theme.onTeal, background: theme.teal, borderRadius: theme.radiusXs, padding: '2px 8px', flexShrink: 0, letterSpacing: 0.2 },
   groupSigla: { fontSize: 15, fontWeight: 800, color: theme.ink, letterSpacing: -0.2, flexShrink: 0 },
   groupNome: { fontSize: 13, color: theme.inkFaint, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },

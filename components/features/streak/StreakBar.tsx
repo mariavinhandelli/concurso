@@ -19,7 +19,10 @@ const COR = {
 };
 
 export const StreakBar = memo(function StreakBar() {
-  const { isMobile } = useUI();
+  const { isMobile, isTablet } = useUI();
+  // Tablet é mais estreito que desktop mas não entra no isMobile — sem essa
+  // distinção, 60 dias espremiam em células mais finas que as do mobile.
+  const totalDias = isMobile ? 30 : isTablet ? 45 : 60;
 
   const { data: info, isError: loadError } = useQuery<StreakInfo>({
     queryKey: ['streak'],
@@ -32,7 +35,6 @@ export const StreakBar = memo(function StreakBar() {
 
   // Skeleton com dimensões corretas enquanto carrega (P10)
   if (!info) {
-    const totalDias = isMobile ? 30 : 60;
     return (
       <div style={styles.wrap}>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
@@ -48,7 +50,6 @@ export const StreakBar = memo(function StreakBar() {
     );
   }
 
-  const totalDias = isMobile ? 30 : 60;
   const dias = info.lastDays.slice(-totalDias);
 
   const primeiroEstudo = dias.findIndex((d) => d.minutes > 0);

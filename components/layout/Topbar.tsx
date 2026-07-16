@@ -25,7 +25,7 @@ import { OPEN_COMMAND_EVENT, OPEN_QUICKLOG_EVENT } from '@/components/features/c
 export function Topbar() {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const { theme: mode, toggleTheme, toggleMobile } = useUI();
+  const { theme: mode, toggleTheme, toggleMobile, isMobile } = useUI();
   const { email, avatarUrl, loaded: userLoaded } = useUser();
   const timer = useTimer();
   const toast = useToast();
@@ -83,11 +83,11 @@ export function Topbar() {
         {/* Busca global / Command Palette — atalho Ctrl/Cmd+K */}
         <button
           onClick={() => window.dispatchEvent(new CustomEvent(OPEN_COMMAND_EVENT))}
-          style={styles.searchBtn}
+          style={isMobile ? { ...styles.searchBtn, padding: '0 6px', marginRight: 0, justifyContent: 'center' } : styles.searchBtn}
           title="Buscar (Ctrl+K)"
           aria-label="Buscar"
         >
-          <Search size={17} color={theme.inkSoft} strokeWidth={1.9} />
+          <Search size={17} color={theme.inkSoft} strokeWidth={1.9} style={{ flexShrink: 0, width: 17, maxWidth: 17 }} />
           <span className="topbar-search-hint" style={styles.searchHint}>Buscar</span>
           <kbd className="topbar-search-hint" style={styles.searchKbd}>Ctrl K</kbd>
         </button>
@@ -219,7 +219,7 @@ const styles: Record<string, React.CSSProperties> = {
     marginRight: '4px', fontFamily: 'inherit', padding: '0 16px 0 13px',
   },
   addLabel: { color: theme.onTeal, fontSize: 14, fontWeight: 600 },
-  searchBtn: { display: 'flex', alignItems: 'center', gap: 8, height: 44, padding: '0 10px', borderRadius: 10, border: `0.5px solid ${theme.line}`, background: theme.card, cursor: 'pointer', fontFamily: 'inherit', marginRight: 2 },
+  searchBtn: { display: 'flex', alignItems: 'center', gap: 8, height: 44, padding: '0 10px', borderRadius: 10, border: `0.5px solid ${theme.line}`, background: theme.card, cursor: 'pointer', fontFamily: 'inherit', marginRight: 2, flexShrink: 0 },
   searchHint: { fontSize: 13, color: theme.inkFaint, fontWeight: 500 },
   searchKbd: { fontFamily: 'ui-monospace, monospace', fontSize: 11, color: theme.inkFaint, border: `0.5px solid ${theme.line}`, borderRadius: 5, padding: '2px 6px', background: theme.muted },
   addMenu: {

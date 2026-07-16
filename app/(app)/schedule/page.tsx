@@ -46,11 +46,11 @@ const ReplanModal = dynamic(
 );
 
 const RepeatIcon = ({ size = 11, color = 'currentColor', mr = 4 }: { size?: number; color?: string; mr?: number }) => (
-  <Repeat size={size} color={color} strokeWidth={2.2} style={{ verticalAlign: '-1px', marginRight: mr }} aria-hidden="true" />
+  <Repeat size={size} color={color} strokeWidth={2.2} style={{ verticalAlign: '-1px', marginRight: mr, flexShrink: 0, width: size, maxWidth: size }} aria-hidden="true" />
 );
 
 const CycleIcon = ({ size = 14, color = 'currentColor', mr = 6 }: { size?: number; color?: string; mr?: number }) => (
-  <RefreshCw size={size} color={color} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: mr }} aria-hidden="true" />
+  <RefreshCw size={size} color={color} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: mr, flexShrink: 0, width: size, maxWidth: size }} aria-hidden="true" />
 );
 
 export default function SchedulePage() {
@@ -196,7 +196,7 @@ export default function SchedulePage() {
                 Recorrência
               </button>
               <button className="touch-target" onClick={() => setPanelOpen(true)} style={{ ...styles.recBtnGhost, justifyContent: 'center', minWidth: 0, padding: isMobile ? '8px 6px' : '8px 12px' }}>
-                <Menu size={14} color={theme.teal} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 6 }} />
+                <Menu size={14} color={theme.teal} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 6, flexShrink: 0, width: 14, maxWidth: 14 }} />
                 Gerenciar
               </button>
             </div>

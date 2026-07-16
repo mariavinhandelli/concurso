@@ -29,7 +29,7 @@ export const Input = forwardRef<HTMLInputElement, Props>(function Input(
       id={inputId}
       className={className}
       style={{
-        width: '100%', boxSizing: 'border-box',
+        width: '100%', minWidth: 0, boxSizing: 'border-box',
         padding: icon ? '10px 13px 10px 38px' : '10px 13px', borderRadius: theme.radiusSm,
         border: `0.5px solid ${error ? theme.danger : theme.line}`,
         background: theme.card, fontSize: 14, color: theme.ink,
