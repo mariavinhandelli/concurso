@@ -65,7 +65,7 @@ export default function JurisprudenciasHubPage() {
       <PageHeader title="Jurisprudências" subtitle="Teses que caem em concurso, organizadas por disciplina." />
 
       {/* Busca */}
-      <form onSubmit={handleSearch} style={{ maxWidth: 560, margin: '0 auto 28px' }}>
+      <form onSubmit={handleSearch} style={{ maxWidth: 560, marginBottom: 28 }}>
         <div style={{ position: 'relative' }}>
           <button
             type="submit"
@@ -89,9 +89,9 @@ export default function JurisprudenciasHubPage() {
       </form>
 
       {/* Ações rápidas */}
-      <div style={{ display: 'flex', gap: 10, justifyContent: 'center', marginBottom: 32, flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-start', marginBottom: 32, flexWrap: 'wrap' }}>
         <button onClick={() => router.push('/jurisprudencias/lista?favoritas=1')} style={{ ...styles.quickBtn, display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-          <Star size={13} fill="#f59e0b" color="#f59e0b" strokeWidth={1.7} />
+          <Star size={13} fill={theme.gold} color={theme.gold} strokeWidth={1.7} />
           Favoritas
         </button>
         <button onClick={() => router.push('/jurisprudencias/revisar')} style={{ ...styles.quickBtn, ...(revisoesHoje ? styles.quickBtnAlert : {}), display: 'inline-flex', alignItems: 'center', gap: 6 }}>
@@ -160,7 +160,7 @@ export default function JurisprudenciasHubPage() {
         display: 'flex',
         flexWrap: 'wrap',
         gap: 12,
-        justifyContent: 'center',
+        justifyContent: 'flex-start',
       }}>
         {/* Todas as disciplinas do hub sempre aparecem; as zeradas ficam
             esmaecidas (mas clicáveis) até receberem conteúdo. */}
@@ -202,7 +202,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   quickBtn: { padding: '9px 18px', borderRadius: theme.radiusPill, border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.inkSoft, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
   quickBtnAlert: { border: `0.5px solid ${theme.warn}`, background: theme.warnTint, color: theme.warnDeep },
-  quickBtnPrimary: { padding: '9px 18px', borderRadius: theme.radiusPill, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+  quickBtnPrimary: { padding: '9px 18px', borderRadius: theme.radiusPill, border: 'none', background: theme.primary, color: theme.onPrimary, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
   discCard: {
     display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8,
     padding: '20px 12px', borderRadius: theme.radius, border: `0.5px solid ${theme.line}`,

@@ -18,6 +18,7 @@ import {
 import { useUI } from '@/components/layout/UIContext';
 import { theme } from '@/lib/theme';
 import { Button } from '@/components/ui/Button';
+import { PageContainer } from '@/components/ui/Page';
 
 interface QuestaoComLei extends LeiQuestao {
   leiSlug: string;
@@ -126,7 +127,7 @@ function SimuladoContent() {
 
   if (leis.length === 0) {
     return (
-      <div style={{ ...s.wrap, padding: isMobile ? '24px 16px' : '40px' }}>
+      <PageContainer width="narrow" style={{ padding: isMobile ? '24px 16px' : '40px' }}>
         <div style={s.doneBox}>
           <p style={s.doneTitle}>Nenhuma lei selecionada.</p>
           <p style={s.doneSub}>
@@ -136,27 +137,27 @@ function SimuladoContent() {
           </p>
           <Button onClick={() => router.push('/vademecum')}>Voltar ao Vade Mecum</Button>
         </div>
-      </div>
+      </PageContainer>
     );
   }
 
   if (fila === null) {
-    return <div style={{ ...s.wrap, padding: 40 }}><p style={{ color: theme.inkFaint }}>Preparando o simulado…</p></div>;
+    return <PageContainer width="narrow" style={{ padding: 40 }}><p style={{ color: theme.inkFaint }}>Preparando o simulado…</p></PageContainer>;
   }
 
   if (fila.length === 0) {
     return (
-      <div style={{ ...s.wrap, padding: isMobile ? '24px 16px' : '40px' }}>
+      <PageContainer width="narrow" style={{ padding: isMobile ? '24px 16px' : '40px' }}>
         <div style={s.doneBox}>
           <p style={s.doneTitle}>Nenhuma questão disponível para essa seleção.</p>
           <Button onClick={() => router.push('/vademecum')}>Voltar ao Vade Mecum</Button>
         </div>
-      </div>
+      </PageContainer>
     );
   }
 
   return (
-    <div style={{ ...s.wrap, padding: isMobile ? '20px 16px' : '34px 40px' }}>
+    <PageContainer width="narrow">
       <div style={s.topo}>
         <button onClick={() => router.push('/vademecum')} style={s.voltar}>← {titulo}</button>
         {!acabou && <span style={s.progresso}>{idx + 1} de {fila.length} · {acertos} certas</span>}
@@ -240,20 +241,19 @@ function SimuladoContent() {
           )}
         </div>
       )}
-    </div>
+    </PageContainer>
   );
 }
 
 export default function SimuladoPage() {
   return (
-    <Suspense fallback={<div style={{ ...s.wrap, padding: 40 }}><p style={{ color: theme.inkFaint }}>Carregando…</p></div>}>
+    <Suspense fallback={<PageContainer width="narrow" style={{ padding: 40 }}><p style={{ color: theme.inkFaint }}>Carregando…</p></PageContainer>}>
       <SimuladoContent />
     </Suspense>
   );
 }
 
 const s: Record<string, CSSProperties> = {
-  wrap: { maxWidth: 720, margin: '0 auto', fontFamily: theme.font },
   topo: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 },
   voltar: { border: 'none', background: 'transparent', color: theme.inkFaint, fontSize: 13, cursor: 'pointer', fontFamily: 'inherit', padding: 0 },
   progresso: { fontSize: 13, fontWeight: 600, color: theme.inkSoft },
@@ -269,13 +269,10 @@ const s: Record<string, CSSProperties> = {
   resultadoOk: { background: theme.okBg, color: theme.okDeep },
   resultadoErro: { background: theme.dangerBg, color: theme.danger },
   comentario: { fontSize: 14, color: theme.inkSoft, lineHeight: 1.6, margin: '0 0 16px' },
-  proxima: { padding: '11px 20px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
   doneBox: { textAlign: 'center', padding: '50px 20px' },
   doneTitle: { fontSize: 22, fontWeight: 700, color: theme.ink, margin: '10px 0 6px' },
   doneSub: { fontSize: 14, color: theme.inkSoft, margin: '0 0 20px', maxWidth: 460, marginLeft: 'auto', marginRight: 'auto', lineHeight: 1.6 },
   doneActions: { display: 'flex', gap: 10, justifyContent: 'center' },
-  doneBtn: { padding: '11px 22px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
-  doneBtnGhost: { padding: '11px 22px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.inkSoft, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
   evolucao: { textAlign: 'left', marginTop: 28, paddingTop: 20, borderTop: `0.5px solid ${theme.line}` },
   evolucaoRow: { display: 'flex', alignItems: 'flex-end', gap: 10, height: 70, marginTop: 6 },
   evolucaoItem: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, flex: 1, height: '100%', justifyContent: 'flex-end' },

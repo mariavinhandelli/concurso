@@ -23,6 +23,8 @@ import { useUI } from '@/components/layout/UIContext';
 import { useToast } from '@/components/ui/ToastProvider';
 import { theme } from '@/lib/theme';
 import { Button } from '@/components/ui/Button';
+import { Badge } from '@/components/ui/Badge';
+import { PageContainer } from '@/components/ui/Page';
 
 // ── Metadados por tipo (rótulo + cor do chip) ──────────────────────────────
 const KIND_META: Record<UnifiedKind, { label: string; fg: string; bg: string }> = {
@@ -56,7 +58,7 @@ const RATINGS_4: { key: JurisRating; fg: string; bg: string }[] = [
 
 function KindBadge({ kind }: { kind: UnifiedKind }) {
   const m = KIND_META[kind];
-  return <span style={{ ...s.kindBadge, color: m.fg, background: m.bg }}>{m.label}</span>;
+  return <Badge style={{ color: m.fg, background: m.bg, textTransform: 'uppercase', letterSpacing: 0.4 }}>{m.label}</Badge>;
 }
 
 export default function RevisarUnificadoPage() {
@@ -167,9 +169,9 @@ export default function RevisarUnificadoPage() {
   // ── Estados de borda ───────────────────────────────────────────────────────
   if (fila === null) {
     return (
-      <div style={{ ...s.wrap, padding: 40 }}>
+      <PageContainer width="narrow" style={{ padding: 40 }}>
         <p style={{ color: theme.inkFaint }}>Montando sua fila de revisão…</p>
-      </div>
+      </PageContainer>
     );
   }
 
@@ -180,7 +182,7 @@ export default function RevisarUnificadoPage() {
     // Fila foi limitada (Modo Retomada) e ainda sobrou pilha para depois.
     const restante = Math.max(0, totalReal - feitas);
     return (
-      <div style={{ ...s.wrap, padding: isMobile ? '40px 16px' : '72px 40px', textAlign: 'center' }}>
+      <PageContainer width="narrow" style={{ padding: isMobile ? '40px 16px' : '72px 40px', textAlign: 'center' }}>
         <div style={{ fontSize: 56, marginBottom: 16 }}>{restante > 0 ? '🌱' : '🎉'}</div>
         <h1 style={s.doneTitle}>
           {feitas === 0 ? 'Nada para revisar agora' : restante > 0 ? 'Bom recomeço!' : 'Revisão em dia!'}
@@ -212,13 +214,13 @@ export default function RevisarUnificadoPage() {
             Voltar para a Home
           </Button>
         </div>
-      </div>
+      </PageContainer>
     );
   }
 
   // ── Player ─────────────────────────────────────────────────────────────────
   return (
-    <div style={{ ...s.wrap, padding: isMobile ? '20px 16px' : '34px 40px' }}>
+    <PageContainer width="narrow">
       {/* Barra superior: sair · progresso · contador */}
       <div style={s.topBar}>
         <button onClick={() => router.push('/')} style={s.exitBtn} className="touch-target">
@@ -280,7 +282,7 @@ export default function RevisarUnificadoPage() {
           )}
         </div>
       )}
-    </div>
+    </PageContainer>
   );
 }
 
@@ -469,7 +471,6 @@ function RatingRow4({ saving, onRate }: { saving: boolean; onRate: (r: JurisRati
 }
 
 const s: Record<string, CSSProperties> = {
-  wrap: { maxWidth: 720, margin: '0 auto', fontFamily: theme.font, minWidth: 0 },
   topBar: { display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 },
   exitBtn: { display: 'flex', alignItems: 'center', gap: 5, border: 'none', background: 'transparent', color: theme.inkFaint, fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit', padding: 0, flexShrink: 0 },
   progressTrack: { flex: 1, height: 5, background: theme.line, borderRadius: theme.radiusPill, overflow: 'hidden' },
@@ -477,7 +478,6 @@ const s: Record<string, CSSProperties> = {
   progressLabel: { fontSize: 13, fontWeight: 600, color: theme.inkFaint, flexShrink: 0, fontVariantNumeric: 'tabular-nums' },
   body: { minWidth: 0 },
   itemHead: { marginBottom: 10 },
-  kindBadge: { display: 'inline-block', fontSize: 11, fontWeight: 700, letterSpacing: 0.4, padding: '4px 11px', borderRadius: theme.radiusPill, textTransform: 'uppercase' },
 
   card: { background: theme.card, border: `0.5px solid ${theme.line}`, borderRadius: theme.radius, boxShadow: theme.shadow, padding: '24px', display: 'flex', flexDirection: 'column', gap: 18, minWidth: 0 },
   subjBadge: { alignSelf: 'flex-start', fontSize: 11, color: '#fff', padding: '3px 10px', borderRadius: theme.radiusXs, fontWeight: 700, letterSpacing: 0.3 },
@@ -507,7 +507,6 @@ const s: Record<string, CSSProperties> = {
   secText: { fontSize: 14, color: theme.ink, lineHeight: 1.65, margin: 0 },
 
   // ações
-  revealBtn: { padding: '13px 32px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 15, fontWeight: 600, cursor: 'pointer', fontFamily: theme.font },
   kbdHint: { fontSize: 12, color: theme.inkFaint, marginTop: 10 },
   kbd: { fontFamily: 'ui-monospace, monospace', fontSize: 11, padding: '1px 6px', borderRadius: 5, border: `0.5px solid ${theme.line}`, background: theme.muted, color: theme.inkSoft },
   ratings3: { display: 'flex', gap: 8 },
@@ -525,6 +524,4 @@ const s: Record<string, CSSProperties> = {
   doneStatNum: { fontSize: 34, fontWeight: 800, letterSpacing: -1, fontVariantNumeric: 'tabular-nums', lineHeight: 1 },
   doneStatLabel: { fontSize: 12, color: theme.inkFaint, fontWeight: 500 },
   doneActions: { display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' },
-  doneBtn: { padding: '12px 28px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: theme.font },
-  doneGhost: { padding: '12px 22px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.inkSoft, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: theme.font },
 };

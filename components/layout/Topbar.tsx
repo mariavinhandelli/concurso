@@ -12,7 +12,7 @@ import { refreshHomeAfterSession } from '@/lib/home-refresh';
 import Image from 'next/image';
 import { createClient } from '@/lib/supabase/client';
 import { invalidateArchivedCache } from '@/services/archivedCache';
-import { theme } from '@/lib/theme';
+import { theme, zIndex } from '@/lib/theme';
 import { useUI } from './UIContext';
 import { useUser } from './UserContext';
 import { useTimer } from '@/components/features/timer/TimerContext';
@@ -79,7 +79,7 @@ export function Topbar() {
         </button>
       </div>
 
-      <div style={styles.right}>
+      <div className="topbar-actions" style={styles.right}>
         {/* Busca global / Command Palette — atalho Ctrl/Cmd+K */}
         <button
           onClick={() => window.dispatchEvent(new CustomEvent(OPEN_COMMAND_EVENT))}
@@ -148,7 +148,7 @@ export function Topbar() {
           )}
         </button>
 
-        <div style={styles.sep} />
+        <div className="topbar-sep" style={styles.sep} />
 
         {/* Avatar + menu */}
         <div ref={menuRef} style={{ position: 'relative' }}>
@@ -225,7 +225,7 @@ const styles: Record<string, React.CSSProperties> = {
   addMenu: {
     position: 'absolute', top: '50px', right: 0, width: 'min(250px, calc(100vw - 32px))', background: theme.card,
     border: `0.5px solid ${theme.line}`, borderRadius: '14px', boxShadow: theme.shadowHover,
-    padding: '6px', zIndex: 40,
+    padding: '6px', zIndex: zIndex.menu,
   },
   menuHint: { display: 'block', fontSize: 12, fontWeight: 400, color: theme.inkFaint, marginTop: 1 },
   iconBtn: {
@@ -240,12 +240,12 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'grid', placeItems: 'center',
   },
   avatarImg: { width: '100%', height: '100%', objectFit: 'cover' },
-  avatarFallback: { color: theme.onTeal, fontWeight: 600, fontSize: 15 },
+  avatarFallback: { color: theme.onPrimary, fontWeight: 600, fontSize: 15 },
   avatarSkeleton: { width: '100%', height: '100%', borderRadius: '50%', background: theme.muted, animation: 'skeleton-pulse 1.4s ease infinite', display: 'block' },
   menu: {
     position: 'absolute', top: '46px', right: 0, width: 'min(240px, calc(100vw - 32px))', background: theme.card,
     border: `0.5px solid ${theme.line}`, borderRadius: '14px', boxShadow: theme.shadowHover,
-    padding: '6px', zIndex: 40, maxHeight: 'calc(100vh - 80px)', overflowY: 'auto',
+    padding: '6px', zIndex: zIndex.menu, maxHeight: 'calc(100vh - 80px)', overflowY: 'auto',
   },
   menuHead: { padding: '10px 12px 12px', borderBottom: `0.5px solid ${theme.line}`, marginBottom: 6 },
   menuName: { fontSize: 13, fontWeight: 700, color: theme.ink },

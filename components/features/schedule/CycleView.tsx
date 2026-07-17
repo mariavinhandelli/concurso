@@ -13,6 +13,7 @@ import { theme } from '@/lib/theme';
 import { useUI } from '@/components/layout/UIContext';
 import { useConfirm } from '@/hooks/useConfirm';
 import { Button } from '@/components/ui/Button';
+import { Badge } from '@/components/ui/Badge';
 import { ArchivedCycles } from './ArchivedCycles';
 import { CompletionPopup } from './CompletionPopup';
 
@@ -130,7 +131,7 @@ export function CycleView({
             <>
               <Button variant="outline" size="sm" style={{ borderColor: theme.teal, color: theme.teal }} onClick={onVoltar}>← Voltar aos arquivados</Button>
               <div style={styles.cycleHeaderRight}>
-                <span style={styles.archivedTag}>Arquivado</span>
+                <Badge variant="neutral">Arquivado</Badge>
                 <Button size="sm" onClick={() => onReativar(ruleId)}>Reativar</Button>
                 <Button variant="ghost" size="sm" style={{ color: theme.danger }} onClick={handleExcluir}>Excluir</Button>
               </div>
@@ -235,9 +236,8 @@ const styles: Record<string, React.CSSProperties> = {
   cycleHeaderRight: { display: 'flex', alignItems: 'center', gap: 8 },
   novoBtn: { padding: '8px 14px', borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.teal, background: theme.card, color: theme.teal, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
   arquivarBtn: { padding: '7px 12px', borderRadius: theme.radiusSm, border: 'none', background: 'transparent', color: theme.inkSoft, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
-  reativarBtn: { padding: '7px 14px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+  reativarBtn: { padding: '7px 14px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onPrimary, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
   excluirBtn: { padding: '7px 12px', borderRadius: theme.radiusSm, border: 'none', background: 'transparent', color: theme.danger, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
-  archivedTag: { fontSize: 11, fontWeight: 700, color: theme.inkSoft, background: 'rgba(15,23,42,.05)', padding: '4px 10px', borderRadius: theme.radiusPill, letterSpacing: 0.3 },
   wrap: { display: 'flex', gap: 24, alignItems: 'flex-start', flexWrap: 'wrap' },
   compass: { flex: '0 0 200px', background: theme.card, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, borderRadius: theme.radius, boxShadow: theme.shadow, padding: 20, textAlign: 'center' },
   compassLabel: { marginTop: 12, fontSize: 13, color: theme.inkSoft },

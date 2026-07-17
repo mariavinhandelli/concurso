@@ -17,6 +17,7 @@ import { YearHeatmap } from '@/components/features/history/YearHeatmap';
 import { PageContainer, PageHeader } from '@/components/ui/Page';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
+import { SegmentedControl } from '@/components/ui/SegmentedControl';
 
 const PERIODOS = [
   { label: 'Hoje', dias: 1 },
@@ -32,13 +33,16 @@ export default function HistoricoPage() {
   const [dias, setDias] = useState(7);
   const [days, setDays] = useState<HistoryDay[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [expandido, setExpandido] = useState<string | null>(null);
   const [busca, setBusca] = useState('');
 
   const reload = useCallback(() => {
     setLoading(true);
+    setError(false);
     getHistory(dias)
       .then((d) => setDays(d))
+      .catch(() => setError(true))
       .finally(() => setLoading(false));
   }, [dias]);
 
@@ -109,18 +113,12 @@ export default function HistoricoPage() {
 
       {/* Barra de filtros */}
       <div style={styles.filters}>
-        <div style={styles.segment}>
-          {PERIODOS.map((p) => (
-            <button
-              className="touch-target"
-              key={p.dias}
-              onClick={() => setDias(p.dias)}
-              style={{ ...styles.segmentBtn, ...(dias === p.dias ? styles.segmentActive : {}) }}
-            >
-              {p.label}
-            </button>
-          ))}
-        </div>
+        <SegmentedControl
+          options={PERIODOS.map((p) => ({ value: String(p.dias), label: p.label }))}
+          value={String(dias)}
+          onChange={(v) => setDias(Number(v))}
+          equalWidth={false}
+        />
         <div style={{ position: 'relative', flex: 1, minWidth: 200 }}>
           <Input
             value={busca}
@@ -145,6 +143,8 @@ export default function HistoricoPage() {
           <Skeleton width={120} height={14} style={{ marginTop: 8 }} />
           <Skeleton height={72} borderRadius={16} />
         </div>
+      ) : error ? (
+        <p style={{ ...styles.muted, color: theme.danger }}>Não foi possível carregar o histórico. Tente novamente.</p>
       ) : !temResultado ? (
         <p style={styles.muted}>
           {busca
@@ -351,9 +351,6 @@ const styles: Record<string, React.CSSProperties> = {
   muted: { color: theme.inkFaint, fontSize: 14 },
 
   filters: { display: 'flex', gap: 12, marginBottom: 26, flexWrap: 'wrap', alignItems: 'center' },
-  segment: { display: 'flex', gap: 3, padding: 3, background: 'rgba(15,23,42,.06)', borderRadius: 10, flexShrink: 0 },
-  segmentBtn: { padding: '7px 14px', borderRadius: 7, border: 'none', background: 'transparent', color: theme.inkSoft, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
-  segmentActive: { background: theme.card, color: theme.ink, boxShadow: theme.shadow },
   clearBtn: { position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', border: 'none', background: 'transparent', color: theme.inkFaint, fontSize: 13, cursor: 'pointer' },
 
   daySection: { marginBottom: 26 },

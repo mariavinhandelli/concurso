@@ -23,6 +23,7 @@ import { useTimer } from '@/components/features/timer/TimerContext';
 import { toLocalDateString } from '@/lib/local-date';
 import { theme } from '@/lib/theme';
 import { Button } from '@/components/ui/Button';
+import { Badge } from '@/components/ui/Badge';
 
 // Alvo genérico de "iniciar sessão" — unifica sugestões e blocos do cronograma.
 type PendingStart = { name: string; topicId: string | null; subjectId: string | null };
@@ -47,7 +48,7 @@ const DORMANT_INVITES: Record<DormantKey, { label: string; desc: string; href: s
 
 function KindPill({ kind }: { kind: SuggestionKind }) {
   const m = KIND_META[kind];
-  return <span style={{ ...pillBase, color: m.fg, background: m.bg }}>{m.label}</span>;
+  return <Badge style={{ color: m.fg, background: m.bg, textTransform: 'uppercase', letterSpacing: 0.3 }}>{m.label}</Badge>;
 }
 
 // Marcador do passo: check verde quando concluído, círculo numerado quando pendente.
@@ -265,9 +266,9 @@ export const PlanoHoje = memo(function PlanoHoje() {
             <div style={styles.studyTop}>
               <span style={{ ...styles.stepLabel, ...(estudoDone ? styles.stepLabelDone : {}) }}>{estudoLabel}</span>
               {temCronograma
-                ? <span style={styles.countChip}>{blocosFeitos}/{blocksDia.length} blocos</span>
+                ? <Badge variant="neutral">{blocosFeitos}/{blocksDia.length} blocos</Badge>
                 : temCiclo
-                ? <span style={styles.countChip}>{fmtMin(ciclo!.todayMinutes)} de {fmtMin(metaCicloHoje)}</span>
+                ? <Badge variant="neutral">{fmtMin(ciclo!.todayMinutes)} de {fmtMin(metaCicloHoje)}</Badge>
                 : principal && <KindPill kind={principal.kind} />}
             </div>
             <span style={styles.stepSub}>{estudoSub}</span>
@@ -291,7 +292,7 @@ export const PlanoHoje = memo(function PlanoHoje() {
       {/* N7 — convite de 1º uso a um módulo dormente (Vade Mecum, Juris, Flashcards) */}
       {dormanteKey && (
         <button style={styles.descobrir} onClick={() => { track(EV.dormantOpened, { module: dormanteKey }); router.push(DORMANT_INVITES[dormanteKey].href); }}>
-          <span style={styles.descobrirPill}>Descobrir</span>
+          <Badge variant="brand" style={{ textTransform: 'uppercase' }}>Descobrir</Badge>
           <span style={styles.descobrirText}>
             <b style={styles.descobrirLabel}>{DORMANT_INVITES[dormanteKey].label}</b>
             {' — '}{DORMANT_INVITES[dormanteKey].desc}
@@ -377,12 +378,6 @@ export const PlanoHoje = memo(function PlanoHoje() {
   );
 });
 
-const pillBase: React.CSSProperties = {
-  fontSize: 11, fontWeight: 700, letterSpacing: 0.3,
-  textTransform: 'uppercase', padding: '2px 7px', borderRadius: theme.radiusPill,
-  whiteSpace: 'nowrap', flexShrink: 0,
-};
-
 const markerBase: React.CSSProperties = {
   width: 26, height: 26, borderRadius: '50%', flexShrink: 0,
   display: 'grid', placeItems: 'center', fontSize: 13, fontWeight: 700,
@@ -418,10 +413,6 @@ const styles: Record<string, React.CSSProperties> = {
   stepLabel: { fontSize: 15, fontWeight: 600, color: theme.ink, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
   stepLabelDone: { color: theme.inkSoft, textDecoration: 'line-through' },
   stepSub: { fontSize: 13, color: theme.inkSoft, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
-  countChip: {
-    fontSize: 11, fontWeight: 700, letterSpacing: 0.3, color: theme.inkSoft,
-    background: theme.muted, padding: '2px 7px', borderRadius: theme.radiusPill, whiteSpace: 'nowrap', flexShrink: 0,
-  },
 
   studyBtn: {
     padding: '9px 16px', borderRadius: 10, border: 'none',
@@ -438,10 +429,6 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'flex', alignItems: 'center', gap: 10, width: '100%', marginTop: 10,
     padding: '10px 12px', borderRadius: theme.radiusSm, border: `0.5px dashed ${theme.line}`,
     background: 'transparent', cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit', minWidth: 0,
-  },
-  descobrirPill: {
-    fontSize: 11, fontWeight: 700, letterSpacing: 0.3, textTransform: 'uppercase',
-    color: theme.tealDeep, background: theme.tealBg, padding: '2px 8px', borderRadius: theme.radiusPill, flexShrink: 0,
   },
   descobrirText: { fontSize: 13, color: theme.inkSoft, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, minWidth: 0 },
   descobrirLabel: { color: theme.ink, fontWeight: 700 },

@@ -6,6 +6,16 @@ import { RefreshCw, Star, TrendingUp, Clock } from 'lucide-react';
 import { theme } from '@/lib/theme';
 import { listUltimasAdicionadas, listMaisCobradas, type Jurisprudencia } from '@/services/jurisprudencias.service';
 import { listFavoritas, listRevisoesHoje, type JurisComInteracao } from '@/services/jurisInteracoes.service';
+import { Skeleton } from '@/components/ui/Skeleton';
+
+function RowSkeleton() {
+  return (
+    <div style={{ padding: '7px 8px', display: 'flex', flexDirection: 'column', gap: 4 }}>
+      <Skeleton width="80%" height={13} />
+      <Skeleton width="40%" height={11} />
+    </div>
+  );
+}
 
 function WidgetBox({ title, icon, children, action }: {
   title: string; icon: React.ReactNode; children: React.ReactNode; action?: { label: string; onClick: () => void };
@@ -40,12 +50,13 @@ export function JurisSidebarWidgets() {
   const [favoritas, setFavoritas] = useState<JurisComInteracao[] | null>(null);
   const [maisCobradas, setMaisCobradas] = useState<Jurisprudencia[] | null>(null);
   const [ultimas, setUltimas] = useState<Jurisprudencia[] | null>(null);
+  const [erros, setErros] = useState({ revisoes: false, favoritas: false, maisCobradas: false, ultimas: false });
 
   useEffect(() => {
-    listRevisoesHoje().then(setRevisoes).catch(() => setRevisoes([]));
-    listFavoritas().then(setFavoritas).catch(() => setFavoritas([]));
-    listMaisCobradas(5).then(setMaisCobradas).catch(() => setMaisCobradas([]));
-    listUltimasAdicionadas(5).then(setUltimas).catch(() => setUltimas([]));
+    listRevisoesHoje().then(setRevisoes).catch(() => { setRevisoes([]); setErros((e) => ({ ...e, revisoes: true })); });
+    listFavoritas().then(setFavoritas).catch(() => { setFavoritas([]); setErros((e) => ({ ...e, favoritas: true })); });
+    listMaisCobradas(5).then(setMaisCobradas).catch(() => { setMaisCobradas([]); setErros((e) => ({ ...e, maisCobradas: true })); });
+    listUltimasAdicionadas(5).then(setUltimas).catch(() => { setUltimas([]); setErros((e) => ({ ...e, ultimas: true })); });
   }, []);
 
   function go(id: string) { router.push(`/jurisprudencias/${id}`); }
@@ -58,7 +69,9 @@ export function JurisSidebarWidgets() {
         action={revisoes && revisoes.length > 0 ? { label: 'Revisar', onClick: () => router.push('/jurisprudencias/revisar') } : undefined}
       >
         {revisoes === null ? (
-          <p style={styles.muted}>Carregando…</p>
+          <><RowSkeleton /><RowSkeleton /></>
+        ) : erros.revisoes ? (
+          <p style={{ ...styles.muted, color: theme.danger }}>Não foi possível carregar.</p>
         ) : revisoes.length === 0 ? (
           <p style={styles.muted}>Nada para revisar hoje.</p>
         ) : (
@@ -68,9 +81,11 @@ export function JurisSidebarWidgets() {
         )}
       </WidgetBox>
 
-      <WidgetBox title="Favoritas" icon={<Star size={13} fill="#f59e0b" color="#f59e0b" strokeWidth={1.7} />}>
+      <WidgetBox title="Favoritas" icon={<Star size={13} fill={theme.gold} color={theme.gold} strokeWidth={1.7} />}>
         {favoritas === null ? (
-          <p style={styles.muted}>Carregando…</p>
+          <><RowSkeleton /><RowSkeleton /></>
+        ) : erros.favoritas ? (
+          <p style={{ ...styles.muted, color: theme.danger }}>Não foi possível carregar.</p>
         ) : favoritas.length === 0 ? (
           <p style={styles.muted}>Nenhuma favorita ainda.</p>
         ) : (
@@ -82,7 +97,9 @@ export function JurisSidebarWidgets() {
 
       <WidgetBox title="Mais cobradas" icon={<TrendingUp size={13} strokeWidth={1.7} />}>
         {maisCobradas === null ? (
-          <p style={styles.muted}>Carregando…</p>
+          <><RowSkeleton /><RowSkeleton /></>
+        ) : erros.maisCobradas ? (
+          <p style={{ ...styles.muted, color: theme.danger }}>Não foi possível carregar.</p>
         ) : maisCobradas.length === 0 ? (
           <p style={styles.muted}>Sem dados ainda.</p>
         ) : (
@@ -94,7 +111,9 @@ export function JurisSidebarWidgets() {
 
       <WidgetBox title="Últimas adicionadas" icon={<Clock size={13} strokeWidth={1.7} />}>
         {ultimas === null ? (
-          <p style={styles.muted}>Carregando…</p>
+          <><RowSkeleton /><RowSkeleton /></>
+        ) : erros.ultimas ? (
+          <p style={{ ...styles.muted, color: theme.danger }}>Não foi possível carregar.</p>
         ) : ultimas.length === 0 ? (
           <p style={styles.muted}>Nenhuma jurisprudência ainda.</p>
         ) : (

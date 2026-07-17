@@ -9,6 +9,7 @@ import {
   listRuleSummaries, stopRule, deleteRule, type RuleSummary,
 } from '@/services/recurrence.service';
 import { theme } from '@/lib/theme';
+import { Skeleton } from '@/components/ui/Skeleton';
 import { useConfirm } from '@/hooks/useConfirm';
 import { Overlay } from '@/components/ui/Overlay';
 
@@ -91,7 +92,10 @@ export function RecurrencePanel({ onClose, onChanged, onEdit }: Props) {
         {error && <p style={styles.errorMsg}>{error}</p>}
 
         {isPending ? (
-          <p style={styles.muted}>Carregando…</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <Skeleton height={64} borderRadius={theme.radiusSm} />
+            <Skeleton height={64} borderRadius={theme.radiusSm} />
+          </div>
         ) : !rules || rules.length === 0 ? (
           <p style={styles.empty}>Nenhuma recorrência ativa. Crie uma para automatizar seu cronograma.</p>
         ) : (

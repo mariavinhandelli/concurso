@@ -8,6 +8,7 @@ import { getCatalogDeckSample, type CatalogFlashcardDeck } from '@/services/flas
 import { theme } from '@/lib/theme';
 import { Overlay } from '@/components/ui/Overlay';
 import { Button } from '@/components/ui/Button';
+import { Skeleton } from '@/components/ui/Skeleton';
 
 interface Props {
   deck: CatalogFlashcardDeck;
@@ -35,7 +36,11 @@ export function FlashcardBankPreviewModal({ deck, onClose, onActivate, activatin
       <p style={s.count}>{deck.cardCount} card{deck.cardCount === 1 ? '' : 's'} neste deck — amostra abaixo:</p>
 
       {error && <p style={s.error}>{error}</p>}
-      {!error && !sample && <p style={s.muted}>Carregando amostra…</p>}
+      {!error && !sample && (
+        <div style={s.list}>
+          {[1, 2, 3].map((i) => <Skeleton key={i} height={72} borderRadius={theme.radius} />)}
+        </div>
+      )}
 
       {sample && (
         <div style={s.list}>

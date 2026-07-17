@@ -21,6 +21,7 @@ import { useUI } from '@/components/layout/UIContext';
 import { createClient } from '@/lib/supabase/client';
 import { theme } from '@/lib/theme';
 import { Button } from '@/components/ui/Button';
+import { EmptyState } from '@/components/ui/EmptyState';
 import { PageContainer } from '@/components/ui/Page';
 
 function ListaSkeleton() {
@@ -228,29 +229,20 @@ function ListaContent() {
                 ))}
               </div>
             ) : items.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '60px 20px', background: theme.card, borderRadius: theme.radius, border: `0.5px solid ${theme.line}` }}>
+              <div style={{ background: theme.card, borderRadius: theme.radius, border: `0.5px solid ${theme.line}` }}>
                 {isFavoritasView ? (
-                  <>
-                    <Star size={38} color={theme.inkFaint} strokeWidth={1.3} style={{ marginBottom: 12 }} />
-                    <p style={{ fontSize: 15, fontWeight: 600, color: theme.ink, margin: '0 0 8px' }}>Nenhum favorito ainda</p>
-                    <p style={{ fontSize: 13, color: theme.inkFaint, margin: '0 0 20px', maxWidth: 340, marginLeft: 'auto', marginRight: 'auto' }}>
-                      Clique na <Star size={13} strokeWidth={2} style={{ verticalAlign: -2 }} /> em qualquer card para guardar as jurisprudências mais importantes.
-                    </p>
-                    <Button onClick={() => router.push('/jurisprudencias/lista')}>
-                      Explorar jurisprudências
-                    </Button>
-                  </>
+                  <EmptyState
+                    icon={<Star size={26} color={theme.teal} strokeWidth={1.8} />}
+                    title="Nenhum favorito ainda"
+                    body="Clique na estrela em qualquer card para guardar as jurisprudências mais importantes."
+                    action={{ label: 'Explorar jurisprudências', onClick: () => router.push('/jurisprudencias/lista') }}
+                  />
                 ) : (
-                  <>
-                    <p style={{ fontSize: 15, color: theme.inkSoft, margin: '0 0 16px' }}>
-                      {hasFilters ? 'Nenhuma jurisprudência encontrada com esses filtros.' : 'Nenhuma jurisprudência cadastrada ainda.'}
-                    </p>
-                    {!hasFilters && (
-                      <Button onClick={() => router.push('/jurisprudencias/nova')}>
-                        Cadastrar primeira jurisprudência
-                      </Button>
-                    )}
-                  </>
+                  <EmptyState
+                    icon={<Star size={26} color={theme.teal} strokeWidth={1.8} />}
+                    title={hasFilters ? 'Nenhuma jurisprudência encontrada com esses filtros.' : 'Nenhuma jurisprudência cadastrada ainda.'}
+                    action={!hasFilters ? { label: 'Cadastrar primeira jurisprudência', onClick: () => router.push('/jurisprudencias/nova') } : undefined}
+                  />
                 )}
               </div>
             ) : (

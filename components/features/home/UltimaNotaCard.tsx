@@ -10,6 +10,7 @@ import { Pencil } from 'lucide-react';
 import { getLastEditedNote, NOTA_KINDS, type StudyNoteMeta } from '@/services/studyNotes.service';
 import { KIND_CORES } from '@/components/features/caderno/notaCores';
 import { theme } from '@/lib/theme';
+import { Skeleton } from '@/components/ui/Skeleton';
 
 function fmtRelative(iso: string): string {
   const diff = Date.now() - new Date(iso).getTime();
@@ -31,7 +32,8 @@ export const UltimaNotaCard = memo(function UltimaNotaCard() {
     staleTime: 60_000,
   });
 
-  if (isLoading || !data) return null;
+  if (isLoading) return <Skeleton height={52} borderRadius={theme.radius} />;
+  if (!data) return null;
 
   const kindLabel = NOTA_KINDS.find((k) => k.value === data.kind)?.label ?? data.kind;
   const cor = KIND_CORES[data.kind];

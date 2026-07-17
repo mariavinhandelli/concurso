@@ -115,8 +115,8 @@ const s: Record<string, React.CSSProperties> = {
     background:   theme.card,
     borderRadius: theme.radius,
     border:       `0.5px solid ${theme.line}`,
-    // Sombra reduzida: hairline + leve drop. Evita o efeito "carta voando".
-    boxShadow: '0 1px 3px rgba(15,23,42,.05), 0 1px 2px rgba(15,23,42,.04)',
+    // Sombra do token — adapta ao dark mode (rgba(15,23,42,...) hardcoded não adaptava).
+    boxShadow: theme.shadow,
     padding: '28px',
   },
   meta: {

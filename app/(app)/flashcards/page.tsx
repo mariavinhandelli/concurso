@@ -6,7 +6,6 @@ import { useEffect, useState, useCallback, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { X, Check } from 'lucide-react';
 import { useToast } from '@/components/ui/ToastProvider';
-import { useUI } from '@/components/layout/UIContext';
 import { buildDailyQueue, buildTargetQueue, type QueueCard } from '@/services/flashcards.service';
 import dynamic from 'next/dynamic';
 const FlashcardEngine = dynamic(
@@ -19,6 +18,7 @@ import { BancoFlashcardsTab } from '@/components/features/flashcards/BancoFlashc
 import { theme } from '@/lib/theme';
 import { Button } from '@/components/ui/Button';
 import { PageContainer, PageHeader } from '@/components/ui/Page';
+import { SegmentedControl } from '@/components/ui/SegmentedControl';
 
 type Tab = 'cards' | 'review' | 'banco';
 
@@ -32,7 +32,6 @@ export default function FlashcardsPage() {
 
 function FlashcardsContent() {
   const params = useSearchParams();
-  const { isMobile } = useUI();
   const toast = useToast();
   const [tab, setTab] = useState<Tab>('review');
   const [session, setSession] = useState<QueueCard[] | null>(null);
@@ -103,13 +102,16 @@ function FlashcardsContent() {
     <PageContainer width="narrow" style={{ minWidth: 0 }}>
       <PageHeader title="Flashcards" subtitle="Crie, organize e revise seus cards." />
 
-      <div style={styles.tabs}>
-        <button className="touch-target" onClick={() => setTab('cards')}
-          style={{ ...styles.tab, ...(tab === 'cards' ? styles.tabActive : {}) }}>Meus Cards</button>
-        <button className="touch-target" onClick={() => setTab('review')}
-          style={{ ...styles.tab, ...(tab === 'review' ? styles.tabActive : {}) }}>Revisar</button>
-        <button className="touch-target" onClick={() => setTab('banco')}
-          style={{ ...styles.tab, ...(tab === 'banco' ? styles.tabActive : {}) }}>Banco</button>
+      <div style={{ marginBottom: 20 }}>
+        <SegmentedControl
+          options={[
+            { value: 'cards', label: 'Meus Cards' },
+            { value: 'review', label: 'Revisar' },
+            { value: 'banco', label: 'Banco' },
+          ]}
+          value={tab}
+          onChange={setTab}
+        />
       </div>
 
       {tab === 'cards'
@@ -125,9 +127,6 @@ const styles: Record<string, React.CSSProperties> = {
   focusPage: { minHeight: 'calc(100vh - var(--topbar-h))', fontFamily: theme.font, display: 'flex', alignItems: 'flex-start', justifyContent: 'center' },
   focusContainer: { width: '100%', maxWidth: 560, padding: 'clamp(16px, 4vw, 40px) clamp(12px, 3vw, 24px)', position: 'relative' },
   exitFocus: { position: 'absolute', top: 16, right: 16, border: 'none', background: 'transparent', color: theme.inkFaint, fontSize: 14, cursor: 'pointer', fontFamily: 'inherit' },
-  tabs: { display: 'flex', gap: 4, marginBottom: 24, padding: 3, background: 'rgba(15,23,42,.06)', borderRadius: theme.radiusSm, width: 'fit-content' },
-  tab: { padding: '8px 18px', borderRadius: 9, border: 'none', background: 'transparent', color: theme.inkSoft, fontSize: 14, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit', transition: 'all .15s' },
-  tabActive: { background: theme.card, color: theme.ink, boxShadow: theme.shadow, fontWeight: 600 },
   empty: { textAlign: 'center', padding: '40px 0' },
   emptyIcon: { fontSize: 36, color: theme.ok, display: 'block', marginBottom: 12 },
   muted: { color: theme.inkFaint, fontSize: 14 },

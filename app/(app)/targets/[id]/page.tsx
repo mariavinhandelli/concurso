@@ -17,6 +17,8 @@ import { Overlay } from '@/components/ui/Overlay';
 import { useUI } from '@/components/layout/UIContext';
 import { Button } from '@/components/ui/Button';
 import { Select } from '@/components/ui/Select';
+import { SegmentedControl } from '@/components/ui/SegmentedControl';
+import { PageContainer } from '@/components/ui/Page';
 
 const HubOverviewTab = dynamic(
   () => import('@/components/features/targets/HubOverviewTab').then((m) => ({ default: m.HubOverviewTab })),
@@ -130,23 +132,23 @@ export default function TargetDetailPage() {
   }
 
   if (loading) return (
-    <div style={{ ...s.container, padding: isMobile ? '20px 16px' : '34px 40px' }}>
+    <PageContainer width="narrow">
       <div style={{ height: 16, width: 88, borderRadius: theme.radiusXs, background: theme.muted, animation: 'focali-pulse 1.4s ease infinite', marginBottom: 20 }} />
       <div style={{ height: 34, width: '55%', borderRadius: theme.radiusSm, background: theme.muted, animation: 'focali-pulse 1.4s ease infinite', marginBottom: 8 }} />
       <div style={{ height: 12, width: '35%', borderRadius: theme.radiusXs, background: theme.muted, animation: 'focali-pulse 1.4s ease infinite', marginBottom: 28 }} />
       <SkeletonList />
-    </div>
+    </PageContainer>
   );
 
   if (!target) return (
-    <div style={{ ...s.container, padding: isMobile ? '20px 16px' : '34px 40px' }}>
+    <PageContainer width="narrow">
       <button onClick={() => router.push('/targets')} style={s.back}>← Concursos</button>
       <p style={{ color: theme.inkFaint, fontSize: 14 }}>Concurso não encontrado.</p>
-    </div>
+    </PageContainer>
   );
 
   return (
-    <div style={{ ...s.container, padding: isMobile ? '20px 16px' : '34px 40px' }}>
+    <PageContainer width="narrow">
       <button onClick={() => router.push('/targets')} style={s.back}>← Concursos</button>
 
       <div style={s.headerRow}>
@@ -175,10 +177,17 @@ export default function TargetDetailPage() {
         </div>
       </div>
 
-      <div style={s.tabs}>
-        <button onClick={() => setTab('visao')} style={{ ...s.tab, ...(tab === 'visao' ? s.tabOn : {}) }}>Visão geral</button>
-        <button onClick={() => setTab('montar')} style={{ ...s.tab, ...(tab === 'montar' ? s.tabOn : {}) }}>Montar edital</button>
-        <button onClick={() => setTab('vertical')} style={{ ...s.tab, ...(tab === 'vertical' ? s.tabOn : {}) }}>Progresso</button>
+      <div style={{ marginBottom: 24 }}>
+        <SegmentedControl
+          options={[
+            { value: 'visao', label: 'Visão geral' },
+            { value: 'montar', label: 'Montar edital' },
+            { value: 'vertical', label: 'Progresso' },
+          ]}
+          value={tab}
+          onChange={setTab}
+          equalWidth={false}
+        />
       </div>
 
       {error && <p style={{ color: theme.danger, fontSize: 13, marginBottom: 12 }}>{error}</p>}
@@ -254,12 +263,11 @@ export default function TargetDetailPage() {
           </div>
         </Overlay>
       )}
-    </div>
+    </PageContainer>
   );
 }
 
 const s: Record<string, CSSProperties> = {
-  container: { maxWidth: 720, margin: '0 auto', fontFamily: theme.font, minWidth: 0 },
   back: {
     border: 'none', background: 'transparent', color: theme.teal, fontSize: 13, fontWeight: 500,
     cursor: 'pointer', padding: '10px 12px', marginBottom: 10, fontFamily: 'inherit',
@@ -272,11 +280,8 @@ const s: Record<string, CSSProperties> = {
   coverageTrack: { flex: 1, maxWidth: 260, height: 6, background: theme.muted, borderRadius: theme.radiusPill, overflow: 'hidden' },
   coverageFill: { height: '100%', background: theme.teal, borderRadius: theme.radiusPill, transition: 'width 0.4s ease' },
   coverageLabel: { fontSize: 12, color: theme.inkFaint, whiteSpace: 'nowrap', fontVariantNumeric: 'tabular-nums' },
-  genBtn: { display: 'inline-flex', alignItems: 'center', padding: '10px 18px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
+  genBtn: { display: 'inline-flex', alignItems: 'center', padding: '10px 18px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onPrimary, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
   genBtnDisabled: { background: theme.muted, color: theme.inkFaint, cursor: 'not-allowed' },
-  tabs: { display: 'flex', gap: 0, marginBottom: 24, borderBottom: `1px solid ${theme.line}` },
-  tab: { padding: '10px 18px', border: 'none', background: 'transparent', color: theme.inkSoft, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', borderBottom: '2px solid transparent', marginBottom: -1, transition: 'color .15s' },
-  tabOn: { color: theme.teal, borderBottomColor: theme.teal },
 
   promoteTitle: { fontSize: 16, fontWeight: 700, color: theme.ink, margin: '0 0 6px' },
   promoteSub: { fontSize: 13, color: theme.inkSoft, margin: '0 0 16px', lineHeight: 1.5 },

@@ -14,6 +14,7 @@ import { countRevisoesDue, listInteracoesByLei } from '@/services/leiInteracoes.
 import { LEIS_COM_QUESTOES } from '@/services/leiQuestoes.service';
 import { VademecumSimuladoModal } from '@/components/features/vademecum/VademecumSimuladoModal';
 import { theme } from '@/lib/theme';
+import { Badge } from '@/components/ui/Badge';
 import { PageContainer, PageHeader } from '@/components/ui/Page';
 
 function normalizar(s: string): string {
@@ -43,7 +44,7 @@ function LeiCard({ lei, onOpen }: { lei: LeiMeta; onOpen: () => void }) {
     <button onClick={onOpen} style={s.card}>
       <div style={s.cardTop}>
         <span style={s.cardSigla}>{lei.nomeCurto}</span>
-        {pct !== null && pct > 0 && <span style={s.pctChip}>{pct}% grifado</span>}
+        {pct !== null && pct > 0 && <Badge variant="brand">{pct}% grifado</Badge>}
       </div>
       <div style={s.cardNome}>{lei.nome}</div>
       <div style={s.cardMeta}>{lei.disciplina} · {lei.totalArtigos} artigos</div>
@@ -156,7 +157,7 @@ export default function VademecumPage() {
 }
 
 const s: Record<string, CSSProperties> = {
-  dueBanner: { display: 'block', width: '100%', textAlign: 'left', background: 'rgba(226,75,74,.10)', color: '#C03A39', border: '0.5px solid rgba(226,75,74,.35)', borderRadius: theme.radius, padding: '12px 16px', fontSize: 14, cursor: 'pointer', fontFamily: 'inherit', marginBottom: 18 },
+  dueBanner: { display: 'block', width: '100%', textAlign: 'left', background: theme.dangerTint, color: theme.danger, border: `0.5px solid color-mix(in srgb, ${theme.danger} 35%, transparent)`, borderRadius: theme.radius, padding: '12px 16px', fontSize: 14, cursor: 'pointer', fontFamily: 'inherit', marginBottom: 18 },
 
   acoesRow: { display: 'flex', gap: 10, marginBottom: 18 },
   simuladoBtn: { display: 'inline-flex', alignItems: 'center', padding: '9px 18px', borderRadius: theme.radiusPill, border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.inkSoft, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
@@ -172,7 +173,6 @@ const s: Record<string, CSSProperties> = {
   card: { textAlign: 'left', background: theme.card, border: `0.5px solid ${theme.line}`, borderRadius: theme.radius, padding: '18px 20px', cursor: 'pointer', fontFamily: 'inherit' },
   cardTop: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
   cardSigla: { fontSize: 13, fontWeight: 700, color: theme.teal },
-  pctChip: { fontSize: 11, fontWeight: 700, color: theme.tealDeep, background: theme.tealBg, borderRadius: theme.radiusPill, padding: '2px 8px' },
   cardNome: { fontSize: 16, fontWeight: 600, color: theme.ink, lineHeight: 1.4, marginTop: 6 },
   cardMeta: { fontSize: 13, color: theme.inkFaint, margin: '6px 0 8px' },
   cardDesc: { fontSize: 13, color: theme.inkSoft, lineHeight: 1.55 },

@@ -25,6 +25,7 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { PageContainer, PageHeader } from '@/components/ui/Page';
+import { SegmentedControl } from '@/components/ui/SegmentedControl';
 
 type Tab = 'meus' | 'banco';
 
@@ -170,13 +171,16 @@ export default function TargetsPage() {
         <PageHeader title="Concursos" subtitle="Acompanhe seus concursos e explore editais prontos para começar em um clique." />
 
         {/* Abas */}
-        <div style={s.tabs}>
-          <button onClick={() => handleTabChange('meus')} style={{ ...s.tab, ...(tab === 'meus' ? s.tabOn : {}) }}>
-            Meus concursos{targets.length > 0 ? ` (${targets.length})` : ''}
-          </button>
-          <button onClick={() => handleTabChange('banco')} style={{ ...s.tab, ...(tab === 'banco' ? s.tabOn : {}) }}>
-            Banco de editais
-          </button>
+        <div style={{ marginBottom: 20 }}>
+          <SegmentedControl
+            options={[
+              { value: 'meus', label: `Meus concursos${targets.length > 0 ? ` (${targets.length})` : ''}` },
+              { value: 'banco', label: 'Banco de editais' },
+            ]}
+            value={tab}
+            onChange={handleTabChange}
+            equalWidth={false}
+          />
         </div>
 
         {tab === 'banco' && (
@@ -544,11 +548,6 @@ const TargetRow = memo(function TargetRow({
 });
 
 const s: Record<string, CSSProperties> = {
-
-  // Abas — mesmo padrão da página de Matérias
-  tabs: { display: 'flex', gap: 4, marginBottom: 20, padding: 3, background: 'rgba(15,23,42,.06)', borderRadius: theme.radiusSm, width: 'fit-content', maxWidth: '100%', overflowX: 'auto' },
-  tab: { padding: '8px 18px', borderRadius: theme.radiusXs, border: 'none', background: 'transparent', color: theme.inkSoft, fontSize: 14, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit', transition: 'all .15s', whiteSpace: 'nowrap' },
-  tabOn: { background: theme.card, color: theme.ink, boxShadow: theme.shadow, fontWeight: 600 },
 
   actionsRow: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 14, flexWrap: 'wrap' },
   newBtn: { padding: '9px 18px', borderRadius: theme.radiusSm, border: `1px solid ${theme.teal}`, background: theme.tealBg, color: theme.teal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },

@@ -13,6 +13,7 @@ import {
 } from '@/services/turmas.service';
 import { RankRow } from './SocialUI';
 import { theme } from '@/lib/theme';
+import { Skeleton } from '@/components/ui/Skeleton';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 
@@ -140,7 +141,10 @@ export function TurmasTab() {
       <section style={s.card}>
         <div style={s.cardTitle}>Minhas turmas</div>
         {isLoading ? (
-          <p style={s.muted}>Carregando…</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <Skeleton height={56} borderRadius={theme.radiusSm} />
+            <Skeleton height={56} borderRadius={theme.radiusSm} />
+          </div>
         ) : (turmas ?? []).length === 0 ? (
           <p style={s.body}>Você ainda não está em nenhuma turma. Crie uma e chame a galera, ou entre com um código.</p>
         ) : (

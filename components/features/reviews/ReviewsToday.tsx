@@ -9,6 +9,7 @@ import { Check } from 'lucide-react';
 import { listDueReviews } from '@/services/reviews.service';
 import { REVIEWS_DUE_KEY } from '@/hooks/reviews.keys';
 import { theme } from '@/lib/theme';
+import { Skeleton } from '@/components/ui/Skeleton';
 
 export function ReviewsToday() {
   const { data, isLoading } = useQuery({
@@ -29,7 +30,10 @@ export function ReviewsToday() {
       </div>
 
       {count === null ? (
-        <p style={styles.muted}>Carregando…</p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, flex: 1 }}>
+          <Skeleton width={64} height={38} />
+          <Skeleton height={44} borderRadius={theme.radiusSm} style={{ marginTop: 'auto' }} />
+        </div>
       ) : count === 0 ? (
         <div style={styles.allDone}>
           <span style={styles.checkDot}><Check size={12} strokeWidth={3} /></span> Nenhuma revisão pendente
@@ -59,5 +63,5 @@ const styles: Record<string, React.CSSProperties> = {
   metric:   { display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 'auto' },
   num:      { fontSize: 40, color: theme.ink, fontWeight: 600, letterSpacing: -1.5, lineHeight: 1, fontVariantNumeric: 'tabular-nums' },
   label:    { fontSize: 14, color: theme.inkSoft, fontWeight: 500 },
-  startBtn: { display: 'block', width: '100%', boxSizing: 'border-box', padding: '12px 0', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', textAlign: 'center', textDecoration: 'none', marginTop: 16, transition: 'all .15s' },
+  startBtn: { display: 'block', width: '100%', boxSizing: 'border-box', padding: '12px 0', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onPrimary, fontSize: 14, fontWeight: 600, cursor: 'pointer', textAlign: 'center', textDecoration: 'none', marginTop: 16, transition: 'all .15s' },
 };

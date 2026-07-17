@@ -16,6 +16,8 @@ import { useUI } from '@/components/layout/UIContext';
 import { useToast } from '@/components/ui/ToastProvider';
 import { theme } from '@/lib/theme';
 import { Button } from '@/components/ui/Button';
+import { Badge } from '@/components/ui/Badge';
+import { PageContainer } from '@/components/ui/Page';
 
 interface ItemFila {
   interacao: LeiInteracao;
@@ -28,10 +30,10 @@ interface ItemFila {
 const LACUNA_LARGURA = 14;
 
 const RATINGS: { value: JurisRating; cor: string }[] = [
-  { value: 'errei',   cor: '#E24B4A' },
-  { value: 'dificil', cor: '#EF9F27' },
-  { value: 'ok',      cor: '#1D9E75' },
-  { value: 'dominei', cor: '#378ADD' },
+  { value: 'errei',   cor: theme.danger },
+  { value: 'dificil', cor: theme.warnDeep },
+  { value: 'ok',      cor: theme.tealDeep },
+  { value: 'dominei', cor: theme.okDeep },
 ];
 
 export default function RevisarArtigosPage() {
@@ -96,12 +98,12 @@ export default function RevisarArtigosPage() {
   }
 
   if (fila === null) {
-    return <div style={{ ...s.wrap, padding: 40 }}><p style={{ color: theme.inkFaint }}>Montando sua fila…</p></div>;
+    return <PageContainer width="narrow" style={{ padding: 40 }}><p style={{ color: theme.inkFaint }}>Montando sua fila…</p></PageContainer>;
   }
 
   if (!atual) {
     return (
-      <div style={{ ...s.wrap, padding: isMobile ? '24px 16px' : '40px' }}>
+      <PageContainer width="narrow" style={{ padding: isMobile ? '40px 16px' : '72px 40px', textAlign: 'center' }}>
         <div style={s.doneBox}>
           <div style={{ fontSize: 40 }}>🎉</div>
           <h1 style={s.doneTitle}>
@@ -114,12 +116,12 @@ export default function RevisarArtigosPage() {
           </p>
           <Button onClick={() => router.push('/vademecum')}>Voltar ao Vade Mecum</Button>
         </div>
-      </div>
+      </PageContainer>
     );
   }
 
   return (
-    <div style={{ ...s.wrap, padding: isMobile ? '20px 16px' : '34px 40px' }}>
+    <PageContainer width="narrow">
       <div style={s.topo}>
         <button onClick={() => router.push('/vademecum')} style={s.voltar}>← Vade Mecum</button>
         <span style={s.progresso}>{idx + 1} de {fila.length}</span>
@@ -127,7 +129,7 @@ export default function RevisarArtigosPage() {
 
       <div style={s.card}>
         <div style={s.cardHead}>
-          <span style={s.leiChip}>{atual.lei.nomeCurto}</span>
+          <Badge variant="brand">{atual.lei.nomeCurto}</Badge>
           <span style={s.rotulo}>{atual.artigo.rotulo}</span>
           {atual.artigo.caminho && <span style={s.caminho}>{atual.artigo.caminho}</span>}
         </div>
@@ -182,18 +184,16 @@ export default function RevisarArtigosPage() {
           ))}
         </div>
       </div>
-    </div>
+    </PageContainer>
   );
 }
 
 const s: Record<string, CSSProperties> = {
-  wrap: { maxWidth: 720, margin: '0 auto', fontFamily: theme.font },
   topo: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 },
   voltar: { border: 'none', background: 'transparent', color: theme.inkFaint, fontSize: 13, cursor: 'pointer', fontFamily: 'inherit', padding: 0 },
   progresso: { fontSize: 13, fontWeight: 600, color: theme.inkSoft },
   card: { background: theme.card, border: `0.5px solid ${theme.line}`, borderRadius: theme.radius, padding: '20px 22px' },
   cardHead: { display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 12 },
-  leiChip: { fontSize: 12, fontWeight: 700, color: theme.teal, background: theme.tealBg, borderRadius: theme.radiusPill, padding: '3px 10px' },
   rotulo: { fontSize: 16, fontWeight: 700, color: theme.ink },
   caminho: { fontSize: 12, color: theme.inkFaint, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
   hint: { fontSize: 13, color: theme.inkSoft, margin: '0 0 12px', display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' },
@@ -207,5 +207,5 @@ const s: Record<string, CSSProperties> = {
   doneBox: { textAlign: 'center', padding: '60px 20px' },
   doneTitle: { fontSize: 22, fontWeight: 700, color: theme.ink, margin: '10px 0 6px' },
   doneSub: { fontSize: 14, color: theme.inkSoft, margin: '0 0 20px' },
-  doneBtn: { padding: '11px 22px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+  doneBtn: { padding: '11px 22px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onPrimary, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
 };

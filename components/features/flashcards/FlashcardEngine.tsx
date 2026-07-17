@@ -312,7 +312,6 @@ const styles: Record<string, React.CSSProperties> = {
   doneStatBox: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 },
   doneStatNum: { fontSize: 36, color: theme.ink, fontWeight: 700, letterSpacing: -1, fontVariantNumeric: 'tabular-nums', lineHeight: 1 },
   doneStatLabel: { fontSize: 12, color: theme.inkFaint, fontWeight: 500 },
-  finishBtn: { marginTop: 8, padding: '12px 28px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
 };
 
 const ratingStyles = RATINGS.map(r => ({ ...styles.ratingBtn, color: r.fg, background: r.bg }));

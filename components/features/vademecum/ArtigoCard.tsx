@@ -19,8 +19,9 @@ import {
 } from '@/lib/lei-grifos';
 import type { LeiQuestao } from '@/services/leiQuestoes.service';
 import { useToast } from '@/components/ui/ToastProvider';
-import { theme } from '@/lib/theme';
+import { theme, zIndex } from '@/lib/theme';
 import { Button } from '@/components/ui/Button';
+import { Badge } from '@/components/ui/Badge';
 import { Textarea } from '@/components/ui/Textarea';
 
 const INCIDENCIA_CHIP: Record<string, { label: string; bg: string; ink: string }> = {
@@ -236,13 +237,16 @@ export const ArtigoCard = memo(function ArtigoCard({ artigo, interacao, onUpdate
     <div ref={rootRef} id={`art-${artigo.numero}`} style={{ ...s.card, opacity: artigo.revogado ? 0.55 : 1 }}>
       <div style={s.head}>
         <span style={s.rotulo}>{artigo.rotulo}</span>
-        {incChip && <span style={{ ...s.incChip, background: incChip.bg, color: incChip.ink }}>{incChip.label}</span>}
+        {incChip && <Badge style={{ background: incChip.bg, color: incChip.ink }}>{incChip.label}</Badge>}
         {emRevisao && (
-          <span style={{ ...s.revChip, ...(revisaoVencida ? s.revChipDue : {}), display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+          <Badge
+            variant={revisaoVencida ? 'danger' : 'brand'}
+            style={{ marginLeft: 'auto' }}
+          >
             {revisaoVencida
               ? <><AlarmClock size={12} strokeWidth={2} />revisão vencida</>
               : <><RefreshCw size={12} strokeWidth={2} />{diasAteRevisao()}</>}
-          </span>
+          </Badge>
         )}
       </div>
 
@@ -398,9 +402,6 @@ const s: Record<string, CSSProperties> = {
   card: { background: theme.card, border: `0.5px solid ${theme.line}`, borderRadius: theme.radius, padding: '16px 18px', marginBottom: 12, position: 'relative' },
   head: { display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 6 },
   rotulo: { fontSize: 15, fontWeight: 700, color: theme.ink },
-  incChip: { fontSize: 11, fontWeight: 600, borderRadius: theme.radiusPill, padding: '3px 9px' },
-  revChip: { fontSize: 11, fontWeight: 600, borderRadius: theme.radiusPill, padding: '3px 9px', background: theme.tealBg, color: theme.tealDeep, marginLeft: 'auto' },
-  revChipDue: { background: 'rgba(226,75,74,.12)', color: '#C03A39' },
   incNota: { fontSize: 13, color: theme.inkSoft, background: theme.muted, borderRadius: theme.radiusSm, padding: '7px 10px', margin: '0 0 10px', lineHeight: 1.5 },
   texto: { fontSize: 15, lineHeight: 1.85, color: theme.ink },
   bloco: { margin: '0 0 8px' },
@@ -423,7 +424,7 @@ const s: Record<string, CSSProperties> = {
   questaoResultadoErro: { background: theme.dangerBg, color: theme.danger },
   questaoComentario: { fontSize: 13, color: theme.inkSoft, lineHeight: 1.55, margin: '0 0 10px' },
   questaoProxima: { border: 'none', background: 'transparent', color: theme.teal, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', padding: 0 },
-  toolbar: { position: 'fixed', zIndex: 70, display: 'flex', alignItems: 'center', gap: 6, background: theme.card, border: `0.5px solid ${theme.line}`, borderRadius: theme.radiusSm, padding: '7px 9px', boxShadow: theme.shadowHover },
+  toolbar: { position: 'fixed', zIndex: zIndex.menu, display: 'flex', alignItems: 'center', gap: 6, background: theme.card, border: `0.5px solid ${theme.line}`, borderRadius: theme.radiusSm, padding: '7px 9px', boxShadow: theme.shadowHover },
   corBtn: { width: 22, height: 22, borderRadius: 7, border: 'none', cursor: 'pointer' },
   toolbarSep: { width: 1, height: 18, background: theme.line },
   subBtn: { border: 'none', background: 'transparent', color: theme.inkSoft, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', padding: '2px 4px' },

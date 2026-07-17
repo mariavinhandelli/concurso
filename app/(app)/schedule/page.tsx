@@ -3,15 +3,17 @@
 // Toda a lógica de estado e handlers está em hooks/useSchedulePage.ts.
 'use client';
 
-import { memo, useState, useEffect, useRef } from 'react';
+import { memo, useState, useEffect, useRef, useSyncExternalStore } from 'react';
 import dynamic from 'next/dynamic';
 import { ChevronLeft, ChevronRight, Menu, Repeat, RefreshCw, Sparkles, Check } from 'lucide-react';
 import { useSchedulePage } from '@/hooks/useSchedulePage';
 import { usePersistedState } from '@/hooks/usePersistedState';
 import { CalendarView } from '@/components/features/calendar/CalendarView';
 import { BlockMenu } from '@/components/features/schedule/BlockMenu';
+import { Button } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { PageContainer, PageHeader } from '@/components/ui/Page';
+import { SegmentedControl } from '@/components/ui/SegmentedControl';
 import { theme } from '@/lib/theme';
 import { toLocalDateString as localDateStr } from '@/lib/local-date';
 import {
@@ -53,7 +55,21 @@ const CycleIcon = ({ size = 14, color = 'currentColor', mr = 6 }: { size?: numbe
   <RefreshCw size={size} color={color} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: mr, flexShrink: 0, width: size, maxWidth: size }} aria-hidden="true" />
 );
 
+// Tablet estreito (768–1023): a grade de 7 colunas não cabe — CSS (globals.css)
+// força a lista mesmo com view==='semana'. Espelha isso na tab "Grade" para não
+// oferecer uma opção que o CSS vai sobrepor. Segue o padrão de useBreakpoints.
+const NARROW_TABLET_QUERY = '(min-width: 768px) and (max-width: 1023px)';
+const mqNarrowTabletList = typeof window !== 'undefined' ? window.matchMedia(NARROW_TABLET_QUERY) : null;
+function subscribeNarrowTablet(cb: () => void) {
+  if (!mqNarrowTabletList) return () => {};
+  mqNarrowTabletList.addEventListener('change', cb);
+  return () => mqNarrowTabletList.removeEventListener('change', cb);
+}
+const getIsNarrowTablet = () => mqNarrowTabletList?.matches ?? false;
+const getSSRFalse = () => false;
+
 export default function SchedulePage() {
+  const isNarrowTablet = useSyncExternalStore(subscribeNarrowTablet, getIsNarrowTablet, getSSRFalse);
   const {
     isMobile, dialog,
     dias, weekLabel, navWeek, setWeekStart,
@@ -92,6 +108,27 @@ export default function SchedulePage() {
   function abrirCiclo() { setCalOverride(null); setCalPref('off'); handleCycleButton(); }
 
   const mostrarLista = view === 'lista' || (view === 'semana' && isMobile);
+  // No tablet estreito (768–1023) o CSS já força a lista mesmo com view==='semana'
+  // (a grade de 7 colunas não cabe) — usado só para a tab ativa, não para o conteúdo.
+  const listaForcada = mostrarLista || isNarrowTablet;
+
+  // Visão ativa da toolbar (Grade/Lista/Mês/Ciclo) — une `calendarOn` (Mês) e `view`
+  // num único valor para o SegmentedControl. "Grade" só existe onde a grade de fato
+  // renderiza (nem mobile, nem tablet estreito têm espaço para as 7 colunas).
+  type ScheduleView = 'grade' | 'lista' | 'mes' | 'ciclo';
+  const activeView: ScheduleView = calendarOn ? 'mes' : view === 'ciclo' ? 'ciclo' : listaForcada ? 'lista' : 'grade';
+  const viewOptions: { value: ScheduleView; label: string }[] = [
+    ...(isMobile || isNarrowTablet ? [] : [{ value: 'grade' as const, label: 'Grade' }]),
+    { value: 'lista', label: 'Lista' },
+    { value: 'mes', label: 'Mês' },
+    { value: 'ciclo', label: 'Ciclo' },
+  ];
+  function onViewChange(v: ScheduleView) {
+    if (v === 'grade') abrirCronograma('semana');
+    else if (v === 'lista') abrirCronograma('lista');
+    else if (v === 'mes') abrirMes();
+    else abrirCiclo();
+  }
 
   // — Resumo semanal —
   const totalPlanned = !loading ? dias.reduce((s, d) => s + dayLoad(d).planned, 0) : 0;
@@ -144,33 +181,9 @@ export default function SchedulePage() {
             </div>
             )}
 
-            <div style={{ ...styles.viewToggle, ...(calendarOn ? { marginLeft: 'auto' } : {}) }}>
-              <button
-                className="schedule-grade-btn touch-target"
-                onClick={() => abrirCronograma('semana')}
-                style={{ ...styles.viewBtn, ...(!calendarOn && view === 'semana' ? styles.viewBtnOn : {}) }}
-              >
-                Grade
-              </button>
-              <button className="touch-target"
-                onClick={() => abrirCronograma('lista')}
-                style={{ ...styles.viewBtn, ...(!calendarOn && mostrarLista ? styles.viewBtnOn : {}) }}
-              >
-                Lista
-              </button>
-              <button className="touch-target"
-                onClick={abrirMes}
-                style={{ ...styles.viewBtn, ...(calendarOn ? styles.viewBtnOn : {}) }}
-              >
-                Mês
-              </button>
+            <div style={calendarOn ? { marginLeft: 'auto' } : undefined}>
               {/* Ciclo: sempre visível — se não houver ciclo, abre o modal de criação */}
-              <button className="touch-target"
-                onClick={abrirCiclo}
-                style={{ ...styles.viewBtn, ...(!calendarOn && view === 'ciclo' ? styles.viewBtnOn : {}) }}
-              >
-                Ciclo
-              </button>
+              <SegmentedControl options={viewOptions} value={activeView} onChange={onViewChange} equalWidth={false} />
             </div>
           </div>
 
@@ -187,18 +200,18 @@ export default function SchedulePage() {
             </button>
 
             <div style={{ display: isMobile ? 'grid' : 'flex', gridTemplateColumns: isMobile ? 'repeat(3, minmax(0, 1fr))' : undefined, gap: isMobile ? 6 : 10, width: isMobile ? '100%' : 'auto' }}>
-              <button className="touch-target" onClick={handleCycleButton} style={{ ...styles.cycleBtn, justifyContent: 'center', minWidth: 0, padding: isMobile ? '8px 6px' : '8px 12px' }}>
-                <CycleIcon size={14} color={theme.teal} mr={6} />
+              <Button className="touch-target" variant="brandOutline" size="sm" onClick={handleCycleButton} style={{ minWidth: 0, padding: isMobile ? '8px 6px' : '8px 12px' }}>
+                <CycleIcon size={14} color={theme.teal} mr={0} />
                 {cicloAtivo ? 'Ver ciclo' : 'Criar ciclo'}
-              </button>
-              <button className="touch-target" onClick={abrirRecorrencia} style={{ ...styles.recBtn, justifyContent: 'center', minWidth: 0, padding: isMobile ? '8px 6px' : '8px 12px' }}>
-                <RepeatIcon size={14} color={theme.teal} mr={6} />
+              </Button>
+              <Button className="touch-target" variant="brandOutline" size="sm" onClick={abrirRecorrencia} style={{ minWidth: 0, padding: isMobile ? '8px 6px' : '8px 12px' }}>
+                <RepeatIcon size={14} color={theme.teal} mr={0} />
                 Recorrência
-              </button>
-              <button className="touch-target" onClick={() => setPanelOpen(true)} style={{ ...styles.recBtnGhost, justifyContent: 'center', minWidth: 0, padding: isMobile ? '8px 6px' : '8px 12px' }}>
-                <Menu size={14} color={theme.teal} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 6, flexShrink: 0, width: 14, maxWidth: 14 }} />
+              </Button>
+              <Button className="touch-target" variant="brandOutline" size="sm" onClick={() => setPanelOpen(true)} style={{ minWidth: 0, padding: isMobile ? '8px 6px' : '8px 12px' }}>
+                <Menu size={14} color={theme.teal} strokeWidth={2} style={{ flexShrink: 0, width: 14, maxWidth: 14 }} />
                 Gerenciar
-              </button>
+              </Button>
             </div>
           </div>
           )}
@@ -298,9 +311,9 @@ export default function SchedulePage() {
                     {' '}Ele gira na aba Ciclo — blocos avulsos aqui são opcionais, para compromissos de dia fixo.
                   </p>
                   <div style={styles.emptyCalloutActions}>
-                    <button onClick={() => setView('ciclo')} style={styles.recBtn}>
+                    <Button variant="brandOutline" size="sm" onClick={() => setView('ciclo')}>
                       Ver ciclo →
-                    </button>
+                    </Button>
                   </div>
                 </div>
               ) : (
@@ -310,10 +323,10 @@ export default function SchedulePage() {
                     {' '}Crie uma recorrência para preencher automaticamente, ou adicione blocos avulsos clicando em &ldquo;+ bloco&rdquo;.
                   </p>
                   <div style={styles.emptyCalloutActions}>
-                    <button onClick={abrirRecorrencia} style={styles.recBtn}>
-                      <RepeatIcon size={13} color={theme.teal} mr={5} />
+                    <Button variant="brandOutline" size="sm" onClick={abrirRecorrencia}>
+                      <RepeatIcon size={13} color={theme.teal} mr={0} />
                       Criar recorrência
-                    </button>
+                    </Button>
                     <button onClick={() => setGeneratorOpen(true)} style={styles.genBtn}>
                       <Sparkles size={13} strokeWidth={2} /> Gerar do edital
                     </button>
@@ -566,13 +579,7 @@ const styles: Record<string, React.CSSProperties> = {
   weekLabel: { position: 'relative', fontSize: 15, fontWeight: 700, color: theme.ink, minWidth: 150, textAlign: 'center', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', fontFamily: 'inherit' },
   datePicker: { position: 'absolute', opacity: 0, width: '100%', height: '100%', left: 0, top: 0, cursor: 'pointer' },
   todayBtn: { padding: '8px 16px', borderRadius: 10, border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.ink, fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit', flexShrink: 0 },
-  recBtn: { display: 'inline-flex', alignItems: 'center', padding: '8px 12px', borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.teal, background: theme.card, color: theme.inkSoft, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
-  recBtnGhost: { display: 'inline-flex', alignItems: 'center', padding: '8px 12px', borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.teal, background: theme.card, color: theme.inkSoft, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
-  cycleBtn: { display: 'inline-flex', alignItems: 'center', padding: '8px 12px', borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.teal, background: theme.card, color: theme.inkSoft, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
-  genBtn: { display: 'inline-flex', alignItems: 'center', padding: '8px 14px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
-  viewToggle: { display: 'flex', gap: 3, background: 'rgba(15,23,42,.06)', borderRadius: theme.radiusSm, padding: 3 },
-  viewBtn: { padding: '7px 14px', border: 'none', background: 'transparent', color: theme.inkSoft, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', borderRadius: theme.radiusSm - 2 },
-  viewBtnOn: { background: theme.card, color: theme.teal, boxShadow: theme.shadow },
+  genBtn: { display: 'inline-flex', alignItems: 'center', padding: '8px 14px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onPrimary, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
   error: { color: theme.danger, fontSize: 13, marginBottom: 12 },
   muted: { color: theme.inkFaint, fontSize: 14 },
   footnote: { fontSize: 12, color: theme.inkFaint, margin: '24px 0 0', lineHeight: 1.5, textAlign: 'center' },
@@ -630,7 +637,7 @@ const styles: Record<string, React.CSSProperties> = {
 };
 
 const blockStyles: Record<string, React.CSSProperties> = {
-  card: { display: 'flex', alignItems: 'flex-start', gap: 6, padding: '6px 8px', borderRadius: theme.radiusXs, minWidth: 0, boxShadow: '0 1px 3px rgba(15,23,42,.06)' },
+  card: { display: 'flex', alignItems: 'flex-start', gap: 6, padding: '6px 8px', borderRadius: theme.radiusXs, minWidth: 0, boxShadow: theme.shadow },
   cardGrid: { gap: 6, padding: '6px 8px' },
   cardList: { gap: 8, padding: '10px 14px' },
   check: { width: 18, height: 18, borderRadius: '50%', borderWidth: 1.5, borderStyle: 'solid', fontSize: 10, fontWeight: 700, cursor: 'pointer', display: 'grid', placeItems: 'center', flexShrink: 0, marginTop: 2 },

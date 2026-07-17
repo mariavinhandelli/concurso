@@ -21,6 +21,7 @@ export function AccuracyEvolutionChart() {
   const [selected, setSelected] = useState<string>('');
   const [data, setData] = useState<EvolutionPoint[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     listSubjectsWithQuestions().then(setSubjects).catch((e) => toast.error(e instanceof Error ? e.message : 'Erro ao carregar filtro de matérias.'));
@@ -28,8 +29,10 @@ export function AccuracyEvolutionChart() {
 
   useEffect(() => {
     setLoading(true);
+    setError(false);
     getAccuracyEvolution(selected || null)
       .then(setData)
+      .catch(() => setError(true))
       .finally(() => setLoading(false));
   }, [selected]);
 
@@ -50,6 +53,8 @@ export function AccuracyEvolutionChart() {
 
       {loading ? (
         <Skeleton height={220} borderRadius={12} />
+      ) : error ? (
+        <p style={{ ...styles.muted, color: theme.danger }}>Não foi possível carregar os dados. Tente novamente.</p>
       ) : !hasData ? (
         <p style={styles.muted}>
           Sem questões registradas ainda neste recorte. Faça sessões de questões com acertos.

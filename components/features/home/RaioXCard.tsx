@@ -8,10 +8,12 @@
 import { memo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
+import { Target } from 'lucide-react';
 import { getRaioX, NIVEL_LABEL, type RaioX, type NivelProntidao } from '@/services/raiox.service';
 import { theme } from '@/lib/theme';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { Button } from '@/components/ui/Button';
+import { Badge } from '@/components/ui/Badge';
 
 const NIVEL_COR: Record<NivelProntidao, string> = {
   construcao: theme.danger,
@@ -82,7 +84,7 @@ export const RaioXCard = memo(function RaioXCard() {
       <div style={styles.heroRow}>
         <span style={styles.heroPct}>{score}</span>
         <div>
-          <span style={{ ...styles.nivelChip, color: NIVEL_COR[nivel], background: NIVEL_BG[nivel] }}>{NIVEL_LABEL[nivel]}</span>
+          <Badge style={{ color: NIVEL_COR[nivel], background: NIVEL_BG[nivel] }}>{NIVEL_LABEL[nivel]}</Badge>
           <p style={styles.heroLabel}>se a prova fosse hoje</p>
         </div>
       </div>
@@ -96,8 +98,8 @@ export const RaioXCard = memo(function RaioXCard() {
 
       {focoPrincipal && (
         <div style={styles.focoBox}>
-          <p style={styles.focoTitulo}>
-            🎯 Foco agora: <b>{focoPrincipal.subjectName}</b>
+          <p style={{ ...styles.focoTitulo, display: 'flex', alignItems: 'center', gap: 6 }}>
+            <Target size={14} strokeWidth={2} /> Foco agora: <b>{focoPrincipal.subjectName}</b>
           </p>
           <p style={styles.focoDetalhe}>
             {focoPrincipal.semTopicosVinculados
@@ -147,7 +149,6 @@ const styles: Record<string, React.CSSProperties> = {
 
   heroRow: { display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 },
   heroPct: { fontSize: 36, fontWeight: 800, color: theme.ink, letterSpacing: -1, lineHeight: 1 },
-  nivelChip: { fontSize: 12, fontWeight: 700, borderRadius: theme.radiusPill, padding: '3px 10px' },
   heroLabel: { fontSize: 13, color: theme.inkFaint, margin: '4px 0 0' },
 
   bar: { display: 'flex', height: 10, background: theme.muted, borderRadius: theme.radiusPill, overflow: 'hidden', marginBottom: 14, gap: 1.5 },

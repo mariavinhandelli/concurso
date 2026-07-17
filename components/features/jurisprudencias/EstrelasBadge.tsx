@@ -34,8 +34,8 @@ export function EstrelasBadge({ value, onChange, size = 16, showLabel = false }:
             aria-label={onChange ? `${n} estrelas` : undefined}
           >
             <Star size={size}
-              fill={n <= value ? '#f59e0b' : theme.line}
-              color={n <= value ? '#f59e0b' : theme.line}
+              fill={n <= value ? theme.gold : theme.line}
+              color={n <= value ? theme.gold : theme.line}
               strokeWidth={1.7} />
           </button>
         ))}

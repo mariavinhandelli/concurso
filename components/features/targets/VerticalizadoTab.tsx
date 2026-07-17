@@ -5,7 +5,7 @@ import { X, ChevronRight, Info, ChartNoAxesColumn } from 'lucide-react';
 import { HealthBar } from '@/components/features/topics/HealthBar';
 import { type SubjectTree, pesoEfetivo } from '@/lib/targets';
 import { theme } from '@/lib/theme';
-import { Button } from '@/components/ui/Button';
+import { EmptyState } from '@/components/ui/EmptyState';
 import { Select } from '@/components/ui/Select';
 
 const COACH_KEY = 'focali_vert_coach_seen';
@@ -79,12 +79,12 @@ export const VerticalizadoTab = memo(function VerticalizadoTab({
 
   if (linked.size === 0) {
     return (
-      <div style={s.emptyState}>
-        <ChartNoAxesColumn size={36} color={theme.inkFaint} strokeWidth={1.2} style={{ marginBottom: 10 }} />
-        <p style={s.emptyTitle}>Nada aqui ainda</p>
-        <p style={s.emptyHint}>Vincule tópicos na aba &quot;Montar edital&quot; para ver o progresso aqui.</p>
-        <Button variant="outline" style={{ borderColor: theme.teal, background: theme.tealBg, color: theme.teal }} onClick={onSwitchToTopics}>Ir para Montar edital →</Button>
-      </div>
+      <EmptyState
+        icon={<ChartNoAxesColumn size={26} color={theme.teal} strokeWidth={1.8} />}
+        title="Nada aqui ainda"
+        body='Vincule tópicos na aba "Montar edital" para ver o progresso aqui.'
+        action={{ label: 'Ir para Montar edital →', onClick: onSwitchToTopics }}
+      />
     );
   }
 
@@ -206,11 +206,6 @@ export const VerticalizadoTab = memo(function VerticalizadoTab({
 
 const s: Record<string, CSSProperties> = {
   section: { display: 'flex', flexDirection: 'column', gap: 12 },
-
-  emptyState: { display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '48px 20px', textAlign: 'center' },
-  emptyTitle: { fontSize: 15, fontWeight: 600, color: theme.inkSoft, margin: '0 0 6px' },
-  emptyHint: { fontSize: 13, color: theme.inkFaint, maxWidth: 320, lineHeight: 1.6, margin: '0 0 16px' },
-  emptyBtn: { padding: '10px 20px', borderRadius: theme.radiusSm, border: `1px solid ${theme.teal}`, background: theme.tealBg, color: theme.teal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
 
   // Coach mark com SVG (sem emoji)
   coachMark: { background: theme.tealBg, border: `1px solid ${theme.teal}`, borderRadius: theme.radiusSm, padding: '12px 14px', animation: 'focali-slide-down 0.2s ease' },

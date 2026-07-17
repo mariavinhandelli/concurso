@@ -24,10 +24,12 @@ export function StudyTimeChart() {
   const [granularity, setGranularity] = useState<Granularity>('dia');
   const [data, setData] = useState<TimePoint[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     setLoading(true);
-    getTimeSeries(granularity).then(setData).finally(() => setLoading(false));
+    setError(false);
+    getTimeSeries(granularity).then(setData).catch(() => setError(true)).finally(() => setLoading(false));
   }, [granularity]);
 
   return (
@@ -53,6 +55,8 @@ export function StudyTimeChart() {
 
       {loading ? (
         <Skeleton height={220} borderRadius={12} />
+      ) : error ? (
+        <p style={{ color: theme.danger, fontSize: 14 }}>Não foi possível carregar os dados. Tente novamente.</p>
       ) : (
         <ResponsiveContainer width="100%" height={260} minWidth={0}>
           <LineChart data={data} margin={{ top: 8, right: 8, bottom: 0, left: -16 }}>

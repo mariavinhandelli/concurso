@@ -10,6 +10,7 @@ import {
 import { INTERVALOS_RAPIDOS } from '@/lib/juris-review';
 import { useToast } from '@/components/ui/ToastProvider';
 import { Button } from '@/components/ui/Button';
+import { Badge } from '@/components/ui/Badge';
 import { Input } from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/Textarea';
 
@@ -175,8 +176,8 @@ export function JurisInteracoesPanel({ jurisId }: Props) {
           }}
         >
           <Star size={20}
-            fill={favorito ? '#f59e0b' : 'none'}
-            color={favorito ? '#f59e0b' : theme.inkFaint}
+            fill={favorito ? theme.gold : 'none'}
+            color={favorito ? theme.gold : theme.inkFaint}
             strokeWidth={1.7}
           />
           <span style={{ fontSize: 14, fontWeight: 600, color: favorito ? theme.warnDeep : theme.ink }}>
@@ -239,7 +240,7 @@ export function JurisInteracoesPanel({ jurisId }: Props) {
             Revisão espaçada
           </span>
           {interacao?.is_review_active && (
-            <span style={styles.activeBadge}>Ativa</span>
+            <Badge variant="ok">Ativa</Badge>
           )}
         </div>
 
@@ -313,9 +314,8 @@ const styles: Record<string, React.CSSProperties> = {
   tagRemove: { border: 'none', background: 'transparent', cursor: 'pointer', color: theme.tealDeep, fontSize: 14, lineHeight: 1, padding: 0, minWidth: 32, minHeight: 32, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' },
   tagAddBtn: {
     padding: '8px 14px', borderRadius: theme.radiusSm, border: 'none',
-    background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: theme.font,
+    background: theme.primary, color: theme.onPrimary, fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: theme.font,
   },
-  activeBadge: { fontSize: 11, fontWeight: 700, color: theme.ok, background: theme.okBg, borderRadius: theme.radiusPill, padding: '2px 8px' },
   nextReview: { fontSize: 14, color: theme.ink, margin: 0 },
   intervalBtn: {
     padding: '8px 14px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`,

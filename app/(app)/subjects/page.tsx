@@ -7,6 +7,7 @@ import { useToast } from '@/components/ui/ToastProvider';
 import { theme } from '@/lib/theme';
 import { useUI } from '@/components/layout/UIContext';
 import { PageContainer, PageHeader } from '@/components/ui/Page';
+import { SegmentedControl } from '@/components/ui/SegmentedControl';
 
 type Tab = 'banco' | 'minhas';
 
@@ -58,21 +59,13 @@ export default function SubjectsPage() {
     <PageContainer width="wide" style={{ minWidth: 0 }}>
       <PageHeader title="Matérias" subtitle="Explore o banco de matérias ou gerencie as suas." />
 
-      <div style={styles.tabs}>
-        <button
-          className="touch-target"
-          onClick={() => handleTabChange('banco')}
-          style={{ ...styles.tab, ...(tab === 'banco' ? styles.tabActive : {}) }}
-        >
-          Explorar
-        </button>
-        <button
-          className="touch-target"
-          onClick={() => handleTabChange('minhas')}
-          style={{ ...styles.tab, ...(tab === 'minhas' ? styles.tabActive : {}) }}
-        >
-          Minhas matérias
-        </button>
+      <div style={{ marginBottom: 20 }}>
+        <SegmentedControl
+          options={[{ value: 'banco', label: 'Explorar' }, { value: 'minhas', label: 'Minhas matérias' }]}
+          value={tab}
+          onChange={handleTabChange}
+          equalWidth={false}
+        />
       </div>
 
       {/* key força re-mount na troca de aba, disparando a animação CSS .tab-enter */}
@@ -85,12 +78,3 @@ export default function SubjectsPage() {
   );
 }
 
-const styles: Record<string, React.CSSProperties> = {
-  tabs: { display: 'flex', gap: 4, marginBottom: 20, padding: 3, background: 'rgba(15,23,42,.06)', borderRadius: theme.radiusSm, width: 'fit-content', maxWidth: '100%', overflowX: 'auto' },
-  tab: {
-    padding: '8px 18px', borderRadius: 9, border: 'none', background: 'transparent',
-    color: theme.inkSoft, fontSize: 14, fontWeight: 500, cursor: 'pointer',
-    fontFamily: 'inherit', transition: 'all .15s',
-  },
-  tabActive: { background: theme.card, color: theme.ink, boxShadow: theme.shadow, fontWeight: 600 },
-};

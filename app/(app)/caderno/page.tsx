@@ -6,13 +6,13 @@
 // atalhos de anotar dentro do Vade Mecum e das Jurisprudências ficam intactos.
 'use client';
 
-import { useEffect, useState, type CSSProperties } from 'react';
+import { useEffect, useState } from 'react';
 import { usePersistedState } from '@/hooks/usePersistedState';
 import { AnotacoesView } from '@/components/features/caderno/AnotacoesView';
 import { TudoView } from '@/components/features/caderno/TudoView';
 import { ErrosView } from '@/components/features/notebook/ErrosView';
-import { theme } from '@/lib/theme';
 import { PageContainer, PageHeader } from '@/components/ui/Page';
+import { SegmentedControl } from '@/components/ui/SegmentedControl';
 
 type Tab = 'tudo' | 'anotacoes' | 'erros';
 
@@ -69,18 +69,8 @@ export default function CadernoHubPage() {
     <PageContainer width="wide">
       <PageHeader title="Caderno" subtitle="Tudo que você escreveu — anotações e erros, num lugar só." />
 
-      <div style={s.tabs} role="tablist">
-        {TABS.map((t) => (
-          <button
-            key={t.value}
-            role="tab"
-            aria-selected={tab === t.value}
-            onClick={() => irParaAba(t.value)}
-            style={{ ...s.tab, ...(tab === t.value ? s.tabOn : {}) }}
-          >
-            {t.label}
-          </button>
-        ))}
+      <div style={{ marginBottom: 18 }}>
+        <SegmentedControl options={TABS} value={tab} onChange={irParaAba} equalWidth={false} />
       </div>
 
       {tab === 'tudo' && <TudoView onAbrir={abrirDoTudo} />}
@@ -90,8 +80,3 @@ export default function CadernoHubPage() {
   );
 }
 
-const s: Record<string, CSSProperties> = {
-  tabs: { display: 'flex', gap: 4, marginBottom: 18, padding: 3, background: 'rgba(15,23,42,.06)', borderRadius: theme.radiusSm, width: 'fit-content' },
-  tab: { padding: '8px 18px', borderRadius: theme.radiusXs, border: 'none', background: 'transparent', color: theme.inkSoft, fontSize: 14, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit', transition: 'all .15s', whiteSpace: 'nowrap' },
-  tabOn: { background: theme.card, color: theme.ink, boxShadow: theme.shadow, fontWeight: 600 },
-};

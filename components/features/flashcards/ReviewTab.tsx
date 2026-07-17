@@ -93,5 +93,4 @@ const styles: Record<string, React.CSSProperties> = {
   num: { fontSize: 40, color: theme.ink, fontWeight: 600, letterSpacing: -1.5, fontVariantNumeric: 'tabular-nums' },
   label: { fontSize: 13, color: theme.inkFaint, fontWeight: 500 },
   estTime: { fontSize: 13, color: theme.inkFaint, margin: '-8px 0 0' },
-  startBtn: { padding: '13px 30px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 15, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
 };

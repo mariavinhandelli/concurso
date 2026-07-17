@@ -14,9 +14,9 @@ import { GRIFO_CORES, GRIFO_CORES_ORDEM } from '@/lib/lei-grifos';
 import { ArtigoCard } from '@/components/features/vademecum/ArtigoCard';
 import { MapaIncidencia } from '@/components/features/vademecum/MapaIncidencia';
 import { QuestoesBanco } from '@/components/features/vademecum/QuestoesBanco';
-import { useUI } from '@/components/layout/UIContext';
 import { useToast } from '@/components/ui/ToastProvider';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { PageContainer, PageHeader } from '@/components/ui/Page';
 import { pushRecent } from '@/lib/recents';
 import { theme } from '@/lib/theme';
 
@@ -39,7 +39,6 @@ export default function LeiReaderPage() {
   const { slug } = useParams<{ slug: string }>();
   const router = useRouter();
   const toast = useToast();
-  const { isMobile } = useUI();
 
   const [lei, setLei] = useState<Lei | null>(null);
   const [erro, setErro] = useState('');
@@ -140,18 +139,18 @@ export default function LeiReaderPage() {
 
   if (erro) {
     return (
-      <div style={{ ...s.wrap, padding: 40 }}>
+      <PageContainer width="default" style={{ padding: 40 }}>
         <EmptyState
           icon={<Book size={26} color={theme.teal} strokeWidth={1.8} />}
           title="Não encontramos essa lei"
           body="O endereço pode ter mudado ou a lei ainda não está no Vade Mecum. Volte à lista para escolher uma das leis disponíveis."
           action={{ label: '← Voltar ao Vade Mecum', onClick: () => router.push('/vademecum') }}
         />
-      </div>
+      </PageContainer>
     );
   }
   if (!lei) {
-    return <div style={{ ...s.wrap, padding: 40 }}><p style={{ color: theme.inkFaint }}>Carregando {slug}…</p></div>;
+    return <PageContainer width="default" style={{ padding: 40 }}><p style={{ color: theme.inkFaint }}>Carregando {slug}…</p></PageContainer>;
   }
 
   const totalGrifos = [...interacoes.values()].reduce((sum, i) => sum + i.grifos.length, 0);
@@ -163,20 +162,20 @@ export default function LeiReaderPage() {
   const pctGrifado = artigosVigentes.length > 0 ? Math.round((artigosComGrifo / artigosVigentes.length) * 100) : 0;
 
   return (
-    <div style={{ ...s.wrap, padding: isMobile ? '20px 16px' : '34px 40px' }}>
+    <PageContainer width="default">
       {/* Cabeçalho */}
       <button onClick={() => router.push('/vademecum')} style={s.voltar}>← Vade Mecum</button>
-      <div style={s.head}>
-        <div style={{ minWidth: 0 }}>
-          <h1 style={s.h1}>{lei.nomeCurto}</h1>
-          <p style={s.sub}>{lei.nome} · atualizada em {lei.geradoEm}</p>
-        </div>
-        <div style={s.statsRow}>
-          <span style={s.stat}><b>{pctGrifado}%</b> grifado</span>
-          <span style={s.stat}><b>{totalGrifos}</b> marcações</span>
-          <span style={s.stat}><b>{emRevisao}</b> em revisão</span>
-        </div>
-      </div>
+      <PageHeader
+        title={lei.nomeCurto}
+        subtitle={`${lei.nome} · atualizada em ${lei.geradoEm}`}
+        actions={(
+          <div style={s.statsRow}>
+            <span style={s.stat}><b>{pctGrifado}%</b> grifado</span>
+            <span style={s.stat}><b>{totalGrifos}</b> marcações</span>
+            <span style={s.stat}><b>{emRevisao}</b> em revisão</span>
+          </div>
+        )}
+      />
 
       {/* Abas */}
       <div style={s.abas}>
@@ -282,16 +281,12 @@ export default function LeiReaderPage() {
           )}
         </>
       )}
-    </div>
+    </PageContainer>
   );
 }
 
 const s: Record<string, CSSProperties> = {
-  wrap: { maxWidth: 960, margin: '0 auto', fontFamily: theme.font },
   voltar: { border: 'none', background: 'transparent', color: theme.inkFaint, fontSize: 13, cursor: 'pointer', fontFamily: 'inherit', padding: 0, marginBottom: 10 },
-  head: { display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 14, flexWrap: 'wrap', marginBottom: 14 },
-  h1: { fontSize: 24, fontWeight: 700, color: theme.ink, margin: 0 },
-  sub: { fontSize: 13, color: theme.inkSoft, margin: '4px 0 0' },
   statsRow: { display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' },
   stat: { fontSize: 13, color: theme.inkSoft, background: theme.card, border: `0.5px solid ${theme.line}`, borderRadius: theme.radiusPill, padding: '5px 12px' },
   abas: { display: 'flex', alignItems: 'center', gap: 6, borderBottom: `0.5px solid ${theme.line}`, marginBottom: 16, paddingBottom: 0, flexWrap: 'wrap' },

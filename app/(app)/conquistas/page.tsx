@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Check, List, Clock, Flame, Star } from 'lucide-react';
+import { Check, List, Clock, Flame, Star, Medal, Target } from 'lucide-react';
 import { theme } from '@/lib/theme';
 import { useBreakpoints } from '@/components/layout/UIContext';
 import { PageContainer, PageHeader } from '@/components/ui/Page';
@@ -161,7 +161,7 @@ export default function ConquistasPage() {
       {byFamily.length === 0 && (
         <div style={s.emptyWrap}>
           <span style={s.emptyIcon}>
-            {filter === 'conquistadas' ? '🏅' : '🎯'}
+            {filter === 'conquistadas' ? <Medal size={40} color={theme.inkFaint} strokeWidth={1.3} /> : <Target size={40} color={theme.inkFaint} strokeWidth={1.3} />}
           </span>
           <p style={s.emptyTitle}>
             {filter === 'conquistadas'

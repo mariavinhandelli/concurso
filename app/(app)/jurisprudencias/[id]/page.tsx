@@ -16,6 +16,7 @@ import { useConfirm } from '@/hooks/useConfirm';
 import { useUI } from '@/components/layout/UIContext';
 import { pushRecent } from '@/lib/recents';
 import { theme } from '@/lib/theme';
+import { PageContainer } from '@/components/ui/Page';
 
 const INCIDENCIA_LABEL: Record<string, string> = {
   baixa: 'Baixa', media: 'Média', alta: 'Alta', muito_alta: 'Muito Alta',
@@ -122,9 +123,9 @@ export default function JurisprudenciaPage() {
 
   if (loading) {
     return (
-      <div style={{ maxWidth: 960, margin: '0 auto', padding: isMobile ? '20px 16px' : '34px 40px' }}>
+      <PageContainer width="default">
         <div style={{ height: 200, background: theme.card, borderRadius: theme.radius, border: `0.5px solid ${theme.line}`, animation: 'skeleton-pulse 1.4s ease-in-out infinite' }} />
-      </div>
+      </PageContainer>
     );
   }
 
@@ -139,7 +140,7 @@ export default function JurisprudenciaPage() {
   return (
     <>
       {dialog}
-      <div style={{ maxWidth: 960, margin: '0 auto', padding: isMobile ? '20px 16px' : '34px 40px', fontFamily: theme.font, minWidth: 0 }}>
+      <PageContainer width="default">
 
         {/* Navegação e ações */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, flexWrap: 'wrap', gap: 10 }}>
@@ -216,7 +217,7 @@ export default function JurisprudenciaPage() {
                 ↑ {INCIDENCIA_LABEL[item.incidencia_concursos]}
               </span>
             </div>
-            <h1 style={{ fontSize: isMobile ? 20 : 24, fontWeight: 700, color: theme.ink, letterSpacing: -0.4, margin: '0 0 4px', lineHeight: 1.4 }}>
+            <h1 style={{ fontSize: isMobile ? 24 : 28, fontWeight: 800, color: theme.ink, letterSpacing: -0.6, margin: '0 0 4px', lineHeight: 1.3 }}>
               {item.titulo || `${item.disciplina}${item.materia ? ` · ${item.materia}` : ''}`}
             </h1>
             <p style={{ fontSize: 14, color: theme.inkSoft, margin: 0 }}>
@@ -229,7 +230,7 @@ export default function JurisprudenciaPage() {
 
         {/* Tabs (só quando não está editando) */}
         {!editing && (
-          <div style={{ display: 'flex', gap: 2, marginBottom: 16, background: 'rgba(15,23,42,.04)', borderRadius: 10, padding: 3, width: 'fit-content' }}>
+          <div style={{ display: 'flex', gap: 2, marginBottom: 16, background: 'rgba(15,23,42,.06)', borderRadius: 10, padding: 3, width: 'fit-content' }}>
             {TABS.map(({ key, label }) => (
               <button
                 key={key}
@@ -305,7 +306,7 @@ export default function JurisprudenciaPage() {
             {item.updated_at !== item.created_at && ` · Atualizado em ${new Date(item.updated_at).toLocaleDateString('pt-BR')}`}
           </p>
         )}
-      </div>
+      </PageContainer>
     </>
   );
 }

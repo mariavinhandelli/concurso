@@ -17,6 +17,8 @@ import type { Subject } from '@/services/subjects.service';
 import type { Topic } from '@/services/topics.service';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { PageContainer } from '@/components/ui/Page';
 import { listEditalPresence, type EditalPresence } from '@/services/targetTopics.service';
 
 const BulkImportModal = dynamic(
@@ -184,7 +186,7 @@ export function TopicsClient({ subjectId, initialSubject }: Props) {
   return (
     <>
       {dialog}
-      <div style={{ ...styles.container, padding: isMobile ? '20px 16px' : '34px 40px' }}>
+      <PageContainer width="default">
 
         {/* Breadcrumb */}
         <nav style={styles.breadcrumb} aria-label="Navegação">
@@ -280,13 +282,12 @@ export function TopicsClient({ subjectId, initialSubject }: Props) {
         {loading ? (
           <TopicsSkeleton />
         ) : topics.length === 0 ? (
-          <div style={styles.emptyState}>
-            <FilePlus size={40} color={theme.inkFaint} strokeWidth={1.2} aria-hidden="true"/>
-            <p style={styles.emptyTitle}>Nenhum tópico ainda</p>
-            <p style={styles.emptyHint}>
-              Dica: use <b>Importar lista</b> para colar o conteúdo programático do edital de uma só vez.
-            </p>
-          </div>
+          <EmptyState
+            icon={<FilePlus size={26} color={theme.teal} strokeWidth={1.8} />}
+            title="Nenhum tópico ainda"
+            body="Cole o conteúdo programático do edital de uma só vez, um tópico por linha."
+            action={{ label: 'Importar lista', onClick: () => setBulkParent(null) }}
+          />
         ) : filteredParents.length === 0 ? (
           <p style={styles.muted}>Nenhum tópico corresponde ao filtro.</p>
         ) : (
@@ -354,7 +355,7 @@ export function TopicsClient({ subjectId, initialSubject }: Props) {
             })}
           </div>
         )}
-      </div>
+      </PageContainer>
 
       {notasTopic && (
         <TopicNotesPopover
@@ -369,7 +370,6 @@ export function TopicsClient({ subjectId, initialSubject }: Props) {
 }
 
 const styles: Record<string, React.CSSProperties> = {
-  container: { maxWidth: 960, margin: '0 auto', fontFamily: theme.font, minWidth: 0 },
 
   breadcrumb: { display: 'flex', alignItems: 'center', gap: 6, marginBottom: 16 },
   breadcrumbLink: {
@@ -408,8 +408,4 @@ const styles: Record<string, React.CSSProperties> = {
 
   error: { color: theme.danger, fontSize: 13, marginBottom: 12 },
   muted: { color: theme.inkFaint, fontSize: 14, marginTop: 8 },
-
-  emptyState: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, padding: '40px 20px', textAlign: 'center' },
-  emptyTitle: { fontSize: 15, color: theme.inkSoft, fontWeight: 600, margin: 0 },
-  emptyHint: { fontSize: 14, color: theme.inkFaint, margin: 0, maxWidth: 360, lineHeight: 1.6 },
 };

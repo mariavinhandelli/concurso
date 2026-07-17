@@ -294,7 +294,7 @@ export default function LoginPage() {
           maxWidth: 460,
           background: B.surface,
           borderRadius: 24,
-          boxShadow: '0 8px 32px rgba(15,23,42,.09), 0 1px 3px rgba(15,23,42,.04)',
+          boxShadow: 'var(--shadow-modal)',
           padding: narrow ? '32px 24px' : '40px 48px',
           margin: 'auto 0',
         }}>
@@ -472,7 +472,7 @@ export default function LoginPage() {
 
 /* ── Sub-components ── */
 
-function FocaliIcon({ size, idPrefix }: { size: number; idPrefix: string }) {
+export function FocaliIcon({ size, idPrefix }: { size: number; idPrefix: string }) {
   const g1 = `${idPrefix}-g1`;
   const g2 = `${idPrefix}-g2`;
   const g3 = `${idPrefix}-g3`;

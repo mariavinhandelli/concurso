@@ -10,6 +10,7 @@ import {
 import { RATING_LABEL, type JurisRating, jurisDaysOverdue, calculateNextJurisReview, fromJurisDbRow, INITIAL_JURIS_STATE } from '@/lib/juris-review';
 import { useUI } from '@/components/layout/UIContext';
 import { theme } from '@/lib/theme';
+import { PageContainer } from '@/components/ui/Page';
 import { Button } from '@/components/ui/Button';
 
 const RATINGS: { key: JurisRating; color: string; bg: string }[] = [
@@ -69,15 +70,15 @@ export default function RevisarPage() {
 
   if (items === null) {
     return (
-      <div style={{ maxWidth: 720, margin: '0 auto', padding: isMobile ? '40px 16px' : '60px 40px', textAlign: 'center', fontFamily: theme.font }}>
+      <PageContainer width="narrow" style={{ padding: isMobile ? '40px 16px' : '72px 40px', textAlign: 'center' }}>
         <p style={{ color: theme.inkFaint, fontSize: 15 }}>Carregando revisões…</p>
-      </div>
+      </PageContainer>
     );
   }
 
   if (done || total === 0) {
     return (
-      <div style={{ maxWidth: 720, margin: '0 auto', padding: isMobile ? '40px 16px' : '80px 40px', textAlign: 'center', fontFamily: theme.font }}>
+      <PageContainer width="narrow" style={{ padding: isMobile ? '40px 16px' : '72px 40px', textAlign: 'center' }}>
         <div style={{ fontSize: 56, marginBottom: 20 }}>🎉</div>
         <h1 style={{ fontSize: 22, fontWeight: 700, color: theme.ink, margin: '10px 0 6px' }}>
           {total === 0 ? 'Nada para revisar hoje!' : 'Sessão concluída!'}
@@ -95,12 +96,12 @@ export default function RevisarPage() {
             Ver todas
           </Button>
         </div>
-      </div>
+      </PageContainer>
     );
   }
 
   return (
-    <div style={{ maxWidth: 720, margin: '0 auto', padding: isMobile ? '20px 16px' : '34px 40px', fontFamily: theme.font }}>
+    <PageContainer width="narrow">
 
       {/* Cabeçalho */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
@@ -197,9 +198,9 @@ export default function RevisarPage() {
           {/* Ações */}
           {!revealed ? (
             <div style={{ textAlign: 'center', marginTop: 20 }}>
-              <button onClick={() => setRevealed(true)} style={styles.revealBtn}>
+              <Button size="lg" onClick={() => setRevealed(true)}>
                 {current.flashcard_frente && current.flashcard_verso ? 'Ver resposta e avaliar' : 'Ver tudo e avaliar'}
-              </button>
+              </Button>
               <p style={{ fontSize: 12, color: theme.inkFaint, marginTop: 12 }}>
                 {current.flashcard_frente && current.flashcard_verso
                   ? 'Tente responder de cabeça antes de revelar'
@@ -255,7 +256,7 @@ export default function RevisarPage() {
           )}
         </>
       )}
-    </div>
+    </PageContainer>
   );
 }
 
@@ -274,16 +275,4 @@ const styles = {
   badge: (bg: string, color: string): React.CSSProperties => ({
     fontSize: 12, fontWeight: 600, color, background: bg, borderRadius: 6, padding: '3px 10px',
   }),
-  revealBtn: {
-    padding: '13px 32px', borderRadius: theme.radiusSm, border: 'none',
-    background: theme.primary, color: theme.onTeal, fontSize: 15, fontWeight: 600, cursor: 'pointer', fontFamily: theme.font,
-  },
-  btnPrimary: {
-    padding: '12px 28px', borderRadius: theme.radiusSm, border: 'none',
-    background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: theme.font,
-  },
-  btnSecondary: {
-    padding: '12px 28px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`,
-    background: theme.card, color: theme.inkSoft, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: theme.font,
-  },
 };

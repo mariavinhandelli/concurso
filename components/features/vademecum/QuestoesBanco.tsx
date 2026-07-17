@@ -17,6 +17,7 @@ import {
   type LeiQuestao, type LeiQuestaoResposta,
 } from '@/services/leiQuestoes.service';
 import { useToast } from '@/components/ui/ToastProvider';
+import { useConfirm } from '@/hooks/useConfirm';
 import { theme } from '@/lib/theme';
 
 type Ordem = 'artigo' | 'incidencia' | 'aleatoria';
@@ -32,6 +33,7 @@ interface Props {
 
 export function QuestoesBanco({ lei, questoes, onNavigate }: Props) {
   const toast = useToast();
+  const { confirm, dialog } = useConfirm();
   const [respostas, setRespostas] = useState<Map<string, LeiQuestaoResposta>>(new Map());
   const [carregado, setCarregado] = useState(false);
   const [ordem, setOrdem] = useState<Ordem>('artigo');
@@ -110,7 +112,13 @@ export function QuestoesBanco({ lei, questoes, onNavigate }: Props) {
   }
 
   async function zerar() {
-    if (!window.confirm(`Zerar seu progresso nas ${respondidas} questões respondidas de ${lei.nomeCurto}?`)) return;
+    const ok = await confirm({
+      title: 'Zerar progresso?',
+      description: `Você perderá as respostas das ${respondidas} questões já respondidas de ${lei.nomeCurto}.`,
+      confirmLabel: 'Zerar',
+      danger: true,
+    });
+    if (!ok) return;
     try {
       await clearRespostasByLei(lei.slug);
       setRespostas(new Map());
@@ -127,6 +135,7 @@ export function QuestoesBanco({ lei, questoes, onNavigate }: Props) {
 
   return (
     <div>
+      {dialog}
       {/* Progresso */}
       <div style={s.progressoRow}>
         <span style={s.progressoTexto}>
@@ -191,14 +200,16 @@ function QuestaoCard({ questao: q, resposta, onResponder, onReabrir, onVerArtigo
 }) {
   const numero = artigoNumeroFromKey(q.artigoKey);
   const respondida = resposta !== undefined;
-  const borda = !respondida ? theme.line : resposta.acertou ? 'rgba(43,155,120,.55)' : 'rgba(226,75,74,.55)';
+  const borda = !respondida ? theme.line : resposta.acertou
+    ? `color-mix(in srgb, ${theme.ok} 55%, transparent)`
+    : `color-mix(in srgb, ${theme.danger} 55%, transparent)`;
 
   return (
     <div style={{ ...s.card, borderColor: borda }}>
       <div style={s.cardHead}>
         <button onClick={onVerArtigo} style={s.artChip} title="Ver o artigo na aba Texto">Art. {numero} →</button>
         {respondida && (
-          <span style={{ ...s.resultado, color: resposta.acertou ? '#2B9B78' : '#C03A39', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+          <span style={{ ...s.resultado, color: resposta.acertou ? theme.okDeep : theme.danger, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
             {resposta.acertou ? <Check size={13} strokeWidth={2.5} /> : <X size={13} strokeWidth={2.5} />}
             {resposta.acertou ? 'acertou' : 'errou'}
           </span>
@@ -215,7 +226,7 @@ function QuestaoCard({ questao: q, resposta, onResponder, onReabrir, onVerArtigo
       ) : (
         <div style={s.feedback}>
           <div style={s.feedbackHead}>
-            <b style={{ color: resposta.acertou ? '#2B9B78' : '#C03A39' }}>
+            <b style={{ color: resposta.acertou ? theme.okDeep : theme.danger }}>
               Gabarito: {q.gabarito ? 'Certo' : 'Errado'}
             </b>
             {q.tipo === 'pegadinha' && <span style={{ ...s.tagPegadinha, display: 'inline-flex', alignItems: 'center', gap: 4 }}><TriangleAlert size={12} strokeWidth={2} />pegadinha</span>}
@@ -244,11 +255,11 @@ const s: Record<string, CSSProperties> = {
   enunciado: { fontSize: 14, color: theme.ink, lineHeight: 1.6, margin: '0 0 12px' },
   botoes: { display: 'flex', gap: 8 },
   ceBtn: { flex: '0 0 auto', minWidth: 96, fontSize: 13, fontWeight: 600, borderRadius: theme.radiusPill, padding: '7px 18px', cursor: 'pointer', fontFamily: 'inherit', borderWidth: 0.5, borderStyle: 'solid' },
-  certoBtn: { color: '#2B9B78', background: 'rgba(43,155,120,.08)', borderColor: 'rgba(43,155,120,.4)' },
-  erradoBtn: { color: '#C03A39', background: 'rgba(226,75,74,.06)', borderColor: 'rgba(226,75,74,.4)' },
+  certoBtn: { color: theme.okDeep, background: theme.okTint, borderColor: `color-mix(in srgb, ${theme.ok} 40%, transparent)` },
+  erradoBtn: { color: theme.danger, background: theme.dangerTint, borderColor: `color-mix(in srgb, ${theme.danger} 40%, transparent)` },
   feedback: { borderTop: `0.5px solid ${theme.line}`, paddingTop: 10 },
   feedbackHead: { display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', fontSize: 13 },
-  tagPegadinha: { fontSize: 11, fontWeight: 700, color: '#C03A39', background: 'rgba(226,75,74,.08)', border: '0.5px solid rgba(226,75,74,.35)', borderRadius: theme.radiusPill, padding: '2px 8px' },
+  tagPegadinha: { fontSize: 11, fontWeight: 700, color: theme.danger, background: theme.dangerTint, border: `0.5px solid color-mix(in srgb, ${theme.danger} 35%, transparent)`, borderRadius: theme.radiusPill, padding: '2px 8px' },
   deNovoBtn: { marginLeft: 'auto', fontSize: 12, color: theme.inkFaint, border: 'none', background: 'transparent', cursor: 'pointer', fontFamily: 'inherit', textDecoration: 'underline', padding: 0 },
   comentario: { fontSize: 13, color: theme.inkSoft, lineHeight: 1.6, margin: '8px 0 0' },
 };

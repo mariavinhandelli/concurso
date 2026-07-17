@@ -38,6 +38,10 @@ export const theme = {
   info: 'var(--info)',    infoBg: 'var(--info-bg)',
   onInfo: 'var(--on-info)',
 
+  gold: 'var(--gold)',
+  silver: 'var(--silver)',
+  bronze: 'var(--bronze)',
+
   /* Marca — gradiente de CTA (1 por tela, no topbar e momentos-chave),
      acento de destaque (links/palavras) e backdrop único de modais. */
   gradientCta: 'var(--gradient-cta)',
@@ -91,10 +95,11 @@ export const pageWide: React.CSSProperties = {
 // Escala de z-index — use sempre estes valores para empilhamento previsível.
 export const zIndex = {
   topbar:   20,   // header sticky
+  drawer:   30,   // sidebar / nav lateral
+  menu:     40,   // dropdowns/popovers (kebab menus, avatar, notificações)
   fab:      50,   // FloatingTimer
   overlay:  60,   // fundos de modal (backdrop)
   modal:    70,   // modais comuns
-  drawer:   30,   // sidebar / nav lateral
   dialog:  200,   // ConfirmDialog (acima de qualquer modal)
   toast:   300,   // ToastProvider (sempre visível)
 } as const;

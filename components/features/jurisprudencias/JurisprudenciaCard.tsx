@@ -92,7 +92,7 @@ export const JurisprudenciaCard = memo(function JurisprudenciaCard({ item, onCli
           aria-label={favorito ? 'Remover dos favoritos' : 'Marcar como favorito'}
           style={{ marginLeft: 'auto', border: 'none', background: 'transparent', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, minWidth: 44, minHeight: 44 }}
         >
-          <Star size={18} fill={favorito ? '#f59e0b' : 'none'} color={favorito ? '#f59e0b' : theme.inkFaint} strokeWidth={1.7} />
+          <Star size={18} fill={favorito ? theme.gold : 'none'} color={favorito ? theme.gold : theme.inkFaint} strokeWidth={1.7} />
         </button>
       </div>
 

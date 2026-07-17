@@ -4,14 +4,15 @@
 'use client';
 
 import { useMemo, type CSSProperties } from 'react';
+import { Target } from 'lucide-react';
 import type { Lei, LeiArtigo, LeiIncidencia } from '@/services/leis.service';
 import { theme } from '@/lib/theme';
 
 const NIVEL: Record<LeiIncidencia, { bg: string; ink: string; border: string; label: string }> = {
-  muito_alta: { bg: 'rgba(226,75,74,.16)',  ink: '#C03A39', border: 'rgba(226,75,74,.45)',  label: 'Muito alta' },
-  alta:       { bg: 'rgba(239,159,39,.16)', ink: '#A96F10', border: 'rgba(239,159,39,.45)', label: 'Alta' },
-  media:      { bg: 'rgba(29,158,117,.13)', ink: '#0F6E56', border: 'rgba(29,158,117,.35)', label: 'Média' },
-  baixa:      { bg: 'transparent',          ink: 'var(--ink-faint, #9A9A93)', border: 'var(--line, #E4E2D8)', label: 'Baixa' },
+  muito_alta: { bg: `color-mix(in srgb, ${theme.danger} 16%, transparent)`, ink: theme.danger,  border: `color-mix(in srgb, ${theme.danger} 45%, transparent)`, label: 'Muito alta' },
+  alta:       { bg: `color-mix(in srgb, ${theme.warn} 16%, transparent)`,   ink: theme.warnDeep, border: `color-mix(in srgb, ${theme.warn} 45%, transparent)`,   label: 'Alta' },
+  media:      { bg: `color-mix(in srgb, ${theme.ok} 13%, transparent)`,     ink: theme.okDeep,   border: `color-mix(in srgb, ${theme.ok} 35%, transparent)`,     label: 'Média' },
+  baixa:      { bg: 'transparent',                                          ink: theme.inkFaint, border: theme.line,                                              label: 'Baixa' },
 };
 
 interface Props {
@@ -57,7 +58,9 @@ export function MapaIncidencia({ lei, onNavigate }: Props) {
 
       {/* Top artigos — os que decidem prova */}
       <div style={s.topBox}>
-        <h3 style={s.topTitle}>🎯 Os {topArtigos.length} artigos que decidem prova</h3>
+        <h3 style={{ ...s.topTitle, display: 'flex', alignItems: 'center', gap: 7 }}>
+          <Target size={16} strokeWidth={2} /> Os {topArtigos.length} artigos que decidem prova
+        </h3>
         <div style={s.topList}>
           {topArtigos.map((a) => (
             <button key={a.key} onClick={() => onNavigate(a.numero)} style={s.topRow}>
@@ -107,7 +110,7 @@ const s: Record<string, CSSProperties> = {
   topTitle: { fontSize: 15, fontWeight: 700, color: theme.ink, margin: '0 0 10px' },
   topList: { display: 'flex', flexDirection: 'column', gap: 4 },
   topRow: { display: 'flex', alignItems: 'baseline', gap: 10, textAlign: 'left', border: 'none', background: 'transparent', cursor: 'pointer', fontFamily: 'inherit', padding: '5px 6px', borderRadius: theme.radiusSm },
-  topNum: { fontSize: 13, fontWeight: 700, color: '#C03A39', flexShrink: 0, minWidth: 74 },
+  topNum: { fontSize: 13, fontWeight: 700, color: theme.danger, flexShrink: 0, minWidth: 74 },
   topNota: { fontSize: 13, color: theme.inkSoft, lineHeight: 1.5 },
   grupo: { marginBottom: 16 },
   grupoTitulo: { fontSize: 12, fontWeight: 700, color: theme.teal, letterSpacing: 0.4, textTransform: 'uppercase', margin: '0 0 8px' },

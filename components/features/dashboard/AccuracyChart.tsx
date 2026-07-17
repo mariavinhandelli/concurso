@@ -19,10 +19,12 @@ export function AccuracyChart() {
   const router = useRouter();
   const [data, setData] = useState<AccuracyPoint[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     getAccuracyBySubject()
       .then(setData)
+      .catch(() => setError(true))
       .finally(() => setLoading(false));
   }, []);
 
@@ -38,6 +40,8 @@ export function AccuracyChart() {
 
       {loading ? (
         <Skeleton height={220} borderRadius={12} />
+      ) : error ? (
+        <p style={{ ...styles.muted, color: theme.danger }}>Não foi possível carregar os dados. Tente novamente.</p>
       ) : data.length === 0 ? (
         <p style={styles.muted}>
           Ainda sem dados. Faça sessões de questões com matéria e acertos registrados.
@@ -65,7 +69,7 @@ export function AccuracyChart() {
       )}
 
       {/* Insight acionável: aponta a matéria mais fraca e leva direto a ela. */}
-      {!loading && pior && (
+      {!loading && !error && pior && (
         pior.pct < LIMIAR_ATENCAO ? (
           <PerfInsight
             tone="warn"

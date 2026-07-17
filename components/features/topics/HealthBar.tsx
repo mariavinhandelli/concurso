@@ -3,16 +3,17 @@
 // construção, rosa-poeira = frágil. Sem dado = barra neutra "não medido".
 'use client';
 
+import { theme } from '@/lib/theme';
 
 interface Props {
   saude?: number; // undefined = nunca medido (sem sessão de questões)
 }
 
-// Faixas de cor por nível de domínio. Tons suaves, alinhados à paleta.
+// Faixas de cor por nível de domínio — mesma régua de theme.perfColor.
 function corPorSaude(s: number): { fill: string; label: string } {
-  if (s >= 70) return { fill: '#9CAF88', label: 'Dominado' };      // verde-sálvia
-  if (s >= 40) return { fill: '#E8C07D', label: 'Em construção' }; // âmbar pastel
-  return { fill: '#D8A0A6', label: 'Frágil' };                     // rosa-poeira
+  if (s >= 70) return { fill: theme.okDeep, label: 'Dominado' };
+  if (s >= 40) return { fill: theme.warnDeep, label: 'Em construção' };
+  return { fill: theme.danger, label: 'Frágil' };
 }
 
 export function HealthBar({ saude }: Props) {
@@ -23,7 +24,7 @@ export function HealthBar({ saude }: Props) {
         <div style={styles.track}>
           <div style={{ ...styles.fill, width: '0%' }} />
         </div>
-        <span style={{ ...styles.pct, color: '#B8B2A8' }}>—</span>
+        <span style={{ ...styles.pct, color: theme.inkFaint }}>—</span>
       </div>
     );
   }
@@ -43,7 +44,7 @@ const styles: Record<string, React.CSSProperties> = {
   wrap: { display: 'flex', alignItems: 'center', gap: 8, minWidth: 90 },
   track: {
     flex: 1, height: 6, borderRadius: 999,
-    background: '#EFEBE3', overflow: 'hidden',
+    background: theme.muted, overflow: 'hidden',
   },
   fill: { height: '100%', borderRadius: 999, transition: 'width 0.3s ease' },
   pct: { fontSize: 12, fontWeight: 600, minWidth: 22, textAlign: 'right' },

@@ -7,7 +7,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Bell } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
-import { theme } from '@/lib/theme';
+import { theme, zIndex } from '@/lib/theme';
 
 type Reminder = {
   id: string;
@@ -146,7 +146,7 @@ const styles: Record<string, React.CSSProperties> = {
   menu: {
     position: 'absolute', top: 52, right: 0, width: 'min(300px, calc(100vw - 32px))', background: theme.card,
     border: `0.5px solid ${theme.line}`, borderRadius: 14, boxShadow: theme.shadowHover,
-    padding: 6, zIndex: 40, fontFamily: theme.font,
+    padding: 6, zIndex: zIndex.menu, fontFamily: theme.font,
   },
   menuHead: { padding: '10px 12px 12px', borderBottom: `0.5px solid ${theme.line}`, marginBottom: 6 },
   menuName: { fontSize: 13, fontWeight: 700, color: theme.ink },

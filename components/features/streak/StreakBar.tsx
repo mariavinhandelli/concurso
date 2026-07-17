@@ -2,19 +2,19 @@
 
 import { memo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Shield } from 'lucide-react';
+import { Shield, Trophy } from 'lucide-react';
 import { getStreak, type StreakInfo } from '@/services/streak.service';
 import { theme } from '@/lib/theme';
 import { useUI } from '@/components/layout/UIContext';
 import { toLocalDateString } from '@/lib/local-date';
 import { Skeleton } from '@/components/ui/Skeleton';
 
-// "falhou" é vermelho translúcido para distinguir claramente de "vazio" (cinza)
+// "falhou" é uma sobreposição translúcida de --ink para distinguir de "vazio" (cinza) nos dois modos
 const COR = {
-  meta: '#22c55e',
-  estudou: '#6366F1',
-  escudo: '#F59E0B',   // folga perdoada pelo escudo semanal
-  falhou: 'rgba(0, 0, 0, 0.22)',
+  meta: theme.ok,
+  estudou: theme.clay,
+  escudo: theme.warn,   // folga perdoada pelo escudo semanal
+  falhou: `color-mix(in srgb, ${theme.ink} 22%, transparent)`,
   vazio: theme.muted,
 };
 
@@ -106,7 +106,9 @@ export const StreakBar = memo(function StreakBar() {
           )}
         </span>
         {novoRecorde ? (
-          <span style={styles.recordDestaque}>🏆 {info.current === info.longest ? 'recorde pessoal!' : `recorde: ${info.longest} dias`}</span>
+          <span style={{ ...styles.recordDestaque, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+            <Trophy size={13} strokeWidth={2} /> {info.current === info.longest ? 'recorde pessoal!' : `recorde: ${info.longest} dias`}
+          </span>
         ) : (
           <span style={styles.record}>recorde: <b style={{ color: theme.ink }}>{info.longest} {info.longest === 1 ? 'dia' : 'dias'}</b></span>
         )}
@@ -144,7 +146,7 @@ const styles: Record<string, React.CSSProperties> = {
   phrase: { fontSize: 15, color: theme.inkSoft },
   hi: { color: theme.teal, fontWeight: 700 },
   warn: { color: theme.clay, fontWeight: 500 },
-  shield: { color: '#B45309', fontWeight: 500 },
+  shield: { color: theme.warnDeep, fontWeight: 500 },
   record: { fontSize: 13, color: theme.inkSoft },
   recordDestaque: { fontSize: 13, color: theme.warn, fontWeight: 700 },
   bar: { display: 'flex', gap: 3, width: '100%', minWidth: 0 },

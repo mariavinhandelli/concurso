@@ -4,9 +4,9 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Check, X, ClipboardList } from 'lucide-react';
 import { listSimuladoSessions, type SimuladoSession } from '@/services/jurisInteracoes.service';
-import { useUI } from '@/components/layout/UIContext';
 import { theme } from '@/lib/theme';
 import { Button } from '@/components/ui/Button';
+import { EmptyState } from '@/components/ui/EmptyState';
 import { PageContainer, PageHeader } from '@/components/ui/Page';
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
@@ -135,7 +135,6 @@ function SimuladoAnalytics({ sessions }: { sessions: SimuladoSession[] }) {
 
 export default function SimuladosPage() {
   const router = useRouter();
-  const { isMobile } = useUI();
   const [sessions, setSessions] = useState<SimuladoSession[] | null>(null);
   const [expanded, setExpanded] = useState<string | null>(null);
 
@@ -169,15 +168,13 @@ export default function SimuladosPage() {
           ))}
         </div>
       ) : sessions.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '60px 20px', background: theme.card, borderRadius: theme.radius, border: `0.5px solid ${theme.line}` }}>
-          <ClipboardList size={38} color={theme.inkFaint} strokeWidth={1.3} style={{ marginBottom: 12 }} />
-          <p style={{ fontSize: 15, fontWeight: 600, color: theme.ink, margin: '0 0 8px' }}>Nenhum simulado ainda</p>
-          <p style={{ fontSize: 13, color: theme.inkFaint, margin: '0 0 20px' }}>
-            Complete um simulado na lista de jurisprudências para ver o histórico aqui.
-          </p>
-          <Button onClick={() => router.push('/jurisprudencias/lista')}>
-            Ir para a lista
-          </Button>
+        <div style={{ background: theme.card, borderRadius: theme.radius, border: `0.5px solid ${theme.line}` }}>
+          <EmptyState
+            icon={<ClipboardList size={26} color={theme.teal} strokeWidth={1.8} />}
+            title="Nenhum simulado ainda"
+            body="Complete um simulado na lista de jurisprudências para ver o histórico aqui."
+            action={{ label: 'Ir para a lista', onClick: () => router.push('/jurisprudencias/lista') }}
+          />
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>

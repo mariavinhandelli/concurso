@@ -14,6 +14,7 @@ import { theme } from '@/lib/theme';
 import { Select } from '@/components/ui/Select';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
+import { Badge } from '@/components/ui/Badge';
 
 type SortKey = 'recente' | 'alfa' | 'progresso';
 
@@ -237,7 +238,7 @@ export function MinhasTab({ isMobile, onError }: Props) {
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={styles.myCardTop}>
                         <span style={styles.myCardName}>{s.name}</span>
-                        {s.is_own && <span style={styles.ownTag}>própria</span>}
+                        {s.is_own && <Badge variant="neutral">própria</Badge>}
                       </div>
                       <div style={styles.myTrack}>
                         <div style={{ ...styles.myFill, width: `${s.progress}%`, background: s.color ?? theme.teal }} />
@@ -253,7 +254,7 @@ export function MinhasTab({ isMobile, onError }: Props) {
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={styles.myCardTop}>
                         <span style={styles.myCardName}>{s.name}</span>
-                        {s.is_own && <span style={styles.ownTag}>própria</span>}
+                        {s.is_own && <Badge variant="neutral">própria</Badge>}
                       </div>
                     </div>
                   </div>
@@ -310,7 +311,6 @@ const styles: Record<string, React.CSSProperties> = {
   colorBar: { width: 10, height: 36, borderRadius: 3, flexShrink: 0 },
   myCardTop: { display: 'flex', alignItems: 'center', gap: 8 },
   myCardName: { fontSize: 15, color: theme.ink, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
-  ownTag: { fontSize: 11, padding: '2px 7px', borderRadius: theme.radiusPill, background: 'rgba(15,23,42,.05)', color: theme.inkFaint, flexShrink: 0 },
   myTrack: { height: 6, background: theme.muted, borderRadius: theme.radiusPill, overflow: 'hidden', marginTop: 8 },
   myFill: { height: '100%', borderRadius: theme.radiusPill, transition: 'width 0.4s cubic-bezier(.2,.7,.3,1)' },
   myMeta: { fontSize: 12, color: theme.inkSoft, marginTop: 4 },

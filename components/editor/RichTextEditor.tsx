@@ -14,7 +14,7 @@ import Image from '@tiptap/extension-image';
 import { Color, TextStyle } from '@tiptap/extension-text-style';
 import { createClient } from '@/lib/supabase/client';
 import { signNotebookImages, unsignNotebookImages, signedNotebookUrl } from '@/lib/notebook-images';
-import { theme } from '@/lib/theme';
+import { theme, zIndex } from '@/lib/theme';
 import { useToast } from '@/components/ui/ToastProvider';
 
 interface Props {
@@ -322,7 +322,7 @@ const styles: Record<string, React.CSSProperties> = {
   colorUnderline: { position: 'absolute', bottom: 5, left: 9, right: 9, height: 3, borderRadius: 2, background: 'linear-gradient(90deg,#f70000,#00cf61,#185dcc)' },
   divider: { width: 1, height: 22, background: theme.line, margin: '0 2px' },
   paletteWrap: { position: 'relative' },
-  palette: { position: 'absolute', top: 40, right: 0, zIndex: 10, display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 6, padding: 10, background: theme.card, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, borderRadius: theme.radiusSm, boxShadow: theme.shadowHover, width: 200, maxWidth: 'calc(100vw - 48px)' },
+  palette: { position: 'absolute', top: 40, right: 0, zIndex: zIndex.menu, display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 6, padding: 10, background: theme.card, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, borderRadius: theme.radiusSm, boxShadow: theme.shadowHover, width: 200, maxWidth: 'calc(100vw - 48px)' },
   swatch: { width: 22, height: 22, borderRadius: 6, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, cursor: 'pointer', padding: 0 },
   clearSwatch: { width: 22, height: 22, borderRadius: 6, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.card, cursor: 'pointer', color: theme.inkFaint, fontSize: 12, padding: 0 },
   editorArea: { padding: 16, color: theme.ink, fontSize: 15, lineHeight: 1.7, overflowX: 'hidden' },

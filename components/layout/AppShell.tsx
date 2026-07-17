@@ -10,7 +10,7 @@ import { useUI } from './UIContext';
 import { CommandPalette } from '@/components/features/command/CommandPalette';
 import { SocialStatsSync } from '@/components/features/social/SocialStatsSync';
 import { track, EV } from '@/lib/analytics';
-import { theme } from '@/lib/theme';
+import { theme, zIndex } from '@/lib/theme';
 
 export function AppShell({ children }: { children: ReactNode }) {
   const { collapsed, isMobile, isTablet, mobileOpen, setMobileOpen } = useUI();
@@ -34,7 +34,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         style={{
           position: 'fixed',
           inset: 0,
-          zIndex: 29,
+          zIndex: zIndex.drawer - 1,
           background: 'var(--backdrop)',
           backdropFilter: mobileOpen && isMobile ? 'blur(2px)' : 'none',
           opacity: mobileOpen && isMobile ? 1 : 0,

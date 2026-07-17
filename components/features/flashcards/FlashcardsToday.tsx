@@ -19,9 +19,10 @@ const SKEL: React.CSSProperties = {
 export function FlashcardsToday() {
   const router = useRouter();
   const [counts, setCounts] = useState<{ pending: number; news: number } | null>(null);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
-    countDailyQueue().then(setCounts).catch(() => setCounts({ pending: 0, news: 0 }));
+    countDailyQueue().then(setCounts).catch(() => { setCounts({ pending: 0, news: 0 }); setError(true); });
   }, []);
 
   const total = counts ? counts.pending + counts.news : 0;
@@ -42,6 +43,8 @@ export function FlashcardsToday() {
           </div>
           <div style={{ ...SKEL, width: '100%', height: 44, borderRadius: theme.radiusSm, marginTop: 'auto' }} />
         </div>
+      ) : error ? (
+        <p style={{ color: theme.danger, fontSize: 14 }}>Não foi possível carregar. Tente novamente.</p>
       ) : total === 0 ? (
         <div style={styles.allDone}>
           <span style={styles.checkDot}><Check size={12} strokeWidth={3} /></span> Nenhum card pendente hoje

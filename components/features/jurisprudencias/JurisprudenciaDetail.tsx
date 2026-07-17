@@ -2,6 +2,7 @@
 
 import { FileText, Star, TriangleAlert, LayoutGrid, Lightbulb, Target, Tag } from 'lucide-react';
 import { theme } from '@/lib/theme';
+import { Badge } from '@/components/ui/Badge';
 import { EstrelasBadge } from './EstrelasBadge';
 import { JurisSection } from './JurisSection';
 import type { Jurisprudencia } from '@/services/jurisprudencias.service';
@@ -326,10 +327,7 @@ export function JurisprudenciaDetail({ item, isMobile }: Props) {
               }}>
                 <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
                   <span style={{ fontSize: 13, fontWeight: 700, color: theme.ink }}>{rel.processo}</span>
-                  <span style={{
-                    fontSize: 11, fontWeight: 600, color: theme.tealDeep, background: theme.tealBg,
-                    borderRadius: theme.radiusPill, padding: '1px 8px', textTransform: 'capitalize',
-                  }}>{rel.relacao}</span>
+                  <Badge variant="brand" style={{ textTransform: 'capitalize' }}>{rel.relacao}</Badge>
                 </div>
                 <p style={{ fontSize: 13, color: theme.inkSoft, lineHeight: 1.55, margin: 0 }}>{rel.motivo}</p>
               </div>
@@ -342,10 +340,7 @@ export function JurisprudenciaDetail({ item, isMobile }: Props) {
       {item.palavras_chave.length > 0 && (
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7, paddingTop: 4 }}>
           {item.palavras_chave.map((k) => (
-            <span key={k} style={{
-              fontSize: 12, fontWeight: 500, color: theme.tealDeep,
-              background: theme.tealBg, borderRadius: theme.radiusPill, padding: '4px 12px',
-            }}>{k}</span>
+            <Badge key={k} variant="brand">{k}</Badge>
           ))}
         </div>
       )}

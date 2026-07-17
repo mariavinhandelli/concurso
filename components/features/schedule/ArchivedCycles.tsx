@@ -4,6 +4,7 @@ import { useState, useCallback } from 'react';
 import { listArchivedCycles, deleteCycle } from '@/services/cycleEngine.service';
 import { useConfirm } from '@/hooks/useConfirm';
 import { theme } from '@/lib/theme';
+import { Skeleton } from '@/components/ui/Skeleton';
 
 interface Props {
   onAbrirArquivado: (id: string) => void;
@@ -62,7 +63,7 @@ export function ArchivedCycles({ onAbrirArquivado, onReativar }: Props) {
         {show && (
           <div style={styles.list}>
             {loading ? (
-              <p style={styles.muted}>Carregando…</p>
+              <Skeleton height={40} borderRadius={theme.radiusSm} />
             ) : items.length === 0 ? (
               <p style={styles.empty}>Nenhum ciclo arquivado ainda.</p>
             ) : (

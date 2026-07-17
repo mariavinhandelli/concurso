@@ -3,8 +3,10 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import { Lock, ArrowRight } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { Input } from '@/components/ui/Input';
+import { FocaliIcon } from '@/app/login/page';
 
 export default function ResetPasswordPage() {
   const router = useRouter();
@@ -12,6 +14,7 @@ export default function ResetPasswordPage() {
   const [confirm, setConfirm] = useState('');
   const [feedback, setFeedback] = useState<{ kind: 'error' | 'ok'; text: string } | null>(null);
   const [loading, setLoading] = useState(false);
+  const [btnHover, setBtnHover] = useState(false);
   const [sessaoValida, setSessaoValida] = useState<boolean | null>(null);
   const redirectTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -66,97 +69,109 @@ export default function ResetPasswordPage() {
 
   return (
     <main style={styles.page}>
-      <form
-        style={styles.card}
-        onSubmit={(event) => {
-          event.preventDefault();
-          void handleReset();
-        }}
-      >
-        <div style={styles.brand}>
-          <svg width="18" height="18" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <linearGradient id="rp-g1" x1="118" y1="96" x2="319" y2="245" gradientUnits="userSpaceOnUse">
-                <stop offset="0" stopColor="#22C55E"/><stop offset="1" stopColor="#A7F5D0"/>
-              </linearGradient>
-              <linearGradient id="rp-g2" x1="118" y1="242" x2="287" y2="303" gradientUnits="userSpaceOnUse">
-                <stop offset="0" stopColor="#A7F5D0"/><stop offset="1" stopColor="#93C5FD"/>
-              </linearGradient>
-              <linearGradient id="rp-g3" x1="175" y1="290" x2="312" y2="421" gradientUnits="userSpaceOnUse">
-                <stop offset="0" stopColor="#6366F1"/><stop offset="1" stopColor="#4338CA"/>
-              </linearGradient>
-            </defs>
-            <path d="M118 151C118 120.624 142.624 96 173 96H331C359.719 96 383 119.281 383 148C383 176.719 359.719 200 331 200H222C193.281 200 170 223.281 170 252V252H118V151Z" fill="url(#rp-g1)"/>
-            <path d="M170 252C170 223.281 193.281 200 222 200H292C320.719 200 344 223.281 344 252C344 280.719 320.719 304 292 304H170V252Z" fill="url(#rp-g2)"/>
-            <path d="M175 304H227V361C227 391.376 202.376 416 172 416C142.177 416 118 391.823 118 362C118 330 143 304 175 304Z" fill="url(#rp-g3)"/>
-          </svg>
-          <span style={styles.brandText}>focali</span>
-        </div>
+      <div style={styles.card}>
+        <form
+          style={{ width: '100%' }}
+          onSubmit={(event) => {
+            event.preventDefault();
+            void handleReset();
+          }}
+        >
+          <div style={styles.brand}>
+            <FocaliIcon size={44} idPrefix="rp" />
+          </div>
 
-        <h1 style={styles.title}>Redefinir senha</h1>
-        <p style={styles.subtitle}>Escolha uma nova senha para sua conta.</p>
+          <h1 style={styles.title}>Redefinir senha</h1>
+          <p style={styles.subtitle}>Escolha uma nova senha para sua conta.</p>
 
-        {sessaoValida === false ? (
-          <p
-            style={{
-              ...styles.feedback,
-              color: 'var(--danger)',
-              background: 'var(--danger-bg)',
-              marginTop: 8,
-            }}
-          >
-            Link inválido ou expirado. Volte ao login e peça um novo e-mail de redefinição.
-          </p>
-        ) : (
-          <>
-            <label htmlFor="new-password" style={styles.label}>Nova senha</label>
-            <Input
-              id="new-password"
-              name="new-password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="mínimo 6 caracteres"
-              autoComplete="new-password"
-              required
-              minLength={6}
-              style={styles.input}
-            />
+          {sessaoValida === false ? (
+            <p
+              style={{
+                ...styles.feedback,
+                color: 'var(--danger)',
+                background: 'var(--danger-bg)',
+                marginTop: 8,
+              }}
+            >
+              Link inválido ou expirado. Volte ao login e peça um novo e-mail de redefinição.
+            </p>
+          ) : (
+            <>
+              <div style={{ marginBottom: 14 }}>
+                <label htmlFor="new-password" style={styles.label}>Nova senha</label>
+                <Input
+                  id="new-password"
+                  name="new-password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="mínimo 6 caracteres"
+                  autoComplete="new-password"
+                  required
+                  minLength={6}
+                  icon={<Lock size={16} strokeWidth={1.8} />}
+                  style={styles.input}
+                />
+              </div>
 
-            <label htmlFor="confirm-password" style={styles.label}>Confirmar nova senha</label>
-            <Input
-              id="confirm-password"
-              name="confirm-password"
-              type="password"
-              value={confirm}
-              onChange={(e) => setConfirm(e.target.value)}
-              placeholder="repita a senha"
-              autoComplete="new-password"
-              required
-              minLength={6}
-              style={styles.input}
-            />
+              <div style={{ marginBottom: 16 }}>
+                <label htmlFor="confirm-password" style={styles.label}>Confirmar nova senha</label>
+                <Input
+                  id="confirm-password"
+                  name="confirm-password"
+                  type="password"
+                  value={confirm}
+                  onChange={(e) => setConfirm(e.target.value)}
+                  placeholder="repita a senha"
+                  autoComplete="new-password"
+                  required
+                  minLength={6}
+                  icon={<Lock size={16} strokeWidth={1.8} />}
+                  style={styles.input}
+                />
+              </div>
 
-            <button type="submit" style={styles.primary} disabled={loading}>
-              {loading ? 'Aguarde…' : 'Redefinir senha'}
-            </button>
-          </>
-        )}
+              <button
+                type="submit"
+                disabled={loading}
+                onMouseEnter={() => setBtnHover(true)}
+                onMouseLeave={() => setBtnHover(false)}
+                style={{
+                  width: '100%', padding: '14px 0', borderRadius: 12, border: 'none',
+                  background: loading
+                    ? 'var(--muted)'
+                    : btnHover ? 'var(--gradient-cta-hover)' : 'var(--gradient-cta)',
+                  color: loading ? 'var(--ink-faint)' : 'var(--on-cta)', fontSize: 15, fontWeight: 600,
+                  cursor: loading ? 'wait' : 'pointer', fontFamily: 'inherit',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                  transition: 'filter 150ms cubic-bezier(.4,0,.2,1)',
+                }}
+              >
+                {loading ? 'Aguarde…' : (
+                  <>
+                    Redefinir senha
+                    <ArrowRight size={16} strokeWidth={2.2} />
+                  </>
+                )}
+              </button>
+            </>
+          )}
 
-        {feedback && (
-          <p
-            role={feedback.kind === 'error' ? 'alert' : 'status'}
-            aria-live="polite"
-            style={{
-              ...styles.feedback,
-              color: feedback.kind === 'error' ? 'var(--danger)' : 'var(--ok)',
-              background: feedback.kind === 'error' ? 'var(--danger-bg)' : 'var(--ok-bg)',
-            }}
-          >
-            {feedback.text}
-          </p>
-        )}
-      </form>
+          {feedback && (
+            <p
+              role={feedback.kind === 'error' ? 'alert' : 'status'}
+              aria-live="polite"
+              style={{
+                ...styles.feedback,
+                color: feedback.kind === 'error' ? 'var(--danger)' : 'var(--ok)',
+                background: feedback.kind === 'error' ? 'var(--danger-bg)' : 'var(--ok-bg)',
+              }}
+            >
+              {feedback.text}
+            </p>
+          )}
+        </form>
+      </div>
     </main>
   );
 }
@@ -172,80 +187,51 @@ const styles: Record<string, React.CSSProperties> = {
     fontFamily: 'var(--font-poppins), Inter, Arial, sans-serif',
   },
   card: {
+    width: '100%',
+    maxWidth: 460,
     background: 'var(--card)',
-    borderRadius: 20,
-    padding: 36,
-    width: 'min(400px, 90vw)',
-    border: '1px solid var(--line)',
-    boxShadow: 'var(--shadow)',
+    borderRadius: 24,
+    boxShadow: 'var(--shadow-modal)',
+    padding: '40px 48px',
   },
   brand: {
     display: 'flex',
+    justifyContent: 'center',
     alignItems: 'center',
-    gap: 8,
-    marginBottom: 24,
-  },
-  logoDot: {
-    width: 10,
-    height: 10,
-    borderRadius: '50%',
-    background: 'var(--teal)',
-  },
-  brandText: {
-    fontSize: 17,
-    fontWeight: 700,
-    color: 'var(--ink)',
-    letterSpacing: -0.4,
-    fontFamily: 'var(--font-poppins), Inter, Arial, sans-serif',
+    marginBottom: 20,
   },
   title: {
-    margin: 0,
-    fontSize: 22,
+    margin: '0 0 6px',
+    fontSize: 20,
+    fontWeight: 700,
     color: 'var(--ink)',
-    fontWeight: 600,
+    textAlign: 'center',
+    letterSpacing: -0.5,
   },
   subtitle: {
-    margin: '4px 0 24px',
-    fontSize: 14,
-    color: 'var(--ink-faint)',
+    margin: '0 0 28px',
+    fontSize: 13,
+    color: 'var(--ink-soft)',
+    textAlign: 'center',
   },
   label: {
     display: 'block',
     fontSize: 13,
+    fontWeight: 500,
     color: 'var(--ink-soft)',
     marginBottom: 6,
-    marginTop: 12,
   },
   input: {
-    width: '100%',
-    boxSizing: 'border-box',
-    padding: 12,
+    padding: '13px 14px 13px 42px',
     borderRadius: 12,
-    border: '1px solid var(--line-strong)',
-    background: 'var(--bg)',
-    fontSize: 14,
-    color: 'var(--ink)',
-    fontFamily: 'inherit',
-    outline: 'none',
-  },
-  primary: {
-    width: '100%',
-    padding: '13px 0',
-    borderRadius: 12,
-    border: 'none',
-    background: 'var(--gradient-cta)',
-    color: 'var(--on-cta)',
-    fontSize: 14,
-    fontWeight: 600,
-    cursor: 'pointer',
-    marginTop: 24,
-    fontFamily: 'inherit',
+    border: '1.5px solid var(--line-strong)',
   },
   feedback: {
     fontSize: 13,
     marginTop: 16,
     textAlign: 'center',
-    padding: '10px 12px',
+    padding: '10px 14px',
     borderRadius: 10,
+    lineHeight: 1.5,
   },
 };

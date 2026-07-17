@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import { useRouter } from 'next/navigation';
 import { ChevronDown } from 'lucide-react';
 import { theme } from '@/lib/theme';
+import { PageContainer, PageHeader } from '@/components/ui/Page';
 import { usePersistedState } from '@/hooks/usePersistedState';
 import { useUI } from '@/components/layout/UIContext';
 import { useUser } from '@/components/layout/UserContext';
@@ -98,7 +99,7 @@ function HomeContent() {
   });
 
   return (
-    <div style={{ ...styles.wrap, padding: isMobile ? '20px 16px' : '34px 40px' }}>
+    <PageContainer width="default">
       {/* Auto-start isolado — não bloqueia o restante da página */}
       <Suspense fallback={null}><TimerAutoStart /></Suspense>
 
@@ -106,20 +107,15 @@ function HomeContent() {
       <OnboardingGate />
       <MarcoEditalCelebracao />
 
-      <div style={styles.topbar}>
-        <div style={{ minWidth: 0 }}>
-          <h1 style={{ ...styles.h1, fontSize: isMobile ? 24 : 28 }}>{nome ? `Olá, ${nome}` : 'Olá'}</h1>
-          <p style={styles.sub}>{hoje.charAt(0).toUpperCase() + hoje.slice(1)}</p>
-        </div>
-        <div style={{
-          ...styles.countdownSlot,
-          flexShrink: isMobile ? 1 : 0,
-          flexBasis: isMobile ? '100%' : 'auto',
-          minWidth: 0,
-        }}>
-          <ExamCountdown />
-        </div>
-      </div>
+      <PageHeader
+        title={nome ? `Olá, ${nome}` : 'Olá'}
+        subtitle={hoje.charAt(0).toUpperCase() + hoje.slice(1)}
+        actions={(
+          <div style={{ flexShrink: isMobile ? 1 : 0, flexBasis: isMobile ? '100%' : 'auto', minWidth: 0 }}>
+            <ExamCountdown />
+          </div>
+        )}
+      />
 
       {/* Decisor único: no máximo UM card de coaching no topo (Rodada 3) */}
       <CoachSlot decision={decision} />
@@ -176,7 +172,7 @@ function HomeContent() {
           )}
         </>
       )}
-    </div>
+    </PageContainer>
   );
 }
 
@@ -185,11 +181,6 @@ export default function Home() {
 }
 
 const styles: Record<string, React.CSSProperties> = {
-  wrap: { maxWidth: 960, margin: '0 auto', padding: '34px 40px', fontFamily: theme.font, minWidth: 0 },
-  topbar: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, gap: 16, flexWrap: 'wrap' },
-  h1: { fontSize: 28, fontWeight: 800, color: theme.ink, letterSpacing: -0.6, margin: 0 },
-  sub: { fontSize: 14, color: theme.inkSoft, margin: '4px 0 0', fontWeight: 500 },
-  countdownSlot: { flexShrink: 0, minWidth: 0 },
   verTudo: { marginTop: 16, width: '100%', padding: '11px 16px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.inkSoft, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: theme.font },
 };
 

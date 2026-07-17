@@ -14,7 +14,7 @@ import { getGoalsSummary, type GoalsSummary } from '@/services/goals.service';
 import { SESSION_SAVED_EVENT, type SessionSavedDetail } from '@/lib/session-celebration';
 import { toLocalDateString } from '@/lib/local-date';
 import { track, EV } from '@/lib/analytics';
-import { theme } from '@/lib/theme';
+import { theme, zIndex } from '@/lib/theme';
 
 const MIN_DIA = 30; // piso do streak (services/streak.service)
 
@@ -166,7 +166,7 @@ export function SessionCelebration() {
 const s: Record<string, React.CSSProperties> = {
   overlay: {
     position: 'fixed', inset: 0, background: 'var(--backdrop)', display: 'grid',
-    placeItems: 'center', zIndex: 80, padding: 20, fontFamily: theme.font,
+    placeItems: 'center', zIndex: zIndex.dialog, padding: 20, fontFamily: theme.font,
     transition: 'opacity .18s ease',
   },
   card: {

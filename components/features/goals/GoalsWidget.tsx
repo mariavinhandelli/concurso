@@ -9,6 +9,7 @@ import {
 import { theme } from '@/lib/theme';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
+import { Skeleton } from '@/components/ui/Skeleton';
 
 export function GoalsWidget() {
   const [summary, setSummary] = useState<GoalsSummary | null>(null);
@@ -45,7 +46,17 @@ export function GoalsWidget() {
   }
 
   if (!summary) {
-    return <p style={styles.muted}>Carregando metas…</p>;
+    if (error) return <p style={styles.error}>{error}</p>;
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        {[1, 2].map((i) => (
+          <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <Skeleton width="40%" height={13} />
+            <Skeleton height={6} borderRadius={theme.radiusPill} />
+          </div>
+        ))}
+      </div>
+    );
   }
 
   const noTarget = summary.targetMinutesPerDay === 0;

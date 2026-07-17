@@ -174,7 +174,7 @@ export function CoachSemanal({ variant = 'banner' }: { variant?: 'banner' | 'row
 }
 
 const s: Record<string, CSSProperties> = {
-  banner: { display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', background: 'rgba(127,119,221,.10)', border: '0.5px solid rgba(127,119,221,.35)', borderRadius: theme.radius, marginBottom: 16 },
+  banner: { display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', background: `color-mix(in srgb, ${theme.clay} 10%, transparent)`, border: `0.5px solid color-mix(in srgb, ${theme.clay} 35%, transparent)`, borderRadius: theme.radius, marginBottom: 16 },
   bannerMsg: { fontSize: 14, color: theme.ink },
   bannerActions: { display: 'flex', alignItems: 'center', gap: 6 },
   bannerBtn: { padding: '8px 14px', borderRadius: theme.radiusSm, border: 'none', background: theme.clay, color: theme.onClay, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
@@ -183,10 +183,10 @@ const s: Record<string, CSSProperties> = {
   rowDivider: { height: '0.5px', background: theme.line, margin: '16px 0' },
   row: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, width: '100%', padding: '4px 2px', background: 'transparent', border: 'none', cursor: 'pointer', fontFamily: theme.font, textAlign: 'left' },
   rowMsg: { fontSize: 14, color: theme.inkSoft, fontWeight: 500, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
-  rowCta: { fontSize: 13, fontWeight: 600, color: '#7F77DD', flexShrink: 0 },
+  rowCta: { fontSize: 13, fontWeight: 600, color: theme.clay, flexShrink: 0 },
 
   head: { display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, padding: '20px 22px 12px' },
-  eyebrow: { fontSize: 11, fontWeight: 700, color: '#7F77DD', letterSpacing: 0.6, textTransform: 'uppercase' },
+  eyebrow: { fontSize: 11, fontWeight: 700, color: theme.clay, letterSpacing: 0.6, textTransform: 'uppercase' },
   h2: { fontSize: 19, fontWeight: 700, color: theme.ink, margin: '4px 0 0' },
 
   body: { overflowY: 'auto', padding: '4px 22px 8px' },
