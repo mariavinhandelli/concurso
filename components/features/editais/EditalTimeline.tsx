@@ -7,18 +7,16 @@
 import { useState, type CSSProperties } from 'react';
 import { ChevronDown, ExternalLink } from 'lucide-react';
 import { theme } from '@/lib/theme';
+import { formatDateBR } from '@/lib/targets';
 import type { EditalUpdate, EditalUpdateTipo } from '@/services/editaisCatalog.service';
 
 const UPDATE_TIPO: Record<EditalUpdateTipo, { label: string; fg: string; bg: string }> = {
   noticia: { label: 'Notícia', fg: theme.teal, bg: theme.tealBg },
   retificacao: { label: 'Retificação', fg: theme.danger, bg: theme.dangerBg },
-  aviso: { label: 'Aviso', fg: theme.warn, bg: theme.warnBg },
+  // warnDeep (não warn cru): warn sobre warnBg reprova AA — fórmula do Badge.
+  aviso: { label: 'Aviso', fg: theme.warnDeep, bg: theme.warnBg },
   resultado: { label: 'Resultado', fg: theme.inkSoft, bg: theme.muted },
 };
-
-function formatDateBR(iso: string): string {
-  return new Date(iso + 'T00:00:00').toLocaleDateString('pt-BR');
-}
 
 function hasDiff(u: EditalUpdate): boolean {
   return Boolean(u.changes && ((u.changes.campos?.length ?? 0) > 0 || (u.changes.conteudo?.length ?? 0) > 0));
@@ -46,8 +44,9 @@ export function EditalTimeline({ updates }: { updates: EditalUpdate[] }) {
             <div
               role={expandable ? 'button' : undefined}
               tabIndex={expandable ? 0 : undefined}
+              aria-expanded={expandable ? open : undefined}
               onClick={expandable ? () => toggle(u.id) : undefined}
-              onKeyDown={expandable ? (e) => { if (e.key === 'Enter' || e.key === ' ') toggle(u.id); } : undefined}
+              onKeyDown={expandable ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(u.id); } } : undefined}
               style={{ ...s.row, cursor: expandable ? 'pointer' : 'default' }}
             >
               <span style={{ ...s.badge, color: meta.fg, background: meta.bg }}>{meta.label}</span>

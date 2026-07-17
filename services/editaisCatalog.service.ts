@@ -4,8 +4,12 @@
 'use client';
 
 import { createClient } from '@/lib/supabase/client';
+import { getCachedUser } from '@/lib/supabase/authCache';
 
 export type EditalSituacao = 'vigente' | 'em_expectativa' | 'encerrado';
+
+// Ordem canônica de exibição: vigente primeiro, encerrado por último.
+export const SITUACAO_ORDER: Record<EditalSituacao, number> = { vigente: 0, em_expectativa: 1, encerrado: 2 };
 
 export interface CatalogEdital {
   id: string;
@@ -70,7 +74,7 @@ function countOf(rel: EmbeddedCount): number {
 
 export async function listCatalogEditais(): Promise<CatalogEdital[]> {
   const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getCachedUser();
 
   const [editaisRes, minhasRes] = await Promise.all([
     supabase
@@ -87,8 +91,6 @@ export async function listCatalogEditais(): Promise<CatalogEdital[]> {
   if (minhasRes.error) throw new Error('Erro ao verificar editais ativados: ' + minhasRes.error.message);
 
   const ativados = new Set((minhasRes.data ?? []).map((r) => r.slug));
-
-  const SITUACAO_ORDER: Record<EditalSituacao, number> = { vigente: 0, em_expectativa: 1, encerrado: 2 };
 
   return ((editaisRes.data ?? []) as EditalRow[])
     .map((e) => {
@@ -309,7 +311,7 @@ export async function getOrgaoBySlug(slug: string): Promise<OrgaoCatalog | null>
 
 export async function isFollowingEdital(editalId: string): Promise<boolean> {
   const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getCachedUser();
   if (!user) return false;
   const { data, error } = await supabase
     .from('edital_follows')
@@ -323,7 +325,7 @@ export async function isFollowingEdital(editalId: string): Promise<boolean> {
 
 export async function followEdital(editalId: string): Promise<void> {
   const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getCachedUser();
   if (!user) throw new Error('Sessão expirada — entre de novo.');
   const { error } = await supabase
     .from('edital_follows')
@@ -333,7 +335,7 @@ export async function followEdital(editalId: string): Promise<void> {
 
 export async function unfollowEdital(editalId: string): Promise<void> {
   const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getCachedUser();
   if (!user) throw new Error('Sessão expirada — entre de novo.');
   const { error } = await supabase
     .from('edital_follows')
@@ -383,7 +385,7 @@ export interface CatalogEditalDetail extends CatalogEdital {
 
 export async function getCatalogEditalBySlug(slug: string): Promise<CatalogEditalDetail | null> {
   const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getCachedUser();
 
   const [editalRes, targetRes] = await Promise.all([
     supabase
@@ -588,7 +590,9 @@ export async function compareEditais(editalAtualId: string, editalAnteriorId: st
 
     if (status === 'adicionada') totalAdded += 1;
     if (status === 'removida') totalRemoved += 1;
-    if (status === 'mantida' && (a!.weight !== b!.weight || topicsAdded.length > 0 || topicsRemoved.length > 0)) totalChanged += 1;
+    // Mudança de nº de questões também conta como alteração — sem isso uma
+    // disciplina que só mudou de 10 para 12 questões sumiria do diff.
+    if (status === 'mantida' && (a!.weight !== b!.weight || a!.numQuestions !== b!.numQuestions || topicsAdded.length > 0 || topicsRemoved.length > 0)) totalChanged += 1;
 
     subjects.push({
       name,

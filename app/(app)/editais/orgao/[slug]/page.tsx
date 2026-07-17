@@ -40,7 +40,7 @@ export default function OrgaoPage() {
     queryKey: ['orgao', slug],
     queryFn: () => getOrgaoBySlug(slug),
   });
-  const { data: editais } = useQuery<CatalogEdital[]>({
+  const { data: editais, isError: editaisError } = useQuery<CatalogEdital[]>({
     queryKey: ['catalog-editais'],
     queryFn: listCatalogEditais,
     enabled: Boolean(orgao),
@@ -117,7 +117,10 @@ export default function OrgaoPage() {
         </span>
       </h2>
 
-      {!editais ? (
+      {editaisError ? (
+        // Erro ≠ vazio: sem isto o skeleton ficaria girando para sempre.
+        <p style={s.mutedText}>Não foi possível carregar os editais. Recarregue a página para tentar de novo.</p>
+      ) : !editais ? (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           {[1, 2].map((i) => <Skeleton key={i} height={84} borderRadius={theme.radiusSm} />)}
         </div>
@@ -126,7 +129,7 @@ export default function OrgaoPage() {
       ) : (
         <div style={s.list}>
           {doOrgao.map((e) => (
-            <EditalCard key={e.id} edital={e} hideOrgao onOpen={() => router.push(`/editais/${e.slug}`)} />
+            <EditalCard key={e.id} edital={e} hideOrgao />
           ))}
         </div>
       )}

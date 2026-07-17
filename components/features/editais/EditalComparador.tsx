@@ -36,6 +36,7 @@ const STATUS_BADGE: Record<EditalComparisonSubject['status'], { label: string; v
 function subjectChanged(sub: EditalComparisonSubject): boolean {
   return sub.status !== 'mantida'
     || sub.weightAtual !== sub.weightAnterior
+    || sub.numQuestionsAtual !== sub.numQuestionsAnterior
     || sub.topicsAdded.length > 0
     || sub.topicsRemoved.length > 0;
 }
@@ -98,6 +99,12 @@ export function EditalComparador({ editalAtualId, editalAtualSlug, options }: Pr
 
       {comparison && !isLoading && (
         <>
+          {/* Direção do diff explícita: "adicionada" = está neste edital e não
+              no comparado — sem isto, comparar com outro concurso lê como
+              mudança temporal, o que engana. */}
+          <p style={s.directionNote}>
+            Mudanças <b>deste edital</b> em relação a “{options.find((o) => o.id === otherId)?.label ?? 'outro edital'}”:
+          </p>
           <div style={s.summaryRow}>
             <Badge variant="ok">{comparison.totalAdded} disciplina{comparison.totalAdded === 1 ? '' : 's'} adicionada{comparison.totalAdded === 1 ? '' : 's'}</Badge>
             <Badge variant="danger">{comparison.totalRemoved} removida{comparison.totalRemoved === 1 ? '' : 's'}</Badge>
@@ -111,6 +118,7 @@ export function EditalComparador({ editalAtualId, editalAtualSlug, options }: Pr
               {comparison.subjects.filter(subjectChanged).map((sub) => {
                 const badge = STATUS_BADGE[sub.status];
                 const pesoMudou = sub.status === 'mantida' && sub.weightAtual !== sub.weightAnterior;
+                const questoesMudou = sub.status === 'mantida' && sub.numQuestionsAtual !== sub.numQuestionsAnterior;
                 return (
                   <div key={sub.name} style={s.subjectRow}>
                     <div style={s.subjectHead}>
@@ -119,6 +127,11 @@ export function EditalComparador({ editalAtualId, editalAtualSlug, options }: Pr
                       {pesoMudou && (
                         <span style={s.pesoChange}>
                           peso {sub.weightAnterior ?? '—'} → <b style={{ color: theme.teal }}>{sub.weightAtual ?? '—'}</b>
+                        </span>
+                      )}
+                      {questoesMudou && (
+                        <span style={s.pesoChange}>
+                          questões {sub.numQuestionsAnterior ?? '—'} → <b style={{ color: theme.teal }}>{sub.numQuestionsAtual ?? '—'}</b>
                         </span>
                       )}
                     </div>
@@ -149,7 +162,8 @@ const s: Record<string, CSSProperties> = {
   selectorLabel: { fontSize: 13, fontWeight: 600, color: theme.inkSoft, whiteSpace: 'nowrap' },
   hint: { fontSize: 13, color: theme.inkFaint, lineHeight: 1.55, margin: '10px 0 0' },
 
-  summaryRow: { display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 14 },
+  directionNote: { fontSize: 12, color: theme.inkFaint, margin: '12px 0 0', lineHeight: 1.5 },
+  summaryRow: { display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 8 },
   subjectList: { display: 'flex', flexDirection: 'column', gap: 8, marginTop: 12 },
   subjectRow: { padding: '10px 12px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.bg, minWidth: 0 },
   subjectHead: { display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', minWidth: 0 },

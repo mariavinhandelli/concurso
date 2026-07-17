@@ -33,6 +33,12 @@ export function buildTargetSlug(
     .join('-') || 'concurso';
 }
 
+// Data ISO (yyyy-mm-dd) em pt-BR. O T00:00:00 fixa meia-noite LOCAL — sem ele
+// o parse é UTC e a data volta um dia no fuso de Brasília.
+export function formatDateBR(iso: string): string {
+  return new Date(iso + 'T00:00:00').toLocaleDateString('pt-BR');
+}
+
 export function formatTargetLabel(t: TargetLabelable): string {
   return [t.boardName ?? 'Banca a definir', t.orgao, t.cargo, t.ano_alvo]
     .filter(Boolean)

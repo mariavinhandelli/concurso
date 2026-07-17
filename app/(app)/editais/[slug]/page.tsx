@@ -7,9 +7,10 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
+import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Bell, BellRing, Download } from 'lucide-react';
+import { Bell, BellRing, Check, Download, FileDown } from 'lucide-react';
 import {
   activateCatalogEdital, followEdital, getCatalogEditalBySlug, getCatalogEditalSubjects,
   isFollowingEdital, listCatalogEditais, listConcursoStats, listEdicoes, listEditalUpdates,
@@ -19,7 +20,7 @@ import {
 } from '@/services/editaisCatalog.service';
 import { getTargetTopicProgress } from '@/services/targetTopics.service';
 import { tryGetUser } from '@/lib/supabase/requireUser';
-import { daysUntilExam, countdownInfo } from '@/lib/targets';
+import { daysUntilExam, countdownInfo, formatDateBR } from '@/lib/targets';
 import { pushRecent } from '@/lib/recents';
 import { track, EV } from '@/lib/analytics';
 import { theme } from '@/lib/theme';
@@ -32,10 +33,6 @@ import { EditalTimeline } from '@/components/features/editais/EditalTimeline';
 import { SITUACAO_LABEL, SituacaoTag } from '@/components/features/editais/EditalCard';
 import { EditalComparador, type ComparadorOption } from '@/components/features/editais/EditalComparador';
 import { ConcursoStatsTable, PastPapersList } from '@/components/features/editais/EditalHistorico';
-
-function formatDateBR(iso: string): string {
-  return new Date(iso + 'T00:00:00').toLocaleDateString('pt-BR');
-}
 
 // Peso 1–5 da disciplina em pontos preenchidos (mesma leitura do antigo modal).
 function WeightDots({ weight }: { weight: number }) {
@@ -66,7 +63,7 @@ export default function EditalDetailPage() {
   const editalId = edital?.id;
   const concursoKey = edital?.concursoKey ?? null;
 
-  const { data: subjects } = useQuery<CatalogEditalSubject[]>({
+  const { data: subjects, isError: subjectsError } = useQuery<CatalogEditalSubject[]>({
     queryKey: ['catalog-edital-subjects', editalId],
     queryFn: () => getCatalogEditalSubjects(editalId!),
     enabled: Boolean(editalId),
@@ -264,15 +261,19 @@ export default function EditalDetailPage() {
           </h1>
           <div style={s.tagRow}>
             <SituacaoTag situacao={edital.situacao} />
-            {edital.isActivated && <span style={s.activatedTag}>Ativado ✓</span>}
+            {edital.isActivated && (
+              <span style={{ ...s.activatedTag, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                Ativado <Check size={12} strokeWidth={2.5} />
+              </span>
+            )}
             {edital.orgaoSlug && (
-              <button
-                onClick={() => router.push(`/editais/orgao/${edital.orgaoSlug}`)}
+              <Link
+                href={`/editais/orgao/${edital.orgaoSlug}`}
                 style={s.orgaoChip}
                 title="Ver todos os cargos deste órgão"
               >
                 {edital.orgao} →
-              </button>
+              </Link>
             )}
             {edital.areaName && <span style={s.metaChip}>{edital.areaName}</span>}
             {edital.uf && <span style={s.metaChip}>{edital.uf}</span>}
@@ -326,7 +327,7 @@ export default function EditalDetailPage() {
             title="Receba uma notificação quando sair retificação, notícia ou resultado deste concurso"
           >
             {following ? (
-              <><BellRing size={15} strokeWidth={2} style={{ marginRight: 6 }} />Acompanhando ✓</>
+              <><BellRing size={15} strokeWidth={2} style={{ marginRight: 6 }} />Acompanhando<Check size={14} strokeWidth={2.5} style={{ marginLeft: 5 }} /></>
             ) : (
               <><Bell size={15} strokeWidth={2} style={{ marginRight: 6 }} />Acompanhar novidades</>
             )}
@@ -391,7 +392,10 @@ export default function EditalDetailPage() {
               {totalQuestions > 0 && ` · ${totalQuestions} questões`}
             </span>
           </div>
-          {!subjects ? (
+          {subjectsError ? (
+            // Erro ≠ vazio: sem isto o skeleton ficaria girando para sempre.
+            <p style={s.mutedText}>Não foi possível carregar as disciplinas. Recarregue a página para tentar de novo.</p>
+          ) : !subjects ? (
             <div style={{ marginTop: 12 }}><Skeleton height={120} borderRadius={theme.radiusSm} /></div>
           ) : subjects.length === 0 ? (
             <p style={s.mutedText}>
@@ -463,7 +467,9 @@ export default function EditalDetailPage() {
                     {e.vagas != null ? ` · ${e.vagas.toLocaleString('pt-BR')} vagas` : ''}
                   </span>
                   {e.editalUrl && (
-                    <a href={e.editalUrl} target="_blank" rel="noopener noreferrer" style={s.paperLink}>Edital ↓</a>
+                    <a href={e.editalUrl} target="_blank" rel="noopener noreferrer" style={s.paperLink}>
+                      <FileDown size={13} strokeWidth={2} style={{ marginRight: 4, verticalAlign: -2 }} />Edital
+                    </a>
                   )}
                 </div>
               ))}
@@ -476,16 +482,16 @@ export default function EditalDetailPage() {
           <section style={s.card}>
             <div style={s.cardHead}>
               <h2 style={s.cardTitle}>Outros cargos de {edital.orgao}</h2>
-              <button onClick={() => router.push(`/editais/orgao/${edital.orgaoSlug}`)} style={s.orgaoPageLink}>
+              <Link href={`/editais/orgao/${edital.orgaoSlug}`} style={s.orgaoPageLink}>
                 Ver órgão →
-              </button>
+              </Link>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 12 }}>
               {outrosCargos.map((e) => (
-                <button key={e.id} onClick={() => router.push(`/editais/${e.slug}`)} style={s.cargoRow}>
+                <Link key={e.id} href={`/editais/${e.slug}`} style={s.cargoRow}>
                   <span style={s.edicaoLabel}>{e.cargo || e.orgao}</span>
                   <SituacaoTag situacao={e.situacao} />
-                </button>
+                </Link>
               ))}
             </div>
           </section>
@@ -522,9 +528,9 @@ const s: Record<string, CSSProperties> = {
   tagRow: { display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' },
   activatedTag: { fontSize: 11, fontWeight: 700, color: theme.teal, background: theme.tealBg, borderRadius: theme.radiusXs, padding: '3px 9px', flexShrink: 0 },
   metaChip: { fontSize: 12, fontWeight: 500, color: theme.inkSoft, background: theme.bg, border: `0.5px solid ${theme.line}`, borderRadius: theme.radiusXs, padding: '3px 8px' },
-  orgaoChip: { fontSize: 12, fontWeight: 600, color: theme.teal, background: theme.tealBg, border: `0.5px solid ${theme.teal}`, borderRadius: theme.radiusXs, padding: '3px 8px', cursor: 'pointer', fontFamily: 'inherit' },
-  orgaoPageLink: { background: 'transparent', border: 'none', color: theme.teal, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', padding: 0, flexShrink: 0 },
-  cargoRow: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, padding: '10px 12px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.bg, minWidth: 0, cursor: 'pointer', fontFamily: 'inherit', width: '100%' },
+  orgaoChip: { fontSize: 12, fontWeight: 600, color: theme.teal, background: theme.tealBg, border: `0.5px solid ${theme.teal}`, borderRadius: theme.radiusXs, padding: '3px 8px', cursor: 'pointer', fontFamily: 'inherit', textDecoration: 'none' },
+  orgaoPageLink: { display: 'inline-flex', alignItems: 'center', color: theme.teal, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', padding: '4px 0', flexShrink: 0, textDecoration: 'none' },
+  cargoRow: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, padding: '10px 12px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.bg, minWidth: 0, cursor: 'pointer', fontFamily: 'inherit', width: '100%', minHeight: 44, textDecoration: 'none' },
 
   countdownBox: { display: 'flex', flexDirection: 'column', alignItems: 'flex-end', flexShrink: 0 },
   countdownBig: { fontSize: 34, fontWeight: 700, lineHeight: 1, fontVariantNumeric: 'tabular-nums' },

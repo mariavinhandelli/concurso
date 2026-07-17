@@ -13,9 +13,10 @@ import { type TargetExam } from '@/services/targetExams.service';
 import { type CatalogEditalInfo, type EditalUpdate, type EditalUpdateTipo } from '@/services/editaisCatalog.service';
 import { normalizeDisciplina } from '@/lib/juris-disciplinas';
 import { leiDisciplinaForSubject } from '@/services/leis.service';
-import { type SubjectTree, daysUntilExam, countdownInfo } from '@/lib/targets';
+import { type SubjectTree, daysUntilExam, countdownInfo, formatDateBR } from '@/lib/targets';
 import { theme } from '@/lib/theme';
 import { Button } from '@/components/ui/Button';
+import { SITUACAO_LABEL } from '@/components/features/editais/EditalCard';
 
 const PREP_KEY_PREFIX = 'focali_prep_';
 
@@ -39,18 +40,8 @@ const PREP_ITEMS: { key: string; label: string; auto?: boolean; catalog?: boolea
   { key: 'lei-seca', label: 'Revisar a lei seca relacionada' },
 ];
 
-const SITUACAO_LABEL: Record<CatalogEditalInfo['situacao'], string> = {
-  vigente: 'Edital vigente',
-  em_expectativa: 'Em expectativa',
-  encerrado: 'Encerrado',
-};
-
 function formatBRL(v: number): string {
   return v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-}
-
-function formatDateBR(iso: string): string {
-  return new Date(iso + 'T00:00:00').toLocaleDateString('pt-BR');
 }
 
 const UPDATE_TIPO: Record<EditalUpdateTipo, { label: string; color: 'teal' | 'warn' | 'muted' | 'danger' }> = {
@@ -272,7 +263,7 @@ export function HubOverviewTab({
               </span>
               <span style={{ ...s.countdownLabel, color: cdColor }}>{cd.label}</span>
               <span style={s.countdownDate}>
-                {new Date(target.exam_date + 'T00:00:00').toLocaleDateString('pt-BR')}
+                {formatDateBR(target.exam_date!)}
               </span>
             </button>
           ) : (

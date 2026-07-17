@@ -19,14 +19,15 @@ export function ConcursoStatsTable({ stats }: { stats: ConcursoStat[] }) {
   return (
     <div className="table-scroll" style={{ marginTop: 12 }}>
       <table style={s.table}>
+        <caption style={s.srOnly}>Histórico do concurso por ano: vagas, inscritos, nota de corte e nomeados</caption>
         <thead>
           <tr>
-            <th style={s.th}>Ano</th>
-            <th style={s.th}>Vagas</th>
-            <th style={s.th}>Inscritos</th>
-            <th style={s.th}>Nota de corte</th>
-            <th style={s.th}>Nomeados</th>
-            <th style={s.th} aria-label="Fonte" />
+            <th scope="col" style={s.th}>Ano</th>
+            <th scope="col" style={s.th}>Vagas</th>
+            <th scope="col" style={s.th}>Inscritos</th>
+            <th scope="col" style={s.th}>Nota de corte</th>
+            <th scope="col" style={s.th}>Nomeados</th>
+            <th scope="col" style={s.th} aria-label="Fonte" />
           </tr>
         </thead>
         <tbody>
@@ -94,11 +95,11 @@ export function PastPapersList({ papers, situacao, editalSlug }: PastPapersProps
           </span>
           <div style={{ display: 'flex', gap: 10, flexShrink: 0 }}>
             <a href={p.provaUrl} target="_blank" rel="noopener noreferrer" onClick={() => handleOpen(p)} style={s.paperLink}>
-              Prova ↓
+              <FileDown size={13} strokeWidth={2} style={{ marginRight: 4, verticalAlign: -2 }} />Prova
             </a>
             {p.gabaritoUrl && (
               <a href={p.gabaritoUrl} target="_blank" rel="noopener noreferrer" style={s.paperLink}>
-                Gabarito ↓
+                <FileDown size={13} strokeWidth={2} style={{ marginRight: 4, verticalAlign: -2 }} />Gabarito
               </a>
             )}
           </div>
@@ -122,4 +123,6 @@ const s: Record<string, CSSProperties> = {
   paperRow: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, padding: '10px 12px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.bg, minWidth: 0 },
   paperLabel: { fontSize: 13, fontWeight: 600, color: theme.ink, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
   paperLink: { fontSize: 13, fontWeight: 600, color: theme.teal, textDecoration: 'none', whiteSpace: 'nowrap' },
+  // Caption só para leitores de tela (padrão visually-hidden).
+  srOnly: { position: 'absolute', width: 1, height: 1, padding: 0, margin: -1, overflow: 'hidden', clip: 'rect(0 0 0 0)', whiteSpace: 'nowrap', border: 0 },
 };
