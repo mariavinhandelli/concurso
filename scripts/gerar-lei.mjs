@@ -189,6 +189,105 @@ const LEIS = {
     descricao: 'Disciplina a ação civil pública de responsabilidade por danos ao meio ambiente, consumidor e outros interesses difusos/coletivos. Texto compilado e atualizado (fonte: Planalto).',
     fonteUrl: 'https://www.planalto.gov.br/ccivil_03/leis/l7347compilada.htm',
   },
+  'lei-11343': {
+    slug: 'lei-11343',
+    nome: 'Lei nº 11.343, de 23 de agosto de 2006 — Lei de Drogas',
+    nomeCurto: 'Lei 11.343/06 (Drogas)',
+    ano: 2006,
+    disciplina: 'Legislação Penal Especial',
+    descricao: 'Sistema Nacional de Políticas Públicas sobre Drogas (Sisnad); tipos penais e procedimento. Texto atualizado (fonte: Planalto).',
+    fonteUrl: 'https://www.planalto.gov.br/ccivil_03/_ato2004-2006/2006/lei/l11343.htm',
+  },
+  'lei-10826': {
+    slug: 'lei-10826',
+    nome: 'Lei nº 10.826, de 22 de dezembro de 2003 — Estatuto do Desarmamento',
+    nomeCurto: 'Lei 10.826/03 (Desarmamento)',
+    ano: 2003,
+    disciplina: 'Legislação Penal Especial',
+    descricao: 'Registro, posse e comercialização de armas de fogo e munição; Sinarm; crimes. Texto atualizado (fonte: Planalto).',
+    fonteUrl: 'https://www.planalto.gov.br/ccivil_03/leis/2003/l10.826.htm',
+  },
+  'lei-11340': {
+    slug: 'lei-11340',
+    nome: 'Lei nº 11.340, de 7 de agosto de 2006 — Lei Maria da Penha',
+    nomeCurto: 'Lei 11.340/06 (Maria da Penha)',
+    ano: 2006,
+    disciplina: 'Legislação Penal Especial',
+    descricao: 'Coíbe a violência doméstica e familiar contra a mulher; medidas protetivas de urgência. Texto atualizado (fonte: Planalto).',
+    fonteUrl: 'https://www.planalto.gov.br/ccivil_03/_ato2004-2006/2006/lei/l11340.htm',
+  },
+  'lei-8072': {
+    slug: 'lei-8072',
+    nome: 'Lei nº 8.072, de 25 de julho de 1990 — Crimes Hediondos',
+    nomeCurto: 'Lei 8.072/90 (Hediondos)',
+    ano: 1990,
+    disciplina: 'Legislação Penal Especial',
+    descricao: 'Dispõe sobre os crimes hediondos e seu regime jurídico diferenciado. Texto atualizado (fonte: Planalto).',
+    fonteUrl: 'https://www.planalto.gov.br/ccivil_03/leis/l8072.htm',
+  },
+  'lei-9455': {
+    slug: 'lei-9455',
+    nome: 'Lei nº 9.455, de 7 de abril de 1997 — Lei de Tortura',
+    nomeCurto: 'Lei 9.455/97 (Tortura)',
+    ano: 1997,
+    disciplina: 'Legislação Penal Especial',
+    descricao: 'Define os crimes de tortura. Texto atualizado (fonte: Planalto).',
+    fonteUrl: 'https://www.planalto.gov.br/ccivil_03/leis/l9455.htm',
+  },
+  'lei-12850': {
+    slug: 'lei-12850',
+    nome: 'Lei nº 12.850, de 2 de agosto de 2013 — Organizações Criminosas',
+    nomeCurto: 'Lei 12.850/13 (ORCRIM)',
+    ano: 2013,
+    disciplina: 'Legislação Penal Especial',
+    descricao: 'Define organização criminosa e disciplina a investigação, meios de obtenção de prova (colaboração premiada, infiltração). Texto atualizado (fonte: Planalto).',
+    fonteUrl: 'https://www.planalto.gov.br/ccivil_03/_ato2011-2014/2013/lei/l12850.htm',
+  },
+  'lei-13869': {
+    slug: 'lei-13869',
+    nome: 'Lei nº 13.869, de 5 de setembro de 2019 — Lei de Abuso de Autoridade',
+    nomeCurto: 'Lei 13.869/19 (Abuso)',
+    ano: 2019,
+    disciplina: 'Legislação Penal Especial',
+    descricao: 'Define os crimes de abuso de autoridade cometidos por agente público. Texto atualizado (fonte: Planalto).',
+    fonteUrl: 'https://www.planalto.gov.br/ccivil_03/_ato2019-2022/2019/lei/l13869.htm',
+  },
+  'lei-9613': {
+    slug: 'lei-9613',
+    nome: 'Lei nº 9.613, de 3 de março de 1998 — Lavagem de Dinheiro',
+    nomeCurto: 'Lei 9.613/98 (Lavagem)',
+    ano: 1998,
+    disciplina: 'Legislação Penal Especial',
+    descricao: 'Crimes de "lavagem" ou ocultação de bens, direitos e valores; COAF. Texto compilado e atualizado (fonte: Planalto).',
+    fonteUrl: 'https://www.planalto.gov.br/ccivil_03/leis/l9613compilado.htm',
+  },
+  'lei-7210': {
+    slug: 'lei-7210',
+    nome: 'Lei nº 7.210, de 11 de julho de 1984 — Lei de Execução Penal (LEP)',
+    nomeCurto: 'LEP (Lei 7.210/84)',
+    ano: 1984,
+    disciplina: 'Legislação Penal Especial',
+    descricao: 'Disciplina a execução da pena e da medida de segurança; progressão de regime, benefícios, disciplina. Texto compilado e atualizado (fonte: Planalto).',
+    fonteUrl: 'https://www.planalto.gov.br/ccivil_03/leis/l7210compilado.htm',
+  },
+  'lei-9099': {
+    slug: 'lei-9099',
+    nome: 'Lei nº 9.099, de 26 de setembro de 1995 — Juizados Especiais Cíveis e Criminais',
+    nomeCurto: 'Lei 9.099/95 (JECrim)',
+    ano: 1995,
+    disciplina: 'Legislação Penal Especial',
+    descricao: 'Juizados Especiais Cíveis e Criminais; infrações de menor potencial ofensivo, transação penal e suspensão condicional do processo. Texto atualizado (fonte: Planalto).',
+    fonteUrl: 'https://www.planalto.gov.br/ccivil_03/leis/l9099.htm',
+  },
+  'lei-9296': {
+    slug: 'lei-9296',
+    nome: 'Lei nº 9.296, de 24 de julho de 1996 — Interceptação Telefônica',
+    nomeCurto: 'Lei 9.296/96 (Interceptação)',
+    ano: 1996,
+    disciplina: 'Legislação Penal Especial',
+    descricao: 'Regulamenta a interceptação de comunicações telefônicas e de sistemas de informática/telemática para prova em investigação criminal. Texto atualizado (fonte: Planalto).',
+    fonteUrl: 'https://www.planalto.gov.br/ccivil_03/leis/l9296.htm',
+  },
 };
 
 // ─── Entrada ─────────────────────────────────────────────────────────────────
@@ -271,7 +370,11 @@ function parseLei(html) {
   //    Em compilados mais recentes, o Planalto às vezes marca o trecho revogado
   //    com <span style="text-decoration:line-through"> em vez de <strike>.
   let body = html.replace(/<(strike|del)\b[\s\S]*?<\/\1>/gi, ' ');
-  body = body.replace(/<span\b[^>]*style\s*=\s*"[^"]*text-decoration\s*:\s*line-through[^"]*"[^>]*>[\s\S]*?<\/span>/gi, ' ');
+  // Quote-agnóstico: o Planalto ora usa aspas duplas, ora simples no style, e o
+  // valor de font-family pode conter aspas duplas embutidas ("Arial") — casar só
+  // por text-decoration:line-through no tag de abertura (que nunca contém '>'),
+  // até o próximo </span> (spans riscados do Planalto não são aninhados).
+  body = body.replace(/<span\b[^>]*text-decoration\s*:\s*line-through[^>]*>[\s\S]*?<\/span>/gi, ' ');
 
   // 2. Divide em parágrafos pela abertura de <p ...> ou <h1..h6 ...> —
   //    o CPM/CPPM usam <h1>/<h2> para PARTE/LIVRO/TÍTULO.
@@ -426,18 +529,50 @@ function ehRubrica(texto) {
 
 // ─── Main ────────────────────────────────────────────────────────────────────
 
+// A maioria das páginas do Planalto é windows-1252, mas algumas (ex.: Lei Maria
+// da Penha, l11340) vêm em UTF-16 — decodificar como 1252 intercala um byte
+// nulo em cada caractere e o parser não acha nenhum "Art.". Detecta pelo BOM
+// (FF FE / FE FF) ou pela presença massiva de bytes nulos no início do buffer.
+function decodeHtml(buf) {
+  const bytes = new Uint8Array(buf);
+  if (bytes[0] === 0xff && bytes[1] === 0xfe) return new TextDecoder('utf-16le').decode(buf);
+  if (bytes[0] === 0xfe && bytes[1] === 0xff) return new TextDecoder('utf-16be').decode(buf);
+  const amostra = bytes.subarray(0, 2000);
+  let nulos = 0;
+  for (const b of amostra) if (b === 0) nulos++;
+  if (nulos > amostra.length / 4) {
+    // UTF-16 sem BOM: bytes pares nulos → LE, ímpares nulos → BE.
+    let nulosPares = 0;
+    for (let i = 1; i < amostra.length; i += 2) if (amostra[i] === 0) nulosPares++;
+    return new TextDecoder(nulosPares > amostra.length / 8 ? 'utf-16le' : 'utf-16be').decode(buf);
+  }
+  return normalizarC1(new TextDecoder('windows-1252').decode(buf));
+}
+
+// Algumas páginas do Planalto (ex.: l8072, l9455, l9613, l7210) trazem a
+// pontuação "inteligente" do intervalo 0x91-0x97 do Windows-1252 num
+// mapeamento que sobra como caractere de controle C1 (U+0091-U+0097) em vez do
+// sinal gráfico — o pior é o U+0096 ("–") que fica invisível e some do rótulo
+// do inciso ("II – texto" vira "II texto"). Mapeia cada um para o sinal correto.
+const C1_PUNTUACAO = {
+  0x91: "‘", 0x92: "’", 0x93: "“", 0x94: "”",
+  0x95: "•", 0x96: "–", 0x97: "—", 0x85: "…",
+};
+function normalizarC1(s) {
+  return s.replace(/[-]/g, (c) => C1_PUNTUACAO[c.charCodeAt(0)] ?? " ");
+}
+
 async function main() {
   let html;
   if (localFile) {
-    const buf = readFileSync(resolve(localFile));
-    html = new TextDecoder('windows-1252').decode(buf);
+    html = decodeHtml(readFileSync(resolve(localFile)));
   } else {
     console.log(`Baixando ${meta.fonteUrl} …`);
     const res = await fetch(meta.fonteUrl, {
       headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' },
     });
     if (!res.ok) throw new Error(`HTTP ${res.status} ao baixar o compilado.`);
-    html = new TextDecoder('windows-1252').decode(await res.arrayBuffer());
+    html = decodeHtml(await res.arrayBuffer());
   }
 
   // Documentos mais antigos (ex.: CLT) às vezes grafam o sufixo de letra COLADO

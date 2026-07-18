@@ -1,0 +1,210 @@
+[
+ {
+  "id": "l9613-q1",
+  "artigoKey": "lei-9613:1",
+  "enunciado": "A lavagem de dinheiro, na forma do art. 1º da Lei 9.613/98, somente se configura quando os bens, direitos ou valores são provenientes de um dos crimes antecedentes taxativamente listados nos incisos I a VIII do caput.",
+  "gabarito": false,
+  "comentario": "Os incisos I a VIII do art. 1º foram revogados pela Lei 12.683/2012. Hoje o caput fala em \"infração penal\" de forma genérica: qualquer infração penal (crime ou contravenção) pode ser antecedente da lavagem — não há mais rol taxativo.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l9613-q2",
+  "artigoKey": "lei-9613:1",
+  "enunciado": "A tentativa do crime de lavagem de dinheiro é punida nos termos do parágrafo único do art. 14 do Código Penal.",
+  "gabarito": true,
+  "comentario": "Literal do art. 1º, § 3º.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l9613-q3",
+  "artigoKey": "lei-9613:1",
+  "enunciado": "A pena do crime de lavagem de dinheiro é aumentada de um a dois terços se o crime for cometido de forma reiterada, por intermédio de organização criminosa ou por meio da utilização de ativo virtual.",
+  "gabarito": true,
+  "comentario": "Literal do art. 1º, § 4º.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l9613-q4",
+  "artigoKey": "lei-9613:2",
+  "enunciado": "O processo e julgamento dos crimes de lavagem de dinheiro independem do processo e julgamento das infrações penais antecedentes, ainda que estas tenham sido praticadas em outro país.",
+  "gabarito": true,
+  "comentario": "Literal do art. 2º, II — autonomia do processo de lavagem em relação ao crime antecedente.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l9613-q5",
+  "artigoKey": "lei-9613:2",
+  "enunciado": "Para que seja recebida a denúncia pelo crime de lavagem de dinheiro, é indispensável que o autor da infração penal antecedente seja identificado e que sua punibilidade não esteja extinta.",
+  "gabarito": false,
+  "comentario": "Art. 2º, § 1º: os fatos desta Lei são puníveis ainda que desconhecido ou isento de pena o autor, ou extinta a punibilidade da infração penal antecedente — basta a denúncia vir instruída com indícios suficientes da existência dessa infração.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l9613-q6",
+  "artigoKey": "lei-9613:2",
+  "enunciado": "Todo crime de lavagem de dinheiro é, por força do art. 2º da Lei 9.613/98, de competência da Justiça Federal.",
+  "gabarito": false,
+  "comentario": "Art. 2º, III: a competência é da Justiça Federal apenas quando praticados contra o sistema financeiro/ordem econômico-financeira ou interesses da União (alínea a), ou quando a infração antecedente for de competência federal (alínea b). Fora dessas hipóteses, pode ser da Justiça Estadual.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l9613-q7",
+  "artigoKey": "lei-9613:4",
+  "enunciado": "As medidas assecuratórias de bens, direitos ou valores previstas na Lei 9.613/98 podem ser decretadas pelo juiz de ofício, a requerimento do Ministério Público ou mediante representação do delegado de polícia, ouvido o Ministério Público no prazo de 24 horas.",
+  "gabarito": true,
+  "comentario": "Literal do art. 4º, caput.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l9613-q8",
+  "artigoKey": "lei-9613:4",
+  "enunciado": "O pedido de liberação de bens sujeitos a medida assecuratória pode ser conhecido pelo juiz independentemente do comparecimento pessoal do acusado, bastando a manifestação de seu advogado.",
+  "gabarito": false,
+  "comentario": "Art. 4º, § 3º: nenhum pedido de liberação será conhecido sem o comparecimento pessoal do acusado ou de interposta pessoa.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l9613-q9",
+  "artigoKey": "lei-9613:4-A",
+  "enunciado": "Nos processos regidos pela Lei 9.613/98, o leilão de bens objeto de alienação antecipada não poderá ocorrer por valor inferior a 75% (setenta e cinco por cento) da avaliação judicial.",
+  "gabarito": true,
+  "comentario": "Literal do art. 4º-A, § 3º.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l9613-q10",
+  "artigoKey": "lei-9613:5",
+  "enunciado": "Quando as circunstâncias o aconselharem, o juiz, ouvido o Ministério Público, nomeará pessoa física ou jurídica qualificada para a administração dos bens, direitos ou valores sujeitos a medidas assecuratórias, mediante termo de compromisso.",
+  "gabarito": true,
+  "comentario": "Literal do art. 5º.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l9613-q11",
+  "artigoKey": "lei-9613:6",
+  "enunciado": "A remuneração da pessoa responsável pela administração dos bens sujeitos a medidas assecuratórias é custeada pelos cofres públicos, e não pelo produto dos próprios bens administrados.",
+  "gabarito": false,
+  "comentario": "Art. 6º, I: a remuneração é fixada pelo juiz e satisfeita com o produto dos bens objeto da administração.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l9613-q12",
+  "artigoKey": "lei-9613:7",
+  "enunciado": "São efeitos da condenação pelo crime de lavagem de dinheiro, além dos previstos no Código Penal, a interdição do exercício de cargo ou função pública e de cargos de direção ou gerência nas pessoas jurídicas referidas no art. 9º, pelo dobro do tempo da pena privativa de liberdade aplicada.",
+  "gabarito": true,
+  "comentario": "Literal do art. 7º, II.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l9613-q13",
+  "artigoKey": "lei-9613:7",
+  "enunciado": "A perda dos bens relacionados à prática de lavagem de dinheiro, como efeito da condenação, atinge inclusive aqueles utilizados para prestar fiança, sem qualquer ressalva em favor de terceiros.",
+  "gabarito": false,
+  "comentario": "Art. 7º, I: a perda dos bens em favor da União (ou do Estado/DF) alcança inclusive os utilizados para prestar fiança, mas é ressalvado o direito do lesado ou de terceiro de boa-fé.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l9613-q14",
+  "artigoKey": "lei-9613:8",
+  "enunciado": "Na falta de tratado ou convenção internacional, é possível decretar medidas assecuratórias sobre bens oriundos de crimes praticados no estrangeiro por solicitação de autoridade estrangeira competente, desde que o governo do país solicitante prometa reciprocidade ao Brasil.",
+  "gabarito": true,
+  "comentario": "Literal do art. 8º, § 1º.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l9613-q15",
+  "artigoKey": "lei-9613:9",
+  "enunciado": "Sujeitam-se às obrigações de identificação de clientes e comunicação ao Coaf, entre outras pessoas, as que comercializem jóias, pedras e metais preciosos, objetos de arte e antiguidades, bem como as prestadoras de serviços de ativos virtuais.",
+  "gabarito": true,
+  "comentario": "Art. 9º, parágrafo único, XI (jóias, pedras e metais preciosos, obras de arte e antiguidades) e XIX (prestadoras de serviços de ativos virtuais).",
+  "tipo": "literal"
+ },
+ {
+  "id": "l9613-q16",
+  "artigoKey": "lei-9613:9",
+  "enunciado": "As obrigações de identificação de clientes e comunicação de operações previstas na Lei 9.613/98 aplicam-se exclusivamente às instituições financeiras tradicionais, como bancos e corretoras de valores mobiliários.",
+  "gabarito": false,
+  "comentario": "O rol do art. 9º é bem mais amplo: inclui, por exemplo, administradoras de consórcio, factoring, seguradoras, imobiliárias, joalherias, comerciantes de bens de luxo, juntas comerciais e prestadoras de serviços de ativos virtuais — não se limita a instituições financeiras.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l9613-q17",
+  "artigoKey": "lei-9613:10",
+  "enunciado": "Os cadastros e registros de clientes e transações mantidos pelas pessoas sujeitas às obrigações da Lei 9.613/98 devem ser conservados pelo período mínimo de cinco anos, a partir do encerramento da conta ou da conclusão da transação.",
+  "gabarito": true,
+  "comentario": "Literal do art. 10, § 2º.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l9613-q18",
+  "artigoKey": "lei-9613:10",
+  "enunciado": "As pessoas sujeitas às obrigações do art. 9º devem cadastrar-se exclusivamente perante o Banco Central do Brasil, independentemente da existência de órgão regulador próprio para sua atividade.",
+  "gabarito": false,
+  "comentario": "Art. 10, IV: o cadastro é feito no órgão regulador ou fiscalizador da respectiva atividade e, apenas na falta deste, no Coaf — não há exclusividade do Banco Central.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l9613-q19",
+  "artigoKey": "lei-9613:11",
+  "enunciado": "As pessoas sujeitas às obrigações do art. 9º devem comunicar ao Coaf, no prazo de 24 horas e sem dar ciência de tal ato a qualquer pessoa, inclusive àquela a que se refira a informação, a proposta ou realização de operações que possam constituir sérios indícios dos crimes previstos na Lei 9.613/98.",
+  "gabarito": true,
+  "comentario": "Literal do art. 11, II.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l9613-q20",
+  "artigoKey": "lei-9613:11",
+  "enunciado": "As comunicações de boa-fé feitas ao Coaf pelas pessoas obrigadas podem acarretar responsabilidade civil ou administrativa caso a suspeita comunicada não se confirme.",
+  "gabarito": false,
+  "comentario": "Art. 11, § 2º: as comunicações de boa-fé, feitas na forma da lei, não acarretam responsabilidade civil ou administrativa.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l9613-q21",
+  "artigoKey": "lei-9613:12",
+  "enunciado": "A multa pecuniária aplicável às pessoas que descumprirem as obrigações dos arts. 10 e 11 da Lei 9.613/98 não pode ser superior ao dobro do valor da operação, ao dobro do lucro obtido ou presumivelmente obtido, ou ao valor de R$ 20.000.000,00 (vinte milhões de reais).",
+  "gabarito": true,
+  "comentario": "Literal do art. 12, II, alíneas \"a\", \"b\" e \"c\".",
+  "tipo": "literal"
+ },
+ {
+  "id": "l9613-q22",
+  "artigoKey": "lei-9613:12",
+  "enunciado": "A inabilitação temporária para o exercício do cargo de administrador das pessoas jurídicas sujeitas à Lei 9.613/98 pode ser aplicada pelo prazo de até vinte anos.",
+  "gabarito": false,
+  "comentario": "Art. 12, III: a inabilitação temporária é aplicada pelo prazo de até DEZ anos, não vinte.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l9613-q23",
+  "artigoKey": "lei-9613:12-A",
+  "enunciado": "As pessoas sujeitas às obrigações dos arts. 10 e 11 da Lei 9.613/98 devem incluir a consulta ao Cadastro Nacional de Pessoas Expostas Politicamente (CNPEP) entre seus procedimentos para o cumprimento dessas obrigações.",
+  "gabarito": true,
+  "comentario": "Literal do art. 12-A, § 2º.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l9613-q24",
+  "artigoKey": "lei-9613:14",
+  "enunciado": "Compete ao Coaf, no exercício de suas atribuições legais, apurar e processar criminalmente os crimes de lavagem de dinheiro que identificar.",
+  "gabarito": false,
+  "comentario": "O Coaf tem natureza administrativa: disciplina, aplica penas administrativas e recebe/examina/identifica ocorrências suspeitas (art. 14, caput). A apuração e o processamento penal cabem às autoridades competentes, às quais o Coaf apenas comunica os fatos (art. 15).",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l9613-q25",
+  "artigoKey": "lei-9613:14",
+  "enunciado": "Para as pessoas mencionadas no art. 9º que não possuam órgão próprio fiscalizador ou regulador, compete ao Coaf expedir as instruções sobre as obrigações de identificação de clientes e manutenção de registros, bem como aplicar as sanções administrativas cabíveis.",
+  "gabarito": true,
+  "comentario": "Literal do art. 14, § 1º.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l9613-q26",
+  "artigoKey": "lei-9613:15",
+  "enunciado": "Compete privativamente ao Coaf, e não a outras autoridades, dar início à ação penal quando concluir pela existência de crime de lavagem de dinheiro.",
+  "gabarito": false,
+  "comentario": "Art. 15: o Coaf apenas comunicará às autoridades competentes para a instauração dos procedimentos cabíveis; não tem competência para iniciar ação penal.",
+  "tipo": "pegadinha"
+ }
+]

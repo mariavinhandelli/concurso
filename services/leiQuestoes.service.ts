@@ -46,6 +46,17 @@ const QUESTOES_ARQUIVO: Record<string, string> = {
   'lei-12016': '/leis/lei-12016-questoes.json',
   'lei-7347': '/leis/lei-7347-questoes.json',
   'eca': '/leis/eca-questoes.json',
+  'lei-11340': '/leis/lei-11340-questoes.json',
+  'lei-10826': '/leis/lei-10826-questoes.json',
+  'lei-11343': '/leis/lei-11343-questoes.json',
+  'lei-13869': '/leis/lei-13869-questoes.json',
+  'lei-12850': '/leis/lei-12850-questoes.json',
+  'lei-7210': '/leis/lei-7210-questoes.json',
+  'lei-9455': '/leis/lei-9455-questoes.json',
+  'lei-8072': '/leis/lei-8072-questoes.json',
+  'lei-9613': '/leis/lei-9613-questoes.json',
+  'lei-9296': '/leis/lei-9296-questoes.json',
+  'lei-9099': '/leis/lei-9099-questoes.json',
 };
 
 // Slugs que têm banco de questões — usado para montar o composer de simulado

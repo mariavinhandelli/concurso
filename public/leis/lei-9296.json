@@ -1,0 +1,420 @@
+{
+ "slug": "lei-9296",
+ "nome": "Lei nº 9.296, de 24 de julho de 1996 — Interceptação Telefônica",
+ "nomeCurto": "Lei 9.296/96 (Interceptação)",
+ "ano": 1996,
+ "disciplina": "Legislação Penal Especial",
+ "descricao": "Regulamenta a interceptação de comunicações telefônicas e de sistemas de informática/telemática para prova em investigação criminal. Texto atualizado (fonte: Planalto).",
+ "fonteUrl": "https://www.planalto.gov.br/ccivil_03/leis/l9296.htm",
+ "geradoEm": "2026-07-17",
+ "artigos": [
+  {
+   "key": "lei-9296:1",
+   "ordem": 1,
+   "numero": "1",
+   "rotulo": "Art. 1º",
+   "caminho": null,
+   "incidencia": "muito_alta",
+   "incidenciaNota": "Reserva de jurisdição — a interceptação depende de ordem do juiz competente da ação principal, sob segredo de justiça — é o requisito-base mais citado da lei em fontes qualitativas de concursos (Estratégia Concursos); sem estatística numérica pública disponível para este artigo.",
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "A interceptação de comunicações telefônicas, de qualquer natureza, para prova em investigação criminal e em instrução processual penal, observará o disposto nesta Lei e dependerá de ordem do juiz competente da ação principal, sob segredo de justiça.",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "Parágrafo único.",
+     "texto": "O disposto nesta Lei aplica-se à interceptação do fluxo de comunicações em sistemas de informática e telemática.",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lei-9296:2",
+   "ordem": 2,
+   "numero": "2",
+   "rotulo": "Art. 2º",
+   "caminho": null,
+   "incidencia": "muito_alta",
+   "incidenciaNota": "Hipóteses de inadmissibilidade (incisos I a III) — clássico ponto de pegadinha, sobretudo o inciso III (crime punido só com detenção não admite interceptação); apontado como um dos dispositivos mais cobrados da lei em fontes qualitativas (Estratégia Concursos, TEC Concursos); sem estatística numérica pública disponível.",
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "Não será admitida a interceptação de comunicações telefônicas quando ocorrer qualquer das seguintes hipóteses:",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "I –",
+     "texto": "não houver indícios razoáveis da autoria ou participação em infração penal;",
+     "nivel": 1
+    },
+    {
+     "id": "b3",
+     "rotulo": "II –",
+     "texto": "a prova puder ser feita por outros meios disponíveis;",
+     "nivel": 1
+    },
+    {
+     "id": "b4",
+     "rotulo": "III –",
+     "texto": "o fato investigado constituir infração penal punida, no máximo, com pena de detenção.",
+     "nivel": 1
+    },
+    {
+     "id": "b5",
+     "rotulo": "Parágrafo único.",
+     "texto": "Em qualquer hipótese deve ser descrita com clareza a situação objeto da investigação, inclusive com a indicação e qualificação dos investigados, salvo impossibilidade manifesta, devidamente justificada.",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lei-9296:3",
+   "ordem": 3,
+   "numero": "3",
+   "rotulo": "Art. 3º",
+   "caminho": null,
+   "incidencia": "muito_alta",
+   "incidenciaNota": "Legitimidade para a interceptação — de ofício pelo juiz ou a requerimento da autoridade policial/MP — tema recorrente de pegadinha, quando a banca tenta atribuir ao delegado poder de decretar a medida (que é exclusivo do juiz); sem estatística numérica pública disponível.",
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "A interceptação das comunicações telefônicas poderá ser determinada pelo juiz, de ofício ou a requerimento:",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "I –",
+     "texto": "da autoridade policial, na investigação criminal;",
+     "nivel": 1
+    },
+    {
+     "id": "b3",
+     "rotulo": "II –",
+     "texto": "do representante do Ministério Público, na investigação criminal e na instrução processual penal.",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lei-9296:4",
+   "ordem": 4,
+   "numero": "4",
+   "rotulo": "Art. 4º",
+   "caminho": null,
+   "incidencia": "alta",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "O pedido de interceptação de comunicação telefônica conterá a demonstração de que a sua realização é necessária à apuração de infração penal, com indicação dos meios a serem empregados.",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "§ 1º",
+     "texto": "Excepcionalmente, o juiz poderá admitir que o pedido seja formulado verbalmente, desde que estejam presentes os pressupostos que autorizem a interceptação, caso em que a concessão será condicionada à sua redução a termo.",
+     "nivel": 1
+    },
+    {
+     "id": "b3",
+     "rotulo": "§ 2º",
+     "texto": "O juiz, no prazo máximo de vinte e quatro horas, decidirá sobre o pedido.",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lei-9296:5",
+   "ordem": 5,
+   "numero": "5",
+   "rotulo": "Art. 5º",
+   "caminho": null,
+   "incidencia": "muito_alta",
+   "incidenciaNota": "Prazo de 15 dias, renovável por igual tempo — pegadinha clássica (não são 30 dias) e o STF admite renovações sucessivas enquanto comprovada a indispensabilidade do meio de prova; apontado como um dos pontos mais testados da lei (Estratégia Concursos); sem estatística numérica pública disponível.",
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "A decisão será fundamentada, sob pena de nulidade, indicando também a forma de execução da diligência, que não poderá exceder o prazo de quinze dias, renovável por igual tempo uma vez comprovada a indispensabilidade do meio de prova.",
+     "nivel": 0
+    }
+   ]
+  },
+  {
+   "key": "lei-9296:6",
+   "ordem": 6,
+   "numero": "6",
+   "rotulo": "Art. 6º",
+   "caminho": null,
+   "incidencia": "alta",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "Deferido o pedido, a autoridade policial conduzirá os procedimentos de interceptação, dando ciência ao Ministério Público, que poderá acompanhar a sua realização.",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "§ 1º",
+     "texto": "No caso de a diligência possibilitar a gravação da comunicação interceptada, será determinada a sua transcrição.",
+     "nivel": 1
+    },
+    {
+     "id": "b3",
+     "rotulo": "§ 2º",
+     "texto": "Cumprida a diligência, a autoridade policial encaminhará o resultado da interceptação ao juiz, acompanhado de auto circunstanciado, que deverá conter o resumo das operações realizadas.",
+     "nivel": 1
+    },
+    {
+     "id": "b4",
+     "rotulo": "§ 3º",
+     "texto": "Recebidos esses elementos, o juiz determinará a providência do art. 8°, ciente o Ministério Público.",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lei-9296:7",
+   "ordem": 7,
+   "numero": "7",
+   "rotulo": "Art. 7º",
+   "caminho": null,
+   "incidencia": "media",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "Para os procedimentos de interceptação de que trata esta Lei, a autoridade policial poderá requisitar serviços e técnicos especializados às concessionárias de serviço público.",
+     "nivel": 0
+    }
+   ]
+  },
+  {
+   "key": "lei-9296:8",
+   "ordem": 8,
+   "numero": "8",
+   "rotulo": "Art. 8º",
+   "caminho": null,
+   "incidencia": "alta",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "A interceptação de comunicação telefônica, de qualquer natureza, ocorrerá em autos apartados, apensados aos autos do inquérito policial ou do processo criminal, preservando-se o sigilo das diligências, gravações e transcrições respectivas.",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "Parágrafo único.",
+     "texto": "A apensação somente poderá ser realizada imediatamente antes do relatório da autoridade, quando se tratar de inquérito policial (Código de Processo Penal, art.10, § 1°) ou na conclusão do processo ao juiz para o despacho decorrente do disposto nos arts. 407, 502 ou 538 do Código de Processo Penal.",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lei-9296:8-A",
+   "ordem": 9,
+   "numero": "8-A",
+   "rotulo": "Art. 8-A",
+   "caminho": null,
+   "incidencia": "muito_alta",
+   "incidenciaNota": "Captação ambiental — trazida pelo Pacote Anticrime (Lei 13.964/2019), com requisitos (pena máxima superior a 4 anos) e prazo próprios (15 dias, renovável); tema de alta atenção em concursos policiais desde a reforma, inclusive pela derrubada de veto dos §§ 2º e 4º pelo Congresso em 2021 (meusitejuridico.editorajuspodivm.com.br); sem estatística numérica pública disponível.",
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "Para investigação ou instrução criminal, poderá ser autorizada pelo juiz, a requerimento da autoridade policial ou do Ministério Público, a captação ambiental de sinais eletromagnéticos, ópticos ou acústicos, quando:",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "I –",
+     "texto": "a prova não puder ser feita por outros meios disponíveis e igualmente eficazes; e",
+     "nivel": 1
+    },
+    {
+     "id": "b3",
+     "rotulo": "II –",
+     "texto": "houver elementos probatórios razoáveis de autoria e participação em infrações criminais cujas penas máximas sejam superiores a 4 (quatro) anos ou em infrações penais conexas.",
+     "nivel": 1
+    },
+    {
+     "id": "b4",
+     "rotulo": "§ 1º",
+     "texto": "O requerimento deverá descrever circunstanciadamente o local e a forma de instalação do dispositivo de captação ambiental.",
+     "nivel": 1
+    },
+    {
+     "id": "b5",
+     "rotulo": "§ 2º",
+     "texto": "A instalação do dispositivo de captação ambiental poderá ser realizada, quando necessária, por meio de operação policial disfarçada ou no período noturno, exceto na casa, nos termos do inciso XI do caput do art. 5º da Constituição Federal.",
+     "nivel": 1
+    },
+    {
+     "id": "b6",
+     "rotulo": "§ 3º",
+     "texto": "A captação ambiental não poderá exceder o prazo de 15 (quinze) dias, renovável por decisão judicial por iguais períodos, se comprovada a indispensabilidade do meio de prova e quando presente atividade criminal permanente, habitual ou continuada.",
+     "nivel": 1
+    },
+    {
+     "id": "b7",
+     "rotulo": "§ 4º",
+     "texto": "A captação ambiental feita por um dos interlocutores sem o prévio conhecimento da autoridade policial ou do Ministério Público poderá ser utilizada, em matéria de defesa, quando demonstrada a integridade da gravação.",
+     "nivel": 1
+    },
+    {
+     "id": "b8",
+     "rotulo": "§ 5º",
+     "texto": "Aplicam-se subsidiariamente à captação ambiental as regras previstas na legislação específica para a interceptação telefônica e telemática.",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lei-9296:9",
+   "ordem": 10,
+   "numero": "9",
+   "rotulo": "Art. 9º",
+   "caminho": null,
+   "incidencia": "alta",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "A gravação que não interessar à prova será inutilizada por decisão judicial, durante o inquérito, a instrução processual ou após esta, em virtude de requerimento do Ministério Público ou da parte interessada.",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "Parágrafo único.",
+     "texto": "O incidente de inutilização será assistido pelo Ministério Público, sendo facultada a presença do acusado ou de seu representante legal.",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lei-9296:10",
+   "ordem": 11,
+   "numero": "10",
+   "rotulo": "Art. 10",
+   "caminho": null,
+   "incidencia": "muito_alta",
+   "incidenciaNota": "Crime de realizar interceptação sem autorização judicial ou com objetivo não autorizado — testado em contraste com o art. 10-A (captação ambiental ilegal); apontado como tema central das provas pós-Pacote Anticrime (Estratégia Concursos); sem estatística numérica pública disponível.",
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "Constitui crime realizar interceptação de comunicações telefônicas, de informática ou telemática, promover escuta ambiental ou quebrar segredo da Justiça, sem autorização judicial ou com objetivos não autorizados em lei:",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": null,
+     "texto": "Pena - reclusão, de 2 (dois) a 4 (quatro) anos, e multa.",
+     "nivel": 0
+    },
+    {
+     "id": "b3",
+     "rotulo": "Parágrafo único.",
+     "texto": "Incorre na mesma pena a autoridade judicial que determina a execução de conduta prevista no caput deste artigo com objetivo não autorizado em lei.",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lei-9296:10-A",
+   "ordem": 12,
+   "numero": "10-A",
+   "rotulo": "Art. 10-A",
+   "caminho": null,
+   "incidencia": "alta",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "Realizar captação ambiental de sinais eletromagnéticos, ópticos ou acústicos para investigação ou instrução criminal sem autorização judicial, quando esta for exigida:",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": null,
+     "texto": "Pena - reclusão, de 2 (dois) a 4 (quatro) anos, e multa.",
+     "nivel": 0
+    },
+    {
+     "id": "b3",
+     "rotulo": "§ 1º",
+     "texto": "Não há crime se a captação é realizada por um dos interlocutores.",
+     "nivel": 1
+    },
+    {
+     "id": "b4",
+     "rotulo": "§ 2º",
+     "texto": "A pena será aplicada em dobro ao funcionário público que descumprir determinação de sigilo das investigações que envolvam a captação ambiental ou revelar o conteúdo das gravações enquanto mantido o sigilo judicial.",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lei-9296:11",
+   "ordem": 13,
+   "numero": "11",
+   "rotulo": "Art. 11",
+   "caminho": null,
+   "incidencia": "media",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "Esta Lei entra em vigor na data de sua publicação.",
+     "nivel": 0
+    }
+   ]
+  },
+  {
+   "key": "lei-9296:12",
+   "ordem": 14,
+   "numero": "12",
+   "rotulo": "Art. 12",
+   "caminho": null,
+   "incidencia": "media",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "Revogam-se as disposições em contrário.",
+     "nivel": 0
+    }
+   ]
+  }
+ ]
+}

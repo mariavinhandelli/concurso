@@ -1,0 +1,178 @@
+[
+ {
+  "id": "l9296-q1",
+  "artigoKey": "lei-9296:1",
+  "enunciado": "A interceptação de comunicações telefônicas, para prova em investigação criminal e em instrução processual penal, dependerá de ordem do juiz competente da ação principal, sob segredo de justiça.",
+  "gabarito": true,
+  "comentario": "Literal do art. 1º, caput.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l9296-q2",
+  "artigoKey": "lei-9296:1",
+  "enunciado": "O disposto na Lei 9.296/96 aplica-se exclusivamente às comunicações telefônicas por voz, não alcançando a interceptação do fluxo de comunicações em sistemas de informática e telemática.",
+  "gabarito": false,
+  "comentario": "Pegadinha: o parágrafo único do art. 1º estende expressamente a lei à interceptação do fluxo de comunicações em sistemas de informática e telemática (ex.: e-mail, mensagens).",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l9296-q3",
+  "artigoKey": "lei-9296:2",
+  "enunciado": "Nos termos do art. 2º, III, da Lei 9.296/96, não será admitida a interceptação telefônica quando o fato investigado constituir infração penal punida, no máximo, com pena de reclusão.",
+  "gabarito": false,
+  "comentario": "Pegadinha: a vedação é para infração punida no máximo com pena de DETENÇÃO (art. 2º, III), não reclusão — crimes apenados com reclusão, em regra, admitem a medida.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l9296-q4",
+  "artigoKey": "lei-9296:2",
+  "enunciado": "Não será admitida a interceptação de comunicações telefônicas quando não houver indícios razoáveis da autoria ou participação em infração penal.",
+  "gabarito": true,
+  "comentario": "Literal do art. 2º, I.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l9296-q5",
+  "artigoKey": "lei-9296:2",
+  "enunciado": "Em qualquer hipótese de interceptação telefônica deve ser descrita com clareza a situação objeto da investigação, inclusive com indicação e qualificação dos investigados, salvo impossibilidade manifesta e devidamente justificada.",
+  "gabarito": true,
+  "comentario": "Literal do art. 2º, parágrafo único.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l9296-q6",
+  "artigoKey": "lei-9296:3",
+  "enunciado": "A interceptação das comunicações telefônicas somente pode ser determinada a requerimento da autoridade policial ou do Ministério Público, sendo vedado ao juiz decretá-la de ofício.",
+  "gabarito": false,
+  "comentario": "Pegadinha: o art. 3º, caput, autoriza expressamente o juiz a determinar a interceptação DE OFÍCIO, além de a requerimento da autoridade policial ou do Ministério Público.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l9296-q7",
+  "artigoKey": "lei-9296:4",
+  "enunciado": "O pedido de interceptação de comunicação telefônica conterá a demonstração de que sua realização é necessária à apuração de infração penal, com indicação dos meios a serem empregados.",
+  "gabarito": true,
+  "comentario": "Literal do art. 4º, caput.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l9296-q8",
+  "artigoKey": "lei-9296:4",
+  "enunciado": "O juiz decidirá sobre o pedido de interceptação telefônica no prazo máximo de quarenta e oito horas.",
+  "gabarito": false,
+  "comentario": "Pegadinha: o art. 4º, § 2º, fixa o prazo de VINTE E QUATRO HORAS, não quarenta e oito.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l9296-q9",
+  "artigoKey": "lei-9296:5",
+  "enunciado": "O prazo de 15 dias da interceptação telefônica é renovável uma única vez, sendo vedada, segundo a Lei 9.296/96, qualquer renovação subsequente.",
+  "gabarito": false,
+  "comentario": "Pegadinha: o art. 5º apenas exige a comprovação da indispensabilidade do meio de prova para a renovação por igual tempo, sem limitar o número de renovações; o STF admite renovações sucessivas enquanto subsistir a necessidade da medida.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l9296-q10",
+  "artigoKey": "lei-9296:5",
+  "enunciado": "A decisão que autoriza a interceptação telefônica deve ser fundamentada, sob pena de nulidade, indicando também a forma de execução da diligência.",
+  "gabarito": true,
+  "comentario": "Literal do art. 5º, caput.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l9296-q11",
+  "artigoKey": "lei-9296:6",
+  "enunciado": "Deferido o pedido de interceptação, a autoridade policial conduzirá os procedimentos, dando ciência ao Ministério Público, que poderá acompanhar sua realização.",
+  "gabarito": true,
+  "comentario": "Literal do art. 6º, caput.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l9296-q12",
+  "artigoKey": "lei-9296:6",
+  "enunciado": "Quando a diligência de interceptação possibilitar a gravação da comunicação interceptada, a transcrição é facultativa, a critério da autoridade policial.",
+  "gabarito": false,
+  "comentario": "Pegadinha: o art. 6º, § 1º, determina que a transcrição SERÁ determinada — não é uma faculdade da autoridade policial.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l9296-q13",
+  "artigoKey": "lei-9296:7",
+  "enunciado": "Para os procedimentos de interceptação de que trata a Lei 9.296/96, a autoridade policial poderá requisitar serviços e técnicos especializados às concessionárias de serviço público.",
+  "gabarito": true,
+  "comentario": "Literal do art. 7º.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l9296-q14",
+  "artigoKey": "lei-9296:8",
+  "enunciado": "A interceptação de comunicação telefônica ocorrerá em autos apartados, apensados aos autos do inquérito policial ou do processo criminal, preservando-se o sigilo das diligências, gravações e transcrições respectivas.",
+  "gabarito": true,
+  "comentario": "Literal do art. 8º, caput.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l9296-q15",
+  "artigoKey": "lei-9296:8-A",
+  "enunciado": "A captação ambiental do art. 8º-A pode ser autorizada quando houver elementos probatórios razoáveis de autoria e participação em infrações criminais cujas penas máximas sejam iguais ou superiores a 4 (quatro) anos.",
+  "gabarito": false,
+  "comentario": "Pegadinha: o art. 8º-A, II, exige penas máximas SUPERIORES a 4 (quatro) anos — a lei não inclui a hipótese de pena máxima exatamente igual a 4 anos.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l9296-q16",
+  "artigoKey": "lei-9296:8-A",
+  "enunciado": "A captação ambiental não poderá exceder o prazo de 15 (quinze) dias, renovável por decisão judicial por iguais períodos, se comprovada a indispensabilidade do meio de prova e quando presente atividade criminal permanente, habitual ou continuada.",
+  "gabarito": true,
+  "comentario": "Literal do art. 8º-A, § 3º.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l9296-q17",
+  "artigoKey": "lei-9296:8-A",
+  "enunciado": "A captação ambiental feita por um dos interlocutores, sem o prévio conhecimento da autoridade policial ou do Ministério Público, pode ser utilizada como prova de acusação contra o outro interlocutor, independentemente da integridade da gravação.",
+  "gabarito": false,
+  "comentario": "Pegadinha: o art. 8º-A, § 4º, autoriza o uso apenas EM MATÉRIA DE DEFESA, e ainda assim condicionado à demonstração da integridade da gravação.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l9296-q18",
+  "artigoKey": "lei-9296:9",
+  "enunciado": "A gravação que não interessar à prova será inutilizada por decisão judicial, durante o inquérito, a instrução processual ou após esta, em virtude de requerimento do Ministério Público ou da parte interessada.",
+  "gabarito": true,
+  "comentario": "Literal do art. 9º, caput.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l9296-q19",
+  "artigoKey": "lei-9296:10",
+  "enunciado": "Constitui crime realizar interceptação de comunicações telefônicas sem autorização judicial ou com objetivos não autorizados em lei, com pena de detenção, de 2 (dois) a 4 (quatro) anos, e multa.",
+  "gabarito": false,
+  "comentario": "Pegadinha: a pena do art. 10 é de RECLUSÃO, de 2 a 4 anos, e multa — não detenção.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l9296-q20",
+  "artigoKey": "lei-9296:10",
+  "enunciado": "Incorre na mesma pena do art. 10 a autoridade judicial que determina a execução de conduta prevista no caput desse artigo com objetivo não autorizado em lei.",
+  "gabarito": true,
+  "comentario": "Literal do art. 10, parágrafo único.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l9296-q21",
+  "artigoKey": "lei-9296:10-A",
+  "enunciado": "Segundo o art. 10-A da Lei 9.296/96, constitui crime a captação ambiental realizada por um dos próprios interlocutores da comunicação.",
+  "gabarito": false,
+  "comentario": "Pegadinha: o art. 10-A, § 1º, exclui expressamente o crime quando a captação é realizada por um dos interlocutores.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l9296-q22",
+  "artigoKey": "lei-9296:10-A",
+  "enunciado": "A pena do crime de captação ambiental ilegal (art. 10-A) será aplicada em dobro ao funcionário público que descumprir determinação de sigilo das investigações que envolvam a captação ambiental ou revelar o conteúdo das gravações enquanto mantido o sigilo judicial.",
+  "gabarito": true,
+  "comentario": "Literal do art. 10-A, § 2º.",
+  "tipo": "literal"
+ }
+]

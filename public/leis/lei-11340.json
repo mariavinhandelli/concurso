@@ -1,0 +1,2004 @@
+{
+ "slug": "lei-11340",
+ "nome": "Lei nº 11.340, de 7 de agosto de 2006 — Lei Maria da Penha",
+ "nomeCurto": "Lei 11.340/06 (Maria da Penha)",
+ "ano": 2006,
+ "disciplina": "Legislação Penal Especial",
+ "descricao": "Coíbe a violência doméstica e familiar contra a mulher; medidas protetivas de urgência. Texto atualizado (fonte: Planalto).",
+ "fonteUrl": "https://www.planalto.gov.br/ccivil_03/_ato2004-2006/2006/lei/l11340.htm",
+ "geradoEm": "2026-07-17",
+ "artigos": [
+  {
+   "key": "lei-11340:1",
+   "ordem": 1,
+   "numero": "1",
+   "rotulo": "Art. 1º",
+   "caminho": "TÍTULO I — DISPOSIÇÕES PRELIMINARES",
+   "incidencia": "media",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "Esta Lei cria mecanismos para coibir e prevenir a violência doméstica e familiar contra a mulher, nos termos do § 8º do art. 226 da Constituição Federal, da Convenção sobre a Eliminação de Todas as Formas de Violência contra a Mulher, da Convenção Interamericana para Prevenir, Punir e Erradicar a Violência contra a Mulher e de outros tratados internacionais ratificados pela República Federativa do Brasil; dispõe sobre a criação dos Juizados de Violência Doméstica e Familiar contra a Mulher; e estabelece medidas de assistência e proteção às mulheres em situação de violência doméstica e familiar.",
+     "nivel": 0
+    }
+   ]
+  },
+  {
+   "key": "lei-11340:2",
+   "ordem": 2,
+   "numero": "2",
+   "rotulo": "Art. 2º",
+   "caminho": "TÍTULO I — DISPOSIÇÕES PRELIMINARES",
+   "incidencia": "media",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "Toda mulher, independentemente de classe, raça, etnia, orientação sexual, renda, cultura, nível educacional, idade e religião, goza dos direitos fundamentais inerentes à pessoa humana, sendo-lhe asseguradas as oportunidades e facilidades para viver sem violência, preservar sua saúde física e mental e seu aperfeiçoamento moral, intelectual e social.",
+     "nivel": 0
+    }
+   ]
+  },
+  {
+   "key": "lei-11340:3",
+   "ordem": 3,
+   "numero": "3",
+   "rotulo": "Art. 3º",
+   "caminho": "TÍTULO I — DISPOSIÇÕES PRELIMINARES",
+   "incidencia": "media",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "Serão asseguradas às mulheres as condições para o exercício efetivo dos direitos à vida, à segurança, à saúde, à alimentação, à educação, à cultura, à moradia, ao acesso à justiça, ao esporte, ao lazer, ao trabalho, à cidadania, à liberdade, à dignidade, ao respeito e à convivência familiar e comunitária.",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "§ 1º",
+     "texto": "O poder público desenvolverá políticas que visem garantir os direitos humanos das mulheres no âmbito das relações domésticas e familiares no sentido de resguardá-las de toda forma de negligência, discriminação, exploração, violência, crueldade e opressão.",
+     "nivel": 1
+    },
+    {
+     "id": "b3",
+     "rotulo": "§ 2º",
+     "texto": "Cabe à família, à sociedade e ao poder público criar as condições necessárias para o efetivo exercício dos direitos enunciados no caput.",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lei-11340:4",
+   "ordem": 4,
+   "numero": "4",
+   "rotulo": "Art. 4º",
+   "caminho": "TÍTULO I — DISPOSIÇÕES PRELIMINARES",
+   "incidencia": "media",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "Na interpretação desta Lei, serão considerados os fins sociais a que ela se destina e, especialmente, as condições peculiares das mulheres em situação de violência doméstica e familiar.",
+     "nivel": 0
+    }
+   ]
+  },
+  {
+   "key": "lei-11340:5",
+   "ordem": 5,
+   "numero": "5",
+   "rotulo": "Art. 5º",
+   "caminho": "TÍTULO II — DA VIOLÊNCIA DOMÉSTICA E FAMILIAR CONTRA A MULHER › CAPÍTULO I — DISPOSIÇÕES GERAIS",
+   "incidencia": "muito_alta",
+   "incidenciaNota": "Núcleo conceitual da lei — âmbito doméstico/familiar/relação íntima de afeto, independência de coabitação (inciso III) e independência de orientação sexual (parágrafo único); base de praticamente toda questão de aplicabilidade. Apontado como o artigo mais cobrado da lei em levantamentos qualitativos de bancas (TEC Concursos, Estratégia Concursos); sem estatística numérica pública disponível.",
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "Para os efeitos desta Lei, configura violência doméstica e familiar contra a mulher qualquer ação ou omissão baseada no gênero que lhe cause morte, lesão, sofrimento físico, sexual ou psicológico e dano moral ou patrimonial:",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "I –",
+     "texto": "no âmbito da unidade doméstica, compreendida como o espaço de convívio permanente de pessoas, com ou sem vínculo familiar, inclusive as esporadicamente agregadas;",
+     "nivel": 1
+    },
+    {
+     "id": "b3",
+     "rotulo": "II –",
+     "texto": "no âmbito da família, compreendida como a comunidade formada por indivíduos que são ou se consideram aparentados, unidos por laços naturais, por afinidade ou por vontade expressa;",
+     "nivel": 1
+    },
+    {
+     "id": "b4",
+     "rotulo": "III –",
+     "texto": "em qualquer relação íntima de afeto, na qual o agressor conviva ou tenha convivido com a ofendida, independentemente de coabitação.",
+     "nivel": 1
+    },
+    {
+     "id": "b5",
+     "rotulo": "Parágrafo único.",
+     "texto": "As relações pessoais enunciadas neste artigo independem de orientação sexual.",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lei-11340:6",
+   "ordem": 6,
+   "numero": "6",
+   "rotulo": "Art. 6º",
+   "caminho": "TÍTULO II — DA VIOLÊNCIA DOMÉSTICA E FAMILIAR CONTRA A MULHER › CAPÍTULO I — DISPOSIÇÕES GERAIS",
+   "incidencia": "alta",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "A violência doméstica e familiar contra a mulher constitui uma das formas de violação dos direitos humanos.",
+     "nivel": 0
+    }
+   ]
+  },
+  {
+   "key": "lei-11340:7",
+   "ordem": 7,
+   "numero": "7",
+   "rotulo": "Art. 7º",
+   "caminho": "TÍTULO II — DA VIOLÊNCIA DOMÉSTICA E FAMILIAR CONTRA A MULHER › CAPÍTULO II — DAS FORMAS DE VIOLÊNCIA DOMÉSTICA E FAMILIAR CONTRA A MULHER",
+   "incidencia": "muito_alta",
+   "incidenciaNota": "As 6 formas de violência (física, psicológica, sexual, patrimonial, moral e vicária — esta última incluída pela Lei nº 15.384/2026); clássico de questões que pedem a classificação de uma conduta descrita. Citado junto ao art. 5º como o conteúdo mais recorrente em provas de carreira policial (TEC Concursos, Estratégia Concursos); sem estatística numérica pública disponível.",
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "São formas de violência doméstica e familiar contra a mulher, entre outras:",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "I –",
+     "texto": "a violência física, entendida como qualquer conduta que ofenda sua integridade ou saúde corporal;",
+     "nivel": 1
+    },
+    {
+     "id": "b3",
+     "rotulo": "II –",
+     "texto": "a violência psicológica, entendida como qualquer conduta que lhe cause dano emocional e diminuição da autoestima ou que lhe prejudique e perturbe o pleno desenvolvimento ou que vise degradar ou controlar suas ações, comportamentos, crenças e decisões, mediante ameaça, constrangimento, humilhação, manipulação, isolamento, vigilância constante, perseguição contumaz, insulto, chantagem, violação de sua intimidade, ridicularização, exploração e limitação do direito de ir e vir ou qualquer outro meio que lhe cause prejuízo à saúde psicológica e à autodeterminação;",
+     "nivel": 1
+    },
+    {
+     "id": "b4",
+     "rotulo": "III –",
+     "texto": "a violência sexual, entendida como qualquer conduta que a constranja a presenciar, a manter ou a participar de relação sexual não desejada, mediante intimidação, ameaça, coação ou uso da força; que a induza a comercializar ou a utilizar, de qualquer modo, a sua sexualidade, que a impeça de usar qualquer método contraceptivo ou que a force ao matrimônio, à gravidez, ao aborto ou à prostituição, mediante coação, chantagem, suborno ou manipulação; ou que limite ou anule o exercício de seus direitos sexuais e reprodutivos;",
+     "nivel": 1
+    },
+    {
+     "id": "b5",
+     "rotulo": "IV –",
+     "texto": "a violência patrimonial, entendida como qualquer conduta que configure retenção, subtração, destruição parcial ou total de seus objetos, instrumentos de trabalho, documentos pessoais, bens, valores e direitos ou recursos econômicos, incluindo os destinados a satisfazer suas necessidades;",
+     "nivel": 1
+    },
+    {
+     "id": "b6",
+     "rotulo": "V –",
+     "texto": "a violência moral, entendida como qualquer conduta que configure calúnia, difamação ou injúria.",
+     "nivel": 1
+    },
+    {
+     "id": "b7",
+     "rotulo": "VI –",
+     "texto": "a violência vicária, entendida como qualquer forma de violência praticada contra descendente, ascendente, dependente, enteado, parente, pessoa sob guarda ou responsabilidade direta da mulher ou pessoa de sua rede de apoio, com vistas a atingi-la.",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lei-11340:8",
+   "ordem": 8,
+   "numero": "8",
+   "rotulo": "Art. 8º",
+   "caminho": "TÍTULO III — DA ASSISTÊNCIA À MULHER EM SITUAÇÃO DE VIOLÊNCIA DOMÉSTICA E FAMILIAR › CAPÍTULO I — DAS MEDIDAS INTEGRADAS DE PREVENÇÃO",
+   "incidencia": "alta",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "A política pública que visa coibir a violência doméstica e familiar contra a mulher far-se-á por meio de um conjunto articulado de ações da União, dos Estados, do Distrito Federal e dos Municípios e de ações não-governamentais, tendo por diretrizes:",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "I –",
+     "texto": "a integração operacional do Poder Judiciário, do Ministério Público e da Defensoria Pública com as áreas de segurança pública, assistência social, saúde, educação, trabalho e habitação;",
+     "nivel": 1
+    },
+    {
+     "id": "b3",
+     "rotulo": "II –",
+     "texto": "a promoção de estudos e pesquisas, estatísticas e outras informações relevantes, com a perspectiva de gênero e de raça ou etnia, concernentes às causas, às conseqüências e à freqüência da violência doméstica e familiar contra a mulher, para a sistematização de dados, a serem unificados nacionalmente, e a avaliação periódica dos resultados das medidas adotadas;",
+     "nivel": 1
+    },
+    {
+     "id": "b4",
+     "rotulo": "III –",
+     "texto": "o respeito, nos meios de comunicação social, dos valores éticos e sociais da pessoa e da família, de forma a coibir os papéis estereotipados que legitimem ou exacerbem a violência doméstica e familiar, de acordo com o estabelecido no inciso III do art. 1º, no inciso IV do art. 3º e no inciso IV do art. 221 da Constituição Federal;",
+     "nivel": 1
+    },
+    {
+     "id": "b5",
+     "rotulo": "IV –",
+     "texto": "a implementação de atendimento policial especializado para as mulheres, em particular nas Delegacias de Atendimento à Mulher;",
+     "nivel": 1
+    },
+    {
+     "id": "b6",
+     "rotulo": "V –",
+     "texto": "a promoção e a realização de campanhas educativas de prevenção da violência doméstica e familiar contra a mulher, voltadas ao público escolar e à sociedade em geral, e a difusão desta Lei e dos instrumentos de proteção aos direitos humanos das mulheres;",
+     "nivel": 1
+    },
+    {
+     "id": "b7",
+     "rotulo": "VI –",
+     "texto": "a celebração de convênios, protocolos, ajustes, termos ou outros instrumentos de promoção de parceria entre órgãos governamentais ou entre estes e entidades não-governamentais, tendo por objetivo a implementação de programas de erradicação da violência doméstica e familiar contra a mulher;",
+     "nivel": 1
+    },
+    {
+     "id": "b8",
+     "rotulo": "VII –",
+     "texto": "a capacitação permanente das Polícias Civil e Militar, da Guarda Municipal, do Corpo de Bombeiros e dos profissionais pertencentes aos órgãos e às áreas enunciados no inciso I quanto às questões de gênero e de raça ou etnia;",
+     "nivel": 1
+    },
+    {
+     "id": "b9",
+     "rotulo": "VIII –",
+     "texto": "a promoção de programas educacionais que disseminem valores éticos de irrestrito respeito à dignidade da pessoa humana com a perspectiva de gênero e de raça ou etnia;",
+     "nivel": 1
+    },
+    {
+     "id": "b10",
+     "rotulo": "IX –",
+     "texto": "o destaque, nos currículos escolares de todos os níveis de ensino, para os conteúdos relativos aos direitos humanos, à eqüidade de gênero e de raça ou etnia e ao problema da violência doméstica e familiar contra a mulher.",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lei-11340:9",
+   "ordem": 9,
+   "numero": "9",
+   "rotulo": "Art. 9º",
+   "caminho": "TÍTULO III — DA ASSISTÊNCIA À MULHER EM SITUAÇÃO DE VIOLÊNCIA DOMÉSTICA E FAMILIAR › CAPÍTULO II — DA ASSISTÊNCIA À MULHER EM SITUAÇÃO DE VIOLÊNCIA DOMÉSTICA E FAMILIAR",
+   "incidencia": "alta",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "A assistência à mulher em situação de violência doméstica e familiar será prestada em caráter prioritário no Sistema Único de Saúde (SUS) e no Sistema Único de Segurança Pública (Susp), de forma articulada e conforme os princípios e as diretrizes previstos na Lei nº 8.742, de 7 de dezembro de 1993 (Lei Orgânica da Assistência Social), e em outras normas e políticas públicas de proteção, e emergencialmente, quando for o caso.",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "§ 1º",
+     "texto": "O juiz determinará, por prazo certo, a inclusão da mulher em situação de violência doméstica e familiar no cadastro de programas assistenciais do governo federal, estadual e municipal.",
+     "nivel": 1
+    },
+    {
+     "id": "b3",
+     "rotulo": "§ 2º",
+     "texto": "O juiz assegurará à mulher em situação de violência doméstica e familiar, para preservar sua integridade física e psicológica:",
+     "nivel": 1
+    },
+    {
+     "id": "b4",
+     "rotulo": "I –",
+     "texto": "acesso prioritário à remoção quando servidora pública, integrante da administração direta ou indireta;",
+     "nivel": 1
+    },
+    {
+     "id": "b5",
+     "rotulo": "II –",
+     "texto": "manutenção do vínculo trabalhista, quando necessário o afastamento do local de trabalho, por até seis meses.",
+     "nivel": 1
+    },
+    {
+     "id": "b6",
+     "rotulo": "III –",
+     "texto": "encaminhamento à assistência judiciária, quando for o caso, inclusive para eventual ajuizamento da ação de separação judicial, de divórcio, de anulação de casamento ou de dissolução de união estável perante o juízo competente.",
+     "nivel": 1
+    },
+    {
+     "id": "b7",
+     "rotulo": "§ 3º",
+     "texto": "A assistência à mulher em situação de violência doméstica e familiar compreenderá o acesso aos benefícios decorrentes do desenvolvimento científico e tecnológico, incluindo os serviços de contracepção de emergência, a profilaxia das Doenças Sexualmente Transmissíveis (DST) e da Síndrome da Imunodeficiência Adquirida (AIDS) e outros procedimentos médicos necessários e cabíveis nos casos de violência sexual.",
+     "nivel": 1
+    },
+    {
+     "id": "b8",
+     "rotulo": "§ 4º",
+     "texto": "Aquele que, por ação ou omissão, causar lesão, violência física, sexual ou psicológica e dano moral ou patrimonial a mulher fica obrigado a ressarcir todos os danos causados, inclusive ressarcir ao Sistema Único de Saúde (SUS), de acordo com a tabela SUS, os custos relativos aos serviços de saúde prestados para o total tratamento das vítimas em situação de violência doméstica e familiar, recolhidos os recursos assim arrecadados ao Fundo de Saúde do ente federado responsável pelas unidades de saúde que prestarem os serviços.",
+     "nivel": 1
+    },
+    {
+     "id": "b9",
+     "rotulo": "§ 5º",
+     "texto": "Os dispositivos de segurança destinados ao uso em caso de perigo iminente e disponibilizados para o monitoramento das vítimas de violência doméstica ou familiar amparadas por medidas protetivas terão seus custos ressarcidos pelo agressor.",
+     "nivel": 1
+    },
+    {
+     "id": "b10",
+     "rotulo": "§ 6º",
+     "texto": "O ressarcimento de que tratam os §§ 4º e 5º deste artigo não poderá importar ônus de qualquer natureza ao patrimônio da mulher e dos seus dependentes, nem configurar atenuante ou ensejar possibilidade de substituição da pena aplicada.",
+     "nivel": 1
+    },
+    {
+     "id": "b11",
+     "rotulo": "§ 7º",
+     "texto": "A mulher em situação de violência doméstica e familiar tem prioridade para matricular seus dependentes em instituição de educação básica mais próxima de seu domicílio, ou transferi-los para essa instituição, mediante a apresentação dos documentos comprobatórios do registro da ocorrência policial ou do processo de violência doméstica e familiar em curso.",
+     "nivel": 1
+    },
+    {
+     "id": "b12",
+     "rotulo": "§ 8º",
+     "texto": "Serão sigilosos os dados da ofendida e de seus dependentes matriculados ou transferidos conforme o disposto no § 7º deste artigo, e o acesso às informações será reservado ao juiz, ao Ministério Público e aos órgãos competentes do poder público.",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lei-11340:10",
+   "ordem": 10,
+   "numero": "10",
+   "rotulo": "Art. 10",
+   "caminho": "TÍTULO III — DA ASSISTÊNCIA À MULHER EM SITUAÇÃO DE VIOLÊNCIA DOMÉSTICA E FAMILIAR › CAPÍTULO III — DO ATENDIMENTO PELA AUTORIDADE POLICIAL",
+   "incidencia": "alta",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "Na hipótese da iminência ou da prática de violência doméstica e familiar contra a mulher, a autoridade policial que tomar conhecimento da ocorrência adotará, de imediato, as providências legais cabíveis.",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "Parágrafo único.",
+     "texto": "Aplica-se o disposto no caput deste artigo ao descumprimento de medida protetiva de urgência deferida.",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lei-11340:10-A",
+   "ordem": 11,
+   "numero": "10-A",
+   "rotulo": "Art. 10-A",
+   "caminho": "TÍTULO III — DA ASSISTÊNCIA À MULHER EM SITUAÇÃO DE VIOLÊNCIA DOMÉSTICA E FAMILIAR › CAPÍTULO III — DO ATENDIMENTO PELA AUTORIDADE POLICIAL",
+   "incidencia": "alta",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "É direito da mulher em situação de violência doméstica e familiar o atendimento policial e pericial especializado, ininterrupto e prestado por servidores - preferencialmente do sexo feminino - previamente capacitados.",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "§ 1º",
+     "texto": "A inquirição de mulher em situação de violência doméstica e familiar ou de testemunha de violência doméstica, quando se tratar de crime contra a mulher, obedecerá às seguintes diretrizes:",
+     "nivel": 1
+    },
+    {
+     "id": "b3",
+     "rotulo": "I –",
+     "texto": "salvaguarda da integridade física, psíquica e emocional da depoente, considerada a sua condição peculiar de pessoa em situação de violência doméstica e familiar;",
+     "nivel": 1
+    },
+    {
+     "id": "b4",
+     "rotulo": "II –",
+     "texto": "garantia de que, em nenhuma hipótese, a mulher em situação de violência doméstica e familiar, familiares e testemunhas terão contato direto com investigados ou suspeitos e pessoas a eles relacionadas;",
+     "nivel": 1
+    },
+    {
+     "id": "b5",
+     "rotulo": "III –",
+     "texto": "não revitimização da depoente, evitando sucessivas inquirições sobre o mesmo fato nos âmbitos criminal, cível e administrativo, bem como questionamentos sobre a vida privada.",
+     "nivel": 1
+    },
+    {
+     "id": "b6",
+     "rotulo": "§ 2º",
+     "texto": "Na inquirição de mulher em situação de violência doméstica e familiar ou de testemunha de delitos de que trata esta Lei, adotar-se-á, preferencialmente, o seguinte procedimento:",
+     "nivel": 1
+    },
+    {
+     "id": "b7",
+     "rotulo": "I –",
+     "texto": "a inquirição será feita em recinto especialmente projetado para esse fim, o qual conterá os equipamentos próprios e adequados à idade da mulher em situação de violência doméstica e familiar ou testemunha e ao tipo e à gravidade da violência sofrida;",
+     "nivel": 1
+    },
+    {
+     "id": "b8",
+     "rotulo": "II –",
+     "texto": "quando for o caso, a inquirição será intermediada por profissional especializado em violência doméstica e familiar designado pela autoridade judiciária ou policial;",
+     "nivel": 1
+    },
+    {
+     "id": "b9",
+     "rotulo": "III –",
+     "texto": "o depoimento será registrado em meio eletrônico ou magnético, devendo a degravação e a mídia integrar o inquérito.",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lei-11340:11",
+   "ordem": 12,
+   "numero": "11",
+   "rotulo": "Art. 11",
+   "caminho": "TÍTULO III — DA ASSISTÊNCIA À MULHER EM SITUAÇÃO DE VIOLÊNCIA DOMÉSTICA E FAMILIAR › CAPÍTULO III — DO ATENDIMENTO PELA AUTORIDADE POLICIAL",
+   "incidencia": "muito_alta",
+   "incidenciaNota": "Providências obrigatórias da autoridade policial no atendimento à ofendida (proteção, encaminhamento, transporte, informação de direitos); tema de aplicação prática direta para PC/PM, recorrente em bancas como CEBRASPE/FGV; sem estatística numérica pública disponível.",
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "No atendimento à mulher em situação de violência doméstica e familiar, a autoridade policial deverá, entre outras providências:",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "I –",
+     "texto": "garantir proteção policial, quando necessário, comunicando de imediato ao Ministério Público e ao Poder Judiciário;",
+     "nivel": 1
+    },
+    {
+     "id": "b3",
+     "rotulo": "II –",
+     "texto": "encaminhar a ofendida ao hospital ou posto de saúde e ao Instituto Médico Legal;",
+     "nivel": 1
+    },
+    {
+     "id": "b4",
+     "rotulo": "III –",
+     "texto": "fornecer transporte para a ofendida e seus dependentes para abrigo ou local seguro, quando houver risco de vida;",
+     "nivel": 1
+    },
+    {
+     "id": "b5",
+     "rotulo": "IV –",
+     "texto": "se necessário, acompanhar a ofendida para assegurar a retirada de seus pertences do local da ocorrência ou do domicílio familiar;",
+     "nivel": 1
+    },
+    {
+     "id": "b6",
+     "rotulo": "V –",
+     "texto": "informar à ofendida os direitos a ela conferidos nesta Lei e os serviços disponíveis, inclusive os de assistência judiciária para o eventual ajuizamento perante o juízo competente da ação de separação judicial, de divórcio, de anulação de casamento ou de dissolução de união estável.",
+     "nivel": 1
+    },
+    {
+     "id": "b7",
+     "rotulo": "Parágrafo único.",
+     "texto": "Verificados indícios de redução a condição análoga à de escravo ou outra forma de violência doméstica contra a trabalhadora doméstica, a autoridade policial que tomar conhecimento da ocorrência deverá comunicá-la, em até 48 (quarenta e oito) horas, à unidade regional do Ministério do Trabalho e Emprego e ao Ministério Público do Trabalho.",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lei-11340:12",
+   "ordem": 13,
+   "numero": "12",
+   "rotulo": "Art. 12",
+   "caminho": "TÍTULO III — DA ASSISTÊNCIA À MULHER EM SITUAÇÃO DE VIOLÊNCIA DOMÉSTICA E FAMILIAR › CAPÍTULO III — DO ATENDIMENTO PELA AUTORIDADE POLICIAL",
+   "incidencia": "muito_alta",
+   "incidenciaNota": "Procedimentos do delegado após o registro da ocorrência (oitiva, provas, prazo de 48h para remessa do pedido de medida protetiva ao juiz, exame de corpo de delito); um dos artigos mais decorados por candidatos a Delegado/Investigador; sem estatística numérica pública disponível.",
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "Em todos os casos de violência doméstica e familiar contra a mulher, feito o registro da ocorrência, deverá a autoridade policial adotar, de imediato, os seguintes procedimentos, sem prejuízo daqueles previstos no Código de Processo Penal:",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "I –",
+     "texto": "ouvir a ofendida, lavrar o boletim de ocorrência e tomar a representação a termo, se apresentada;",
+     "nivel": 1
+    },
+    {
+     "id": "b3",
+     "rotulo": "II –",
+     "texto": "colher todas as provas que servirem para o esclarecimento do fato e de suas circunstâncias;",
+     "nivel": 1
+    },
+    {
+     "id": "b4",
+     "rotulo": "III –",
+     "texto": "remeter, no prazo de 48 (quarenta e oito) horas, expediente apartado ao juiz com o pedido da ofendida, para a concessão de medidas protetivas de urgência;",
+     "nivel": 1
+    },
+    {
+     "id": "b5",
+     "rotulo": "IV –",
+     "texto": "determinar que se proceda ao exame de corpo de delito da ofendida e requisitar outros exames periciais necessários;",
+     "nivel": 1
+    },
+    {
+     "id": "b6",
+     "rotulo": "V –",
+     "texto": "ouvir o agressor e as testemunhas;",
+     "nivel": 1
+    },
+    {
+     "id": "b7",
+     "rotulo": "VI –",
+     "texto": "ordenar a identificação do agressor e fazer juntar aos autos sua folha de antecedentes criminais, indicando a existência de mandado de prisão ou registro de outras ocorrências policiais contra ele;",
+     "nivel": 1
+    },
+    {
+     "id": "b8",
+     "rotulo": null,
+     "texto": "VI-A - verificar se o agressor possui registro de porte ou posse de arma de fogo e, na hipótese de existência, juntar aos autos essa informação, bem como notificar a ocorrência à instituição responsável pela concessão do registro ou da emissão do porte, nos termos da Lei nº 10.826, de 22 de dezembro de 2003 (Estatuto do Desarmamento);",
+     "nivel": 0
+    },
+    {
+     "id": "b9",
+     "rotulo": "VII –",
+     "texto": "remeter, no prazo legal, os autos do inquérito policial ao juiz e ao Ministério Público.",
+     "nivel": 1
+    },
+    {
+     "id": "b10",
+     "rotulo": "§ 1º",
+     "texto": "O pedido da ofendida será tomado a termo pela autoridade policial e deverá conter:",
+     "nivel": 1
+    },
+    {
+     "id": "b11",
+     "rotulo": "I –",
+     "texto": "qualificação da ofendida e do agressor;",
+     "nivel": 1
+    },
+    {
+     "id": "b12",
+     "rotulo": "II –",
+     "texto": "nome e idade dos dependentes;",
+     "nivel": 1
+    },
+    {
+     "id": "b13",
+     "rotulo": "III –",
+     "texto": "descrição sucinta do fato e das medidas protetivas solicitadas pela ofendida.",
+     "nivel": 1
+    },
+    {
+     "id": "b14",
+     "rotulo": "IV –",
+     "texto": "informação sobre a condição de a ofendida ser pessoa com deficiência e se da violência sofrida resultou deficiência ou agravamento de deficiência preexistente.",
+     "nivel": 1
+    },
+    {
+     "id": "b15",
+     "rotulo": "§ 2º",
+     "texto": "A autoridade policial deverá anexar ao documento referido no § 1º o boletim de ocorrência e cópia de todos os documentos disponíveis em posse da ofendida.",
+     "nivel": 1
+    },
+    {
+     "id": "b16",
+     "rotulo": "§ 3º",
+     "texto": "Serão admitidos como meios de prova os laudos ou prontuários médicos fornecidos por hospitais e postos de saúde.",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lei-11340:12-A",
+   "ordem": 14,
+   "numero": "12-A",
+   "rotulo": "Art. 12-A",
+   "caminho": "TÍTULO III — DA ASSISTÊNCIA À MULHER EM SITUAÇÃO DE VIOLÊNCIA DOMÉSTICA E FAMILIAR › CAPÍTULO III — DO ATENDIMENTO PELA AUTORIDADE POLICIAL",
+   "incidencia": "alta",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "Os Estados e o Distrito Federal, na formulação de suas políticas e planos de atendimento à mulher em situação de violência doméstica e familiar, darão prioridade, no âmbito da Polícia Civil, à criação de Delegacias Especializadas de Atendimento à Mulher (Deams), de Núcleos Investigativos de Feminicídio e de equipes especializadas para o atendimento e a investigação das violências graves contra a mulher.",
+     "nivel": 0
+    }
+   ]
+  },
+  {
+   "key": "lei-11340:12-B",
+   "ordem": 15,
+   "numero": "12-B",
+   "rotulo": "Art. 12-B",
+   "caminho": "TÍTULO III — DA ASSISTÊNCIA À MULHER EM SITUAÇÃO DE VIOLÊNCIA DOMÉSTICA E FAMILIAR › CAPÍTULO III — DO ATENDIMENTO PELA AUTORIDADE POLICIAL",
+   "incidencia": "alta",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "(VETADO).",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "§ 1º",
+     "texto": "(VETADO).",
+     "nivel": 1
+    },
+    {
+     "id": "b3",
+     "rotulo": "§ 2º",
+     "texto": "(VETADO).",
+     "nivel": 1
+    },
+    {
+     "id": "b4",
+     "rotulo": "§ 3º",
+     "texto": "A autoridade policial poderá requisitar os serviços públicos necessários à defesa da mulher em situação de violência doméstica e familiar e de seus dependentes.",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lei-11340:12-C",
+   "ordem": 16,
+   "numero": "12-C",
+   "rotulo": "Art. 12-C",
+   "caminho": "TÍTULO III — DA ASSISTÊNCIA À MULHER EM SITUAÇÃO DE VIOLÊNCIA DOMÉSTICA E FAMILIAR › CAPÍTULO III — DO ATENDIMENTO PELA AUTORIDADE POLICIAL",
+   "incidencia": "muito_alta",
+   "incidenciaNota": "Afastamento imediato do agressor do lar pelo delegado ou policial quando o Município não for sede de comarca; teve a constitucionalidade da atuação supletiva de delegados e policiais confirmada pelo STF na ADI 6138/DF (rel. Min. Alexandre de Moraes, j. 23.3.2022), o que reforça sua cobrança em provas de carreira policial.",
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "Verificada a existência de risco atual ou iminente à vida ou à integridade física, sexual, psicológica, moral ou patrimonial da mulher em situação de violência doméstica e familiar, ou de seus dependentes, o agressor será imediatamente afastado do lar, domicílio ou local de convivência com a ofendida:",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "I –",
+     "texto": "pela autoridade judicial;",
+     "nivel": 1
+    },
+    {
+     "id": "b3",
+     "rotulo": "II –",
+     "texto": "pelo delegado de polícia, quando o Município não for sede de comarca; ou",
+     "nivel": 1
+    },
+    {
+     "id": "b4",
+     "rotulo": "III –",
+     "texto": "pelo policial, quando o Município não for sede de comarca e não houver delegado disponível no momento da denúncia.",
+     "nivel": 1
+    },
+    {
+     "id": "b5",
+     "rotulo": "§ 1º",
+     "texto": "Nas hipóteses dos incisos II e III do caput deste artigo, o juiz será comunicado no prazo máximo de 24 (vinte e quatro) horas e decidirá, em igual prazo, sobre a manutenção ou a revogação da medida aplicada, devendo dar ciência ao Ministério Público concomitantemente.",
+     "nivel": 1
+    },
+    {
+     "id": "b6",
+     "rotulo": "§ 2º",
+     "texto": "Nos casos de risco à integridade física da ofendida ou à efetividade da medida protetiva de urgência, não será concedida liberdade provisória ao preso.",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lei-11340:12-D",
+   "ordem": 17,
+   "numero": "12-D",
+   "rotulo": "Art. 12-D",
+   "caminho": "TÍTULO III — DA ASSISTÊNCIA À MULHER EM SITUAÇÃO DE VIOLÊNCIA DOMÉSTICA E FAMILIAR › CAPÍTULO III — DO ATENDIMENTO PELA AUTORIDADE POLICIAL",
+   "incidencia": "alta",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "Verificada a existência de risco atual ou iminente à vida ou à integridade física ou psicológica da mulher em situação de violência doméstica e familiar, ou de seus dependentes, o agressor será imediatamente submetido à monitoração eletrônica:",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "I –",
+     "texto": "pela autoridade judicial;",
+     "nivel": 1
+    },
+    {
+     "id": "b3",
+     "rotulo": "II –",
+     "texto": "pelo delegado de polícia, quando o Município não for sede de comarca.",
+     "nivel": 1
+    },
+    {
+     "id": "b4",
+     "rotulo": "Parágrafo único.",
+     "texto": "Na hipótese do inciso II do caput deste artigo, o juiz será comunicado no prazo máximo de 24 (vinte e quatro) horas e decidirá, em igual prazo, sobre a manutenção ou a revogação da medida aplicada, devendo dar ciência ao Ministério Público concomitantemente.",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lei-11340:13",
+   "ordem": 18,
+   "numero": "13",
+   "rotulo": "Art. 13",
+   "caminho": "TÍTULO IV — DOS PROCEDIMENTOS › CAPÍTULO I — DISPOSIÇÕES GERAIS",
+   "incidencia": "alta",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "Ao processo, ao julgamento e à execução das causas cíveis e criminais decorrentes da prática de violência doméstica e familiar contra a mulher aplicar-se-ão as normas dos Códigos de Processo Penal e Processo Civil e da legislação específica relativa à criança, ao adolescente e ao idoso que não conflitarem com o estabelecido nesta Lei.",
+     "nivel": 0
+    }
+   ]
+  },
+  {
+   "key": "lei-11340:14",
+   "ordem": 19,
+   "numero": "14",
+   "rotulo": "Art. 14",
+   "caminho": "TÍTULO IV — DOS PROCEDIMENTOS › CAPÍTULO I — DISPOSIÇÕES GERAIS",
+   "incidencia": "alta",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "Os Juizados de Violência Doméstica e Familiar contra a Mulher, órgãos da Justiça Ordinária com competência cível e criminal, poderão ser criados pela União, no Distrito Federal e nos Territórios, e pelos Estados, para o processo, o julgamento e a execução das causas decorrentes da prática de violência doméstica e familiar contra a mulher.",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "Parágrafo único.",
+     "texto": "Os atos processuais poderão realizar-se em horário noturno, conforme dispuserem as normas de organização judiciária.",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lei-11340:14-A",
+   "ordem": 20,
+   "numero": "14-A",
+   "rotulo": "Art. 14-A",
+   "caminho": "TÍTULO IV — DOS PROCEDIMENTOS › CAPÍTULO I — DISPOSIÇÕES GERAIS",
+   "incidencia": "media",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "A ofendida tem a opção de propor ação de divórcio ou de dissolução de união estável no Juizado de Violência Doméstica e Familiar contra a Mulher.",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "§ 1º",
+     "texto": "Exclui-se da competência dos Juizados de Violência Doméstica e Familiar contra a Mulher a pretensão relacionada à partilha de bens.",
+     "nivel": 1
+    },
+    {
+     "id": "b3",
+     "rotulo": "§ 2º",
+     "texto": "Iniciada a situação de violência doméstica e familiar após o ajuizamento da ação de divórcio ou de dissolução de união estável, a ação terá preferência no juízo onde estiver.",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lei-11340:15",
+   "ordem": 21,
+   "numero": "15",
+   "rotulo": "Art. 15",
+   "caminho": "TÍTULO IV — DOS PROCEDIMENTOS › CAPÍTULO I — DISPOSIÇÕES GERAIS",
+   "incidencia": "alta",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "É competente, por opção da ofendida, para os processos cíveis regidos por esta Lei, o Juizado:",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "I –",
+     "texto": "do seu domicílio ou de sua residência;",
+     "nivel": 1
+    },
+    {
+     "id": "b3",
+     "rotulo": "II –",
+     "texto": "do lugar do fato em que se baseou a demanda;",
+     "nivel": 1
+    },
+    {
+     "id": "b4",
+     "rotulo": "III –",
+     "texto": "do domicílio do agressor.",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lei-11340:16",
+   "ordem": 22,
+   "numero": "16",
+   "rotulo": "Art. 16",
+   "caminho": "TÍTULO IV — DOS PROCEDIMENTOS › CAPÍTULO I — DISPOSIÇÕES GERAIS",
+   "incidencia": "muito_alta",
+   "incidenciaNota": "Renúncia à representação só perante o juiz, em audiência especialmente designada, antes do recebimento da denúncia e ouvido o MP — clássica pegadinha (não há renúncia perante a autoridade policial); tema recorrente citado por múltiplas bancas de concurso (Estratégia Concursos, TEC Concursos).",
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "Nas ações penais públicas condicionadas à representação da ofendida de que trata esta Lei, só será admitida a renúncia à representação perante o juiz, em audiência especialmente designada com tal finalidade, antes do recebimento da denúncia e ouvido o Ministério Público.",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "Parágrafo único.",
+     "texto": "A audiência prevista no caput deste artigo tem por objetivo confirmar a retratação da vítima, não a representação, e somente será designada pelo juiz mediante manifestação expressa de seu desejo de se retratar, apresentada por escrito ou oralmente antes do recebimento da denúncia, devendo a retratação ser devidamente registrada nos autos.",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lei-11340:16-A",
+   "ordem": 23,
+   "numero": "16-A",
+   "rotulo": "Art. 16-A",
+   "caminho": "TÍTULO IV — DOS PROCEDIMENTOS › CAPÍTULO I — DISPOSIÇÕES GERAIS",
+   "incidencia": "media",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "Nos crimes praticados no âmbito de violência doméstica e familiar contra a mulher, a ofendida decai do direito de queixa ou de representação se não o exerce no prazo de 12 (doze) meses, contado do dia em que veio a saber quem é o autor do crime, ou, no caso do § 3º do art. 100 do Decreto-Lei nº 2.848, de 7 de dezembro de 1940 (Código Penal), do dia em que se esgota o prazo para oferecimento da denúncia.",
+     "nivel": 0
+    }
+   ]
+  },
+  {
+   "key": "lei-11340:17",
+   "ordem": 24,
+   "numero": "17",
+   "rotulo": "Art. 17",
+   "caminho": "TÍTULO IV — DOS PROCEDIMENTOS › CAPÍTULO I — DISPOSIÇÕES GERAIS",
+   "incidencia": "alta",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "É vedada a aplicação, nos casos de violência doméstica e familiar contra a mulher, de penas de cesta básica ou outras de prestação pecuniária, bem como a substituição de pena que implique o pagamento isolado de multa.",
+     "nivel": 0
+    }
+   ]
+  },
+  {
+   "key": "lei-11340:17-A",
+   "ordem": 25,
+   "numero": "17-A",
+   "rotulo": "Art. 17-A",
+   "caminho": "TÍTULO IV — DOS PROCEDIMENTOS › CAPÍTULO I — DISPOSIÇÕES GERAIS",
+   "incidencia": "media",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "O nome da ofendida ficará sob sigilo nos processos em que se apuram crimes praticados no contexto de violência doméstica e familiar contra a mulher.",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "Parágrafo único.",
+     "texto": "O sigilo referido no caput deste artigo não abrange o nome do autor do fato, tampouco os demais dados do processo.",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lei-11340:18",
+   "ordem": 26,
+   "numero": "18",
+   "rotulo": "Art. 18",
+   "caminho": "TÍTULO IV — DOS PROCEDIMENTOS › CAPÍTULO II — DAS MEDIDAS PROTETIVAS DE URGÊNCIA › Seção I — Disposições Gerais",
+   "incidencia": "muito_alta",
+   "incidenciaNota": "Prazo de 48h para o juiz apreciar o pedido de medidas protetivas e providências correlatas (encaminhamento à assistência judiciária, comunicação ao MP, apreensão de arma de fogo); um dos prazos mais cobrados da lei.",
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "Recebido o expediente com o pedido da ofendida, caberá ao juiz, no prazo de 48 (quarenta e oito) horas:",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "I –",
+     "texto": "conhecer do expediente e do pedido e decidir sobre as medidas protetivas de urgência;",
+     "nivel": 1
+    },
+    {
+     "id": "b3",
+     "rotulo": "II –",
+     "texto": "determinar o encaminhamento da ofendida ao órgão de assistência judiciária, quando for o caso, inclusive para o ajuizamento da ação de separação judicial, de divórcio, de anulação de casamento ou de dissolução de união estável perante o juízo competente;",
+     "nivel": 1
+    },
+    {
+     "id": "b4",
+     "rotulo": "III –",
+     "texto": "comunicar ao Ministério Público para que adote as providências cabíveis.",
+     "nivel": 1
+    },
+    {
+     "id": "b5",
+     "rotulo": "IV –",
+     "texto": "determinar a apreensão imediata de arma de fogo sob a posse do agressor.",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lei-11340:19",
+   "ordem": 27,
+   "numero": "19",
+   "rotulo": "Art. 19",
+   "caminho": "TÍTULO IV — DOS PROCEDIMENTOS › CAPÍTULO II — DAS MEDIDAS PROTETIVAS DE URGÊNCIA › Seção I — Disposições Gerais",
+   "incidencia": "muito_alta",
+   "incidenciaNota": "Regras gerais das medidas protetivas de urgência (concessão pelo juiz a requerimento do MP ou da ofendida, possibilidade de concessão imediata sem oitiva das partes, cumulação e substituição); base para a maioria das questões sobre medidas protetivas.",
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "As medidas protetivas de urgência poderão ser concedidas pelo juiz, a requerimento do Ministério Público ou a pedido da ofendida.",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "§ 1º",
+     "texto": "As medidas protetivas de urgência poderão ser concedidas de imediato, independentemente de audiência das partes e de manifestação do Ministério Público, devendo este ser prontamente comunicado.",
+     "nivel": 1
+    },
+    {
+     "id": "b3",
+     "rotulo": "§ 2º",
+     "texto": "As medidas protetivas de urgência serão aplicadas isolada ou cumulativamente, e poderão ser substituídas a qualquer tempo por outras de maior eficácia, sempre que os direitos reconhecidos nesta Lei forem ameaçados ou violados.",
+     "nivel": 1
+    },
+    {
+     "id": "b4",
+     "rotulo": "§ 3º",
+     "texto": "Poderá o juiz, a requerimento do Ministério Público ou a pedido da ofendida, conceder novas medidas protetivas de urgência ou rever aquelas já concedidas, se entender necessário à proteção da ofendida, de seus familiares e de seu patrimônio, ouvido o Ministério Público.",
+     "nivel": 1
+    },
+    {
+     "id": "b5",
+     "rotulo": "§ 4º",
+     "texto": "As medidas protetivas de urgência serão concedidas em juízo de cognição sumária a partir do depoimento da ofendida perante a autoridade policial ou da apresentação de suas alegações escritas e poderão ser indeferidas no caso de avaliação pela autoridade de inexistência de risco à integridade física, psicológica, sexual, patrimonial ou moral da ofendida ou de seus dependentes.",
+     "nivel": 1
+    },
+    {
+     "id": "b6",
+     "rotulo": "§ 5º",
+     "texto": "As medidas protetivas de urgência serão concedidas independentemente da tipificação penal da violência, do ajuizamento de ação penal ou cível, da existência de inquérito policial ou do registro de boletim de ocorrência.",
+     "nivel": 1
+    },
+    {
+     "id": "b7",
+     "rotulo": "§ 6º",
+     "texto": "As medidas protetivas de urgência vigorarão enquanto persistir risco à integridade física, psicológica, sexual, patrimonial ou moral da ofendida ou de seus dependentes.",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lei-11340:20",
+   "ordem": 28,
+   "numero": "20",
+   "rotulo": "Art. 20",
+   "caminho": "TÍTULO IV — DOS PROCEDIMENTOS › CAPÍTULO II — DAS MEDIDAS PROTETIVAS DE URGÊNCIA › Seção I — Disposições Gerais",
+   "incidencia": "muito_alta",
+   "incidenciaNota": "Prisão preventiva do agressor, decretável de ofício pelo juiz, a requerimento do MP ou mediante representação da autoridade policial, em qualquer fase do inquérito ou da instrução; tema clássico de prova de carreira policial.",
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "Em qualquer fase do inquérito policial ou da instrução criminal, caberá a prisão preventiva do agressor, decretada pelo juiz, de ofício, a requerimento do Ministério Público ou mediante representação da autoridade policial.",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "Parágrafo único.",
+     "texto": "O juiz poderá revogar a prisão preventiva se, no curso do processo, verificar a falta de motivo para que subsista, bem como de novo decretá-la, se sobrevierem razões que a justifiquem.",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lei-11340:21",
+   "ordem": 29,
+   "numero": "21",
+   "rotulo": "Art. 21",
+   "caminho": "TÍTULO IV — DOS PROCEDIMENTOS › CAPÍTULO II — DAS MEDIDAS PROTETIVAS DE URGÊNCIA › Seção I — Disposições Gerais",
+   "incidencia": "alta",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "A ofendida deverá ser notificada dos atos processuais relativos ao agressor, especialmente dos pertinentes ao ingresso e à saída da prisão, sem prejuízo da intimação do advogado constituído ou do defensor público.",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "Parágrafo único.",
+     "texto": "A ofendida não poderá entregar intimação ou notificação ao agressor.",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lei-11340:22",
+   "ordem": 30,
+   "numero": "22",
+   "rotulo": "Art. 22",
+   "caminho": "TÍTULO IV — DOS PROCEDIMENTOS › CAPÍTULO II — DAS MEDIDAS PROTETIVAS DE URGÊNCIA › Seção II — Das Medidas Protetivas de Urgência que Obrigam o Agressor",
+   "incidencia": "muito_alta",
+   "incidenciaNota": "Rol das medidas protetivas que obrigam o agressor (afastamento do lar, proibição de aproximação/contato, restrição de porte de arma, monitoração eletrônica etc.); o artigo mais extenso e mais decorado da lei, com incidência muito alta em provas objetivas.",
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "Constatada a prática de violência doméstica e familiar contra a mulher, nos termos desta Lei, o juiz poderá aplicar, de imediato, ao agressor, em conjunto ou separadamente, as seguintes medidas protetivas de urgência, entre outras:",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "I –",
+     "texto": "suspensão da posse ou restrição do porte de armas, com comunicação ao órgão competente, nos termos da Lei nº 10.826, de 22 de dezembro de 2003;",
+     "nivel": 1
+    },
+    {
+     "id": "b3",
+     "rotulo": "II –",
+     "texto": "afastamento do lar, domicílio ou local de convivência com a ofendida;",
+     "nivel": 1
+    },
+    {
+     "id": "b4",
+     "rotulo": "III –",
+     "texto": "proibição de determinadas condutas, entre as quais:",
+     "nivel": 1
+    },
+    {
+     "id": "b5",
+     "rotulo": "a)",
+     "texto": "aproximação da ofendida, de seus familiares e das testemunhas, fixando o limite mínimo de distância entre estes e o agressor;",
+     "nivel": 2
+    },
+    {
+     "id": "b6",
+     "rotulo": "b)",
+     "texto": "contato com a ofendida, seus familiares e testemunhas por qualquer meio de comunicação;",
+     "nivel": 2
+    },
+    {
+     "id": "b7",
+     "rotulo": "c)",
+     "texto": "freqüentação de determinados lugares a fim de preservar a integridade física e psicológica da ofendida;",
+     "nivel": 2
+    },
+    {
+     "id": "b8",
+     "rotulo": "IV –",
+     "texto": "restrição ou suspensão de visitas aos dependentes menores, ouvida a equipe de atendimento multidisciplinar ou serviço similar;",
+     "nivel": 1
+    },
+    {
+     "id": "b9",
+     "rotulo": "V –",
+     "texto": "prestação de alimentos provisionais ou provisórios.",
+     "nivel": 1
+    },
+    {
+     "id": "b10",
+     "rotulo": "VI –",
+     "texto": "comparecimento do agressor a programas de recuperação e reeducação; e",
+     "nivel": 1
+    },
+    {
+     "id": "b11",
+     "rotulo": "VII –",
+     "texto": "acompanhamento psicossocial do agressor, por meio de atendimento individual e/ou em grupo de apoio.",
+     "nivel": 1
+    },
+    {
+     "id": "b12",
+     "rotulo": "VIII –",
+     "texto": "monitoração eletrônica, disponibilizando-se à vítima aplicação ou dispositivo de segurança que alerte sobre eventual aproximação do agressor.",
+     "nivel": 1
+    },
+    {
+     "id": "b13",
+     "rotulo": "§ 1º",
+     "texto": "As medidas referidas neste artigo não impedem a aplicação de outras previstas na legislação em vigor, sempre que a segurança da ofendida ou as circunstâncias o exigirem, devendo a providência ser comunicada ao Ministério Público.",
+     "nivel": 1
+    },
+    {
+     "id": "b14",
+     "rotulo": "§ 2º",
+     "texto": "Na hipótese de aplicação do inciso I, encontrando-se o agressor nas condições mencionadas no caput e incisos do art. 6º da Lei nº 10.826, de 22 de dezembro de 2003, o juiz comunicará ao respectivo órgão, corporação ou instituição as medidas protetivas de urgência concedidas e determinará a restrição do porte de armas, ficando o superior imediato do agressor responsável pelo cumprimento da determinação judicial, sob pena de incorrer nos crimes de prevaricação ou de desobediência, conforme o caso.",
+     "nivel": 1
+    },
+    {
+     "id": "b15",
+     "rotulo": "§ 3º",
+     "texto": "Para garantir a efetividade das medidas protetivas de urgência, poderá o juiz requisitar, a qualquer momento, auxílio da força policial.",
+     "nivel": 1
+    },
+    {
+     "id": "b16",
+     "rotulo": "§ 4º",
+     "texto": "Na aplicação das medidas protetivas de urgência, o juiz concederá a tutela específica ou determinará providências que assegurem a obtenção de tutela pelo resultado prático equivalente.",
+     "nivel": 1
+    },
+    {
+     "id": "b17",
+     "rotulo": "§ 5º",
+     "texto": "(Revogado)",
+     "nivel": 1
+    },
+    {
+     "id": "b18",
+     "rotulo": "§ 6º",
+     "texto": "A aplicação da medida prevista no inciso VIII do caput deste artigo terá prioridade nos casos em que houver descumprimento de medidas protetivas anteriormente impostas ou quando for verificado risco iminente à integridade física ou psicológica da vítima.",
+     "nivel": 1
+    },
+    {
+     "id": "b19",
+     "rotulo": "§ 7º",
+     "texto": "Para a efetivação da medida prevista no inciso VIII do caput deste artigo, a autoridade competente promoverá a instalação do equipamento e instruirá o agressor sobre o seu funcionamento e as áreas de exclusão onde não poderá circular, conforme definido na decisão da autoridade judicial, devendo a ciência constar de termo nos autos.",
+     "nivel": 1
+    },
+    {
+     "id": "b20",
+     "rotulo": "§ 8º",
+     "texto": "O sistema de monitoração eletrônica de que trata o inciso VIII do caput deste artigo deverá emitir alerta automático e simultâneo à vítima e à unidade policial mais próxima sempre que o agressor romper o perímetro de exclusão fixado judicialmente.",
+     "nivel": 1
+    },
+    {
+     "id": "b21",
+     "rotulo": "§ 9º",
+     "texto": "Nos casos previstos no § 6º deste artigo, a decisão judicial que deixar de aplicar a medida protetiva de monitoração eletrônica deverá apresentar fundamentação expressa quanto às razões da não aplicação da medida.",
+     "nivel": 1
+    },
+    {
+     "id": "b22",
+     "rotulo": "§ 10º",
+     "texto": "As medidas protetivas de natureza cível, inclusive as de prestação de alimentos provisionais ou provisórios, constituem título executivo judicial de pleno direito, dispensando a propositura de ação principal.",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lei-11340:23",
+   "ordem": 31,
+   "numero": "23",
+   "rotulo": "Art. 23",
+   "caminho": "TÍTULO IV — DOS PROCEDIMENTOS › CAPÍTULO II — DAS MEDIDAS PROTETIVAS DE URGÊNCIA › Seção III — Das Medidas Protetivas de Urgência à Ofendida",
+   "incidencia": "alta",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "Poderá o juiz, quando necessário, sem prejuízo de outras medidas:",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "I –",
+     "texto": "encaminhar a ofendida e seus dependentes a programa oficial ou comunitário de proteção ou de atendimento;",
+     "nivel": 1
+    },
+    {
+     "id": "b3",
+     "rotulo": "II –",
+     "texto": "determinar a recondução da ofendida e a de seus dependentes ao respectivo domicílio, após afastamento do agressor;",
+     "nivel": 1
+    },
+    {
+     "id": "b4",
+     "rotulo": "III –",
+     "texto": "determinar o afastamento da ofendida do lar, sem prejuízo dos direitos relativos a bens, guarda dos filhos e alimentos;",
+     "nivel": 1
+    },
+    {
+     "id": "b5",
+     "rotulo": "IV –",
+     "texto": "determinar a separação de corpos.",
+     "nivel": 1
+    },
+    {
+     "id": "b6",
+     "rotulo": "V –",
+     "texto": "determinar a matrícula dos dependentes da ofendida em instituição de educação básica mais próxima do seu domicílio, ou a transferência deles para essa instituição, independentemente da existência de vaga.",
+     "nivel": 1
+    },
+    {
+     "id": "b7",
+     "rotulo": "VI –",
+     "texto": "conceder à ofendida auxílio-aluguel, com valor fixado em função de sua situação de vulnerabilidade social e econômica, por período não superior a 6 (seis) meses.",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lei-11340:24",
+   "ordem": 32,
+   "numero": "24",
+   "rotulo": "Art. 24",
+   "caminho": "TÍTULO IV — DOS PROCEDIMENTOS › CAPÍTULO II — DAS MEDIDAS PROTETIVAS DE URGÊNCIA › Seção III — Das Medidas Protetivas de Urgência à Ofendida",
+   "incidencia": "alta",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "Para a proteção patrimonial dos bens da sociedade conjugal ou daqueles de propriedade particular da mulher, o juiz poderá determinar, liminarmente, as seguintes medidas, entre outras:",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "I –",
+     "texto": "restituição de bens indevidamente subtraídos pelo agressor à ofendida;",
+     "nivel": 1
+    },
+    {
+     "id": "b3",
+     "rotulo": "II –",
+     "texto": "proibição temporária para a celebração de atos e contratos de compra, venda e locação de propriedade em comum, salvo expressa autorização judicial;",
+     "nivel": 1
+    },
+    {
+     "id": "b4",
+     "rotulo": "III –",
+     "texto": "suspensão das procurações conferidas pela ofendida ao agressor;",
+     "nivel": 1
+    },
+    {
+     "id": "b5",
+     "rotulo": "IV –",
+     "texto": "prestação de caução provisória, mediante depósito judicial, por perdas e danos materiais decorrentes da prática de violência doméstica e familiar contra a ofendida.",
+     "nivel": 1
+    },
+    {
+     "id": "b6",
+     "rotulo": "Parágrafo único.",
+     "texto": "Deverá o juiz oficiar ao cartório competente para os fins previstos nos incisos II e III deste artigo.",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lei-11340:24-A",
+   "ordem": 33,
+   "numero": "24-A",
+   "rotulo": "Art. 24-A",
+   "caminho": "TÍTULO IV — DOS PROCEDIMENTOS › CAPÍTULO II — DAS MEDIDAS PROTETIVAS DE URGÊNCIA › Seção IV — Do Crime de Descumprimento de Medidas Protetivas de Urgência — Descumprimento de Medidas Protetivas de Urgência",
+   "incidencia": "muito_alta",
+   "incidenciaNota": "Crime autônomo de descumprimento de medida protetiva de urgência (pena de reclusão de 2 a 5 anos e multa), incluído pela Lei nº 13.641/2018; recorrente em provas de carreira policial por envolver flagrante e competência para concessão de fiança apenas pela autoridade judicial.",
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "Descumprir decisão judicial que defere medidas protetivas de urgência previstas nesta Lei:",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": null,
+     "texto": "Pena – reclusão, de 2 (dois) a 5 (cinco) anos, e multa.",
+     "nivel": 0
+    },
+    {
+     "id": "b3",
+     "rotulo": "§ 1º",
+     "texto": "A configuração do crime independe da competência civil ou criminal do juiz que deferiu as medidas.",
+     "nivel": 1
+    },
+    {
+     "id": "b4",
+     "rotulo": "§ 2º",
+     "texto": "Na hipótese de prisão em flagrante, apenas a autoridade judicial poderá conceder fiança.",
+     "nivel": 1
+    },
+    {
+     "id": "b5",
+     "rotulo": "§ 3º",
+     "texto": "O disposto neste artigo não exclui a aplicação de outras sanções cabíveis.",
+     "nivel": 1
+    },
+    {
+     "id": "b6",
+     "rotulo": "§ 4º",
+     "texto": "A pena será aumentada de 1/3 (um terço) até a metade se o descumprimento decorrer da violação das áreas de exclusão monitoradas eletronicamente ou da remoção, violação ou alteração do dispositivo de monitoração sem autorização judicial.",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lei-11340:25",
+   "ordem": 34,
+   "numero": "25",
+   "rotulo": "Art. 25",
+   "caminho": "TÍTULO IV — DOS PROCEDIMENTOS › CAPÍTULO III — DA ATUAÇÃO DO MINISTÉRIO PÚBLICO",
+   "incidencia": "alta",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "O Ministério Público intervirá, quando não for parte, nas causas cíveis e criminais decorrentes da violência doméstica e familiar contra a mulher.",
+     "nivel": 0
+    }
+   ]
+  },
+  {
+   "key": "lei-11340:26",
+   "ordem": 35,
+   "numero": "26",
+   "rotulo": "Art. 26",
+   "caminho": "TÍTULO IV — DOS PROCEDIMENTOS › CAPÍTULO III — DA ATUAÇÃO DO MINISTÉRIO PÚBLICO",
+   "incidencia": "alta",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "Caberá ao Ministério Público, sem prejuízo de outras atribuições, nos casos de violência doméstica e familiar contra a mulher, quando necessário:",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "I –",
+     "texto": "requisitar força policial e serviços públicos de saúde, de educação, de assistência social e de segurança, entre outros;",
+     "nivel": 1
+    },
+    {
+     "id": "b3",
+     "rotulo": "II –",
+     "texto": "fiscalizar os estabelecimentos públicos e particulares de atendimento à mulher em situação de violência doméstica e familiar, e adotar, de imediato, as medidas administrativas ou judiciais cabíveis no tocante a quaisquer irregularidades constatadas;",
+     "nivel": 1
+    },
+    {
+     "id": "b4",
+     "rotulo": "III –",
+     "texto": "cadastrar os casos de violência doméstica e familiar contra a mulher.",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lei-11340:27",
+   "ordem": 36,
+   "numero": "27",
+   "rotulo": "Art. 27",
+   "caminho": "TÍTULO IV — DOS PROCEDIMENTOS › CAPÍTULO IV — DA ASSISTÊNCIA JUDICIÁRIA",
+   "incidencia": "media",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "Em todos os atos processuais, cíveis e criminais, a mulher em situação de violência doméstica e familiar deverá estar acompanhada de advogado, ressalvado o previsto no art. 19 desta Lei.",
+     "nivel": 0
+    }
+   ]
+  },
+  {
+   "key": "lei-11340:28",
+   "ordem": 37,
+   "numero": "28",
+   "rotulo": "Art. 28",
+   "caminho": "TÍTULO IV — DOS PROCEDIMENTOS › CAPÍTULO IV — DA ASSISTÊNCIA JUDICIÁRIA",
+   "incidencia": "media",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "É garantido a toda mulher em situação de violência doméstica e familiar o acesso aos serviços de Defensoria Pública ou de Assistência Judiciária Gratuita, nos termos da lei, em sede policial e judicial, mediante atendimento específico e humanizado.",
+     "nivel": 0
+    }
+   ]
+  },
+  {
+   "key": "lei-11340:29",
+   "ordem": 38,
+   "numero": "29",
+   "rotulo": "Art. 29",
+   "caminho": "TÍTULO V — DA EQUIPE DE ATENDIMENTO MULTIDISCIPLINAR",
+   "incidencia": "baixa",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "Os Juizados de Violência Doméstica e Familiar contra a Mulher que vierem a ser criados poderão contar com uma equipe de atendimento multidisciplinar, a ser integrada por profissionais especializados nas áreas psicossocial, jurídica e de saúde.",
+     "nivel": 0
+    }
+   ]
+  },
+  {
+   "key": "lei-11340:30",
+   "ordem": 39,
+   "numero": "30",
+   "rotulo": "Art. 30",
+   "caminho": "TÍTULO V — DA EQUIPE DE ATENDIMENTO MULTIDISCIPLINAR",
+   "incidencia": "baixa",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "Compete à equipe de atendimento multidisciplinar, entre outras atribuições que lhe forem reservadas pela legislação local, fornecer subsídios por escrito ao juiz, ao Ministério Público e à Defensoria Pública, mediante laudos ou verbalmente em audiência, e desenvolver trabalhos de orientação, encaminhamento, prevenção e outras medidas, voltados para a ofendida, o agressor e os familiares, com especial atenção às crianças e aos adolescentes.",
+     "nivel": 0
+    }
+   ]
+  },
+  {
+   "key": "lei-11340:31",
+   "ordem": 40,
+   "numero": "31",
+   "rotulo": "Art. 31",
+   "caminho": "TÍTULO V — DA EQUIPE DE ATENDIMENTO MULTIDISCIPLINAR",
+   "incidencia": "baixa",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "Quando a complexidade do caso exigir avaliação mais aprofundada, o juiz poderá determinar a manifestação de profissional especializado, mediante a indicação da equipe de atendimento multidisciplinar.",
+     "nivel": 0
+    }
+   ]
+  },
+  {
+   "key": "lei-11340:32",
+   "ordem": 41,
+   "numero": "32",
+   "rotulo": "Art. 32",
+   "caminho": "TÍTULO V — DA EQUIPE DE ATENDIMENTO MULTIDISCIPLINAR",
+   "incidencia": "baixa",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "O Poder Judiciário, na elaboração de sua proposta orçamentária, poderá prever recursos para a criação e manutenção da equipe de atendimento multidisciplinar, nos termos da Lei de Diretrizes Orçamentárias.",
+     "nivel": 0
+    }
+   ]
+  },
+  {
+   "key": "lei-11340:33",
+   "ordem": 42,
+   "numero": "33",
+   "rotulo": "Art. 33",
+   "caminho": "TÍTULO VI — DISPOSIÇÕES TRANSITÓRIAS",
+   "incidencia": "alta",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "Enquanto não estruturados os Juizados de Violência Doméstica e Familiar contra a Mulher, as varas criminais acumularão as competências cível e criminal para conhecer e julgar as causas decorrentes da prática de violência doméstica e familiar contra a mulher, observadas as previsões do Título IV desta Lei, subsidiada pela legislação processual pertinente.",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "Parágrafo único.",
+     "texto": "Será garantido o direito de preferência, nas varas criminais, para o processo e o julgamento das causas referidas no caput.",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lei-11340:34",
+   "ordem": 43,
+   "numero": "34",
+   "rotulo": "Art. 34",
+   "caminho": "TÍTULO VII — DISPOSIÇÕES FINAIS",
+   "incidencia": "baixa",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "A instituição dos Juizados de Violência Doméstica e Familiar contra a Mulher poderá ser acompanhada pela implantação das curadorias necessárias e do serviço de assistência judiciária.",
+     "nivel": 0
+    }
+   ]
+  },
+  {
+   "key": "lei-11340:35",
+   "ordem": 44,
+   "numero": "35",
+   "rotulo": "Art. 35",
+   "caminho": "TÍTULO VII — DISPOSIÇÕES FINAIS",
+   "incidencia": "baixa",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "A União, o Distrito Federal, os Estados e os Municípios poderão criar e promover, no limite das respectivas competências:",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "I –",
+     "texto": "centros de atendimento integral e multidisciplinar para mulheres e respectivos dependentes em situação de violência doméstica e familiar;",
+     "nivel": 1
+    },
+    {
+     "id": "b3",
+     "rotulo": "II –",
+     "texto": "casas-abrigos para mulheres e respectivos dependentes menores em situação de violência doméstica e familiar;",
+     "nivel": 1
+    },
+    {
+     "id": "b4",
+     "rotulo": "III –",
+     "texto": "delegacias, núcleos de defensoria pública, serviços de saúde e centros de perícia médico-legal especializados no atendimento à mulher em situação de violência doméstica e familiar;",
+     "nivel": 1
+    },
+    {
+     "id": "b5",
+     "rotulo": "IV –",
+     "texto": "programas e campanhas de enfrentamento da violência doméstica e familiar;",
+     "nivel": 1
+    },
+    {
+     "id": "b6",
+     "rotulo": "V –",
+     "texto": "centros de educação e de reabilitação para os agressores.",
+     "nivel": 1
+    },
+    {
+     "id": "b7",
+     "rotulo": "Parágrafo único.",
+     "texto": "As campanhas a que se refere o inciso IV do caput deste artigo deverão contemplar informações sobre procedimentos e abordagens policiais, prevenção à revitimização, funcionamento das medidas protetivas de urgência e mecanismos de monitoração eletrônica.",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lei-11340:36",
+   "ordem": 45,
+   "numero": "36",
+   "rotulo": "Art. 36",
+   "caminho": "TÍTULO VII — DISPOSIÇÕES FINAIS",
+   "incidencia": "baixa",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "A União, os Estados, o Distrito Federal e os Municípios promoverão a adaptação de seus órgãos e de seus programas às diretrizes e aos princípios desta Lei.",
+     "nivel": 0
+    }
+   ]
+  },
+  {
+   "key": "lei-11340:37",
+   "ordem": 46,
+   "numero": "37",
+   "rotulo": "Art. 37",
+   "caminho": "TÍTULO VII — DISPOSIÇÕES FINAIS",
+   "incidencia": "baixa",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "A defesa dos interesses e direitos transindividuais previstos nesta Lei poderá ser exercida, concorrentemente, pelo Ministério Público e por associação de atuação na área, regularmente constituída há pelo menos um ano, nos termos da legislação civil.",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "Parágrafo único.",
+     "texto": "O requisito da pré-constituição poderá ser dispensado pelo juiz quando entender que não há outra entidade com representatividade adequada para o ajuizamento da demanda coletiva.",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lei-11340:38",
+   "ordem": 47,
+   "numero": "38",
+   "rotulo": "Art. 38",
+   "caminho": "TÍTULO VII — DISPOSIÇÕES FINAIS",
+   "incidencia": "media",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "As estatísticas sobre a violência doméstica e familiar contra a mulher serão incluídas nas bases de dados dos órgãos oficiais do Sistema de Justiça e Segurança a fim de subsidiar o sistema nacional de dados e informações relativo às mulheres.",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "Parágrafo único.",
+     "texto": "As Secretarias de Segurança Pública dos Estados e do Distrito Federal poderão remeter suas informações criminais para a base de dados do Ministério da Justiça.",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lei-11340:38-A",
+   "ordem": 48,
+   "numero": "38-A",
+   "rotulo": "Art. 38-A",
+   "caminho": "TÍTULO VII — DISPOSIÇÕES FINAIS",
+   "incidencia": "alta",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "O juiz competente providenciará o registro da medida protetiva de urgência.",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "Parágrafo único.",
+     "texto": "As medidas protetivas de urgência serão, após sua concessão, imediatamente registradas em banco de dados mantido e regulamentado pelo Conselho Nacional de Justiça, garantido o acesso instantâneo do Ministério Público, da Defensoria Pública e dos órgãos de segurança pública e de assistência social, com vistas à fiscalização e à efetividade das medidas protetivas.",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lei-11340:39",
+   "ordem": 49,
+   "numero": "39",
+   "rotulo": "Art. 39",
+   "caminho": "TÍTULO VII — DISPOSIÇÕES FINAIS",
+   "incidencia": "baixa",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "A União, os Estados, o Distrito Federal e os Municípios, no limite de suas competências e nos termos das respectivas leis de diretrizes orçamentárias, poderão estabelecer dotações orçamentárias específicas, em cada exercício financeiro, para a implementação das medidas estabelecidas nesta Lei.",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "Parágrafo único.",
+     "texto": "Na implementação das medidas estabelecidas nesta Lei, os entes federativos deverão observar, entre as prioridades de alocação de recursos, a aquisição e a manutenção de equipamentos de monitoração eletrônica para agressores e de dispositivos de segurança para as vítimas.",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lei-11340:40",
+   "ordem": 50,
+   "numero": "40",
+   "rotulo": "Art. 40",
+   "caminho": "TÍTULO VII — DISPOSIÇÕES FINAIS",
+   "incidencia": "baixa",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "As obrigações previstas nesta Lei não excluem outras decorrentes dos princípios por ela adotados.",
+     "nivel": 0
+    }
+   ]
+  },
+  {
+   "key": "lei-11340:40-A",
+   "ordem": 51,
+   "numero": "40-A",
+   "rotulo": "Art. 40-A",
+   "caminho": "TÍTULO VII — DISPOSIÇÕES FINAIS",
+   "incidencia": "media",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "Esta Lei será aplicada a todas as situações previstas no seu art. 5º, independentemente da causa ou da motivação dos atos de violência e da condição do ofensor ou da ofendida.",
+     "nivel": 0
+    }
+   ]
+  },
+  {
+   "key": "lei-11340:41",
+   "ordem": 52,
+   "numero": "41",
+   "rotulo": "Art. 41",
+   "caminho": "TÍTULO VII — DISPOSIÇÕES FINAIS",
+   "incidencia": "muito_alta",
+   "incidenciaNota": "Não aplicação da Lei nº 9.099/1995 (Juizados Especiais Criminais) aos crimes de violência doméstica e familiar, independentemente da pena prevista — reforçado pela Súmula 536 do STJ; um dos pontos mais cobrados e mais alvo de pegadinha da lei.",
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "Aos crimes praticados com violência doméstica e familiar contra a mulher, independentemente da pena prevista, não se aplica a Lei nº 9.099, de 26 de setembro de 1995.",
+     "nivel": 0
+    }
+   ]
+  },
+  {
+   "key": "lei-11340:42",
+   "ordem": 53,
+   "numero": "42",
+   "rotulo": "Art. 42",
+   "caminho": "TÍTULO VII — DISPOSIÇÕES FINAIS",
+   "incidencia": "baixa",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "O art. 313 do Decreto-Lei nº 3.689, de 3 de outubro de 1941 (Código de Processo Penal), passa a vigorar acrescido do seguinte inciso IV:",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": null,
+     "texto": "“Art. 313..................................................",
+     "nivel": 0
+    },
+    {
+     "id": "b3",
+     "rotulo": null,
+     "texto": "................................................................",
+     "nivel": 0
+    },
+    {
+     "id": "b4",
+     "rotulo": "IV –",
+     "texto": "se o crime envolver violência doméstica e familiar contra a mulher, nos termos da lei específica, para garantir a execução das medidas protetivas de urgência.” (NR)",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lei-11340:43",
+   "ordem": 54,
+   "numero": "43",
+   "rotulo": "Art. 43",
+   "caminho": "TÍTULO VII — DISPOSIÇÕES FINAIS",
+   "incidencia": "baixa",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "A alínea f do inciso II do art. 61 do Decreto-Lei nº 2.848, de 7 de dezembro de 1940 (Código Penal), passa a vigorar com a seguinte redação:",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": null,
+     "texto": "“Art. 61...................................................",
+     "nivel": 0
+    },
+    {
+     "id": "b3",
+     "rotulo": null,
+     "texto": ".................................................................",
+     "nivel": 0
+    },
+    {
+     "id": "b4",
+     "rotulo": null,
+     "texto": "II -............................................................",
+     "nivel": 0
+    },
+    {
+     "id": "b5",
+     "rotulo": null,
+     "texto": ".................................................................",
+     "nivel": 0
+    },
+    {
+     "id": "b6",
+     "rotulo": "f)",
+     "texto": "com abuso de autoridade ou prevalecendo-se de relações domésticas, de coabitação ou de hospitalidade, ou com violência contra a mulher na forma da lei específica;",
+     "nivel": 2
+    },
+    {
+     "id": "b7",
+     "rotulo": null,
+     "texto": "........................................................... ” (NR)",
+     "nivel": 0
+    }
+   ]
+  },
+  {
+   "key": "lei-11340:44",
+   "ordem": 55,
+   "numero": "44",
+   "rotulo": "Art. 44",
+   "caminho": "TÍTULO VII — DISPOSIÇÕES FINAIS",
+   "incidencia": "baixa",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "O art. 129 do Decreto-Lei nº 2.848, de 7 de dezembro de 1940 (Código Penal), passa a vigorar com as seguintes alterações:",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": null,
+     "texto": "“Art. 129...................................................",
+     "nivel": 0
+    },
+    {
+     "id": "b3",
+     "rotulo": null,
+     "texto": "..................................................................",
+     "nivel": 0
+    },
+    {
+     "id": "b4",
+     "rotulo": "§ 9º",
+     "texto": "Se a lesão for praticada contra ascendente, descendente, irmão, cônjuge ou companheiro, ou com quem conviva ou tenha convivido, ou, ainda, prevalecendo-se o agente das relações domésticas, de coabitação ou de hospitalidade:",
+     "nivel": 1
+    },
+    {
+     "id": "b5",
+     "rotulo": null,
+     "texto": "Pena - detenção, de 3 (três) meses a 3 (três) anos.",
+     "nivel": 0
+    },
+    {
+     "id": "b6",
+     "rotulo": null,
+     "texto": "..................................................................",
+     "nivel": 0
+    },
+    {
+     "id": "b7",
+     "rotulo": "§ 11º",
+     "texto": "Na hipótese do § 9º deste artigo, a pena será aumentada de um terço se o crime for cometido contra pessoa portadora de deficiência.” (NR)",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lei-11340:45",
+   "ordem": 56,
+   "numero": "45",
+   "rotulo": "Art. 45",
+   "caminho": "TÍTULO VII — DISPOSIÇÕES FINAIS",
+   "incidencia": "baixa",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "O art. 152 da Lei nº 7.210, de 11 de julho de 1984 (Lei de Execução Penal), passa a vigorar com a seguinte redação:",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": null,
+     "texto": "“Art. 152....................................................",
+     "nivel": 0
+    },
+    {
+     "id": "b3",
+     "rotulo": "Parágrafo único.",
+     "texto": "Nos casos de violência doméstica contra a mulher, o juiz poderá determinar o comparecimento obrigatório do agressor a programas de recuperação e reeducação.” (NR)",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lei-11340:46",
+   "ordem": 57,
+   "numero": "46",
+   "rotulo": "Art. 46",
+   "caminho": "TÍTULO VII — DISPOSIÇÕES FINAIS",
+   "incidencia": "baixa",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "Esta Lei entra em vigor 45 (quarenta e cinco) dias após sua publicação.",
+     "nivel": 0
+    }
+   ]
+  }
+ ]
+}

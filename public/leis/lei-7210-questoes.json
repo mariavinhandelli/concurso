@@ -1,0 +1,418 @@
+[
+ {
+  "id": "l7210-q1",
+  "artigoKey": "lei-7210:1",
+  "enunciado": "A execução penal tem por objetivo efetivar as disposições de sentença ou decisão criminal e proporcionar condições para a harmônica integração social do condenado e do internado.",
+  "gabarito": true,
+  "comentario": "Literal do art. 1º.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l7210-q2",
+  "artigoKey": "lei-7210:8",
+  "enunciado": "O exame criminológico é obrigatório tanto para o condenado que inicia o cumprimento de pena em regime fechado quanto para aquele em regime semiaberto.",
+  "gabarito": false,
+  "comentario": "Art. 8º, caput e parágrafo único: o exame criminológico é obrigatório apenas no regime fechado; no regime semiaberto, é facultativo (\"poderá ser submetido\").",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l7210-q3",
+  "artigoKey": "lei-7210:9-A",
+  "enunciado": "O condenado à pena de reclusão em regime inicial fechado será submetido obrigatoriamente à identificação do perfil genético, mediante extração de DNA, por ocasião do ingresso no estabelecimento prisional.",
+  "gabarito": true,
+  "comentario": "Literal do art. 9-A, caput.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l7210-q4",
+  "artigoKey": "lei-7210:10",
+  "enunciado": "A assistência ao preso e ao internado é uma faculdade do Estado, não se estendendo ao egresso.",
+  "gabarito": false,
+  "comentario": "Art. 10: a assistência é DEVER do Estado (não faculdade) e o parágrafo único estende-a expressamente ao egresso.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l7210-q5",
+  "artigoKey": "lei-7210:11",
+  "enunciado": "São modalidades de assistência previstas na LEP: material, à saúde, jurídica, educacional, social, religiosa e psicológica.",
+  "gabarito": false,
+  "comentario": "Art. 11 prevê apenas seis modalidades (material, à saúde, jurídica, educacional, social e religiosa); não há uma \"assistência psicológica\" autônoma no rol.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l7210-q6",
+  "artigoKey": "lei-7210:25",
+  "enunciado": "A assistência ao egresso pode incluir alojamento e alimentação, em estabelecimento adequado, pelo prazo de dois meses, prorrogável uma única vez mediante comprovado empenho na obtenção de emprego.",
+  "gabarito": true,
+  "comentario": "Literal do art. 25, II e parágrafo único.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l7210-q7",
+  "artigoKey": "lei-7210:36",
+  "enunciado": "O trabalho externo para presos em regime fechado em serviços ou obras públicas está limitado a 20% (vinte por cento) do total de empregados na obra.",
+  "gabarito": false,
+  "comentario": "Art. 36, § 1º: o limite máximo é de dez por cento (10%), não vinte.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l7210-q8",
+  "artigoKey": "lei-7210:39",
+  "enunciado": "Constitui dever do condenado a indenização à vítima ou aos seus sucessores, quando possível fazê-lo.",
+  "gabarito": false,
+  "comentario": "Art. 39: o inciso VII (indenização à vítima) não traz a condicionante \"quando possível\" — essa condicionante qualifica apenas o inciso VIII (indenização ao Estado).",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l7210-q9",
+  "artigoKey": "lei-7210:39",
+  "enunciado": "O disposto no art. 39 da LEP sobre os deveres do condenado aplica-se, no que couber, ao preso provisório.",
+  "gabarito": true,
+  "comentario": "Literal do art. 39, parágrafo único.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l7210-q10",
+  "artigoKey": "lei-7210:41",
+  "enunciado": "Constitui direito do preso a entrevista pessoal e reservada com o advogado.",
+  "gabarito": true,
+  "comentario": "Literal do art. 41, IX.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l7210-q11",
+  "artigoKey": "lei-7210:41",
+  "enunciado": "Os direitos previstos nos incisos V, X e XV do art. 41 podem ser suspensos ou restringidos por decisão da autoridade administrativa do estabelecimento penal, independentemente de motivação judicial.",
+  "gabarito": false,
+  "comentario": "Art. 41, § 1º: a suspensão ou restrição depende de ato MOTIVADO DO JUIZ da execução penal, não de decisão administrativa.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l7210-q12",
+  "artigoKey": "lei-7210:41",
+  "enunciado": "O preso tem direito a receber, a cada seis meses, atestado de pena a cumprir, emitido pela autoridade administrativa do estabelecimento.",
+  "gabarito": false,
+  "comentario": "Art. 41, XVI: o atestado é emitido ANUALMENTE, sob responsabilidade da autoridade JUDICIÁRIA competente — não a cada seis meses nem pela autoridade administrativa.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l7210-q13",
+  "artigoKey": "lei-7210:45",
+  "enunciado": "É vedado o emprego de cela escura como sanção disciplinar, bem como as sanções coletivas.",
+  "gabarito": true,
+  "comentario": "Literal do art. 45, §§ 2º e 3º.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l7210-q14",
+  "artigoKey": "lei-7210:50",
+  "enunciado": "Constitui falta grave a posse, pelo condenado, de aparelho telefônico, de rádio ou similar que permita a comunicação com outros presos ou com o ambiente externo.",
+  "gabarito": true,
+  "comentario": "Literal do art. 50, VII.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l7210-q15",
+  "artigoKey": "lei-7210:50",
+  "enunciado": "A recusa do condenado em submeter-se ao procedimento de identificação do perfil genético configura, por si só, apenas o crime de desobediência, não se enquadrando como falta grave disciplinar.",
+  "gabarito": false,
+  "comentario": "Art. 50, VIII, tipifica expressamente essa recusa como falta grave disciplinar.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l7210-q16",
+  "artigoKey": "lei-7210:52",
+  "enunciado": "O regime disciplinar diferenciado tem duração máxima de até dois anos, sem prejuízo de repetição da sanção por nova falta grave de mesma espécie.",
+  "gabarito": true,
+  "comentario": "Literal do art. 52, caput, I.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l7210-q17",
+  "artigoKey": "lei-7210:52",
+  "enunciado": "No regime disciplinar diferenciado, o preso tem direito a visitas semanais de até três pessoas por vez, com duração de três horas.",
+  "gabarito": false,
+  "comentario": "Art. 52, III: as visitas são QUINZENAIS, de até 2 (duas) pessoas por vez, com duração de 2 (duas) horas — não semanais, de 3 pessoas, por 3 horas.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l7210-q18",
+  "artigoKey": "lei-7210:52",
+  "enunciado": "O regime disciplinar diferenciado tem duração máxima de até um ano, sendo vedada qualquer prorrogação.",
+  "gabarito": false,
+  "comentario": "Art. 52, I, fixa duração máxima de até 2 (dois) anos; além disso, o § 4º admite prorrogação sucessiva por períodos de 1 (um) ano em hipóteses específicas.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l7210-q19",
+  "artigoKey": "lei-7210:53",
+  "enunciado": "São sanções disciplinares previstas na LEP: advertência verbal, repreensão, suspensão ou restrição de direitos, isolamento e inclusão no regime disciplinar diferenciado.",
+  "gabarito": true,
+  "comentario": "Literal do art. 53, I a V.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l7210-q20",
+  "artigoKey": "lei-7210:57",
+  "enunciado": "Na aplicação das sanções disciplinares devem ser levados em conta a natureza, os motivos, as circunstâncias e as consequências do fato, bem como a pessoa do faltoso e seu tempo de prisão.",
+  "gabarito": true,
+  "comentario": "Literal do art. 57, caput.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l7210-q21",
+  "artigoKey": "lei-7210:58",
+  "enunciado": "O isolamento, a suspensão e a restrição de direitos podem ser aplicados por prazo indeterminado quando se tratar de falta grave de natureza gravíssima.",
+  "gabarito": false,
+  "comentario": "Art. 58: o limite é de trinta dias, ressalvada apenas a hipótese do regime disciplinar diferenciado; não existe exceção por \"gravidade\" da falta.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l7210-q22",
+  "artigoKey": "lei-7210:65",
+  "enunciado": "A execução penal competirá ao juiz indicado na lei local de organização judiciária e, na sua ausência, ao juiz da sentença.",
+  "gabarito": true,
+  "comentario": "Literal do art. 65.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l7210-q23",
+  "artigoKey": "lei-7210:66",
+  "enunciado": "Compete ao juiz da execução decidir sobre a progressão ou regressão nos regimes, bem como sobre a detração e a remição da pena.",
+  "gabarito": true,
+  "comentario": "Literal do art. 66, III, \"b\" e \"c\".",
+  "tipo": "literal"
+ },
+ {
+  "id": "l7210-q24",
+  "artigoKey": "lei-7210:72",
+  "enunciado": "Compete ao Departamento Penitenciário Nacional estabelecer, mediante convênios com as unidades federativas, o cadastro nacional das vagas existentes em estabelecimentos locais destinadas ao cumprimento de penas privativas de liberdade aplicadas pela justiça de outra unidade federativa.",
+  "gabarito": true,
+  "comentario": "Literal do art. 72, VI.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l7210-q25",
+  "artigoKey": "lei-7210:82",
+  "enunciado": "A mulher e o maior de sessenta anos serão recolhidos, separadamente, a estabelecimento próprio e adequado à sua condição pessoal.",
+  "gabarito": true,
+  "comentario": "Literal do art. 82, § 1º.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l7210-q26",
+  "artigoKey": "lei-7210:87",
+  "enunciado": "A penitenciária destina-se ao condenado à pena de reclusão, em regime aberto.",
+  "gabarito": false,
+  "comentario": "Art. 87: a penitenciária destina-se ao condenado em regime FECHADO, não aberto.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l7210-q27",
+  "artigoKey": "lei-7210:88",
+  "enunciado": "São requisitos básicos da unidade celular a salubridade do ambiente e a área mínima de 9 m² (nove metros quadrados).",
+  "gabarito": false,
+  "comentario": "Art. 88, parágrafo único, \"b\": a área mínima exigida é de 6 m² (seis metros quadrados), não 9 m².",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l7210-q28",
+  "artigoKey": "lei-7210:105",
+  "enunciado": "A guia de recolhimento somente será expedida se o réu já estiver preso no momento do trânsito em julgado da sentença condenatória, não se aplicando aos casos em que ele vier a ser preso posteriormente.",
+  "gabarito": false,
+  "comentario": "Art. 105 abrange ambas as hipóteses: \"se o réu estiver OU VIER A SER preso\", o juiz ordenará a expedição da guia de recolhimento.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l7210-q29",
+  "artigoKey": "lei-7210:110",
+  "enunciado": "O juiz, na sentença, estabelece o regime inicial de cumprimento de pena com base exclusivamente em seu livre convencimento, sem qualquer vinculação ao art. 33 do Código Penal.",
+  "gabarito": false,
+  "comentario": "Art. 110: o juiz deve observar o disposto no art. 33 e parágrafos do Código Penal ao fixar o regime inicial.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l7210-q30",
+  "artigoKey": "lei-7210:112",
+  "enunciado": "Para a progressão de regime, o condenado primário que praticou crime sem violência à pessoa ou grave ameaça deve cumprir ao menos 16% (dezesseis por cento) da pena no regime anterior.",
+  "gabarito": true,
+  "comentario": "Literal do art. 112, I (redação da Lei 13.964/2019 — Pacote Anticrime).",
+  "tipo": "literal"
+ },
+ {
+  "id": "l7210-q31",
+  "artigoKey": "lei-7210:112",
+  "enunciado": "O condenado reincidente que praticou crime com violência à pessoa ou grave ameaça deve cumprir ao menos 25% (vinte e cinco por cento) da pena para progredir de regime.",
+  "gabarito": false,
+  "comentario": "Art. 112: 25% é a fração do PRIMÁRIO com violência (inciso III); o REINCIDENTE com violência deve cumprir 30% (inciso IV).",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l7210-q32",
+  "artigoKey": "lei-7210:112",
+  "enunciado": "No caso de mulher gestante ou mãe ou responsável por crianças ou pessoas com deficiência, um dos requisitos cumulativos para a progressão especial de regime é ter cumprido ao menos 1/8 (um oitavo) da pena no regime anterior.",
+  "gabarito": true,
+  "comentario": "Literal do art. 112, § 3º, III.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l7210-q33",
+  "artigoKey": "lei-7210:112",
+  "enunciado": "A progressão de regime prescinde de boa conduta carcerária quando o condenado já tiver cumprido o requisito objetivo (fração da pena).",
+  "gabarito": false,
+  "comentario": "Art. 112, § 1º (redação da Lei 14.843/2024): em todos os casos, a progressão exige boa conduta carcerária comprovada pelo diretor do estabelecimento e resultados do exame criminológico, além do requisito objetivo.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l7210-q34",
+  "artigoKey": "lei-7210:112",
+  "enunciado": "Considera-se equiparado a hediondo, para fins de progressão de regime, o crime de tráfico de drogas na modalidade privilegiada, prevista no § 4º do art. 33 da Lei nº 11.343/2006.",
+  "gabarito": false,
+  "comentario": "Art. 112, § 5º, dispõe exatamente o contrário: esse tráfico privilegiado NÃO se considera hediondo ou equiparado para os fins do artigo.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l7210-q35",
+  "artigoKey": "lei-7210:114",
+  "enunciado": "Somente poderá ingressar no regime aberto o condenado que estiver trabalhando ou comprovar a possibilidade de fazê-lo imediatamente.",
+  "gabarito": true,
+  "comentario": "Literal do art. 114, I (um dos requisitos cumulativos, ao lado do inciso II).",
+  "tipo": "literal"
+ },
+ {
+  "id": "l7210-q36",
+  "artigoKey": "lei-7210:118",
+  "enunciado": "A execução da pena privativa de liberdade ficará sujeita à forma regressiva quando o condenado praticar fato definido como crime doloso ou falta grave.",
+  "gabarito": true,
+  "comentario": "Literal do art. 118, I.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l7210-q37",
+  "artigoKey": "lei-7210:122",
+  "enunciado": "A saída temporária pode ser autorizada, para o condenado em regime semiaberto, para fins de visita à família, conforme o inciso I do art. 122 da LEP.",
+  "gabarito": false,
+  "comentario": "O inciso I do art. 122 foi REVOGADO pela Lei nº 14.843/2024. Atualmente, a saída temporária sem vigilância direta somente é autorizada para frequência a curso supletivo profissionalizante ou de instrução de 2º grau ou superior (inciso II).",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l7210-q38",
+  "artigoKey": "lei-7210:122",
+  "enunciado": "Não terá direito à saída temporária o condenado que cumpre pena por praticar crime hediondo ou com violência ou grave ameaça contra pessoa.",
+  "gabarito": true,
+  "comentario": "Literal do art. 122, § 2º.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l7210-q39",
+  "artigoKey": "lei-7210:122",
+  "enunciado": "A ausência de vigilância direta na saída temporária não impede a utilização de equipamento de monitoração eletrônica pelo condenado, quando assim determinar o juiz da execução.",
+  "gabarito": true,
+  "comentario": "Literal do art. 122, § 1º.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l7210-q40",
+  "artigoKey": "lei-7210:123",
+  "enunciado": "Para a saída temporária, exige-se o cumprimento mínimo de 1/6 (um sexto) da pena, se o condenado for primário, e de 1/4 (um quarto), se reincidente.",
+  "gabarito": true,
+  "comentario": "Literal do art. 123, II.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l7210-q41",
+  "artigoKey": "lei-7210:123",
+  "enunciado": "A saída temporária depende de decisão do diretor do estabelecimento penal, dispensada a oitiva do Ministério Público e da administração penitenciária.",
+  "gabarito": false,
+  "comentario": "Art. 123, caput: a autorização depende de ato MOTIVADO DO JUIZ da execução, ouvidos o Ministério Público e a administração penitenciária.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l7210-q42",
+  "artigoKey": "lei-7210:126",
+  "enunciado": "Para fins de remição, computa-se 1 (um) dia de pena a cada 12 (doze) horas de frequência escolar, divididas, no mínimo, em 3 (três) dias.",
+  "gabarito": true,
+  "comentario": "Literal do art. 126, § 1º, I.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l7210-q43",
+  "artigoKey": "lei-7210:126",
+  "enunciado": "Para fins de remição pelo trabalho, computa-se 1 (um) dia de pena a cada 3 (três) dias de trabalho.",
+  "gabarito": true,
+  "comentario": "Literal do art. 126, § 1º, II.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l7210-q44",
+  "artigoKey": "lei-7210:126",
+  "enunciado": "O tempo a remir em função das horas de estudo será acrescido em 50% (cinquenta por cento) no caso de conclusão do ensino fundamental, médio ou superior durante o cumprimento da pena.",
+  "gabarito": false,
+  "comentario": "Art. 126, § 5º: o acréscimo previsto é de 1/3 (um terço), não 50%.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l7210-q45",
+  "artigoKey": "lei-7210:127",
+  "enunciado": "Em caso de falta grave, o juiz pode revogar a totalidade do tempo remido pelo condenado.",
+  "gabarito": false,
+  "comentario": "Art. 127: a revogação está limitada a até 1/3 (um terço) do tempo remido, não à totalidade.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l7210-q46",
+  "artigoKey": "lei-7210:131",
+  "enunciado": "O livramento condicional poderá ser concedido de ofício pelo juiz da execução, dispensada a oitiva do Ministério Público e do Conselho Penitenciário.",
+  "gabarito": false,
+  "comentario": "Art. 131: a concessão exige que sejam ouvidos o Ministério Público e o Conselho Penitenciário, além dos requisitos do art. 83 do Código Penal.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l7210-q47",
+  "artigoKey": "lei-7210:132",
+  "enunciado": "São obrigações sempre impostas ao liberado condicional: obter ocupação lícita dentro de prazo razoável se apto para o trabalho, comunicar periodicamente sua ocupação ao juiz e não mudar do território da comarca sem prévia autorização judicial.",
+  "gabarito": true,
+  "comentario": "Literal do art. 132, § 1º, \"a\", \"b\" e \"c\".",
+  "tipo": "literal"
+ },
+ {
+  "id": "l7210-q48",
+  "artigoKey": "lei-7210:146-B",
+  "enunciado": "O juiz poderá definir a fiscalização por monitoração eletrônica quando autorizar a saída temporária no regime semiaberto ou quando conceder o livramento condicional.",
+  "gabarito": true,
+  "comentario": "Literal do art. 146-B, II e VIII.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l7210-q49",
+  "artigoKey": "lei-7210:146-C",
+  "enunciado": "É permitido ao condenado remover temporariamente o dispositivo de monitoração eletrônica, desde que comunique previamente o servidor responsável pela monitoração.",
+  "gabarito": false,
+  "comentario": "Art. 146-C, II, veda expressamente remover, violar, modificar ou danificar de qualquer forma o dispositivo, ou permitir que outrem o faça — não há exceção por comunicação prévia.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l7210-q50",
+  "artigoKey": "lei-7210:156",
+  "enunciado": "O juiz poderá suspender, pelo período de um a três anos, a execução da pena privativa de liberdade não superior a dois anos, na forma prevista nos arts. 77 a 82 do Código Penal.",
+  "gabarito": false,
+  "comentario": "Art. 156: o período de suspensão é de 2 (dois) a 4 (quatro) anos, não de um a três.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l7210-q51",
+  "artigoKey": "lei-7210:180",
+  "enunciado": "A pena privativa de liberdade não superior a dois anos pode ser convertida em restritiva de direitos independentemente do regime de cumprimento e do tempo de pena já cumprido.",
+  "gabarito": false,
+  "comentario": "Art. 180 exige que o condenado esteja em regime ABERTO e que tenha cumprido pelo menos 1/4 (um quarto) da pena, além de antecedentes e personalidade favoráveis.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l7210-q52",
+  "artigoKey": "lei-7210:187",
+  "enunciado": "Concedida a anistia, o juiz declarará extinta a punibilidade, de ofício, a requerimento do interessado ou do Ministério Público, ou por proposta da autoridade administrativa ou do Conselho Penitenciário.",
+  "gabarito": true,
+  "comentario": "Literal do art. 187.",
+  "tipo": "literal"
+ }
+]

@@ -1,0 +1,186 @@
+{
+ "slug": "lei-9455",
+ "nome": "Lei nº 9.455, de 7 de abril de 1997 — Lei de Tortura",
+ "nomeCurto": "Lei 9.455/97 (Tortura)",
+ "ano": 1997,
+ "disciplina": "Legislação Penal Especial",
+ "descricao": "Define os crimes de tortura. Texto atualizado (fonte: Planalto).",
+ "fonteUrl": "https://www.planalto.gov.br/ccivil_03/leis/l9455.htm",
+ "geradoEm": "2026-07-18",
+ "artigos": [
+  {
+   "key": "lei-9455:1",
+   "ordem": 1,
+   "numero": "1",
+   "rotulo": "Art. 1º",
+   "caminho": null,
+   "incidencia": "muito_alta",
+   "incidenciaNota": "Coração da lei — praticamente toda questão de concurso gira em torno deste artigo. Pegadinhas clássicas apontadas por cursos preparatórios (Gran Cursos, Estratégia Concursos): confundir o inciso I (tortura-prova, para obter informação/confissão ou por discriminação) com o II (tortura-castigo, contra quem está sob guarda/poder do agente); tratar a omissão do § 2º como se fosse o próprio crime de tortura, quando na verdade é tipo autônomo com pena de DETENÇÃO (não reclusão); e esquecer que a perda do cargo (§ 5º) é efeito automático da condenação, com interdição pelo DOBRO da pena. O inciso III (tortura no contexto de violência doméstica e familiar contra a mulher) é acréscimo recente da Lei nº 15.410/2026 e tende a ganhar peso em provas de 2026/2027 por ineditismo. Sem estatística numérica pública de incidência disponível para este artigo.",
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "Constitui crime de tortura:",
+     "nivel": 0
+    },
+    {
+     "id": "b2",
+     "rotulo": "I –",
+     "texto": "constranger alguém com emprego de violência ou grave ameaça, causando-lhe sofrimento físico ou mental:",
+     "nivel": 1
+    },
+    {
+     "id": "b3",
+     "rotulo": "a)",
+     "texto": "com o fim de obter informação, declaração ou confissão da vítima ou de terceira pessoa;",
+     "nivel": 2
+    },
+    {
+     "id": "b4",
+     "rotulo": "b)",
+     "texto": "para provocar ação ou omissão de natureza criminosa;",
+     "nivel": 2
+    },
+    {
+     "id": "b5",
+     "rotulo": "c)",
+     "texto": "em razão de discriminação racial ou religiosa;",
+     "nivel": 2
+    },
+    {
+     "id": "b6",
+     "rotulo": "II –",
+     "texto": "submeter alguém, sob sua guarda, poder ou autoridade, com emprego de violência ou grave ameaça, a intenso sofrimento físico ou mental, como forma de aplicar castigo pessoal ou medida de caráter preventivo.",
+     "nivel": 1
+    },
+    {
+     "id": "b7",
+     "rotulo": "III –",
+     "texto": "submeter mulher, reiteradamente, a intenso sofrimento físico ou mental, no contexto de violência doméstica e familiar, sem prejuízo da aplicação das penas correspondentes a outras infrações penais.",
+     "nivel": 1
+    },
+    {
+     "id": "b8",
+     "rotulo": null,
+     "texto": "Pena - reclusão, de dois a oito anos.",
+     "nivel": 0
+    },
+    {
+     "id": "b9",
+     "rotulo": "§ 1º",
+     "texto": "Na mesma pena incorre quem submete pessoa presa ou sujeita a medida de segurança a sofrimento físico ou mental, por intermédio da prática de ato não previsto em lei ou não resultante de medida legal.",
+     "nivel": 1
+    },
+    {
+     "id": "b10",
+     "rotulo": "§ 2º",
+     "texto": "Aquele que se omite em face dessas condutas, quando tinha o dever de evitá-las ou apurá-las, incorre na pena de detenção de um a quatro anos.",
+     "nivel": 1
+    },
+    {
+     "id": "b11",
+     "rotulo": "§ 3º",
+     "texto": "Se resulta lesão corporal de natureza grave ou gravíssima, a pena é de reclusão de quatro a dez anos; se resulta morte, a reclusão é de oito a dezesseis anos.",
+     "nivel": 1
+    },
+    {
+     "id": "b12",
+     "rotulo": "§ 4º",
+     "texto": "Aumenta-se a pena de um sexto até um terço:",
+     "nivel": 1
+    },
+    {
+     "id": "b13",
+     "rotulo": "I –",
+     "texto": "se o crime é cometido por agente público;",
+     "nivel": 1
+    },
+    {
+     "id": "b14",
+     "rotulo": "II –",
+     "texto": "se o crime é cometido contra criança, gestante, portador de deficiência, adolescente ou maior de 60 (sessenta) anos;",
+     "nivel": 1
+    },
+    {
+     "id": "b15",
+     "rotulo": "III –",
+     "texto": "se o crime é cometido mediante seqüestro.",
+     "nivel": 1
+    },
+    {
+     "id": "b16",
+     "rotulo": "§ 5º",
+     "texto": "A condenação acarretará a perda do cargo, função ou emprego público e a interdição para seu exercício pelo dobro do prazo da pena aplicada.",
+     "nivel": 1
+    },
+    {
+     "id": "b17",
+     "rotulo": "§ 6º",
+     "texto": "O crime de tortura é inafiançável e insuscetível de graça ou anistia.",
+     "nivel": 1
+    },
+    {
+     "id": "b18",
+     "rotulo": "§ 7º",
+     "texto": "O condenado por crime previsto nesta Lei, salvo a hipótese do § 2º, iniciará o cumprimento da pena em regime fechado.",
+     "nivel": 1
+    }
+   ]
+  },
+  {
+   "key": "lei-9455:2",
+   "ordem": 2,
+   "numero": "2",
+   "rotulo": "Art. 2º",
+   "caminho": null,
+   "incidencia": "alta",
+   "incidenciaNota": "Extraterritorialidade — cobrado sobretudo em pegadinha de \"cometido fora do Brasil\": a lei brasileira alcança o fato se a vítima for brasileira OU o agente estiver em local sob jurisdição brasileira (condições alternativas, não cumulativas). Sem estatística numérica pública de incidência disponível para este artigo.",
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "O disposto nesta Lei aplica-se ainda quando o crime não tenha sido cometido em território nacional, sendo a vítima brasileira ou encontrando-se o agente em local sob jurisdição brasileira.",
+     "nivel": 0
+    }
+   ]
+  },
+  {
+   "key": "lei-9455:3",
+   "ordem": 3,
+   "numero": "3",
+   "rotulo": "Art. 3º",
+   "caminho": null,
+   "incidencia": "media",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "Esta Lei entra em vigor na data de sua publicação.",
+     "nivel": 0
+    }
+   ]
+  },
+  {
+   "key": "lei-9455:4",
+   "ordem": 4,
+   "numero": "4",
+   "rotulo": "Art. 4º",
+   "caminho": null,
+   "incidencia": "media",
+   "incidenciaNota": null,
+   "revogado": false,
+   "blocos": [
+    {
+     "id": "b1",
+     "rotulo": null,
+     "texto": "Revoga-se o art. 233 da Lei nº 8.069, de 13 de julho de 1990 - Estatuto da Criança e do Adolescente.",
+     "nivel": 0
+    }
+   ]
+  }
+ ]
+}
