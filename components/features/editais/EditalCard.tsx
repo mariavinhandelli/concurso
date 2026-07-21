@@ -63,6 +63,10 @@ export function EditalCard({ edital: e, hideOrgao }: Props) {
       href={`/editais/${e.slug}`}
       onMouseEnter={() => setHov(true)}
       onMouseLeave={() => setHov(false)}
+      // Paridade teclado: o foco recebe o mesmo realce (borda teal + sombra)
+      // que o mouse — o anel global de :focus-visible continua por cima.
+      onFocus={() => setHov(true)}
+      onBlur={() => setHov(false)}
       style={{
         ...s.card,
         borderColor: hov ? theme.teal : theme.line,
@@ -94,7 +98,9 @@ const s: Record<string, CSSProperties> = {
   // warnDeep (não warn cru): warn sobre warnBg dá ~1,9:1 e reprova AA — mesma
   // fórmula do Badge do design system.
   situacaoExpectativa: { color: theme.warnDeep, background: theme.warnBg },
-  situacaoEncerrado: { color: theme.inkFaint, background: theme.muted },
+  // inkSoft (não inkFaint): inkFaint sobre muted reprova AA em 11px nas 4
+  // paletas do dark mode; inkSoft passa em todas menos menta (dívida de paleta).
+  situacaoEncerrado: { color: theme.inkSoft, background: theme.muted },
   activatedTag: { fontSize: 11, fontWeight: 700, color: theme.teal, background: theme.tealBg, borderRadius: theme.radiusXs, padding: '2px 8px', flexShrink: 0 },
   cardMeta: { fontSize: 13, color: theme.inkSoft, marginTop: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
   cardExtra: { fontSize: 12, color: theme.inkFaint, marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },

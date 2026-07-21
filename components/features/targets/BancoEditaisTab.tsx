@@ -266,7 +266,9 @@ export function BancoEditaisTab({ onImportar, onImportarPdf }: Props) {
               <div key={g.key} style={s.group}>
                 {/* O toggle e o link "Ver órgão" são irmãos dentro do cartão —
                     link dentro de <button> é HTML inválido (foco/AT quebram). */}
-                <div style={s.groupHead}>
+                {/* marginBottom só com o grupo aberto — fechado, o gap do
+                    groupList (10px) já é o respiro; 8px extras viravam 18px. */}
+                <div style={{ ...s.groupHead, marginBottom: open ? 8 : 0 }}>
                   <button
                     onClick={() => toggleGroup(g.key)}
                     style={s.groupToggle}
@@ -333,7 +335,7 @@ const s: Record<string, CSSProperties> = {
 
   groupList: { display: 'flex', flexDirection: 'column', gap: 10 },
   group: { minWidth: 0 },
-  groupHead: { display: 'flex', alignItems: 'center', width: '100%', border: `0.5px solid ${theme.line}`, borderRadius: theme.radiusSm, background: theme.card, boxShadow: theme.shadow, minWidth: 0, marginBottom: 8 },
+  groupHead: { display: 'flex', alignItems: 'center', width: '100%', border: `0.5px solid ${theme.line}`, borderRadius: theme.radiusSm, background: theme.card, boxShadow: theme.shadow, minWidth: 0 },
   groupToggle: { display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 8, flex: 1, minWidth: 0, padding: '12px 14px', background: 'transparent', border: 'none', cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left', minHeight: 44, borderRadius: theme.radiusSm },
   groupVigente: { fontSize: 11, fontWeight: 700, color: theme.onTeal, background: theme.teal, borderRadius: theme.radiusXs, padding: '2px 8px', flexShrink: 0, letterSpacing: 0.2 },
   groupSigla: { fontSize: 15, fontWeight: 800, color: theme.ink, letterSpacing: -0.2, flexShrink: 0 },

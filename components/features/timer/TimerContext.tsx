@@ -8,7 +8,7 @@
 // FloatingTimer/FocusMode, que exibem o relógio, pagam o tick.
 'use client';
 
-import { createContext, useContext, useEffect, useMemo, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useMemo, useRef, type ReactNode } from 'react';
 import { useStudyTimer } from '@/hooks/useStudyTimer';
 
 type TimerValue = ReturnType<typeof useStudyTimer>;
@@ -21,12 +21,23 @@ const TimerTickContext = createContext<TimerTickValue | null>(null);
 export function TimerProvider({ children }: { children: ReactNode }) {
   const timer = useStudyTimer();
 
+  // Só toca no document.title ENQUANTO há sessão rodando. Escrever "Focali"
+  // fora disso clobberava o <title> por página (generateMetadata) depois da
+  // hidratação — o Google renderiza JS e indexava o título genérico.
+  const savedTitle = useRef<string | null>(null);
+  const lastWritten = useRef<string | null>(null);
   useEffect(() => {
     if (timer.status === 'running') {
-      document.title = `⏱ ${timer.formatted} · Focali`;
-      return () => { document.title = 'Focali'; };
+      // Se a navegação trocou o título desde a última escrita nossa, o título
+      // atual é o da página nova — é ele que deve ser restaurado no fim.
+      if (document.title !== lastWritten.current) savedTitle.current = document.title;
+      lastWritten.current = `⏱ ${timer.formatted} · Focali`;
+      document.title = lastWritten.current;
+    } else if (savedTitle.current !== null) {
+      document.title = savedTitle.current;
+      savedTitle.current = null;
+      lastWritten.current = null;
     }
-    document.title = 'Focali';
   }, [timer.status, timer.formatted]);
 
   const tickValue = useMemo(

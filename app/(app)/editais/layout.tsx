@@ -8,6 +8,13 @@ export const metadata: Metadata = {
   description:
     'Editais de concursos públicos organizados por órgão: grade verticalizada, pesos por disciplina, linha do tempo de retificações, provas anteriores e histórico. PC-GO, PM-GO, TJ-GO, TCE-GO e mais.',
   alternates: { canonical: '/editais' },
+  // Sem openGraph próprio, o compartilhamento cai no OG genérico da home.
+  openGraph: {
+    title: 'Banco de Editais de Concursos | Focali',
+    description:
+      'Editais de concursos organizados por órgão: grade verticalizada, pesos por disciplina, linha do tempo e provas anteriores.',
+    url: '/editais',
+  },
 };
 
 export default function EditaisLayout({ children }: { children: React.ReactNode }) {

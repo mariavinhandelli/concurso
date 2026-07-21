@@ -8,7 +8,7 @@
 import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
-import { Check, X } from 'lucide-react';
+import { Check, Download, X } from 'lucide-react';
 import { type TargetExam } from '@/services/targetExams.service';
 import { type CatalogEditalInfo, type EditalUpdate, type EditalUpdateTipo } from '@/services/editaisCatalog.service';
 import { normalizeDisciplina } from '@/lib/juris-disciplinas';
@@ -288,7 +288,8 @@ export function HubOverviewTab({
               </button>
               {catalogInfo.editalUrl && (
                 <a href={catalogInfo.editalUrl} target="_blank" rel="noopener noreferrer" style={s.downloadBtn}>
-                  Baixar edital ↓
+                  <Download size={14} strokeWidth={2} style={{ marginRight: 6, verticalAlign: -2 }} />
+                  Baixar edital
                 </a>
               )}
             </div>

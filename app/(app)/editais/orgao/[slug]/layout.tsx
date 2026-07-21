@@ -15,11 +15,15 @@ export async function generateMetadata(
       .eq('slug', slug)
       .maybeSingle();
     if (!data) return { title: 'Órgão não encontrado | Focali' };
+    const title = `Concursos ${data.sigla} — ${data.nome} | Focali`;
+    const description = data.descricao
+      ?? `Editais e concursos do órgão ${data.nome} (${data.sigla}): cargos, vagas, bancas e grade de estudos na Focali.`;
     return {
-      title: `Concursos ${data.sigla} — ${data.nome} | Focali`,
-      description: data.descricao
-        ?? `Editais e concursos do órgão ${data.nome} (${data.sigla}): cargos, vagas, bancas e grade de estudos na Focali.`,
+      title,
+      description,
       alternates: { canonical: `/editais/orgao/${slug}` },
+      // Sem openGraph próprio, o compartilhamento cai no OG genérico da home.
+      openGraph: { title, description, url: `/editais/orgao/${slug}` },
     };
   } catch {
     return { title: 'Órgão | Focali' };

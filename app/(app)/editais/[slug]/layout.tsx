@@ -29,11 +29,15 @@ export async function generateMetadata(
       data.banca ? `banca ${data.banca}` : null,
       data.vagas != null ? `${data.vagas} vagas` : null,
     ].filter(Boolean).join(', ');
+    const title = `Concurso ${titulo} | Focali`;
+    const description =
+      `Concurso ${titulo}${partes ? ` (${partes})` : ''}: edital verticalizado, pesos por disciplina, linha do tempo, provas anteriores e plano de estudos na Focali.`;
     return {
-      title: `Concurso ${titulo} | Focali`,
-      description:
-        `Concurso ${titulo}${partes ? ` (${partes})` : ''}: edital verticalizado, pesos por disciplina, linha do tempo, provas anteriores e plano de estudos na Focali.`,
+      title,
+      description,
       alternates: { canonical: `/editais/${slug}` },
+      // Sem openGraph próprio, o compartilhamento cai no OG genérico da home.
+      openGraph: { title, description, url: `/editais/${slug}` },
     };
   } catch {
     return { title: 'Edital | Focali' };

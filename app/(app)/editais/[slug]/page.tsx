@@ -417,9 +417,13 @@ export default function EditalDetailPage() {
                         <WeightDots weight={sub.weight} />
                         {sub.numQuestions != null ? (
                           <span style={s.questionBadge}>{sub.numQuestions} questões</span>
-                        ) : (
+                        ) : totalQuestions > 0 ? (
+                          // Só faz sentido apontar a exceção quando OUTRAS
+                          // disciplinas têm nº fixo; se nenhuma tem (ex.: TJ-GO
+                          // Juiz), repetir "sem questões fixas" 15× é ruído — o
+                          // aviso da ficha já explica o formato da prova.
                           <span style={s.questionBadgeMuted}>sem questões fixas</span>
-                        )}
+                        ) : null}
                       </div>
                     </div>
                     <div style={s.subjectMetaRow}>
