@@ -242,7 +242,13 @@ export default function EditalDetailPage() {
     ...(edital.vagas != null ? [{ label: 'Vagas', value: edital.vagas.toLocaleString('pt-BR') }] : []),
     ...(edital.remuneracao != null ? [{ label: 'Remuneração', value: edital.remuneracao.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) }] : []),
     ...(edital.examDate ? [{ label: 'Prova', value: formatDateBR(edital.examDate) }] : []),
-    ...(edital.inscricoesAte ? [{ label: 'Inscrições até', value: formatDateBR(edital.inscricoesAte) }] : []),
+    // Data passada ganha "· encerradas" — sem isso a ficha parece prometer
+    // inscrição aberta em concurso que já fechou.
+    ...(edital.inscricoesAte ? [{
+      label: 'Inscrições até',
+      value: formatDateBR(edital.inscricoesAte)
+        + (daysUntilExam(edital.inscricoesAte) < 0 ? ' · encerradas' : ''),
+    }] : []),
     ...(edital.uf ? [{ label: 'UF', value: edital.uf }] : []),
     ...(edital.nivel ? [{ label: 'Escolaridade', value: `Nível ${edital.nivel}` }] : []),
   ];

@@ -24,7 +24,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     );
     const [editaisRes, orgaosRes] = await Promise.all([
       supabase.from('editais_catalog').select('slug').eq('is_active', true),
-      supabase.from('orgaos_catalog').select('slug'),
+      // Só órgãos com pelo menos um edital ativo — órgão vazio renderiza
+      // "nenhum edital curado", página thin que não deve ser indexada.
+      supabase.from('orgaos_catalog').select('slug, editais_catalog!inner(id)').eq('editais_catalog.is_active', true),
     ]);
     const editais = (editaisRes.data ?? []).map((e) => ({
       url: `${BASE}/editais/${e.slug}`,
