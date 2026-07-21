@@ -11,10 +11,11 @@ import { X } from 'lucide-react';
 import { useConfirm } from '@/hooks/useConfirm';
 import { useToast } from '@/components/ui/ToastProvider';
 import { searchNotes, listNotes, getNote, deleteNote, countNotesBySubject, listNotesByBoard, listRecentNotes, listCriticalTopics, listBoards, type ErrorNote, type CriticalTopic } from '@/services/notebook.service';
-import { listActive as listSubjectOptions } from '@/services/subjects.service';
+import { listActiveWithColor, type SubjectColorOption } from '@/services/subjects.service';
 import { listLeaves as listTopicOptions, type PickerOption } from '@/services/topics.service';
 import { scheduleReviewFromError } from '@/services/reviews.service';
 import { NoteEditor } from '@/components/features/notebook/NoteEditor';
+import { SubjectPill } from '@/components/features/caderno/SubjectPill';
 import { theme } from '@/lib/theme';
 import { useUI } from '@/components/layout/UIContext';
 import { Button } from '@/components/ui/Button';
@@ -34,7 +35,7 @@ export function ErrosView({ openNoteId }: { openNoteId?: string | null }) {
   const [criticals, setCriticals] = useState<CriticalTopic[]>([]);
 
   const [level, setLevel] = useState<Level>('subjects');
-  const [subjects, setSubjects] = useState<PickerOption[]>([]);
+  const [subjects, setSubjects] = useState<SubjectColorOption[]>([]);
   const [topics, setTopics] = useState<PickerOption[]>([]);
   const [notes, setNotes] = useState<ErrorNote[]>([]);
   const [counts, setCounts] = useState<Record<string, number>>({});
@@ -60,7 +61,7 @@ export function ErrosView({ openNoteId }: { openNoteId?: string | null }) {
 
   useEffect(() => {
     Promise.all([
-      listSubjectOptions().then(setSubjects),
+      listActiveWithColor().then(setSubjects),
       countNotesBySubject().then(setCounts),
     ])
       .catch(() => setPageError('Erro ao carregar matérias. Recarregue a página.'))
@@ -349,17 +350,21 @@ export function ErrosView({ openNoteId }: { openNoteId?: string | null }) {
                           <Link href="/subjects" style={{ display: 'inline-block', marginTop: 10, fontSize: 14, color: theme.teal, fontWeight: 600, textDecoration: 'none' }}>Adicionar matéria →</Link>
                         </div>
                       ) : subjects.map((sub) => (
-                        <div key={sub.id} onClick={() => openSubject(sub)} style={styles.navItem}>
-                          <span style={styles.navItemName}>{sub.name}</span>
-                          {counts[sub.id] ? <span style={styles.count}>{counts[sub.id]}</span> : null}
-                        </div>
+                        <SubjectPill
+                          key={sub.id}
+                          color={sub.color}
+                          name={sub.name}
+                          count={counts[sub.id] ?? 0}
+                          active={curSubject?.id === sub.id}
+                          onClick={() => openSubject(sub)}
+                        />
                       ))}
                     </div>
                   )}
 
                   {level === 'topics' && curSubject && (
                     <div style={styles.list}>
-                      <button onClick={() => setLevel('subjects')} style={styles.back}>← Matérias</button>
+                      <button onClick={() => { setLevel('subjects'); setCurSubject(null); }} style={styles.back}>← Matérias</button>
                       <p style={styles.crumbSubject}>{curSubject.name}</p>
                       {topics.map((t) => (
                         <div key={t.id} onClick={() => openTopic(t)} style={styles.navItem}>
@@ -461,7 +466,6 @@ const styles: Record<string, React.CSSProperties> = {
   list: { display: 'flex', flexDirection: 'column', gap: 8 },
   navItem: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, background: theme.card, borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, padding: '13px 15px', cursor: 'pointer' },
   navItemName: { fontSize: 14, color: theme.ink, fontWeight: 500, lineHeight: 1.45 },
-  count: { fontSize: 11, color: theme.inkSoft, background: 'rgba(15,23,42,.05)', padding: '2px 8px', borderRadius: 10, fontWeight: 600, flexShrink: 0 },
   critItem: { display: 'flex', flexDirection: 'column', gap: 3, background: theme.card, borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, padding: '13px 15px', cursor: 'pointer' },
   critAlert: { borderWidth: 1.5, borderColor: theme.crit, background: theme.bg },
   critTop: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 },

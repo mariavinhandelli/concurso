@@ -9,12 +9,13 @@ import {
   type Flashcard,
 } from '@/services/flashcards.service';
 import { listLeaves as listTopicOptions, type PickerOption } from '@/services/topics.service';
+import type { SubjectColorOption } from '@/services/subjects.service';
 
 export type NavLevel = 'subjects' | 'topics' | 'cards';
 
 export interface FlashcardNavState {
   level: NavLevel;
-  subjects: PickerOption[];
+  subjects: SubjectColorOption[];
   topics: PickerOption[];
   cards: Flashcard[];
   counts: Record<string, number>;
@@ -24,7 +25,7 @@ export interface FlashcardNavState {
 }
 
 export interface FlashcardNavActions {
-  setSubjects: (s: PickerOption[]) => void;
+  setSubjects: (s: SubjectColorOption[]) => void;
   setCounts: (c: Record<string, number>) => void;
   setLoadError: (e: string | null) => void;
   openSubject: (s: PickerOption, onError: (msg: string) => void) => void;
@@ -37,7 +38,7 @@ export interface FlashcardNavActions {
 
 export function useFlashcardNavigation(): FlashcardNavState & FlashcardNavActions {
   const [level, setLevel] = useState<NavLevel>('subjects');
-  const [subjects, setSubjects] = useState<PickerOption[]>([]);
+  const [subjects, setSubjects] = useState<SubjectColorOption[]>([]);
   const [topics, setTopics] = useState<PickerOption[]>([]);
   const [cards, setCards] = useState<Flashcard[]>([]);
   const [counts, setCounts] = useState<Record<string, number>>({});

@@ -16,8 +16,26 @@ export interface Subject {
 }
 
 export type PickerOption = { id: string; name: string };
+export type SubjectColorOption = PickerOption & { color: string };
 
 export { SUBJECT_COLORS } from '@/lib/subject-colors';
+
+// Igual a listActive(), mas inclui `color` — para pickers que mostram a bolinha
+// da matéria (Flashcards, Erros). Mantém a ordem alfabética de listActive();
+// listSubjects() ordena por position/created_at, que é a ordem de arrastar do
+// /subjects, não a esperada num seletor de matéria.
+export async function listActiveWithColor(): Promise<SubjectColorOption[]> {
+  const { supabase, userId } = await requireUser();
+  const { data, error } = await supabase
+    .from('subjects')
+    .select('id, name, color')
+    .eq('user_id', userId)
+    .eq('status', 'ativo')
+    .order('name', { ascending: true })
+    .limit(200);
+  if (error) throw new Error('Erro ao carregar matérias: ' + error.message);
+  return data ?? [];
+}
 
 export async function listSubjects(): Promise<Subject[]> {
   const { supabase, userId } = await requireUser();

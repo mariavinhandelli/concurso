@@ -10,8 +10,9 @@ import {
   deleteFlashcard, buildTopicQueue, countFlashcardsBySubject,
   type QueueCard, type Flashcard,
 } from '@/services/flashcards.service';
-import { listActive as listSubjectOptions, type PickerOption } from '@/services/subjects.service';
+import { listActiveWithColor, type PickerOption } from '@/services/subjects.service';
 import { CardForm } from '@/components/features/flashcards/CardForm';
+import { SubjectPill } from '@/components/features/caderno/SubjectPill';
 import { theme } from '@/lib/theme';
 import { Button } from '@/components/ui/Button';
 
@@ -29,7 +30,7 @@ export function CardsTab({ onStudy }: Props) {
 
   useEffect(() => {
     Promise.all([
-      listSubjectOptions().then(nav.setSubjects),
+      listActiveWithColor().then(nav.setSubjects),
       countFlashcardsBySubject().then(nav.setCounts),
     ]).catch(e => {
       const msg = e instanceof Error ? e.message : 'Erro ao carregar matérias. Recarregue a página.';
@@ -97,12 +98,17 @@ export function CardsTab({ onStudy }: Props) {
             {nav.subjects.map(s => (
               <div
                 key={s.id}
-                style={{ ...styles.navItem, ...(hoveredId === s.id ? styles.navItemHover : {}) }}
+                style={{ ...styles.subjectRow, ...(hoveredId === s.id ? styles.subjectRowHover : {}) }}
                 onMouseEnter={() => setHoveredId(s.id)}
                 onMouseLeave={() => setHoveredId(null)}
               >
-                <span onClick={() => nav.openSubject(s, msg => toast.error(msg))} style={{ flex: 1, cursor: 'pointer', minWidth: 0 }}>{s.name}</span>
-                {nav.counts[s.id] ? <span style={styles.count}>{nav.counts[s.id]}</span> : null}
+                <SubjectPill
+                  style={styles.subjectPill}
+                  color={s.color}
+                  name={s.name}
+                  count={nav.counts[s.id] ?? 0}
+                  onClick={() => nav.openSubject(s, msg => toast.error(msg))}
+                />
                 {nav.counts[s.id] ? (
                   <button onClick={() => studySubject(s)} style={styles.studyBtn}>Estudar</button>
                 ) : null}
@@ -211,7 +217,9 @@ const styles: Record<string, React.CSSProperties> = {
   back: { border: 'none', background: 'transparent', color: theme.teal, fontSize: 13, fontWeight: 500, cursor: 'pointer', padding: 0, textAlign: 'left', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 2 },
   navItem: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, background: theme.card, borderRadius: theme.radiusSm, border: `1px solid ${theme.lineStrong}`, padding: '13px 15px', cursor: 'pointer', fontSize: 14, color: theme.ink, fontWeight: 500, minWidth: 0, transition: 'background .12s, transform .12s' },
   navItemHover: { background: 'rgba(15,23,42,.03)', transform: 'translateX(2px)' },
-  count: { fontSize: 11, color: theme.inkSoft, background: 'rgba(15,23,42,.05)', padding: '2px 8px', borderRadius: 10, fontWeight: 600, flexShrink: 0 },
+  subjectRow: { display: 'flex', alignItems: 'center', gap: 6, borderRadius: 9, transition: 'background .12s, transform .12s' },
+  subjectRowHover: { background: 'rgba(15,23,42,.03)', transform: 'translateX(2px)' },
+  subjectPill: { flex: 1, minWidth: 0 },
   studyBtn: { padding: '5px 13px', borderRadius: theme.radiusXs, border: 'none', background: theme.tealBg, color: theme.tealDeep, fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', flexShrink: 0 },
   cardsHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, flexWrap: 'wrap' },
   studyTopicBtn: { padding: '7px 15px', borderRadius: 10, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', flexShrink: 0 },

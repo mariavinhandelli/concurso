@@ -3,7 +3,7 @@
 // e Turmas (grupos com código). Amigos só veem agregados — nunca conteúdo.
 'use client';
 
-import { Suspense, useState, type CSSProperties } from 'react';
+import { Suspense, useRef, useState, type CSSProperties } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Check, X } from 'lucide-react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -16,7 +16,9 @@ import { Avatar, RankRow } from '@/components/features/social/SocialUI';
 import { TurmasTab } from '@/components/features/social/TurmasTab';
 import { theme } from '@/lib/theme';
 import { Button } from '@/components/ui/Button';
+import { Badge } from '@/components/ui/Badge';
 import { PageContainer, PageHeader } from '@/components/ui/Page';
+import { SegmentedControl } from '@/components/ui/SegmentedControl';
 
 function inviteUrl(code: string): string {
   const origin = typeof window !== 'undefined' ? window.location.origin : '';
@@ -31,6 +33,9 @@ function AmigosContent() {
   const qc = useQueryClient();
   const [tab, setTab] = useState<Tab>(params.get('tab') === 'turmas' ? 'turmas' : 'amigos');
   const [busy, setBusy] = useState(false);
+  // Guard síncrono: `disabled={busy}` só vale após o re-render — dois cliques
+  // no mesmo tick disparavam aceitar/recusar amizade duas vezes.
+  const busyRef = useRef(false);
   const [code, setCode] = useState('');
   const [copiado, setCopiado] = useState(false);
 
@@ -38,11 +43,12 @@ function AmigosContent() {
   const invalidate = () => qc.invalidateQueries({ queryKey: ['social-overview'] });
 
   async function run(fn: () => Promise<void>) {
-    if (busy) return;
+    if (busyRef.current) return;
+    busyRef.current = true;
     setBusy(true);
     try { await fn(); await invalidate(); }
     catch (e) { toast.error(e instanceof Error ? e.message : 'Algo deu errado.'); }
-    finally { setBusy(false); }
+    finally { busyRef.current = false; setBusy(false); }
   }
 
   async function ativar() { await run(async () => { await enableSocial(); toast.success('Perfil social ativado! 🎉'); }); }
@@ -78,9 +84,13 @@ function AmigosContent() {
     <PageContainer width="narrow">
       <PageHeader title="Amigos" subtitle="Constância é mais fácil em companhia. Estude com quem te cobra (no bom sentido)." />
 
-      <div style={s.segmented}>
-        <button onClick={() => setTab('amigos')} style={{ ...s.segBtn, ...(tab === 'amigos' ? s.segOn : {}) }}>Amigos</button>
-        <button onClick={() => setTab('turmas')} style={{ ...s.segBtn, ...(tab === 'turmas' ? s.segOn : {}) }}>Turmas</button>
+      <div style={{ marginBottom: 18 }}>
+        <SegmentedControl
+          options={[{ value: 'amigos', label: 'Amigos' }, { value: 'turmas', label: 'Turmas' }]}
+          value={tab}
+          onChange={setTab}
+          equalWidth={false}
+        />
       </div>
 
       {tab === 'turmas' ? (
@@ -96,10 +106,10 @@ function AmigosContent() {
             estuda, seus erros ou anotações. Você pode desativar quando quiser.
           </p>
           <div style={s.privacyRow}>
-            <span style={s.pillOk}><Check size={12} strokeWidth={2.5} style={{ marginRight: 4, verticalAlign: -1 }} />sequência</span>
-            <span style={s.pillOk}><Check size={12} strokeWidth={2.5} style={{ marginRight: 4, verticalAlign: -1 }} />minutos da semana</span>
-            <span style={s.pillOk}><Check size={12} strokeWidth={2.5} style={{ marginRight: 4, verticalAlign: -1 }} />% do edital</span>
-            <span style={s.pillNo}><X size={12} strokeWidth={2.5} style={{ marginRight: 4, verticalAlign: -1 }} />conteúdo · erros · anotações</span>
+            <Badge variant="brand"><Check size={12} strokeWidth={2.5} />sequência</Badge>
+            <Badge variant="brand"><Check size={12} strokeWidth={2.5} />minutos da semana</Badge>
+            <Badge variant="brand"><Check size={12} strokeWidth={2.5} />% do edital</Badge>
+            <Badge variant="neutral"><X size={12} strokeWidth={2.5} />conteúdo · erros · anotações</Badge>
           </div>
           <button onClick={ativar} disabled={busy} style={{ ...s.primary, marginTop: 18, opacity: busy ? 0.6 : 1 }}>
             {busy ? 'Ativando…' : 'Ativar perfil social'}
@@ -181,10 +191,6 @@ export default function AmigosPage() {
 const s: Record<string, CSSProperties> = {
   muted: { fontSize: 14, color: theme.inkFaint, padding: '16px 4px' },
 
-  segmented: { display: 'inline-flex', gap: 2, padding: 3, borderRadius: theme.radiusPill, background: theme.muted, marginBottom: 18 },
-  segBtn: { padding: '7px 20px', borderRadius: theme.radiusPill, border: 'none', background: 'transparent', color: theme.inkSoft, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
-  segOn: { background: theme.card, color: theme.ink, boxShadow: theme.shadow },
-
   card: { background: theme.card, border: `0.5px solid ${theme.line}`, borderRadius: theme.radius, boxShadow: theme.shadow, padding: 22, marginBottom: 16, minWidth: 0 },
   cardTitle: { fontSize: 12, fontWeight: 600, color: theme.inkFaint, letterSpacing: 1, textTransform: 'uppercase', marginBottom: 14 },
   cardH: { fontSize: 18, fontWeight: 800, color: theme.ink, margin: '0 0 8px', letterSpacing: -0.3 },
@@ -192,8 +198,6 @@ const s: Record<string, CSSProperties> = {
   strong: { color: theme.ink, fontWeight: 700 },
 
   privacyRow: { display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 14 },
-  pillOk: { fontSize: 12, fontWeight: 600, color: theme.tealDeep, background: theme.tealBg, padding: '5px 10px', borderRadius: theme.radiusPill },
-  pillNo: { fontSize: 12, fontWeight: 600, color: theme.inkSoft, background: theme.muted, padding: '5px 10px', borderRadius: theme.radiusPill },
 
   inviteRow: { display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' },
   codeBox: { fontFamily: 'ui-monospace, monospace', fontSize: 16, fontWeight: 700, letterSpacing: 2, color: theme.ink, background: theme.bg, border: `0.5px solid ${theme.line}`, borderRadius: theme.radiusSm, padding: '10px 14px', flex: 1, minWidth: 120, textAlign: 'center' },
@@ -206,9 +210,9 @@ const s: Record<string, CSSProperties> = {
 
   rankList: { display: 'flex', flexDirection: 'column', gap: 6 },
 
-  primary: { padding: '11px 20px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
+  primary: { padding: '11px 20px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onPrimary, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
   secondary: { padding: '11px 16px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.ink, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
-  miniPrimary: { padding: '7px 13px', borderRadius: theme.radiusXs, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', flexShrink: 0 },
+  miniPrimary: { padding: '7px 13px', borderRadius: theme.radiusXs, border: 'none', background: theme.primary, color: theme.onPrimary, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', flexShrink: 0 },
   miniGhost: { padding: '7px 11px', borderRadius: theme.radiusXs, border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.inkSoft, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', flexShrink: 0 },
   disableBtn: { border: 'none', background: 'transparent', color: theme.inkFaint, fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit', padding: '4px 2px', textDecoration: 'underline' },
 };

@@ -13,6 +13,7 @@ import {
   type StudyNoteMeta, type StudyNote, type NotaKind,
 } from '@/services/studyNotes.service';
 import { NotaEditor } from '@/components/features/caderno/NotaEditor';
+import { SubjectPill } from '@/components/features/caderno/SubjectPill';
 import { KIND_CORES } from '@/components/features/caderno/notaCores';
 import { useUI } from '@/components/layout/UIContext';
 import { useToast } from '@/components/ui/ToastProvider';
@@ -135,38 +136,33 @@ export function AnotacoesView({ openNotaId }: { openNotaId?: string | null }) {
 
   const painelMaterias = (
     <div style={{ ...s.painelMaterias, ...(materiasHorizontal ? s.painelMateriasMobile : {}) }}>
-      <button
+      <SubjectPill
         className="touch-target"
+        name="Todas"
+        count={totalNotas}
+        alwaysShowCount
+        active={filtro === 'all'}
         onClick={() => setFiltro('all')}
-        style={{ ...s.materiaItem, ...(filtro === 'all' ? s.materiaItemOn : {}) }}
-      >
-        <span style={s.materiaNome}>Todas</span>
-        <span style={s.materiaCount}>{totalNotas}</span>
-      </button>
-      {subjects.map((sub) => {
-        const n = countPorMateria.get(sub.id) ?? 0;
-        return (
-          <button
-            className="touch-target"
-            key={sub.id}
-            onClick={() => setFiltro(sub.id)}
-            style={{ ...s.materiaItem, ...(filtro === sub.id ? s.materiaItemOn : {}) }}
-          >
-            <span style={{ ...s.materiaDot, background: sub.color ?? '#C9B8DD' }} />
-            <span style={s.materiaNome}>{sub.name}</span>
-            {n > 0 && <span style={s.materiaCount}>{n}</span>}
-          </button>
-        );
-      })}
-      {(countPorMateria.get('none') ?? 0) > 0 && (
-        <button
+      />
+      {subjects.map((sub) => (
+        <SubjectPill
           className="touch-target"
+          key={sub.id}
+          color={sub.color ?? '#C9B8DD'}
+          name={sub.name}
+          count={countPorMateria.get(sub.id) ?? 0}
+          active={filtro === sub.id}
+          onClick={() => setFiltro(sub.id)}
+        />
+      ))}
+      {(countPorMateria.get('none') ?? 0) > 0 && (
+        <SubjectPill
+          className="touch-target"
+          name="Sem matéria"
+          count={countPorMateria.get('none')}
+          active={filtro === 'none'}
           onClick={() => setFiltro('none')}
-          style={{ ...s.materiaItem, ...(filtro === 'none' ? s.materiaItemOn : {}) }}
-        >
-          <span style={s.materiaNome}>Sem matéria</span>
-          <span style={s.materiaCount}>{countPorMateria.get('none')}</span>
-        </button>
+        />
       )}
     </div>
   );
@@ -287,11 +283,6 @@ const s: Record<string, CSSProperties> = {
 
   painelMaterias: { display: 'flex', flexDirection: 'column', gap: 2, overflowY: 'auto', paddingRight: 2 },
   painelMateriasMobile: { flexDirection: 'row', overflowX: 'auto', overflowY: 'visible', gap: 6, paddingBottom: 4 },
-  materiaItem: { display: 'flex', alignItems: 'center', gap: 8, textAlign: 'left', padding: '8px 10px', borderRadius: 9, border: 'none', background: 'transparent', cursor: 'pointer', fontFamily: 'inherit', minWidth: 0, flexShrink: 0, whiteSpace: 'nowrap' },
-  materiaItemOn: { background: theme.tealBg },
-  materiaDot: { width: 8, height: 8, borderRadius: '50%', flexShrink: 0 },
-  materiaNome: { fontSize: 13, fontWeight: 600, color: theme.ink, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 },
-  materiaCount: { fontSize: 12, color: theme.inkFaint, flexShrink: 0, fontVariantNumeric: 'tabular-nums' },
 
   painelNotas: { display: 'flex', flexDirection: 'column', gap: 8, overflowY: 'auto', paddingRight: 2, minWidth: 0 },
   notasTools: { display: 'flex', gap: 8, position: 'sticky', top: 0, background: theme.bg, paddingBottom: 2, zIndex: 1 },
