@@ -8,18 +8,13 @@ import {
   type JurisComInteracao,
 } from '@/services/jurisInteracoes.service';
 import { RATING_LABEL, type JurisRating, jurisDaysOverdue, calculateNextJurisReview, fromJurisDbRow, INITIAL_JURIS_STATE } from '@/lib/juris-review';
+import { RATING_STYLE } from '@/lib/juris-labels';
 import { useUI } from '@/components/layout/UIContext';
 import { theme } from '@/lib/theme';
 import { PageContainer } from '@/components/ui/Page';
 import { Button } from '@/components/ui/Button';
 
-const RATINGS: { key: JurisRating; color: string; bg: string }[] = [
-  { key: 'errei',   color: theme.danger,   bg: theme.dangerTint },
-  { key: 'dificil', color: theme.warnDeep, bg: theme.warnTint },
-  { key: 'ok',      color: theme.tealDeep, bg: theme.tealBg },
-  { key: 'dominei', color: theme.okDeep,   bg: theme.okTint },
-];
-
+const RATINGS = RATING_STYLE;
 
 export default function RevisarPage() {
   const router = useRouter();

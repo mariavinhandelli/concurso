@@ -62,8 +62,9 @@ export function JurisFilterBar({ values, onChange, disciplinas }: Props) {
         <div
           role="button"
           tabIndex={0}
+          aria-expanded={open}
           onClick={() => setOpen((v) => !v)}
-          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setOpen((v) => !v); }}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setOpen((v) => !v); } }}
           style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '12px 16px', cursor: 'pointer', userSelect: 'none' }}
         >
           <Funnel size={15} color={theme.inkSoft} strokeWidth={1.7} />

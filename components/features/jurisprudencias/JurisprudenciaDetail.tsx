@@ -5,6 +5,7 @@ import { theme } from '@/lib/theme';
 import { Badge } from '@/components/ui/Badge';
 import { EstrelasBadge } from './EstrelasBadge';
 import { JurisSection } from './JurisSection';
+import { TIPO_LABEL, STATUS_LABEL, INCIDENCIA_LABEL, tipoRefLabel } from '@/lib/juris-labels';
 import type { Jurisprudencia } from '@/services/jurisprudencias.service';
 
 interface Props {
@@ -54,17 +55,6 @@ function IconTag() {
   return <Tag size={16} strokeWidth={1.7} />;
 }
 
-const TIPO_LABEL: Record<string, string> = {
-  sumula: 'Súmula', sumula_vinculante: 'Súmula Vinculante', acordao: 'Acórdão', decisao_monocratica: 'Decisão Monocrática',
-  informativo: 'Informativo', outro: 'Outro',
-};
-const STATUS_LABEL: Record<string, string> = {
-  vigente: 'Vigente', cancelada: 'Cancelada', substituida: 'Substituída', revisada: 'Revisada',
-};
-const INCIDENCIA_LABEL: Record<string, string> = {
-  baixa: 'Baixa', media: 'Média', alta: 'Alta', muito_alta: 'Muito Alta',
-};
-
 function fmtDate(d: string | null): string {
   if (!d) return '—';
   return new Date(d + 'T00:00:00').toLocaleDateString('pt-BR');
@@ -89,6 +79,21 @@ export function JurisprudenciaDetail({ item, isMobile }: Props) {
         </p>
       </div>
 
+      {/* ── Aviso de superação — independente do box de súmula: um acórdão
+             superado também precisa alertar o estudante ── */}
+      {(item.cancelada || item.superada || item.superada_parcialmente) && (
+        <div style={{
+          padding: '12px 16px', borderRadius: theme.radiusSm,
+          background: theme.dangerTint, fontSize: 13, color: theme.danger, fontWeight: 600,
+          border: `0.5px solid ${theme.danger}`,
+        }}>
+          {item.cancelada ? 'Entendimento cancelado — não aplique em prova.' : item.superada ? 'Entendimento superado — não aplique em prova.' : 'Entendimento parcialmente superado — confira o alcance atual.'}
+          {item.superada_por && item.superada_por.length > 0 && (
+            <span style={{ fontWeight: 400 }}> Ver: {item.superada_por.join(', ')}</span>
+          )}
+        </div>
+      )}
+
       {/* ── SÚMULA — texto oficial (oculto se idêntico à tese) ── */}
       {item.texto_sumula && item.texto_sumula !== item.tese && (
         <div style={{
@@ -98,7 +103,9 @@ export function JurisprudenciaDetail({ item, isMobile }: Props) {
           padding: isMobile ? '16px' : '20px 24px',
         }}>
           <div style={{ fontSize: 11, fontWeight: 700, color: theme.inkFaint, letterSpacing: 0.8, textTransform: 'uppercase', marginBottom: 8 }}>
-            {TIPO_LABEL[item.tipo] ?? 'Súmula'}{item.numero_sumula ? ` ${item.numero_sumula}` : ''} · {item.tribunal}
+            {item.numero_sumula && item.tipo !== 'sumula' && item.tipo !== 'sumula_vinculante'
+              ? `${TIPO_LABEL[item.tipo] ?? item.tipo} · Tema ${item.numero_sumula}`
+              : tipoRefLabel(item.tipo, item.numero_sumula)} · {item.tribunal}
           </div>
           {item.titulo && (
             <p style={{ fontSize: 14, fontWeight: 700, color: theme.ink, margin: '0 0 8px' }}>{item.titulo}</p>
@@ -113,17 +120,8 @@ export function JurisprudenciaDetail({ item, isMobile }: Props) {
               {item.origem_publicacao ?? ''}
             </p>
           )}
-          {(item.cancelada || item.superada || item.superada_parcialmente) && (
-            <div style={{
-              marginTop: 12, padding: '10px 14px', borderRadius: 10,
-              background: theme.dangerTint, fontSize: 13, color: theme.danger, fontWeight: 600,
-            }}>
-              {item.cancelada ? 'Súmula cancelada.' : item.superada ? 'Entendimento superado.' : 'Entendimento parcialmente superado.'}
-              {item.superada_por && item.superada_por.length > 0 && (
-                <span style={{ fontWeight: 400 }}> Ver: {item.superada_por.join(', ')}</span>
-              )}
-            </div>
-          )}
+          {/* aviso de superação migrou para logo abaixo da tese — vale para
+              qualquer tipo de julgado, não só súmulas com texto oficial */}
         </div>
       )}
 

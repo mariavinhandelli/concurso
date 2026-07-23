@@ -5,21 +5,8 @@ import { Star, X } from 'lucide-react';
 import { theme } from '@/lib/theme';
 import { EstrelasBadge } from './EstrelasBadge';
 import { getInteracao, toggleFavorito } from '@/services/jurisInteracoes.service';
-import type { Jurisprudencia, JurisIncidencia } from '@/services/jurisprudencias.service';
-
-const INCIDENCIA_LABEL: Record<JurisIncidencia, string> = {
-  baixa: 'Baixa', media: 'Média', alta: 'Alta', muito_alta: 'Muito Alta',
-};
-const INCIDENCIA_COLOR: Record<JurisIncidencia, string> = {
-  baixa: theme.inkFaint, media: theme.warn, alta: '#f97316', muito_alta: theme.danger,
-};
-const TIPO_LABEL: Record<string, string> = {
-  sumula: 'Súmula', sumula_vinculante: 'Súm. Vinculante', acordao: 'Acórdão', decisao_monocratica: 'Dec. Monocrática',
-  informativo: 'Informativo', outro: 'Outro',
-};
-const STATUS_LABEL: Record<string, string> = {
-  cancelada: 'Cancelada', substituida: 'Substituída', revisada: 'Revisada',
-};
+import type { Jurisprudencia } from '@/services/jurisprudencias.service';
+import { INCIDENCIA_LABEL, INCIDENCIA_COLOR, STATUS_LABEL, tipoRefLabel } from '@/lib/juris-labels';
 
 interface Props {
   item: Jurisprudencia;
@@ -73,15 +60,23 @@ export const JurisprudenciaCard = memo(function JurisprudenciaCard({ item, onCli
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
         <span style={styles.tribunalBadge}>{item.tribunal}</span>
         <span style={styles.tipoBadge}>
-          {item.numero_sumula
-            ? `${item.tipo === 'sumula_vinculante' ? 'SV' : 'Súmula'} ${item.numero_sumula}`
-            : (TIPO_LABEL[item.tipo] ?? item.tipo)}
+          {tipoRefLabel(item.tipo, item.numero_sumula, { short: true })}
         </span>
-        {item.status !== 'vigente' && (
-          <span style={{ ...styles.tipoBadge, background: theme.dangerTint, color: theme.danger }}>
-            {STATUS_LABEL[item.status]}
-          </span>
-        )}
+        {(() => {
+          // Entendimento não mais aplicável: o status (enum) e as flags de
+          // súmula sinalizam superação — a lista precisa refletir ambos.
+          const superadoLabel =
+            item.status !== 'vigente' ? STATUS_LABEL[item.status]
+              : item.cancelada ? 'Cancelada'
+              : item.superada ? 'Superada'
+              : item.superada_parcialmente ? 'Superada em parte'
+              : null;
+          return superadoLabel ? (
+            <span style={{ ...styles.tipoBadge, background: theme.dangerTint, color: theme.danger }}>
+              {superadoLabel}
+            </span>
+          ) : null;
+        })()}
         {reviewOverdueDays > 0 && (
           <span style={{ fontSize: 11, fontWeight: 700, color: theme.danger, background: theme.dangerTint, borderRadius: 6, padding: '2px 8px' }}>
             ↻ {reviewOverdueDays}d atrasada

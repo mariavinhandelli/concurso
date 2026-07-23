@@ -153,7 +153,7 @@ function ListaContent() {
   }, []);
 
   async function handleDelete(id: string) {
-    if (!await confirm({ title: 'Apagar esta jurisprudência?', description: 'Ela some do banco para todos os usuários. Esta ação não pode ser desfeita.', confirmLabel: 'Apagar', danger: true })) return;
+    if (!await confirm({ title: 'Apagar esta jurisprudência?', description: 'Ela é sua e some apenas da sua conta. Suas anotações e favoritos ligados a ela deixam de aparecer.', confirmLabel: 'Apagar', danger: true })) return;
     try {
       await deleteJurisprudencia(id);
       toast.success('Jurisprudência apagada.');

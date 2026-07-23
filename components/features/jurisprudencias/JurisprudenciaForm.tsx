@@ -161,10 +161,10 @@ export function JurisprudenciaForm({ initial = {}, saving, onSave, onCancel }: P
             <Input value={relator} onChange={(e) => setRelator(e.target.value)} placeholder="Nome do(a) relator(a)" />
           </Field>
           <Field label="Data de julgamento">
-            <Input type="date" value={dataJulgamento} onChange={(e) => setDataJulgamento(e.target.value)} />
+            <Input type="date" value={dataJulgamento} onChange={(e) => setDataJulgamento(e.target.value)} aria-label="Data de julgamento" />
           </Field>
           <Field label="Data de publicação">
-            <Input type="date" value={dataPublicacao} onChange={(e) => setDataPublicacao(e.target.value)} />
+            <Input type="date" value={dataPublicacao} onChange={(e) => setDataPublicacao(e.target.value)} aria-label="Data de publicação" />
           </Field>
           <Field label="Status">
             <Select value={status} onChange={(e) => setStatus(e.target.value as Jurisprudencia['status'])}>

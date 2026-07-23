@@ -7,7 +7,9 @@ import {
   FileText, Briefcase, Vote, Percent, ShieldCheck, Medal, CalendarClock, ChartNoAxesColumn,
   TriangleAlert, type LucideIcon,
 } from 'lucide-react';
-import { DISCIPLINAS_HUB, countByDisciplina } from '@/services/jurisprudencias.service';
+// DISCIPLINAS_HUB vem do lib leve; o service (que embute os ~840KB de julgados)
+// só entra por import dinâmico — a landing do módulo não paga o bundle inteiro.
+import { DISCIPLINAS_HUB } from '@/lib/juris-disciplinas';
 import { getSimuladoInsights, type SimuladoInsights } from '@/services/jurisInteracoes.service';
 import { countRevisoesHoje } from '@/services/jurisRevisao.service';
 import { useUI } from '@/components/layout/UIContext';
@@ -46,7 +48,10 @@ export default function JurisprudenciasHubPage() {
   const [insights, setInsights] = useState<SimuladoInsights | null>(null);
 
   useEffect(() => {
-    countByDisciplina().then(setCounts).catch(() => {});
+    import('@/services/jurisprudencias.service')
+      .then((m) => m.countByDisciplina())
+      .then(setCounts)
+      .catch(() => {});
     countRevisoesHoje().then(setRevisoesHoje).catch(() => setRevisoesHoje(0));
     getSimuladoInsights().then(setInsights).catch(() => {});
   }, []);

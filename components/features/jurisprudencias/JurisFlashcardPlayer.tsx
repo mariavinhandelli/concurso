@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/Button';
 import type { Jurisprudencia } from '@/services/jurisprudencias.service';
 import { submitRevisao } from '@/services/jurisInteracoes.service';
 import { RATING_LABEL, type JurisRating } from '@/lib/juris-review';
+import { RATING_STYLE } from '@/lib/juris-labels';
 import { useConfirm } from '@/hooks/useConfirm';
 import { Overlay } from '@/components/ui/Overlay';
 import { useToast } from '@/components/ui/ToastProvider';
@@ -16,12 +17,7 @@ interface Props {
   onClose: () => void;
 }
 
-const RATINGS: { key: JurisRating; color: string; bg: string }[] = [
-  { key: 'errei',   color: theme.danger,   bg: theme.dangerTint },
-  { key: 'dificil', color: theme.warnDeep, bg: theme.warnTint },
-  { key: 'ok',      color: theme.tealDeep, bg: theme.tealBg },
-  { key: 'dominei', color: theme.okDeep,   bg: theme.okTint },
-];
+const RATINGS = RATING_STYLE;
 
 export const JurisFlashcardPlayer = memo(function JurisFlashcardPlayer({ items, onClose }: Props) {
   const cards = useMemo(() => items.filter((i) => i.flashcard_frente && i.flashcard_verso), [items]);
@@ -71,9 +67,9 @@ export const JurisFlashcardPlayer = memo(function JurisFlashcardPlayer({ items, 
 
   if (cards.length === 0) {
     return (
-      <Overlay onClose={onClose}>
+      <Overlay onClose={onClose} labelledBy="flashcard-vazio-msg">
         <div style={{ textAlign: 'center', padding: '40px 24px' }}>
-          <p style={{ fontSize: 15, color: theme.inkSoft, marginBottom: 20 }}>Nenhum flashcard disponível nesta seleção.</p>
+          <p id="flashcard-vazio-msg" style={{ fontSize: 15, color: theme.inkSoft, marginBottom: 20 }}>Nenhum flashcard disponível nesta seleção.</p>
           <Button variant="outline" onClick={onClose}>Fechar</Button>
         </div>
       </Overlay>
@@ -152,6 +148,11 @@ export const JurisFlashcardPlayer = memo(function JurisFlashcardPlayer({ items, 
                   Ótimo! Todos os cards bem avaliados.
                 </p>
               )}
+              {/* Transparência: avaliar inscreve o julgado na revisão espaçada —
+                  antes isso acontecia sem nenhum aviso e a fila "crescia sozinha". */}
+              <p style={{ fontSize: 12, color: theme.inkFaint, marginTop: 8, textAlign: 'center' }}>
+                Cards avaliados entram na sua revisão espaçada e voltam em “Revisões de hoje” na data certa.
+              </p>
             </div>
           )}
 
@@ -198,7 +199,9 @@ export const JurisFlashcardPlayer = memo(function JurisFlashcardPlayer({ items, 
         aria-label={flipped ? 'Verso — Resposta. Pressione Espaço para virar de volta.' : 'Frente — Pergunta. Pressione Espaço para revelar a resposta.'}
         aria-keyshortcuts="Space"
         onClick={() => setFlipped((v) => !v)}
-        onKeyDown={(e) => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); setFlipped((v) => !v); } }}
+        // stopPropagation: o listener global de atalhos também trata Espaço/Enter —
+        // sem isso, com o card focado o flip disparava DUAS vezes e não saía do lugar.
+        onKeyDown={(e) => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); setFlipped((v) => !v); } }}
         style={{
           minHeight: 180, borderRadius: theme.radiusSm,
           border: `1.5px solid ${flipped ? theme.teal : theme.line}`,

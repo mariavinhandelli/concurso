@@ -18,13 +18,7 @@ import { pushRecent } from '@/lib/recents';
 import { theme } from '@/lib/theme';
 import { PageContainer } from '@/components/ui/Page';
 
-const INCIDENCIA_LABEL: Record<string, string> = {
-  baixa: 'Baixa', media: 'Média', alta: 'Alta', muito_alta: 'Muito Alta',
-};
-const TIPO_LABEL: Record<string, string> = {
-  sumula: 'Súmula', sumula_vinculante: 'Súmula Vinculante', acordao: 'Acórdão', decisao_monocratica: 'Decisão Monocrática',
-  informativo: 'Informativo', outro: 'Outro',
-};
+import { INCIDENCIA_LABEL, TIPO_LABEL } from '@/lib/juris-labels';
 
 type Tab = 'leitura' | 'estudo' | 'pessoal';
 
@@ -283,6 +277,13 @@ export default function JurisprudenciaPage() {
                 incidencia_concursos: item.incidencia_concursos,
                 supera_entendimento_anterior: item.supera_entendimento_anterior,
                 observacao_evolucao: item.observacao_evolucao ?? undefined,
+                // Sem estes campos no initial, o form nasce vazio e o submit
+                // grava null — editar qualquer coisa apagava flashcard e questão.
+                flashcard_frente: item.flashcard_frente ?? undefined,
+                flashcard_verso: item.flashcard_verso ?? undefined,
+                questao_enunciado: item.questao_enunciado ?? undefined,
+                questao_gabarito: item.questao_gabarito ?? undefined,
+                questao_comentario: item.questao_comentario ?? undefined,
               }}
               saving={saving}
               onSave={handleSave}

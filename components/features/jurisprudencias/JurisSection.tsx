@@ -43,6 +43,7 @@ export function JurisSection({
     }}>
       <button
         onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
         style={{
           display: 'flex', alignItems: 'center', gap: 10,
           width: '100%', padding: '13px 16px',

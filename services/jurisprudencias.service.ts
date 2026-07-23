@@ -268,7 +268,9 @@ export async function getJurisprudencia(id: string): Promise<Jurisprudencia | nu
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
-  const { data } = await supabase.from('jurisprudencias').select('*').eq('id', id).is('deleted_at', null).maybeSingle();
+  // Julgados criados são privados do criador — mesmo escopo da lista
+  // (a RLS também garante isso; aqui é defesa em profundidade).
+  const { data } = await supabase.from('jurisprudencias').select('*').eq('id', id).eq('created_by', user.id).is('deleted_at', null).maybeSingle();
   return (data as Jurisprudencia | null) ?? null;
 }
 

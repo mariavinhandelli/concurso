@@ -84,9 +84,9 @@ export function JurisSimulado({ items, onClose }: Props) {
 
   if (disponiveis.length === 0) {
     return (
-      <Overlay onClose={onClose}>
+      <Overlay onClose={onClose} labelledBy="simulado-vazio-msg">
         <div style={{ textAlign: 'center', padding: '40px 24px' }}>
-          <p style={{ fontSize: 15, color: theme.inkSoft, marginBottom: 20 }}>Nenhuma questão C/E disponível nesta seleção.</p>
+          <p id="simulado-vazio-msg" style={{ fontSize: 15, color: theme.inkSoft, marginBottom: 20 }}>Nenhuma questão C/E disponível nesta seleção.</p>
           <Button variant="outline" onClick={onClose}>Fechar</Button>
         </div>
       </Overlay>
@@ -157,7 +157,9 @@ export function JurisSimulado({ items, onClose }: Props) {
         saveSimuladoSession({
           total:       questoes.length,
           certas:      novos.filter(Boolean).length,
-          elapsedSecs: elapsed,
+          // Relógio de parede, não o state: concluir via Enter usa um closure
+          // antigo do listener e o `elapsed` do state chega defasado.
+          elapsedSecs: Math.round((Date.now() - startedAt.current) / 1000),
           respostas,
         })
           .then(() => { savedRef.current = true; })
@@ -197,9 +199,9 @@ export function JurisSimulado({ items, onClose }: Props) {
     const topErros = questoes.filter((_, i) => !acertos[i]).slice(0, 5);
 
     return (
-      <Overlay onClose={onClose}>
+      <Overlay onClose={onClose} labelledBy="simulado-resultado-title">
         <div style={{ padding: '8px 0' }}>
-          <h2 style={{ fontSize: 20, fontWeight: 800, color: theme.ink, margin: '0 0 6px' }}>Resultado do Simulado</h2>
+          <h2 id="simulado-resultado-title" style={{ fontSize: 20, fontWeight: 800, color: theme.ink, margin: '0 0 6px' }}>Resultado do Simulado</h2>
           <p style={{ fontSize: 13, color: theme.inkFaint, margin: '0 0 20px' }}>
             {total} {total === 1 ? 'questão' : 'questões'} · Tempo: {formatTime(elapsed)}
           </p>

@@ -1,6 +1,6 @@
 // services/jurisInteracoes.service.ts
 // Interações PESSOAIS com jurisprudências do banco global: favorito, estrelas
-// pessoais, anotações, tags, trechos destacados e revisão espaçada.
+// pessoais, anotações, tags e revisão espaçada.
 // Tudo isolado por usuário via RLS (auth.uid() = user_id) + filtro explícito.
 
 import { createClient } from '@/lib/supabase/client';
@@ -11,14 +11,6 @@ import {
 import { localDateInDays, toLocalDateString } from '@/lib/local-date';
 import type { Jurisprudencia } from '@/services/jurisprudencias.service';
 
-export interface Destaque {
-  id: string;
-  campo: string;
-  trecho: string;
-  nota: string | null;
-  criado_em: string;
-}
-
 export interface JurisInteracao {
   id: string;
   user_id: string;
@@ -27,7 +19,6 @@ export interface JurisInteracao {
   estrelas_pessoais: 1 | 2 | 3 | 4 | 5 | null;
   anotacoes: string | null;
   tags_pessoais: string[];
-  destaques: Destaque[];
   is_review_active: boolean;
   next_review_date: string | null;
   interval_days: number;
@@ -46,7 +37,6 @@ const EMPTY_INTERACAO_FIELDS = {
   estrelas_pessoais: null,
   anotacoes: null,
   tags_pessoais: [] as string[],
-  destaques: [] as Destaque[],
   is_review_active: false,
   next_review_date: null,
   interval_days: 0,
@@ -100,33 +90,6 @@ export async function setEstrelasPessoais(jurisId: string, estrelas: 1 | 2 | 3 |
 
 export async function saveAnotacao(jurisId: string, anotacoes: string, tags: string[]): Promise<void> {
   await upsertInteracao(jurisId, { anotacoes: anotacoes.trim() || null, tags_pessoais: tags });
-}
-
-// Usa RPCs atômicas no Postgres para evitar race condition de read-modify-write.
-export async function addDestaque(jurisId: string, campo: string, trecho: string, nota?: string): Promise<Destaque[]> {
-  const supabase = createClient();
-  const destaque: Destaque = {
-    id: crypto.randomUUID(),
-    campo, trecho,
-    nota: nota?.trim() || null,
-    criado_em: new Date().toISOString(),
-  };
-  const { data, error } = await supabase.rpc('append_juris_destaque', {
-    p_juris_id: jurisId,
-    p_destaque: destaque,
-  });
-  if (error) throw new Error('Erro ao salvar destaque: ' + error.message);
-  return (data ?? []) as Destaque[];
-}
-
-export async function removeDestaque(jurisId: string, destaqueId: string): Promise<Destaque[]> {
-  const supabase = createClient();
-  const { data, error } = await supabase.rpc('remove_juris_destaque', {
-    p_juris_id: jurisId,
-    p_destaque_id: destaqueId,
-  });
-  if (error) throw new Error('Erro ao remover destaque: ' + error.message);
-  return (data ?? []) as Destaque[];
 }
 
 // Agenda a primeira revisão com intervalo manual (1/7/15/30 ou personalizado).

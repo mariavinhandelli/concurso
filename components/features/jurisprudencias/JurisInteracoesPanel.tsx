@@ -62,8 +62,10 @@ export function JurisInteracoesPanel({ jurisId }: Props) {
   // Salva automaticamente anotações ao trocar de aba ou de jurisprudência.
   useEffect(() => {
     return () => {
+      // trim() dos dois lados: o baseline pós-save guarda o texto trimado e o
+      // service também trima — sem isso, um espaço no fim gerava upsert redundante.
       const isDirty =
-        anotacoesRef.current !== lastSavedAnotacoesRef.current ||
+        anotacoesRef.current.trim() !== lastSavedAnotacoesRef.current.trim() ||
         JSON.stringify(tagsRef.current) !== JSON.stringify(lastSavedTagsRef.current);
       if (isDirty) {
         saveAnotacao(jurisId, anotacoesRef.current, tagsRef.current)
