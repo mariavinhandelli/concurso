@@ -87,8 +87,8 @@ export function ImportarEditalModal({
         </div>
 
         <div style={s.fields}>
-          <Input value={cargo} onChange={(e) => setCargo(e.target.value)} placeholder="Cargo (ex: Analista)" style={{ flex: 1, minWidth: 140 }} />
-          <Input value={orgao} onChange={(e) => setOrgao(e.target.value)} placeholder="Órgão (opcional)" style={{ flex: 1, minWidth: 140 }} />
+          <Input value={cargo} onChange={(e) => setCargo(e.target.value)} placeholder="Cargo (ex: Analista)" aria-label="Cargo" style={{ flex: 1, minWidth: 140 }} />
+          <Input value={orgao} onChange={(e) => setOrgao(e.target.value)} placeholder="Órgão (opcional)" aria-label="Órgão" style={{ flex: 1, minWidth: 140 }} />
         </div>
 
         {catalogMatch && (
@@ -126,6 +126,8 @@ export function ImportarEditalModal({
             placeholder={'LÍNGUA PORTUGUESA\n1. Interpretação de textos\n2. Ortografia\n\nDIREITO CONSTITUCIONAL\n1. Princípios fundamentais\n2. Direitos e garantias'}
             style={{ flex: 1, minWidth: 240, minHeight: 240, lineHeight: 1.6 }}
             autoFocus
+            aria-label="Conteúdo programático do edital"
+            maxLength={150_000}
           />
           <div style={s.preview}>
             <div style={s.previewHeader}>

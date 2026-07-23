@@ -195,12 +195,12 @@ export function ImportarEditalPdfModal({
           )}
 
           <div style={s.fields}>
-            <Input value={cargo} onChange={(e) => setCargo(e.target.value)} placeholder="Cargo" style={{ flex: 1, minWidth: 140 }} />
-            <Input value={orgao} onChange={(e) => setOrgao(e.target.value)} placeholder="Órgão" style={{ flex: 1, minWidth: 140 }} />
+            <Input value={cargo} onChange={(e) => setCargo(e.target.value)} placeholder="Cargo" aria-label="Cargo" style={{ flex: 1, minWidth: 140 }} />
+            <Input value={orgao} onChange={(e) => setOrgao(e.target.value)} placeholder="Órgão" aria-label="Órgão" style={{ flex: 1, minWidth: 140 }} />
           </div>
           <div style={s.fields}>
-            <Input value={ano} onChange={(e) => setAno(e.target.value.replace(/\D/g, ''))} placeholder="Ano" style={{ flex: 1, minWidth: 100 }} />
-            <Input type="date" value={examDate} onChange={(e) => setExamDate(e.target.value)} style={{ flex: 1, minWidth: 140 }} />
+            <Input value={ano} onChange={(e) => setAno(e.target.value.replace(/\D/g, ''))} placeholder="Ano" aria-label="Ano" style={{ flex: 1, minWidth: 100 }} />
+            <Input type="date" value={examDate} onChange={(e) => setExamDate(e.target.value)} aria-label="Data da prova" style={{ flex: 1, minWidth: 140 }} />
           </div>
 
           {banca.trim() && (

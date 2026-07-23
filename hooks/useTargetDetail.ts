@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useToast } from '@/components/ui/ToastProvider';
 import { listSubjects } from '@/services/subjects.service';
 import { listAllTopics, type Topic } from '@/services/topics.service';
@@ -157,7 +157,40 @@ export function useTargetDetail(targetId: string) {
     }
   }, [targetId, load, toast]);
 
-  const changeSubjectWeight = useCallback(async (subjectId: string, weight: number, nQ: string) => {
+  // Upsert de peso com debounce por disciplina: trocar o Select rapidamente
+  // disparava uma rajada de upserts concorrentes. O estado local é otimista e
+  // imediato; só a gravação espera 500ms. Pendências são despejadas no unmount.
+  const weightTimers = useRef(new Map<string, ReturnType<typeof setTimeout>>());
+  const weightPending = useRef(new Map<string, { weight: number; numQuestions: number | null }>());
+
+  const flushSubjectWeight = useCallback((subjectId: string) => {
+    const pending = weightPending.current.get(subjectId);
+    if (!pending) return;
+    weightPending.current.delete(subjectId);
+    upsertBlueprint({
+      targetExamId: targetId, subjectId,
+      weight: pending.weight, numQuestionsExpected: pending.numQuestions,
+    }).catch((e) => {
+      load().catch(() => {});
+      toast.error(e instanceof Error ? e.message : 'Erro ao salvar peso da disciplina.');
+    });
+  }, [targetId, load, toast]);
+
+  useEffect(() => {
+    const timers = weightTimers.current;
+    const pending = weightPending.current;
+    return () => {
+      // Despeja gravações pendentes ao sair da página (fire-and-forget).
+      timers.forEach(clearTimeout);
+      timers.clear();
+      for (const [subjectId, p] of pending) {
+        upsertBlueprint({ targetExamId: targetId, subjectId, weight: p.weight, numQuestionsExpected: p.numQuestions }).catch(() => {});
+      }
+      pending.clear();
+    };
+  }, [targetId]);
+
+  const changeSubjectWeight = useCallback((subjectId: string, weight: number, nQ: string) => {
     // nº de questões: inteiro ≥ 0; entrada inválida ou negativa vira "não informado"
     // (um valor negativo persistido enviesaria o gerador de cronograma).
     const parsed = Math.round(Number(nQ));
@@ -172,16 +205,14 @@ export function useTargetDetail(targetId: string) {
         num_questions_expected: numQuestions,
       } as Blueprint,
     }));
-    try {
-      await upsertBlueprint({
-        targetExamId: targetId, subjectId, weight,
-        numQuestionsExpected: numQuestions,
-      });
-    } catch (e) {
-      load().catch(() => {});
-      toast.error(e instanceof Error ? e.message : 'Erro ao salvar peso da disciplina.');
-    }
-  }, [targetId, load, toast]);
+    weightPending.current.set(subjectId, { weight, numQuestions });
+    const existing = weightTimers.current.get(subjectId);
+    if (existing) clearTimeout(existing);
+    weightTimers.current.set(subjectId, setTimeout(() => {
+      weightTimers.current.delete(subjectId);
+      flushSubjectWeight(subjectId);
+    }, 500));
+  }, [flushSubjectWeight]);
 
   return {
     target, catalogInfo, updates, tree, linked, saudeMap, incidencias, topicWeights, subjectWeights, blueprints, nQInputs,

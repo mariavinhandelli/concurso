@@ -22,8 +22,13 @@ export interface TargetExam {
   is_primary: boolean;
   phase: 'pre' | 'pos';
   catalog_edital_id: string | null;
+  // Chaves marcadas manualmente na Central de preparação (pré-edital).
+  // Vive no banco para sincronizar entre dispositivos e morrer com o concurso.
+  prep_checklist: string[];
   created_at: string;
 }
+
+const TARGET_COLS = 'id, user_id, board_id, orgao, cargo, ano_alvo, exam_date, slug, is_primary, phase, catalog_edital_id, prep_checklist, created_at';
 
 async function getBoardName(supabase: SupabaseClient, boardId: string): Promise<string | null> {
   const { data } = await supabase
@@ -38,7 +43,7 @@ export async function getTargetExam(id: string): Promise<TargetExam | null> {
   const { supabase, userId } = await requireUser();
   const { data, error } = await supabase
     .from('target_exams')
-    .select('id, user_id, board_id, orgao, cargo, ano_alvo, exam_date, slug, is_primary, phase, catalog_edital_id, created_at')
+    .select(TARGET_COLS)
     .eq('id', id)
     .eq('user_id', userId)
     .maybeSingle();
@@ -52,7 +57,7 @@ export async function listTargetExams(): Promise<TargetExam[]> {
   const { supabase, userId } = await requireUser();
   const { data, error } = await supabase
     .from('target_exams')
-    .select('id, user_id, board_id, orgao, cargo, ano_alvo, exam_date, slug, is_primary, phase, catalog_edital_id, created_at')
+    .select(TARGET_COLS)
     .eq('user_id', userId)
     .is('archived_at', null) // M11: concursos arquivados somem de countdown/cobertura/lista ativa
     .order('is_primary', { ascending: false })
@@ -112,7 +117,7 @@ export async function createTargetExam(input: {
       slug,
       catalog_edital_id: input.catalog_edital_id ?? null,
     })
-    .select('id, user_id, board_id, orgao, cargo, ano_alvo, exam_date, slug, is_primary, phase, catalog_edital_id, created_at')
+    .select(TARGET_COLS)
     .single();
 
   if (error) {
@@ -122,6 +127,70 @@ export async function createTargetExam(input: {
 
   invalidatePrimaryTargetCache();
   return { ...data, boardName: bancaNome } as TargetExam;
+}
+
+// Edita a identidade do concurso (cargo/órgão/ano/banca). Recalcula o slug —
+// ele identifica o alvo na ativação idempotente do catálogo e precisa acompanhar.
+export async function updateTargetExam(
+  id: string,
+  input: { orgao: string | null; cargo: string | null; ano_alvo: number | null; board_id: string | null },
+): Promise<void> {
+  const { supabase, userId } = await requireUser();
+
+  const { data: current, error: curErr } = await supabase
+    .from('target_exams')
+    .select('phase')
+    .eq('id', id)
+    .eq('user_id', userId)
+    .single();
+  if (curErr) throw new Error('Erro ao carregar concurso: ' + curErr.message);
+  if (current.phase === 'pos' && !input.board_id) {
+    throw new Error('No pós-edital a banca é obrigatória.');
+  }
+
+  const bancaNome = input.board_id ? await getBoardName(supabase, input.board_id) : null;
+  const slug = buildTargetSlug(bancaNome, input.orgao, input.cargo, input.ano_alvo);
+
+  const { error } = await supabase
+    .from('target_exams')
+    .update({
+      orgao: input.orgao?.trim() || null,
+      cargo: input.cargo?.trim() || null,
+      ano_alvo: input.ano_alvo ?? null,
+      board_id: input.board_id,
+      slug,
+    })
+    .eq('id', id)
+    .eq('user_id', userId);
+  if (error) {
+    if (error.code === '23505') throw new Error('Você já tem um concurso-alvo igual a esse.');
+    throw new Error('Erro ao editar concurso: ' + error.message);
+  }
+  invalidatePrimaryTargetCache();
+}
+
+// Desfaz uma promoção acidental: volta o concurso para pré-edital.
+// A banca é mantida (segue válida como "banca provável").
+export async function demoteToPre(targetExamId: string): Promise<void> {
+  const { supabase, userId } = await requireUser();
+  const { error } = await supabase
+    .from('target_exams')
+    .update({ phase: 'pre' })
+    .eq('id', targetExamId)
+    .eq('user_id', userId);
+  if (error) throw new Error('Erro ao voltar para pré-edital: ' + error.message);
+  invalidatePrimaryTargetCache();
+}
+
+// Persiste as chaves marcadas manualmente na Central de preparação.
+export async function updateTargetPrepChecklist(targetExamId: string, items: string[]): Promise<void> {
+  const { supabase, userId } = await requireUser();
+  const { error } = await supabase
+    .from('target_exams')
+    .update({ prep_checklist: items })
+    .eq('id', targetExamId)
+    .eq('user_id', userId);
+  if (error) throw new Error('Erro ao salvar checklist: ' + error.message);
 }
 
 export async function promoteToPos(targetExamId: string, boardId?: string): Promise<void> {
@@ -171,7 +240,7 @@ export async function listArchivedTargetExams(): Promise<TargetExam[]> {
   const { supabase, userId } = await requireUser();
   const { data, error } = await supabase
     .from('target_exams')
-    .select('id, user_id, board_id, orgao, cargo, ano_alvo, exam_date, slug, is_primary, phase, catalog_edital_id, created_at')
+    .select(TARGET_COLS)
     .eq('user_id', userId)
     .not('archived_at', 'is', null)
     .order('created_at', { ascending: false });

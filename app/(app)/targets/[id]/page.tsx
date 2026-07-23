@@ -7,16 +7,17 @@ import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 import dynamic from 'next/dynamic';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, Pencil } from 'lucide-react';
 import { useTargetDetail } from '@/hooks/useTargetDetail';
 import { formatTargetLabel } from '@/lib/targets';
-import { updateTargetExamDate, promoteToPos } from '@/services/targetExams.service';
+import { updateTargetExamDate, promoteToPos, updateTargetExam, demoteToPre } from '@/services/targetExams.service';
 import { listAllBoards, type Board } from '@/services/boards.service';
 import { useToast } from '@/components/ui/ToastProvider';
 import { theme } from '@/lib/theme';
 import { Overlay } from '@/components/ui/Overlay';
 import { useUI } from '@/components/layout/UIContext';
 import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { SegmentedControl } from '@/components/ui/SegmentedControl';
 import { PageContainer } from '@/components/ui/Page';
@@ -35,6 +36,10 @@ const VerticalizadoTab = dynamic(
 );
 const GeneratorModal = dynamic(
   () => import('@/components/features/schedule/GeneratorModal').then((m) => ({ default: m.GeneratorModal })),
+  { ssr: false },
+);
+const ArquivarConcursoModal = dynamic(
+  () => import('@/components/features/targets/ArquivarConcursoModal').then((m) => ({ default: m.ArquivarConcursoModal })),
   { ssr: false },
 );
 
@@ -84,6 +89,17 @@ export default function TargetDetailPage() {
   const [promoteBoards, setPromoteBoards] = useState<Board[]>([]);
   const [promoteBoardId, setPromoteBoardId] = useState('');
   const [promoting, setPromoting] = useState(false);
+  const [archiveOpen, setArchiveOpen] = useState(false);
+
+  // ── Edição do concurso (cargo/órgão/ano/banca + voltar para pré) ──
+  const [editOpen, setEditOpen] = useState(false);
+  const [editBoards, setEditBoards] = useState<Board[]>([]);
+  const [editCargo, setEditCargo] = useState('');
+  const [editOrgao, setEditOrgao] = useState('');
+  const [editAno, setEditAno] = useState('');
+  const [editBoardId, setEditBoardId] = useState('');
+  const [savingEdit, setSavingEdit] = useState(false);
+  const [demoting, setDemoting] = useState(false);
 
   useEffect(() => { load(); }, [load]);
 
@@ -131,6 +147,62 @@ export default function TargetDetailPage() {
       setPromoteOpen(true);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : 'Erro ao carregar bancas.');
+    }
+  }
+
+  async function handleOpenEdit() {
+    if (!target) return;
+    try {
+      const boards = await listAllBoards();
+      setEditBoards(boards);
+      setEditCargo(target.cargo ?? '');
+      setEditOrgao(target.orgao ?? '');
+      setEditAno(target.ano_alvo?.toString() ?? '');
+      setEditBoardId(target.board_id ?? '');
+      setEditOpen(true);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'Erro ao carregar bancas.');
+    }
+  }
+
+  async function handleSaveEdit() {
+    if (!target) return;
+    if (!editCargo.trim() && !editOrgao.trim() && !editBoardId && !editAno.trim()) {
+      toast.error('Informe ao menos um campo para identificar o concurso.');
+      return;
+    }
+    setSavingEdit(true);
+    try {
+      const ano = editAno && Number.isFinite(Number(editAno)) ? Number(editAno) : null;
+      await updateTargetExam(targetId, {
+        cargo: editCargo.trim() || null,
+        orgao: editOrgao.trim() || null,
+        ano_alvo: ano,
+        board_id: editBoardId || null,
+      });
+      toast.success('Concurso atualizado.');
+      setEditOpen(false);
+      invalidateHomeCaches();
+      load();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'Erro ao editar concurso.');
+    } finally {
+      setSavingEdit(false);
+    }
+  }
+
+  async function handleDemote() {
+    setDemoting(true);
+    try {
+      await demoteToPre(targetId);
+      toast.success('Concurso voltou para pré-edital.');
+      setEditOpen(false);
+      invalidateHomeCaches();
+      load();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'Erro ao voltar para pré-edital.');
+    } finally {
+      setDemoting(false);
     }
   }
 
@@ -185,15 +257,25 @@ export default function TargetDetailPage() {
           </div>
         </div>
 
-        <div title={!canGenerate ? 'Vincule ao menos um tópico para gerar o cronograma' : undefined} style={{ flexShrink: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
           <button
-            onClick={() => canGenerate && setGeneratorOpen(true)}
-            style={{ ...s.genBtn, ...(canGenerate ? {} : s.genBtnDisabled) }}
-            aria-disabled={!canGenerate}
+            onClick={handleOpenEdit}
+            style={s.editBtn}
+            title="Editar concurso"
+            aria-label="Editar concurso (cargo, órgão, ano, banca)"
           >
-            <Sparkles size={15} strokeWidth={2} style={{ marginRight: 7 }} />
-            Gerar cronograma
+            <Pencil size={15} color={theme.inkSoft} strokeWidth={1.8} />
           </button>
+          <div title={!canGenerate ? 'Vincule ao menos um tópico para gerar o cronograma' : undefined}>
+            <button
+              onClick={() => canGenerate && setGeneratorOpen(true)}
+              style={{ ...s.genBtn, ...(canGenerate ? {} : s.genBtnDisabled) }}
+              aria-disabled={!canGenerate}
+            >
+              <Sparkles size={15} strokeWidth={2} style={{ marginRight: 7 }} />
+              Gerar cronograma
+            </button>
+          </div>
         </div>
       </div>
 
@@ -227,6 +309,7 @@ export default function TargetDetailPage() {
           onGenerate={() => setGeneratorOpen(true)}
           onPromote={handlePromote}
           onSaveDate={handleSaveDate}
+          onArchive={() => setArchiveOpen(true)}
         />
       )}
 
@@ -268,6 +351,59 @@ export default function TargetDetailPage() {
         />
       )}
 
+      {archiveOpen && target && (
+        <ArquivarConcursoModal
+          target={{ id: target.id, label: formatTargetLabel(target) }}
+          onClose={() => setArchiveOpen(false)}
+          onArchived={() => {
+            setArchiveOpen(false);
+            invalidateHomeCaches();
+            queryClient.invalidateQueries({ queryKey: ['target-exams-archived'] });
+            router.push('/targets');
+          }}
+        />
+      )}
+
+      {editOpen && target && (
+        <Overlay onClose={() => setEditOpen(false)} maxWidth={440} labelledBy="edit-target-title">
+          <h3 id="edit-target-title" style={s.promoteTitle}>Editar concurso</h3>
+          <p style={s.promoteSub}>Corrija cargo, órgão, ano ou banca — nada além da identificação muda.</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <Input value={editCargo} onChange={(e) => setEditCargo(e.target.value)} placeholder="Cargo (ex: Auditor Fiscal)" aria-label="Cargo" />
+            <Input value={editOrgao} onChange={(e) => setEditOrgao(e.target.value)} placeholder="Órgão (ex: TCE-GO)" aria-label="Órgão" />
+            <div style={{ display: 'flex', gap: 10 }}>
+              <Input
+                value={editAno}
+                onChange={(e) => setEditAno(e.target.value)}
+                placeholder="Ano (ex: 2026)"
+                aria-label="Ano previsto"
+                type="number"
+                min="2000"
+                max="2100"
+                style={{ maxWidth: 140 }}
+              />
+              <Select value={editBoardId} onChange={(e) => setEditBoardId(e.target.value)} aria-label="Banca" style={{ flex: 1 }}>
+                <option value="">{target.phase === 'pos' ? 'Banca (obrigatória no pós)' : 'Banca (a definir)'}</option>
+                {editBoards.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
+              </Select>
+            </div>
+          </div>
+          <div style={{ display: 'flex', gap: 10, alignItems: 'center', justifyContent: 'space-between', marginTop: 18, flexWrap: 'wrap' }}>
+            {target.phase === 'pos' ? (
+              <button onClick={handleDemote} disabled={demoting} style={s.demoteLink}>
+                {demoting ? 'Voltando…' : '← Voltar para pré-edital'}
+              </button>
+            ) : <span />}
+            <div style={{ display: 'flex', gap: 10 }}>
+              <Button variant="ghost" onClick={() => setEditOpen(false)}>Cancelar</Button>
+              <Button onClick={handleSaveEdit} disabled={savingEdit}>
+                {savingEdit ? 'Salvando…' : 'Salvar'}
+              </Button>
+            </div>
+          </div>
+        </Overlay>
+      )}
+
       {promoteOpen && (
         <Overlay onClose={() => setPromoteOpen(false)} maxWidth={400} labelledBy="promote-target-detail-title">
           <h3 id="promote-target-detail-title" style={s.promoteTitle}>Edital publicado! Qual é a banca?</h3>
@@ -301,6 +437,8 @@ const s: Record<string, CSSProperties> = {
   coverageFill: { height: '100%', background: theme.teal, borderRadius: theme.radiusPill, transition: 'width 0.4s ease' },
   coverageLabel: { fontSize: 12, color: theme.inkFaint, whiteSpace: 'nowrap', fontVariantNumeric: 'tabular-nums' },
   genBtn: { display: 'inline-flex', alignItems: 'center', padding: '10px 18px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onPrimary, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
+  editBtn: { display: 'inline-flex', alignItems: 'center', justifyContent: 'center', minWidth: 44, minHeight: 44, borderRadius: theme.radiusSm, border: 'none', background: 'transparent', cursor: 'pointer', transition: 'background .12s' },
+  demoteLink: { background: 'transparent', border: 'none', color: theme.inkSoft, fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit', padding: '10px 0', textDecoration: 'underline', textUnderlineOffset: 3 },
   genBtnDisabled: { background: theme.muted, color: theme.inkFaint, cursor: 'not-allowed' },
 
   promoteTitle: { fontSize: 16, fontWeight: 700, color: theme.ink, margin: '0 0 6px' },

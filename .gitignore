@@ -24,6 +24,10 @@
 .DS_Store
 *.pem
 
+# arquivos temporários de sessões de curadoria/auditoria
+scratchpad_*
+Usersmaria*
+
 # debug
 npm-debug.log*
 yarn-debug.log*

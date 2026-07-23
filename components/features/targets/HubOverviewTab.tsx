@@ -9,7 +9,8 @@ import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { Check, Download, X } from 'lucide-react';
-import { type TargetExam } from '@/services/targetExams.service';
+import { type TargetExam, updateTargetPrepChecklist } from '@/services/targetExams.service';
+import { useToast } from '@/components/ui/ToastProvider';
 import { type CatalogEditalInfo, type EditalUpdate, type EditalUpdateTipo } from '@/services/editaisCatalog.service';
 import { normalizeDisciplina } from '@/lib/juris-disciplinas';
 import { leiDisciplinaForSubject } from '@/services/leis.service';
@@ -66,33 +67,48 @@ interface Props {
   onGenerate: () => void;
   onPromote: () => void;
   onSaveDate: (date: string | null) => Promise<void>;
+  onArchive: () => void;
 }
 
 export function HubOverviewTab({
   target, catalogInfo, updates, tree, linked, subjectWeights, isMobile, canGenerate,
-  onGoMontar, onGoProgresso, onGenerate, onPromote, onSaveDate,
+  onGoMontar, onGoProgresso, onGenerate, onPromote, onSaveDate, onArchive,
 }: Props) {
   const router = useRouter();
+  const toast = useToast();
   const [editingDate, setEditingDate] = useState(false);
   const [dateValue, setDateValue] = useState('');
-  const [prepDone, setPrepDone] = useState<Set<string>>(new Set());
+  // Checklist manual vive no banco (target.prep_checklist) — sincroniza entre
+  // dispositivos e morre com o concurso. O localStorage antigo é migrado 1x.
+  const [prepDone, setPrepDone] = useState<Set<string>>(() => new Set(target.prep_checklist ?? []));
   const [prepOpen, setPrepOpen] = useState(true);
 
   const isPre = target.phase === 'pre';
 
   useEffect(() => {
+    const fromDb = new Set(target.prep_checklist ?? []);
     try {
       const raw = localStorage.getItem(PREP_KEY_PREFIX + target.id);
-      if (raw) setPrepDone(new Set(JSON.parse(raw) as string[]));
-    } catch { /* estado corrompido = checklist zerada */ }
-  }, [target.id]);
+      if (raw) {
+        const legacy = (JSON.parse(raw) as string[]).filter((k) => !fromDb.has(k));
+        if (legacy.length > 0) {
+          legacy.forEach((k) => fromDb.add(k));
+          updateTargetPrepChecklist(target.id, [...fromDb]).catch(() => {});
+        }
+        localStorage.removeItem(PREP_KEY_PREFIX + target.id);
+      }
+    } catch { /* estado local corrompido = fica só o do banco */ }
+    setPrepDone(fromDb);
+  }, [target.id, target.prep_checklist]);
 
   function togglePrep(key: string) {
-    setPrepDone((prev) => {
-      const next = new Set(prev);
-      if (next.has(key)) next.delete(key); else next.add(key);
-      try { localStorage.setItem(PREP_KEY_PREFIX + target.id, JSON.stringify([...next])); } catch { /* quota */ }
-      return next;
+    const prev = prepDone;
+    const next = new Set(prev);
+    if (next.has(key)) next.delete(key); else next.add(key);
+    setPrepDone(next);
+    updateTargetPrepChecklist(target.id, [...next]).catch((e) => {
+      setPrepDone(prev); // rollback otimista
+      toast.error(e instanceof Error ? e.message : 'Erro ao salvar checklist.');
     });
   }
 
@@ -281,6 +297,25 @@ export function HubOverviewTab({
           )}
         </div>
       </div>
+
+      {/* ── Prova já realizada: orienta o próximo passo em vez de deixar o
+             concurso "encerrado" parado no painel para sempre ── */}
+      {days !== null && days < 0 && !editingDate && (
+        <div style={s.pastExamRow}>
+          <span style={s.pastExamText}>
+            Prova realizada em {formatDateBR(target.exam_date!)}. Se houver nova prova, atualize a data — ou arquive o concurso para tirá-lo do painel sem perder nada.
+          </span>
+          <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+            <Button variant="outline" size="sm" style={{ borderColor: theme.teal, background: theme.tealBg, color: theme.teal }}
+              onClick={() => { setDateValue(''); setEditingDate(true); }}>
+              Nova data
+            </Button>
+            <Button variant="outline" size="sm" onClick={onArchive}>
+              Arquivar
+            </Button>
+          </div>
+        </div>
+      )}
 
       {/* ── Sobre o concurso (ficha do catálogo) ── */}
       {catalogInfo && (
@@ -517,6 +552,8 @@ const s: Record<string, CSSProperties> = {
   section: { display: 'flex', flexDirection: 'column', gap: 12 },
 
   statusCard: { display: 'flex', gap: 16, background: theme.card, border: `0.5px solid ${theme.line}`, borderRadius: theme.radiusSm, boxShadow: theme.shadow, padding: 18, alignItems: 'stretch' },
+  pastExamRow: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', background: theme.warnBg, border: `0.5px solid ${theme.warn}`, borderRadius: theme.radiusSm, padding: '12px 16px', marginTop: -8 },
+  pastExamText: { fontSize: 13, color: theme.inkSoft, lineHeight: 1.5, flex: '1 1 260px' },
   statusTags: { display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', marginBottom: 8 },
   phaseTag: { fontSize: 11, fontWeight: 600, borderRadius: theme.radiusXs, padding: '3px 8px', flexShrink: 0 },
   phaseTagPre: { color: theme.inkSoft, background: theme.muted },

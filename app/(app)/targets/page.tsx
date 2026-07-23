@@ -552,7 +552,7 @@ const s: Record<string, CSSProperties> = {
 
   actionsRow: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 14, flexWrap: 'wrap' },
   newBtn: { padding: '9px 18px', borderRadius: theme.radiusSm, border: `1px solid ${theme.teal}`, background: theme.tealBg, color: theme.teal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
-  importarLink: { background: 'transparent', border: 'none', color: theme.inkSoft, fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit', padding: 0, whiteSpace: 'nowrap' },
+  importarLink: { background: 'transparent', border: 'none', color: theme.inkSoft, fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit', padding: '12px 4px', minHeight: 44, display: 'inline-flex', alignItems: 'center', whiteSpace: 'nowrap' },
 
   // Card de criação
   createCard: { background: theme.card, border: `0.5px solid ${theme.line}`, borderRadius: theme.radius, boxShadow: theme.shadow, padding: 20, marginBottom: 20 },
@@ -572,7 +572,7 @@ const s: Record<string, CSSProperties> = {
   btnSecondary: { padding: '6px 14px', borderRadius: theme.radiusSm, border: `1px solid ${theme.teal}`, background: theme.tealBg, color: theme.teal, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
   btnGhost: { padding: '10px 12px', borderRadius: theme.radiusSm, border: 'none', background: 'transparent', color: theme.inkFaint, fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
   btnAdvanced: { display: 'inline-flex', alignItems: 'center', gap: 5, background: 'transparent', border: 'none', color: theme.teal, fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit', padding: '4px 2px' },
-  iconBtn: { border: 'none', cursor: 'pointer', padding: 8, display: 'flex', alignItems: 'center', borderRadius: theme.radiusSm, transition: 'background .12s', flexShrink: 0 },
+  iconBtn: { border: 'none', cursor: 'pointer', minWidth: 44, minHeight: 44, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: theme.radiusSm, transition: 'background .12s', flexShrink: 0 },
 
   skeletonList: { display: 'flex', flexDirection: 'column', gap: 8 },
   skeletonRow: { height: 68, borderRadius: theme.radiusSm, background: theme.muted, animation: 'focali-pulse 1.4s ease infinite' },
@@ -592,7 +592,7 @@ const s: Record<string, CSSProperties> = {
   // border desmembrado (sem shorthand): o hover sobrescreve só o borderColor e
   // misturar shorthand + longhand no mesmo style dispara warning do React.
   targetRow: { display: 'flex', alignItems: 'center', gap: 12, background: theme.card, borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, padding: '12px 14px', transition: 'border-color .15s, box-shadow .15s', minWidth: 0 },
-  starBtn: { border: 'none', background: 'transparent', cursor: 'pointer', padding: 4, display: 'flex', alignItems: 'center', flexShrink: 0 },
+  starBtn: { border: 'none', background: 'transparent', cursor: 'pointer', minWidth: 44, minHeight: 44, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginLeft: -8 },
   targetMain: { flex: 1, display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', cursor: 'pointer', minWidth: 0 },
   targetLabel: { fontSize: 15, color: theme.ink, fontWeight: 600 },
   phaseTag: { fontSize: 11, fontWeight: 600, borderRadius: theme.radiusXs, padding: '3px 8px', flexShrink: 0 },
@@ -601,10 +601,10 @@ const s: Record<string, CSSProperties> = {
   countdownTag: { fontSize: 11, fontWeight: 600, borderRadius: theme.radiusXs, padding: '3px 8px', flexShrink: 0 },
   topicCountTag: { fontSize: 12, color: theme.inkFaint, fontVariantNumeric: 'tabular-nums', flexShrink: 0 },
   targetActions: { display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0 },
-  dateBtn: { fontSize: 12, color: theme.teal, border: `1px dashed ${theme.teal}`, background: 'transparent', borderRadius: theme.radiusXs, padding: '3px 10px', cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
+  dateBtn: { fontSize: 12, color: theme.teal, border: `1px dashed ${theme.teal}`, background: 'transparent', borderRadius: theme.radiusXs, padding: '8px 10px', minHeight: 36, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
   dateInput: { padding: '4px 8px', borderRadius: theme.radiusXs, border: `1px solid ${theme.lineStrong}`, background: theme.card, fontSize: 13, color: theme.ink, fontFamily: 'inherit', outline: 'none' },
-  dateSaveBtn: { border: 'none', background: theme.primary, color: theme.onTeal, borderRadius: theme.radiusXs, padding: '4px 8px', cursor: 'pointer', fontSize: 12, fontFamily: 'inherit' },
-  dateCancelBtn: { border: 'none', background: 'transparent', color: theme.inkFaint, borderRadius: theme.radiusXs, padding: '4px 6px', cursor: 'pointer', fontSize: 12, fontFamily: 'inherit' },
+  dateSaveBtn: { border: 'none', background: theme.primary, color: theme.onTeal, borderRadius: theme.radiusXs, minWidth: 36, minHeight: 36, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: 12, fontFamily: 'inherit' },
+  dateCancelBtn: { border: 'none', background: 'transparent', color: theme.inkFaint, borderRadius: theme.radiusXs, minWidth: 36, minHeight: 36, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: 12, fontFamily: 'inherit' },
 
   promoteTitle: { fontSize: 16, fontWeight: 700, color: theme.ink, margin: '0 0 6px' },
   promoteSub: { fontSize: 13, color: theme.inkSoft, margin: '0 0 16px', lineHeight: 1.5 },
