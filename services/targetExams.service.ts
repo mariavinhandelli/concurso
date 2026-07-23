@@ -6,6 +6,7 @@
 
 import { requireUser } from '@/lib/supabase/requireUser';
 import { buildTargetSlug } from '@/lib/targets';
+import { invalidatePrimaryTargetCache } from '@/services/primaryTargetCache';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
 export interface TargetExam {
@@ -119,6 +120,7 @@ export async function createTargetExam(input: {
     throw new Error('Erro ao criar concurso-alvo: ' + error.message);
   }
 
+  invalidatePrimaryTargetCache();
   return { ...data, boardName: bancaNome } as TargetExam;
 }
 
@@ -142,12 +144,14 @@ export async function promoteToPos(targetExamId: string, boardId?: string): Prom
     .eq('id', targetExamId)
     .eq('user_id', userId);
   if (error) throw new Error('Erro ao promover concurso: ' + error.message);
+  invalidatePrimaryTargetCache();
 }
 
 export async function setPrimaryTargetExam(targetExamId: string): Promise<void> {
   const { supabase } = await requireUser();
   const { error } = await supabase.rpc('set_primary_target_exam', { p_target_id: targetExamId });
   if (error) throw new Error(error.message);
+  invalidatePrimaryTargetCache();
 }
 
 export async function deleteTargetExam(targetExamId: string): Promise<void> {
@@ -158,6 +162,7 @@ export async function deleteTargetExam(targetExamId: string): Promise<void> {
     .eq('id', targetExamId)
     .eq('user_id', userId);
   if (error) throw new Error('Erro ao excluir concurso-alvo: ' + error.message);
+  invalidatePrimaryTargetCache();
 }
 
 // ── M11: arquivamento (não-destrutivo, reversível via archived_at) ──────────
@@ -191,6 +196,7 @@ export async function archiveTargetExam(id: string): Promise<void> {
     .eq('id', id)
     .eq('user_id', userId);
   if (error) throw new Error('Erro ao arquivar concurso: ' + error.message);
+  invalidatePrimaryTargetCache();
 }
 
 export async function unarchiveTargetExam(id: string): Promise<void> {
@@ -201,4 +207,5 @@ export async function unarchiveTargetExam(id: string): Promise<void> {
     .eq('id', id)
     .eq('user_id', userId);
   if (error) throw new Error('Erro ao restaurar concurso: ' + error.message);
+  invalidatePrimaryTargetCache();
 }

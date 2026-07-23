@@ -10,7 +10,7 @@ import {
 } from '@/services/goals.service';
 import { fmtMin } from '@/lib/format/time';
 import { GoalEditorPopover } from './GoalEditorPopover';
-import { theme } from '@/lib/theme';
+import { theme, perfColor } from '@/lib/theme';
 import { useUI } from '@/components/layout/UIContext';
 
 export const TodayBlock = memo(function TodayBlock() {
@@ -19,11 +19,11 @@ export const TodayBlock = memo(function TodayBlock() {
   const queryClient = useQueryClient();
 
   // ── Dados via TanStack Query — cache, deduplicação e refetch ao focar são automáticos ──
-  const { data: goals } = useQuery<GoalsSummary>({
+  const { data: goals, isError: goalsErr, refetch: refetchGoals, isRefetching: goalsRefetching } = useQuery<GoalsSummary>({
     queryKey: ['goals-summary'],
     queryFn: getGoalsSummary,
   });
-  const { data: qGoals } = useQuery<QuestionsSummary>({
+  const { data: qGoals, isError: qErr, refetch: refetchQ, isRefetching: qRefetching } = useQuery<QuestionsSummary>({
     queryKey: ['questions-summary'],
     queryFn: getQuestionsSummary,
   });
@@ -103,12 +103,12 @@ export const TodayBlock = memo(function TodayBlock() {
 
   const hoursTotal = (Number(hours) || 0) * 60 + (Number(mins) || 0);
 
-  // P16 — cor do acerto proporcional ao desempenho
+  // P16 — cor do acerto proporcional ao desempenho.
+  // H14 — usa a MESMA régua de theme.perfColor (80/65) que HealthBar,
+  // AccuracyChart e JurisSimulado já seguem; antes era 80/60 só aqui.
   const acertoColor = qGoals?.todayAcerto == null
     ? theme.inkSoft
-    : qGoals.todayAcerto >= 80 ? theme.ok
-    : qGoals.todayAcerto >= 60 ? theme.warn
-    : theme.crit;
+    : perfColor(qGoals.todayAcerto / 100).fg;
 
   // P16 — delta vs ontem
   const acrDelta = (qGoals?.todayAcerto != null && qGoals?.yesterdayAcerto != null)
@@ -119,18 +119,36 @@ export const TodayBlock = memo(function TodayBlock() {
     : acrDelta < 0 ? theme.crit
     : theme.inkSoft;
 
+  // Sem meta de questões e sem nenhum registro na semana: a linha ficaria
+  // permanentemente "0 / — · Acerto —" ocupando espaço nobre sem informar nada.
+  // Só aparece quando há meta definida ou algum questionário já resolvido.
+  // Erro tem prioridade sobre esse cálculo — nunca decide "esconder" por falha de rede.
+  const mostrarQuestoes = !qErr && (!qGoals || qGoals.targetQuestionsPerDay > 0 || qGoals.weekQuestions > 0);
+
   return (
     <div style={styles.wrap}>
-      {/* ── Linha 1: meta de horas ── */}
+      {/* ── Linha 1: meta de horas — H11: erro vira aviso+retry, nunca "0min/0min" silencioso ── */}
+      {goalsErr && !goals ? (
+        <p style={styles.errorRow}>
+          Não consegui carregar sua meta de horas.{' '}
+          <button style={styles.retryLink} onClick={() => refetchGoals()} disabled={goalsRefetching}>
+            {goalsRefetching ? 'tentando…' : 'tentar de novo'}
+          </button>
+        </p>
+      ) : (
       <div style={{ ...styles.strip, flexWrap: isMobile ? 'wrap' : 'nowrap' }}>
         <div style={styles.metaWrap}>
           <button
             style={styles.stripBtn}
             onClick={() => { setEditingHours((v) => !v); setEditingQ(false); }}
             title="Ajustar meta de horas"
+            data-popover-trigger
+            aria-haspopup="dialog"
+            aria-expanded={editingHours}
           >
             <Clock size={15} color={theme.inkSoft} strokeWidth={1.8} />
-            H. Estudo{' '}
+            {/* H16 — "H. Estudo" era críptico (abreviação ambígua); "Estudo hoje" é direto. */}
+            Estudo hoje{' '}
             <b style={styles.stripVal}>{goals ? `${fmtMin(goals.todayMinutes)} / ${fmtMin(goals.targetMinutesPerDay)}` : '…'}</b>
             <ChevronDown size={12} color={theme.inkFaint} strokeWidth={2} style={{ transform: editingHours ? 'rotate(180deg)' : 'none', transition: 'transform .15s' }} />
           </button>
@@ -144,16 +162,23 @@ export const TodayBlock = memo(function TodayBlock() {
               onClose={() => setEditingHours(false)}
             >
               <div style={styles.popRow}>
-                <input value={hours} onChange={(e) => setHours(e.target.value)} type="number" min="0" style={styles.popInput} />
+                <input value={hours} onChange={(e) => setHours(e.target.value)} type="number" min="0" aria-label="Horas" style={styles.popInput} />
                 <span style={styles.popUnit}>h</span>
-                <input value={mins} onChange={(e) => setMins(e.target.value)} type="number" min="0" max="59" style={styles.popInput} />
+                <input value={mins} onChange={(e) => setMins(e.target.value)} type="number" min="0" max="59" aria-label="Minutos" style={styles.popInput} />
                 <span style={styles.popUnit}>min</span>
               </div>
             </GoalEditorPopover>
           )}
         </div>
 
-        <div style={{ ...styles.bar, order: isMobile ? 3 : 0, flexBasis: isMobile ? '100%' : undefined }}>
+        <div
+          style={{ ...styles.bar, order: isMobile ? 3 : 0, flexBasis: isMobile ? '100%' : undefined }}
+          role="progressbar"
+          aria-label="Meta diária de horas"
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={metaHoursPct}
+        >
           <div style={{ ...styles.barFill, width: `${metaHoursPct}%` }} />
         </div>
 
@@ -162,14 +187,21 @@ export const TodayBlock = memo(function TodayBlock() {
           Progresso <b style={styles.stripVal}>{metaHoursPct}%</b>
         </span>
       </div>
+      )}
 
-      {/* ── Linha 2: meta de questões ── */}
+      {/* ── Linha 2: meta de questões — só quando há meta ou histórico. Sem
+          nenhum dos dois, a linha ficaria "0 / — · Acerto —" pra sempre; em
+          vez disso um link discreto mantém a função descobrível sob interação. ── */}
+      {mostrarQuestoes ? (
       <div style={{ ...styles.strip, flexWrap: isMobile ? 'wrap' : 'nowrap', marginTop: 8 }}>
         <div style={styles.metaWrap}>
           <button
             style={styles.stripBtn}
             onClick={() => { setEditingQ((v) => !v); setEditingHours(false); }}
             title="Ajustar meta de questões"
+            data-popover-trigger
+            aria-haspopup="dialog"
+            aria-expanded={editingQ}
           >
             <ClipboardCheck size={15} color={theme.inkSoft} strokeWidth={1.8} />
             Questões{' '}
@@ -188,14 +220,21 @@ export const TodayBlock = memo(function TodayBlock() {
               onClose={() => setEditingQ(false)}
             >
               <div style={styles.popRow}>
-                <input value={qTarget} onChange={(e) => setQTarget(e.target.value)} type="number" min="0" style={{ ...styles.popInput, width: 64 }} />
+                <input value={qTarget} onChange={(e) => setQTarget(e.target.value)} type="number" min="0" aria-label="Questões por dia" style={{ ...styles.popInput, width: 64 }} />
                 <span style={styles.popUnit}>questões/dia</span>
               </div>
             </GoalEditorPopover>
           )}
         </div>
 
-        <div style={{ ...styles.bar, order: isMobile ? 3 : 0, flexBasis: isMobile ? '100%' : undefined }}>
+        <div
+          style={{ ...styles.bar, order: isMobile ? 3 : 0, flexBasis: isMobile ? '100%' : undefined }}
+          role="progressbar"
+          aria-label="Meta diária de questões"
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={metaQPct}
+        >
           <div style={{ ...styles.barFill, width: `${metaQPct}%` }} />
         </div>
 
@@ -209,6 +248,40 @@ export const TodayBlock = memo(function TodayBlock() {
           )}
         </span>
       </div>
+      ) : qErr ? (
+        <p style={{ ...styles.errorRow, marginTop: 6 }}>
+          Não consegui carregar suas questões.{' '}
+          <button style={styles.retryLink} onClick={() => refetchQ()} disabled={qRefetching}>
+            {qRefetching ? 'tentando…' : 'tentar de novo'}
+          </button>
+        </p>
+      ) : (
+        <div style={{ ...styles.metaWrap, marginTop: 6 }}>
+          <button
+            style={styles.addQLink}
+            onClick={() => { setEditingQ((v) => !v); setEditingHours(false); }}
+            data-popover-trigger
+            aria-haspopup="dialog"
+            aria-expanded={editingQ}
+          >
+            + meta de questões (opcional)
+          </button>
+          {editingQ && (
+            <GoalEditorPopover
+              label="Meta diária de questões"
+              weeklyHint={Number(qTarget) > 0 ? `Meta semanal: ${Number(qTarget) * 7} questões` : undefined}
+              saving={savingQ}
+              onSave={saveQGoal}
+              onClose={() => setEditingQ(false)}
+            >
+              <div style={styles.popRow}>
+                <input value={qTarget} onChange={(e) => setQTarget(e.target.value)} type="number" min="0" aria-label="Questões por dia" style={{ ...styles.popInput, width: 64 }} />
+                <span style={styles.popUnit}>questões/dia</span>
+              </div>
+            </GoalEditorPopover>
+          )}
+        </div>
+      )}
     </div>
   );
 });
@@ -225,4 +298,7 @@ const styles: Record<string, React.CSSProperties> = {
   popRow: { display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12 },
   popInput: { width: 48, padding: '7px 8px', borderRadius: theme.radiusXs, border: `0.5px solid ${theme.line}`, background: theme.card, fontSize: 14, color: theme.ink, fontFamily: 'inherit', outline: 'none', textAlign: 'center' },
   popUnit: { fontSize: 13, color: theme.inkSoft },
+  addQLink: { border: 'none', background: 'transparent', color: theme.inkFaint, fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', padding: 0 },
+  errorRow: { fontSize: 14, color: theme.crit, margin: 0, padding: '4px 4px' },
+  retryLink: { border: 'none', background: 'transparent', color: theme.crit, fontSize: 14, fontWeight: 700, textDecoration: 'underline', cursor: 'pointer', fontFamily: 'inherit', padding: 0 },
 };

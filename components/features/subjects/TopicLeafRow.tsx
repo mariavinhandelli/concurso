@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useState } from 'react';
-import { X, Pencil, RefreshCw, Play, Check } from 'lucide-react';
+import { X, Pencil, NotebookPen, RefreshCw, Play, Check } from 'lucide-react';
 import type { Topic } from '@/services/topics.service';
+import { daysOverdue } from '@/lib/spaced-repetition';
 import { HealthBar } from '@/components/features/topics/HealthBar';
 import { theme } from '@/lib/theme';
 
@@ -32,10 +33,29 @@ function TopicLeafRowInner({
 }: Props) {
   const [checkAnim, setCheckAnim] = useState(false);
 
+  // Touch targets: 32px é confortável com mouse, mas apertado no dedo.
+  // Em mobile as ações sobem para 44px (recomendação WCAG) e o checkbox para 28.
+  const iconBtn = isMobile ? { ...styles.iconBtn, width: 44, height: 44 } : styles.iconBtn;
+  const reviewBtn = isMobile ? { ...styles.reviewBtn, minWidth: 44, height: 44 } : styles.reviewBtn;
+  const deleteBtn = isMobile ? { ...styles.deleteBtn, width: 44, height: 44 } : styles.deleteBtn;
+  const checkbox = isMobile ? { ...styles.checkbox, width: 28, height: 28 } : styles.checkbox;
+
   function handleToggle() {
     setCheckAnim(true);
     onToggle(topic);
   }
+
+  // Dias de atraso (positivo) ou dias até a próxima revisão (negativo) — mesma
+  // informação que Vade Mecum/Jurisprudências já mostram no próprio conteúdo,
+  // aqui só como tooltip + badge discreto pra não sobrecarregar a linha.
+  const overdue = topic.is_review_active ? daysOverdue(topic.next_review_date) : 0;
+  const reviewTitle = !topic.is_review_active
+    ? 'Ativar revisão espaçada'
+    : overdue > 0
+      ? `Em revisão — venceu há ${overdue} ${overdue === 1 ? 'dia' : 'dias'}. Clique para desativar.`
+      : overdue === 0
+        ? 'Em revisão — vence hoje. Clique para desativar.'
+        : `Em revisão — próxima em ${Math.abs(overdue)} ${Math.abs(overdue) === 1 ? 'dia' : 'dias'}. Clique para desativar.`;
 
   return (
     // Em desktop, className="topic-row" ativa hover-reveal das ações via globals.css.
@@ -48,7 +68,7 @@ function TopicLeafRowInner({
         onClick={handleToggle}
         onAnimationEnd={() => setCheckAnim(false)}
         className={checkAnim ? 'checkbox-pop' : undefined}
-        style={{ ...styles.checkbox, ...(topic.is_completed ? styles.checkboxOn : {}) }}
+        style={{ ...checkbox, ...(topic.is_completed ? styles.checkboxOn : {}) }}
         aria-label={topic.is_completed ? 'Concluído — clique para desmarcar' : 'Marcar como concluído'}
       >
         {topic.is_completed && <Check size={13} strokeWidth={2.5} />}
@@ -81,7 +101,7 @@ function TopicLeafRowInner({
       >
         <button
           onClick={() => isEditing ? onCommitEdit(topic.id, editText) : onStartEdit(topic)}
-          style={{ ...styles.iconBtn, color: isEditing ? theme.teal : theme.inkSoft }}
+          style={{ ...iconBtn, color: isEditing ? theme.teal : theme.inkSoft }}
           title="Editar nome" aria-label="Editar tópico"
         >
           <Pencil size={15} strokeWidth={1.8} />
@@ -91,12 +111,13 @@ function TopicLeafRowInner({
         <button
           onClick={() => onToggleReview(topic)}
           style={{
-            ...styles.reviewBtn,
-            color: topic.is_review_active ? theme.teal : theme.inkSoft,
-            background: topic.is_review_active ? theme.tealBg : 'transparent',
+            ...reviewBtn,
+            color: overdue > 0 ? theme.danger : topic.is_review_active ? theme.teal : theme.inkSoft,
+            background: overdue > 0 ? theme.dangerBg : topic.is_review_active ? theme.tealBg : 'transparent',
             fontFamily: theme.font,
+            position: 'relative',
           }}
-          title={topic.is_review_active ? 'Em revisão — clique para desativar' : 'Ativar revisão espaçada'}
+          title={reviewTitle}
           aria-label="Alternar revisão espaçada"
         >
           {topic.is_review_active ? (
@@ -104,27 +125,29 @@ function TopicLeafRowInner({
           ) : (
             <span style={{ fontSize: 12, fontWeight: 600, whiteSpace: 'nowrap' }}>Revisar</span>
           )}
+          {overdue > 0 && <span style={styles.noteBadge}>{overdue}</span>}
         </button>
 
         <button
           onClick={() => onViewNotes(topic)}
-          style={{ ...styles.iconBtn, color: noteCount > 0 ? theme.teal : theme.inkSoft, position: 'relative' }}
+          style={{ ...iconBtn, color: noteCount > 0 ? theme.teal : theme.inkSoft, position: 'relative' }}
           title={noteCount > 0 ? `${noteCount} ${noteCount === 1 ? 'anotação' : 'anotações'}` : 'Anotar sobre este tópico'}
           aria-label="Ver anotações do tópico"
         >
-          <Pencil size={15} strokeWidth={1.8} />
+          {/* NotebookPen ≠ Pencil do "editar nome" — mesmos ícones lado a lado confundiam */}
+          <NotebookPen size={15} strokeWidth={1.8} />
           {noteCount > 0 && <span style={styles.noteBadge}>{noteCount}</span>}
         </button>
 
         <button
           onClick={() => onStudy(topic.id)}
-          style={{ ...styles.iconBtn, color: theme.teal }}
+          style={{ ...iconBtn, color: theme.teal }}
           title="Estudar este tópico" aria-label="Estudar"
         >
           <Play size={16} fill="currentColor" stroke="none" />
         </button>
 
-        <button onClick={() => onDelete(topic.id)} style={styles.deleteBtn} aria-label="Apagar tópico" title="Apagar">
+        <button onClick={() => onDelete(topic.id)} style={deleteBtn} aria-label="Apagar tópico" title="Apagar">
           <X size={14} strokeWidth={2} />
         </button>
       </div>

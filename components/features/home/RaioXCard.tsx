@@ -9,7 +9,7 @@ import { memo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { Target } from 'lucide-react';
-import { getRaioX, NIVEL_LABEL, type RaioX, type NivelProntidao } from '@/services/raiox.service';
+import { getRaioX, NIVEL_LABEL, nivelDe, type RaioX, type NivelProntidao } from '@/services/raiox.service';
 import { theme } from '@/lib/theme';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { Button } from '@/components/ui/Button';
@@ -31,7 +31,7 @@ const NIVEL_BG: Record<NivelProntidao, string> = {
 export const RaioXCard = memo(function RaioXCard() {
   const router = useRouter();
   const [expandido, setExpandido] = useState(false);
-  const { data, isLoading, isError } = useQuery<RaioX>({
+  const { data, isLoading, isError, refetch, isRefetching } = useQuery<RaioX>({
     queryKey: ['raiox'],
     queryFn: getRaioX,
   });
@@ -46,7 +46,19 @@ export const RaioXCard = memo(function RaioXCard() {
     );
   }
 
-  if (isError || !data) return null;
+  // H11 — antes sumia em silêncio (return null); agora avisa e oferece retry,
+  // em vez de o card simplesmente desaparecer do Panorama sem explicação.
+  if (isError || !data) {
+    return (
+      <div style={styles.card}>
+        <span style={styles.eyebrow}>Raio-X da prontidão</span>
+        <p style={styles.emptyMsg}>Não foi possível carregar o Raio-X agora.</p>
+        <button style={styles.ctaBtn} onClick={() => refetch()} disabled={isRefetching}>
+          {isRefetching ? 'tentando…' : 'tentar de novo'}
+        </button>
+      </div>
+    );
+  }
 
   if (!data.hasTarget) {
     return (
@@ -92,7 +104,7 @@ export const RaioXCard = memo(function RaioXCard() {
       {/* Barra segmentada — largura proporcional ao peso, cor pelo score da matéria */}
       <div style={styles.bar}>
         {materias.map((m) => (
-          <div key={m.subjectId} style={{ flex: m.weight, background: NIVEL_COR[nivelDeLocal(m.score)] }} title={`${m.subjectName}: ${m.score}%`} />
+          <div key={m.subjectId} style={{ flex: m.weight, background: NIVEL_COR[nivelDe(m.score)] }} title={`${m.subjectName}: ${m.score}%`} />
         ))}
       </div>
 
@@ -115,7 +127,7 @@ export const RaioXCard = memo(function RaioXCard() {
       <div style={styles.lista}>
         {visiveis.map((m) => (
           <div key={m.subjectId} style={styles.listaItem}>
-            <span style={{ ...styles.listaDot, background: NIVEL_COR[nivelDeLocal(m.score)] }} />
+            <span style={{ ...styles.listaDot, background: NIVEL_COR[nivelDe(m.score)] }} />
             <span style={styles.listaNome}>{m.subjectName}</span>
             <span style={styles.listaScore}>{m.score}%</span>
           </div>
@@ -127,16 +139,13 @@ export const RaioXCard = memo(function RaioXCard() {
           {expandido ? 'ver menos' : `ver todas as ${materias.length} matérias`}
         </button>
       )}
+
+      <button style={styles.analiseLink} onClick={() => router.push('/performance')}>
+        ver análise completa →
+      </button>
     </div>
   );
 });
-
-function nivelDeLocal(score: number): NivelProntidao {
-  if (score >= 85) return 'pronto';
-  if (score >= 70) return 'quase_la';
-  if (score >= 40) return 'progresso';
-  return 'construcao';
-}
 
 const styles: Record<string, React.CSSProperties> = {
   card: {
@@ -156,7 +165,6 @@ const styles: Record<string, React.CSSProperties> = {
   focoBox: { background: theme.bg, border: `0.5px solid ${theme.line}`, borderRadius: theme.radiusSm, padding: '12px 14px', marginBottom: 12 },
   focoTitulo: { fontSize: 14, color: theme.ink, margin: '0 0 3px' },
   focoDetalhe: { fontSize: 13, color: theme.inkSoft, margin: '0 0 10px' },
-  focoBtn: { border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 13, fontWeight: 600, borderRadius: theme.radiusSm, padding: '8px 14px', cursor: 'pointer', fontFamily: 'inherit' },
 
   lista: { display: 'flex', flexDirection: 'column', gap: 6 },
   listaItem: { display: 'flex', alignItems: 'center', gap: 8 },
@@ -164,6 +172,12 @@ const styles: Record<string, React.CSSProperties> = {
   listaNome: { fontSize: 13, color: theme.ink, flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
   listaScore: { fontSize: 13, fontWeight: 600, color: theme.inkSoft, fontVariantNumeric: 'tabular-nums' },
   verMaisBtn: { marginTop: 10, border: 'none', background: 'transparent', color: theme.inkSoft, fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', padding: 0 },
+  analiseLink: {
+    display: 'block', width: '100%', textAlign: 'center', marginTop: 14, paddingTop: 12,
+    border: 'none', borderTop: `0.5px solid ${theme.line}`,
+    background: 'transparent', color: theme.inkSoft,
+    fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
+  },
 
   emptyMsg: { fontSize: 14, color: theme.inkSoft, margin: '4px 0 0', lineHeight: 1.5 },
   ctaBtn: { marginTop: 12, border: 'none', background: 'transparent', color: theme.teal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', padding: 0 },

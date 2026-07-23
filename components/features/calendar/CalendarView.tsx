@@ -6,7 +6,7 @@
 // Grade/Lista. Traz os próprios controles (nav + "+ Lembrete").
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { X, Trash2, Clock, FileText, Layers, Bell, RefreshCw, Plus, type LucideIcon } from 'lucide-react';
 import { useConfirm } from '@/hooks/useConfirm';
@@ -25,7 +25,11 @@ type Mode = 'week' | 'month';
 type EvType = CalendarEvent['type'] | 'block';
 interface ViewEvent { date: string; type: EvType; label: string; color: string; reminderId?: string; }
 
+// Indexado por Date.getDay() (0=Dom) — para formatar datas.
 const WEEKDAYS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+// Cabeçalho da grade: começa na SEGUNDA, como a Grade/Lista do cronograma
+// (antes o Mês começava no domingo e as duas abas discordavam).
+const WEEK_HEADER = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
 const MONTHS = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
   'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
 
@@ -149,6 +153,20 @@ export function CalendarView() {
     }
   }
 
+  // Esc fecha o painel do dia (o backdrop já fecha no clique; teclado faltava)
+  // e o foco volta para a célula que o abriu ao fechar (WCAG 2.4.3).
+  useEffect(() => {
+    if (!selectedDay) return;
+    const opener = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') fecharDia(); };
+    window.addEventListener('keydown', onKey);
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      opener?.focus?.();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedDay]);
+
   const todayISO = toLocalISO(new Date());
   const cellMinHeight = isMobile ? 58 : 96;
   const gridGap = isMobile ? 4 : 8;
@@ -181,7 +199,7 @@ export function CalendarView() {
       </div>
 
       <div style={{ ...styles.weekHeader, gap: gridGap }}>
-        {WEEKDAYS.map((w) => <div key={w} style={styles.weekDay}>{isMobile ? w.charAt(0) : w}</div>)}
+        {WEEK_HEADER.map((w) => <div key={w} style={styles.weekDay}>{isMobile ? w.charAt(0) : w}</div>)}
       </div>
 
       <div style={{ ...styles.grid, gap: gridGap }}>
@@ -194,6 +212,9 @@ export function CalendarView() {
           return (
             <div
               key={i}
+              role="button"
+              tabIndex={0}
+              aria-label={`${formataDataExtenso(iso)}${dayEvents.length > 0 ? `, ${dayEvents.length} evento(s)` : ', sem eventos'}`}
               style={{
                 ...styles.cell,
                 minHeight: cellMinHeight,
@@ -202,6 +223,7 @@ export function CalendarView() {
                 ...(isSelected ? styles.cellSelected : {}),
               }}
               onClick={() => abrirDia(iso)}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); abrirDia(iso); } }}
               title="Ver eventos do dia"
             >
               <span style={{ ...styles.dayNum, ...(isToday ? styles.dayNumToday : {}) }}>
@@ -212,9 +234,11 @@ export function CalendarView() {
                   <div
                     key={j}
                     style={{ ...styles.event, background: chipBg(e.type, e.color) }}
-                    title={e.label}
+                    title={`${tipoLabel(e.type)}: ${e.label}`}
                   >
-                    <span style={{ width: 6, height: 6, borderRadius: '50%', background: e.color, flexShrink: 0, display: 'inline-block' }} />
+                    {/* Ícone do TIPO na cor da matéria: a cor sozinha não distinguia
+                        bloco de revisão (ambas usam a cor da matéria). */}
+                    <EventIcon type={e.type} color={e.color} size={isMobile ? 10 : 11} />
                     {!isMobile && <span style={styles.eventLabel}>{e.label}</span>}
                   </div>
                 ))}
@@ -227,16 +251,18 @@ export function CalendarView() {
         })}
       </div>
 
+      {/* Legenda por ÍCONE: as cores dos eventos vêm da matéria (blocos e
+          revisões), então uma legenda de cores fixas mentia. */}
       <div style={{ ...styles.legend, gap: isMobile ? '8px 12px' : 18 }}>
         {([
-          { color: theme.teal,    label: 'Bloco de estudo' },
-          { color: theme.ok,      label: 'Revisão de tópico' },
-          { color: theme.clay,    label: 'Flashcards' },
-          { color: theme.danger,  label: 'Prova' },
-          { color: theme.primary, label: 'Lembrete' },
-        ] as { color: string; label: string }[]).map((item) => (
+          { type: 'block',     label: 'Bloco de estudo' },
+          { type: 'topic',     label: 'Revisão de tópico' },
+          { type: 'flashcard', label: 'Flashcards' },
+          { type: 'exam',      label: 'Prova' },
+          { type: 'reminder',  label: 'Lembrete' },
+        ] as { type: EvType; label: string }[]).map((item) => (
           <span key={item.label} style={styles.legendItem}>
-            <span style={{ width: 8, height: 8, borderRadius: '50%', background: item.color, display: 'inline-block', flexShrink: 0 }} />
+            <EventIcon type={item.type} color={theme.inkSoft} size={13} />
             {item.label}
           </span>
         ))}
@@ -248,6 +274,9 @@ export function CalendarView() {
           onClick={fecharDia}
         >
           <div
+            role="dialog"
+            aria-modal="true"
+            aria-label={`Eventos de ${formataDataExtenso(selectedDay)}`}
             style={{ ...styles.sheet, ...(isMobile ? styles.sheetMobile : styles.sheetDesktop) }}
             onClick={(e) => e.stopPropagation()}
           >
@@ -324,10 +353,13 @@ export function CalendarView() {
   );
 }
 
+// Dias a recuar até a segunda-feira da semana (getDay(): 0=Dom → 6; 1=Seg → 0).
+const diasAteSegunda = (d: Date) => (d.getDay() + 6) % 7;
+
 function computeGrid(mode: Mode, anchor: Date) {
   if (mode === 'week') {
     const start = new Date(anchor);
-    start.setDate(start.getDate() - start.getDay());
+    start.setDate(start.getDate() - diasAteSegunda(start));
     const days = Array.from({ length: 7 }, (_, i) => {
       const d = new Date(start); d.setDate(start.getDate() + i); return d;
     });
@@ -337,7 +369,7 @@ function computeGrid(mode: Mode, anchor: Date) {
   } else {
     const first = new Date(anchor.getFullYear(), anchor.getMonth(), 1);
     const gridStart = new Date(first);
-    gridStart.setDate(first.getDate() - first.getDay());
+    gridStart.setDate(first.getDate() - diasAteSegunda(first));
     const days = Array.from({ length: 42 }, (_, i) => {
       const d = new Date(gridStart); d.setDate(gridStart.getDate() + i); return d;
     });
@@ -355,7 +387,7 @@ function formataDataExtenso(iso: string): string {
 
 const styles: Record<string, React.CSSProperties> = {
   controlsRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18, gap: 12, flexWrap: 'wrap' },
-  periodLabel: { fontSize: 15, color: theme.ink, margin: 0, fontWeight: 700, textTransform: 'capitalize' },
+  periodLabel: { fontSize: 15, color: theme.ink, margin: 0, fontWeight: 700 },
   controls: { display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' },
   addReminderBtn: { padding: '8px 14px', borderRadius: 10, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
   modeToggle: { display: 'flex', gap: 4, padding: 3, background: 'rgba(15,23,42,.06)', borderRadius: theme.radiusSm, marginRight: 4 },
@@ -399,7 +431,8 @@ const styles: Record<string, React.CSSProperties> = {
   sheetDesktop: { width: 420, maxWidth: '92vw', maxHeight: '80vh', borderRadius: 18, padding: 22, alignSelf: 'center', boxShadow: theme.shadowHover },
   grabber: { width: 40, height: 4, borderRadius: theme.radiusPill, background: theme.line, margin: '4px auto 14px' },
   sheetHead: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 },
-  sheetDate: { fontSize: 17, fontWeight: 700, color: theme.ink, textTransform: 'capitalize' },
+  // Sem text-transform: capitalize — deixava "22 De Julho" (o "de" virava "De").
+  sheetDate: { fontSize: 17, fontWeight: 700, color: theme.ink },
   sheetCount: { fontSize: 13, color: theme.inkFaint, marginTop: 2 },
   sheetClose: { width: 44, height: 44, borderRadius: 10, border: 'none', background: theme.muted, display: 'grid', placeItems: 'center', cursor: 'pointer', flexShrink: 0 },
   sheetList: { display: 'flex', flexDirection: 'column', gap: 8, overflowY: 'auto', flex: 1 },

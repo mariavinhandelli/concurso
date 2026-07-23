@@ -3,6 +3,7 @@
 import { useState, useEffect, memo } from 'react';
 import { TriangleAlert } from 'lucide-react';
 import { theme } from '@/lib/theme';
+import { fmtInterval } from '@/lib/interval-format';
 import type { ReviewItem, ReviewRating } from '@/services/reviews.service';
 
 interface ReviewCardProps {
@@ -11,17 +12,11 @@ interface ReviewCardProps {
   onRate: (topicId: string, rating: ReviewRating) => void;
 }
 
-function fmtInterval(days: number): string {
-  if (days <= 1) return 'amanhã';
-  if (days < 7)  return `${days} dias`;
-  if (days === 7) return '1 semana';
-  if (days < 30) return `${Math.round(days / 7)} sem.`;
-  if (days < 60) return '1 mês';
-  return `${Math.round(days / 30)} meses`;
-}
-
 // Usa as variáveis --review-* do globals.css que já garantem contraste WCAG AA
 // (texto escuro sobre fundo claro), resolvendo o falha de contraste do pressed state anterior.
+// Mesma gramática dos flashcards (Errei/Difícil/Médio/Fácil): 'Esqueci' é o
+// lapso vermelho que zera o intervalo; 'Difícil' vira neutro — antes era
+// vermelho e induzia o usuário a achar que reiniciava a contagem.
 const RATINGS: {
   key:       ReviewRating;
   label:     string;
@@ -29,7 +24,8 @@ const RATINGS: {
   pressedBg: string;
   pressedFg: string;
 }[] = [
-  { key: 'dificil',       label: 'Difícil',      fg: theme.crit, pressedBg: 'var(--review-hard)',   pressedFg: 'var(--review-hard-text)'   },
+  { key: 'esqueci',       label: 'Esqueci',       fg: theme.danger,   pressedBg: 'var(--review-hard)',   pressedFg: 'var(--review-hard-text)'   },
+  { key: 'dificil',       label: 'Difícil',      fg: theme.inkSoft,  pressedBg: 'var(--muted)',         pressedFg: 'var(--ink)'                },
   { key: 'intermediario', label: 'Médio',         fg: theme.warn, pressedBg: 'var(--review-medium)', pressedFg: 'var(--review-medium-text)' },
   { key: 'facil',         label: 'Fácil',         fg: theme.ok,   pressedBg: 'var(--review-easy)',   pressedFg: 'var(--review-easy-text)'   },
 ];
@@ -60,7 +56,7 @@ export const ReviewCard = memo(function ReviewCard({ item, isExiting, onRate }: 
         {item.overdueDays > 0 && (
           <span
             style={s.overdue}
-            title={`Esta revisão venceu há ${item.overdueDays} ${item.overdueDays === 1 ? 'dia' : 'dias'}. Avalie como Difícil para reiniciar o intervalo.`}
+            title={`Esta revisão venceu há ${item.overdueDays} ${item.overdueDays === 1 ? 'dia' : 'dias'}. Se não lembra mais do conteúdo, avalie como Esqueci para recomeçar o intervalo.`}
           >
             <TriangleAlert size={12} color={theme.crit} strokeWidth={2} aria-hidden="true" style={{ flexShrink: 0 }} />
             {item.overdueDays} {item.overdueDays === 1 ? 'dia' : 'dias'} atrasada

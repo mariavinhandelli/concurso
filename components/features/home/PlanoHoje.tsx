@@ -4,10 +4,10 @@ import { memo, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { ChevronDown, ChevronRight, Check } from 'lucide-react';
-import { countDueReviews } from '@/services/reviews.service';
+import { countDueReviews, getOldestDueTopicDate } from '@/services/reviews.service';
 import { countDueCards } from '@/services/flashcards.service';
-import { countRevisoesDue } from '@/services/leiInteracoes.service';
-import { countRevisoesHoje } from '@/services/jurisRevisao.service';
+import { countRevisoesDue, getOldestDueLeiDate } from '@/services/leiInteracoes.service';
+import { countRevisoesHoje, getOldestDueJurisDate } from '@/services/jurisRevisao.service';
 import { getGoalsSummary, type GoalsSummary } from '@/services/goals.service';
 import { listBlocks, type StudyBlock } from '@/services/studyBlocks.service';
 import {
@@ -20,7 +20,8 @@ import { getUserFeatures, DEFAULT_FEATURES, type UserFeatures } from '@/services
 import { fmtMin } from '@/lib/format/time';
 import { track, EV } from '@/lib/analytics';
 import { useTimer } from '@/components/features/timer/TimerContext';
-import { toLocalDateString } from '@/lib/local-date';
+import { useLocalToday } from '@/hooks/useLocalToday';
+import { parseLocalDate } from '@/lib/local-date';
 import { theme } from '@/lib/theme';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
@@ -75,17 +76,37 @@ export const PlanoHoje = memo(function PlanoHoje() {
   const [verMais, setVerMais] = useState(false);
   const [verAtencao, setVerAtencao] = useState(false);
 
-  const hoje = toLocalDateString(new Date());
+  // H16 — useLocalToday re-renderiza à meia-noite; sem isso, today-blocks
+  // ficava preso no dia anterior numa aba deixada aberta durante a virada.
+  const hoje = useLocalToday();
 
   // Reusa as MESMAS query keys da Home → dedupe + sincronia com invalidações existentes.
-  const { data: revisoes } = useQuery<number>({ queryKey: ['due-reviews-count'], queryFn: countDueReviews });
-  const { data: leiDue } = useQuery<number>({ queryKey: ['due-lei-count'], queryFn: countRevisoesDue });
-  const { data: jurisDue } = useQuery<number>({ queryKey: ['due-juris-count'], queryFn: countRevisoesHoje });
-  const { data: flashcards } = useQuery<number>({ queryKey: ['due-cards-count'], queryFn: countDueCards });
+  const { data: revisoes, isError: revisoesErr, refetch: refetchRevisoes } = useQuery<number>({ queryKey: ['due-reviews-count'], queryFn: countDueReviews });
+  const { data: leiDue, isError: leiErr, refetch: refetchLei } = useQuery<number>({ queryKey: ['due-lei-count'], queryFn: countRevisoesDue });
+  const { data: jurisDue, isError: jurisErr, refetch: refetchJuris } = useQuery<number>({ queryKey: ['due-juris-count'], queryFn: countRevisoesHoje });
+  const { data: flashcards, isError: fcErr, refetch: refetchCards } = useQuery<number>({ queryKey: ['due-cards-count'], queryFn: countDueCards });
   const { data: goals } = useQuery<GoalsSummary>({ queryKey: ['goals-summary'], queryFn: getGoalsSummary });
   const { data: sug } = useQuery<SuggestionsResult>({ queryKey: ['home-suggestions'], queryFn: getSuggestions });
   const { data: blocos } = useQuery<StudyBlock[]>({ queryKey: ['today-blocks', hoje], queryFn: () => listBlocks(hoje, hoje) });
   const { data: dormant } = useQuery<DormantModules>({ queryKey: ['dormant-modules'], queryFn: getDormantModules, staleTime: 5 * 60_000 });
+
+  // Idade do atraso: qual das 3 filas de revisão tem o item vencido há mais tempo.
+  // Só busca quando há algo vencido — 3 selects "limit 1" baratos, não vale a
+  // pena disparar quando revEmDia (nada pendente).
+  const temAlgoVencido = (revisoes ?? 0) > 0 || (leiDue ?? 0) > 0 || (jurisDue ?? 0) > 0;
+  const { data: oldestDue } = useQuery<string | null>({
+    queryKey: ['due-oldest-date'],
+    queryFn: async () => {
+      const [t, l, j] = await Promise.all([
+        getOldestDueTopicDate(), getOldestDueLeiDate(), getOldestDueJurisDate(),
+      ]);
+      return [t, l, j].filter(Boolean).sort()[0] ?? null;
+    },
+    enabled: temAlgoVencido,
+  });
+  const diasAtraso = oldestDue
+    ? Math.max(0, Math.round((parseLocalDate(hoje).getTime() - parseLocalDate(oldestDue).getTime()) / 86_400_000))
+    : null;
 
   // C2 — ciclo ativo alimenta o passo "Estudar" quando não há blocos hoje.
   // Sem isto, o plano gerado no onboarding vivia só na aba Ciclo da Agenda e o
@@ -136,8 +157,12 @@ export const PlanoHoje = memo(function PlanoHoje() {
   // jurisprudências vencidas — um único passo, uma única fila mental.
   const leiDueCount = leiDue ?? 0;
   const jurisDueCount = jurisDue ?? 0;
-  const revEmDia = revisoes === 0 && leiDueCount === 0 && jurisDueCount === 0;
-  const fcEmDia = flashcards === 0;
+  // H11 — se alguma das 3 contagens falhou, NÃO dá pra afirmar "tudo em dia":
+  // os services agora propagam o erro (não engolem mais como 0), então aqui
+  // é só respeitar isso e não marcar o passo como concluído por engano.
+  const revErro = revisoesErr || leiErr || jurisErr;
+  const revEmDia = !revErro && revisoes === 0 && leiDueCount === 0 && jurisDueCount === 0;
+  const fcEmDia = !fcErr && flashcards === 0;
   const studiedToday = (goals?.todayMinutes ?? 0) > 0;
   // Fila vazia só vira "concluído" depois que o dia começou (estudo registrado).
   // Sem isso, usuário novo com filas vazias via "2 de 3 concluídos" sem ter feito nada.
@@ -179,20 +204,37 @@ export const PlanoHoje = memo(function PlanoHoje() {
   const sugStart = (s: SuggestedTopic): PendingStart =>
     ({ name: s.name, topicId: s.id, subjectId: s.subjectId });
 
-  const revSub = revisoes === undefined ? '…'
+  // "mais antiga há N dias" só quando o atraso é real (≥2 dias) — vencido hoje
+  // ou ontem é rotina, não negligência, e não merece alarme.
+  const atrasoLabel = diasAtraso !== null && diasAtraso >= 2
+    ? ` · mais antiga há ${diasAtraso} dias` : '';
+  const revSub = revErro ? 'não consegui verificar'
+    : revisoes === undefined ? '…'
     : revEmDia ? 'tudo em dia'
     : [
         revisoes > 0 ? `${revisoes} ${revisoes === 1 ? 'revisão' : 'revisões'}` : null,
         leiDueCount > 0 ? `${leiDueCount} de lei seca` : null,
-        jurisDueCount > 0 ? `${jurisDueCount} de jurisprudência` : null,
-      ].filter(Boolean).join(' · ') + ` · ~${(revisoes ?? 0) * 3 + leiDueCount * 2 + jurisDueCount * 2} min`;
+        jurisDueCount > 0 ? `${jurisDueCount} de jurisprudência${jurisDueCount === 1 ? '' : 's'}` : null,
+      ].filter(Boolean).join(' · ') + ` · ~${(revisoes ?? 0) * 3 + leiDueCount * 2 + jurisDueCount * 2} min` + atrasoLabel;
 
   // Fila Única de Revisão: tópicos, lei seca e jurisprudência num só player.
   const revisarHref = '/revisar';
 
-  const fcSub = flashcards === undefined ? '…'
+  const fcSub = fcErr ? 'não consegui verificar'
+    : flashcards === undefined ? '…'
     : flashcards > 0 ? `${flashcards} na fila · ~${Math.ceil(flashcards * 1.5)} min`
     : 'tudo em dia';
+
+  function tentarDeNovoRevisar(e: React.MouseEvent) {
+    e.stopPropagation();
+    if (revisoesErr) refetchRevisoes();
+    if (leiErr) refetchLei();
+    if (jurisErr) refetchJuris();
+  }
+  function tentarDeNovoFlashcards(e: React.MouseEvent) {
+    e.stopPropagation();
+    refetchCards();
+  }
 
   // Passo 3 muda de rótulo/fonte conforme haja cronograma planejado hoje.
   const estudoLabel = temCronograma ? 'Cronograma' : temCiclo ? 'Ciclo' : 'Estudar';
@@ -232,7 +274,17 @@ export const PlanoHoje = memo(function PlanoHoje() {
           {allDone ? 'concluído 🎉' : `${doneCount} de 3 concluído${doneCount === 1 ? '' : 's'}`}
         </span>
       </div>
-      <div style={styles.bar}><div style={{ ...styles.barFill, width: `${pct}%` }} /></div>
+      <div
+        style={styles.bar}
+        role="progressbar"
+        aria-label="Progresso do plano de hoje"
+        aria-valuemin={0}
+        aria-valuemax={3}
+        aria-valuenow={doneCount}
+        aria-valuetext={`${doneCount} de 3 passos concluídos`}
+      >
+        <div style={{ ...styles.barFill, width: `${pct}%` }} />
+      </div>
 
       {/* Pacto de estudo (intenção de implementação) — o cue do dia; some ao estudar */}
       <PactoEstudo diaComecou={diaComecou} />
@@ -244,9 +296,11 @@ export const PlanoHoje = memo(function PlanoHoje() {
           <StepMarker index={1} done={revDone} />
           <div style={styles.stepText}>
             <span style={{ ...styles.stepLabel, ...(revDone ? styles.stepLabelDone : {}) }}>Revisar</span>
-            <span style={styles.stepSub}>{revSub}</span>
+            <span style={{ ...styles.stepSub, ...(revErro ? styles.stepSubErro : {}) }}>{revSub}</span>
           </div>
-          <Chevron />
+          {revErro
+            ? <button style={styles.retryBtn} onClick={tentarDeNovoRevisar}>tentar de novo</button>
+            : <Chevron />}
         </button>
 
         {/* 2 · Flashcards */}
@@ -254,9 +308,11 @@ export const PlanoHoje = memo(function PlanoHoje() {
           <StepMarker index={2} done={fcDone} />
           <div style={styles.stepText}>
             <span style={{ ...styles.stepLabel, ...(fcDone ? styles.stepLabelDone : {}) }}>Flashcards</span>
-            <span style={styles.stepSub}>{fcSub}</span>
+            <span style={{ ...styles.stepSub, ...(fcErr ? styles.stepSubErro : {}) }}>{fcSub}</span>
           </div>
-          <Chevron />
+          {fcErr
+            ? <button style={styles.retryBtn} onClick={tentarDeNovoFlashcards}>tentar de novo</button>
+            : <Chevron />}
         </button>
 
         {/* 3 · Estudar / Cronograma — CTA segue o plano quando ele existe */}
@@ -353,8 +409,11 @@ export const PlanoHoje = memo(function PlanoHoje() {
         </div>
       )}
 
-      {/* Alerta de esquecimento — visível mesmo com cronograma ativo */}
-      {temCronograma && atencao.length > 0 && (
+      {/* Alerta de esquecimento — visível mesmo com plano ativo (cronograma OU ciclo).
+          Antes só aparecia com temCronograma: quem usa ciclo (o caminho padrão
+          criado pelo onboarding) nunca via o alerta — o diferencial do Plano de
+          Hoje (vigiar o que o plano não cobre) ficava desligado pra maioria. */}
+      {(temCronograma || temCiclo) && atencao.length > 0 && (
         <div style={styles.atencaoWrap}>
           <button style={styles.atencaoToggle} onClick={() => setVerAtencao((v) => !v)}>
             <span style={{ ...styles.dot, background: theme.clay }} />
@@ -413,6 +472,11 @@ const styles: Record<string, React.CSSProperties> = {
   stepLabel: { fontSize: 15, fontWeight: 600, color: theme.ink, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
   stepLabelDone: { color: theme.inkSoft, textDecoration: 'line-through' },
   stepSub: { fontSize: 13, color: theme.inkSoft, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
+  stepSubErro: { color: theme.crit },
+  retryBtn: {
+    flexShrink: 0, border: 'none', background: 'transparent', color: theme.crit,
+    fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', padding: '6px 8px',
+  },
 
   studyBtn: {
     padding: '9px 16px', borderRadius: 10, border: 'none',
@@ -466,6 +530,4 @@ const styles: Record<string, React.CSSProperties> = {
   confirmBanner: { marginBottom: 12, padding: '11px 14px', borderRadius: theme.radiusSm, background: theme.warnBg, border: `0.5px solid ${theme.warn}` },
   confirmMsg: { margin: '0 0 10px', fontSize: 14, color: theme.ink, lineHeight: 1.5 },
   confirmBtns: { display: 'flex', gap: 8 },
-  confirmCancel: { padding: '7px 14px', borderRadius: theme.radiusXs, border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.inkSoft, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
-  confirmOk: { padding: '7px 14px', borderRadius: theme.radiusXs, border: 'none', background: theme.warn, color: theme.onWarn, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
 };

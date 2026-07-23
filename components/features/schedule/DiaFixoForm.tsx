@@ -60,7 +60,8 @@ export const DiaFixoForm = forwardRef<DiaFixoFormRef, Props>(function DiaFixoFor
       setError('');
       const result: RecurrenceItemInput[] = [];
       for (const it of validos) {
-        const mins = (Number(it.h) || 0) * 60 + (Number(it.m) || 0) || 60;
+        // Saneia: horas/minutos negativos ou absurdos viravam planned_minutes inválido.
+        const mins = Math.min(1440, Math.max(5, (Number(it.h) || 0) * 60 + (Number(it.m) || 0) || 60));
         for (const wd of it.weekdays) {
           result.push({ subjectId: it.subjectId, plannedMinutes: mins, weekday: wd, position: 0 });
         }
@@ -83,6 +84,17 @@ export const DiaFixoForm = forwardRef<DiaFixoFormRef, Props>(function DiaFixoFor
 
   const colorOf = (subjectId: string) => subjects.find((s) => s.id === subjectId)?.color ?? theme.line;
 
+  // Option de resgate quando o subjectId do item não está na lista carregada:
+  // (a) subjects ainda não chegaram — sem ela o <select> controlado montava
+  // vazio e NUNCA exibia a matéria (React não reaplica value quando as options
+  // chegam depois); (b) matéria arquivada — segue existindo na regra.
+  const fallbackName = (subjectId: string) => {
+    const m = editRule?.materias.find((x) => x.subjectId === subjectId);
+    if (!m) return 'Matéria (arquivada)';
+    return m.archived ? `${m.subjectName} (arquivada)` : m.subjectName;
+  };
+  const semMatch = (subjectId: string) => !!subjectId && !subjects.some((s) => s.id === subjectId);
+
   return (
     <>
       <label style={styles.sectionLabel}>Matérias do padrão</label>
@@ -92,6 +104,7 @@ export const DiaFixoForm = forwardRef<DiaFixoFormRef, Props>(function DiaFixoFor
             <span style={{ ...styles.colorDot, background: colorOf(it.subjectId) }} />
             <Select value={it.subjectId} onChange={(e) => patch(it.uid, { subjectId: e.target.value })} style={{ flex: 1, minWidth: 0, padding: '8px 32px 8px 10px', borderRadius: theme.radiusXs, fontSize: 14 }}>
               <option value="">Selecione a matéria…</option>
+              {semMatch(it.subjectId) && <option value={it.subjectId}>{fallbackName(it.subjectId)}</option>}
               {subjects.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
             </Select>
             {items.length > 1 && <IconButton size="sm" onClick={() => remove(it.uid)} aria-label="Remover" style={{ color: theme.inkFaint }}><X size={13} strokeWidth={2} /></IconButton>}

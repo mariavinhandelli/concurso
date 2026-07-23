@@ -66,7 +66,7 @@ export function ArquivarConcursoModal({
         ) : (
           <div style={s.body}>
             {preview.hasActiveCycle && (
-              <button onClick={() => setCycleOverride(!effCycle)} style={s.row}>
+              <button onClick={() => setCycleOverride(!effCycle)} style={s.row} role="checkbox" aria-checked={effCycle}>
                 <Check on={effCycle} />
                 <span style={s.rowLabel}>Arquivar também o ciclo de estudos ativo</span>
               </button>
@@ -76,7 +76,7 @@ export function ArquivarConcursoModal({
               <div style={s.group}>
                 <p style={s.groupTitle}>Matérias usadas só neste concurso</p>
                 {preview.exclusiveSubjects.map((sub) => (
-                  <button key={sub.id} onClick={() => toggleSubject(sub.id)} style={s.row}>
+                  <button key={sub.id} onClick={() => toggleSubject(sub.id)} style={s.row} role="checkbox" aria-checked={effSubjects.has(sub.id)}>
                     <Check on={effSubjects.has(sub.id)} />
                     <span style={s.rowLabel}>{sub.name}</span>
                   </button>

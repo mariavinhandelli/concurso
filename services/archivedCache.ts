@@ -16,6 +16,7 @@
 // Chamar invalidateArchivedCache() após qualquer operação de archive/unarchive.
 
 import { createClient } from '@/lib/supabase/client';
+import { getCachedUser } from '@/lib/supabase/authCache';
 
 let _archivedCache: Promise<string[]> | null = null;
 let _archivedCacheExpiry = 0;
@@ -27,7 +28,8 @@ export async function getArchivedSubjectIds(): Promise<string[]> {
   _archivedCacheExpiry = now + 60_000; // 60s — invalidação manual já existe em archive/unarchive
   const fetchPromise = (async () => {
     const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    // getCachedUser evita um getUser() de rede por carga — mesma fonte dos services.
+    const user = await getCachedUser();
     if (!user) {
       _cachedUserId = null;
       return [];

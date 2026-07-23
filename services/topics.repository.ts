@@ -37,7 +37,7 @@ export async function fetchTopics(
     .eq('user_id', userId)
     .order('position', { ascending: true })
     .order('created_at', { ascending: true })
-    .limit(500);
+    .limit(2000);
   if (error) throw new Error('Erro ao listar tópicos: ' + error.message);
   return data ?? [];
 }
@@ -60,16 +60,41 @@ export async function fetchAllTopics(
   return data ?? [];
 }
 
+// Como fetchAllTopics, mas restrito a matérias com status 'ativo' (inner join).
+// O embed subjects!inner só serve de filtro — é removido do retorno para manter
+// o shape de Topic.
+export async function fetchActiveTopics(
+  supabase: SupabaseClient,
+  userId: string,
+): Promise<Topic[]> {
+  const { data, error } = await supabase
+    .from('topics')
+    .select('*, subjects!inner(status)')
+    .eq('user_id', userId)
+    .eq('subjects.status', 'ativo')
+    .order('subject_id', { ascending: true })
+    .order('position', { ascending: true })
+    .order('created_at', { ascending: true })
+    .limit(5000);
+  if (error) throw new Error('Erro ao listar tópicos: ' + error.message);
+  return (data ?? []).map((row) => {
+    const topic = { ...(row as Topic & { subjects?: unknown }) };
+    delete topic.subjects;
+    return topic as Topic;
+  });
+}
+
 export async function insertTopic(
   supabase: SupabaseClient,
   userId: string,
   subjectId: string,
   name: string,
   parentId: string | null,
+  position: number,
 ): Promise<Topic> {
   const { data, error } = await supabase
     .from('topics')
-    .insert({ user_id: userId, subject_id: subjectId, name: name.trim(), parent_id: parentId })
+    .insert({ user_id: userId, subject_id: subjectId, name: name.trim(), parent_id: parentId, position })
     .select()
     .single();
   if (error) throw new Error('Erro ao criar tópico: ' + error.message);

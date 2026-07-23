@@ -4,6 +4,7 @@
 
 import { useState, useCallback, useRef, useMemo, useEffect } from 'react';
 import { submitCardReview, type ReviewRating, type QueueCard } from '@/services/flashcards.service';
+import type { UserFeatures } from '@/services/userFeatures.service';
 
 export interface StudySessionState {
   index: number;
@@ -22,12 +23,17 @@ export interface StudySessionState {
 export interface StudySessionActions {
   flip: () => void;
   setFlipped: (v: boolean) => void;
-  rate: (rating: ReviewRating) => Promise<void>;
+  // Retorna true só quando a avaliação foi salva com sucesso — o chamador usa
+  // isso para não exibir feedback de sucesso otimista em caso de falha.
+  rate: (rating: ReviewRating) => Promise<boolean>;
 }
 
 export function useStudySession(
   queue: QueueCard[],
   onError: (msg: string) => void,
+  // Já resolvido pelo chamador (ex.: via React Query no FlashcardEngine) —
+  // evita buscar user_features de novo a cada avaliação.
+  features?: UserFeatures,
 ): StudySessionState & StudySessionActions {
   // Fila interna: "Errei" re-enfileira o card no fim da sessão (rever ainda hoje),
   // então a fila da sessão pode crescer além da fila recebida.
@@ -50,6 +56,8 @@ export function useStudySession(
   const savingRef = useRef(false);
   const onErrorRef = useRef(onError);
   useEffect(() => { onErrorRef.current = onError; }, [onError]);
+  const featuresRef = useRef(features);
+  useEffect(() => { featuresRef.current = features; }, [features]);
 
   const total = cards.length;
   const current = cards[index];
@@ -69,11 +77,11 @@ export function useStudySession(
   const flip = useCallback(() => setFlipped(v => !v), []);
 
   const rate = useCallback(async (rating: ReviewRating) => {
-    if (!current || savingRef.current) return;
+    if (!current || savingRef.current) return false;
     savingRef.current = true;
     setSaving(true);
     try {
-      await submitCardReview(current.id, rating);
+      await submitCardReview(current.id, rating, featuresRef.current);
       if (rating === 'errei') {
         // Estado pós-lapso (SM-2 já persistido): repetições zeradas, intervalo 1.
         // O card volta pro fim desta sessão para ser visto de novo hoje.
@@ -83,8 +91,10 @@ export function useStudySession(
       }
       setFlipped(false);
       setIndex(i => i + 1);
+      return true;
     } catch (e) {
       onErrorRef.current(e instanceof Error ? e.message : 'Erro ao salvar avaliação. Tente novamente.');
+      return false;
     } finally {
       savingRef.current = false;
       setSaving(false);

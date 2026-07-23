@@ -56,7 +56,11 @@ export async function getScheduleBlocks(startDate: string, endDate: string): Pro
   ] = await Promise.all([
     supabase.from('subjects').select('id, name, color').eq('user_id', userId),
     supabase.from('study_blocks').select('*').eq('user_id', userId).gte('block_date', startDate).lte('block_date', endDate),
-    supabase.from('recurrence_rules').select('*, recurrence_items(*)').eq('user_id', userId).eq('mode', 'dia_fixo').eq('is_active', true).lte('start_date', endDate),
+    // Histórico: regras paradas/versionadas (is_active=false + end_date) continuam
+    // renderizando as semanas passadas — "Parar" promete manter o passado. Só o
+    // intervalo [start_date, end_date] decide; is_active limita apenas regras sem fim.
+    supabase.from('recurrence_rules').select('*, recurrence_items(*)').eq('user_id', userId).eq('mode', 'dia_fixo').lte('start_date', endDate)
+      .or(`end_date.gte.${startDate},and(end_date.is.null,is_active.eq.true)`),
     supabase.from('recurrence_overrides').select('*').eq('user_id', userId).gte('occur_date', startDate).lte('occur_date', endDate),
   ]);
   if (subjErr) throw new Error('Erro ao carregar matérias: ' + subjErr.message);
@@ -160,14 +164,16 @@ export async function toggleRecurrenceDone(block: ScheduleBlock, done: boolean):
   const { supabase, userId } = await requireUser();
 
   if (block.is_virtual) {
-    const { error } = await supabase.from('recurrence_overrides').insert({
+    // Upsert no índice único (rule_id,item_id,occur_date): dois cliques em
+    // abas/dispositivos diferentes não criam override duplicado.
+    const { error } = await supabase.from('recurrence_overrides').upsert({
       user_id: userId,
       rule_id: block.rule_id,
       item_id: block.item_id,
       occur_date: block.block_date,
       is_done: done,
       done_at: done ? new Date().toISOString() : null,
-    });
+    }, { onConflict: 'rule_id,item_id,occur_date' });
     if (error) throw new Error('Erro ao registrar: ' + error.message);
   } else {
     const { error } = await supabase
@@ -215,13 +221,13 @@ export async function skipOccurrence(block: ScheduleBlock): Promise<void> {
   const { supabase, userId } = await requireUser();
 
   if (block.is_virtual) {
-    const { error } = await supabase.from('recurrence_overrides').insert({
+    const { error } = await supabase.from('recurrence_overrides').upsert({
       user_id: userId,
       rule_id: block.rule_id,
       item_id: block.item_id,
       occur_date: block.block_date,
       is_skipped: true,
-    });
+    }, { onConflict: 'rule_id,item_id,occur_date' });
     if (error) throw new Error('Erro ao pular: ' + error.message);
   } else {
     const { error } = await supabase

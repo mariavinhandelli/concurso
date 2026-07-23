@@ -24,6 +24,8 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: theme.bg }}>
+      {/* Navegação por teclado: pula sidebar + topbar direto para o conteúdo */}
+      <a href="#conteudo" className="skip-link">Pular para o conteúdo</a>
       <Sidebar />
 
       {/* Overlay do drawer — renderizado sempre, CSS oculta no desktop via pointer-events.
@@ -55,7 +57,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         }}
       >
         <Topbar />
-        <main style={{ flex: 1, minWidth: 0 }}>{children}</main>
+        <main id="conteudo" style={{ flex: 1, minWidth: 0 }}>{children}</main>
       </div>
 
       <CommandPalette />

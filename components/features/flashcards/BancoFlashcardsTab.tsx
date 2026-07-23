@@ -38,11 +38,13 @@ export function BancoFlashcardsTab() {
       } else {
         toast.success('Você já tinha todos os cards deste deck.');
       }
+      // Só fecha a amostra em caso de sucesso — em erro, o usuário mantém o
+      // contexto do deck que estava vendo e pode tentar de novo.
+      setPreviewDeck(null);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : 'Erro ao ativar o deck. Tente novamente.');
     } finally {
       setActivatingId(null);
-      setPreviewDeck(null);
     }
   }
 

@@ -5,6 +5,7 @@
 
 import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
 import dynamic from 'next/dynamic';
 import { Sparkles } from 'lucide-react';
 import { useTargetDetail } from '@/hooks/useTargetDetail';
@@ -68,6 +69,15 @@ export default function TargetDetailPage() {
     load, toggleTopic, toggleAllOfSubject, changeTopicWeight, changeSubjectWeight, setNQInputs,
   } = useTargetDetail(targetId);
 
+  const queryClient = useQueryClient();
+  // Home (ExamCountdown, CoberturaEdital, Raio-X) lê estes caches; sem invalidar,
+  // data/fase alteradas aqui não refletem lá até um refetch por acaso.
+  const invalidateHomeCaches = () => {
+    for (const key of [['target-exams'], ['edital-coverage'], ['raiox'], ['catalog-editais']]) {
+      queryClient.invalidateQueries({ queryKey: key });
+    }
+  };
+
   const [tab, setTab] = useState<Tab>('visao');
   const [generatorOpen, setGeneratorOpen] = useState(false);
   const [promoteOpen, setPromoteOpen] = useState(false);
@@ -77,13 +87,20 @@ export default function TargetDetailPage() {
 
   useEffect(() => { load(); }, [load]);
 
-  const totalTopics = useMemo(() => tree.reduce((acc, n) => acc + n.topics.length, 0), [tree]);
-  const coveragePct = totalTopics > 0 ? Math.round((linked.size / totalTopics) * 100) : 0;
+  // Progresso do concurso = tópicos concluídos entre os VINCULADOS a este edital
+  // (mesma régua do card "Progresso do edital"). O total da biblioteca não entra:
+  // tópicos de outros concursos não dizem nada sobre este.
+  const linkedDone = useMemo(
+    () => tree.reduce((acc, n) => acc + n.topics.filter((t) => linked.has(t.id) && t.is_completed).length, 0),
+    [tree, linked],
+  );
+  const progressPct = linked.size > 0 ? Math.round((linkedDone / linked.size) * 100) : 0;
   const canGenerate = linked.size > 0;
 
   async function handleSaveDate(date: string | null) {
     await updateTargetExamDate(targetId, date);
     toast.success(date ? 'Data da prova salva.' : 'Data removida.');
+    invalidateHomeCaches();
     load();
   }
 
@@ -94,6 +111,7 @@ export default function TargetDetailPage() {
       try {
         await promoteToPos(targetId);
         toast.success('Concurso promovido para pós-edital.');
+        invalidateHomeCaches();
         load();
       } catch (e) {
         toast.error(e instanceof Error ? e.message : 'Erro ao promover.');
@@ -123,6 +141,7 @@ export default function TargetDetailPage() {
       await promoteToPos(targetId, promoteBoardId);
       toast.success('Concurso promovido para pós-edital.');
       setPromoteOpen(false);
+      invalidateHomeCaches();
       load();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : 'Erro ao promover.');
@@ -156,11 +175,12 @@ export default function TargetDetailPage() {
           <h1 style={{ ...s.h1, fontSize: isMobile ? 24 : 28 }}>{formatTargetLabel(target)}</h1>
           <div style={s.coverageRow}>
             <div style={s.coverageTrack}>
-              <div style={{ ...s.coverageFill, width: `${coveragePct}%` }} />
+              <div style={{ ...s.coverageFill, width: `${progressPct}%` }} />
             </div>
             <span style={s.coverageLabel}>
-              {linked.size}/{totalTopics} tópicos
-              {totalTopics > 0 && <span style={{ marginLeft: 5, color: theme.teal, fontWeight: 700 }}>{coveragePct}%</span>}
+              {linked.size === 0
+                ? 'nenhum tópico vinculado'
+                : <>{linkedDone}/{linked.size} tópicos concluídos<span style={{ marginLeft: 5, color: theme.teal, fontWeight: 700 }}>{progressPct}%</span></>}
             </span>
           </div>
         </div>
@@ -275,7 +295,7 @@ const s: Record<string, CSSProperties> = {
     borderRadius: theme.radiusSm, marginLeft: -12, transition: 'background .12s',
   },
   headerRow: { display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, marginBottom: 24, flexWrap: 'wrap' },
-  h1: { fontWeight: 800, color: theme.ink, letterSpacing: -0.6, margin: '0 0 12px', overflowWrap: 'break-word' },
+  h1: { fontWeight: 800, color: theme.ink, letterSpacing: -0.6, margin: '0 0 12px', overflowWrap: 'break-word', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' },
   coverageRow: { display: 'flex', alignItems: 'center', gap: 10 },
   coverageTrack: { flex: 1, maxWidth: 260, height: 6, background: theme.muted, borderRadius: theme.radiusPill, overflow: 'hidden' },
   coverageFill: { height: '100%', background: theme.teal, borderRadius: theme.radiusPill, transition: 'width 0.4s ease' },

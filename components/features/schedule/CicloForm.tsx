@@ -55,11 +55,12 @@ export const CicloForm = forwardRef<CicloFormRef, Props>(function CicloForm(
       return {
         items: validos.map((it, i): RecurrenceItemInput => ({
           subjectId: it.subjectId,
-          plannedMinutes: (Number(it.h) || 0) * 60 + (Number(it.m) || 0) || 60,
+          // Saneia: valores negativos/absurdos viravam planned_minutes inválido.
+          plannedMinutes: Math.min(1440, Math.max(5, (Number(it.h) || 0) * 60 + (Number(it.m) || 0) || 60)),
           cycleOrder: i,
           position: i,
         })),
-        cycleDailyMinutes: (Number(metaH) || 0) * 60 + (Number(metaM) || 0),
+        cycleDailyMinutes: Math.min(1440, Math.max(0, (Number(metaH) || 0) * 60 + (Number(metaM) || 0))),
       };
     },
   }));
@@ -80,6 +81,16 @@ export const CicloForm = forwardRef<CicloFormRef, Props>(function CicloForm(
 
   const colorOf = (subjectId: string) => subjects.find((s) => s.id === subjectId)?.color ?? theme.line;
 
+  // Option de resgate para subjectId fora da lista carregada (subjects ainda
+  // não chegaram, ou matéria arquivada) — sem ela o <select> controlado
+  // exibia "Selecione…" mesmo com valor interno válido. Ver DiaFixoForm.
+  const fallbackName = (subjectId: string) => {
+    const m = editRule?.materias.find((x) => x.subjectId === subjectId);
+    if (!m) return 'Matéria (arquivada)';
+    return m.archived ? `${m.subjectName} (arquivada)` : m.subjectName;
+  };
+  const semMatch = (subjectId: string) => !!subjectId && !subjects.some((s) => s.id === subjectId);
+
   return (
     <>
       <label style={styles.sectionLabel}>Sequência do ciclo</label>
@@ -94,6 +105,7 @@ export const CicloForm = forwardRef<CicloFormRef, Props>(function CicloForm(
             <span style={{ ...styles.colorDot, background: colorOf(it.subjectId) }} />
             <Select value={it.subjectId} onChange={(e) => patch(it.uid, { subjectId: e.target.value })} style={{ flex: 1, minWidth: 0, padding: '8px 32px 8px 10px', borderRadius: theme.radiusXs, fontSize: 14 }}>
               <option value="">Selecione a matéria…</option>
+              {semMatch(it.subjectId) && <option value={it.subjectId}>{fallbackName(it.subjectId)}</option>}
               {subjects.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
             </Select>
             {items.length > 1 && <IconButton size="sm" onClick={() => remove(it.uid)} aria-label="Remover" style={{ color: theme.inkFaint }}><X size={13} strokeWidth={2} /></IconButton>}

@@ -14,6 +14,7 @@ import { type CatalogEditalInfo, type EditalUpdate, type EditalUpdateTipo } from
 import { normalizeDisciplina } from '@/lib/juris-disciplinas';
 import { leiDisciplinaForSubject } from '@/services/leis.service';
 import { type SubjectTree, daysUntilExam, countdownInfo, formatDateBR } from '@/lib/targets';
+import { useLocalToday } from '@/hooks/useLocalToday';
 import { theme } from '@/lib/theme';
 import { Button } from '@/components/ui/Button';
 import { SITUACAO_LABEL } from '@/components/features/editais/EditalCard';
@@ -113,7 +114,10 @@ export function HubOverviewTab({
 
   const progressoPct = stats.totalLinked > 0 ? Math.round((stats.totalDone / stats.totalLinked) * 100) : 0;
 
-  const days = target.exam_date ? daysUntilExam(target.exam_date) : null;
+  // H16: re-render na virada do dia — sem isso, aba aberta atravessando a
+  // meia-noite mostra countdown defasado (mesmo padrão do ExamCountdown).
+  const localToday = useLocalToday();
+  const days = target.exam_date ? daysUntilExam(target.exam_date, new Date(localToday + 'T00:00:00')) : null;
   const cd = days !== null ? countdownInfo(days) : null;
   const cdColor = cd
     ? { danger: theme.danger, warn: theme.warn, ok: theme.teal, past: theme.inkFaint }[cd.tone]
@@ -223,7 +227,7 @@ export function HubOverviewTab({
           </div>
           <p style={s.statusHint}>
             {isPre
-              ? 'Sem edital vigente — use a central de preparação abaixo para chegar pronta na publicação.'
+              ? 'Sem edital vigente — use a central de preparação abaixo para chegar na frente quando o edital sair.'
               : 'Edital publicado — acompanhe o progresso e mantenha o cronograma em dia.'}
           </p>
           {isPre && (
@@ -246,11 +250,12 @@ export function HubOverviewTab({
                 value={dateValue}
                 onChange={(e) => setDateValue(e.target.value)}
                 autoFocus
+                aria-label="Data da prova"
                 style={s.dateInput}
                 onKeyDown={(e) => { if (e.key === 'Enter') handleSaveDate(); if (e.key === 'Escape') setEditingDate(false); }}
               />
-              <button onClick={handleSaveDate} style={s.dateSaveBtn}><Check size={14} strokeWidth={2.2} /></button>
-              <button onClick={() => setEditingDate(false)} style={s.dateCancelBtn}><X size={14} strokeWidth={2} /></button>
+              <button onClick={handleSaveDate} aria-label="Salvar data" style={s.dateSaveBtn}><Check size={14} strokeWidth={2.2} /></button>
+              <button onClick={() => setEditingDate(false)} aria-label="Cancelar edição da data" style={s.dateCancelBtn}><X size={14} strokeWidth={2} /></button>
             </div>
           ) : days !== null && cd ? (
             <button
@@ -372,7 +377,14 @@ export function HubOverviewTab({
       {/* ── Central de preparação (pré-edital) ── */}
       {isPre && (
         <div style={s.card}>
-          <div style={s.cardHead} onClick={() => setPrepOpen((v) => !v)}>
+          <div
+            style={{ ...s.cardHead, cursor: 'pointer' }}
+            role="button"
+            tabIndex={0}
+            aria-expanded={prepOpen}
+            onClick={() => setPrepOpen((v) => !v)}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setPrepOpen((v) => !v); } }}
+          >
             <div>
               <h3 style={s.cardTitle}>Central de preparação</h3>
               <p style={s.cardSub}>
@@ -394,6 +406,7 @@ export function HubOverviewTab({
                     key={item.key}
                     onClick={() => handlePrepClick(item)}
                     disabled={itemDisabled}
+                    aria-pressed={checked}
                     style={{
                       ...s.prepRow,
                       ...(checked ? s.prepRowDone : {}),

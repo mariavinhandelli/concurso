@@ -35,11 +35,15 @@ export function computeReplan(blocks: ScheduleBlock[], weekStart: Date, hoje: Da
   // não têm dia novo definido; senão o cálculo ficaria circular).
   const idsAtrasados = new Set(atrasados.map((b) => b.id));
   const cargaPorDia = new Map<string, number>();
-  for (const dia of dias) cargaPorDia.set(dia, 0);
+  // Matérias já presentes em cada dia: usado para não empilhar a mesma matéria
+  // duas vezes no mesmo dia quando existe alternativa equivalente.
+  const materiasPorDia = new Map<string, Set<string>>();
+  for (const dia of dias) { cargaPorDia.set(dia, 0); materiasPorDia.set(dia, new Set()); }
   for (const b of blocks) {
     if (idsAtrasados.has(b.id)) continue;
     if (!cargaPorDia.has(b.block_date)) continue;
     cargaPorDia.set(b.block_date, (cargaPorDia.get(b.block_date) ?? 0) + b.planned_minutes);
+    materiasPorDia.get(b.block_date)!.add(b.subject_id);
   }
 
   const cargaMaxima = Math.max(CARGA_MINIMA_PADRAO, ...[...cargaPorDia.values()]);
@@ -50,21 +54,27 @@ export function computeReplan(blocks: ScheduleBlock[], weekStart: Date, hoje: Da
   const ordenados = [...atrasados].sort((a, b) => a.block_date.localeCompare(b.block_date));
 
   for (const bloco of ordenados) {
+    // 1ª passada: dias dentro do teto e SEM a mesma matéria (evita "Português
+    // 2× na sexta" quando outro dia comporta igual). 2ª passada: relaxa a
+    // restrição de matéria. Fallback: o dia menos carregado, custe o que custar.
     let melhorDia: string | null = null;
     let melhorCarga = Infinity;
-    for (const dia of dias) {
-      const carga = cargaPorDia.get(dia) ?? 0;
-      if (carga + bloco.planned_minutes <= cargaMaxima && carga < melhorCarga) {
-        melhorDia = dia;
-        melhorCarga = carga;
+    for (const evitarRepeticao of [true, false]) {
+      for (const dia of dias) {
+        const carga = cargaPorDia.get(dia) ?? 0;
+        if (evitarRepeticao && materiasPorDia.get(dia)!.has(bloco.subject_id)) continue;
+        if (carga + bloco.planned_minutes <= cargaMaxima && carga < melhorCarga) {
+          melhorDia = dia;
+          melhorCarga = carga;
+        }
       }
+      if (melhorDia) break;
     }
-    // Nenhum dia comporta sem estourar o teto — usa o menos carregado mesmo assim
-    // (melhor um dia um pouco cheio do que o bloco ficar perdido no passado).
     if (!melhorDia) {
       melhorDia = dias.reduce((min, d) => ((cargaPorDia.get(d) ?? 0) < (cargaPorDia.get(min) ?? 0) ? d : min), dias[0]);
     }
     cargaPorDia.set(melhorDia, (cargaPorDia.get(melhorDia) ?? 0) + bloco.planned_minutes);
+    materiasPorDia.get(melhorDia)!.add(bloco.subject_id);
     moves.push({ block: bloco, fromDate: bloco.block_date, toDate: melhorDia });
   }
 

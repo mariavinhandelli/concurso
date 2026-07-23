@@ -179,7 +179,7 @@ export function Sidebar() {
 }
 
 const styles: Record<string, CSSProperties> = {
-  aside: { flexShrink: 0, height: '100dvh', position: 'fixed', top: 0, left: 0, zIndex: zIndex.drawer, background: SB.bg, borderRight: `0.5px solid ${SB.border}`, padding: '20px 14px', paddingBottom: 'max(20px, env(safe-area-inset-bottom))', display: 'flex', flexDirection: 'column', gap: 4, fontFamily: 'var(--font-poppins), sans-serif', overflow: 'hidden' },
+  aside: { flexShrink: 0, height: '100dvh', position: 'fixed', top: 0, left: 0, zIndex: zIndex.drawer, background: SB.bg, borderRight: `0.5px solid ${SB.border}`, padding: '20px 14px max(20px, env(safe-area-inset-bottom))', display: 'flex', flexDirection: 'column', gap: 4, fontFamily: 'var(--font-poppins), sans-serif', overflow: 'hidden' },
   brand: { display: 'flex', alignItems: 'center', height: 40, marginBottom: 18, padding: '0 4px', flexShrink: 0 },
   brandInner: { display: 'flex', alignItems: 'center', gap: 10 },
   logo: { width: 32, height: 32, borderRadius: 9, background: '#fff', display: 'grid', placeItems: 'center', flexShrink: 0, boxShadow: '0 1px 6px rgba(0,0,0,0.18)' },

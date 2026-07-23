@@ -6,18 +6,23 @@
 // /jurisprudencias/revisar. Cada tipo mantém sua própria gramática de avaliação.
 'use client';
 
-import { useCallback, useEffect, useMemo, useState, type CSSProperties } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 import { X } from 'lucide-react';
-import { buildFilaUnificada, type UnifiedItem, type UnifiedKind } from '@/services/revisaoUnificada.service';
-import { submitReview, type ReviewRating } from '@/services/reviews.service';
+import { buildFilaUnificada, getNextScheduledDateUnificada, type UnifiedItem, type UnifiedKind } from '@/services/revisaoUnificada.service';
+import { parseLocalDate, toLocalDateString, localDateInDays } from '@/lib/local-date';
+import { submitReview, rescheduleReview, type ReviewRating } from '@/services/reviews.service';
 import { submitCardReview, type ReviewRating as CardRating } from '@/services/flashcards.service';
 import { submitRevisaoArtigo } from '@/services/leiInteracoes.service';
 import { submitRevisao as submitJurisRevisao } from '@/services/jurisInteracoes.service';
-import { RATING_LABEL, type JurisRating } from '@/lib/juris-review';
+import {
+  RATING_LABEL, calculateNextJurisReview, fromJurisDbRow, INITIAL_JURIS_STATE,
+  type JurisRating, type JurisReviewState,
+} from '@/lib/juris-review';
 import { GRIFO_CORES, SUBLINHADO_COR, segmentarBloco } from '@/lib/lei-grifos';
 import { refreshHomeAfterSession } from '@/lib/home-refresh';
+import { fmtInterval } from '@/lib/interval-format';
 import { ReviewCard } from '@/components/features/reviews/ReviewCard';
 import { useUI } from '@/components/layout/UIContext';
 import { useToast } from '@/components/ui/ToastProvider';
@@ -27,38 +32,52 @@ import { Badge } from '@/components/ui/Badge';
 import { PageContainer } from '@/components/ui/Page';
 
 // ── Metadados por tipo (rótulo + cor do chip) ──────────────────────────────
-const KIND_META: Record<UnifiedKind, { label: string; fg: string; bg: string }> = {
-  topic:     { label: 'Tópico',         fg: theme.teal,   bg: theme.tealBg },
-  flashcard: { label: 'Flashcard',      fg: theme.info,   bg: theme.infoBg },
-  lei:       { label: 'Lei seca',       fg: theme.clay,   bg: theme.clayBg },
-  juris:     { label: 'Jurisprudência', fg: theme.warnDeep, bg: theme.warnTint },
+const KIND_META: Record<UnifiedKind, { label: string; plural: string; fg: string; bg: string }> = {
+  topic:     { label: 'Tópico',         plural: 'Tópicos',         fg: theme.teal,   bg: theme.tealBg },
+  flashcard: { label: 'Flashcard',      plural: 'Flashcards',      fg: theme.info,   bg: theme.infoBg },
+  lei:       { label: 'Lei seca',       plural: 'Leis secas',      fg: theme.clay,   bg: theme.clayBg },
+  // warnBg (sólido) e não warnTint: o mesmo tint translúcido media ~2,3:1 no
+  // escuro contra warnDeep — o mesmo bug de contraste corrigido em RATINGS_4.
+  juris:     { label: 'Jurisprudência', plural: 'Jurisprudências', fg: theme.warnDeep, bg: theme.warnBg },
 };
 
-const RATINGS_3: { key: ReviewRating; label: string; fg: string; bg: string }[] = [
-  { key: 'dificil',       label: 'Difícil', fg: theme.inkSoft, bg: theme.muted  },
-  { key: 'intermediario', label: 'Médio',   fg: theme.info,    bg: theme.infoBg },
-  { key: 'facil',         label: 'Fácil',   fg: theme.okDeep,  bg: theme.okBg   },
-];
+// Ordem 1..4 dos atalhos de teclado para tópicos — espelha os botões do ReviewCard.
+const TOPIC_KEYS: ReviewRating[] = ['esqueci', 'dificil', 'intermediario', 'facil'];
 
 // Flashcards ganham o lapso ("Errei"): quality 0 no SM-2 — reseta repetições e
 // derruba o ease factor. Alinha com lei/juris, que já tinham o botão.
+// Fundos sólidos (não os *Tint translúcidos): sobre o tema escuro um tint de
+// baixo alfa fica quase da mesma luminância do texto colorido — contraste
+// medido abaixo de 2:1 em 3 dos 4 botões. 'Médio' vai para fundo neutro porque
+// --info-bg é o único token de tint que não ganhou versão sólida no escuro.
 const FC_RATINGS: { key: CardRating; label: string; fg: string; bg: string }[] = [
-  { key: 'errei',         label: 'Errei',   fg: theme.danger,  bg: theme.dangerTint },
+  { key: 'errei',         label: 'Errei',   fg: theme.danger,  bg: theme.dangerBg },
   { key: 'dificil',       label: 'Difícil', fg: theme.inkSoft, bg: theme.muted  },
-  { key: 'intermediario', label: 'Médio',   fg: theme.info,    bg: theme.infoBg },
+  { key: 'intermediario', label: 'Médio',   fg: theme.info,    bg: theme.muted  },
   { key: 'facil',         label: 'Fácil',   fg: theme.okDeep,  bg: theme.okBg   },
 ];
 
 const RATINGS_4: { key: JurisRating; fg: string; bg: string }[] = [
-  { key: 'errei',   fg: theme.danger,   bg: theme.dangerTint },
-  { key: 'dificil', fg: theme.warnDeep, bg: theme.warnTint },
+  { key: 'errei',   fg: theme.danger,   bg: theme.dangerBg },
+  { key: 'dificil', fg: theme.warnDeep, bg: theme.warnBg },
   { key: 'ok',      fg: theme.tealDeep, bg: theme.tealBg },
-  { key: 'dominei', fg: theme.okDeep,   bg: theme.okTint },
+  { key: 'dominei', fg: theme.okDeep,   bg: theme.okBg },
 ];
 
 function KindBadge({ kind }: { kind: UnifiedKind }) {
   const m = KIND_META[kind];
   return <Badge style={{ color: m.fg, background: m.bg, textTransform: 'uppercase', letterSpacing: 0.4 }}>{m.label}</Badge>;
+}
+
+// Data da próxima revisão agendada, para o empty state "nada vencido hoje".
+function fmtProximaData(dateStr: string): string {
+  const hoje = parseLocalDate(toLocalDateString());
+  const alvo = parseLocalDate(dateStr);
+  const dias = Math.round((alvo.getTime() - hoje.getTime()) / 86_400_000);
+  if (dias <= 0) return 'hoje';
+  if (dias === 1) return 'amanhã';
+  if (dias < 7) return `em ${dias} dias`;
+  return alvo.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long' });
 }
 
 export default function RevisarUnificadoPage() {
@@ -68,12 +87,21 @@ export default function RevisarUnificadoPage() {
   const toast = useToast();
 
   const [fila, setFila] = useState<UnifiedItem[] | null>(null);
+  const [erro, setErro] = useState(false); // falha ao montar a fila ≠ fila vazia
   const [totalReal, setTotalReal] = useState(0); // itens antes do teto (para "o resto espera")
   const [idx, setIdx] = useState(0);
-  const [saving, setSaving] = useState(false);
+  // Guarda SÍNCRONA contra duplo submit: dois keydowns no mesmo tick passam
+  // pelo estado React (que só muda no próximo render) — a ref não. Fica
+  // travada durante todo o salvamento em segundo plano (não durante o avanço
+  // otimista, que é instantâneo) para blindar contra o mesmo `current` stale.
+  const savingRef = useRef(false);
   const [revealed, setRevealed] = useState(false);           // flashcard / juris
   const [reveladas, setReveladas] = useState<Set<string>>(new Set()); // lacunas de lei
   const [tally, setTally] = useState<Record<UnifiedKind, number>>({ topic: 0, flashcard: 0, lei: 0, juris: 0 });
+  const [puladas, setPuladas] = useState(0);
+  const [adiadas, setAdiadas] = useState(0); // tópicos reagendados manualmente — não voltam à fila de hoje
+  const [adiarAberto, setAdiarAberto] = useState(false);
+  const [proximaData, setProximaData] = useState<string | null>(null); // só preenchida quando a fila nasce vazia
 
   // Modo Retomada envia ?limite=N para um "recomeço leve" sem encarar a pilha toda.
   const limite = useMemo(() => {
@@ -85,12 +113,20 @@ export default function RevisarUnificadoPage() {
   // Só a parte assíncrona — sem setState síncrono, para o efeito de montagem
   // não disparar render em cascata.
   const fetchFila = useCallback(() => {
+    setErro(false);
     buildFilaUnificada()
       .then((f) => {
         setTotalReal(f.items.length);
         setFila(limite ? f.items.slice(0, limite) : f.items);
+        // Fila já nasce vazia: busca quando algo vai vencer, à parte da
+        // renderização principal — não atrasa a tela de "tudo em dia".
+        if (f.items.length === 0) {
+          getNextScheduledDateUnificada().then(setProximaData).catch(() => setProximaData(null));
+        }
       })
-      .catch(() => setFila([]));
+      // Erro ≠ vazio: mostrar "tudo em dia" numa falha de rede esconderia a
+      // pilha real do usuário. Tela de erro com retry.
+      .catch(() => { setFila(null); setErro(true); });
   }, [limite]);
 
   useEffect(() => { fetchFila(); }, [fetchFila]);
@@ -103,6 +139,9 @@ export default function RevisarUnificadoPage() {
     setRevealed(false);
     setReveladas(new Set());
     setTally({ topic: 0, flashcard: 0, lei: 0, juris: 0 });
+    setPuladas(0);
+    setAdiadas(0);
+    setProximaData(null);
     fetchFila();
   }, [fetchFila]);
 
@@ -114,24 +153,79 @@ export default function RevisarUnificadoPage() {
   function advance() {
     setRevealed(false);
     setReveladas(new Set());
+    setAdiarAberto(false);
     setIdx((i) => i + 1);
   }
 
-  async function commit(fn: () => Promise<unknown>) {
-    if (saving || !current) return;
-    const kind = current.kind;
-    setSaving(true);
+  // Pular sem avaliar: o item continua vencido e volta na próxima fila. Sem
+  // guarda contra o `current` — o avanço em si já é síncrono e instantâneo.
+  function skip() {
+    if (!current) return;
+    setPuladas((n) => n + 1);
+    advance();
+  }
+
+  // Adiar (só tópicos, únicos com data manual — reagenda sem passar pelo SM-2):
+  // diferente de pular, o item sai do vencimento de hoje de verdade, então não
+  // conta como "restante" na tela final. Otimista como o commit() — e usa a
+  // MESMA savingRef: dois presets clicados em sequência rápida (ou o date
+  // input disparando onChange duas vezes) senão pulariam 2 itens de uma vez.
+  async function adiar(dateStr: string) {
+    if (savingRef.current || !current || current.kind !== 'topic') return;
+    savingRef.current = true;
+    const item = current;
+    setAdiadas((n) => n + 1);
+    advance();
+    try {
+      await rescheduleReview(item.id, dateStr);
+      queryClient.invalidateQueries({ queryKey: ['due-reviews-count'] });
+    } catch (e) {
+      setAdiadas((n) => Math.max(0, n - 1));
+      toast.error(e instanceof Error ? e.message : 'Não foi possível adiar essa revisão.');
+    } finally {
+      savingRef.current = false;
+    }
+  }
+
+  // requeue: lapso ("Errei" de flashcard) — o cartão volta para o FIM da fila
+  // da sessão, cumprindo a promessa de "rever ainda hoje" do SM-2.
+  //
+  // Otimista: a UI avança NA HORA (advance + contagem/requeue), o salvamento
+  // roda em segundo plano. Antes o usuário esperava ~1 round-trip (GET+UPDATE)
+  // parado no mesmo card a cada avaliação; agora já vê o próximo item mesmo
+  // com a rede lenta. Falha? Desfaz só a contagem otimista — o dado nunca foi
+  // gravado, então o item reaparece sozinho numa fila futura; não força o
+  // usuário de volta a um card que ele já deixou para trás.
+  async function commit(fn: () => Promise<unknown>, opts?: { requeue?: boolean }) {
+    if (savingRef.current || !current) return;
+    savingRef.current = true;
+    const item = current;
+
+    if (opts?.requeue) {
+      setFila((f) => (f ? [...f, item] : f));
+    } else {
+      setTally((t) => ({ ...t, [item.kind]: t[item.kind] + 1 }));
+    }
+    advance();
+
     try {
       await fn();
       refreshHomeAfterSession(queryClient);
       queryClient.invalidateQueries({ queryKey: ['due-juris-count'] });
       queryClient.invalidateQueries({ queryKey: ['retomada'] });
-      setTally((t) => ({ ...t, [kind]: t[kind] + 1 }));
-      advance();
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : 'Erro ao salvar. Tente novamente.');
+      if (opts?.requeue) {
+        setFila((f) => {
+          if (!f) return f;
+          const lastIdx = f.map((it) => it.kind === item.kind && it.id === item.id).lastIndexOf(true);
+          return lastIdx === -1 ? f : f.filter((_, i) => i !== lastIdx);
+        });
+      } else {
+        setTally((t) => ({ ...t, [item.kind]: Math.max(0, t[item.kind] - 1) }));
+      }
+      toast.error(e instanceof Error ? e.message : 'Não foi possível salvar essa avaliação. O item deve reaparecer numa próxima fila.');
     } finally {
-      setSaving(false);
+      savingRef.current = false;
     }
   }
 
@@ -139,7 +233,7 @@ export default function RevisarUnificadoPage() {
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
-      if (!current || saving) return;
+      if (!current) return;
       const needsReveal = current.kind === 'flashcard' || current.kind === 'juris';
 
       if ((e.key === ' ' || e.code === 'Space') && needsReveal && !revealed) {
@@ -151,12 +245,13 @@ export default function RevisarUnificadoPage() {
       if (!Number.isInteger(n) || n < 1) return;
       if (needsReveal && !revealed) return;
 
-      if (current.kind === 'topic' && n <= 3) {
-        void commit(() => submitReview(current.id, RATINGS_3[n - 1].key));
+      if (current.kind === 'topic' && n <= 4) {
+        void commit(() => submitReview(current.id, TOPIC_KEYS[n - 1]));
       } else if (current.kind === 'flashcard' && n <= 4) {
-        void commit(() => submitCardReview(current.id, FC_RATINGS[n - 1].key));
+        const rating = FC_RATINGS[n - 1].key;
+        void commit(() => submitCardReview(current.id, rating), { requeue: rating === 'errei' });
       } else if (current.kind === 'lei' && n <= 4) {
-        void commit(() => submitRevisaoArtigo(current.id, RATINGS_4[n - 1].key));
+        void commit(() => submitRevisaoArtigo(current.id, RATINGS_4[n - 1].key, current.interacao));
       } else if (current.kind === 'juris' && n <= 4) {
         void commit(() => submitJurisRevisao(current.id, RATINGS_4[n - 1].key, current.juris.interacao));
       }
@@ -164,9 +259,23 @@ export default function RevisarUnificadoPage() {
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [current, saving, revealed]);
+  }, [current, revealed]);
 
   // ── Estados de borda ───────────────────────────────────────────────────────
+  if (erro) {
+    return (
+      <PageContainer width="narrow" style={{ padding: isMobile ? '40px 16px' : '72px 40px', textAlign: 'center' }}>
+        <div style={{ fontSize: 48, marginBottom: 16 }}>📡</div>
+        <h1 style={s.doneTitle}>Não conseguimos montar sua fila</h1>
+        <p style={s.doneSub}>Verifique sua conexão e tente de novo — suas revisões continuam salvas.</p>
+        <div style={s.doneActions}>
+          <Button onClick={fetchFila}>Tentar de novo</Button>
+          <Button variant="outline" onClick={() => router.push('/')}>Voltar para a Home</Button>
+        </div>
+      </PageContainer>
+    );
+  }
+
   if (fila === null) {
     return (
       <PageContainer width="narrow" style={{ padding: 40 }}>
@@ -179,38 +288,52 @@ export default function RevisarUnificadoPage() {
     const linhas: { kind: UnifiedKind; n: number }[] = (Object.keys(tally) as UnifiedKind[])
       .map((k) => ({ kind: k, n: tally[k] }))
       .filter((l) => l.n > 0);
-    // Fila foi limitada (Modo Retomada) e ainda sobrou pilha para depois.
-    const restante = Math.max(0, totalReal - feitas);
+    // Fila foi limitada (Modo Retomada), houve pulos, ou itens foram adiados
+    // para uma data futura de verdade (não "restam" mais na pilha de hoje).
+    const restante = Math.max(0, totalReal - feitas - adiadas);
+    const nuncaTeveFila = totalReal === 0;
+    const soPulou = !nuncaTeveFila && feitas === 0;
+
+    let subMsg: string;
+    if (nuncaTeveFila) {
+      subMsg = proximaData
+        ? `Nenhuma revisão venceu hoje. A próxima vence ${fmtProximaData(proximaData)}.`
+        : 'Nenhuma revisão venceu hoje. Para alimentar a fila, ative a revisão nos seus tópicos, flashcards, artigos do Vade Mecum e jurisprudências.';
+    } else if (soPulou) {
+      const partes: string[] = [];
+      if (puladas > 0) partes.push(`pulou ${puladas === 1 ? '1 item' : `${puladas} itens`} — ${puladas === 1 ? 'ele continua' : 'eles continuam'} na fila`);
+      if (adiadas > 0) partes.push(`adiou ${adiadas === 1 ? '1 tópico' : `${adiadas} tópicos`} para outra data`);
+      subMsg = `Você ${partes.join(' e ')}.`;
+    } else if (restante > 0) {
+      subMsg = `Você fez ${feitas} ${feitas === 1 ? 'item' : 'itens'}. ${restante === 1 ? 'Ainda resta 1 — sem pressa, ele espera' : `Ainda restam ${restante} — sem pressa, eles esperam`} por você.`;
+    } else {
+      subMsg = `Você revisou ${feitas} ${feitas === 1 ? 'item' : 'itens'} nesta sessão.`;
+    }
+
     return (
       <PageContainer width="narrow" style={{ padding: isMobile ? '40px 16px' : '72px 40px', textAlign: 'center' }}>
-        <div style={{ fontSize: 56, marginBottom: 16 }}>{restante > 0 ? '🌱' : '🎉'}</div>
+        <div style={{ fontSize: 56, marginBottom: 16 }}>{nuncaTeveFila ? '🎉' : restante > 0 ? '🌱' : '🎉'}</div>
         <h1 style={s.doneTitle}>
-          {feitas === 0 ? 'Nada para revisar agora' : restante > 0 ? 'Bom recomeço!' : 'Revisão em dia!'}
+          {nuncaTeveFila ? 'Nada para revisar agora' : soPulou ? 'Até a próxima!' : restante > 0 ? 'Bom recomeço!' : 'Revisão em dia!'}
         </h1>
-        <p style={s.doneSub}>
-          {feitas === 0
-            ? 'Suas quatro filas de revisão estão zeradas. Volte quando algo vencer.'
-            : restante > 0
-              ? `Você fez ${feitas} ${feitas === 1 ? 'item' : 'itens'}. Ainda restam ${restante} — sem pressa, elas esperam por você.`
-              : `Você revisou ${feitas} ${feitas === 1 ? 'item' : 'itens'} nesta sessão.`}
-        </p>
+        <p style={s.doneSub}>{subMsg}</p>
         {linhas.length > 0 && (
           <div style={s.doneStats}>
             {linhas.map((l) => (
               <div key={l.kind} style={s.doneStatBox}>
                 <span style={{ ...s.doneStatNum, color: KIND_META[l.kind].fg }}>{l.n}</span>
-                <span style={s.doneStatLabel}>{KIND_META[l.kind].label}</span>
+                <span style={s.doneStatLabel}>{l.n === 1 ? KIND_META[l.kind].label : KIND_META[l.kind].plural}</span>
               </div>
             ))}
           </div>
         )}
         <div style={s.doneActions}>
-          {restante > 0 && (
+          {restante > 0 && !soPulou && (
             <Button onClick={continuar}>
               Continuar · +{Math.min(limite ?? restante, restante)}
             </Button>
           )}
-          <Button variant={restante > 0 ? 'outline' : 'primary'} onClick={() => router.push('/')}>
+          <Button variant={restante > 0 && !soPulou ? 'outline' : 'primary'} onClick={() => router.push('/')}>
             Voltar para a Home
           </Button>
         </div>
@@ -221,13 +344,22 @@ export default function RevisarUnificadoPage() {
   // ── Player ─────────────────────────────────────────────────────────────────
   return (
     <PageContainer width="narrow">
+      <h1 style={s.srOnly}>Fila de revisão</h1>
       {/* Barra superior: sair · progresso · contador */}
       <div style={s.topBar}>
         <button onClick={() => router.push('/')} style={s.exitBtn} className="touch-target">
           <X size={14} strokeWidth={2} />
           Sair
         </button>
-        <div style={s.progressTrack}>
+        <div
+          style={s.progressTrack}
+          role="progressbar"
+          aria-label="Progresso da sessão de revisão"
+          aria-valuemin={0}
+          aria-valuemax={total}
+          aria-valuenow={idx}
+          aria-valuetext={`Item ${idx + 1} de ${total}`}
+        >
           <div style={{ ...s.progressBar, width: `${(idx / total) * 100}%` }} />
         </div>
         <span style={s.progressLabel}>{idx + 1}/{total}</span>
@@ -237,7 +369,37 @@ export default function RevisarUnificadoPage() {
         <div style={s.body}>
           <div style={s.itemHead}>
             <KindBadge kind={current.kind} />
+            <div style={s.itemHeadActions}>
+              {current.kind === 'topic' && (
+                <button onClick={() => setAdiarAberto((v) => !v)} style={s.skipBtn} className="touch-target">
+                  Adiar
+                </button>
+              )}
+              <button onClick={skip} style={s.skipBtn} className="touch-target">
+                Pular por agora →
+              </button>
+            </div>
           </div>
+
+          {current.kind === 'topic' && adiarAberto && (
+            <div style={s.adiarPop}>
+              <p style={s.adiarTitle}>Adiar esta revisão para</p>
+              <div style={s.adiarPresets}>
+                {[1, 3, 7].map((d) => (
+                  <button key={d} onClick={() => void adiar(localDateInDays(d))} style={s.adiarPresetBtn}>
+                    +{d} {d === 1 ? 'dia' : 'dias'}
+                  </button>
+                ))}
+                <input
+                  type="date"
+                  min={localDateInDays(1)}
+                  aria-label="Data específica"
+                  onChange={(e) => { if (e.target.value) void adiar(e.target.value); }}
+                  style={s.adiarDateInput}
+                />
+              </div>
+            </div>
+          )}
 
           {current.kind === 'topic' && (
             <ReviewCard
@@ -253,9 +415,8 @@ export default function RevisarUnificadoPage() {
               key={current.id}
               item={current}
               revealed={revealed}
-              saving={saving}
               onReveal={() => setRevealed(true)}
-              onRate={(rating) => { void commit(() => submitCardReview(current.id, rating)); }}
+              onRate={(rating) => { void commit(() => submitCardReview(current.id, rating), { requeue: rating === 'errei' }); }}
             />
           )}
 
@@ -265,8 +426,7 @@ export default function RevisarUnificadoPage() {
               item={current}
               reveladas={reveladas}
               setReveladas={setReveladas}
-              saving={saving}
-              onRate={(rating) => { void commit(() => submitRevisaoArtigo(current.id, rating)); }}
+              onRate={(rating) => { void commit(() => submitRevisaoArtigo(current.id, rating, current.interacao)); }}
             />
           )}
 
@@ -275,7 +435,6 @@ export default function RevisarUnificadoPage() {
               key={current.id}
               item={current}
               revealed={revealed}
-              saving={saving}
               onReveal={() => setRevealed(true)}
               onRate={(rating) => { void commit(() => submitJurisRevisao(current.id, rating, current.juris.interacao)); }}
             />
@@ -288,10 +447,10 @@ export default function RevisarUnificadoPage() {
 
 // ── Corpo: Flashcard (frente → verso → 3 avaliações) ────────────────────────
 function FlashcardBody({
-  item, revealed, saving, onReveal, onRate,
+  item, revealed, onReveal, onRate,
 }: {
   item: Extract<UnifiedItem, { kind: 'flashcard' }>;
-  revealed: boolean; saving: boolean;
+  revealed: boolean;
   onReveal: () => void; onRate: (r: CardRating) => void;
 }) {
   const { card } = item;
@@ -308,7 +467,7 @@ function FlashcardBody({
           <p style={s.kbdHint}>ou aperte <kbd style={s.kbd}>espaço</kbd></p>
         </div>
       ) : (
-        <RatingRowFC saving={saving} onRate={onRate} />
+        <RatingRowFC item={item} onRate={onRate} />
       )}
     </div>
   );
@@ -316,11 +475,11 @@ function FlashcardBody({
 
 // ── Corpo: Lei seca (texto com lacunas → 4 avaliações) ──────────────────────
 function LeiBody({
-  item, reveladas, setReveladas, saving, onRate,
+  item, reveladas, setReveladas, onRate,
 }: {
   item: Extract<UnifiedItem, { kind: 'lei' }>;
   reveladas: Set<string>; setReveladas: (s: Set<string>) => void;
-  saving: boolean; onRate: (r: JurisRating) => void;
+  onRate: (r: JurisRating) => void;
 }) {
   const { artigo, lei, interacao } = item;
   const grifos = interacao.grifos ?? [];
@@ -346,15 +505,18 @@ function LeiBody({
               if (!seg.grifo) return <span key={i}>{seg.texto}</span>;
               const aberta = reveladas.has(seg.grifo.id);
               if (!aberta) {
+                // Botão (não span): focável por teclado e com largura fixa —
+                // largura proporcional vazaria o tamanho da resposta, e spans
+                // só com espaços colapsam para 0px de largura.
                 return (
-                  <span
+                  <button
                     key={i}
+                    type="button"
                     onClick={() => setReveladas(new Set(reveladas).add(seg.grifo!.id))}
-                    title="Clique para revelar"
+                    title="Revelar trecho oculto"
+                    aria-label="Revelar trecho oculto"
                     style={s.lacuna}
-                  >
-                    {' '.repeat(Math.max(6, Math.min(seg.texto.length, 40)))}
-                  </span>
+                  />
                 );
               }
               const estilo: CSSProperties = seg.grifo.estilo === 'sublinhado'
@@ -365,17 +527,17 @@ function LeiBody({
           </p>
         ))}
       </div>
-      <RatingRow4 saving={saving} onRate={onRate} />
+      <RatingRow4 state={fromJurisDbRow(interacao)} onRate={onRate} />
     </div>
   );
 }
 
 // ── Corpo: Jurisprudência (tese/pergunta → revelar → 4 avaliações) ──────────
 function JurisBody({
-  item, revealed, saving, onReveal, onRate,
+  item, revealed, onReveal, onRate,
 }: {
   item: Extract<UnifiedItem, { kind: 'juris' }>;
-  revealed: boolean; saving: boolean;
+  revealed: boolean;
   onReveal: () => void; onRate: (r: JurisRating) => void;
 }) {
   const j = item.juris;
@@ -421,49 +583,48 @@ function JurisBody({
           <p style={s.kbdHint}>ou aperte <kbd style={s.kbd}>espaço</kbd></p>
         </div>
       ) : (
-        <RatingRow4 saving={saving} onRate={onRate} />
+        <RatingRow4
+          state={j.interacao ? fromJurisDbRow(j.interacao) : INITIAL_JURIS_STATE}
+          onRate={onRate}
+        />
       )}
     </div>
   );
 }
 
 // ── Linhas de avaliação reutilizáveis ───────────────────────────────────────
-function RatingRow3({ saving, onRate }: { saving: boolean; onRate: (r: ReviewRating) => void }) {
-  return (
-    <div style={s.ratings3}>
-      {RATINGS_3.map((r, i) => (
-        <button key={r.key} onClick={() => onRate(r.key)} disabled={saving}
-          style={{ ...s.rating3Btn, color: r.fg, background: r.bg, opacity: saving ? 0.55 : 1 }}>
-          <span style={s.ratingKey}>{i + 1}</span>
-          <span style={s.ratingLbl}>{r.label}</span>
-        </button>
-      ))}
-    </div>
-  );
-}
-
-function RatingRowFC({ saving, onRate }: { saving: boolean; onRate: (r: CardRating) => void }) {
+function RatingRowFC({
+  item, onRate,
+}: {
+  item: Extract<UnifiedItem, { kind: 'flashcard' }>; onRate: (r: CardRating) => void;
+}) {
   return (
     <div style={s.ratings4}>
       {FC_RATINGS.map((r, i) => (
-        <button key={r.key} onClick={() => onRate(r.key)} disabled={saving}
-          style={{ ...s.rating4Btn, border: `0.5px solid ${r.fg}`, background: r.bg, color: r.fg, opacity: saving ? 0.55 : 1 }}>
+        <button key={r.key} onClick={() => onRate(r.key)}
+          style={{ ...s.rating4Btn, border: `0.5px solid ${r.fg}`, background: r.bg, color: r.fg }}>
           <span style={s.ratingKey}>{i + 1}</span>
           <span style={s.ratingLbl}>{r.label}</span>
+          <span style={s.ratingInterval}>→ {fmtInterval(item.card.nextIntervals[r.key])}</span>
         </button>
       ))}
     </div>
   );
 }
 
-function RatingRow4({ saving, onRate }: { saving: boolean; onRate: (r: JurisRating) => void }) {
+function RatingRow4({
+  state, onRate,
+}: {
+  state: JurisReviewState; onRate: (r: JurisRating) => void;
+}) {
   return (
     <div style={s.ratings4}>
       {RATINGS_4.map((r, i) => (
-        <button key={r.key} onClick={() => onRate(r.key)} disabled={saving}
-          style={{ ...s.rating4Btn, border: `0.5px solid ${r.fg}`, background: r.bg, color: r.fg, opacity: saving ? 0.55 : 1 }}>
+        <button key={r.key} onClick={() => onRate(r.key)}
+          style={{ ...s.rating4Btn, border: `0.5px solid ${r.fg}`, background: r.bg, color: r.fg }}>
           <span style={s.ratingKey}>{i + 1}</span>
           <span style={s.ratingLbl}>{RATING_LABEL[r.key]}</span>
+          <span style={s.ratingInterval}>→ {fmtInterval(calculateNextJurisReview(state, r.key).intervalDays)}</span>
         </button>
       ))}
     </div>
@@ -471,13 +632,21 @@ function RatingRow4({ saving, onRate }: { saving: boolean; onRate: (r: JurisRati
 }
 
 const s: Record<string, CSSProperties> = {
+  srOnly: { position: 'absolute', width: 1, height: 1, padding: 0, margin: -1, overflow: 'hidden', clip: 'rect(0 0 0 0)', whiteSpace: 'nowrap', border: 0 },
   topBar: { display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 },
   exitBtn: { display: 'flex', alignItems: 'center', gap: 5, border: 'none', background: 'transparent', color: theme.inkFaint, fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit', padding: 0, flexShrink: 0 },
   progressTrack: { flex: 1, height: 5, background: theme.line, borderRadius: theme.radiusPill, overflow: 'hidden' },
   progressBar: { height: '100%', background: theme.teal, borderRadius: theme.radiusPill, transition: 'width .3s ease' },
   progressLabel: { fontSize: 13, fontWeight: 600, color: theme.inkFaint, flexShrink: 0, fontVariantNumeric: 'tabular-nums' },
   body: { minWidth: 0 },
-  itemHead: { marginBottom: 10 },
+  itemHead: { marginBottom: 10, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 },
+  itemHeadActions: { display: 'flex', alignItems: 'center', gap: 14, flexShrink: 0 },
+  skipBtn: { border: 'none', background: 'transparent', color: theme.inkFaint, fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit', padding: 0, flexShrink: 0 },
+  adiarPop: { background: theme.muted, border: `0.5px solid ${theme.line}`, borderRadius: theme.radiusSm, padding: '12px 14px', marginBottom: 12 },
+  adiarTitle: { fontSize: 12, fontWeight: 600, color: theme.inkSoft, margin: '0 0 8px' },
+  adiarPresets: { display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' },
+  adiarPresetBtn: { border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.ink, fontSize: 13, fontWeight: 600, padding: '7px 12px', borderRadius: theme.radiusXs, cursor: 'pointer', fontFamily: 'inherit' },
+  adiarDateInput: { border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.ink, fontSize: 13, padding: '6px 10px', borderRadius: theme.radiusXs, fontFamily: 'inherit' },
 
   card: { background: theme.card, border: `0.5px solid ${theme.line}`, borderRadius: theme.radius, boxShadow: theme.shadow, padding: '24px', display: 'flex', flexDirection: 'column', gap: 18, minWidth: 0 },
   subjBadge: { alignSelf: 'flex-start', fontSize: 11, color: '#fff', padding: '3px 10px', borderRadius: theme.radiusXs, fontWeight: 700, letterSpacing: 0.3 },
@@ -497,7 +666,7 @@ const s: Record<string, CSSProperties> = {
   leiTexto: { fontSize: 15, lineHeight: 1.9, color: theme.ink },
   leiBloco: { margin: '0 0 8px' },
   leiBlocoRotulo: { fontWeight: 600, color: theme.inkSoft },
-  lacuna: { background: theme.muted, borderRadius: 4, cursor: 'pointer', borderBottom: `1.5px dashed ${theme.inkFaint}` },
+  lacuna: { display: 'inline-block', width: 72, height: '1.05em', verticalAlign: 'text-bottom', background: theme.muted, borderRadius: 4, cursor: 'pointer', border: 'none', borderBottom: `1.5px dashed ${theme.inkFaint}`, padding: 0 },
 
   // juris
   teseBox: { background: theme.tealBg, border: `1px solid ${theme.teal}`, borderRadius: theme.radiusSm, padding: '16px 18px' },
@@ -509,12 +678,11 @@ const s: Record<string, CSSProperties> = {
   // ações
   kbdHint: { fontSize: 12, color: theme.inkFaint, marginTop: 10 },
   kbd: { fontFamily: 'ui-monospace, monospace', fontSize: 11, padding: '1px 6px', borderRadius: 5, border: `0.5px solid ${theme.line}`, background: theme.muted, color: theme.inkSoft },
-  ratings3: { display: 'flex', gap: 8 },
-  rating3Btn: { flex: 1, minWidth: 0, padding: '13px 6px 11px', borderRadius: theme.radiusSm, border: 'none', cursor: 'pointer', fontFamily: 'inherit', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 },
   ratings4: { display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 },
   rating4Btn: { padding: '13px 10px', borderRadius: theme.radiusSm, cursor: 'pointer', fontFamily: theme.font, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 },
   ratingKey: { fontSize: 11, opacity: 0.65 },
   ratingLbl: { fontWeight: 700, fontSize: 14 },
+  ratingInterval: { fontSize: 11, fontWeight: 500, opacity: 0.85 },
 
   // done
   doneTitle: { fontSize: 26, fontWeight: 800, color: theme.ink, margin: '0 0 10px', letterSpacing: -0.4 },

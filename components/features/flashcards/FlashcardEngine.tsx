@@ -39,7 +39,15 @@ export function FlashcardEngine({ queue, onFinish, onExit }: Props) {
   const toast = useToast();
   const { confirm, dialog: confirmDialog } = useConfirm();
   const onError = useCallback((msg: string) => toast.error(msg), [toast]);
-  const session = useStudySession(queue, onError);
+
+  // Ajuste SRS pessoal por matéria (user_features) — os botões mostram o
+  // intervalo que submitCardReview vai aplicar de fato, e o mesmo valor é
+  // repassado à sessão para não buscar de novo a cada avaliação.
+  const { data: features = DEFAULT_FEATURES } = useQuery<UserFeatures>({
+    queryKey: ['user-features'], queryFn: getUserFeatures, staleTime: 60 * 60_000,
+  });
+
+  const session = useStudySession(queue, onError, features);
 
   const sessionRef = useRef(session);
 
@@ -78,12 +86,6 @@ export function FlashcardEngine({ queue, onFinish, onExit }: Props) {
     transition: 'opacity 0.1s ease, transform 0.1s ease',
   }), [lifting]);
 
-  // Ajuste SRS pessoal por matéria (user_features) — os botões mostram o
-  // intervalo que submitCardReview vai aplicar de fato.
-  const { data: features = DEFAULT_FEATURES } = useQuery<UserFeatures>({
-    queryKey: ['user-features'], queryFn: getUserFeatures, staleTime: 60 * 60_000,
-  });
-
   const intervals = useMemo(() => {
     const c = session.current;
     if (!c) return null;
@@ -115,8 +117,10 @@ export function FlashcardEngine({ queue, onFinish, onExit }: Props) {
 
   const handleRate = useCallback(async (r: (typeof RATINGS)[0]) => {
     const days = r.key === 'errei' ? -1 : intervals?.[r.key]; // -1 = volta nesta sessão
-    await sessionRef.current.rate(r.key);
-    if (days != null) {
+    const ok = await sessionRef.current.rate(r.key);
+    // Só mostra o feedback "salvo" se a avaliação realmente foi persistida —
+    // em falha, o toast de erro (via onError) já avisa o usuário.
+    if (ok && days != null) {
       setGhostRating({ label: r.label, days });
       trackedTimeout(() => setGhostRating(null), 1800);
     }
@@ -163,7 +167,10 @@ export function FlashcardEngine({ queue, onFinish, onExit }: Props) {
 
   if (session.isFinished) {
     return (
-      <div style={styles.done}>
+      <div style={styles.done} role="status">
+        <span style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0,0,0,0)' }}>
+          Sessão de estudo concluída.
+        </span>
         <CheckCircle2
           size={52}
           strokeWidth={1.5}
@@ -214,11 +221,22 @@ export function FlashcardEngine({ queue, onFinish, onExit }: Props) {
         <span style={styles.counterNew}>Novos: {newCount}</span>
       </div>
 
-      <div style={cardStyle} onClick={handleFlip}>
+      <div
+        style={cardStyle}
+        onClick={handleFlip}
+        role="button"
+        tabIndex={0}
+        aria-pressed={flipped}
+        aria-label={flipped ? 'Cartão virado — mostrando a resposta. Ativar para voltar à pergunta.' : 'Cartão — ativar para ver a resposta.'}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') { e.preventDefault(); handleFlip(); }
+          // Espaço já é tratado pelo listener global (funciona com foco em qualquer lugar da tela).
+        }}
+      >
         {current?.subjectName && (
           <span style={badgeStyle}>{current.subjectName}{current.isNew ? ' · novo' : ''}</span>
         )}
-        <div style={styles.cardContent}>
+        <div style={styles.cardContent} aria-live="polite">
           <p style={styles.face}>{current?.front}</p>
           {flipped && (
             <>

@@ -31,6 +31,11 @@ interface ToastContextValue {
 
 const ToastContext = createContext<ToastContextValue | null>(null);
 
+// Toasts com action ficam abertos mais tempo para dar tempo de clicar "Desfazer".
+// Exportado para quem agenda efeitos colaterais atrelados à janela do toast
+// (ex.: DELETE real após o "Desfazer" expirar) não depender de número mágico.
+export const TOAST_ACTION_DURATION_MS = 6000;
+
 let idSeq = 0;
 
 export function ToastProvider({ children }: { children: ReactNode }) {
@@ -47,8 +52,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   const push = useCallback((message: string, kind: ToastKind, opts?: ToastOptions) => {
     const id = ++idSeq;
     setToasts((prev) => [...prev.slice(-4), { id, message, kind, action: opts?.action }]);
-    // Toasts com action ficam abertos 6s para dar tempo de clicar "Desfazer"
-    const duration = opts?.action ? 6000 : 4000;
+    const duration = opts?.action ? TOAST_ACTION_DURATION_MS : 4000;
     const t = setTimeout(() => dismiss(id), duration);
     timers.current.set(id, t);
   }, [dismiss]);

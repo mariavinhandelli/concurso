@@ -6,6 +6,7 @@
 
 import { tryGetUser } from '@/lib/supabase/requireUser';
 import { getSaudeMap } from '@/services/metrics.service';
+import { getPrimaryTargetExam } from '@/services/primaryTargetCache';
 
 const LIMIAR_DOMINIO = 70; // saúde >= isso conta como "dominado"
 
@@ -34,16 +35,8 @@ export async function getEditalCoverage(): Promise<EditalCoverage> {
   const { supabase, userId } = auth;
 
   // Alvo primário (ou o mais antigo, se nenhum marcado como primário).
-  const { data: targets } = await supabase
-    .from('target_exams')
-    .select('id, orgao, cargo, slug')
-    .eq('user_id', userId)
-    .is('archived_at', null) // M11: ignora concursos arquivados
-    .order('is_primary', { ascending: false })
-    .order('created_at', { ascending: true })
-    .limit(1);
-
-  const target = targets?.[0];
+  // H12 — cache compartilhado com raiox/suggestion (mesma query, 3x por carga).
+  const target = await getPrimaryTargetExam();
   if (!target) return EMPTY;
 
   const targetName =

@@ -71,6 +71,4 @@ const s: Record<string, CSSProperties> = {
   h2: { fontSize: 20, fontWeight: 700, color: theme.ink, margin: '0 0 8px' },
   sub: { fontSize: 14, color: theme.inkSoft, margin: '0 0 22px', lineHeight: 1.55 },
   actions: { display: 'flex', gap: 10, justifyContent: 'center' },
-  ghost: { padding: '10px 18px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.inkSoft, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
-  primary: { padding: '10px 18px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
 };

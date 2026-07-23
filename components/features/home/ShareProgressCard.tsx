@@ -293,12 +293,4 @@ const styles: Record<string, React.CSSProperties> = {
   loading: { position: 'absolute', fontSize: 14, color: theme.inkSoft },
 
   actions: { display: 'flex', gap: 10, marginTop: 18 },
-  primary: {
-    flex: 1, padding: '12px 16px', borderRadius: theme.radiusSm, border: 'none',
-    background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
-  },
-  secondary: {
-    flex: 1, padding: '12px 16px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`,
-    background: theme.card, color: theme.ink, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
-  },
 };

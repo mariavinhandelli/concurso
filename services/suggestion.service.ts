@@ -7,6 +7,7 @@ import { createClient } from '@/lib/supabase/client';
 import { getCachedUser } from '@/lib/supabase/authCache';
 import { listDueReviews } from '@/services/reviews.service';
 import { getSaudeMap } from '@/services/metrics.service';
+import { getPrimaryTargetExam } from '@/services/primaryTargetCache';
 
 export type SuggestionKind = 'revisao' | 'reforco' | 'recuperar';
 
@@ -37,7 +38,7 @@ export async function getSuggestions(): Promise<SuggestionsResult> {
   // Fase 1 (paralela): revisões vencidas + tópicos do usuário + histórico de estudo.
   // Os logs vêm em ordem decrescente de data para derivarmos o "último estudo por tópico"
   // (a primeira ocorrência de cada topic_id já é a mais recente).
-  const [vencidas, { data: topicos }, { data: logs }, { data: primTargets }] = await Promise.all([
+  const [vencidas, { data: topicos }, { data: logs }, primTarget] = await Promise.all([
     listDueReviews(),
     supabase
       .from('topics')
@@ -50,15 +51,9 @@ export async function getSuggestions(): Promise<SuggestionsResult> {
       .eq('user_id', user.id)
       .not('topic_id', 'is', null)
       .order('ended_at', { ascending: false }),
-    // N10: edital primário (mesmo critério do coverage.service) → peso das matérias.
-    supabase
-      .from('target_exams')
-      .select('id')
-      .eq('user_id', user.id)
-      .is('archived_at', null)
-      .order('is_primary', { ascending: false })
-      .order('created_at', { ascending: true })
-      .limit(1),
+    // N10: edital primário → peso das matérias.
+    // H12 — cache compartilhado com coverage/raiox (mesma query, 3x por carga).
+    getPrimaryTargetExam(),
   ]);
 
   // Último estudo por tópico (ISO string). Como os logs vêm desc, a 1ª vez que
@@ -84,7 +79,7 @@ export async function getSuggestions(): Promise<SuggestionsResult> {
   const saudeMap = todosIds.length > 0 ? await getSaudeMap(todosIds) : {};
 
   // N10: peso por matéria do edital primário (exam_blueprints.weight, ex.: 2–4).
-  const primaryTargetId = primTargets?.[0]?.id as string | undefined;
+  const primaryTargetId = primTarget?.id;
   const pesoPorSubject: Record<string, number> = {};
   let maxPeso = 0;
   if (primaryTargetId) {

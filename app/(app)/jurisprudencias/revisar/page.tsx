@@ -31,6 +31,7 @@ export default function RevisarPage() {
   const [revealed, setRevealed] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
+  const [feitas, setFeitas] = useState(0); // avaliadas de fato — pulos não contam
 
   useEffect(() => {
     listRevisoesHoje()
@@ -55,6 +56,7 @@ export default function RevisarPage() {
     setSubmitting(true);
     try {
       await submitRevisao(current.id, rating, current.interacao);
+      setFeitas((n) => n + 1);
       if (idx + 1 >= total) {
         setDone(true);
       } else {
@@ -81,12 +83,14 @@ export default function RevisarPage() {
       <PageContainer width="narrow" style={{ padding: isMobile ? '40px 16px' : '72px 40px', textAlign: 'center' }}>
         <div style={{ fontSize: 56, marginBottom: 20 }}>🎉</div>
         <h1 style={{ fontSize: 22, fontWeight: 700, color: theme.ink, margin: '10px 0 6px' }}>
-          {total === 0 ? 'Nada para revisar hoje!' : 'Sessão concluída!'}
+          {total === 0 ? 'Nada para revisar hoje!' : feitas > 0 ? 'Sessão concluída!' : 'Até a próxima!'}
         </h1>
         <p style={{ fontSize: 15, color: theme.inkSoft, margin: '0 0 32px' }}>
           {total === 0
             ? 'Você está em dia com suas revisões.'
-            : `Você revisou ${total} jurisprudência${total !== 1 ? 's' : ''} hoje.`}
+            : feitas > 0
+              ? `Você revisou ${feitas} jurisprudência${feitas !== 1 ? 's' : ''} hoje.`
+              : 'Você pulou as revisões de hoje — elas continuam na fila.'}
         </p>
         <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
           <Button onClick={() => router.push('/jurisprudencias')}>

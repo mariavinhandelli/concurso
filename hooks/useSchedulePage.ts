@@ -23,7 +23,11 @@ export function useSchedulePage() {
   const queryClient = useQueryClient();
 
   // — UI state —
-  const [weekStart, setWeekStart] = useState<Date>(() => mondayOf(new Date()));
+  // weekStart é SEMPRE uma segunda-feira: o setter normaliza qualquer data
+  // (o date picker "Ir para uma data" aceita qualquer dia; sem isso a grade
+  // renderizava qua–ter com rótulos Seg–Dom e perdia os blocos de seg/ter).
+  const [weekStart, setWeekStartRaw] = useState<Date>(() => mondayOf(new Date()));
+  const setWeekStart = useCallback((d: Date) => setWeekStartRaw(mondayOf(d)), []);
   const [view, setView] = useState<'semana' | 'lista' | 'ciclo'>('semana');
   const [viewingArchivedId, setViewingArchivedId] = useState<string | null>(null);
   const [modalDate, setModalDate] = useState<string | null>(null);
@@ -100,8 +104,14 @@ export function useSchedulePage() {
   // — Invalidação encapsulada (compatível com page.tsx existente) —
 
   const load = useCallback(() => {
-    queryClient.invalidateQueries({ queryKey: ['schedule', weekKey] });
-  }, [queryClient, weekKey]);
+    // Prefixo ['schedule']: editar um bloco pode remarcá-lo para OUTRA semana,
+    // e as semanas adjacentes ficam pré-carregadas — invalidar só a semana
+    // atual deixava a semana de destino stale por até 60s. O prefixo não
+    // alcança ['schedule-rules'] (chave distinta). A aba Mês ('calendar-blocks')
+    // consome os mesmos blocos e é invalidada junto.
+    queryClient.invalidateQueries({ queryKey: ['schedule'] });
+    queryClient.invalidateQueries({ queryKey: ['calendar-blocks'] });
+  }, [queryClient]);
 
   const loadRules = useCallback(() => {
     queryClient.invalidateQueries({ queryKey: ['schedule-rules'] });

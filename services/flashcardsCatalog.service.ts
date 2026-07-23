@@ -43,21 +43,20 @@ export async function listCatalogFlashcardDecks(): Promise<CatalogFlashcardDeck[
   if (decksRes.error) throw new Error('Erro ao listar banco de flashcards: ' + decksRes.error.message);
   if (minhasRes.error) throw new Error('Erro ao verificar flashcards ativados: ' + minhasRes.error.message);
 
-  const meusCatalogCardIds = new Set((minhasRes.data ?? []).map((r) => r.catalog_card_id));
+  const meusCatalogCardIds = Array.from(new Set((minhasRes.data ?? []).map((r) => r.catalog_card_id)));
 
-  // conta quantos cards ativados pertencem a cada deck (join client-side, o
-  // catálogo inteiro cabe fácil em memória — poucas centenas de linhas)
-  let countByDeck = new Map<string, number>();
-  if (meusCatalogCardIds.size > 0) {
+  // Conta quantos cards ativados pertencem a cada deck — busca só os cards que
+  // o usuário já tem (não o catálogo inteiro), então escala com o progresso do
+  // usuário, não com o tamanho total do catálogo.
+  const countByDeck = new Map<string, number>();
+  if (meusCatalogCardIds.length > 0) {
     const { data: cardsRes, error: cardsErr } = await supabase
       .from('flashcard_catalog_cards')
-      .select('id, deck_catalog_id');
+      .select('id, deck_catalog_id')
+      .in('id', meusCatalogCardIds);
     if (cardsErr) throw new Error('Erro ao verificar progresso do banco: ' + cardsErr.message);
-    countByDeck = new Map();
     for (const c of cardsRes ?? []) {
-      if (meusCatalogCardIds.has(c.id)) {
-        countByDeck.set(c.deck_catalog_id, (countByDeck.get(c.deck_catalog_id) ?? 0) + 1);
-      }
+      countByDeck.set(c.deck_catalog_id, (countByDeck.get(c.deck_catalog_id) ?? 0) + 1);
     }
   }
 

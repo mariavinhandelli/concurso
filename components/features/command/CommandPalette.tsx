@@ -12,7 +12,7 @@ import { useRouter } from 'next/navigation';
 import { Search } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { listSubjects, type Subject } from '@/services/subjects.service';
-import { listAllTopics, type Topic } from '@/services/topics.service';
+import { listActiveTopics, type Topic } from '@/services/topics.service';
 import { listNotes, type ErrorNote } from '@/services/notebook.service';
 import { LEIS_CATALOG } from '@/services/leis.service';
 import { listCatalogEditais, type CatalogEdital } from '@/services/editaisCatalog.service';
@@ -97,8 +97,10 @@ export function CommandPalette() {
   const { data: subjects } = useQuery<Subject[]>({
     queryKey: ['cmd-subjects'], queryFn: listSubjects, enabled: open, staleTime: 60_000,
   });
+  // Só matérias ativas — tópico de matéria arquivada não deve aparecer como
+  // destino de navegação/estudo no palette.
   const { data: topics } = useQuery<Topic[]>({
-    queryKey: ['cmd-topics'], queryFn: listAllTopics, enabled: open, staleTime: 60_000,
+    queryKey: ['cmd-topics-ativos'], queryFn: listActiveTopics, enabled: open, staleTime: 60_000,
   });
   // Caderno de erros na busca — "peculato" precisa achar o erro, não só o tópico.
   const { data: erros } = useQuery<ErrorNote[]>({

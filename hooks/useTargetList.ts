@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useConfirm } from '@/hooks/useConfirm';
-import { useToast } from '@/components/ui/ToastProvider';
+import { useToast, TOAST_ACTION_DURATION_MS } from '@/components/ui/ToastProvider';
 import {
   listTargetExams, createTargetExam, setPrimaryTargetExam,
   deleteTargetExam, promoteToPos, updateTargetExamDate,
@@ -14,6 +15,15 @@ export type CreateTargetInput = Parameters<typeof createTargetExam>[0];
 export function useTargetList() {
   const toast = useToast();
   const { confirm, dialog } = useConfirm();
+  const queryClient = useQueryClient();
+
+  // Home (ExamCountdown, CoberturaEdital, Raio-X) lê estes caches via React Query;
+  // sem invalidar, mutações feitas aqui só apareceriam lá após refetch por acaso.
+  const invalidateHomeCaches = useCallback(() => {
+    for (const key of [['target-exams'], ['edital-coverage'], ['raiox'], ['catalog-editais']]) {
+      queryClient.invalidateQueries({ queryKey: key });
+    }
+  }, [queryClient]);
 
   const [targets, setTargets] = useState<TargetExam[]>([]);
   const [boards, setBoards] = useState<Board[]>([]);
@@ -48,6 +58,7 @@ export function useTargetList() {
       const novo = await createTargetExam(input);
       const updated = await listTargetExams();
       setTargets(updated);
+      invalidateHomeCaches();
       return novo;
     } catch (e) {
       toast.error(e instanceof Error ? e.message : 'Erro ao criar concurso.');
@@ -61,6 +72,7 @@ export function useTargetList() {
     try {
       await setPrimaryTargetExam(id);
       toast.success('Concurso definido como foco.');
+      invalidateHomeCaches();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : 'Erro ao definir foco.');
       reloadTargets();
@@ -77,6 +89,7 @@ export function useTargetList() {
     try {
       await promoteToPos(targetId, boardId);
       toast.success('Concurso promovido para pós-edital.');
+      invalidateHomeCaches();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : 'Erro ao promover.');
       reloadTargets();
@@ -89,7 +102,7 @@ export function useTargetList() {
   async function deleteTarget(id: string) {
     const ok = await confirm({
       title: 'Apagar este concurso-alvo?',
-      description: 'Os pesos e configurações definidos nele também serão apagados.',
+      description: 'Os pesos e configurações definidos nele também serão apagados. As matérias e tópicos continuam na sua biblioteca (em Matérias). Para tirar o concurso do painel sem apagar nada, prefira arquivar.',
       confirmLabel: 'Apagar',
       danger: true,
     });
@@ -132,11 +145,12 @@ export function useTargetList() {
       if (undone) return;
       try {
         await deleteTargetExam(id);
+        invalidateHomeCaches();
       } catch (e) {
         toast.error(e instanceof Error ? e.message : 'Erro ao apagar. O concurso foi restaurado.');
         reloadTargets();
       }
-    }, 6200);
+    }, TOAST_ACTION_DURATION_MS + 200);
   }
 
   async function saveDate(id: string, date: string | null): Promise<void> {
@@ -144,6 +158,7 @@ export function useTargetList() {
     try {
       await updateTargetExamDate(id, date);
       toast.success(date ? 'Data da prova salva.' : 'Data removida.');
+      invalidateHomeCaches();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : 'Erro ao salvar data.');
       reloadTargets();

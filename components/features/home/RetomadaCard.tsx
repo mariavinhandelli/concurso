@@ -89,7 +89,5 @@ const s: Record<string, React.CSSProperties> = {
   title: { fontSize: 21, fontWeight: 800, color: theme.ink, letterSpacing: -0.4, margin: '0 0 6px' },
   body: { fontSize: 15, color: theme.inkSoft, lineHeight: 1.6, margin: '0 0 16px', maxWidth: 620 },
   actions: { display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' },
-  primary: { padding: '11px 20px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
-  ghost: { padding: '11px 14px', borderRadius: theme.radiusSm, border: 'none', background: 'transparent', color: theme.inkSoft, fontSize: 14, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' },
   reassure: { display: 'flex', alignItems: 'center', gap: 7, fontSize: 13, color: theme.tealDeep, margin: '14px 0 0', fontWeight: 500 },
 };

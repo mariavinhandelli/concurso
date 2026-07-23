@@ -4,12 +4,13 @@
 // estável "slug:numero" (ex.: 'cf-88:37'). Revisão reusa o motor de
 // jurisprudências (lib/juris-review.ts) — mesmos intervalos 1/3/15/45.
 
-import { requireUser } from '@/lib/supabase/requireUser';
+import { requireUser, tryGetUser } from '@/lib/supabase/requireUser';
 import {
   calculateNextJurisReview, fromJurisDbRow, toJurisDbRow,
   type JurisRating,
 } from '@/lib/juris-review';
 import { toLocalDateString } from '@/lib/local-date';
+import { getLei, LEIS_CATALOG, type Lei, type LeiArtigo } from '@/services/leis.service';
 
 export type GrifoCor = 'regra' | 'prazo' | 'competencia' | 'excecao';
 export type GrifoEstilo = 'grifo' | 'sublinhado';
@@ -124,15 +125,25 @@ export async function desativarRevisaoArtigo(artigoKey: string): Promise<void> {
   await upsertInteracao(artigoKey, { is_review_active: false, next_review_date: null });
 }
 
-export async function submitRevisaoArtigo(artigoKey: string, rating: JurisRating): Promise<LeiInteracao> {
-  const { supabase, userId } = await requireUser();
-  const { data: atual, error } = await supabase
-    .from('lei_interacoes')
-    .select('interval_days, repetitions')
-    .eq('user_id', userId)
-    .eq('artigo_key', artigoKey)
-    .maybeSingle();
-  if (error) throw new Error('Erro ao ler estado de revisão: ' + error.message);
+// currentState opcional: quem já tem a interação em mãos (fila unificada)
+// evita o GET extra antes do upsert.
+export async function submitRevisaoArtigo(
+  artigoKey: string,
+  rating: JurisRating,
+  currentState?: Pick<LeiInteracao, 'interval_days' | 'repetitions'> | null,
+): Promise<LeiInteracao> {
+  let atual = currentState;
+  if (atual == null) {
+    const { supabase, userId } = await requireUser();
+    const { data, error } = await supabase
+      .from('lei_interacoes')
+      .select('interval_days, repetitions')
+      .eq('user_id', userId)
+      .eq('artigo_key', artigoKey)
+      .maybeSingle();
+    if (error) throw new Error('Erro ao ler estado de revisão: ' + error.message);
+    atual = data;
+  }
 
   const state = fromJurisDbRow(atual ?? { interval_days: 0, repetitions: 0 });
   const result = calculateNextJurisReview(state, rating);
@@ -153,6 +164,32 @@ export async function listRevisoesDue(): Promise<LeiInteracao[]> {
   return (data ?? []) as LeiInteracao[];
 }
 
+export interface LeiItemHidratado {
+  interacao: LeiInteracao;
+  artigo: LeiArtigo;
+  lei: Lei;
+}
+
+// Hidrata interações de lei com o artigo do catálogo local (sem rede após o
+// primeiro load de cada lei) — usado pela fila única e pela fila legada de
+// lei seca, que hoje mostram exatamente a mesma pilha.
+export async function hydrateLeiInteracoes(due: LeiInteracao[]): Promise<LeiItemHidratado[]> {
+  if (due.length === 0) return [];
+  const slugs = new Set(due.map((d) => d.artigo_key.split(':')[0]));
+  const leis = new Map<string, Lei>();
+  for (const slug of slugs) {
+    if (LEIS_CATALOG.some((l) => l.slug === slug)) leis.set(slug, await getLei(slug));
+  }
+  const out: LeiItemHidratado[] = [];
+  for (const interacao of due) {
+    const slug = interacao.artigo_key.split(':')[0];
+    const lei = leis.get(slug);
+    const artigo = lei?.artigos.find((a) => a.key === interacao.artigo_key);
+    if (lei && artigo) out.push({ interacao, artigo, lei });
+  }
+  return out;
+}
+
 export async function countRevisoesDue(): Promise<number> {
   const { supabase, userId } = await requireUser();
   const { count, error } = await supabase
@@ -161,8 +198,40 @@ export async function countRevisoesDue(): Promise<number> {
     .eq('user_id', userId)
     .eq('is_review_active', true)
     .lte('next_review_date', toLocalDateString());
-  if (error) return 0;
+  // H11 — não engolir erro como 0: viraria "tudo em dia" falso no Plano de Hoje.
+  if (error) throw new Error('Erro ao contar revisões de lei: ' + error.message);
   return count ?? 0;
+}
+
+// Data do próximo artigo agendado (para o empty state da fila de revisão) —
+// sem o filtro lte: pode cair no futuro, diferente de getOldestDueLeiDate.
+export async function getNextScheduledLeiDate(): Promise<string | null> {
+  const auth = await tryGetUser();
+  if (!auth) return null;
+  const { data } = await auth.supabase
+    .from('lei_interacoes')
+    .select('next_review_date')
+    .eq('user_id', auth.userId)
+    .eq('is_review_active', true)
+    .not('next_review_date', 'is', null)
+    .order('next_review_date', { ascending: true })
+    .limit(1)
+    .maybeSingle();
+  return data?.next_review_date ?? null;
+}
+
+export async function getOldestDueLeiDate(): Promise<string | null> {
+  const { supabase, userId } = await requireUser();
+  const { data } = await supabase
+    .from('lei_interacoes')
+    .select('next_review_date')
+    .eq('user_id', userId)
+    .eq('is_review_active', true)
+    .lte('next_review_date', toLocalDateString())
+    .order('next_review_date', { ascending: true })
+    .limit(1)
+    .maybeSingle();
+  return data?.next_review_date ?? null;
 }
 
 // M12: artigos favoritados (chave 'slug:numero') — para os Favoritos globais do palette.

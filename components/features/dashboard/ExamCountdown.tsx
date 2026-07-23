@@ -6,15 +6,18 @@ import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 import {
   listTargetExams, updateTargetExamDate, createTargetExam, type TargetExam,
 } from '@/services/targetExams.service';
+import { useLocalToday } from '@/hooks/useLocalToday';
+import { parseLocalDate } from '@/lib/local-date';
 import { theme } from '@/lib/theme';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { Skeleton } from '@/components/ui/Skeleton';
 
-function daysUntil(d: string): number {
+// H16 — recebe "hoje" de fora (useLocalToday) em vez de ler new Date() a cada
+// chamada: sem isso, a contagem congelava numa aba aberta atravessando a
+// meia-noite até algo mais disparar um re-render.
+function daysUntil(d: string, today: Date): number {
   const target = new Date(d + 'T00:00:00');
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
   return Math.round((target.getTime() - today.getTime()) / 86_400_000);
 }
 
@@ -39,7 +42,11 @@ function sortTargets(list: TargetExam[]): TargetExam[] {
 
 export const ExamCountdown = memo(function ExamCountdown() {
   const queryClient = useQueryClient();
-  const [idx, setIdx] = useState(0);
+  // idx null = usuário ainda não navegou; o padrão é a primeira prova NÃO realizada.
+  const [idx, setIdx] = useState<number | null>(null);
+  // Depois de criar uma prova, o carrossel foca nela (a lista reordena por data,
+  // então o índice só é conhecido após o refetch — por isso guardamos o id).
+  const [focusId, setFocusId] = useState<string | null>(null);
   const [adding, setAdding] = useState(false);
   const [newName, setNewName] = useState('');
   const [newDate, setNewDate] = useState('');
@@ -50,6 +57,7 @@ export const ExamCountdown = memo(function ExamCountdown() {
     queryKey: ['target-exams'],
     queryFn: listTargetExams,
   });
+  const today = parseLocalDate(useLocalToday());
 
   const updateDate = useMutation({
     mutationFn: ({ id, date }: { id: string; date: string }) =>
@@ -66,22 +74,28 @@ export const ExamCountdown = memo(function ExamCountdown() {
       orgao: newName.trim() || 'Nova prova',
       exam_date: newDate || null,
     }),
-    onSuccess: () => {
+    onSuccess: (created) => {
       queryClient.invalidateQueries({ queryKey: ['target-exams'] });
       setAdding(false);
       setNewName('');
       setNewDate('');
-      setIdx(rawTargets.length);
+      setFocusId(created.id);
     },
   });
 
   const sorted = sortTargets(rawTargets);
   const total = sorted.length;
-  const safeIdx = total > 0 ? Math.min(idx, total - 1) : 0;
+  // Padrão: primeira prova futura ou sem data — prova já realizada não é "próxima".
+  const firstUpcoming = sorted.findIndex((t) => !t.exam_date || daysUntil(t.exam_date, today) >= 0);
+  const defaultIdx = firstUpcoming === -1 ? 0 : firstUpcoming;
+  const focusIdx = focusId ? sorted.findIndex((t) => t.id === focusId) : -1;
+  const safeIdx = total > 0
+    ? (focusIdx >= 0 ? focusIdx : Math.min(idx ?? defaultIdx, total - 1))
+    : 0;
   const current = sorted[safeIdx] ?? null;
 
-  function prev() { setIdx((i) => (i - 1 + total) % total); setEditingDate(false); }
-  function next() { setIdx((i) => (i + 1) % total); setEditingDate(false); }
+  function prev() { setFocusId(null); setIdx((safeIdx - 1 + total) % total); setEditingDate(false); }
+  function next() { setFocusId(null); setIdx((safeIdx + 1) % total); setEditingDate(false); }
 
   /* ── Skeleton ── */
   if (isLoading) {
@@ -107,7 +121,7 @@ export const ExamCountdown = memo(function ExamCountdown() {
       <div style={styles.wrap}>
         <div style={styles.header}>
           <span style={styles.eyebrow}>Nova prova</span>
-          <button style={styles.cancelLink} onClick={() => { setAdding(false); setNewName(''); setNewDate(''); }}>
+          <button className="touch-target" style={styles.cancelLink} onClick={() => { setAdding(false); setNewName(''); setNewDate(''); }}>
             cancelar
           </button>
         </div>
@@ -149,7 +163,7 @@ export const ExamCountdown = memo(function ExamCountdown() {
       <div style={styles.wrap}>
         <div style={styles.header}>
           <span style={styles.eyebrow}>Próxima prova</span>
-          <button style={styles.addLink} onClick={() => setAdding(true)}>+ adicionar</button>
+          <button className="touch-target" style={styles.addLink} onClick={() => setAdding(true)}>+ adicionar</button>
         </div>
         <p style={styles.emptyText}>Nenhuma prova no radar.</p>
       </div>
@@ -157,7 +171,7 @@ export const ExamCountdown = memo(function ExamCountdown() {
   }
 
   /* ── Carrossel principal ── */
-  const dias = current?.exam_date ? daysUntil(current.exam_date) : null;
+  const dias = current?.exam_date ? daysUntil(current.exam_date, today) : null;
   const passou = dias !== null && dias < 0;
   const critico = dias !== null && !passou && dias <= 7;
   const urgente = dias !== null && !passou && dias > 7 && dias <= 30;
@@ -191,16 +205,18 @@ export const ExamCountdown = memo(function ExamCountdown() {
           {total > 1 && (
             <div style={styles.dots}>
               {sorted.map((_, i) => (
+                // H15 — o indicador visual é um dot de 5px, mas a área clicável
+                // é bem maior (padding invisível) para caber num touch target
+                // de ~44px sem inchar o desenho da pill.
                 <button
                   key={i}
-                  style={{
-                    ...styles.dot,
-                    background: i === safeIdx ? theme.teal : theme.line,
-                    width: i === safeIdx ? 14 : 5,
-                  }}
-                  onClick={() => { setIdx(i); setEditingDate(false); }}
+                  className="touch-target icon-touch-target"
+                  style={styles.dotHit}
+                  onClick={() => { setFocusId(null); setIdx(i); setEditingDate(false); }}
                   aria-label={`Prova ${i + 1}`}
-                />
+                >
+                  <span style={{ ...styles.dot, background: i === safeIdx ? theme.teal : theme.line, width: i === safeIdx ? 14 : 5 }} />
+                </button>
               ))}
             </div>
           )}
@@ -214,6 +230,10 @@ export const ExamCountdown = memo(function ExamCountdown() {
           <ChevronRight size={14} strokeWidth={2.5} />
         </button>
       </div>
+
+      {updateDate.isError && (
+        <p style={styles.errorMsg}>Não foi possível salvar a data. Tente de novo.</p>
+      )}
 
       {/* Contador / data */}
       {current?.exam_date ? (
@@ -234,14 +254,15 @@ export const ExamCountdown = memo(function ExamCountdown() {
           {editingDate ? (
             <div style={styles.inlineDateEdit}>
               <input type="date" style={styles.dateInput} value={pendingDate} autoFocus
+                aria-label="Data da prova"
                 onChange={(e) => setPendingDate(e.target.value)} />
-              <button style={styles.confirmDateBtn}
+              <button className="touch-target" style={styles.confirmDateBtn}
                 onClick={() => pendingDate && updateDate.mutate({ id: current.id, date: pendingDate })}
                 disabled={!pendingDate || updateDate.isPending}>ok</button>
-              <button style={styles.cancelDateBtn} onClick={() => { setEditingDate(false); setPendingDate(''); }}><X size={14} strokeWidth={2} /></button>
+              <button style={styles.cancelDateBtn} aria-label="Cancelar edição da data" onClick={() => { setEditingDate(false); setPendingDate(''); }}><X size={14} strokeWidth={2} /></button>
             </div>
           ) : (
-            <button style={styles.editDateBtn}
+            <button className="touch-target" style={styles.editDateBtn}
               onClick={() => { setPendingDate(current.exam_date ?? ''); setEditingDate(true); }}>
               editar
             </button>
@@ -252,16 +273,17 @@ export const ExamCountdown = memo(function ExamCountdown() {
         editingDate ? (
           <div style={styles.inlineDateEdit}>
             <input type="date" style={styles.dateInput} value={pendingDate} autoFocus
+              aria-label="Data da prova"
               onChange={(e) => setPendingDate(e.target.value)} />
-            <button style={styles.confirmDateBtn}
+            <button className="touch-target" style={styles.confirmDateBtn}
               onClick={() => pendingDate && updateDate.mutate({ id: current!.id, date: pendingDate })}
               disabled={!pendingDate || updateDate.isPending}>ok</button>
-            <button style={styles.cancelDateBtn} onClick={() => { setEditingDate(false); setPendingDate(''); }}><X size={14} strokeWidth={2} /></button>
+            <button style={styles.cancelDateBtn} aria-label="Cancelar edição da data" onClick={() => { setEditingDate(false); setPendingDate(''); }}><X size={14} strokeWidth={2} /></button>
           </div>
         ) : (
           <div style={styles.noDateRow}>
             <span style={styles.noDateText}>Sem data definida</span>
-            <button style={styles.setDateBtn} onClick={() => setEditingDate(true)}>Definir →</button>
+            <button className="touch-target" style={styles.setDateBtn} onClick={() => setEditingDate(true)}>Definir →</button>
           </div>
         )
       )}
@@ -289,7 +311,8 @@ const styles: Record<string, React.CSSProperties> = {
     overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', width: '100%',
   },
   dots: { display: 'flex', gap: 4, alignItems: 'center' },
-  dot: { height: 5, borderRadius: theme.radiusPill, border: 'none', cursor: 'pointer', padding: 0, transition: 'width .2s ease, background .2s ease' },
+  dotHit: { display: 'grid', placeItems: 'center', padding: '19px 10px', border: 'none', background: 'transparent', cursor: 'pointer' },
+  dot: { display: 'block', height: 5, borderRadius: theme.radiusPill, transition: 'width .2s ease, background .2s ease' },
 
   /* Countdown row */
   countRow: { display: 'flex', alignItems: 'center', gap: 10, justifyContent: 'center', flexWrap: 'wrap' },

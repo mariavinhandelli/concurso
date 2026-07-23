@@ -6,7 +6,7 @@
 import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-  listRuleSummaries, stopRule, deleteRule, type RuleSummary,
+  listRuleSummaries, stopRule, deleteRule,
 } from '@/services/recurrence.service';
 import { theme } from '@/lib/theme';
 import { Skeleton } from '@/components/ui/Skeleton';
@@ -120,6 +120,7 @@ export function RecurrencePanel({ onClose, onChanged, onEdit }: Props) {
                           <span style={styles.seqNum}>{i + 1}</span>
                           <span style={{ ...styles.dot, background: m.subjectColor }} />
                           <span style={styles.materiaName}>{m.subjectName}</span>
+                          {m.archived && <span style={styles.archivedTag}>arquivada</span>}
                           <span style={styles.materiaDias}>{fmtMeta(m.minutes)}</span>
                         </div>
                       ))
@@ -129,6 +130,7 @@ export function RecurrencePanel({ onClose, onChanged, onEdit }: Props) {
                         <div key={m.subjectId} style={styles.materiaRow}>
                           <span style={{ ...styles.dot, background: m.subjectColor }} />
                           <span style={styles.materiaName}>{m.subjectName}</span>
+                          {m.archived && <span style={styles.archivedTag}>arquivada</span>}
                           <span style={styles.materiaDias}>{diasLabel(m.weekdays)} · {fmtMeta(m.minutes)}</span>
                         </div>
                       ))
@@ -136,7 +138,10 @@ export function RecurrencePanel({ onClose, onChanged, onEdit }: Props) {
                   </div>
 
                   <div style={styles.ruleFooter}>
+                    {/* "desde" distingue regras iguais (ex.: dois ciclos "sem prazo") */}
                     <span style={styles.prazo}>
+                      desde {new Date(r.startDate + 'T00:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit' })}
+                      {' · '}
                       {r.endDate ? `até ${new Date(r.endDate + 'T00:00:00').toLocaleDateString('pt-BR')}` : 'sem prazo'}
                     </span>
                     <div style={styles.ruleActions}>
@@ -174,6 +179,7 @@ const styles: Record<string, React.CSSProperties> = {
   dot: { width: 10, height: 10, borderRadius: 3, flexShrink: 0 },
   materiaName: { fontSize: 14, fontWeight: 600, color: theme.ink, flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
   materiaDias: { fontSize: 12, color: theme.inkSoft, whiteSpace: 'nowrap' },
+  archivedTag: { fontSize: 10, fontWeight: 700, color: theme.inkFaint, background: 'rgba(15,23,42,.05)', padding: '2px 6px', borderRadius: 5, letterSpacing: 0.3, textTransform: 'uppercase', flexShrink: 0 },
   ruleFooter: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTopWidth: 0.5, borderTopStyle: 'solid', borderTopColor: theme.line, paddingTop: 10 },
   prazo: { fontSize: 12, color: theme.inkFaint },
   ruleActions: { display: 'flex', gap: 8 },

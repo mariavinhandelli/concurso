@@ -90,7 +90,7 @@ export function CardForm({ subjectId, topicId, card, onSaved, onCreatedAndNew, o
         </label>
       )}
 
-      {error && <p style={styles.error}>{error}</p>}
+      {error && <p role="alert" style={styles.error}>{error}</p>}
 
       <div style={styles.actions}>
         <Button variant="outline" onClick={onCancel}>Cancelar</Button>

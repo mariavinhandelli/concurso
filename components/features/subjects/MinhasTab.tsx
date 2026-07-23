@@ -1,11 +1,12 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { Search, Pencil, Archive, X } from 'lucide-react';
 import { useConfirm } from '@/hooks/useConfirm';
 import { createSubject, updateSubject, deleteSubject } from '@/services/subjects.service';
-import { SUBJECT_COLORS } from '@/lib/subject-colors';
+import { SUBJECT_COLORS, subjectColorName } from '@/lib/subject-colors';
+import { useToast } from '@/components/ui/ToastProvider';
 import {
   getMySubjects, archiveSubject, unarchiveSubject,
   type MySubject, type SubjectStatus,
@@ -25,14 +26,20 @@ interface Props {
 
 export function MinhasTab({ isMobile, onError }: Props) {
   const { confirm, dialog } = useConfirm();
+  const toast = useToast();
   const [status, setStatus] = useState<SubjectStatus>('ativo');
   const [ativas, setAtivas] = useState<MySubject[]>([]);
   const [arquivadas, setArquivadas] = useState<MySubject[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [processingId, setProcessingId] = useState<string | null>(null);
 
   const [newName, setNewName] = useState('');
   const [newColor, setNewColor] = useState(SUBJECT_COLORS[0]);
+  const [creating, setCreating] = useState(false);
+  // Ref além do estado: cliques no mesmo tick veem o state antigo (setState é
+  // assíncrono) — só o ref bloqueia reentrada de forma síncrona.
+  const creatingRef = useRef(false);
 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
@@ -49,7 +56,11 @@ export function MinhasTab({ isMobile, onError }: Props) {
       ]);
       setAtivas(a);
       setArquivadas(arq);
+      setLoadError(false);
     } catch (e) {
+      // Erro ≠ vazio: sem isso a tela mostrava "Nenhuma matéria ativa" após
+      // falha de rede, como se o usuário não tivesse dados.
+      setLoadError(true);
       onError(e instanceof Error ? e.message : 'Erro ao carregar matérias.');
     } finally {
       setLoading(false);
@@ -58,14 +69,37 @@ export function MinhasTab({ isMobile, onError }: Props) {
   }, []);
   useEffect(() => { load(); }, [load]);
 
+  // Duplicata exata (case-insensitive) — evita segunda "Direito Penal" por engano.
+  // Retorna mensagem de bloqueio ou null se o nome está livre.
+  function duplicateMsg(name: string, ignoreId?: string): string | null {
+    const alvo = name.trim().toLowerCase();
+    if (ativas.some((s) => s.id !== ignoreId && s.name.toLowerCase() === alvo)) {
+      return 'Você já tem uma matéria ativa com esse nome.';
+    }
+    if (arquivadas.some((s) => s.id !== ignoreId && s.name.toLowerCase() === alvo)) {
+      return 'Existe uma matéria arquivada com esse nome — reative-a na aba Arquivadas.';
+    }
+    return null;
+  }
+
   async function handleCreate() {
-    if (!newName.trim()) return;
+    // Guard de reentrada: duplo clique/Enter repetido criava a matéria duas vezes.
+    // `loading` também bloqueia: antes das listas chegarem, a checagem de
+    // duplicata rodaria contra arrays vazios e deixaria passar qualquer nome.
+    if (!newName.trim() || creatingRef.current || loading) return;
+    const dup = duplicateMsg(newName);
+    if (dup) { onError(dup); return; }
+    creatingRef.current = true;
+    setCreating(true);
     try {
       await createSubject(newName, newColor);
       setNewName('');
       await load();
     } catch (e) {
       onError(e instanceof Error ? e.message : 'Erro ao criar.');
+    } finally {
+      creatingRef.current = false;
+      setCreating(false);
     }
   }
 
@@ -78,6 +112,8 @@ export function MinhasTab({ isMobile, onError }: Props) {
 
   async function saveEdit() {
     if (!editingId || !editName.trim()) { cancelEdit(); return; }
+    const dup = duplicateMsg(editName, editingId);
+    if (dup) { onError(dup); return; }
     try {
       await updateSubject(editingId, { name: editName, color: editColor });
       cancelEdit();
@@ -87,9 +123,23 @@ export function MinhasTab({ isMobile, onError }: Props) {
     }
   }
 
-  async function handleArchive(id: string) {
+  async function handleArchive(id: string, name: string) {
     setProcessingId(id);
-    try { await archiveSubject(id); await load(); }
+    try {
+      await archiveSubject(id);
+      await load();
+      // Ação silenciosa e fora da tela (a matéria some da lista) — o toast com
+      // "Desfazer" confirma o que houve e dá o caminho de volta em um clique.
+      toast.success(`"${name}" arquivada.`, {
+        action: {
+          label: 'Desfazer',
+          onClick: () => {
+            unarchiveSubject(id).then(load).catch((e) =>
+              onError(e instanceof Error ? e.message : 'Erro ao reativar.'));
+          },
+        },
+      });
+    }
     catch (e) { onError(e instanceof Error ? e.message : 'Erro ao arquivar.'); }
     finally { setProcessingId(null); }
   }
@@ -109,12 +159,18 @@ export function MinhasTab({ isMobile, onError }: Props) {
 
   const base = status === 'ativo' ? ativas : arquivadas;
 
+  // Touch targets: 44px em mobile (recomendação WCAG); 32/28px só com mouse.
+  const iconBtn = isMobile ? { ...styles.iconBtn, width: 44, height: 44 } : styles.iconBtn;
+  const deleteBtn = isMobile ? { ...styles.deleteBtn, width: 44, height: 44 } : styles.deleteBtn;
+
   const lista = useMemo(() => {
     const q = search.trim().toLowerCase();
     const filtered = q ? base.filter((s) => s.name.toLowerCase().includes(q)) : base;
     if (sort === 'alfa') return [...filtered].sort((a, b) => a.name.localeCompare(b.name, 'pt'));
     if (sort === 'progresso') return [...filtered].sort((a, b) => (b.progress ?? 0) - (a.progress ?? 0));
-    return filtered;
+    // "Recentes" agora ordena de fato por criação (antes devolvia a ordem de
+    // position/created_at asc — as mais ANTIGAS primeiro, contradizendo o rótulo).
+    return [...filtered].sort((a, b) => b.created_at.localeCompare(a.created_at));
   }, [base, search, sort]);
 
   return (
@@ -130,7 +186,9 @@ export function MinhasTab({ isMobile, onError }: Props) {
             placeholder="Criar matéria própria (ex: Lei Orgânica do TCE-GO)"
             style={styles.input}
           />
-          <button onClick={handleCreate} style={{ ...styles.addBtn, width: isMobile ? '100%' : undefined }}>Criar</button>
+          <button onClick={handleCreate} disabled={creating} style={{ ...styles.addBtn, width: isMobile ? '100%' : undefined, opacity: creating ? 0.6 : 1, cursor: creating ? 'wait' : 'pointer' }}>
+            {creating ? 'Criando…' : 'Criar'}
+          </button>
         </div>
         <div style={styles.colors}>
           {SUBJECT_COLORS.map((c) => (
@@ -138,7 +196,8 @@ export function MinhasTab({ isMobile, onError }: Props) {
               key={c}
               onClick={() => setNewColor(c)}
               style={{ ...styles.colorDot, background: c, outline: newColor === c ? `2px solid ${theme.ink}` : 'none', outlineOffset: 2 }}
-              aria-label={`Cor ${c}`}
+              aria-label={`Cor ${subjectColorName(c)}`}
+              aria-pressed={newColor === c}
             />
           ))}
         </div>
@@ -146,17 +205,18 @@ export function MinhasTab({ isMobile, onError }: Props) {
 
       {/* Sub-filtro ativas/arquivadas */}
       <div style={styles.pills}>
+        {/* Counts só após o load — durante o loading exibia "Ativas (0)" enganoso */}
         <button
           onClick={() => { setStatus('ativo'); if (editingId) cancelEdit(); }}
           style={{ ...styles.pill, ...(status === 'ativo' ? styles.pillActive : {}) }}
         >
-          Ativas ({ativas.length})
+          Ativas{loading ? '' : ` (${ativas.length})`}
         </button>
         <button
           onClick={() => { setStatus('arquivado'); if (editingId) cancelEdit(); }}
           style={{ ...styles.pill, ...(status === 'arquivado' ? styles.pillActive : {}) }}
         >
-          Arquivadas ({arquivadas.length})
+          Arquivadas{loading ? '' : ` (${arquivadas.length})`}
         </button>
       </div>
 
@@ -195,6 +255,11 @@ export function MinhasTab({ isMobile, onError }: Props) {
             <div key={i} style={{ height: 72, borderRadius: 14, background: theme.muted, animation: 'skeleton-pulse 1.4s ease infinite', animationDelay: `${i * 80}ms` }} />
           ))}
         </div>
+      ) : loadError && base.length === 0 ? (
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 10 }}>
+          <p style={styles.muted}>Não foi possível carregar suas matérias. Verifique a conexão.</p>
+          <Button size="sm" variant="outline" onClick={() => { setLoading(true); load(); }}>Tentar de novo</Button>
+        </div>
       ) : lista.length === 0 ? (
         <p style={styles.muted}>
           {search ? 'Nenhuma matéria encontrada para esta busca.' :
@@ -225,7 +290,8 @@ export function MinhasTab({ isMobile, onError }: Props) {
                       key={c}
                       onClick={() => setEditColor(c)}
                       style={{ ...styles.colorDot, background: c, outline: editColor === c ? `2px solid ${theme.ink}` : 'none', outlineOffset: 2 }}
-                      aria-label={`Cor ${c}`}
+                      aria-label={`Cor ${subjectColorName(c)}`}
+                      aria-pressed={editColor === c}
                     />
                   ))}
                 </div>
@@ -263,17 +329,17 @@ export function MinhasTab({ isMobile, onError }: Props) {
                 <div style={styles.myActions}>
                   {status === 'ativo' ? (
                     <>
-                      <button onClick={() => startEdit(s)} style={styles.iconBtn} aria-label={`Editar ${s.name}`} title="Editar">
+                      <button onClick={() => startEdit(s)} style={iconBtn} aria-label={`Editar ${s.name}`} title="Editar">
                         <Pencil size={15} color={theme.inkSoft} strokeWidth={1.8} />
                       </button>
-                      <button onClick={() => handleArchive(s.id)} disabled={processingId === s.id} style={{ ...styles.iconBtn, opacity: processingId === s.id ? 0.4 : 1 }} aria-label={`Arquivar ${s.name}`} title="Arquivar">
+                      <button onClick={() => handleArchive(s.id, s.name)} disabled={processingId === s.id} style={{ ...iconBtn, opacity: processingId === s.id ? 0.4 : 1 }} aria-label={`Arquivar ${s.name}`} title="Arquivar">
                         <Archive size={15} color={theme.inkSoft} strokeWidth={1.8} />
                       </button>
                     </>
                   ) : (
                     <>
                       <button onClick={() => handleUnarchive(s.id)} disabled={processingId === s.id} style={{ ...styles.unarchiveBtn, opacity: processingId === s.id ? 0.4 : 1 }} title="Reativar">{processingId === s.id ? '…' : 'Reativar'}</button>
-                      <button onClick={() => handleDelete(s.id, s.name)} disabled={processingId === s.id} style={{ ...styles.deleteBtn, opacity: processingId === s.id ? 0.4 : 1 }} aria-label={`Apagar ${s.name}`} title="Apagar"><X size={13} strokeWidth={2} /></button>
+                      <button onClick={() => handleDelete(s.id, s.name)} disabled={processingId === s.id} style={{ ...deleteBtn, opacity: processingId === s.id ? 0.4 : 1 }} aria-label={`Apagar ${s.name}`} title="Apagar"><X size={13} strokeWidth={2} /></button>
                     </>
                   )}
                 </div>

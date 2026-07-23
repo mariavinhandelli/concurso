@@ -12,6 +12,7 @@
 
 import { tryGetUser } from '@/lib/supabase/requireUser';
 import { getSaudeMap, mediaPonderadaRenormalizada } from '@/services/metrics.service';
+import { getPrimaryTargetExam } from '@/services/primaryTargetCache';
 
 export type NivelProntidao = 'construcao' | 'progresso' | 'quase_la' | 'pronto';
 
@@ -48,7 +49,9 @@ const EMPTY: RaioX = {
   score: 0, nivel: 'construcao', materias: [], focoPrincipal: null,
 };
 
-function nivelDe(score: number): NivelProntidao {
+// H14 — exportada para RaioXCard.tsx colorir cada matéria com a MESMA régua
+// do score global, em vez de manter uma cópia local que podia divergir.
+export function nivelDe(score: number): NivelProntidao {
   if (score >= 85) return 'pronto';
   if (score >= 70) return 'quase_la';
   if (score >= 40) return 'progresso';
@@ -67,16 +70,8 @@ export async function getRaioX(): Promise<RaioX> {
   if (!auth) return EMPTY;
   const { supabase, userId } = auth;
 
-  const { data: targets } = await supabase
-    .from('target_exams')
-    .select('id, orgao, cargo, slug')
-    .eq('user_id', userId)
-    .is('archived_at', null) // M11: ignora concursos arquivados
-    .order('is_primary', { ascending: false })
-    .order('created_at', { ascending: true })
-    .limit(1);
-
-  const target = targets?.[0];
+  // H12 — cache compartilhado com coverage/suggestion (mesma query, 3x por carga).
+  const target = await getPrimaryTargetExam();
   if (!target) return EMPTY;
   const targetName = [target.orgao, target.cargo].filter(Boolean).join(' · ') || target.slug || 'Meu edital';
 

@@ -1,26 +1,29 @@
 'use client';
 
 import { memo } from 'react';
+import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { getJourneyStats, type JourneyStats as TJourneyStats } from '@/services/journey.service';
+import { getEditalCoverage, type EditalCoverage } from '@/services/coverage.service';
+import { fmtMin } from '@/lib/format/time';
 import { theme } from '@/lib/theme';
 import { useUI } from '@/components/layout/UIContext';
 import { Skeleton } from '@/components/ui/Skeleton';
 
-function fmtHours(minutes: number): string {
-  const h = Math.floor(minutes / 60);
-  const m = minutes % 60;
-  if (h === 0) return `${m}min`;
-  if (m === 0) return `${h}h`;
-  return `${h}h ${m}min`;
-}
-
 export const JourneyStats = memo(function JourneyStats() {
+  const router = useRouter();
   const { isMobile, isTablet } = useUI();
   const { data: j, isLoading } = useQuery<TJourneyStats>({
     queryKey: ['journey-stats'],
     queryFn: getJourneyStats,
     staleTime: 5 * 60_000,
+  });
+  // Mesma key do card Cobertura do Edital (dedupe): o chip "edital coberto"
+  // precisa mostrar o MESMO número do card vizinho — antes cada um media uma
+  // coisa (tópicos do edital vs. todos os tópicos) e a Home se contradizia.
+  const { data: cov } = useQuery<EditalCoverage>({
+    queryKey: ['edital-coverage'],
+    queryFn: getEditalCoverage,
   });
 
   if (isLoading) {
@@ -43,11 +46,15 @@ export const JourneyStats = memo(function JourneyStats() {
 
   if (!j || (j.totalMinutes === 0 && j.totalTopics === 0)) return null;
 
+  const temEdital = !!cov?.hasTarget && (cov?.total ?? 0) > 0;
   const stats: { value: string; label: string }[] = [
-    { value: fmtHours(j.totalMinutes), label: 'de estudo' },
+    { value: fmtMin(j.totalMinutes), label: 'de estudo' },
     { value: String(j.sessionsThisMonth), label: 'sessões este mês' },
-    { value: j.totalTopics > 0 ? `${j.coveragePct}%` : '—', label: 'edital coberto' },
-    { value: j.avgTopicsPerWeek4w > 0 ? `${j.avgTopicsPerWeek4w}/sem` : '—', label: 'ritmo' },
+    temEdital
+      ? { value: `${cov!.pct}%`, label: 'edital coberto' }
+      : { value: j.totalTopics > 0 ? `${j.coveragePct}%` : '—', label: 'tópicos cobertos' },
+    // H16 — vírgula decimal pt-BR ("0,3/sem"), não ponto ("0.3/sem").
+    { value: j.avgTopicsPerWeek4w > 0 ? `${j.avgTopicsPerWeek4w.toString().replace('.', ',')}/sem` : '—', label: 'ritmo' },
   ];
 
   return (
@@ -61,6 +68,9 @@ export const JourneyStats = memo(function JourneyStats() {
           </div>
         ))}
       </div>
+      <button style={styles.analiseLink} onClick={() => router.push('/performance')}>
+        ver análise completa →
+      </button>
     </div>
   );
 });
@@ -111,5 +121,9 @@ const styles: Record<string, React.CSSProperties> = {
     color: theme.inkFaint,
     fontWeight: 500,
     lineHeight: 1.3,
+  },
+  analiseLink: {
+    display: 'block', width: '100%', textAlign: 'center', marginTop: 2, border: 'none',
+    background: 'transparent', color: theme.inkSoft, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', padding: 0,
   },
 };

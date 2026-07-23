@@ -7,7 +7,7 @@
 // nenhuma sessão registrada, e respeita o "pular" (localStorage por usuário).
 'use client';
 
-import { useMemo, useState, type CSSProperties } from 'react';
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { useRouter } from 'next/navigation';
 import { Info } from 'lucide-react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -16,13 +16,19 @@ import { getOnboardingStatus } from '@/services/onboarding.service';
 import { listCatalogEditais, activateCatalogEdital, type CatalogEdital } from '@/services/editaisCatalog.service';
 import { buildPreview, type GeneratorPreview } from '@/services/scheduleGenerator.service';
 import { createRule, type RecurrenceItemInput } from '@/services/recurrence.service';
+import { getActiveCycleRule } from '@/services/cycleEngine.service';
 import { getDailyTarget, setDailyTarget, setStudyAnchor } from '@/services/goals.service';
 import { ANCORAS_SUGERIDAS } from '@/components/features/home/PactoEstudo';
 import { refreshHomeAfterSession } from '@/lib/home-refresh';
+import { fmtMin } from '@/lib/format/time';
 import { theme, zIndex } from '@/lib/theme';
 import { Button } from '@/components/ui/Button';
 
 function skipKey(userId: string) { return `focali_onboarding_skipped_${userId}`; }
+// Lido uma única vez pelo PlanoProntoBanner na Home (removido após a leitura) —
+// celebra o plano recém-criado em vez de a Home abrir direto na "parede de
+// zeros" (streak 0, missões 0 de 3) no primeiro instante pós-onboarding.
+export function justOnboardedKey(userId: string) { return `focali_just_onboarded_${userId}`; }
 
 // ─── Gate: decide se o wizard aparece ───────────────────────────────────────
 
@@ -63,13 +69,6 @@ export function OnboardingGate() {
 
 const HORAS_CHIPS = [2, 3, 4, 6];
 
-function fmtH(min: number) {
-  const h = Math.floor(min / 60); const m = min % 60;
-  if (h === 0) return `${m}min`;
-  if (m === 0) return `${h}h`;
-  return `${h}h${String(m).padStart(2, '0')}`;
-}
-
 function OnboardingWizard({ userId, onClose }: { userId: string; onClose: (rememberSkip: boolean) => void }) {
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -87,6 +86,20 @@ function OnboardingWizard({ userId, onClose }: { userId: string; onClose: (remem
     queryKey: ['catalog-editais'],
     queryFn: listCatalogEditais,
   });
+
+  // Semântica de diálogo: trava o scroll da página, leva o foco para dentro do
+  // modal ao abrir e devolve ao elemento anterior ao fechar (WCAG 2.4.3).
+  const modalRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const scrollAnterior = document.body.style.overflow;
+    const focoAnterior = document.activeElement as HTMLElement | null;
+    document.body.style.overflow = 'hidden';
+    modalRef.current?.focus();
+    return () => {
+      document.body.style.overflow = scrollAnterior;
+      focoAnterior?.focus?.();
+    };
+  }, []);
 
   const porArea = useMemo(() => {
     const map = new Map<string, CatalogEdital[]>();
@@ -110,9 +123,13 @@ function OnboardingWizard({ userId, onClose }: { userId: string; onClose: (remem
     setBusy(true);
     setError('');
     try {
+      // H13 — activateCatalogEdital já é idempotente no banco (retorna o mesmo
+      // target_exam ao repetir). createRule NÃO é: se uma tentativa anterior
+      // criou o ciclo mas falhou depois disso, "tentar de novo" duplicaria a
+      // regra ativa. Checar o ciclo ativo antes de criar fecha essa lacuna.
       const targetId = await activateCatalogEdital(editalId);
       const prev = await buildPreview(targetId, horasNum * 60);
-      if (prev.subjects.length > 0) {
+      if (prev.subjects.length > 0 && !(await getActiveCycleRule())) {
         const items: RecurrenceItemInput[] = prev.subjects.map((s, i) => ({
           subjectId: s.subjectId, plannedMinutes: s.minutesPerCycle, cycleOrder: i, position: i,
         }));
@@ -135,6 +152,12 @@ function OnboardingWizard({ userId, onClose }: { userId: string; onClose: (remem
         }
       }
       setPreview(prev);
+      if (typeof window !== 'undefined' && prev.subjects.length > 0) {
+        const primeiro = prev.subjects[0];
+        window.localStorage.setItem(justOnboardedKey(userId), JSON.stringify({
+          subjectId: primeiro.subjectId, subjectName: primeiro.subjectName, minutes: primeiro.minutesPerCycle,
+        }));
+      }
       refreshHomeAfterSession(queryClient);
       queryClient.invalidateQueries({ queryKey: ['onboarding-status'] });
       // O concurso recém-ativado alimenta a "Próxima prova" e o ciclo da Agenda —
@@ -161,7 +184,14 @@ function OnboardingWizard({ userId, onClose }: { userId: string; onClose: (remem
 
   return (
     <div style={s.overlay}>
-      <div style={s.modal}>
+      <div
+        ref={modalRef}
+        style={s.modal}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Boas-vindas — configure seu plano de estudos"
+        tabIndex={-1}
+      >
         {/* Cabeçalho */}
         <div style={s.head}>
           <div style={s.brand}>Focali</div>
@@ -293,7 +323,7 @@ function OnboardingWizard({ userId, onClose }: { userId: string; onClose: (remem
             <h2 style={s.h2}>🎉 Tudo pronto!</h2>
             <p style={s.sub}>
               {preview && preview.subjects.length > 0
-                ? `Seu ciclo de ${fmtH(preview.totalMinutes)} por dia foi criado. É assim que seu tempo será dividido:`
+                ? `Seu ciclo de ${fmtMin(preview.totalMinutes)} por dia foi criado. É assim que seu tempo será dividido:`
                 : 'Seu edital foi ativado! Monte seu cronograma quando quiser na aba Cronograma.'}
             </p>
 
@@ -306,7 +336,7 @@ function OnboardingWizard({ userId, onClose }: { userId: string; onClose: (remem
                     <span style={s.previewBar}>
                       <span style={{ ...s.previewFill, width: `${p.sharePct}%`, background: p.subjectColor }} />
                     </span>
-                    <span style={s.previewTime}>{fmtH(p.minutesPerCycle)}</span>
+                    <span style={s.previewTime}>{fmtMin(p.minutesPerCycle)}</span>
                   </div>
                 ))}
                 {(() => {
@@ -315,8 +345,8 @@ function OnboardingWizard({ userId, onClose }: { userId: string; onClose: (remem
                   const volta = preview.subjects.reduce((acc, p) => acc + p.minutesPerCycle, 0);
                   return volta > preview.totalMinutes ? (
                     <p style={s.cargaAviso}>
-                      Uma volta completa soma <b>{fmtH(volta)}</b> (mínimo de 30min por matéria) — mais que
-                      suas <b>{fmtH(preview.totalMinutes)}</b> diárias. Tudo bem: a volta atravessa mais de um
+                      Uma volta completa soma <b>{fmtMin(volta)}</b> (mínimo de 30min por matéria) — mais que
+                      suas <b>{fmtMin(preview.totalMinutes)}</b> diárias. Tudo bem: a volta atravessa mais de um
                       dia, girando na ordem acima.
                     </p>
                   ) : null;
@@ -393,6 +423,4 @@ const s: Record<string, CSSProperties> = {
 
   error: { color: theme.danger, fontSize: 13, margin: '12px 0 0' },
   actions: { display: 'flex', alignItems: 'center', gap: 10, marginTop: 20 },
-  skip: { padding: '10px 14px', borderRadius: theme.radiusSm, border: 'none', background: 'transparent', color: theme.inkFaint, fontSize: 14, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' },
-  primary: { padding: '11px 22px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
 };

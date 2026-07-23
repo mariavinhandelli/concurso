@@ -12,7 +12,7 @@ import { Skeleton } from '@/components/ui/Skeleton';
 export const CoberturaEdital = memo(function CoberturaEdital() {
   const router = useRouter();
   const [sharing, setSharing] = useState(false);
-  const { data, isLoading, isError } = useQuery<EditalCoverage>({
+  const { data, isLoading, isError, refetch, isRefetching } = useQuery<EditalCoverage>({
     queryKey: ['edital-coverage'],
     queryFn: getEditalCoverage,
   });
@@ -27,7 +27,18 @@ export const CoberturaEdital = memo(function CoberturaEdital() {
     );
   }
 
-  if (isError || !data) return null;
+  // H11 — antes sumia em silêncio (return null); agora avisa e oferece retry.
+  if (isError || !data) {
+    return (
+      <div style={styles.card}>
+        <span style={styles.eyebrow}>Cobertura do edital</span>
+        <p style={styles.emptyMsg}>Não foi possível carregar a cobertura agora.</p>
+        <button style={styles.ctaBtn} onClick={() => refetch()} disabled={isRefetching}>
+          {isRefetching ? 'tentando…' : 'tentar de novo'}
+        </button>
+      </div>
+    );
+  }
 
   // Sem concurso-alvo → convite a definir um (destrava a métrica).
   if (!data.hasTarget) {
@@ -69,7 +80,15 @@ export const CoberturaEdital = memo(function CoberturaEdital() {
       </div>
 
       {/* Barra segmentada — flex proporcional às contagens (sem falhas de arredondamento) */}
-      <div style={styles.bar}>
+      <div
+        style={styles.bar}
+        role="progressbar"
+        aria-label="Cobertura do edital"
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={pct}
+        aria-valuetext={`${pct}% do edital coberto — ${covered} de ${total} tópicos`}
+      >
         {mastered > 0 && <div style={{ flex: mastered, background: theme.teal }} />}
         {inProgress > 0 && <div style={{ flex: inProgress, background: theme.warn }} />}
         {notStarted > 0 && <div style={{ flex: notStarted, background: theme.muted }} />}
@@ -84,6 +103,10 @@ export const CoberturaEdital = memo(function CoberturaEdital() {
       <button style={styles.shareBtn} onClick={() => setSharing(true)}>
         <Share size={15} color={theme.teal} strokeWidth={1.9} />
         Compartilhar meu progresso
+      </button>
+
+      <button style={styles.analiseLink} onClick={() => router.push('/performance')}>
+        ver análise completa →
       </button>
 
       {sharing && <ShareProgressCard onClose={() => setSharing(false)} />}
@@ -122,5 +145,9 @@ const styles: Record<string, React.CSSProperties> = {
     borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.bg,
     color: theme.teal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', width: '100%',
     justifyContent: 'center',
+  },
+  analiseLink: {
+    display: 'block', width: '100%', textAlign: 'center', marginTop: 10, border: 'none',
+    background: 'transparent', color: theme.inkSoft, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', padding: 0,
   },
 };

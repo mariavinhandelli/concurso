@@ -59,7 +59,7 @@ export const MissoesSemana = memo(function MissoesSemana({ bare = false }: { bar
             <div style={styles.itemText}>
               <span style={{ ...styles.itemLabel, ...(m.concluida ? styles.itemLabelDone : {}) }}>{m.label}</span>
               <span style={styles.itemSub}>
-                {m.concluida ? m.descricao : `${m.current}${m.unit ? '' : ''} de ${m.target}${m.unit ? ' ' + m.unit : ''}`}
+                {m.concluida ? m.descricao : `${m.current} de ${m.target}${m.unit ? ' ' + m.unit : ''}`}
               </span>
             </div>
             {!m.concluida && m.target > 1 && (

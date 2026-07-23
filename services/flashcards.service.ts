@@ -7,7 +7,7 @@ import { calculateNextReview, daysOverdue, type RecallGrade } from '@/lib/spaced
 import { fromDbRow, toDbRow } from '@/lib/spaced-repetition.mapper';
 import { localDateInDays, toLocalDateString } from '@/lib/local-date';
 import { getArchivedSubjectIds } from '@/services/archivedCache';
-import { getUserFeatures, srsModifierFor } from '@/services/userFeatures.service';
+import { getUserFeatures, srsModifierFor, type UserFeatures } from '@/services/userFeatures.service';
 import * as repo from '@/services/flashcards.repository';
 
 // 'errei' = lapso (quality 0 no SM-2): reseta as repetições, derruba o ease factor
@@ -46,6 +46,8 @@ export interface DueCard extends Flashcard {
   subjectName: string;
   subjectColor: string;
   overdueDays: number;
+  // Próximos intervalos pré-computados — exibidos nos botões de avaliação (inspiração Anki).
+  nextIntervals: Record<ReviewRating, number>;
 }
 
 export interface QueueCard {
@@ -100,13 +102,15 @@ export async function createFlashcard(input: FlashcardInput): Promise<void> {
   });
 }
 
-export async function submitCardReview(cardId: string, rating: ReviewRating): Promise<void> {
+// features é opcional: quem já tem o valor em cache (ex.: FlashcardEngine, via
+// React Query) pode passá-lo para evitar um 2º fetch idêntico a cada avaliação.
+export async function submitCardReview(cardId: string, rating: ReviewRating, features?: UserFeatures): Promise<void> {
   const { supabase, userId } = await requireUser();
-  const [row, features] = await Promise.all([
+  const [row, resolvedFeatures] = await Promise.all([
     repo.fetchCardSRState(supabase, userId, cardId),
-    getUserFeatures(),
+    features ? Promise.resolve(features) : getUserFeatures(),
   ]);
-  const mod = srsModifierFor(features, row.subject_id);
+  const mod = srsModifierFor(resolvedFeatures, row.subject_id);
   const result = calculateNextReview(fromDbRow(row), RATING_TO_GRADE[rating], new Date(), mod);
   await repo.updateFlashcard(supabase, userId, cardId, { ...toDbRow(result), is_review_active: true });
 }
@@ -159,9 +163,10 @@ export async function listDueCards(): Promise<DueCard[]> {
   const auth = await tryGetUser();
   if (!auth) return [];
   const today = toLocalDateString();
-  const [archivedIds, rows] = await Promise.all([
+  const [archivedIds, rows, features] = await Promise.all([
     getArchivedSubjectIds(),
     repo.fetchDueCardsWithSubject(auth.supabase, auth.userId, today),
+    getUserFeatures(),
   ]);
   const excluded = new Set(archivedIds);
   const filtered = excluded.size > 0
@@ -170,6 +175,8 @@ export async function listDueCards(): Promise<DueCard[]> {
 
   return filtered.map(c => {
       const subj = Array.isArray(c.subjects) ? c.subjects[0] : c.subjects;
+      const srState = fromDbRow({ ease_factor: c.ease_factor, interval_days: c.interval_days, repetitions: c.repetitions });
+      const mod = srsModifierFor(features, c.subject_id);
       return {
         id: c.id, front: c.front, back: c.back,
         topic_id: c.topic_id, subject_id: c.subject_id,
@@ -180,6 +187,12 @@ export async function listDueCards(): Promise<DueCard[]> {
         subjectName: subj?.name ?? 'Sem matéria',
         subjectColor: subj?.color ?? '#C9B8DD',
         overdueDays: daysOverdue(c.next_review_date),
+        nextIntervals: {
+          errei:         calculateNextReview(srState, RATING_TO_GRADE.errei, new Date(), mod).intervalDays,
+          dificil:       calculateNextReview(srState, RATING_TO_GRADE.dificil, new Date(), mod).intervalDays,
+          intermediario: calculateNextReview(srState, RATING_TO_GRADE.intermediario, new Date(), mod).intervalDays,
+          facil:         calculateNextReview(srState, RATING_TO_GRADE.facil, new Date(), mod).intervalDays,
+        },
       };
     });
 }
@@ -189,6 +202,48 @@ export async function countDueCards(): Promise<number> {
   if (!auth) return 0;
   const archivedIds = await getArchivedSubjectIds();
   return repo.countDueFlashcards(auth.supabase, auth.userId, toLocalDateString(), archivedIds);
+}
+
+// Data do próximo card agendado (para o empty state da fila de revisão).
+// Exclusão de arquivadas em memória (como em listDueCards): "subject_id NOT IN"
+// descartaria cards sem matéria, já que NULL NOT IN (...) é NULL/false em SQL.
+// Busca um lote e pega o primeiro sobrevivente — não a linha 1 crua.
+export async function getNextScheduledCardDate(): Promise<string | null> {
+  const auth = await tryGetUser();
+  if (!auth) return null;
+  const archivedIds = await getArchivedSubjectIds();
+  const excluded = new Set(archivedIds);
+  const { data } = await auth.supabase
+    .from('flashcards')
+    .select('next_review_date, subject_id')
+    .eq('user_id', auth.userId)
+    .eq('is_review_active', true)
+    .not('next_review_date', 'is', null)
+    .order('next_review_date', { ascending: true })
+    .limit(50);
+  const row = (data ?? []).find((c) => !c.subject_id || !excluded.has(c.subject_id));
+  return row?.next_review_date ?? null;
+}
+
+export interface FlashcardByError {
+  id: string;
+  front: string;
+  isReviewActive: boolean;
+  nextReviewDate: string | null;
+}
+
+// Flashcards já criados a partir de um erro do Caderno (source_error_id) — para
+// o Caderno mostrar, ao reabrir um erro, se já existe cartão vinculado e se
+// está em revisão ativa, em vez de o usuário ter que procurar manualmente.
+export async function listFlashcardsByError(errorId: string): Promise<FlashcardByError[]> {
+  const auth = await tryGetUser();
+  if (!auth) return [];
+  const rows = await repo.fetchFlashcardsByError(auth.supabase, auth.userId, errorId);
+  return rows.map((r) => ({
+    id: r.id, front: r.front,
+    isReviewActive: r.is_review_active,
+    nextReviewDate: r.next_review_date,
+  }));
 }
 
 export async function countFlashcardsByError(errorId: string): Promise<number> {

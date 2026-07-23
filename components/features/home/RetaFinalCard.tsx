@@ -157,9 +157,6 @@ const s: Record<string, React.CSSProperties> = {
   prontidao: { fontSize: 14, color: theme.inkSoft, lineHeight: 1.55, margin: '0 0 16px', maxWidth: 640 },
 
   actions: { display: 'flex', gap: 10, flexWrap: 'wrap' },
-  btn: { padding: '10px 16px', borderRadius: theme.radiusSm, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
-  btnPrimary: { border: 'none' },
-  btnGhost: { border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.inkSoft },
 
   checklist: { marginTop: 18, paddingTop: 16, borderTop: `0.5px solid ${theme.line}` },
   checkHead: { display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 8 },

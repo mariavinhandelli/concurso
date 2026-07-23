@@ -5,11 +5,12 @@
 // Cada item carrega o dado necessário para renderizar E para reagendar, sem
 // que o player precise conhecer os detalhes de cada fonte.
 
-import { listDueReviews, type ReviewItem } from '@/services/reviews.service';
-import { listDueCards, type DueCard } from '@/services/flashcards.service';
-import { listRevisoesDue, type LeiInteracao } from '@/services/leiInteracoes.service';
+import { listDueReviews, getNextScheduledDate as getNextScheduledTopicDate, type ReviewItem } from '@/services/reviews.service';
+import { listDueCards, getNextScheduledCardDate, type DueCard } from '@/services/flashcards.service';
+import { listRevisoesDue, hydrateLeiInteracoes, getNextScheduledLeiDate, type LeiInteracao } from '@/services/leiInteracoes.service';
 import { listRevisoesHoje, type JurisComInteracao } from '@/services/jurisInteracoes.service';
-import { getLei, LEIS_CATALOG, type Lei, type LeiArtigo } from '@/services/leis.service';
+import { getNextScheduledJurisDate } from '@/services/jurisRevisao.service';
+import type { Lei, LeiArtigo } from '@/services/leis.service';
 
 export type UnifiedKind = 'topic' | 'flashcard' | 'lei' | 'juris';
 
@@ -25,24 +26,6 @@ export interface FilaUnificada {
   total: number;
 }
 
-// Hidrata as revisões de lei vencidas com o artigo do catálogo local (sem rede).
-async function buildLeiItems(due: LeiInteracao[]): Promise<UnifiedItem[]> {
-  if (due.length === 0) return [];
-  const slugs = new Set(due.map((d) => d.artigo_key.split(':')[0]));
-  const leis = new Map<string, Lei>();
-  for (const slug of slugs) {
-    if (LEIS_CATALOG.some((l) => l.slug === slug)) leis.set(slug, await getLei(slug));
-  }
-  const out: UnifiedItem[] = [];
-  for (const interacao of due) {
-    const slug = interacao.artigo_key.split(':')[0];
-    const lei = leis.get(slug);
-    const artigo = lei?.artigos.find((a) => a.key === interacao.artigo_key);
-    if (lei && artigo) out.push({ kind: 'lei', id: interacao.artigo_key, interacao, artigo, lei });
-  }
-  return out;
-}
-
 export async function buildFilaUnificada(): Promise<FilaUnificada> {
   // Uma fonte lenta ou vazia nunca deve derrubar as demais.
   const [topics, cards, leiDue, jurisDue] = await Promise.all([
@@ -52,7 +35,8 @@ export async function buildFilaUnificada(): Promise<FilaUnificada> {
     listRevisoesHoje().catch(() => [] as JurisComInteracao[]),
   ]);
 
-  const leiItems = await buildLeiItems(leiDue);
+  const leiItems: UnifiedItem[] = (await hydrateLeiInteracoes(leiDue))
+    .map(({ interacao, artigo, lei }) => ({ kind: 'lei', id: interacao.artigo_key, interacao, artigo, lei }));
 
   // Agrupado por natureza (não intercalado) para reduzir troca de contexto: o
   // usuário mantém a mesma "gramática" de avaliação por bloco. Ordem: tópicos →
@@ -72,4 +56,18 @@ export async function buildFilaUnificada(): Promise<FilaUnificada> {
   };
 
   return { items, counts, total: items.length };
+}
+
+// Menor data entre as 4 fontes — só chamada quando a fila está vazia, para o
+// empty state dizer quando algo vai vencer em vez de só "nada para revisar".
+export async function getNextScheduledDateUnificada(): Promise<string | null> {
+  const dates = await Promise.all([
+    getNextScheduledTopicDate().catch(() => null),
+    getNextScheduledCardDate().catch(() => null),
+    getNextScheduledLeiDate().catch(() => null),
+    getNextScheduledJurisDate().catch(() => null),
+  ]);
+  const validas = dates.filter((d): d is string => d !== null);
+  if (validas.length === 0) return null;
+  return validas.reduce((min, d) => (d < min ? d : min));
 }

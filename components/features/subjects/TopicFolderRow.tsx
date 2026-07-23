@@ -86,13 +86,18 @@ function TopicFolderRowFn({
   const kidsDone = kids.filter((k) => k.is_completed).length;
   const kidsPct = kids.length === 0 ? 0 : Math.round((kidsDone / kids.length) * 100);
 
+  // Touch targets: 44px em mobile (recomendação WCAG); 32/26px só com mouse.
+  const iconBtn = isMobile ? { ...styles.iconBtn, width: 44, height: 44 } : styles.iconBtn;
+  const deleteBtn = isMobile ? { ...styles.deleteBtn, width: 44, height: 44 } : styles.deleteBtn;
+  const caretBtn = isMobile ? { ...styles.caretBtn, width: 40, height: 40 } : styles.caretBtn;
+
   return (
     <div style={styles.folderWrap}>
       {/* Cabeçalho da pasta */}
       <div style={styles.folderHead}>
         <button
           onClick={() => onToggleCollapse(topic.id)}
-          style={styles.caretBtn}
+          style={caretBtn}
           aria-label={isCollapsed ? 'Expandir pasta' : 'Recolher pasta'}
         >
           <ChevronDown
@@ -130,19 +135,19 @@ function TopicFolderRowFn({
           {/* Botão "+" agora no header — mais acessível que no rodapé da lista */}
           <button
             onClick={() => { if (isCollapsed) onToggleCollapse(topic.id); onStartAddChild(topic.id); }}
-            style={{ ...styles.iconBtn, color: theme.teal }}
+            style={{ ...iconBtn, color: theme.teal }}
             title="Adicionar subtópico" aria-label="Adicionar subtópico"
           >
             <Plus size={15} strokeWidth={2} />
           </button>
           <button
             onClick={() => isFolderEditing ? onCommitEdit(topic.id, editText) : onStartEdit(topic)}
-            style={{ ...styles.iconBtn, color: isFolderEditing ? theme.teal : theme.inkSoft }}
+            style={{ ...iconBtn, color: isFolderEditing ? theme.teal : theme.inkSoft }}
             title="Editar nome da pasta" aria-label="Editar pasta"
           >
             <Pencil size={15} strokeWidth={1.8} />
           </button>
-          <button onClick={() => onDeleteFolder(topic.id)} style={styles.deleteBtn} aria-label="Apagar pasta" title="Apagar pasta">
+          <button onClick={() => onDeleteFolder(topic.id)} style={deleteBtn} aria-label="Apagar pasta" title="Apagar pasta">
             <X size={14} strokeWidth={2} />
           </button>
         </div>

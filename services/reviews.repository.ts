@@ -132,6 +132,36 @@ export async function countDueTopicReviews(
     ? base.not('subject_id', 'in', `(${excludeSubjectIds.join(',')})`)
     : base;
 
-  const { count } = await query;
+  const { count, error } = await query;
+  // H11 — antes engolia o erro (`count ?? 0`): uma falha de rede virava
+  // silenciosamente "0 revisões", e o Plano de Hoje marcava o passo como
+  // concluído sem o usuário ter revisado nada. Agora propaga pra React Query
+  // marcar isError e o card mostrar "não consegui verificar" com retry.
+  if (error) throw new Error('Erro ao contar revisões: ' + error.message);
   return count ?? 0;
+}
+
+// Data da revisão vencida mais antiga — para o "há N dias" no Plano de Hoje.
+// fetchDueTopicReviews já ordena asc por next_review_date; aqui só a 1ª linha.
+export async function fetchOldestDueTopicDate(
+  supabase: SupabaseClient,
+  userId: string,
+  excludeSubjectIds: string[] = [],
+): Promise<string | null> {
+  const base = supabase
+    .from('topics')
+    .select('next_review_date')
+    .eq('user_id', userId)
+    .eq('is_review_active', true)
+    .not('next_review_date', 'is', null)
+    .lte('next_review_date', toLocalDateString())
+    .order('next_review_date', { ascending: true })
+    .limit(1);
+
+  const query = excludeSubjectIds.length > 0
+    ? base.not('subject_id', 'in', `(${excludeSubjectIds.join(',')})`)
+    : base;
+
+  const { data } = await query.maybeSingle();
+  return data?.next_review_date ?? null;
 }

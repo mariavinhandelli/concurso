@@ -12,9 +12,10 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { X, Zap } from 'lucide-react';
 import {
-  getGoalsSummary, getSuggestedDailyTarget, setDailyTarget,
+  getGoalsSummary, getSuggestedDailyTarget, setDailyTarget, getStudyAnchor,
   type GoalsSummary, type SuggestedTarget,
 } from '@/services/goals.service';
+import { listBlocks, type StudyBlock } from '@/services/studyBlocks.service';
 import { usePersistedState } from '@/hooks/usePersistedState';
 import { useToast } from '@/components/ui/ToastProvider';
 import { toLocalDateString } from '@/lib/local-date';
@@ -37,6 +38,18 @@ export function MetaSugeridaHint() {
 
   const { data: goals } = useQuery<GoalsSummary>({ queryKey: ['goals-summary'], queryFn: getGoalsSummary });
   const { data: sug } = useQuery<SuggestedTarget>({ queryKey: ['suggested-target'], queryFn: getSuggestedDailyTarget });
+  // Mesma key do PactoEstudo (dedupe) — só para saber se o pacto já está pedindo
+  // uma decisão hoje (ver comentário abaixo sobre a régua de 1 nudge por dia).
+  const { data: anchor } = useQuery<string | null>({
+    queryKey: ['study-anchor'], queryFn: getStudyAnchor, staleTime: 5 * 60_000,
+  });
+  // Mesma key do PlanoHoje (dedupe) — precisa do blocosFeitos pra replicar o
+  // diaComecou de verdade (ver bug: sem isso, um bloco marcado feito sem
+  // minutos registrados fazia o Pacto sumir mas o nudge daqui ficava suprimido
+  // por engano, e o usuário não via nudge nenhum naquele dia).
+  const { data: blocos } = useQuery<StudyBlock[]>({
+    queryKey: ['today-blocks', hoje], queryFn: () => listBlocks(hoje, hoje),
+  });
 
   if (!goals || !sug) return null;
 
@@ -48,8 +61,16 @@ export function MetaSugeridaHint() {
     && sug.suggestedMinutes < target;
   const zeroHoje = target > 0 && goals.todayMinutes === 0;
 
+  // Régua de 1 nudge por dia: o Pacto de Estudo (PlanoHoje) já pede uma decisão
+  // ("crie um pacto") quando não há âncora e o dia não começou (mesmo critério
+  // de diaComecou do PlanoHoje: minutos OU bloco marcado feito). Dois cards
+  // pedindo decisão na mesma dobra é ruído — o Pacto tem prioridade porque
+  // aparece primeiro na página. anchor === undefined (ainda carregando) não
+  // suprime nada, só quando já sabemos que o Pacto está pedindo decisão de fato.
+  const diaComecou = goals.todayMinutes > 0 || (blocos ?? []).some((b) => b.is_done);
+  const pactoPedeDecisao = anchor === null && !diaComecou;
   // Estados 1 e 2 são "nudges" acionáveis (aplicam a sugestão); dispensáveis por hoje.
-  const mostrarNudge = (semMeta || heroica) && dismissedOn !== hoje;
+  const mostrarNudge = (semMeta || heroica) && dismissedOn !== hoje && !pactoPedeDecisao;
   // Estado 3 é microcopy de projeção; também dispensável por hoje.
   const mostrarProjecao = !mostrarNudge && zeroHoje && dismissedOn !== hoje;
 

@@ -77,7 +77,7 @@ export default function TargetsPage() {
 
   const refreshTargetViews = useCallback(() => {
     load(); // recarrega os ativos (useTargetList)
-    for (const key of [['target-exams'], ['target-exams-archived'], ['edital-coverage'], ['raiox']]) {
+    for (const key of [['target-exams'], ['target-exams-archived'], ['edital-coverage'], ['raiox'], ['catalog-editais']]) {
       queryClient.invalidateQueries({ queryKey: key });
     }
   }, [load, queryClient]);
@@ -488,11 +488,12 @@ const TargetRow = memo(function TargetRow({
                 value={dateValue}
                 onChange={(e) => setDateValue(e.target.value)}
                 autoFocus
+                aria-label="Data da prova"
                 style={s.dateInput}
                 onKeyDown={(e) => { if (e.key === 'Enter') handleSaveDate(); if (e.key === 'Escape') setEditing(false); }}
               />
-              <button onClick={handleSaveDate} style={s.dateSaveBtn}><Check size={14} strokeWidth={2.2} /></button>
-              <button onClick={() => setEditing(false)} style={s.dateCancelBtn}><X size={14} strokeWidth={2} /></button>
+              <button onClick={handleSaveDate} aria-label="Salvar data" style={s.dateSaveBtn}><Check size={14} strokeWidth={2.2} /></button>
+              <button onClick={() => setEditing(false)} aria-label="Cancelar edição da data" style={s.dateCancelBtn}><X size={14} strokeWidth={2} /></button>
             </div>
           ) : (
             <button
@@ -588,7 +589,9 @@ const s: Record<string, CSSProperties> = {
   archivedRow: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, padding: '10px 14px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.bg, minWidth: 0 },
   archivedName: { fontSize: 14, color: theme.inkSoft, fontWeight: 500, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
   restoreBtn: { flexShrink: 0, padding: '6px 14px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.teal}`, background: theme.tealBg, color: theme.teal, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
-  targetRow: { display: 'flex', alignItems: 'center', gap: 12, background: theme.card, borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, padding: '12px 14px', transition: 'border-color .15s, box-shadow .15s', minWidth: 0 },
+  // border desmembrado (sem shorthand): o hover sobrescreve só o borderColor e
+  // misturar shorthand + longhand no mesmo style dispara warning do React.
+  targetRow: { display: 'flex', alignItems: 'center', gap: 12, background: theme.card, borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, padding: '12px 14px', transition: 'border-color .15s, box-shadow .15s', minWidth: 0 },
   starBtn: { border: 'none', background: 'transparent', cursor: 'pointer', padding: 4, display: 'flex', alignItems: 'center', flexShrink: 0 },
   targetMain: { flex: 1, display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', cursor: 'pointer', minWidth: 0 },
   targetLabel: { fontSize: 15, color: theme.ink, fontWeight: 600 },

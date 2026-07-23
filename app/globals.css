@@ -690,8 +690,18 @@ img, video, canvas {
 .skel         { animation: skeleton-pulse 1.4s ease infinite; }
 .add-block-btn { border: none !important; transition: background .15s ease, color .15s ease !important; }
 .add-block-btn:hover { background: var(--teal-bg) !important; color: var(--teal) !important; }
-.block-check { transition: border-color .15s ease, background .15s ease, transform .1s ease !important; }
+.block-check { transition: border-color .15s ease, background .15s ease, transform .1s ease !important; position: relative; }
 .block-check:hover { transform: scale(1.1) !important; opacity: 1 !important; }
+/* Foco visível no seletor de semana (o input de data é invisível por cima do
+   rótulo; sem isto o foco por teclado não aparecia). */
+.week-label-picker:focus-within { outline: 2px solid var(--teal); outline-offset: 2px; border-radius: 8px; }
+
+/* Alvo de toque efetivo ~44px sem inflar o círculo de 16–18px (WCAG 2.5.8).
+   O seletor de 44px em globals exclui .block-check de propósito (densidade
+   da grade); em telas de toque a área invisível compensa. */
+@media (pointer: coarse) {
+  .block-check::after { content: ''; position: absolute; inset: -13px; }
+}
 
 /* Fade de entrada ao trocar abas */
 @keyframes tabEnter {
@@ -770,6 +780,27 @@ img, video, canvas {
    cores têm largura pra aparecer. !important vence o background inline. */
 .topbar-add-btn:hover {
   background: var(--primary-hover) !important;
+}
+
+/* ── Skip link: invisível até receber foco por teclado ── */
+.skip-link {
+  position: fixed;
+  top: -100px;
+  left: 16px;
+  z-index: 9999;
+  padding: 10px 16px;
+  border-radius: 10px;
+  background: var(--card);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-hover);
+  font-weight: 600;
+  font-size: 14px;
+  text-decoration: none;
+  transition: top .15s ease;
+}
+.skip-link:focus {
+  top: 12px;
 }
 
 /* ── Hambúrguer oculto por padrão (aparece só em mobile via media query) ── */

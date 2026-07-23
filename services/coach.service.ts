@@ -6,11 +6,23 @@
 // bullet só aparece se a amostra for suficiente para dizer algo honesto.
 
 import { tryGetUser } from '@/lib/supabase/requireUser';
-import { getStreak } from '@/services/streak.service';
-import { getRaioX } from '@/services/raiox.service';
-import { getSuggestions } from '@/services/suggestion.service';
+import { getStreak, type StreakInfo } from '@/services/streak.service';
+import { getRaioX, type RaioX } from '@/services/raiox.service';
+import { getSuggestions, type SuggestionsResult } from '@/services/suggestion.service';
 import { mondayOf } from '@/lib/schedule-utils';
 import { toLocalDateString as localDateStr } from '@/lib/local-date';
+
+// H10 — StreakBar, RaioXCard e PlanoHoje já buscam esses 3 dados via React
+// Query ('streak', 'raiox', 'home-suggestions'). Chamar getStreak/getRaioX/
+// getSuggestions direto aqui (sem passar por deps) re-executava tudo de novo —
+// ~13 round-trips redundantes por carga da Home. O chamador (CoachSemanal)
+// agora passa os dados já cacheados via queryClient.ensureQueryData; só
+// refazemos a busca aqui se algo vier faltando (uso fora da Home, testes etc).
+export interface CoachSemanalDeps {
+  streak?: StreakInfo;
+  raiox?: RaioX;
+  suggestions?: SuggestionsResult;
+}
 
 const MIN_QUESTOES_MATERIA = 10; // amostra mínima pra apontar "melhor matéria" com confiança
 const MIN_SESSOES_CAUSA = 3;     // amostra mínima pra apontar uma causa de erro predominante
@@ -86,7 +98,7 @@ function semanaParaExibir(hoje: Date): { start: Date; end: Date; isCurrent: bool
   return { start, end, isCurrent: false };
 }
 
-export async function getCoachSemanal(): Promise<CoachResumo> {
+export async function getCoachSemanal(deps: CoachSemanalDeps = {}): Promise<CoachResumo> {
   const auth = await tryGetUser();
   if (!auth) return EMPTY;
   const { supabase, userId } = auth;
@@ -106,9 +118,9 @@ export async function getCoachSemanal(): Promise<CoachResumo> {
       .gte('started_at', start.toISOString())
       .lt('started_at', endExclusive.toISOString()),
     supabase.from('subjects').select('id, name').eq('user_id', userId),
-    getStreak(),
-    getRaioX(),
-    getSuggestions(),
+    deps.streak ?? getStreak(),
+    deps.raiox ?? getRaioX(),
+    deps.suggestions ?? getSuggestions(),
   ]);
 
   if (!logs || logs.length === 0) {

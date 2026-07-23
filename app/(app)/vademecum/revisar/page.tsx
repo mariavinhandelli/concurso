@@ -7,8 +7,10 @@
 import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
-import { getLei, LEIS_CATALOG, type Lei, type LeiArtigo } from '@/services/leis.service';
-import { listRevisoesDue, submitRevisaoArtigo, type LeiInteracao } from '@/services/leiInteracoes.service';
+import {
+  listRevisoesDue, submitRevisaoArtigo, hydrateLeiInteracoes,
+  type LeiItemHidratado,
+} from '@/services/leiInteracoes.service';
 import { RATING_LABEL, type JurisRating } from '@/lib/juris-review';
 import { GRIFO_CORES, SUBLINHADO_COR, segmentarBloco } from '@/lib/lei-grifos';
 import { refreshHomeAfterSession } from '@/lib/home-refresh';
@@ -19,15 +21,8 @@ import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { PageContainer } from '@/components/ui/Page';
 
-interface ItemFila {
-  interacao: LeiInteracao;
-  artigo: LeiArtigo;
-  lei: Lei;
-}
-
-// Largura fixa da lacuna — não proporcional ao trecho oculto, para não vazar
-// pista do tamanho da resposta (recall ativo puro).
-const LACUNA_LARGURA = 14;
+// Lacuna com largura fixa via CSS — não proporcional ao trecho oculto, para
+// não vazar pista do tamanho da resposta (recall ativo puro).
 
 const RATINGS: { value: JurisRating; cor: string }[] = [
   { value: 'errei',   cor: theme.danger },
@@ -42,7 +37,7 @@ export default function RevisarArtigosPage() {
   const queryClient = useQueryClient();
   const { isMobile } = useUI();
 
-  const [fila, setFila] = useState<ItemFila[] | null>(null);
+  const [fila, setFila] = useState<LeiItemHidratado[] | null>(null);
   const [idx, setIdx] = useState(0);
   const [reveladas, setReveladas] = useState<Set<string>>(new Set());
   const [saving, setSaving] = useState(false);
@@ -53,20 +48,8 @@ export default function RevisarArtigosPage() {
     async function load() {
       try {
         const due = await listRevisoesDue();
-        const slugs = new Set(due.map((d) => d.artigo_key.split(':')[0]));
-        const leis = new Map<string, Lei>();
-        for (const slug of slugs) {
-          if (LEIS_CATALOG.some((l) => l.slug === slug)) leis.set(slug, await getLei(slug));
-        }
-        if (cancelled) return;
-        const itens: ItemFila[] = [];
-        for (const interacao of due) {
-          const slug = interacao.artigo_key.split(':')[0];
-          const lei = leis.get(slug);
-          const artigo = lei?.artigos.find((a) => a.key === interacao.artigo_key);
-          if (lei && artigo) itens.push({ interacao, artigo, lei });
-        }
-        setFila(itens);
+        const itens = await hydrateLeiInteracoes(due);
+        if (!cancelled) setFila(itens);
       } catch {
         if (!cancelled) setFila([]);
       }
@@ -152,14 +135,14 @@ export default function RevisarArtigosPage() {
                 const aberta = reveladas.has(seg.grifo.id);
                 if (!aberta) {
                   return (
-                    <span
+                    <button
                       key={i}
+                      type="button"
                       onClick={() => setReveladas((prev) => new Set(prev).add(seg.grifo!.id))}
-                      title="Clique para revelar"
+                      title="Revelar trecho oculto"
+                      aria-label="Revelar trecho oculto"
                       style={s.lacuna}
-                    >
-                      {' '.repeat(LACUNA_LARGURA)}
-                    </span>
+                    />
                   );
                 }
                 const estiloSeg: CSSProperties = seg.grifo.estilo === 'sublinhado'
@@ -201,7 +184,7 @@ const s: Record<string, CSSProperties> = {
   texto: { fontSize: 15, lineHeight: 1.9, color: theme.ink },
   bloco: { margin: '0 0 8px' },
   blocoRotulo: { fontWeight: 600, color: theme.inkSoft },
-  lacuna: { background: theme.muted, borderRadius: 4, cursor: 'pointer', borderBottom: `1.5px dashed ${theme.inkFaint}` },
+  lacuna: { display: 'inline-block', width: 72, height: '1.05em', verticalAlign: 'text-bottom', background: theme.muted, borderRadius: 4, cursor: 'pointer', border: 'none', borderBottom: `1.5px dashed ${theme.inkFaint}`, padding: 0 },
   ratings: { display: 'flex', gap: 8, marginTop: 18, flexWrap: 'wrap' },
   ratingBtn: { flex: 1, minWidth: 90, padding: '11px 8px', borderRadius: theme.radiusSm, borderWidth: 1.5, borderStyle: 'solid', background: 'transparent', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' },
   doneBox: { textAlign: 'center', padding: '60px 20px' },

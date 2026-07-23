@@ -143,6 +143,9 @@ export async function editRuleVersioned(
     p_cycle_weekdays:      input.cycleWeekdays ?? null,
     p_cycle_daily_minutes: input.cycleDailyMinutes ?? 180,
     p_items:               itemsJson,
+    // Data local do usuário: sem ela o servidor usava CURRENT_DATE (UTC) e a
+    // edição feita à noite (BRT) só valia a partir do dia seguinte.
+    p_today:               localDateStr(new Date()),
   });
 
   if (error) throw new Error('Erro ao editar regra: ' + error.message);
@@ -188,6 +191,7 @@ export interface RuleSummary {
     weekdays: number[];
     minutes: number;
     cycleOrder: number;
+    archived: boolean;   // matéria arquivada segue na regra; a UI sinaliza
   }[];
 }
 
@@ -206,9 +210,9 @@ export async function listRuleSummaries(): Promise<RuleSummary[]> {
   if (error) throw new Error('Erro ao listar regras: ' + error.message);
 
   const { data: subjects } = await supabase
-    .from('subjects').select('id, name, color').eq('user_id', userId);
-  const subjMap: Record<string, { name: string; color: string }> = {};
-  for (const s of subjects ?? []) subjMap[s.id] = { name: s.name, color: s.color ?? '#C9B8DD' };
+    .from('subjects').select('id, name, color, status').eq('user_id', userId);
+  const subjMap: Record<string, { name: string; color: string; archived: boolean }> = {};
+  for (const s of subjects ?? []) subjMap[s.id] = { name: s.name, color: s.color ?? '#C9B8DD', archived: s.status === 'arquivado' };
 
   return (rules ?? []).map((r) => {
     const porMateria = new Map<string, { weekdays: number[]; minutes: number; cycleOrder: number }>();
@@ -228,6 +232,7 @@ export async function listRuleSummaries(): Promise<RuleSummary[]> {
       weekdays: v.weekdays.sort(),
       minutes: v.minutes,
       cycleOrder: v.cycleOrder,
+      archived: subjMap[subjectId]?.archived ?? false,
     }));
     if (r.mode === 'ciclo') materias = materias.sort((a, b) => a.cycleOrder - b.cycleOrder);
 

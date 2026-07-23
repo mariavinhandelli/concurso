@@ -26,17 +26,20 @@ export function CardsTab({ onStudy }: Props) {
   const [creating, setCreating] = useState(false);
   const [editingCard, setEditingCard] = useState<Flashcard | null>(null);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
+  const [loadingSubjects, setLoadingSubjects] = useState(true);
   const nav = useFlashcardNavigation();
 
   useEffect(() => {
     Promise.all([
       listActiveWithColor().then(nav.setSubjects),
       countFlashcardsBySubject().then(nav.setCounts),
-    ]).catch(e => {
+    ]).then(() => {
+      nav.setLoadError(null);
+    }).catch(e => {
       const msg = e instanceof Error ? e.message : 'Erro ao carregar matérias. Recarregue a página.';
       nav.setLoadError(msg);
       toast.error(msg);
-    });
+    }).finally(() => setLoadingSubjects(false));
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -89,7 +92,10 @@ export function CardsTab({ onStudy }: Props) {
         {nav.level === 'subjects' && (
           <div style={styles.list}>
             <p style={styles.crumb}>Escolha a matéria</p>
-            {nav.subjects.length === 0 && (
+            {loadingSubjects && (
+              <p style={styles.muted}>Carregando matérias…</p>
+            )}
+            {!loadingSubjects && nav.subjects.length === 0 && (
               <div style={styles.emptyState}>
                 <p style={styles.muted}>Nenhuma matéria cadastrada ainda.</p>
                 <Link href="/subjects" style={styles.emptyAction}>Adicionar matéria →</Link>
@@ -124,7 +130,10 @@ export function CardsTab({ onStudy }: Props) {
             {nav.topics.map(t => (
               <div
                 key={t.id}
+                role="button"
+                tabIndex={0}
                 onClick={() => nav.openTopic(t, msg => toast.error(msg))}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); nav.openTopic(t, msg => toast.error(msg)); } }}
                 style={{ ...styles.navItem, ...(hoveredId === t.id ? styles.navItemHover : {}) }}
                 onMouseEnter={() => setHoveredId(t.id)}
                 onMouseLeave={() => setHoveredId(null)}
@@ -133,7 +142,10 @@ export function CardsTab({ onStudy }: Props) {
               </div>
             ))}
             <div
+              role="button"
+              tabIndex={0}
               onClick={() => nav.openTopic('none', msg => toast.error(msg))}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); nav.openTopic('none', msg => toast.error(msg)); } }}
               style={{ ...styles.navItem, fontStyle: 'italic', color: theme.inkFaint, ...(hoveredId === 'none' ? styles.navItemHover : {}) }}
               onMouseEnter={() => setHoveredId('none')}
               onMouseLeave={() => setHoveredId(null)}
@@ -155,6 +167,7 @@ export function CardsTab({ onStudy }: Props) {
 
             {editingCard ? (
               <CardForm
+                key={editingCard.id}
                 subjectId={editingCard.subject_id}
                 topicId={editingCard.topic_id}
                 card={editingCard}

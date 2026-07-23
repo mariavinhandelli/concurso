@@ -13,8 +13,11 @@ import { getArchivedSubjectIds } from '@/services/archivedCache';
 import { getUserFeatures, srsModifierFor } from '@/services/userFeatures.service';
 import * as repo from '@/services/reviews.repository';
 
-export type ReviewRating = 'dificil' | 'intermediario' | 'facil';
+// 'esqueci' = lapso (quality 0 no SM-2): zera repetições e volta o tópico para
+// amanhã — antes o grade 'errou' existia no algoritmo mas era inalcançável.
+export type ReviewRating = 'esqueci' | 'dificil' | 'intermediario' | 'facil';
 const RATING_TO_GRADE: Record<ReviewRating, RecallGrade> = {
+  esqueci: 'errou',
   dificil: 'dificil',
   intermediario: 'bom',
   facil: 'facil',
@@ -29,7 +32,7 @@ export interface ReviewItem {
   nextReviewDate: string | null;
   overdueDays: number;
   // Próximos intervalos pré-computados — exibidos nos botões de avaliação (inspiração Anki).
-  nextIntervals: { dificil: number; intermediario: number; facil: number };
+  nextIntervals: { esqueci: number; dificil: number; intermediario: number; facil: number };
 }
 
 // ---------- Queries ----------
@@ -56,6 +59,7 @@ export async function listDueReviews(): Promise<ReviewItem[]> {
       nextReviewDate: t.next_review_date,
       overdueDays: daysOverdue(t.next_review_date),
       nextIntervals: {
+        esqueci:      calculateNextReview(srState, RATING_TO_GRADE.esqueci, new Date(), mod).intervalDays,
         dificil:      calculateNextReview(srState, RATING_TO_GRADE.dificil, new Date(), mod).intervalDays,
         intermediario: calculateNextReview(srState, RATING_TO_GRADE.intermediario, new Date(), mod).intervalDays,
         facil:        calculateNextReview(srState, RATING_TO_GRADE.facil, new Date(), mod).intervalDays,
@@ -65,15 +69,23 @@ export async function listDueReviews(): Promise<ReviewItem[]> {
 }
 
 // Retorna a data da próxima revisão agendada (para o empty state após a sessão).
+// Exclui matérias arquivadas — senão um tópico esquecido numa matéria arquivada
+// aparece como "próxima revisão" mesmo vencido há meses, contradizendo a fila
+// (que já o exclui corretamente).
 export async function getNextScheduledDate(): Promise<string | null> {
   const auth = await tryGetUser();
   if (!auth) return null;
-  const { data } = await auth.supabase
+  const archivedIds = await getArchivedSubjectIds();
+  const base = auth.supabase
     .from('topics')
     .select('next_review_date')
     .eq('user_id', auth.userId)
     .eq('is_review_active', true)
-    .not('next_review_date', 'is', null)
+    .not('next_review_date', 'is', null);
+  const query = archivedIds.length > 0
+    ? base.not('subject_id', 'in', `(${archivedIds.join(',')})`)
+    : base;
+  const { data } = await query
     .order('next_review_date', { ascending: true })
     .limit(1)
     .maybeSingle();
@@ -87,10 +99,32 @@ export async function countDueReviews(): Promise<number> {
   return repo.countDueTopicReviews(auth.supabase, auth.userId, archivedIds);
 }
 
+export async function getOldestDueTopicDate(): Promise<string | null> {
+  const auth = await tryGetUser();
+  if (!auth) return null;
+  const archivedIds = await getArchivedSubjectIds();
+  return repo.fetchOldestDueTopicDate(auth.supabase, auth.userId, archivedIds);
+}
+
 export async function getReviewStatus(topicId: string): Promise<boolean> {
   const auth = await tryGetUser();
   if (!auth) return false;
   return repo.fetchTopicReviewActive(auth.supabase, auth.userId, topicId);
+}
+
+export interface TopicReviewSchedule {
+  isActive: boolean;
+  nextReviewDate: string | null;
+}
+
+// Estado de agendamento de um tópico (para o Caderno mostrar, ao reabrir um
+// erro, se aquele tópico já está em revisão e quando vence).
+export async function getTopicReviewSchedule(topicId: string): Promise<TopicReviewSchedule | null> {
+  const auth = await tryGetUser();
+  if (!auth) return null;
+  const row = await repo.fetchTopicSchedule(auth.supabase, auth.userId, topicId);
+  if (!row) return null;
+  return { isActive: row.is_review_active, nextReviewDate: row.next_review_date };
 }
 
 // ---------- Mutations ----------

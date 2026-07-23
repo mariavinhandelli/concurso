@@ -11,6 +11,8 @@ import { useUI } from '@/components/layout/UIContext';
 import { useUser } from '@/components/layout/UserContext';
 import { useTimer } from '@/components/features/timer/TimerContext';
 import { useCoachDecision } from '@/hooks/useCoach';
+import { useLocalToday } from '@/hooks/useLocalToday';
+import { parseLocalDate } from '@/lib/local-date';
 import { SemanaPanel } from '@/components/features/home/SemanaPanel';
 import { OnboardingGate } from '@/components/features/home/OnboardingWizard';
 import { CoachSlot } from '@/components/features/home/CoachSlot';
@@ -23,6 +25,7 @@ import { RaioXCard } from '@/components/features/home/RaioXCard';
 import { UltimaNotaCard } from '@/components/features/home/UltimaNotaCard';
 import { TimePieCard } from '@/components/features/home/TimePieCard';
 import { JourneyStats } from '@/components/features/home/JourneyStats';
+import { PlanoProntoBanner } from '@/components/features/home/PlanoProntoBanner';
 import { ExamCountdown } from '@/components/features/dashboard/ExamCountdown';
 
 // Componente mínimo isolado no Suspense — usa useSearchParams apenas para
@@ -89,12 +92,15 @@ function HomeContent() {
 
   // Pré-carrega as rotas mais acessadas a partir da Home para navegação instantânea.
   useEffect(() => {
-    router.prefetch('/reviews');
+    router.prefetch('/revisar');
     router.prefetch('/flashcards');
     router.prefetch('/conquistas');
   }, [router]);
 
-  const hoje = new Date().toLocaleDateString('pt-BR', {
+  // H16 — useLocalToday re-renderiza exatamente à meia-noite; sem isso, uma
+  // aba aberta durante a virada mostrava a saudação do dia anterior.
+  const todayStr = useLocalToday();
+  const hoje = parseLocalDate(todayStr).toLocaleDateString('pt-BR', {
     weekday: 'long', day: 'numeric', month: 'long',
   });
 
@@ -120,11 +126,20 @@ function HomeContent() {
       {/* Decisor único: no máximo UM card de coaching no topo (Rodada 3) */}
       <CoachSlot decision={decision} />
 
+      {/* Flash de boas-vindas ao plano recém-criado pelo onboarding — antes da
+          "Esta semana" (streak/missões zeradas), não depois. */}
+      <PlanoProntoBanner />
+
       {/* ── ZONA 1 · Agora — o que fazer neste momento ── */}
       <ZoneHeader label="Agora" />
       <PlanoHoje />
 
-      {returnMode ? (
+      {decision.loading ? (
+        /* Enquanto o decisor não resolve, segura a renderização das zonas abaixo:
+           evita pintar o painel completo e colapsá-lo em seguida (layout shift)
+           quando o usuário está voltando de um hiato. */
+        null
+      ) : returnMode ? (
         /* Modo retorno (hiato): acolhe + 1 ação; o resto fica atrás de "ver tudo"
            para não entregar a montanha nem a parede de zeros a quem voltou de longe. */
         <button style={styles.verTudo} onClick={() => setExpandido(true)}>

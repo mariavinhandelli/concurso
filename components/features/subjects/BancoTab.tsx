@@ -19,6 +19,7 @@ export function BancoTab({ isMobile, onError, onActivated }: Props) {
   const [areas, setAreas] = useState<CatalogArea[]>([]);
   const [subjects, setSubjects] = useState<CatalogSubject[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [areaFilter, setAreaFilter] = useState<string>('todas');
   const [query, setQuery] = useState('');
   const [activatingId, setActivatingId] = useState<string | null>(null);
@@ -47,7 +48,10 @@ export function BancoTab({ isMobile, onError, onActivated }: Props) {
       const [a, s] = await Promise.all([getCatalogAreas(), getCatalogSubjects()]);
       setAreas(a);
       setSubjects(s);
+      setLoadError(false);
     } catch (e) {
+      // Erro ≠ vazio: sem isso a falha de rede aparecia como catálogo vazio.
+      setLoadError(true);
       onError(e instanceof Error ? e.message : 'Erro ao carregar o banco.');
     } finally {
       setLoading(false);
@@ -90,7 +94,29 @@ export function BancoTab({ isMobile, onError, onActivated }: Props) {
       .filter((g) => g.items.length > 0);
   }, [areas, filtered, areaFilter]);
 
-  if (loading) return <p style={styles.muted}>Carregando…</p>;
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        {[1, 2, 3].map((i) => (
+          <div key={i} style={{ height: 72, borderRadius: 14, background: theme.muted, animation: 'skeleton-pulse 1.4s ease infinite', animationDelay: `${i * 80}ms` }} />
+        ))}
+      </div>
+    );
+  }
+
+  if (loadError && subjects.length === 0) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 10 }}>
+        <p style={styles.muted}>Não foi possível carregar o banco de matérias. Verifique a conexão.</p>
+        <button
+          onClick={() => { setLoading(true); load(); }}
+          style={{ ...styles.activateBtn }}
+        >
+          Tentar de novo
+        </button>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -101,6 +127,7 @@ export function BancoTab({ isMobile, onError, onActivated }: Props) {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Buscar matéria…"
+          aria-label="Buscar matéria no banco"
           style={styles.searchInput}
         />
       </div>
@@ -147,8 +174,15 @@ export function BancoTab({ isMobile, onError, onActivated }: Props) {
                 <div
                   key={s.id}
                   className="subject-card"
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`Ver tópicos de ${s.name}`}
                   style={{ ...styles.catCard, cursor: 'pointer' }}
                   onClick={() => openModal(s)}
+                  onKeyDown={(e) => {
+                    // Card era só clicável com mouse — teclado não abria o modal de tópicos.
+                    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openModal(s); }
+                  }}
                   onMouseEnter={() => { void getCatalogTopics(s.id); }}
                 >
                   <div style={{ minWidth: 0, flex: 1 }}>

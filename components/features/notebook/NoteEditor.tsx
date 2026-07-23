@@ -14,6 +14,9 @@ import { ERROR_TYPES, createNote, updateNote, listBoards, type ErrorNote, type N
 import { listActive as listSubjectOptions } from '@/services/subjects.service';
 import { listLeaves as listTopicOptions, type PickerOption } from '@/services/topics.service';
 import { getAcertoTopico } from '@/services/metrics.service';
+import { getTopicReviewSchedule, type TopicReviewSchedule } from '@/services/reviews.service';
+import { listFlashcardsByError, type FlashcardByError } from '@/services/flashcards.service';
+import { daysOverdue } from '@/lib/spaced-repetition';
 import { FlashcardModal } from '@/components/features/notebook/FlashcardModal';
 import { theme } from '@/lib/theme';
 import { Button } from '@/components/ui/Button';
@@ -45,6 +48,8 @@ export function NoteEditor({ note, presetSubjectId = null, presetTopicId = null,
   const [boards, setBoards] = useState<{ id: string; name: string; color: string }[]>([]);
 
   const [acerto, setAcerto] = useState<{ pct: number | null; total: number } | null>(null);
+  const [topicSchedule, setTopicSchedule] = useState<TopicReviewSchedule | null>(null);
+  const [linkedFlashcards, setLinkedFlashcards] = useState<FlashcardByError[]>([]);
 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -91,6 +96,26 @@ export function NoteEditor({ note, presetSubjectId = null, presetTopicId = null,
       .then((a) => { if (latestTopicIdRef.current === topicId) setAcerto(a); })
       .catch(() => { if (latestTopicIdRef.current === topicId) setAcerto(null); });
   }, [topicId]);
+
+  // Mesma guarda: mostra se o tópico já está em revisão ao reabrir o erro —
+  // sem isso, o usuário não tinha como saber que já existia um agendamento
+  // (só descobria indo em Matérias ou na Agenda separadamente).
+  useEffect(() => {
+    if (!topicId) { setTopicSchedule(null); return; }
+    const id = topicId;
+    getTopicReviewSchedule(id)
+      .then((s) => { if (latestTopicIdRef.current === id || topicId === id) setTopicSchedule(s); })
+      .catch(() => setTopicSchedule(null));
+  }, [topicId]);
+
+  // Flashcards já criados a partir DESTE erro — só existe para erro já salvo.
+  useEffect(() => {
+    if (!note?.id) { setLinkedFlashcards([]); return; }
+    const id = note.id;
+    listFlashcardsByError(id)
+      .then((cards) => { if (note?.id === id) setLinkedFlashcards(cards); })
+      .catch(() => setLinkedFlashcards([]));
+  }, [note?.id]);
 
   useEffect(() => {
     setTitle(note?.title ?? '');
@@ -217,6 +242,34 @@ export function NoteEditor({ note, presetSubjectId = null, presetTopicId = null,
             </span>
           </div>
         )
+      )}
+
+      {/* Estado de revisão do tópico + flashcards já criados a partir deste
+          erro — sem isso, reabrir um erro não dizia se ele já tinha sido
+          agendado nem se um flashcard já existia (só descobria em outra tela). */}
+      {topicId && topicSchedule?.isActive && (
+        <div style={styles.acertoBox}>
+          <span style={styles.acertoLabel}>Revisão deste tópico</span>
+          <span style={{ ...styles.acertoPct, fontSize: 13, color: theme.teal }}>
+            {(() => {
+              const d = daysOverdue(topicSchedule.nextReviewDate);
+              if (d > 0) return `venceu há ${d} ${d === 1 ? 'dia' : 'dias'}`;
+              if (d === 0) return 'vence hoje';
+              return `próxima em ${Math.abs(d)} ${Math.abs(d) === 1 ? 'dia' : 'dias'}`;
+            })()}
+          </span>
+        </div>
+      )}
+
+      {note && linkedFlashcards.length > 0 && (
+        <div style={styles.acertoBox}>
+          <span style={styles.acertoLabel}>
+            {linkedFlashcards.length === 1 ? '1 flashcard criado a partir deste erro' : `${linkedFlashcards.length} flashcards criados a partir deste erro`}
+          </span>
+          <span style={styles.acertoMeta}>
+            {linkedFlashcards.some((c) => c.isReviewActive) ? 'em revisão' : 'fora da revisão'}
+          </span>
+        </div>
       )}
 
       <RichTextEditor

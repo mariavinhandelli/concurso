@@ -145,29 +145,29 @@ export default function SchedulePage() {
         <div style={styles.toolbar}>
           {/* Linha 1: navegação + seletor de view */}
           <div style={styles.toolbarRow}>
-            {/* Navegação semanal — só no cronograma; a aba Mês tem sua própria nav */}
-            {!calendarOn && (
+            {/* Navegação semanal — só na Grade/Lista; Mês tem nav própria e no
+                Ciclo a semana não significa nada (só confundia). */}
+            {!calendarOn && view !== 'ciclo' && (
             <div style={{ ...styles.nav, width: isMobile ? '100%' : undefined, gap: isMobile ? 6 : 10 }}>
               <button className="icon-touch-target" style={styles.navBtn} onClick={() => navWeek(-1)} aria-label="Semana anterior">
                 <ChevronLeft size={16} strokeWidth={2} />
               </button>
-              <button
-                type="button"
-                className="touch-target"
+              {/* Input como IRMÃO sobreposto ao rótulo (input dentro de <button>
+                  é HTML inválido e confunde tecnologia assistiva). */}
+              <span
+                className="touch-target week-label-picker"
                 style={{ ...styles.weekLabel, minWidth: isMobile ? 0 : 150, flex: isMobile ? 1 : undefined }}
-                title="Ir para uma data"
-                onClick={(e) => {
-                  const inp = e.currentTarget.querySelector('input[type=date]') as HTMLInputElement | null;
-                  if (inp?.showPicker) inp.showPicker(); else inp?.focus();
-                }}
               >
                 {weekLabel}
                 <input
                   type="date"
+                  aria-label="Ir para uma data"
+                  title="Ir para uma data"
+                  onClick={(e) => { const inp = e.currentTarget; if (inp.showPicker) inp.showPicker(); }}
                   onChange={(e) => { if (e.target.value) setWeekStart(new Date(e.target.value + 'T12:00:00')); }}
                   style={styles.datePicker}
                 />
-              </button>
+              </span>
               <button className="icon-touch-target" style={styles.navBtn} onClick={() => navWeek(1)} aria-label="Próxima semana">
                 <ChevronRight size={16} strokeWidth={2} />
               </button>
@@ -181,7 +181,7 @@ export default function SchedulePage() {
             </div>
             )}
 
-            <div style={calendarOn ? { marginLeft: 'auto' } : undefined}>
+            <div style={calendarOn || view === 'ciclo' ? { marginLeft: 'auto' } : undefined}>
               {/* Ciclo: sempre visível — se não houver ciclo, abre o modal de criação */}
               <SegmentedControl options={viewOptions} value={activeView} onChange={onViewChange} equalWidth={false} />
             </div>
@@ -542,7 +542,8 @@ const BlockCard = memo(function BlockCard({ block, onToggle, onDelete, onEdit, o
           borderColor: block.is_done ? t.border : 'rgba(15,23,42,.2)',
           ...(block.is_done ? { background: t.border, color: '#fff' } : { background: 'transparent' }),
         }}
-        aria-label="Concluir"
+        aria-label={`${block.is_done ? 'Desmarcar' : 'Concluir'} ${block.subjectName ?? 'bloco'}`}
+        aria-pressed={block.is_done}
       >
         {block.is_done && <Check size={13} strokeWidth={2.5} />}
       </button>
@@ -626,7 +627,9 @@ const styles: Record<string, React.CSSProperties> = {
   // Lista
   listView: { flexDirection: 'column', gap: 14 },
   listDay: { background: theme.card, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, borderRadius: theme.radius, boxShadow: theme.shadow, padding: 16, minWidth: 0 },
-  listDayEmpty: { background: 'transparent', boxShadow: 'none', borderColor: 'transparent', paddingTop: 10, paddingBottom: 10 },
+  // padding em shorthand (não paddingTop/Bottom): misturar com o `padding: 16`
+  // de listDay disparava o warning de estilo conflitante do React a cada render.
+  listDayEmpty: { background: 'transparent', boxShadow: 'none', borderColor: 'transparent', padding: '10px 16px' },
   listDayHead: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10, gap: 10, flexWrap: 'wrap' },
   listDayName: { fontSize: 15, fontWeight: 700, color: theme.ink },
   listDayRight: { display: 'flex', alignItems: 'center', gap: 12 },

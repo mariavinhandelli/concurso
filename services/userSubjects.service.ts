@@ -18,6 +18,7 @@ export interface MySubject {
   status: SubjectStatus;
   catalog_id: string | null;   // null = matéria criada pelo próprio usuário
   is_own: boolean;             // atalho: catalog_id === null
+  created_at: string;          // para a ordenação "Recentes" da aba Minhas
   leaf_total: number;          // total de tópicos-folha (estudáveis)
   leaf_done: number;           // folhas com is_completed = true
   progress: number;            // 0-100, arredondado
@@ -32,7 +33,7 @@ export async function getMySubjects(status: SubjectStatus = 'ativo'): Promise<My
 
   const { data: subjects, error: subErr } = await supabase
     .from('subjects')
-    .select('id, name, color, position, status, catalog_id')
+    .select('id, name, color, position, status, catalog_id, created_at')
     .eq('user_id', user.id)
     .eq('status', status)
     .order('position', { ascending: true })
@@ -71,6 +72,7 @@ export async function getMySubjects(status: SubjectStatus = 'ativo'): Promise<My
       status: s.status as SubjectStatus,
       catalog_id: s.catalog_id,
       is_own: s.catalog_id === null,
+      created_at: s.created_at,
       leaf_total: leafTotal,
       leaf_done: leafDone,
       progress,

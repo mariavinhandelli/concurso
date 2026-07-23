@@ -5,6 +5,7 @@
 
 import { createClient } from '@/lib/supabase/client';
 import { getCachedUser } from '@/lib/supabase/authCache';
+import { invalidatePrimaryTargetCache } from '@/services/primaryTargetCache';
 
 export type EditalSituacao = 'vigente' | 'em_expectativa' | 'encerrado';
 
@@ -242,6 +243,7 @@ export async function activateCatalogEdital(editalId: string): Promise<string> {
   const supabase = createClient();
   const { data, error } = await supabase.rpc('activate_catalog_edital', { p_edital_id: editalId });
   if (error) throw new Error('Erro ao ativar edital: ' + error.message);
+  invalidatePrimaryTargetCache();
   return data as string;
 }
 

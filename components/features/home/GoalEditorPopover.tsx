@@ -1,6 +1,6 @@
 'use client';
 
-import type { ReactNode } from 'react';
+import { useEffect, useRef, type ReactNode } from 'react';
 import { theme, zIndex } from '@/lib/theme';
 import { Button } from '@/components/ui/Button';
 
@@ -14,8 +14,35 @@ interface GoalEditorPopoverProps {
 }
 
 export function GoalEditorPopover({ label, weeklyHint, saving, onSave, onClose, children }: GoalEditorPopoverProps) {
+  const ref = useRef<HTMLDivElement>(null);
+
+  // Escape fecha; clique fora fecha. O gatilho (data-popover-trigger) é ignorado
+  // no clique-fora — senão o pointerdown fecharia e o click do gatilho reabriria.
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') onClose();
+    }
+    function onDown(e: PointerEvent) {
+      const alvo = e.target as Element | null;
+      if (!alvo) return;
+      if (alvo.closest('[data-popover-trigger]')) return;
+      if (ref.current && !ref.current.contains(alvo)) onClose();
+    }
+    document.addEventListener('keydown', onKey);
+    document.addEventListener('pointerdown', onDown);
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      document.removeEventListener('pointerdown', onDown);
+    };
+  }, [onClose]);
+
+  // Foco entra no primeiro campo ao abrir (navegação por teclado).
+  useEffect(() => {
+    ref.current?.querySelector<HTMLElement>('input, button')?.focus();
+  }, []);
+
   return (
-    <div style={styles.popover}>
+    <div ref={ref} style={styles.popover} role="dialog" aria-label={label}>
       <div style={styles.popLabel}>{label}</div>
       {children}
       {weeklyHint && <div style={styles.popHint}>{weeklyHint}</div>}
@@ -38,9 +65,4 @@ const styles: Record<string, React.CSSProperties> = {
   popLabel: { fontSize: 12, fontWeight: 600, color: theme.inkSoft, marginBottom: 10 },
   popHint: { fontSize: 12, color: theme.inkFaint, marginBottom: 10, marginTop: -4 },
   popActions: { display: 'flex', gap: 8, justifyContent: 'flex-end' },
-  popSave: {
-    padding: '7px 14px', borderRadius: theme.radiusXs, border: 'none',
-    background: theme.teal, color: theme.onTeal, fontSize: 13, fontWeight: 600,
-    fontFamily: 'inherit',
-  },
 };

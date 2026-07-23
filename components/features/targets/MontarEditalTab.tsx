@@ -163,16 +163,26 @@ export const MontarEditalTab = memo(function MontarEditalTab({
             return (
               <div key={node.subject.id} style={s.subjectBlock}>
                 <div style={s.subjectHead}>
-                  <button onClick={() => toggleExpand(node.subject.id)} style={s.expandBtn} aria-label="Expandir">
+                  <button
+                    onClick={() => toggleExpand(node.subject.id)}
+                    style={s.expandBtn}
+                    aria-label={`${aberto ? 'Recolher' : 'Expandir'} ${node.subject.name}`}
+                    aria-expanded={aberto}
+                  >
                     <Chevron open={aberto} />
                   </button>
+                  {/* O clique no nome é atalho redundante do botão acima (que é o alvo de teclado) */}
                   <span style={s.subjectName} onClick={() => toggleExpand(node.subject.id)}>
                     {node.subject.name}
                   </span>
                   <span style={{ ...s.subjectCount, ...(marcados > 0 ? { color: theme.teal, fontWeight: 700 } : {}) }}>
                     {marcados}/{ids.length}
                   </span>
-                  <button onClick={() => handleMarkAll(node, !todosMarcados)} style={s.markAllBtn}>
+                  <button
+                    onClick={() => handleMarkAll(node, !todosMarcados)}
+                    style={s.markAllBtn}
+                    aria-label={`${todosMarcados ? 'Desmarcar' : 'Marcar'} todos os tópicos de ${node.subject.name}`}
+                  >
                     {todosMarcados ? 'Desmarcar tudo' : 'Marcar tudo'}
                   </button>
                 </div>
@@ -200,41 +210,56 @@ export const MontarEditalTab = memo(function MontarEditalTab({
         </>
       )}
 
-      {innerTab === 'pesos' && (
-        <div style={s.weightsBlock}>
-          <p style={s.weightsHint}>Peso 1 (padrão) a 5 (cai muito). Define quanto tempo a matéria recebe no cronograma. Questões esperadas é opcional.</p>
-          <div style={s.weightList}>
-            {tree.map((node) => {
-              const sid = node.subject.id;
-              const bp = blueprints[sid];
-              const weight = bp?.weight ?? 1;
-              const nQ = nQInputs[sid] ?? bp?.num_questions_expected?.toString() ?? '';
-              return (
-                <div key={sid} style={{ ...s.weightRow, flexDirection: isMobile ? 'column' : 'row', alignItems: isMobile ? 'stretch' : 'center', gap: isMobile ? 10 : 0 }}>
-                  <span style={s.weightSubject}>{node.subject.name}</span>
-                  <div style={{ ...s.weightControls, ...(isMobile ? { width: '100%' } : {}) }}>
-                    <Select
-                      value={weight}
-                      onChange={(e) => onChangeSubjectWeight(sid, Number(e.target.value), nQ)}
-                      style={{ flex: isMobile ? 1 : undefined }}
-                    >
-                      {[1, 2, 3, 4, 5].map((w) => <option key={w} value={w}>Peso {w}</option>)}
-                    </Select>
-                    <Input
-                      value={nQ}
-                      onChange={(e) => onNQChange(sid, e.target.value)}
-                      onBlur={(e) => onChangeSubjectWeight(sid, weight, e.target.value)}
-                      placeholder="nº questões"
-                      type="number"
-                      style={{ width: isMobile ? undefined : 120, flex: isMobile ? 1 : undefined, minWidth: 0 }}
-                    />
+      {innerTab === 'pesos' && (() => {
+        // Pesos valem para ESTE concurso: só matérias com tópicos vinculados
+        // (ou com peso já salvo) — definir peso de matéria fora do edital confunde
+        // e não afeta o cronograma.
+        const doEdital = tree.filter((node) =>
+          node.topics.some((t) => linked.has(t.id)) || blueprints[node.subject.id]);
+        return (
+          <div style={s.weightsBlock}>
+            <p style={s.weightsHint}>Peso 1 (padrão) a 5 (cai muito). Define quanto tempo a matéria recebe no cronograma. Questões esperadas é opcional.</p>
+            {doEdital.length === 0 ? (
+              <p style={s.weightsHint}>Nenhuma matéria vinculada ainda — marque tópicos na aba “Tópicos” para definir pesos.</p>
+            ) : (
+            <div style={s.weightList}>
+              {doEdital.map((node) => {
+                const sid = node.subject.id;
+                const bp = blueprints[sid];
+                const weight = bp?.weight ?? 1;
+                const nQ = nQInputs[sid] ?? bp?.num_questions_expected?.toString() ?? '';
+                return (
+                  <div key={sid} style={{ ...s.weightRow, flexDirection: isMobile ? 'column' : 'row', alignItems: isMobile ? 'stretch' : 'center', gap: isMobile ? 10 : 0 }}>
+                    <span style={s.weightSubject}>{node.subject.name}</span>
+                    <div style={{ ...s.weightControls, ...(isMobile ? { width: '100%' } : {}) }}>
+                      <Select
+                        value={weight}
+                        aria-label={`Peso de ${node.subject.name}`}
+                        onChange={(e) => onChangeSubjectWeight(sid, Number(e.target.value), nQ)}
+                        style={{ flex: isMobile ? 1 : undefined }}
+                      >
+                        {[1, 2, 3, 4, 5].map((w) => <option key={w} value={w}>Peso {w}</option>)}
+                      </Select>
+                      <Input
+                        value={nQ}
+                        onChange={(e) => onNQChange(sid, e.target.value)}
+                        onBlur={(e) => onChangeSubjectWeight(sid, weight, e.target.value)}
+                        placeholder="nº questões"
+                        aria-label={`Questões esperadas de ${node.subject.name}`}
+                        type="number"
+                        min={0}
+                        step={1}
+                        style={{ width: isMobile ? undefined : 120, flex: isMobile ? 1 : undefined, minWidth: 0 }}
+                      />
+                    </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
+            )}
           </div>
-        </div>
-      )}
+        );
+      })()}
     </div>
   );
 });

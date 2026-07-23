@@ -37,6 +37,9 @@ export function BlockModal({ blockDate, dateLabel, onClose, onCreated, editBlock
   const [subjectId, setSubjectId] = useState(editBlock?.subjectId ?? '');
   const [topicId, setTopicId] = useState(editBlock?.topicId ?? '');
   const [minutes, setMinutes] = useState(String(editBlock?.plannedMinutes ?? 60));
+  // Edição pode remarcar o dia (updateBlock já aceitava blockDate; faltava a UI —
+  // sem isso a única forma de mover um bloco era excluir e recriar).
+  const [date, setDate] = useState(blockDate);
   const [saving, setSaving] = useState(false);
   // Guard síncrono: `disabled={saving}` só vale após o re-render — dois cliques
   // no mesmo tick disparavam handleSave duas vezes e duplicavam o bloco.
@@ -59,14 +62,17 @@ export function BlockModal({ blockDate, dateLabel, onClose, onCreated, editBlock
   async function handleSave() {
     if (savingRef.current) return;
     if (!subjectId) { setError('Escolha uma matéria.'); return; }
+    // Duração saneada: -30, 0 e 99999 viravam lixo no banco (o RPC agora também rejeita).
+    const plannedMinutes = Math.min(1440, Math.max(5, Math.round(Number(minutes)) || 60));
     savingRef.current = true;
     setSaving(true);
     setError('');
     try {
       if (isEdit && editBlock) {
         await updateBlock(editBlock.id, {
-          plannedMinutes: Number(minutes) || 60,
+          plannedMinutes,
           topicId: topicId || null,
+          ...(date && date !== blockDate ? { blockDate: date } : {}),
         });
         // Nota: editar matéria de um bloco existente não é suportado aqui
         // (mudaria a cor/contexto); se trocou a matéria, ignoramos por ora.
@@ -75,7 +81,7 @@ export function BlockModal({ blockDate, dateLabel, onClose, onCreated, editBlock
           blockDate,
           subjectId,
           topicId: topicId || null,
-          plannedMinutes: Number(minutes) || 60,
+          plannedMinutes,
         });
       }
       onCreated();
@@ -97,6 +103,14 @@ export function BlockModal({ blockDate, dateLabel, onClose, onCreated, editBlock
           {subjects.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
         </Select>
         {isEdit && <p style={styles.hint}>A matéria não muda na edição. Para trocá-la, exclua e crie outro bloco.</p>}
+
+        {isEdit && (
+          <>
+            <label style={styles.label} htmlFor="block-modal-date">Dia</label>
+            <Input id="block-modal-date" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+            {date !== blockDate && <p style={styles.hint}>O bloco será remarcado para o dia escolhido.</p>}
+          </>
+        )}
 
         <label style={styles.label}>Tópico (opcional)</label>
         <Select value={topicId} onChange={(e) => setTopicId(e.target.value)} disabled={!subjectId || topics.length === 0}>

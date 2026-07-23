@@ -41,6 +41,9 @@ export interface FlashcardQueueRow {
 }
 
 export interface FlashcardWithSubjectRow extends FlashcardRow {
+  ease_factor: number | null;
+  interval_days: number | null;
+  repetitions: number | null;
   subjects?: SubjectRef | SubjectRef[] | null;
 }
 
@@ -174,7 +177,7 @@ export async function fetchDueCardsWithSubject(
 ): Promise<FlashcardWithSubjectRow[]> {
   const { data, error } = await supabase
     .from('flashcards')
-    .select('id, front, back, topic_id, subject_id, source_error_id, is_review_active, next_review_date, created_at, subjects(name, color)')
+    .select('id, front, back, topic_id, subject_id, source_error_id, is_review_active, next_review_date, created_at, ease_factor, interval_days, repetitions, subjects(name, color)')
     .eq('user_id', userId)
     .eq('is_review_active', true)
     .not('next_review_date', 'is', null)
@@ -240,7 +243,9 @@ export async function countDueFlashcards(
     ? base.or(`subject_id.is.null,subject_id.not.in.(${excludeSubjectIds.join(',')})`)
     : base;
 
-  const { count } = await query;
+  const { count, error } = await query;
+  // H11 — não engolir erro como 0: viraria "tudo em dia" falso no Plano de Hoje.
+  if (error) throw new Error('Erro ao contar flashcards: ' + error.message);
   return count ?? 0;
 }
 
@@ -260,7 +265,9 @@ export async function countNewFlashcards(
     ? base.or(`subject_id.is.null,subject_id.not.in.(${excludeSubjectIds.join(',')})`)
     : base;
 
-  const { count } = await query;
+  const { count, error } = await query;
+  // Mesmo cuidado do H11 em countDueFlashcards: não engolir erro como 0.
+  if (error) throw new Error('Erro ao contar novos flashcards: ' + error.message);
   return count ?? 0;
 }
 
@@ -277,6 +284,29 @@ export async function countFlashcardsByError(
 
   if (error) { console.error('countFlashcardsByError:', error); return 0; }
   return count ?? 0;
+}
+
+export interface FlashcardByErrorRow {
+  id: string;
+  front: string;
+  is_review_active: boolean;
+  next_review_date: string | null;
+}
+
+export async function fetchFlashcardsByError(
+  supabase: SupabaseClient,
+  userId: string,
+  errorId: string,
+): Promise<FlashcardByErrorRow[]> {
+  const { data, error } = await supabase
+    .from('flashcards')
+    .select('id, front, is_review_active, next_review_date')
+    .eq('source_error_id', errorId)
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false });
+
+  if (error) throw new Error('Erro ao buscar flashcards do erro: ' + error.message);
+  return data ?? [];
 }
 
 // ---------- Mutations ----------

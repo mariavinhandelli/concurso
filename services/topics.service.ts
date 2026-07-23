@@ -53,13 +53,25 @@ export async function listAllTopics() {
   return repo.fetchAllTopics(supabase, userId);
 }
 
+// Igual a listAllTopics, mas só de matérias ATIVAS — para pickers de estudo
+// (Modo Foco, Command Palette). Tópicos de matérias arquivadas continuam
+// existindo (e contando no progresso de editais via listAllTopics), mas não
+// devem ser oferecidos como alvo de nova sessão.
+export async function listActiveTopics() {
+  const { supabase, userId } = await requireUser();
+  return repo.fetchActiveTopics(supabase, userId);
+}
+
 export async function createTopic(
   subjectId: string,
   name: string,
   parentId: string | null = null,
 ) {
   const { supabase, userId } = await requireUser();
-  return repo.insertTopic(supabase, userId, subjectId, name, parentId);
+  // position = max+1 — sem isso o default 0 do banco jogava o tópico novo para
+  // o TOPO/meio da lista quando já existiam tópicos importados (positions 0..n).
+  const position = await repo.fetchMaxTopicPosition(supabase, subjectId);
+  return repo.insertTopic(supabase, userId, subjectId, name, parentId, position);
 }
 
 export async function toggleCompleted(id: string, value: boolean): Promise<void> {

@@ -24,7 +24,10 @@ export async function getStudyDayTotals(days: number = DEFAULT_DAYS): Promise<Da
       const supabase = createClient();
       const tz = (typeof Intl !== 'undefined' && Intl.DateTimeFormat().resolvedOptions().timeZone) || 'America/Sao_Paulo';
       const { data, error } = await supabase.rpc('get_study_day_totals', { p_tz: tz, p_days: days });
-      if (error) return [];
+      // H11 — RPC compartilhada por goals/questions/streak: engolir o erro como
+      // [] fazia os 3 cards mostrarem "0" silenciosamente numa falha de rede,
+      // em vez de sinalizar que não deu pra verificar.
+      if (error) throw new Error('Erro ao agregar totais de estudo: ' + error.message);
       return ((data ?? []) as DayTotal[]).map((r) => ({
         day: r.day,
         seconds: r.seconds ?? 0,

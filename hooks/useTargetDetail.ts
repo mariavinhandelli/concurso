@@ -35,10 +35,15 @@ export function useTargetDetail(targetId: string) {
   // inFlight previne duplo-clique no mesmo tópico; inFlightTopics é state para re-render das tabs
   const inFlight = useRef(new Set<string>());
   const [inFlightTopics, setInFlightTopics] = useState<Set<string>>(new Set());
+  // Sequência do load: navegar entre concursos dispara loads concorrentes e o
+  // mais antigo não pode sobrescrever o estado do mais novo ao resolver depois.
+  const loadSeq = useRef(0);
 
   // Stage 1 (parallel): target + subjects + allTopics + linked + weights + blueprints
   // Stage 2 (parallel after stage 1): saudeMap (needs topic IDs from allTopics)
   const load = useCallback(async () => {
+    const mySeq = ++loadSeq.current;
+    const isStale = () => loadSeq.current !== mySeq;
     try {
       setError('');
       const [target, subjects, allTopics, linkedIds, tWeights, blueprintsList, incidenciaMap] = await Promise.all([
@@ -53,6 +58,7 @@ export function useTargetDetail(targetId: string) {
         listTopicIncidencia(targetId).catch(() => ({} as Record<string, number>)),
       ]);
 
+      if (isStale()) return;
       setTarget(target);
       setLinked(linkedIds);
       setTopicWeights(tWeights);
@@ -61,8 +67,8 @@ export function useTargetDetail(targetId: string) {
       // Ficha do catálogo (última edição, banca, vagas…) — em background,
       // o hub renderiza sem ela e o card "Sobre o concurso" aparece quando chegar.
       if (target?.catalog_edital_id) {
-        getCatalogEditalInfo(target.catalog_edital_id).then(setCatalogInfo).catch(() => {});
-        listEditalUpdates(target.catalog_edital_id).then(setUpdates).catch(() => {});
+        getCatalogEditalInfo(target.catalog_edital_id).then((v) => { if (!isStale()) setCatalogInfo(v); }).catch(() => {});
+        listEditalUpdates(target.catalog_edital_id).then((v) => { if (!isStale()) setUpdates(v); }).catch(() => {});
       } else {
         setCatalogInfo(null);
         setUpdates([]);
@@ -82,6 +88,7 @@ export function useTargetDetail(targetId: string) {
       // Só os tópicos vinculados aparecem nas abas que usam saúde — evita
       // calcular métricas para a biblioteca inteira (cresce com o catálogo).
       const saude = await getSaudeMap([...linkedIds]);
+      if (isStale()) return;
       setSaudeMap(saude);
 
       const sw: Record<string, number> = {};
@@ -151,6 +158,10 @@ export function useTargetDetail(targetId: string) {
   }, [targetId, load, toast]);
 
   const changeSubjectWeight = useCallback(async (subjectId: string, weight: number, nQ: string) => {
+    // nº de questões: inteiro ≥ 0; entrada inválida ou negativa vira "não informado"
+    // (um valor negativo persistido enviesaria o gerador de cronograma).
+    const parsed = Math.round(Number(nQ));
+    const numQuestions = nQ !== '' && Number.isFinite(parsed) && parsed >= 0 ? parsed : null;
     setSubjectWeights((prev) => ({ ...prev, [subjectId]: weight }));
     setBlueprints((prev) => ({
       ...prev,
@@ -158,13 +169,13 @@ export function useTargetDetail(targetId: string) {
         ...prev[subjectId],
         subject_id: subjectId,
         weight,
-        num_questions_expected: nQ ? Number(nQ) : null,
+        num_questions_expected: numQuestions,
       } as Blueprint,
     }));
     try {
       await upsertBlueprint({
         targetExamId: targetId, subjectId, weight,
-        numQuestionsExpected: nQ ? Number(nQ) : null,
+        numQuestionsExpected: numQuestions,
       });
     } catch (e) {
       load().catch(() => {});

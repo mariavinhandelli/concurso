@@ -3,6 +3,7 @@
 // com navegação por offset (0 = atual, -1 = anterior, etc.).
 
 import { createClient } from '@/lib/supabase/client';
+import { getCachedUser } from '@/lib/supabase/authCache';
 
 export type PeriodView = 'dia' | 'semana' | 'mes' | 'total';
 
@@ -80,7 +81,7 @@ export async function getTimeByCategory(
   view: PeriodView, offset: number,
 ): Promise<TimeByCategoryResult> {
   const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getCachedUser();
   if (!user) return { slices: [], totalMinutes: 0, periodLabel: '', canGoForward: false };
 
   const { start, end, label, canGoForward } = periodRange(view, offset);

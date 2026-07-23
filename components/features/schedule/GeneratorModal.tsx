@@ -8,6 +8,7 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 import { useToast } from '@/components/ui/ToastProvider';
 import { buildPreview, listTargetExams, type GeneratorPreview } from '@/services/scheduleGenerator.service';
 import { createRule, type RecurrenceMode, type RecurrenceItemInput } from '@/services/recurrence.service';
+import { getActiveCycleRule, archiveCycle } from '@/services/cycleEngine.service';
 import { distribuirDiaFixo } from '@/lib/schedule/distributor';
 import { theme } from '@/lib/theme';
 import { toLocalDateString } from '@/lib/local-date';
@@ -52,7 +53,7 @@ export function GeneratorModal({ onClose, onGenerated, presetExamId }: Props) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [presetExamId]);
 
-  const cargaMinutos = (Number(horasDia) || 0) * 60;
+  const cargaMinutos = Math.min(24, Math.max(0, Number(horasDia) || 0)) * 60;
 
   const recalcGenRef = useRef(0);
 
@@ -113,12 +114,19 @@ export function GeneratorModal({ onClose, onGenerated, presetExamId }: Props) {
     }
 
     try {
+      // Só existe 1 ciclo ativo por vez (mesma regra de "+ Novo ciclo"): gerar
+      // um novo ciclo arquiva o anterior — antes ficavam 2 ativos e o segundo
+      // sumia da aba Ciclo, órfão no "Gerenciar".
+      const cicloAnterior = mode === 'ciclo' ? await getActiveCycleRule() : null;
       await createRule({
         mode,
         endDate,
         cycleDailyMinutes: mode === 'ciclo' ? cargaMinutos : undefined,
         items,
       });
+      if (cicloAnterior) {
+        try { await archiveCycle(cicloAnterior); } catch { /* novo ciclo já criado; falha aqui não deve bloquear */ }
+      }
       onGenerated();
       onClose();
     } catch (e) {

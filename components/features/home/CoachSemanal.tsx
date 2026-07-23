@@ -8,23 +8,19 @@
 
 import { useEffect, useState, type CSSProperties } from 'react';
 import { useRouter } from 'next/navigation';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { ClipboardList, X } from 'lucide-react';
 import { getCoachSemanal, type CoachResumo } from '@/services/coach.service';
+import { getStreak, type StreakInfo } from '@/services/streak.service';
+import { getRaioX, type RaioX } from '@/services/raiox.service';
+import { getSuggestions, type SuggestionsResult } from '@/services/suggestion.service';
+import { fmtMin } from '@/lib/format/time';
 import { theme } from '@/lib/theme';
 import { Button } from '@/components/ui/Button';
 import { Overlay } from '@/components/ui/Overlay';
 import { IconButton } from '@/components/ui/IconButton';
 
 function dismissKey(weekStart: string): string { return `focali_coach_dismissed_${weekStart}`; }
-
-function fmtH(min: number): string {
-  const h = Math.floor(min / 60);
-  const m = min % 60;
-  if (h === 0) return `${m}min`;
-  if (m === 0) return `${h}h`;
-  return `${h}h${String(m).padStart(2, '0')}`;
-}
 
 function fmtPeriodo(weekStart: string, weekEnd: string): string {
   const opts: Intl.DateTimeFormatOptions = { day: '2-digit', month: 'short' };
@@ -37,7 +33,7 @@ function fmtPeriodo(weekStart: string, weekEnd: string): string {
 // os dados sustentarem algo honesto (sem preencher lacuna com genérico vago).
 function montarNarrativa(r: CoachResumo): { abertura: string; destaques: string[]; decisoes: string[] } {
   const dias = r.totalDays === 1 ? '1 dia' : `${r.totalDays} dias`;
-  const abertura = `Você estudou ${fmtH(r.totalMinutes)} em ${dias}${r.topicsCount > 0 ? `, passando por ${r.topicsCount} ${r.topicsCount === 1 ? 'tópico' : 'tópicos'}` : ''}.`;
+  const abertura = `Você estudou ${fmtMin(r.totalMinutes)} em ${dias}${r.topicsCount > 0 ? `, passando por ${r.topicsCount} ${r.topicsCount === 1 ? 'tópico' : 'tópicos'}` : ''}.`;
 
   const destaques: string[] = [];
   if (r.questionsTotal >= 10) {
@@ -79,12 +75,24 @@ function montarNarrativa(r: CoachResumo): { abertura: string; destaques: string[
 // resumo faz parte do painel). variant 'banner': o banner dispensável original.
 export function CoachSemanal({ variant = 'banner' }: { variant?: 'banner' | 'row' } = {}) {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [modalOpen, setModalOpen] = useState(false);
   const [dismissed, setDismissed] = useState(true); // começa true — só libera após checar localStorage (evita flash)
 
   const { data } = useQuery<CoachResumo>({
     queryKey: ['coach-semanal'],
-    queryFn: getCoachSemanal,
+    // H10 — reusa o cache de 'streak'/'raiox'/'home-suggestions' (StreakBar,
+    // RaioXCard e PlanoHoje já buscam esses dados na mesma carga da Home) em
+    // vez de disparar getStreak/getRaioX/getSuggestions de novo por dentro do
+    // coach.service — cortava ~13 round-trips redundantes por visita.
+    queryFn: async () => {
+      const [streak, raiox, suggestions] = await Promise.all([
+        queryClient.ensureQueryData<StreakInfo>({ queryKey: ['streak'], queryFn: () => getStreak() }),
+        queryClient.ensureQueryData<RaioX>({ queryKey: ['raiox'], queryFn: getRaioX }),
+        queryClient.ensureQueryData<SuggestionsResult>({ queryKey: ['home-suggestions'], queryFn: getSuggestions }),
+      ]);
+      return getCoachSemanal({ streak, raiox, suggestions });
+    },
     staleTime: 5 * 60_000,
   });
 
@@ -197,6 +205,4 @@ const s: Record<string, CSSProperties> = {
   itemDecisao: { fontSize: 14, color: theme.ink, lineHeight: 1.6, margin: '0 0 10px', fontWeight: 500 },
 
   actions: { display: 'flex', gap: 10, justifyContent: 'flex-end', padding: '14px 22px', borderTop: `0.5px solid ${theme.line}` },
-  fecharBtn: { padding: '9px 16px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.inkSoft, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
-  verMaisBtn: { padding: '9px 16px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
 };

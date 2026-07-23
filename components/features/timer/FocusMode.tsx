@@ -11,7 +11,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Shrink } from 'lucide-react';
 import { useTimer, useTimerTick } from './TimerContext';
 import { listSubjects, type Subject } from '@/services/subjects.service';
-import { listAllTopics, type Topic } from '@/services/topics.service';
+import { listActiveTopics, type Topic } from '@/services/topics.service';
 import { SESSION_MODES } from '@/lib/session-modes';
 import { theme, zIndex } from '@/lib/theme';
 
@@ -62,7 +62,8 @@ export function FocusMode() {
   // Resolve nome da matéria/tópico da sessão (reusa as queries do palette).
   const enabled = open && hasSession;
   const { data: subjects } = useQuery<Subject[]>({ queryKey: ['cmd-subjects'], queryFn: listSubjects, enabled, staleTime: 60_000 });
-  const { data: topics } = useQuery<Topic[]>({ queryKey: ['cmd-topics'], queryFn: listAllTopics, enabled, staleTime: 60_000 });
+  // Só matérias ativas — tópico de matéria arquivada não é alvo de estudo.
+  const { data: topics } = useQuery<Topic[]>({ queryKey: ['cmd-topics-ativos'], queryFn: listActiveTopics, enabled, staleTime: 60_000 });
 
   const ctx = useMemo(() => {
     const a = timer.active;

@@ -148,7 +148,11 @@ export const VerticalizadoTab = memo(function VerticalizadoTab({
           <div key={node.subject.id} style={s.vertBlock}>
             <div style={s.vertHead} onClick={() => toggleExpand(node.subject.id)}>
               <span style={s.vertHeadLeft}>
-                <button style={s.expandBtn} aria-label="Expandir"><Chevron open={aberto} /></button>
+                <button
+                  style={s.expandBtn}
+                  aria-label={`${aberto ? 'Recolher' : 'Expandir'} ${node.subject.name}`}
+                  aria-expanded={aberto}
+                ><Chevron open={aberto} /></button>
                 <span style={s.subjectName}>{node.subject.name}</span>
               </span>
               <span style={s.vertProgress}>

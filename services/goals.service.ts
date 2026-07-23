@@ -5,6 +5,7 @@
 import { createClient } from '@/lib/supabase/client';
 import { getCachedUser } from '@/lib/supabase/authCache';
 import { getStudyDayTotals } from '@/services/studyTotals.service';
+import { getProfileSettings, invalidateProfileSettingsCache } from '@/services/profileSettingsCache';
 import { toLocalDateString as localDateStr } from '@/lib/local-date';
 import { track, EV } from '@/lib/analytics';
 
@@ -32,18 +33,10 @@ function startOfDayDaysAgo(days: number): string {
 }
 
 // Lê a meta diária (em minutos) das configurações do perfil.
+// H12 — cache compartilhado: goals-summary, suggested-target e streak liam
+// profiles.settings cada um por conta própria (3 round-trips da mesma coluna).
 export async function getDailyTarget(): Promise<number> {
-  const supabase = createClient();
-  const user = await getCachedUser();
-  if (!user) return 0;
-
-  const { data } = await supabase
-    .from('profiles')
-    .select('settings')
-    .eq('id', user.id)
-    .maybeSingle();
-
-  const settings = (data?.settings ?? {}) as { dailyTargetMinutes?: number };
+  const settings = await getProfileSettings();
   return settings.dailyTargetMinutes ?? 0;
 }
 
@@ -60,17 +53,16 @@ export async function setDailyTarget(minutes: number): Promise<void> {
   });
 
   if (error) throw new Error('Erro ao salvar meta: ' + error.message);
+  invalidateProfileSettingsCache();
   track(EV.goalAdjusted, { minutes });
 }
 
 // ---------- Meta de questões ----------
 
+// H12 — mesmo cache compartilhado (ver getDailyTarget acima).
 export async function getDailyTargetQuestions(): Promise<number> {
-  const supabase = createClient();
-  const user = await getCachedUser();
-  if (!user) return 0;
-  const { data } = await supabase.from('profiles').select('settings').eq('id', user.id).maybeSingle();
-  return ((data?.settings ?? {}) as { dailyTargetQuestions?: number }).dailyTargetQuestions ?? 0;
+  const settings = await getProfileSettings();
+  return settings.dailyTargetQuestions ?? 0;
 }
 
 export async function setDailyTargetQuestions(count: number): Promise<void> {
@@ -84,6 +76,7 @@ export async function setDailyTargetQuestions(count: number): Promise<void> {
   });
 
   if (error) throw new Error('Erro ao salvar meta de questões: ' + error.message);
+  invalidateProfileSettingsCache();
 }
 
 export async function getQuestionsSummary(): Promise<QuestionsSummary> {
@@ -154,12 +147,10 @@ export async function getGoalsSummary(): Promise<GoalsSummary> {
 // que já existe é o gatilho mais confiável que há. A âncora fica em
 // profiles.settings.studyAnchor e vira o cue diário no Plano de Hoje.
 
+// H12 — mesmo cache compartilhado (ver getDailyTarget acima).
 export async function getStudyAnchor(): Promise<string | null> {
-  const supabase = createClient();
-  const user = await getCachedUser();
-  if (!user) return null;
-  const { data } = await supabase.from('profiles').select('settings').eq('id', user.id).maybeSingle();
-  const anchor = ((data?.settings ?? {}) as { studyAnchor?: string }).studyAnchor;
+  const settings = await getProfileSettings();
+  const anchor = settings.studyAnchor;
   return anchor && anchor.trim() ? anchor.trim() : null;
 }
 
@@ -172,6 +163,7 @@ export async function setStudyAnchor(anchor: string | null): Promise<void> {
     p_patch: { studyAnchor: anchor?.trim() ?? '' },
   });
   if (error) throw new Error('Erro ao salvar o pacto: ' + error.message);
+  invalidateProfileSettingsCache();
   track(EV.pactSet, { hasAnchor: !!anchor?.trim() });
 }
 

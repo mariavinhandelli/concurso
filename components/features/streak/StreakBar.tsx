@@ -24,13 +24,23 @@ export const StreakBar = memo(function StreakBar() {
   // distinção, 60 dias espremiam em células mais finas que as do mobile.
   const totalDias = isMobile ? 30 : isTablet ? 45 : 60;
 
-  const { data: info, isError: loadError } = useQuery<StreakInfo>({
+  const { data: info, isError: loadError, refetch, isRefetching } = useQuery<StreakInfo>({
     queryKey: ['streak'],
     queryFn: () => getStreak(),
   });
 
+  // H11 — o service que alimenta isto (studyTotals) antes engolia erro de rede
+  // como "sem dados"; StreakBar já tratava isError, mas nunca disparava de
+  // fato. Agora dispara de verdade — mantém o aviso e ganha um retry.
   if (loadError) {
-    return <p style={styles.muted}>Não foi possível carregar a constância.</p>;
+    return (
+      <p style={styles.muted}>
+        Não foi possível carregar a constância.{' '}
+        <button style={styles.retryLink} onClick={() => refetch()} disabled={isRefetching}>
+          {isRefetching ? 'tentando…' : 'tentar de novo'}
+        </button>
+      </p>
+    );
   }
 
   // Skeleton com dimensões corretas enquanto carrega (P10)
@@ -156,4 +166,5 @@ const styles: Record<string, React.CSSProperties> = {
   legendItem: { display: 'flex', alignItems: 'center', gap: 5, fontSize: 11, color: theme.inkFaint },
   lDot: { width: 9, height: 9, borderRadius: 2, display: 'inline-block' },
   muted: { color: theme.inkFaint, fontSize: 14, margin: 0 },
+  retryLink: { border: 'none', background: 'transparent', color: theme.teal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', padding: 0 },
 };

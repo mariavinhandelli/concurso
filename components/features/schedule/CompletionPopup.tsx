@@ -17,7 +17,9 @@ export function CompletionPopup({ plannedMinutes, saving, onConfirm, onClose }: 
   const [m, setM] = useState(String(plannedMinutes % 60));
 
   function handleConfirm() {
-    onConfirm((Number(h) || 0) * 60 + (Number(m) || 0));
+    // Saneia: valores negativos deixavam o ciclo com "-2h de 3h" e "-2ª volta",
+    // sem botão de desfazer para se recuperar.
+    onConfirm(Math.min(1440, Math.max(0, (Number(h) || 0) * 60 + (Number(m) || 0))));
   }
 
   return (

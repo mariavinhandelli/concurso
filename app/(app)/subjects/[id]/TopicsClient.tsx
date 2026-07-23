@@ -133,6 +133,10 @@ export function TopicsClient({ subjectId, initialSubject }: Props) {
   });
 
   const [newName, setNewName] = useState('');
+  const [creating, setCreating] = useState(false);
+  // Ref além do estado: cliques no mesmo tick veem o state antigo (setState é
+  // assíncrono) — só o ref bloqueia reentrada de forma síncrona.
+  const creatingRef = useRef(false);
   const [bulkParent, setBulkParent] = useState<string | null | undefined>(undefined);
   const [addingChildOf, setAddingChildOf] = useState<string | null>(null);
   const [childName, setChildName] = useState('');
@@ -160,7 +164,9 @@ export function TopicsClient({ subjectId, initialSubject }: Props) {
 
   const handleDeleteFolder = useCallback(async (id: string) => {
     const count = (childrenOf.get(id) ?? []).length;
-    const desc = count > 0 ? `${count} subtópico${count > 1 ? 's' : ''} também serão apagados.` : undefined;
+    const desc = count > 0
+      ? (count === 1 ? '1 subtópico também será apagado.' : `${count} subtópicos também serão apagados.`)
+      : undefined;
     if (!await confirm({
       title: 'Apagar esta pasta?',
       description: desc,
@@ -171,16 +177,33 @@ export function TopicsClient({ subjectId, initialSubject }: Props) {
   }, [confirm, handleDelete, childrenOf]);
 
   const handleStartAddChild = useCallback((parentId: string) => { setAddingChildOf(parentId); setChildName(''); }, []);
+  // Ref de reentrada: dois Enter no mesmo tick chegam antes do re-render que
+  // desmonta o input — sem o guard, o subtópico era criado duas vezes.
+  const committingChildRef = useRef(false);
   const handleCommitAddChild = useCallback(async (parentId: string, name: string) => {
+    if (committingChildRef.current) return;
+    committingChildRef.current = true;
     setAddingChildOf(null); setChildName('');
-    if (name.trim()) await handleCreate(name, parentId);
+    try {
+      if (name.trim()) await handleCreate(name, parentId);
+    } finally {
+      committingChildRef.current = false;
+    }
   }, [handleCreate]);
   const handleCancelAddChild = useCallback(() => { setAddingChildOf(null); setChildName(''); }, []);
 
-  const handleCreateLoose = useCallback(() => {
-    if (!newName.trim()) return;
-    handleCreate(newName);
-    setNewName('');
+  const handleCreateLoose = useCallback(async () => {
+    // Guard de reentrada: duplo clique/Enter repetido criava o tópico duas vezes.
+    if (!newName.trim() || creatingRef.current) return;
+    creatingRef.current = true;
+    setCreating(true);
+    try {
+      await handleCreate(newName);
+      setNewName('');
+    } finally {
+      creatingRef.current = false;
+      setCreating(false);
+    }
   }, [newName, handleCreate]);
 
   return (
@@ -238,8 +261,8 @@ export function TopicsClient({ subjectId, initialSubject }: Props) {
             placeholder="Novo tópico (ex: Controle de Constitucionalidade)"
             style={{ flexBasis: isMobile ? '100%' : undefined, flexGrow: 1 }}
           />
-          <Button onClick={handleCreateLoose} style={{ flex: isMobile ? 1 : undefined }}>
-            Adicionar
+          <Button onClick={handleCreateLoose} disabled={creating} style={{ flex: isMobile ? 1 : undefined }}>
+            {creating ? 'Adicionando…' : 'Adicionar'}
           </Button>
           <Button
             variant="outline"
