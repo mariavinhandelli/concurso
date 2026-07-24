@@ -70,8 +70,14 @@ const _cache = new Map<string, Promise<LeiQuestao[]>>();
 // Cache global: 1 linha por artigo, servida a todas as usuárias. Se a leitura
 // falhar por qualquer motivo, degrada silenciosamente para só as questões
 // estáticas — geração nunca pode quebrar o banco de questões.
-async function getQuestoesGeradas(slug: string): Promise<LeiQuestao[]> {
-  try {
+// Uma ÚNICA leitura de ai_artifacts para todas as leis (o modal de simulado
+// pede as questões das 37 leis de uma vez — sem este cache eram 37 queries
+// idênticas trazendo a tabela publicada inteira cada uma).
+let _geradasTodas: Promise<{ leiSlug?: string; questao: LeiQuestao }[]> | null = null;
+
+function getTodasQuestoesGeradas(): Promise<{ leiSlug?: string; questao: LeiQuestao }[]> {
+  if (_geradasTodas) return _geradasTodas;
+  _geradasTodas = (async () => {
     const ctx = await tryGetUser();
     if (!ctx) return [];
     const { data } = await ctx.supabase
@@ -79,19 +85,31 @@ async function getQuestoesGeradas(slug: string): Promise<LeiQuestao[]> {
       .select('id, payload')
       .eq('artifact_type', 'questao_ce_lei')
       .eq('status', 'published');
-    return (data ?? [])
-      .filter((row) => (row.payload as { leiSlug?: string })?.leiSlug === slug)
-      .map((row) => {
-        const p = row.payload as { artigoKey: string; enunciado: string; gabarito: boolean; comentario: string; tipo?: LeiQuestaoTipo };
-        return {
+    return (data ?? []).map((row) => {
+      const p = row.payload as { leiSlug?: string; artigoKey: string; enunciado: string; gabarito: boolean; comentario: string; tipo?: LeiQuestaoTipo };
+      return {
+        leiSlug: p?.leiSlug,
+        questao: {
           id: `ai:${row.id}`,
           artigoKey: p.artigoKey,
           enunciado: p.enunciado,
           gabarito: p.gabarito,
           comentario: p.comentario,
           tipo: p.tipo,
-        };
-      });
+        },
+      };
+    });
+  })().catch(() => {
+    _geradasTodas = null; // falha não fica cacheada — permite retry
+    return [];
+  });
+  return _geradasTodas;
+}
+
+async function getQuestoesGeradas(slug: string): Promise<LeiQuestao[]> {
+  try {
+    const todas = await getTodasQuestoesGeradas();
+    return todas.filter((r) => r.leiSlug === slug).map((r) => r.questao);
   } catch {
     return [];
   }

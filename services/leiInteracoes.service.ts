@@ -42,6 +42,28 @@ export interface LeiInteracao {
   updated_at: string;
 }
 
+// Contagem de artigos com ao menos um grifo, por lei (slug → nº de artigos).
+// Uma única query leve (só artigo_key) — a biblioteca usa isto para decidir
+// quais leis precisam do JSON completo para calcular o % grifado, em vez de
+// baixar o catálogo inteiro (~10MB) a cada visita.
+export async function countArtigosComGrifoPorLei(): Promise<Map<string, number>> {
+  const { supabase, userId } = await requireUser();
+  const { data, error } = await supabase
+    .from('lei_interacoes')
+    .select('artigo_key')
+    .eq('user_id', userId)
+    .neq('grifos', '[]');
+  if (error) throw new Error('Erro ao buscar grifos: ' + error.message);
+
+  const map = new Map<string, number>();
+  for (const row of data ?? []) {
+    const key = row.artigo_key as string;
+    const slug = key.slice(0, key.indexOf(':'));
+    map.set(slug, (map.get(slug) ?? 0) + 1);
+  }
+  return map;
+}
+
 // Todas as interações do usuário com artigos de uma lei, indexadas por chave.
 export async function listInteracoesByLei(slug: string): Promise<Map<string, LeiInteracao>> {
   const { supabase, userId } = await requireUser();

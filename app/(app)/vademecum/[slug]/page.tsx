@@ -7,7 +7,7 @@
 import { useCallback, useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Book } from 'lucide-react';
-import { getLei, type Lei, type LeiArtigo } from '@/services/leis.service';
+import { getLei, LEIS_CATALOG, type Lei, type LeiArtigo } from '@/services/leis.service';
 import { listInteracoesByLei, type LeiInteracao, type GrifoCor } from '@/services/leiInteracoes.service';
 import { getQuestoesLei, agruparPorArtigo, type LeiQuestao } from '@/services/leiQuestoes.service';
 import { GRIFO_CORES, GRIFO_CORES_ORDEM } from '@/lib/lei-grifos';
@@ -25,6 +25,12 @@ type Aba = 'texto' | 'mapa' | 'questoes';
 interface Grupo {
   caminho: string;
   artigos: LeiArtigo[];
+}
+
+// "2026-07-04" → "04/07/2026" (a data ISO crua no header parecia código).
+function formatarDataGeracao(iso: string): string {
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso);
+  return m ? `${m[3]}/${m[2]}/${m[1]}` : iso;
 }
 
 function emptyInteracao(artigoKey: string): LeiInteracao {
@@ -49,6 +55,7 @@ export default function LeiReaderPage() {
   const [aba, setAba] = useState<Aba>('texto');
   const [abertos, setAbertos] = useState<Set<number>>(new Set([0]));
   const [busca, setBusca] = useState('');
+  const [termo, setTermo] = useState(''); // busca textual ativa (quando o input não é nº de artigo)
   const [filtroCores, setFiltroCores] = useState<Set<GrifoCor>>(new Set());
 
   useEffect(() => {
@@ -122,12 +129,50 @@ export default function LeiReaderPage() {
 
     setAba('texto');
     setFiltroCores(new Set());
+    setTermo('');
     const gi = grupos.findIndex((g) => g.artigos.some((a) => a.key === artigo.key));
     if (gi >= 0) setAbertos((prev) => new Set(prev).add(gi));
-    setTimeout(() => {
-      document.getElementById(`art-${artigo.numero}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 80);
+    // Grupos grandes (ex.: art. 5º da CF, capítulos do CC) levam mais que um
+    // frame para renderizar — tenta de novo até o elemento existir, senão o
+    // scroll falhava em silêncio. Scroll instantâneo de propósito: o smooth é
+    // cancelado pelos commits de render que ainda estão acontecendo no grupo.
+    const tentarScroll = (tentativa: number) => {
+      const el = document.getElementById(`art-${artigo.numero}`);
+      if (el) { el.scrollIntoView({ block: 'start' }); return; }
+      if (tentativa < 8) setTimeout(() => tentarScroll(tentativa + 1), 120 * (tentativa + 1));
+    };
+    setTimeout(() => tentarScroll(0), 80);
   }, [lei, grupos, toast]);
+
+  // Busca textual: nº de artigo pula direto; qualquer outro texto vira busca
+  // por termo no texto integral da lei (acentos e caixa ignorados).
+  const submeterBusca = useCallback((valor: string) => {
+    const v = valor.trim();
+    if (!v) { setTermo(''); return; }
+    const pareceArtigo = /^(art\.?\s*)?\d+[\dA-Za-z.ºo°-]*$/i.test(v);
+    if (pareceArtigo) { jumpTo(v); return; }
+    setAba('texto');
+    setFiltroCores(new Set());
+    setTermo(v);
+  }, [jumpTo]);
+
+  const normalizarTexto = (s: string) => s.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();
+  const LIMITE_RESULTADOS = 80;
+  const resultadoTermo = useMemo(() => {
+    if (!lei || !termo) return null;
+    const alvo = normalizarTexto(termo);
+    const encontrados: LeiArtigo[] = [];
+    let total = 0;
+    for (const a of lei.artigos) {
+      const bate = a.blocos.some((b) => normalizarTexto(b.texto).includes(alvo))
+        || normalizarTexto(a.rotulo).includes(alvo);
+      if (bate) {
+        total += 1;
+        if (encontrados.length < LIMITE_RESULTADOS) encontrados.push(a);
+      }
+    }
+    return { artigos: encontrados, total };
+  }, [lei, termo]);
 
   function toggleGrupo(i: number) {
     setAbertos((prev) => {
@@ -150,7 +195,8 @@ export default function LeiReaderPage() {
     );
   }
   if (!lei) {
-    return <PageContainer width="default" style={{ padding: 40 }}><p style={{ color: theme.inkFaint }}>Carregando {slug}…</p></PageContainer>;
+    const meta = LEIS_CATALOG.find((l) => l.slug === slug);
+    return <PageContainer width="default" style={{ padding: 40 }}><p style={{ color: theme.inkFaint }}>Carregando {meta?.nomeCurto ?? 'a lei'}…</p></PageContainer>;
   }
 
   const totalGrifos = [...interacoes.values()].reduce((sum, i) => sum + i.grifos.length, 0);
@@ -167,11 +213,18 @@ export default function LeiReaderPage() {
       <button onClick={() => router.push('/vademecum')} style={s.voltar}>← Vade Mecum</button>
       <PageHeader
         title={lei.nomeCurto}
-        subtitle={`${lei.nome} · atualizada em ${lei.geradoEm}`}
+        subtitle={(
+          <>
+            {lei.nome} · atualizada em {formatarDataGeracao(lei.geradoEm)}
+            {lei.fonteUrl && (
+              <> · <a href={lei.fonteUrl} target="_blank" rel="noopener noreferrer" style={s.fonteLink}>fonte oficial ↗</a></>
+            )}
+          </>
+        )}
         actions={(
           <div style={s.statsRow}>
             <span style={s.stat}><b>{pctGrifado}%</b> grifado</span>
-            <span style={s.stat}><b>{totalGrifos}</b> marcações</span>
+            <span style={s.stat}><b>{totalGrifos}</b> marca{totalGrifos === 1 ? 'ção' : 'ções'}</span>
             <span style={s.stat}><b>{emRevisao}</b> em revisão</span>
           </div>
         )}
@@ -188,15 +241,15 @@ export default function LeiReaderPage() {
         )}
         <div style={{ flex: 1 }} />
         <form
-          onSubmit={(e) => { e.preventDefault(); jumpTo(busca); setBusca(''); }}
+          onSubmit={(e) => { e.preventDefault(); submeterBusca(busca); setBusca(''); }}
           style={s.jumpForm}
         >
           <input
             value={busca}
             onChange={(e) => setBusca(e.target.value)}
-            placeholder="ir para art…"
+            placeholder="art. nº ou termo…"
             style={s.jumpInput}
-            aria-label="Ir para artigo"
+            aria-label="Ir para artigo ou buscar termo no texto"
           />
         </form>
       </div>
@@ -229,7 +282,28 @@ export default function LeiReaderPage() {
             )}
           </div>
 
-          {filtroAtivo ? (
+          {termo && resultadoTermo ? (
+            <>
+              <p style={s.filtroResumo}>
+                {resultadoTermo.total === 0
+                  ? <>Nenhum artigo contém “{termo}”.</>
+                  : <>
+                      {resultadoTermo.total} artigo{resultadoTermo.total === 1 ? ' contém' : 's contêm'} “{termo}”
+                      {resultadoTermo.total > resultadoTermo.artigos.length && ` (mostrando os ${resultadoTermo.artigos.length} primeiros)`}
+                    </>}
+                {' '}<button onClick={() => setTermo('')} style={s.limparFiltro}>limpar busca</button>
+              </p>
+              {resultadoTermo.artigos.map((a) => (
+                <ArtigoCard
+                  key={a.key}
+                  artigo={a}
+                  interacao={interacoes.get(a.key) ?? null}
+                  onUpdate={handleUpdate}
+                  questoes={questoesPorArtigo.get(a.key)}
+                />
+              ))}
+            </>
+          ) : filtroAtivo ? (
             <>
               <p style={s.filtroResumo}>
                 {artigosFiltrados.length} artigo{artigosFiltrados.length === 1 ? '' : 's'} com marcações desse tipo
@@ -307,4 +381,5 @@ const s: Record<string, CSSProperties> = {
   seta: { fontSize: 12, color: theme.inkFaint, transition: 'transform .15s', flexShrink: 0 },
   grupoNome: { fontSize: 13, fontWeight: 600, color: theme.ink, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
   grupoMeta: { fontSize: 12, color: theme.inkFaint, marginLeft: 'auto', flexShrink: 0 },
+  fonteLink: { color: theme.teal, textDecoration: 'underline', fontWeight: 600 },
 };

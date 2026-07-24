@@ -107,7 +107,7 @@ export const LEIS_CATALOG: LeiMeta[] = [
     nomeCurto: 'LGPD',
     ano: 2018,
     disciplina: 'Legislação Especial',
-    descricao: 'Texto compilado e atualizado (fonte: Planalto), com alterações até as Leis 15.352 e 15.452 de 2026.',
+    descricao: 'Texto compilado e atualizado (fonte: Planalto), com alterações até a Lei 15.352/2026.',
     arquivo: '/leis/lgpd.json',
     totalArtigos: 79,
   },

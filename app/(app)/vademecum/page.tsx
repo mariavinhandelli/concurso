@@ -10,7 +10,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { CircleHelp, AlarmClock } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { LEIS_CATALOG, getLei, type LeiMeta } from '@/services/leis.service';
-import { countRevisoesDue, listInteracoesByLei } from '@/services/leiInteracoes.service';
+import { countRevisoesDue, countArtigosComGrifoPorLei } from '@/services/leiInteracoes.service';
 import { LEIS_COM_QUESTOES } from '@/services/leiQuestoes.service';
 import { VademecumSimuladoModal } from '@/components/features/vademecum/VademecumSimuladoModal';
 import { theme } from '@/lib/theme';
@@ -21,25 +21,37 @@ function normalizar(s: string): string {
   return s.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();
 }
 
-// % da lei grifada (sobre artigos vigentes) — carregado por card, sem
-// bloquear a lista (cada lei pesa o próprio fetch, cacheado por slug).
-function usePctGrifado(slug: string): number | null {
+// % da lei grifada (sobre artigos vigentes). Uma única query leve traz a
+// contagem de artigos grifados de TODAS as leis; o JSON completo da lei só é
+// baixado para as leis que realmente têm grifo (antes: 35 leis ≈ 10MB por
+// visita à biblioteca, só para pintar os chips).
+function useGrifosPorLei(): Map<string, number> | null {
   const { data } = useQuery({
-    queryKey: ['vademecum-pct', slug],
-    queryFn: async () => {
-      const [lei, interacoes] = await Promise.all([getLei(slug), listInteracoesByLei(slug)]);
-      const vigentes = lei.artigos.filter((a) => !a.revogado);
-      if (vigentes.length === 0) return 0;
-      const comGrifo = vigentes.filter((a) => (interacoes.get(a.key)?.grifos.length ?? 0) > 0).length;
-      return Math.round((comGrifo / vigentes.length) * 100);
-    },
+    queryKey: ['vademecum-grifos-por-lei'],
+    queryFn: countArtigosComGrifoPorLei,
     staleTime: 60_000,
   });
   return data ?? null;
 }
 
-function LeiCard({ lei, onOpen }: { lei: LeiMeta; onOpen: () => void }) {
-  const pct = usePctGrifado(lei.slug);
+function usePctGrifado(slug: string, artigosComGrifo: number): number | null {
+  const { data } = useQuery({
+    queryKey: ['vademecum-pct', slug, artigosComGrifo],
+    enabled: artigosComGrifo > 0,
+    queryFn: async () => {
+      const lei = await getLei(slug);
+      const vigentes = lei.artigos.filter((a) => !a.revogado).length;
+      if (vigentes === 0) return 0;
+      return Math.round((artigosComGrifo / vigentes) * 100);
+    },
+    staleTime: 60_000,
+  });
+  if (artigosComGrifo === 0) return 0;
+  return data ?? null;
+}
+
+function LeiCard({ lei, artigosComGrifo, onOpen }: { lei: LeiMeta; artigosComGrifo: number; onOpen: () => void }) {
+  const pct = usePctGrifado(lei.slug, artigosComGrifo);
   return (
     <button onClick={onOpen} style={s.card}>
       <div style={s.cardTop}>
@@ -65,6 +77,7 @@ function VademecumContent() {
     return d && LEIS_CATALOG.some((l) => l.disciplina === d) ? d : 'todas';
   });
   const [showSimulado, setShowSimulado] = useState(false);
+  const grifosPorLei = useGrifosPorLei();
 
   useEffect(() => {
     let cancelled = false;
@@ -135,7 +148,12 @@ function VademecumContent() {
       ) : (
         <div style={s.grid}>
           {leisFiltradas.map((lei) => (
-            <LeiCard key={lei.slug} lei={lei} onOpen={() => router.push(`/vademecum/${lei.slug}`)} />
+            <LeiCard
+              key={lei.slug}
+              lei={lei}
+              artigosComGrifo={grifosPorLei?.get(lei.slug) ?? 0}
+              onOpen={() => router.push(`/vademecum/${lei.slug}`)}
+            />
           ))}
         </div>
       )}

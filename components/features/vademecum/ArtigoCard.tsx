@@ -5,13 +5,14 @@
 'use client';
 
 import { memo, useEffect, useRef, useState, type CSSProperties } from 'react';
-import { AlarmClock, RefreshCw, Info, Pencil, Check, X } from 'lucide-react';
+import { AlarmClock, RefreshCw, Info, Pencil, Check, X, Star } from 'lucide-react';
 import type { LeiArtigo } from '@/services/leis.service';
 import {
-  addGrifo, removeGrifo, saveAnotacaoArtigo,
+  addGrifo, removeGrifo, saveAnotacaoArtigo, toggleFavoritoArtigo,
   ativarRevisaoArtigo, desativarRevisaoArtigo,
   type LeiInteracao, type LeiGrifo, type GrifoCor,
 } from '@/services/leiInteracoes.service';
+import { useUI } from '@/components/layout/UIContext';
 import { isJurisDue } from '@/lib/juris-review';
 import {
   GRIFO_CORES, GRIFO_CORES_ORDEM, SUBLINHADO_COR,
@@ -52,6 +53,8 @@ interface GrifoPopover {
 
 export const ArtigoCard = memo(function ArtigoCard({ artigo, interacao, onUpdate, questoes }: Props) {
   const toast = useToast();
+  const { isMobile, isTablet } = useUI();
+  const touch = isMobile || isTablet;
   const rootRef = useRef<HTMLDivElement>(null);
   const toolbarRef = useRef<HTMLDivElement>(null);
   const popoverRef = useRef<HTMLDivElement>(null);
@@ -67,6 +70,11 @@ export const ArtigoCard = memo(function ArtigoCard({ artigo, interacao, onUpdate
   const grifos = interacao?.grifos ?? [];
   const emRevisao = interacao?.is_review_active ?? false;
   const revisaoVencida = emRevisao && isJurisDue(interacao?.next_review_date ?? null);
+  // Recém-ativada (nunca avaliada): mostrar "vencida" em vermelho no instante
+  // em que o usuário acabou de ligar a revisão parecia punição — é só a
+  // primeira entrada na fila de hoje.
+  const revisaoNova = revisaoVencida && (interacao?.repetitions ?? 0) === 0 && !interacao?.last_reviewed;
+  const favorito = interacao?.favorito ?? false;
 
   // ── Seleção → barra de marcação ──────────────────────────────────────────
   // Ouve `selectionchange` (dispara no mouse E no toque, ao contrário de
@@ -192,6 +200,18 @@ export const ArtigoCard = memo(function ArtigoCard({ artigo, interacao, onUpdate
     }
   }
 
+  // ── Favorito ──────────────────────────────────────────────────────────────
+  async function toggleFavorito() {
+    const novo = !favorito;
+    onUpdate(artigo.key, { favorito: novo }); // otimista — reverte no erro
+    try {
+      await toggleFavoritoArtigo(artigo.key, novo);
+    } catch (e) {
+      onUpdate(artigo.key, { favorito: !novo });
+      toast.error(e instanceof Error ? e.message : 'Erro ao salvar favorito.');
+    }
+  }
+
   // ── Revisão espaçada ──────────────────────────────────────────────────────
   async function toggleRevisao() {
     try {
@@ -240,12 +260,14 @@ export const ArtigoCard = memo(function ArtigoCard({ artigo, interacao, onUpdate
         {incChip && <Badge style={{ background: incChip.bg, color: incChip.ink }}>{incChip.label}</Badge>}
         {emRevisao && (
           <Badge
-            variant={revisaoVencida ? 'danger' : 'brand'}
+            variant={revisaoVencida && !revisaoNova ? 'danger' : 'brand'}
             style={{ marginLeft: 'auto' }}
           >
-            {revisaoVencida
-              ? <><AlarmClock size={12} strokeWidth={2} />revisão vencida</>
-              : <><RefreshCw size={12} strokeWidth={2} />{diasAteRevisao()}</>}
+            {revisaoNova
+              ? <><RefreshCw size={12} strokeWidth={2} />na fila de hoje</>
+              : revisaoVencida
+                ? <><AlarmClock size={12} strokeWidth={2} />revisão vencida</>
+                : <><RefreshCw size={12} strokeWidth={2} />{diasAteRevisao()}</>}
           </Badge>
         )}
       </div>
@@ -302,17 +324,26 @@ export const ArtigoCard = memo(function ArtigoCard({ artigo, interacao, onUpdate
       <div style={s.footer}>
         <button
           onClick={() => { setNotasOpen((v) => !v); setNotaDraft(null); }}
-          style={{ ...s.footBtn, ...(temNota ? s.footBtnOn : {}) }}
+          style={{ ...s.footBtn, ...(touch ? s.footBtnTouch : {}), ...(temNota ? s.footBtnOn : {}) }}
         >
           <Pencil size={13} strokeWidth={2} /> {temNota ? 'Anotações' : 'Anotar'}
         </button>
-        <button onClick={toggleRevisao} style={{ ...s.footBtn, ...(emRevisao ? s.footBtnOn : {}) }}>
+        <button onClick={toggleRevisao} style={{ ...s.footBtn, ...(touch ? s.footBtnTouch : {}), ...(emRevisao ? s.footBtnOn : {}) }}>
           <RefreshCw size={13} strokeWidth={2} /> {emRevisao ? 'Em revisão' : 'Revisar'}
+        </button>
+        <button
+          onClick={toggleFavorito}
+          aria-pressed={favorito}
+          aria-label={favorito ? `Remover ${artigo.rotulo} dos favoritos` : `Favoritar ${artigo.rotulo}`}
+          title={favorito ? 'Remover dos favoritos' : 'Favoritar — aparece na busca rápida (Ctrl+K)'}
+          style={{ ...s.footBtn, ...(touch ? s.footBtnTouch : {}), ...(favorito ? s.footBtnOn : {}) }}
+        >
+          <Star size={13} strokeWidth={2} fill={favorito ? 'currentColor' : 'none'} /> {favorito ? 'Favorito' : 'Favoritar'}
         </button>
         {temQuestoes && (
           <button
             onClick={() => { setQuestaoOpen((v) => !v); setResposta(null); }}
-            style={{ ...s.footBtn, ...(questaoOpen ? s.footBtnOn : {}) }}
+            style={{ ...s.footBtn, ...(touch ? s.footBtnTouch : {}), ...(questaoOpen ? s.footBtnOn : {}) }}
           >
             <Check size={13} strokeWidth={2} /> Questão C/E {questoes!.length > 1 ? `(${questoes!.length})` : ''}
           </button>
@@ -375,7 +406,7 @@ export const ArtigoCard = memo(function ArtigoCard({ artigo, interacao, onUpdate
               title={GRIFO_CORES[cor].label}
               aria-label={`Grifar: ${GRIFO_CORES[cor].label}`}
               onClick={() => aplicarGrifo(cor, 'grifo')}
-              style={{ ...s.corBtn, background: GRIFO_CORES[cor].chip }}
+              style={{ ...s.corBtn, ...(touch ? s.corBtnTouch : {}), background: GRIFO_CORES[cor].chip }}
             />
           ))}
           <span style={s.toolbarSep} />
@@ -408,6 +439,7 @@ const s: Record<string, CSSProperties> = {
   blocoRotulo: { fontWeight: 600, color: theme.inkSoft },
   footer: { display: 'flex', alignItems: 'center', gap: 8, marginTop: 10, paddingTop: 10, borderTop: `0.5px solid ${theme.line}`, flexWrap: 'wrap' },
   footBtn: { border: `0.5px solid ${theme.line}`, background: 'transparent', color: theme.inkSoft, fontSize: 13, fontWeight: 600, borderRadius: theme.radiusPill, padding: '5px 12px', cursor: 'pointer', fontFamily: 'inherit', display: 'inline-flex', alignItems: 'center', gap: 5 },
+  footBtnTouch: { minHeight: 44, padding: '5px 14px' },
   footBtnOn: { borderColor: theme.teal, color: theme.tealDeep, background: theme.tealBg },
   grifoCount: { fontSize: 12, color: theme.inkFaint, marginLeft: 'auto' },
   notaBox: { marginTop: 10 },
@@ -426,6 +458,7 @@ const s: Record<string, CSSProperties> = {
   questaoProxima: { border: 'none', background: 'transparent', color: theme.teal, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', padding: 0 },
   toolbar: { position: 'fixed', zIndex: zIndex.menu, display: 'flex', alignItems: 'center', gap: 6, background: theme.card, border: `0.5px solid ${theme.line}`, borderRadius: theme.radiusSm, padding: '7px 9px', boxShadow: theme.shadowHover },
   corBtn: { width: 22, height: 22, borderRadius: 7, border: 'none', cursor: 'pointer' },
+  corBtnTouch: { width: 34, height: 34, borderRadius: 10 },
   toolbarSep: { width: 1, height: 18, background: theme.line },
   subBtn: { border: 'none', background: 'transparent', color: theme.inkSoft, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', padding: '2px 4px' },
   popLabel: { fontSize: 13, fontWeight: 600, color: theme.ink, padding: '0 2px' },
