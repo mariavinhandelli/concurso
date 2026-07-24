@@ -5,8 +5,9 @@
 'use client';
 
 import { memo, useEffect, useRef, useState, type CSSProperties } from 'react';
-import { AlarmClock, RefreshCw, Info, Pencil, Check, X, Star } from 'lucide-react';
-import type { LeiArtigo } from '@/services/leis.service';
+import { AlarmClock, RefreshCw, Info, Pencil, Check, X, Star, Layers } from 'lucide-react';
+import { LEIS_CATALOG, type LeiArtigo } from '@/services/leis.service';
+import { createFlashcard } from '@/services/flashcards.service';
 import {
   addGrifo, removeGrifo, saveAnotacaoArtigo, toggleFavoritoArtigo,
   ativarRevisaoArtigo, desativarRevisaoArtigo,
@@ -66,6 +67,10 @@ export const ArtigoCard = memo(function ArtigoCard({ artigo, interacao, onUpdate
   const [questaoOpen, setQuestaoOpen] = useState(false);
   const [questaoIdx, setQuestaoIdx] = useState(0);
   const [resposta, setResposta] = useState<boolean | null>(null);
+  const [flashOpen, setFlashOpen] = useState(false);
+  const [flashFront, setFlashFront] = useState('');
+  const [flashBack, setFlashBack] = useState('');
+  const [flashSaving, setFlashSaving] = useState(false);
 
   const grifos = interacao?.grifos ?? [];
   const emRevisao = interacao?.is_review_active ?? false;
@@ -212,6 +217,41 @@ export const ArtigoCard = memo(function ArtigoCard({ artigo, interacao, onUpdate
     }
   }
 
+  // ── Flashcard a partir do artigo ─────────────────────────────────────────
+  // Fecha o ciclo ler → marcar → treinar sem sair do leitor: frente sugerida
+  // com a referência da lei, verso pré-preenchido com os trechos grifados
+  // (se houver) — o que você marcou é o que vale memorizar.
+  function abrirFlashcard() {
+    if (!flashOpen) {
+      const nomeCurto = LEIS_CATALOG.find((l) => artigo.key.startsWith(l.slug + ':'))?.nomeCurto ?? '';
+      const trechos = grifos
+        .map((g) => {
+          const bloco = artigo.blocos.find((b) => b.id === g.bloco);
+          return bloco ? bloco.texto.slice(g.start, g.end).trim() : '';
+        })
+        .filter(Boolean);
+      setFlashFront(`${nomeCurto} — ${artigo.rotulo}: `);
+      setFlashBack(trechos.join('\n'));
+    }
+    setFlashOpen((v) => !v);
+  }
+
+  async function salvarFlashcard() {
+    const front = flashFront.trim();
+    const back = flashBack.trim();
+    if (!front || !back) { toast.info('Preencha a frente e o verso do flashcard.'); return; }
+    setFlashSaving(true);
+    try {
+      await createFlashcard({ front, back, topicId: null, subjectId: null, sourceErrorId: null, addToReview: true });
+      setFlashOpen(false);
+      toast.success('Flashcard criado — ele já entra na sua fila de revisão.');
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'Erro ao criar flashcard.');
+    } finally {
+      setFlashSaving(false);
+    }
+  }
+
   // ── Revisão espaçada ──────────────────────────────────────────────────────
   async function toggleRevisao() {
     try {
@@ -340,6 +380,13 @@ export const ArtigoCard = memo(function ArtigoCard({ artigo, interacao, onUpdate
         >
           <Star size={13} strokeWidth={2} fill={favorito ? 'currentColor' : 'none'} /> {favorito ? 'Favorito' : 'Favoritar'}
         </button>
+        <button
+          onClick={abrirFlashcard}
+          title="Criar flashcard deste artigo (verso pré-preenchido com seus grifos)"
+          style={{ ...s.footBtn, ...(touch ? s.footBtnTouch : {}), ...(flashOpen ? s.footBtnOn : {}) }}
+        >
+          <Layers size={13} strokeWidth={2} /> Flashcard
+        </button>
         {temQuestoes && (
           <button
             onClick={() => { setQuestaoOpen((v) => !v); setResposta(null); }}
@@ -364,6 +411,34 @@ export const ArtigoCard = memo(function ArtigoCard({ artigo, interacao, onUpdate
             <Button variant="outline" size="sm" onClick={() => { setNotasOpen(false); setNotaDraft(null); }}>Fechar</Button>
             <Button size="sm" onClick={salvarNota} disabled={savingNota || notaDraft === null}>
               {savingNota ? 'Salvando…' : 'Salvar'}
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {flashOpen && (
+        <div style={s.notaBox}>
+          <Textarea
+            value={flashFront}
+            onChange={(e) => setFlashFront(e.target.value)}
+            rows={2}
+            placeholder={`Pergunta — ex.: O que diz o ${artigo.rotulo}?`}
+            aria-label="Frente do flashcard"
+            style={{ fontSize: 14 }}
+          />
+          <div style={{ height: 8 }} />
+          <Textarea
+            value={flashBack}
+            onChange={(e) => setFlashBack(e.target.value)}
+            rows={3}
+            placeholder="Resposta — o que você precisa lembrar"
+            aria-label="Verso do flashcard"
+            style={{ fontSize: 14 }}
+          />
+          <div style={s.notaActions}>
+            <Button variant="outline" size="sm" onClick={() => setFlashOpen(false)}>Cancelar</Button>
+            <Button size="sm" onClick={salvarFlashcard} disabled={flashSaving}>
+              {flashSaving ? 'Criando…' : 'Criar flashcard'}
             </Button>
           </div>
         </div>

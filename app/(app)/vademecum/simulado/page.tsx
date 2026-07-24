@@ -68,13 +68,24 @@ function SimuladoContent() {
 
   useEffect(() => { startedAtRef.current = Date.now(); }, []);
 
+  // &max=N (opcional): sorteia N questões do pool combinado — o embaralhar
+  // vem antes do slice, então o recorte já é a amostra aleatória.
+  const maxQuestoes = useMemo(() => {
+    const n = parseInt(params.get('max') ?? '', 10);
+    return Number.isFinite(n) && n > 0 ? n : 0;
+  }, [params]);
+
   useEffect(() => {
     if (leis.length === 0) { setFila([]); return; }
     let cancelled = false;
     Promise.all(leis.map((l) => getQuestoesLei(l.slug).then((qs) =>
       qs.map((q): QuestaoComLei => ({ ...q, leiSlug: l.slug, leiNomeCurto: l.nomeCurto })),
     )))
-      .then((porLei) => { if (!cancelled) setFila(embaralhar(porLei.flat())); })
+      .then((porLei) => {
+        if (cancelled) return;
+        const pool = embaralhar(porLei.flat());
+        setFila(maxQuestoes > 0 ? pool.slice(0, maxQuestoes) : pool);
+      })
       .catch(() => { if (!cancelled) setFila([]); });
     if (chave) {
       listLeiSimuladoSessions(chave)
@@ -88,6 +99,18 @@ function SimuladoContent() {
   const atual = fila?.[idx] ?? null;
   const acertos = useMemo(() => historico.filter((h) => h.acertou).length, [historico]);
   const acabou = fila !== null && fila.length > 0 && idx >= fila.length;
+
+  // Simulado em andamento não é salvo até o fim — avisa antes de fechar/sair
+  // da página por acidente (reload, fechar aba).
+  const emAndamento = historico.length > 0 && !acabou;
+  useEffect(() => {
+    if (!emAndamento) return;
+    function onBeforeUnload(e: BeforeUnloadEvent) {
+      e.preventDefault();
+    }
+    window.addEventListener('beforeunload', onBeforeUnload);
+    return () => window.removeEventListener('beforeunload', onBeforeUnload);
+  }, [emAndamento]);
 
   // Salva a sessão uma única vez ao concluir, e recarrega o histórico.
   // `chave` vazia (nenhum slug válido) não deve virar sessão no histórico.

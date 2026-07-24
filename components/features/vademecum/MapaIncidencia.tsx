@@ -3,10 +3,14 @@
 // concursos. Chips coloridos agrupados por Título; clique navega ao artigo.
 'use client';
 
-import { useMemo, type CSSProperties } from 'react';
+import { useMemo, useState, type CSSProperties } from 'react';
 import { Target } from 'lucide-react';
 import type { Lei, LeiArtigo, LeiIncidencia } from '@/services/leis.service';
 import { theme } from '@/lib/theme';
+
+// Acima deste tamanho o heatmap fica colapsado por Título — o CC tem 2092
+// artigos e renderizar todos os chips de uma vez travava o primeiro paint.
+const LIMIAR_COLAPSO = 400;
 
 const NIVEL: Record<LeiIncidencia, { bg: string; ink: string; border: string; label: string }> = {
   muito_alta: { bg: `color-mix(in srgb, ${theme.danger} 16%, transparent)`, ink: theme.danger,  border: `color-mix(in srgb, ${theme.danger} 45%, transparent)`, label: 'Muito alta' },
@@ -32,6 +36,16 @@ export function MapaIncidencia({ lei, onNavigate }: Props) {
     }
     return out;
   }, [lei]);
+
+  const colapsavel = lei.artigos.length > LIMIAR_COLAPSO;
+  const [abertos, setAbertos] = useState<Set<number>>(new Set());
+  function toggleGrupo(i: number) {
+    setAbertos((prev) => {
+      const next = new Set(prev);
+      if (next.has(i)) next.delete(i); else next.add(i);
+      return next;
+    });
+  }
 
   const topArtigos = useMemo(
     () => lei.artigos.filter((a) => a.incidencia === 'muito_alta'),
@@ -71,33 +85,52 @@ export function MapaIncidencia({ lei, onNavigate }: Props) {
         </div>
       </div>
 
-      {/* Heatmap por Título */}
-      {grupos.map((g) => (
-        <div key={g.titulo} style={s.grupo}>
-          <h4 style={s.grupoTitulo}>{g.titulo}</h4>
-          <div style={s.chips}>
-            {g.artigos.map((a) => {
-              const n = NIVEL[a.incidencia];
-              return (
-                <button
-                  key={a.key}
-                  onClick={() => onNavigate(a.numero)}
-                  title={`${a.rotulo} — incidência ${n.label.toLowerCase()}${a.revogado ? ' (revogado)' : ''}`}
-                  style={{
-                    ...s.chip,
-                    background: n.bg,
-                    color: n.ink,
-                    borderColor: n.border,
-                    textDecoration: a.revogado ? 'line-through' : 'none',
-                  }}
-                >
-                  {a.numero}
-                </button>
-              );
-            })}
+      {/* Heatmap por Título — colapsado por padrão em diplomas extensos */}
+      {grupos.map((g, i) => {
+        const aberto = !colapsavel || abertos.has(i);
+        const relevantes = colapsavel
+          ? g.artigos.filter((a) => a.incidencia === 'muito_alta' || a.incidencia === 'alta').length
+          : 0;
+        return (
+          <div key={`${g.titulo}-${i}`} style={s.grupo}>
+            {colapsavel ? (
+              <button onClick={() => toggleGrupo(i)} style={s.grupoToggle} aria-expanded={aberto}>
+                <span style={{ ...s.seta, transform: aberto ? 'rotate(90deg)' : 'none' }}>▸</span>
+                <span style={s.grupoTitulo2}>{g.titulo}</span>
+                <span style={s.grupoResumo}>
+                  {g.artigos[0].rotulo}–{g.artigos[g.artigos.length - 1].numero}
+                  {relevantes > 0 && ` · ${relevantes} relevante${relevantes === 1 ? '' : 's'}`}
+                </span>
+              </button>
+            ) : (
+              <h4 style={s.grupoTitulo}>{g.titulo}</h4>
+            )}
+            {aberto && (
+              <div style={s.chips}>
+                {g.artigos.map((a) => {
+                  const n = NIVEL[a.incidencia];
+                  return (
+                    <button
+                      key={a.key}
+                      onClick={() => onNavigate(a.numero)}
+                      title={`${a.rotulo} — incidência ${n.label.toLowerCase()}${a.revogado ? ' (revogado)' : ''}`}
+                      style={{
+                        ...s.chip,
+                        background: n.bg,
+                        color: n.ink,
+                        borderColor: n.border,
+                        textDecoration: a.revogado ? 'line-through' : 'none',
+                      }}
+                    >
+                      {a.numero}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
@@ -114,6 +147,10 @@ const s: Record<string, CSSProperties> = {
   topNota: { fontSize: 13, color: theme.inkSoft, lineHeight: 1.5 },
   grupo: { marginBottom: 16 },
   grupoTitulo: { fontSize: 12, fontWeight: 700, color: theme.teal, letterSpacing: 0.4, textTransform: 'uppercase', margin: '0 0 8px' },
+  grupoToggle: { display: 'flex', alignItems: 'center', gap: 8, width: '100%', textAlign: 'left', background: theme.card, border: `0.5px solid ${theme.line}`, borderRadius: theme.radius, padding: '10px 14px', cursor: 'pointer', fontFamily: 'inherit', marginBottom: 8 },
+  seta: { fontSize: 12, color: theme.inkFaint, transition: 'transform .15s', flexShrink: 0 },
+  grupoTitulo2: { fontSize: 12, fontWeight: 700, color: theme.teal, letterSpacing: 0.4, textTransform: 'uppercase', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
+  grupoResumo: { fontSize: 12, color: theme.inkFaint, marginLeft: 'auto', flexShrink: 0 },
   chips: { display: 'flex', flexWrap: 'wrap', gap: 5 },
   chip: { minWidth: 40, padding: '6px 6px', borderRadius: theme.radiusXs, borderWidth: 1, borderStyle: 'solid', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', textAlign: 'center' },
 };

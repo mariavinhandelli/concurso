@@ -15,6 +15,7 @@ import { ArtigoCard } from '@/components/features/vademecum/ArtigoCard';
 import { MapaIncidencia } from '@/components/features/vademecum/MapaIncidencia';
 import { QuestoesBanco } from '@/components/features/vademecum/QuestoesBanco';
 import { useToast } from '@/components/ui/ToastProvider';
+import { useUI } from '@/components/layout/UIContext';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { PageContainer, PageHeader } from '@/components/ui/Page';
 import { pushRecent } from '@/lib/recents';
@@ -45,6 +46,7 @@ export default function LeiReaderPage() {
   const { slug } = useParams<{ slug: string }>();
   const router = useRouter();
   const toast = useToast();
+  const { isMobile } = useUI();
 
   const [lei, setLei] = useState<Lei | null>(null);
   const [erro, setErro] = useState('');
@@ -231,11 +233,11 @@ export default function LeiReaderPage() {
       />
 
       {/* Abas */}
-      <div style={s.abas}>
-        <button onClick={() => setAba('texto')} style={{ ...s.abaBtn, ...(aba === 'texto' ? s.abaOn : {}) }}>Texto</button>
-        <button onClick={() => setAba('mapa')} style={{ ...s.abaBtn, ...(aba === 'mapa' ? s.abaOn : {}) }}>Mapa de incidência</button>
+      <div style={s.abas} role="tablist" aria-label="Seções da lei">
+        <button role="tab" aria-selected={aba === 'texto'} onClick={() => setAba('texto')} style={{ ...s.abaBtn, ...(aba === 'texto' ? s.abaOn : {}) }}>Texto</button>
+        <button role="tab" aria-selected={aba === 'mapa'} onClick={() => setAba('mapa')} style={{ ...s.abaBtn, ...(aba === 'mapa' ? s.abaOn : {}) }}>Mapa de incidência</button>
         {totalQuestoes > 0 && (
-          <button onClick={() => setAba('questoes')} style={{ ...s.abaBtn, ...(aba === 'questoes' ? s.abaOn : {}) }}>
+          <button role="tab" aria-selected={aba === 'questoes'} onClick={() => setAba('questoes')} style={{ ...s.abaBtn, ...(aba === 'questoes' ? s.abaOn : {}) }}>
             Questões ({totalQuestoes})
           </button>
         )}
@@ -260,9 +262,12 @@ export default function LeiReaderPage() {
         <QuestoesBanco lei={lei} questoes={questoes} onNavigate={jumpTo} />
       ) : (
         <>
-          {/* Legenda + filtro por cor — clicar numa cor mostra só o que você marcou daquele tipo */}
+          {/* Legenda + filtro por cor — clicar numa cor mostra só o que você marcou daquele tipo.
+              No mobile o hint some (a primeira tela já é densa; os chips têm rótulo próprio). */}
           <div style={s.legenda}>
-            <span style={s.legHint}>{filtroAtivo ? 'Filtrando por:' : 'Selecione um trecho para grifar, ou filtre:'}</span>
+            {(!isMobile || filtroAtivo) && (
+              <span style={s.legHint}>{filtroAtivo ? 'Filtrando por:' : 'Selecione um trecho para grifar, ou filtre:'}</span>
+            )}
             {GRIFO_CORES_ORDEM.map((c) => {
               const ativo = filtroCores.has(c);
               return (

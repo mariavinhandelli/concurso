@@ -42,6 +42,9 @@ export function VademecumSimuladoModal({ onClose }: { onClose: () => void }) {
     [],
   );
   const [selecionadas, setSelecionadas] = useState<Set<string>>(new Set());
+  // 0 = todas. Marcar as 37 leis dá 1000+ questões — sem um teto, o simulado
+  // vira maratona impossível de terminar (e sessão não salva se abandonar).
+  const [maxQuestoes, setMaxQuestoes] = useState(0);
 
   function toggle(slug: string) {
     setSelecionadas((prev) => {
@@ -54,7 +57,8 @@ export function VademecumSimuladoModal({ onClose }: { onClose: () => void }) {
   function iniciar() {
     if (selecionadas.size === 0) return;
     const slugs = [...selecionadas].sort().join(',');
-    router.push(`/vademecum/simulado?leis=${encodeURIComponent(slugs)}`);
+    const max = maxQuestoes > 0 ? `&max=${maxQuestoes}` : '';
+    router.push(`/vademecum/simulado?leis=${encodeURIComponent(slugs)}${max}`);
   }
 
   return (
@@ -72,6 +76,19 @@ export function VademecumSimuladoModal({ onClose }: { onClose: () => void }) {
       <div style={s.checkGrid}>
         {leis.map((lei) => (
           <LeiCheckboxRow key={lei.slug} lei={lei} checked={selecionadas.has(lei.slug)} onToggle={() => toggle(lei.slug)} />
+        ))}
+      </div>
+
+      <div style={s.maxRow}>
+        <span style={s.maxLabel}>Quantidade:</span>
+        {[0, 20, 50].map((n) => (
+          <button
+            key={n}
+            onClick={() => setMaxQuestoes(n)}
+            style={{ ...s.maxChip, ...(maxQuestoes === n ? s.maxChipOn : {}) }}
+          >
+            {n === 0 ? 'Todas' : `${n} sorteadas`}
+          </button>
         ))}
       </div>
 
@@ -95,6 +112,10 @@ const s: Record<string, React.CSSProperties> = {
   checkInput: { flexShrink: 0, cursor: 'pointer' },
   checkNome: { fontSize: 13, fontWeight: 600, color: theme.ink, flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
   checkCount: { fontSize: 12, color: theme.inkFaint, flexShrink: 0 },
+  maxRow: { display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 16 },
+  maxLabel: { fontSize: 13, color: theme.inkFaint },
+  maxChip: { fontSize: 12, color: theme.inkSoft, background: 'transparent', borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, borderRadius: theme.radiusPill, padding: '5px 12px', cursor: 'pointer', fontFamily: 'inherit' },
+  maxChipOn: { borderColor: theme.teal, background: theme.tealBg, color: theme.tealDeep, fontWeight: 600 },
   iniciarBtn: { width: '100%', padding: '12px 0', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' },
   iniciarBtnOff: { background: theme.line, color: theme.inkFaint, cursor: 'not-allowed' },
 };
