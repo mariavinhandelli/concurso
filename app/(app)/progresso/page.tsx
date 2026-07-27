@@ -1,7 +1,9 @@
 // app/(app)/progresso/page.tsx — aba EVOLUÇÃO (M1)
 // Ordem deliberada: identidade (heatmap) → ritmo → prontidão/cobertura →
-// tempo → acerto → energia → distribuição. O heatmap abre a página porque é o
-// retrato do hábito (Atomic Habits): antes vivia escondido em /historico.
+// tempo → acerto → retenção → energia → distribuição. O heatmap abre a página
+// porque é o retrato do hábito (Atomic Habits): antes vivia escondido em
+// /historico. Retenção (M3) vem depois do acerto: primeiro "quanto acerto",
+// depois "quanto ESTOU RETENDO do que estudei".
 'use client';
 
 import { useEffect } from 'react';
@@ -29,6 +31,10 @@ const AccuracyEvolutionChart = dynamic(
 );
 const EnergiaDesempenho = dynamic(
   () => import('@/components/features/dashboard/EnergiaDesempenho').then((m) => ({ default: m.EnergiaDesempenho })),
+  { ssr: false, loading: chartLoading },
+);
+const RetencaoChart = dynamic(
+  () => import('@/components/features/dashboard/RetencaoChart').then((m) => ({ default: m.RetencaoChart })),
   { ssr: false, loading: chartLoading },
 );
 
@@ -65,6 +71,11 @@ export default function EvolucaoPage() {
       </div>
       <div style={{ ...styles.card, padding: isMobile ? 16 : 24 }}>
         <AccuracyEvolutionChart />
+      </div>
+
+      {/* retenção — estudar ≠ aprender (M3) */}
+      <div style={{ ...styles.card, gridColumn: '1 / -1', padding: isMobile ? 16 : 24 }}>
+        <RetencaoChart />
       </div>
 
       {/* energia × desempenho */}

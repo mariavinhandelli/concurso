@@ -95,10 +95,15 @@ ficam persistidas mas saem da tela. Falha em coverage/raiox não derruba as fam�
 Bônus da verificação: ETA acima de 1 ano agora é suprimido (ritmo quase nulo gerava
 "~34338 meses no seu ritmo"). **Segue sendo a feature que nenhum concorrente tem.**
 
-**M3 — Curva de retenção.** Gráfico "o que você estudou vs. o que você ainda lembra" a partir de
-`topic_metrics.saude_atual` + decaimento já calculado. Anki mostra isso para cards; ninguém mostra
-para um edital inteiro. É a métrica que justifica o slogan da tese. *Esforço M-A, valor de marca
-enorme.*
+**M3 — Curva de retenção.** ✅ **ENTREGUE 27/07** e verificado ao vivo. Infra: tabela
+`progress_snapshots` (PK user+date, RLS select-own, escrita SÓ pela função SECURITY DEFINER — nem
+authenticated executa) + `take_progress_snapshots()` idempotente + **pg_cron diário 06:10 UTC**
+(~03:10 SP) + semente imediata (5 usuários fotografados no primeiro run). Snapshot = saúde média,
+tópicos com métrica, dominados (≥70) e cobertura do alvo primário. UI: `RetencaoChart` na Evolução
+(lazy, React Query, staleTime 1h) com 2 linhas — saúde média (teal) e cobertura (índigo tracejada)
+— e honestidade em camadas: vazio explica como nasce o primeiro ponto; <3 pontos diz "a curva
+começou em DD/MM". Nunca fabrica passado. Ponto real verificado no SVG (cy ≈ saúde 23). Anki mostra
+retenção por card; **ninguém mostra para um edital inteiro** — agora a Focali mostra.
 
 **M4 — Raridade + share de conquista.** ✅ **ENTREGUE 26/07** e verificado ao vivo. RPC
 `get_badge_rarity` (SECURITY DEFINER, só agregados anônimos; badges de edital ficam de fora — o id
