@@ -7,11 +7,18 @@
 //
 // Segredo necessário: ANTHROPIC_API_KEY (mesmo secret das outras functions).
 
+import webpush from 'npm:web-push@3.6.7';
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 
 const ANTHROPIC_API_KEY = Deno.env.get('ANTHROPIC_API_KEY') ?? '';
 const BATCH_SIZE = 30;           // usuários por execução — folga enorme hoje
 const MIN_MINUTES_MES = 15;      // menos que isso não há mês a narrar
+
+// Push "sua leitura está pronta" — mesmo VAPID dos lembretes diários.
+// Best-effort: sem chave ou sem inscrição, a narrativa é gravada do mesmo jeito.
+const VAPID_PUBLIC = 'BBgjY2251ulxouwlZRKBWC4cMXfWWU4gyUpwHEnBcZxQrl8S0nTdjIvvYZ-KKJ7QCWXGEpIwWM6krSHew1mIKHE';
+const VAPID_SUBJECT = 'mailto:mariavinhandelli@gmail.com';
+const VAPID_PRIVATE = Deno.env.get('VAPID_PRIVATE_KEY') ?? '';
 
 const supabase = createClient(
   Deno.env.get('SUPABASE_URL')!,
@@ -174,10 +181,45 @@ async function judgeNarrative(mesLabel: string, s: MonthStats, frases: string[])
 
 const MESES = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
 
+// Envia "sua leitura está pronta" para as inscrições da usuária. Nunca lança.
+async function pushLeituraPronta(userId: string, mesLabel: string): Promise<void> {
+  if (!VAPID_PRIVATE) return;
+  try {
+    const { data: subs } = await supabase
+      .from('push_subscriptions')
+      .select('id, endpoint, p256dh, auth')
+      .eq('user_id', userId);
+    if (!subs?.length) return;
+    const payload = JSON.stringify({
+      title: `Sua leitura de ${mesLabel.split(' ')[0]} está pronta`,
+      body: 'Como foi seu mês de estudos, em poucas frases — a partir dos seus números.',
+      url: '/progresso',
+      tag: 'focali-leitura-mes',
+    });
+    for (const sub of subs) {
+      try {
+        await webpush.sendNotification(
+          { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
+          payload,
+        );
+      } catch (e) {
+        const code = (e as { statusCode?: number }).statusCode ?? 0;
+        // inscrição morta (mesma limpeza do send-daily-reminders)
+        if (code === 404 || code === 410) {
+          await supabase.from('push_subscriptions').delete().eq('id', sub.id);
+        }
+      }
+    }
+  } catch (e) {
+    console.error(`Push da leitura falhou (${userId}):`, e);
+  }
+}
+
 Deno.serve(async () => {
   if (!ANTHROPIC_API_KEY) {
     return new Response(JSON.stringify({ error: 'ANTHROPIC_API_KEY não configurada' }), { status: 500 });
   }
+  if (VAPID_PRIVATE) webpush.setVapidDetails(VAPID_SUBJECT, VAPID_PUBLIC, VAPID_PRIVATE);
 
   // Mês COMPLETO anterior (UTC é suficiente para bordas de mês aqui: o cron
   // roda dia 1 às 07:30 UTC, horas depois da virada em qualquer fuso BR).
@@ -262,6 +304,9 @@ Deno.serve(async () => {
       continue;
     }
     created++;
+
+    // Retenção: quem tem push ativo fica sabendo que a leitura chegou.
+    await pushLeituraPronta(userId, mesLabel);
   }
 
   return new Response(
