@@ -27,8 +27,8 @@ export function RetencaoChart() {
   return (
     <div style={styles.wrap}>
       <div style={styles.head}>
-        <span style={styles.eyebrow}>Retenção ao longo do tempo</span>
-        <span style={styles.subtitle}>Saúde média dos tópicos e cobertura do edital, dia a dia</span>
+        <h2 style={styles.title}>Retenção ao longo do tempo</h2>
+        <span style={styles.subtitle}>saúde média dos tópicos e cobertura do edital, dia a dia</span>
       </div>
 
       {isLoading ? (
@@ -75,9 +75,10 @@ export function RetencaoChart() {
 
 const styles: Record<string, React.CSSProperties> = {
   wrap: { fontFamily: theme.font, width: '100%', boxSizing: 'border-box' },
+  // Gramática única dos cards da Evolução: h2 16px + hint (sem eyebrow maiúsculo).
   head: { marginBottom: 20 },
-  eyebrow: { display: 'block', fontSize: 11, fontWeight: 500, color: theme.inkFaint, letterSpacing: 1, textTransform: 'uppercase' },
-  subtitle: { display: 'block', fontSize: 13, color: theme.inkSoft, marginTop: 6 },
+  title: { fontSize: 16, fontWeight: 700, color: theme.ink, margin: 0, letterSpacing: -0.3 },
+  subtitle: { display: 'block', fontSize: 13, color: theme.inkFaint, fontWeight: 500, marginTop: 4 },
   muted: { color: theme.inkFaint, fontSize: 14, lineHeight: 1.5, padding: '30px 0', textAlign: 'center' },
   coletando: { fontSize: 12, color: theme.inkFaint, fontStyle: 'italic', margin: '12px 0 0' },
 };

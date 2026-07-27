@@ -40,13 +40,18 @@ export function AccuracyEvolutionChart() {
   });
 
   const hasData = data.some((d) => d.total > 0);
+  // Semana com pouca amostra: 2 questões certas viram "100%" e a linha mente.
+  // O ponto fica VAZADO (anel) e uma nota explica — o dado aparece, mas com o
+  // peso visual que merece. Mesmo espírito do MIN_QUESTOES_CONFIAVEL do insight.
+  const MIN_QUESTOES_SEMANA = 10;
+  const temSemanaFraca = data.some((d) => d.total > 0 && d.total < MIN_QUESTOES_SEMANA);
 
   return (
     <div style={styles.wrap}>
       <div style={styles.header}>
         <div>
-          <span style={styles.eyebrow}>Evolução nas questões</span>
-          <span style={styles.subtitle}>Taxa de acerto semanal (últimas 12 semanas)</span>
+          <h2 style={styles.title}>Evolução nas questões</h2>
+          <span style={styles.subtitle}>taxa de acerto semanal (últimas 12 semanas)</span>
         </div>
         <Select value={selected} onChange={(e) => setSelected(e.target.value)} style={{ width: 'min(220px, 100%)', maxWidth: '100%', fontSize: 13 }} aria-label="Filtrar por matéria">
           <option value="">Geral</option>
@@ -88,10 +93,22 @@ export function AccuracyEvolutionChart() {
             <Area type="monotone" dataKey="pct" stroke="none" fill="url(#accEvo)" connectNulls />
             <Line type="monotone" dataKey="pct" name="Acerto" connectNulls
               stroke={theme.teal} strokeWidth={2.5}
-              dot={{ r: 3, fill: theme.teal, strokeWidth: 0 }}
+              dot={(props: { cx?: number; cy?: number; value?: number | null; payload?: EvolutionPoint; index?: number }) => {
+                const { cx, cy, value, payload, index } = props;
+                if (cx == null || cy == null || value == null) return <g key={`d-${index}`} />;
+                const fraca = (payload?.total ?? 0) < MIN_QUESTOES_SEMANA;
+                return fraca
+                  ? <circle key={`d-${index}`} cx={cx} cy={cy} r={3.5} fill={theme.card} stroke={theme.teal} strokeWidth={1.5} />
+                  : <circle key={`d-${index}`} cx={cx} cy={cy} r={3} fill={theme.teal} />;
+              }}
               activeDot={{ r: 5, fill: theme.teal, strokeWidth: 0 }} />
           </ComposedChart>
         </ResponsiveContainer>
+      )}
+      {!loading && !error && hasData && temSemanaFraca && (
+        <p style={styles.amostra}>
+          Pontos vazados = semanas com menos de {MIN_QUESTOES_SEMANA} questões — leitura só indicativa.
+        </p>
       )}
     </div>
   );
@@ -100,7 +117,9 @@ export function AccuracyEvolutionChart() {
 const styles: Record<string, React.CSSProperties> = {
   wrap: { fontFamily: theme.font, width: '100%', boxSizing: 'border-box' },
   header: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20, gap: 12, flexWrap: 'wrap' },
-  eyebrow: { display: 'block', fontSize: 11, fontWeight: 500, color: theme.inkFaint, letterSpacing: 1, textTransform: 'uppercase' },
-  subtitle: { display: 'block', fontSize: 13, color: theme.inkSoft, marginTop: 6 },
+  // Gramática única dos cards da Evolução: h2 16px + hint (sem eyebrow maiúsculo).
+  title: { fontSize: 16, fontWeight: 700, color: theme.ink, margin: 0, letterSpacing: -0.3 },
+  subtitle: { display: 'block', fontSize: 13, color: theme.inkFaint, fontWeight: 500, marginTop: 4 },
   muted: { color: theme.inkFaint, fontSize: 14, padding: '30px 0', textAlign: 'center' },
+  amostra: { fontSize: 12, color: theme.inkFaint, fontStyle: 'italic', margin: '10px 0 0' },
 };

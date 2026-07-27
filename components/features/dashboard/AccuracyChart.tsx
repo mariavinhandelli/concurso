@@ -37,8 +37,8 @@ export function AccuracyChart() {
   return (
     <div style={styles.wrap}>
       <div style={styles.head}>
-        <span style={styles.eyebrow}>Acertos por matéria</span>
-        <span style={styles.subtitle}>Da menor taxa — onde focar primeiro</span>
+        <h2 style={styles.title}>Acertos por matéria</h2>
+        <span style={styles.subtitle}>da menor taxa — onde focar primeiro</span>
       </div>
 
       {loading ? (
@@ -102,9 +102,11 @@ export function AccuracyChart() {
 
 const styles: Record<string, React.CSSProperties> = {
   wrap: { fontFamily: theme.font, width: '100%', boxSizing: 'border-box' },
-  head: { marginBottom: 20 },
-  eyebrow: { display: 'block', fontSize: 11, fontWeight: 500, color: theme.inkFaint, letterSpacing: 1, textTransform: 'uppercase' },
-  subtitle: { display: 'block', fontSize: 13, color: theme.inkSoft, marginTop: 6 },
+  // Mesma gramática de cabeçalho dos demais cards da Evolução (Ritmo, Tempo,
+  // Energia): h2 16px + hint — o eyebrow maiúsculo destoava lado a lado.
+  head: { display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 20, gap: 8, flexWrap: 'wrap' },
+  title: { fontSize: 16, fontWeight: 700, color: theme.ink, margin: 0, letterSpacing: -0.3 },
+  subtitle: { fontSize: 13, color: theme.inkFaint, fontWeight: 500 },
   muted: { color: theme.inkFaint, fontSize: 14 },
   list: { display: 'flex', flexDirection: 'column', gap: 16 },
   row: {},
