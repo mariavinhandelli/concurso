@@ -75,11 +75,12 @@ export async function getRaioX(): Promise<RaioX> {
   if (!target) return EMPTY;
   const targetName = [target.orgao, target.cargo].filter(Boolean).join(' · ') || target.slug || 'Meu edital';
 
-  const { data: blueprintRows } = await supabase
+  const { data: blueprintRows, error: blueprintError } = await supabase
     .from('exam_blueprints')
     .select('subject_id, weight, subjects(name, color)')
     .eq('target_exam_id', target.id)
     .eq('user_id', userId);
+  if (blueprintError) throw new Error('Erro ao buscar pesos do edital: ' + blueprintError.message);
 
   const blueprints = (blueprintRows ?? [])
     .map((b) => {
@@ -91,10 +92,11 @@ export async function getRaioX(): Promise<RaioX> {
 
   if (blueprints.length === 0) return { ...EMPTY, hasTarget: true, targetName };
 
-  const { data: links } = await supabase
+  const { data: links, error: linksError } = await supabase
     .from('topic_target_exams')
     .select('topic_id')
     .eq('target_exam_id', target.id);
+  if (linksError) throw new Error('Erro ao buscar tópicos do edital: ' + linksError.message);
   const linkedIds = (links ?? []).map((l) => l.topic_id as string);
 
   if (linkedIds.length === 0) {
@@ -103,13 +105,21 @@ export async function getRaioX(): Promise<RaioX> {
 
   const subjectIds = blueprints.map((b) => b.subjectId);
 
-  const [{ data: topicRows }, { data: studiedRows }, { data: accRows }, saudeMap] = await Promise.all([
+  const [
+    { data: topicRows, error: topicsError },
+    { data: studiedRows, error: studiedError },
+    { data: accRows, error: accError },
+    saudeMap,
+  ] = await Promise.all([
     supabase.from('topics').select('id, subject_id').in('id', linkedIds),
     supabase.from('study_logs').select('topic_id').eq('user_id', userId).in('topic_id', linkedIds),
     supabase.from('study_logs').select('subject_id, questions_total, questions_correct')
       .eq('user_id', userId).eq('mode', 'questoes').in('subject_id', subjectIds),
     getSaudeMap(linkedIds),
   ]);
+  if (topicsError) throw new Error('Erro ao buscar tópicos: ' + topicsError.message);
+  if (studiedError) throw new Error('Erro ao buscar tópicos estudados: ' + studiedError.message);
+  if (accError) throw new Error('Erro ao buscar acerto em questões: ' + accError.message);
 
   const coveredSet = new Set((studiedRows ?? []).map((r) => r.topic_id as string));
 

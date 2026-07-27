@@ -43,17 +43,18 @@ export async function getEditalCoverage(): Promise<EditalCoverage> {
     [target.orgao, target.cargo].filter(Boolean).join(' · ') || target.slug || 'Meu edital';
 
   // Tópicos vinculados ao edital (denominador).
-  const { data: links } = await supabase
+  const { data: links, error: linksError } = await supabase
     .from('topic_target_exams')
     .select('topic_id')
     .eq('target_exam_id', target.id);
+  if (linksError) throw new Error('Erro ao buscar tópicos do edital: ' + linksError.message);
 
   const linkedIds = (links ?? []).map((l) => l.topic_id as string);
   const total = linkedIds.length;
   if (total === 0) return { ...EMPTY, hasTarget: true, targetId: target.id, targetName };
 
   // Estudados ≥1 vez (interseção com study_logs) + saúde em lote.
-  const [{ data: studiedRows }, saudeMap] = await Promise.all([
+  const [{ data: studiedRows, error: studiedError }, saudeMap] = await Promise.all([
     supabase
       .from('study_logs')
       .select('topic_id')
@@ -61,6 +62,7 @@ export async function getEditalCoverage(): Promise<EditalCoverage> {
       .in('topic_id', linkedIds),
     getSaudeMap(linkedIds),
   ]);
+  if (studiedError) throw new Error('Erro ao buscar tópicos estudados: ' + studiedError.message);
 
   const coveredSet = new Set((studiedRows ?? []).map((r) => r.topic_id as string));
   const covered = coveredSet.size;

@@ -64,6 +64,29 @@ export async function countArtigosComGrifoPorLei(): Promise<Map<string, number>>
   return map;
 }
 
+// Revisões VENCIDAS por lei (slug → nº de artigos). Mesma ideia da contagem de
+// grifos: uma query leve para a biblioteca poder dizer, no card, onde a revisão
+// está atrasada — antes o total aparecia só no banner geral, sem indicar a lei.
+export async function countRevisoesDuePorLei(): Promise<Map<string, number>> {
+  const { supabase, userId } = await requireUser();
+  const { data, error } = await supabase
+    .from('lei_interacoes')
+    .select('artigo_key')
+    .eq('user_id', userId)
+    .eq('is_review_active', true)
+    .lte('next_review_date', toLocalDateString());
+  // mesmo princípio do countRevisoesDue: erro não vira "nada vencido"
+  if (error) throw new Error('Erro ao contar revisões por lei: ' + error.message);
+
+  const map = new Map<string, number>();
+  for (const row of data ?? []) {
+    const key = row.artigo_key as string;
+    const slug = key.slice(0, key.indexOf(':'));
+    map.set(slug, (map.get(slug) ?? 0) + 1);
+  }
+  return map;
+}
+
 // Todas as interações do usuário com artigos de uma lei, indexadas por chave.
 export async function listInteracoesByLei(slug: string): Promise<Map<string, LeiInteracao>> {
   const { supabase, userId } = await requireUser();

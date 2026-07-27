@@ -28,6 +28,11 @@ export async function getDormantModules(): Promise<DormantModules> {
     head('juris_interacoes'),
     head('flashcards'),
   ]);
+  // Sem checar error, uma falha de rede virava count=undefined → "nunca usado"
+  // → convite de descoberta indevido pra quem já usa o módulo normalmente.
+  if (lei.error) throw new Error('Erro ao verificar uso do Vade Mecum: ' + lei.error.message);
+  if (juris.error) throw new Error('Erro ao verificar uso de Jurisprudências: ' + juris.error.message);
+  if (fc.error) throw new Error('Erro ao verificar uso de Flashcards: ' + fc.error.message);
 
   return {
     lei: (lei.count ?? 0) === 0,

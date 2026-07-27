@@ -27,12 +27,14 @@ export interface FilaUnificada {
 }
 
 export async function buildFilaUnificada(): Promise<FilaUnificada> {
-  // Uma fonte lenta ou vazia nunca deve derrubar as demais.
+  // Erro real de qualquer fonte deve propagar (não virar fila vazia/menor): o
+  // /revisar/page.tsx trata falha com tela de erro + retry, e uma falha
+  // engolida aqui a esconderia como "tudo em dia" falso.
   const [topics, cards, leiDue, jurisDue] = await Promise.all([
-    listDueReviews().catch(() => [] as ReviewItem[]),
-    listDueCards().catch(() => [] as DueCard[]),
-    listRevisoesDue().catch(() => [] as LeiInteracao[]),
-    listRevisoesHoje().catch(() => [] as JurisComInteracao[]),
+    listDueReviews(),
+    listDueCards(),
+    listRevisoesDue(),
+    listRevisoesHoje(),
   ]);
 
   const leiItems: UnifiedItem[] = (await hydrateLeiInteracoes(leiDue))

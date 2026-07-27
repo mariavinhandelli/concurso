@@ -26,13 +26,14 @@ export async function getRetomadaStatus(): Promise<RetomadaStatus> {
   const auth = await tryGetUser();
   if (!auth) return NEUTRO;
 
-  const { data } = await auth.supabase
+  const { data, error } = await auth.supabase
     .from('study_logs')
     .select('started_at')
     .eq('user_id', auth.userId)
     .order('started_at', { ascending: false })
     .limit(1)
     .maybeSingle();
+  if (error) throw new Error('Erro ao verificar última sessão: ' + error.message);
 
   // Nunca estudou → é caso de onboarding, não de retomada.
   if (!data?.started_at) return NEUTRO;
@@ -46,11 +47,14 @@ export async function getRetomadaStatus(): Promise<RetomadaStatus> {
   if (diasAusente < HIATO_MIN_DIAS) return { ...NEUTRO, diasAusente };
 
   // Só busca as contagens quando de fato houve hiato (evita 4 queries à toa).
+  // Sem .catch: uma falha real aqui não pode virar "pendencias: 0" — isso
+  // mostraria "suas revisões estão em dia" pro usuário que voltou de um hiato
+  // real, a falsa tranquilidade que o H11 evitou nas 4 fontes por baixo.
   const [rev, cards, lei, juris] = await Promise.all([
-    countDueReviews().catch(() => 0),
-    countDueCards().catch(() => 0),
-    countRevisoesDue().catch(() => 0),
-    countRevisoesHoje().catch(() => 0),
+    countDueReviews(),
+    countDueCards(),
+    countRevisoesDue(),
+    countRevisoesHoje(),
   ]);
 
   return { isHiato: true, diasAusente, pendencias: rev + cards + lei + juris };
