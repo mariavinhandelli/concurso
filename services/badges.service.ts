@@ -61,12 +61,18 @@ export interface BadgeState {
   newlyUnlocked: Badge[];
 }
 
-// Marcos de volume: 100 (1ª semana) → 500 (1 mês) → 2k (3-6 meses) → 6k (federal)
-const VOLUME_TARGETS = [100, 500, 2000, 6000];
-// Horas: 50 (iniciante) → 200 (comprometido) → 500 (federal médio) → 1000 (fiscal federal)
-const TEMPO_TARGETS_HORAS = [50, 200, 500, 1000];
-// Dias: 7 (1ª semana) → 30 (hábito formado) → 100 (elite, referência Duolingo)
-const CONSISTENCIA_TARGETS_DIAS = [7, 30, 100];
+// Marcos de volume — degraus mais densos que a v1 (100→500 pulava a 2ª/3ª
+// semana inteiras sem nenhuma vitória no meio, e 500→2000 deixava ~3 meses
+// sem nada). 250 e 1.000 preenchem os buracos; 10.000 é o topo aspiracional.
+const VOLUME_TARGETS = [100, 250, 500, 1000, 2500, 6000, 10000];
+// Horas — mesmo motivo: 25h e 100h davam a 1ª vitória de tempo na semana 1
+// (antes só a de 50h, que levava semanas) e um degrau entre 200→500.
+const TEMPO_TARGETS_HORAS = [25, 50, 100, 250, 500, 1000];
+// Dias — 14 e 60 evitam o "tudo ou nada" de 30→100 (quebrar no dia 60 hoje
+// não deixa NADA a mostrar); 365 é o badge de marca ("Constância que
+// aprova" — o slogan). Rótulo e descrição especiais abaixo, não genéricos.
+const CONSISTENCIA_TARGETS_DIAS = [7, 14, 30, 60, 100, 365];
+const CONSISTENCIA_MARCA_DIAS = 365;
 
 // Faixas CUMULATIVAS: uma sessão a 92% conta para ouro, prata E bronze. O que
 // separa os tiers é a exigência de acerto, e o volume compensa na direção
@@ -202,8 +208,32 @@ const EDITAL_COBERTURA_ALVOS = [
   { pct: 100, label: 'Edital coberto' },
 ];
 const EDITAL_PRONTIDAO_ALVO = 70; // mesma régua "quase_la" do Raio-X e do domínio da cobertura
+// "Sem lacunas" usa o mesmo piso de score que separa matéria fraca de OK no
+// Raio-X (nivelDe: <40 = construção) — abaixo disso a matéria está mesmo
+// abandonada, não é rigor excessivo.
+const EDITAL_SEM_LACUNAS_MIN_SCORE = 50;
 
-function buildEditalBadges(cov: EditalCoverage | null, raiox: RaioX | null): Badge[] {
+// Itens do checklist da Central de Preparação (HubOverviewTab.PREP_ITEMS) que
+// contam para "Checklist de véspera". Mantidos em espelho — se a lista de lá
+// mudar, esta precisa acompanhar. Os catalog-gated (comparar-editais,
+// mapa-incidencia, estilo-banca) só entram quando há vínculo com o catálogo,
+// exatamente como na Central — senão o badge nunca fecharia por motivo fora
+// do controle da usuária.
+const PREP_CHECKLIST_MANUAL_KEYS = ['prova-ultima', 'estudar-edital', 'cronograma', 'juris', 'lei-seca'];
+const PREP_CHECKLIST_CATALOG_KEYS = ['comparar-editais', 'mapa-incidencia', 'estilo-banca'];
+
+export interface EditalChecklistInfo {
+  targetId: string;
+  phase: 'pre' | 'pos';
+  hasCatalogLink: boolean;
+  prepChecklist: string[];
+}
+
+function buildEditalBadges(
+  cov: EditalCoverage | null,
+  raiox: RaioX | null,
+  checklist: EditalChecklistInfo | null,
+): Badge[] {
   // Sem alvo ou sem tópicos vinculados → a família simplesmente não existe.
   if (!cov || !cov.hasTarget || !cov.targetId || cov.total === 0) return [];
   const badges: Badge[] = [];
@@ -255,6 +285,79 @@ function buildEditalBadges(cov: EditalCoverage | null, raiox: RaioX | null): Bad
       hint: top.score >= EDITAL_PRONTIDAO_ALVO
         ? undefined
         : `${top.subjectName}: ${top.score}/${EDITAL_PRONTIDAO_ALVO} de prontidão`,
+    });
+
+    // Sem lacunas: TODAS as matérias com peso acima do piso — o antídoto do
+    // "só estudo o que gosto". Diferente de "Prioridade em dia" (só a maior
+    // peso), este olha o conjunto inteiro.
+    const fracas = raiox.materias.filter((m) => m.score < EDITAL_SEM_LACUNAS_MIN_SCORE);
+    const totalMaterias = raiox.materias.length;
+    const emDia = totalMaterias - fracas.length;
+    badges.push({
+      id: `edital-${cov.targetId}-sem-lacunas`,
+      family: 'edital',
+      label: 'Sem lacunas',
+      description: `Nenhuma matéria do edital abaixo de ${EDITAL_SEM_LACUNAS_MIN_SCORE} de prontidão.`,
+      unlocked: fracas.length === 0,
+      current: emDia,
+      target: totalMaterias,
+      unit: 'matérias',
+      progress: totalMaterias > 0 ? clamp01(emDia / totalMaterias) : 0,
+      hint: fracas.length === 0
+        ? undefined
+        : fracas.length === 1
+          ? `${fracas[0].subjectName} está abaixo de ${EDITAL_SEM_LACUNAS_MIN_SCORE}`
+          : `${fracas.length} matérias abaixo de ${EDITAL_SEM_LACUNAS_MIN_SCORE}`,
+    });
+  }
+
+  // Checklist de véspera: os itens manuais + os automáticos (montar edital,
+  // definir pesos — já garantidos pela própria família existir/ter blueprint)
+  // + os catalog-gated SE o concurso está vinculado ao catálogo.
+  if (checklist) {
+    const chaves = new Set(checklist.prepChecklist);
+    const manualDone = PREP_CHECKLIST_MANUAL_KEYS.filter((k) => chaves.has(k)).length;
+    const catalogKeys = checklist.hasCatalogLink ? PREP_CHECKLIST_CATALOG_KEYS : [];
+    const catalogDone = catalogKeys.filter((k) => chaves.has(k)).length;
+    // 'montar-edital' e 'pesos' são automáticos: já provados por esta família
+    // existir (cov.total > 0) e por hasBlueprint, respectivamente.
+    const autoTotal = 2;
+    const autoDone = (cov.total > 0 ? 1 : 0) + (raiox?.hasBlueprint ? 1 : 0);
+    const total = PREP_CHECKLIST_MANUAL_KEYS.length + catalogKeys.length + autoTotal;
+    const done = manualDone + catalogDone + autoDone;
+    const faltamItens = Math.max(0, total - done);
+    badges.push({
+      id: `edital-${cov.targetId}-checklist-vespera`,
+      family: 'edital',
+      label: 'Checklist de véspera',
+      description: 'Complete a Central de Preparação do seu concurso.',
+      unlocked: done >= total,
+      current: done,
+      target: total,
+      unit: 'itens',
+      progress: total > 0 ? clamp01(done / total) : 0,
+      // Sem hint, "1 restantes" (fallback genérico da UI) lê mal — unidades
+      // fora de horas/dias caem nesse fallback sem palavra nenhuma.
+      hint: done >= total
+        ? undefined
+        : `${faltamItens} ${faltamItens === 1 ? 'item restante' : 'itens restantes'} na Central de Preparação`,
+    });
+
+    // Dia de prova: chegar à fase pós-edital. Independe de resultado — celebra
+    // ter chegado lá, que já é mais do que a maioria faz.
+    badges.push({
+      id: `edital-${cov.targetId}-dia-da-prova`,
+      family: 'edital',
+      label: 'Dia de prova',
+      description: 'Chegue ao dia da prova deste concurso.',
+      unlocked: checklist.phase === 'pos',
+      current: checklist.phase === 'pos' ? 1 : 0,
+      target: 1,
+      unit: 'prova',
+      progress: checklist.phase === 'pos' ? 1 : 0,
+      // Binário — "1 restantes" (fallback genérico sem palavra) não faz
+      // sentido aqui; sem ETA possível (não é volume, é uma data externa).
+      hint: checklist.phase === 'pos' ? undefined : 'ainda na fase de preparação',
     });
   }
 
@@ -340,11 +443,14 @@ function buildBadges(
     const unlocked = consistency.longest >= target;
     const atual    = consistency.current;
     const restante = Math.max(0, target - atual);
+    const ehMarca  = target === CONSISTENCIA_MARCA_DIAS;
     badges.push({
       id: `consistencia-${target}`,
       family: 'consistencia',
-      label: `${target} dias seguidos`,
-      description: `Estude ${target} dias consecutivos (mínimo 30 min por dia).`,
+      label: ehMarca ? 'Constância que aprova' : `${target} dias seguidos`,
+      description: ehMarca
+        ? 'Um ano inteiro de estudo consistente, dia após dia — a marca da casa.'
+        : `Estude ${target} dias consecutivos (mínimo 30 min por dia).`,
       unlocked,
       current: unlocked ? target : atual,
       target,
@@ -401,10 +507,32 @@ export async function getBadgeState(): Promise<BadgeState | null> {
   ]);
   if (!badgeData) return null;
 
+  // Checklist/fase do alvo primário — só busca se a família de edital existe
+  // de fato (cov.total > 0), evitando uma query extra sem propósito.
+  let checklist: EditalChecklistInfo | null = null;
+  if (coverage?.hasTarget && coverage.targetId && coverage.total > 0) {
+    try {
+      const { data } = await supabase
+        .from('target_exams')
+        .select('phase, catalog_edital_id, prep_checklist')
+        .eq('id', coverage.targetId)
+        .eq('user_id', user.id)
+        .maybeSingle();
+      if (data) {
+        checklist = {
+          targetId: coverage.targetId,
+          phase: data.phase as 'pre' | 'pos',
+          hasCatalogLink: !!data.catalog_edital_id,
+          prepChecklist: (data.prep_checklist as string[] | null) ?? [],
+        };
+      }
+    } catch { /* checklist/dia-de-prova ficam ausentes; resto da família segue */ }
+  }
+
   const { stats, rhythm } = badgeData;
   const consistency: ConsistencyStats = { current: streak.current, longest: streak.longest };
   const badges = [
-    ...buildEditalBadges(coverage, raiox),
+    ...buildEditalBadges(coverage, raiox, checklist),
     ...buildBadges(stats, consistency, rhythm),
   ];
 

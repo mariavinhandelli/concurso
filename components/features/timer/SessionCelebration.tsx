@@ -8,7 +8,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { Check, Trophy } from 'lucide-react';
+import { Check, Trophy, Sparkles } from 'lucide-react';
 import { getStreak, type StreakInfo } from '@/services/streak.service';
 import { getGoalsSummary, type GoalsSummary } from '@/services/goals.service';
 import { getBadgeState, type Badge } from '@/services/badges.service';
@@ -19,12 +19,27 @@ import { theme, zIndex } from '@/lib/theme';
 
 const MIN_DIA = 30; // piso do streak (services/streak.service)
 
+// Teaser "quase lá": conquista trancada com progresso alto vira gancho para a
+// PRÓXIMA sessão — o momento de maior ROI para reter, porque a pessoa acabou
+// de provar a si mesma que consegue. Só entra quando nada foi desbloqueado
+// agora (se já celebrou uma, empilhar "quase outra" dilui o momento).
+const TEASER_PROGRESSO_MIN = 0.9;
+const UNIDADE_SINGULAR: Record<string, string> = {
+  questões: 'questão', horas: 'hora', dias: 'dia', tópicos: 'tópico',
+  pontos: 'ponto', matérias: 'matéria', itens: 'item',
+};
+function formatFaltam(n: number, unit: string): string {
+  if (n === 1) return `1 ${UNIDADE_SINGULAR[unit] ?? unit}`;
+  return `${n.toLocaleString('pt-BR')} ${unit}`;
+}
+
 interface CelebrationData {
   minutes: number;
   retroDate: string | null; // preenchido quando o registro é de um dia passado
   streak: StreakInfo | null;
   goals: GoalsSummary | null;
   badges: Badge[];          // conquistas desbloqueadas POR ESTA sessão
+  teaser: Badge | null;     // conquista trancada mais próxima (só quando badges está vazio)
 }
 
 export function SessionCelebration() {
@@ -45,7 +60,7 @@ export function SessionCelebration() {
 
       // Registro retroativo: celebração simples, sem streak/meta (que são de hoje).
       if (!isToday) {
-        setData({ minutes: detail.minutes, retroDate: detail.dateLocal, streak: null, goals: null, badges: [] });
+        setData({ minutes: detail.minutes, retroDate: detail.dateLocal, streak: null, goals: null, badges: [], teaser: null });
         return;
       }
 
@@ -58,9 +73,17 @@ export function SessionCelebration() {
         getGoalsSummary().catch(() => null),
         getBadgeState().catch(() => null),
       ]);
+      const badges = badgeState?.newlyUnlocked ?? [];
+      // Teaser só quando NADA foi desbloqueado agora — a conquista real desta
+      // sessão não divide a cena com a promessa de uma futura.
+      const teaser = badges.length === 0
+        ? (badgeState?.badges ?? [])
+            .filter((b) => !b.unlocked && b.progress >= TEASER_PROGRESSO_MIN)
+            .sort((a, b) => b.progress - a.progress)[0] ?? null
+        : null;
       setData({
         minutes: detail.minutes, retroDate: null, streak, goals,
-        badges: badgeState?.newlyUnlocked ?? [],
+        badges, teaser,
       });
       track(EV.celebrationShown, {
         minutes: detail.minutes,
@@ -90,7 +113,7 @@ export function SessionCelebration() {
 
   if (!data) return null;
 
-  const { minutes, retroDate, streak, goals, badges } = data;
+  const { minutes, retroDate, streak, goals, badges, teaser } = data;
 
   // ── Linha da sequência: dia garantido / escada até os 30 min ──
   let streakLine: { emoji: string; text: string; strong?: boolean } | null = null;
@@ -151,6 +174,17 @@ export function SessionCelebration() {
           </div>
         ))}
 
+        {/* Quase lá: gancho honesto para a próxima sessão — só quando nada
+            foi desbloqueado agora (ver TEASER_PROGRESSO_MIN). */}
+        {teaser && (
+          <div style={s.teaserLine}>
+            <Sparkles size={16} strokeWidth={2} style={{ flexShrink: 0 }} />
+            <span>
+              Faltam {formatFaltam(Math.max(0, teaser.target - teaser.current), teaser.unit)} para <b>{teaser.label}</b>
+            </span>
+          </div>
+        )}
+
         {streakLine && (
           <div style={{ ...s.line, ...(streakLine.strong ? s.lineStrong : {}) }}>
             <span style={s.lineEmoji}>{streakLine.emoji}</span>
@@ -210,6 +244,12 @@ const s: Record<string, React.CSSProperties> = {
     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
     fontSize: 14, color: theme.warnDeep, fontWeight: 600,
     padding: '9px 12px', borderRadius: theme.radiusSm, background: theme.warnBg,
+    marginBottom: 8,
+  },
+  teaserLine: {
+    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+    fontSize: 13, color: theme.clay, fontWeight: 600,
+    padding: '9px 12px', borderRadius: theme.radiusSm, background: theme.clayBg,
     marginBottom: 8,
   },
   record: { fontSize: 13, fontWeight: 700, color: theme.warn, marginBottom: 8 },
