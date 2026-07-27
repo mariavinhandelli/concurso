@@ -122,9 +122,17 @@ neutro — informar sem punir. Sem delta quando a janela anterior é vazia ("+2h
 "Acerto em questões" entrou no lugar de "média por dia estudado" (derivada decorativa).
 Cobertura/retenção mês-a-mês ficam para quando houver snapshot histórico (M3) — sem inventar.
 
-**M6 — Narrativa do mês (IA sobre números determinísticos).** 3 frases em segunda pessoa geradas
-sobre os agregados que já existem — a IA redige, nunca calcula (mantém a regra do coach). Vira
-também o e-mail/push mensal de retenção. *Esforço M, depende de M5.*
+**M6 — Narrativa do mês (IA sobre números determinísticos).** ✅ **ENTREGUE 27/07** e verificado
+ao vivo. Edge Function `monthly-narrative` (padrão da IA invisível): computa deterministicamente
+os números do mês COMPLETO anterior (minutos, dias ativos em fuso SP, questões, acerto, badges do
+mês, deltas vs. mês anterior), pede 2-4 frases ao haiku e **só grava se um juiz confirmar
+fidelidade** (nenhum número inventado). Tabela `monthly_narratives` own-only — privada, fora de
+`ai_artifacts` — com `stats` jsonb ao lado do texto (auditável). pg_cron dia 1 às 07:30 UTC +
+semente: a leitura de junho da conta de teste saiu com os números exatos do banco ("480 minutos,
+5 dias, 191 questões, 67%"). Card `NarrativaMes` na Evolução, logo sob o heatmap; sem narrativa,
+o card não existe. Custo: 2 chamadas haiku/usuário/mês. Armadilha documentada: o output
+estruturado não aceita minItems>1/maxItems em arrays — limites vão no código. Próximo passo
+natural (não feito): reusar a narrativa como push/e-mail mensal de retenção.
 
 ### O que NÃO fazer
 
