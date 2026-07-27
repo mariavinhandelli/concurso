@@ -3,14 +3,26 @@
 // (período + total) e cruzamento energia × desempenho. Leitura de study_logs.
 
 import { createClient } from '@/lib/supabase/client';
+import { getCachedUser } from '@/lib/supabase/authCache';
 import { getStreak } from '@/services/streak.service';
+import { getStudyDayTotals } from '@/services/studyTotals.service';
+import { toLocalDateString as localDateStr } from '@/lib/local-date';
 
 export interface ConstanciaResumo {
   // Período (últimos N dias)
   horasPeriodo: number;
   sessoesPeriodo: number;
-  mediaHorasDia: number;       // média sobre os dias do período
+  diasAtivosPeriodo: number;   // dias com estudo no período — o número honesto de ritmo
+  mediaHorasDiaAtivo: number;  // média sobre os dias ESTUDADOS (não sobre os 30 corridos)
   sessoesPorSemana: number;    // média semanal no período
+  questoesPeriodo: number;
+  acertoPct: number | null;    // % de acerto no período (null = sem questões)
+  // M5 — "você vs. você": a MESMA janela imediatamente anterior (dias..2×dias
+  // atrás). Janelas móveis comparáveis — nunca "26 de julho vs. junho inteiro".
+  prevHorasPeriodo: number;
+  prevDiasAtivos: number;
+  prevQuestoes: number;
+  prevAcertoPct: number | null;
   // Total geral (toda a história)
   horasTotal: number;
   sessoesTotal: number;
@@ -26,61 +38,81 @@ export interface EnergiaPonto {
 }
 
 // Resumo de constância: período (últimos `dias`) + total geral + streak.
+// Perf: antes isto paginava a tabela INTEIRA de study_logs no cliente só para
+// somar horas e contar sessões. Agora as horas vêm agregadas do servidor
+// (get_study_day_totals — a mesma RPC que streak/metas já usam, deduplicada
+// por request) e as sessões vêm de dois COUNT head-only. Nenhuma linha crua
+// trafega.
 export async function getConstanciaResumo(dias = 30): Promise<ConstanciaResumo | null> {
   const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getCachedUser();
   if (!user) return null;
-
-  // Todas as sessões (para o total geral) — paginadas para evitar truncamento silencioso do PostgREST.
-  const PAGE_SIZE = 1000;
-  type LogRow = { duration_sec: number | null; started_at: string };
-  const todas: LogRow[] = [];
-  let from = 0;
-  while (true) {
-    const { data, error } = await supabase
-      .from('study_logs')
-      .select('duration_sec, started_at')
-      .eq('user_id', user.id)
-      .order('id', { ascending: true })
-      .range(from, from + PAGE_SIZE - 1);
-    if (error) throw new Error('Erro ao carregar resumo de constância: ' + error.message);
-    if (!data || data.length === 0) break;
-    todas.push(...data);
-    if (data.length < PAGE_SIZE) break;
-    from += PAGE_SIZE;
-  }
-
-  let segTotal = 0;
-  let sessoesTotal = 0;
-  let segPeriodo = 0;
-  let sessoesPeriodo = 0;
 
   const corte = new Date();
   corte.setDate(corte.getDate() - dias);
   corte.setHours(0, 0, 0, 0);
+  const corteDia = localDateStr(corte);
+  // Janela anterior (M5): [2×dias atrás, dias atrás) — mesmo tamanho, comparável.
+  const cortePrev = new Date(corte);
+  cortePrev.setDate(cortePrev.getDate() - dias);
+  const cortePrevDia = localDateStr(cortePrev);
 
-  for (const l of todas) {
-    const sec = l.duration_sec ?? 0;
-    segTotal += sec;
-    sessoesTotal += 1;
-    if (new Date(l.started_at) >= corte) {
-      segPeriodo += sec;
-      sessoesPeriodo += 1;
+  const [dayTotals, streak, totalRes, periodoRes] = await Promise.all([
+    getStudyDayTotals(),
+    getStreak(),
+    supabase
+      .from('study_logs')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', user.id),
+    supabase
+      .from('study_logs')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', user.id)
+      .gte('started_at', corte.toISOString()),
+  ]);
+
+  if (totalRes.error) throw new Error('Erro ao carregar resumo de constância: ' + totalRes.error.message);
+  if (periodoRes.error) throw new Error('Erro ao carregar resumo de constância: ' + periodoRes.error.message);
+
+  let segTotal = 0;
+  let segPeriodo = 0;
+  let diasAtivosPeriodo = 0;
+  let questoesPeriodo = 0, certasPeriodo = 0;
+  let segPrev = 0, prevDiasAtivos = 0, prevQuestoes = 0, prevCertas = 0;
+  for (const d of dayTotals) {
+    segTotal += d.seconds;
+    if (d.day >= corteDia) {
+      segPeriodo += d.seconds;
+      questoesPeriodo += d.questions;
+      certasPeriodo += d.correct;
+      if (d.seconds > 0) diasAtivosPeriodo += 1;
+    } else if (d.day >= cortePrevDia) {
+      segPrev += d.seconds;
+      prevQuestoes += d.questions;
+      prevCertas += d.correct;
+      if (d.seconds > 0) prevDiasAtivos += 1;
     }
   }
 
+  const sessoesTotal = totalRes.count ?? 0;
+  const sessoesPeriodo = periodoRes.count ?? 0;
   const horasPeriodo = segPeriodo / 3600;
   const horasTotal = segTotal / 3600;
-  const mediaHorasDia = horasPeriodo / dias;
-  const sessoesPorSemana = (sessoesPeriodo / dias) * 7;
-
-  const streak = await getStreak();
 
   return {
     horasPeriodo,
     sessoesPeriodo,
-    mediaHorasDia,
-    sessoesPorSemana,
+    diasAtivosPeriodo,
+    // Média sobre os DIAS ESTUDADOS, não sobre os 30 dias corridos: quem estuda
+    // 3x por semana não se reconhece numa média diluída pelos dias de folga.
+    mediaHorasDiaAtivo: diasAtivosPeriodo > 0 ? horasPeriodo / diasAtivosPeriodo : 0,
+    sessoesPorSemana: (sessoesPeriodo / dias) * 7,
+    questoesPeriodo,
+    acertoPct: questoesPeriodo > 0 ? Math.round((certasPeriodo / questoesPeriodo) * 100) : null,
+    prevHorasPeriodo: segPrev / 3600,
+    prevDiasAtivos,
+    prevQuestoes,
+    prevAcertoPct: prevQuestoes > 0 ? Math.round((prevCertas / prevQuestoes) * 100) : null,
     horasTotal,
     sessoesTotal,
     sequenciaAtual: streak.current,
@@ -91,7 +123,7 @@ export async function getConstanciaResumo(dias = 30): Promise<ConstanciaResumo |
 // Energia × desempenho: acerto médio por nível de energia (1..5).
 export async function getEnergiaDesempenho(): Promise<EnergiaPonto[]> {
   const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getCachedUser();
   if (!user) return [];
 
   const { data: logs, error } = await supabase

@@ -96,18 +96,20 @@ export async function getTimeByCategory(
 
   if (error) throw new Error('Erro ao agregar tempo: ' + error.message);
 
-  // Soma segundos por disciplina.
+  // Soma segundos por disciplina. Sessões SEM matéria (revisões passivas,
+  // simulados de VM) entram numa fatia própria — antes eram descartadas e o
+  // card dizia "nenhum estudo" enquanto o Ritmo, na mesma página, contava a
+  // sessão. A mesma fonte não pode dar duas respostas.
+  const SEM_MATERIA_ID = '__sem_materia__';
   const porSubject = new Map<string, { name: string; color: string; sec: number }>();
   for (const log of logs ?? []) {
-    if (!log.subject_id) continue; // ignora sessões sem matéria
+    const key = log.subject_id ?? SEM_MATERIA_ID;
     const subj = Array.isArray(log.subjects) ? log.subjects[0] : log.subjects;
-    const atual = porSubject.get(log.subject_id) ?? {
-      name: subj?.name ?? 'Sem matéria',
-      color: subj?.color ?? '#C9B8DD',
-      sec: 0,
-    };
+    const atual = porSubject.get(key) ?? (log.subject_id
+      ? { name: subj?.name ?? 'Sem matéria', color: subj?.color ?? '#C9B8DD', sec: 0 }
+      : { name: 'Revisões e treinos', color: '#94A3B8', sec: 0 }); // cinza neutro (dado dinâmico do gráfico)
     atual.sec += log.duration_sec ?? 0;
-    porSubject.set(log.subject_id, atual);
+    porSubject.set(key, atual);
   }
 
   const slices: CategorySlice[] = Array.from(porSubject.entries())

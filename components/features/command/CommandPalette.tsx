@@ -54,9 +54,9 @@ const NAV: { label: string; href: string }[] = [
   { label: 'Vade Mecum', href: '/vademecum' },
   { label: 'Caderno', href: '/caderno' },
   { label: 'Cadernos de erros', href: '/caderno?tab=erros' },
-  { label: 'Performance', href: '/performance' },
-  { label: 'Conquistas', href: '/conquistas' },
-  { label: 'Histórico', href: '/historico' },
+  { label: 'Progresso', href: '/progresso' },
+  { label: 'Conquistas', href: '/progresso/conquistas' },
+  { label: 'Histórico', href: '/progresso/historico' },
   { label: 'Meu perfil', href: '/profile' },
   { label: 'Configurações', href: '/settings' },
 ];

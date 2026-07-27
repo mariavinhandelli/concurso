@@ -3,6 +3,7 @@
 // Por ora soma no navegador; se o volume crescer muito, migra-se p/ o banco.
 
 import { createClient } from '@/lib/supabase/client';
+import { getCachedUser } from '@/lib/supabase/authCache';
 import { getDailyTarget } from '@/services/goals.service';
 
 export type Granularity = 'dia' | 'semana' | 'mes' | 'ano';
@@ -65,7 +66,7 @@ const DAYS_PER_BUCKET: Record<Granularity, number> = {
 
 export async function getTimeSeries(g: Granularity): Promise<TimePoint[]> {
   const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getCachedUser();
   if (!user) return [];
 
   const { buckets, daysBack } = CONFIG[g];

@@ -68,8 +68,8 @@ export const JourneyStats = memo(function JourneyStats() {
           </div>
         ))}
       </div>
-      <button style={styles.analiseLink} onClick={() => router.push('/performance')}>
-        ver análise completa →
+      <button style={styles.analiseLink} onClick={() => router.push('/progresso')}>
+        ver progresso completo →
       </button>
     </div>
   );

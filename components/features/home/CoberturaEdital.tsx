@@ -105,10 +105,7 @@ export const CoberturaEdital = memo(function CoberturaEdital() {
         Compartilhar meu progresso
       </button>
 
-      <button style={styles.analiseLink} onClick={() => router.push('/performance')}>
-        ver análise completa →
-      </button>
-
+      {/* M1: o card agora mora em /progresso — link auto-referente removido. */}
       {sharing && <ShareProgressCard onClose={() => setSharing(false)} />}
     </div>
   );

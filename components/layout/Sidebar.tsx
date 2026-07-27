@@ -4,7 +4,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useState, type CSSProperties } from 'react';
 import {
   X, ChevronLeft, House, RefreshCw, Layers, CalendarClock, FolderOpen, List,
-  Gavel, Book, Pencil, ChartNoAxesColumn, Trophy, Users, History, type LucideIcon,
+  Gavel, Book, Pencil, ChartNoAxesColumn, Users, type LucideIcon,
 } from 'lucide-react';
 import { useUI } from './UIContext';
 import { zIndex } from '@/lib/theme';
@@ -44,10 +44,10 @@ const NAV: NavItem[] = [
   { href: '/caderno', label: 'Caderno', icon: Pencil },
 
   { type: 'sep', label: 'Progresso' },
-  { href: '/performance', label: 'Performance', icon: ChartNoAxesColumn },
-  { href: '/conquistas', label: 'Conquistas', icon: Trophy },
+  // M1 — Performance/Conquistas/Histórico viraram abas de /progresso: uma
+  // entrada em vez de três (as rotas antigas redirecionam).
+  { href: '/progresso', label: 'Progresso', icon: ChartNoAxesColumn },
   { href: '/amigos', label: 'Amigos', icon: Users },
-  { href: '/historico', label: 'Histórico', icon: History },
 ];
 
 export function Sidebar() {
@@ -150,7 +150,10 @@ export function Sidebar() {
             );
           }
 
-          const active = pathname === n.href;
+          // Prefixo cobre as abas internas (ex.: /progresso/conquistas
+          // mantém "Progresso" aceso). Home ('/') continua por igualdade.
+          const active = pathname === n.href
+            || (n.href !== '/' && pathname.startsWith(n.href + '/'));
           const isHover = hover === n.href;
           return (
             <button

@@ -4,7 +4,7 @@
 // lacuna; avalie com Errei/Difícil/Ok/Dominei (intervalos 1/3/15/45).
 'use client';
 
-import { useEffect, useMemo, useState, type CSSProperties } from 'react';
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 import {
@@ -14,6 +14,7 @@ import {
 import { RATING_LABEL, type JurisRating } from '@/lib/juris-review';
 import { GRIFO_CORES, SUBLINHADO_COR, segmentarBloco } from '@/lib/lei-grifos';
 import { refreshHomeAfterSession } from '@/lib/home-refresh';
+import { savePassiveSession } from '@/services/passiveSession.service';
 import { useUI } from '@/components/layout/UIContext';
 import { useToast } from '@/components/ui/ToastProvider';
 import { theme } from '@/lib/theme';
@@ -42,6 +43,22 @@ export default function RevisarArtigosPage() {
   const [reveladas, setReveladas] = useState<Set<string>>(new Set());
   const [saving, setSaving] = useState(false);
   const [feitas, setFeitas] = useState(0);
+  // Sessão passiva (mode: leitura_lei): início do player + trava de gravação
+  // única. Inicializada no efeito (Date.now() no render viola pureza).
+  const inicioRef = useRef(0);
+  const sessaoGravadaRef = useRef(false);
+  useEffect(() => { if (!inicioRef.current) inicioRef.current = Date.now(); }, []);
+
+  const acabou = fila !== null && idx >= fila.length;
+  useEffect(() => {
+    if (!acabou || feitas === 0 || sessaoGravadaRef.current) return;
+    sessaoGravadaRef.current = true;
+    void savePassiveSession({
+      mode: 'leitura_lei',
+      startedAtMs: inicioRef.current,
+      itemsLabel: `Revisão de lei seca: ${feitas} artigo${feitas === 1 ? '' : 's'}.`,
+    }).then((gravou) => { if (gravou) refreshHomeAfterSession(queryClient); });
+  }, [acabou, feitas, queryClient]);
 
   useEffect(() => {
     let cancelled = false;

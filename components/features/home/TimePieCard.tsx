@@ -1,9 +1,7 @@
 'use client';
 
 import { memo, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
-import { ChevronRight } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import {
   getTimeByCategory, type TimeByCategoryResult,
@@ -29,7 +27,6 @@ const PieChartSection = dynamic(
 // (StudyTimeChart). A Home mostra só a semana corrente — "quanto estudei e em
 // quê" — com um link para quem quiser explorar o histórico completo.
 export const TimePieCard = memo(function TimePieCard() {
-  const router = useRouter();
   const [logOpen, setLogOpen] = useState(false);
 
   const { data, isError: loadError } = useQuery<TimeByCategoryResult>({
@@ -60,11 +57,7 @@ export const TimePieCard = memo(function TimePieCard() {
         <PieChartSection slices={data!.slices} totalMinutes={data!.totalMinutes} />
       )}
 
-      <button style={styles.analiseLink} onClick={() => router.push('/performance')}>
-        ver análise completa
-        <ChevronRight size={13} strokeWidth={2.2} />
-      </button>
-
+      {/* M1: o card agora mora em /progresso — link auto-referente removido. */}
       {logOpen && (
         <ManualLogModal onClose={() => setLogOpen(false)} onSaved={() => setLogOpen(false)} />
       )}

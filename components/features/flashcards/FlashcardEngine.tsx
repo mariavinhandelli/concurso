@@ -9,6 +9,7 @@ import { useConfirm } from '@/hooks/useConfirm';
 import { calculateNextReview, INITIAL_SR_STATE, type RecallGrade } from '@/lib/spaced-repetition';
 import { fromDbRow } from '@/lib/spaced-repetition.mapper';
 import { getUserFeatures, srsModifierFor, DEFAULT_FEATURES, type UserFeatures } from '@/services/userFeatures.service';
+import { savePassiveSession } from '@/services/passiveSession.service';
 import { theme, kbd as kbdStyle } from '@/lib/theme';
 import { Button } from '@/components/ui/Button';
 import type { ReviewRating, QueueCard } from '@/services/flashcards.service';
@@ -50,6 +51,22 @@ export function FlashcardEngine({ queue, onFinish, onExit }: Props) {
   const session = useStudySession(queue, onError, features);
 
   const sessionRef = useRef(session);
+
+  // Sessão passiva (mode: flashcards): estudar cards passa a contar como
+  // estudo — streak, metas e conquistas. Gravada UMA vez ao concluir a fila.
+  // Início setado no efeito (Date.now() no render viola pureza).
+  const inicioRef = useRef(0);
+  const sessaoGravadaRef = useRef(false);
+  useEffect(() => { if (!inicioRef.current) inicioRef.current = Date.now(); }, []);
+  useEffect(() => {
+    if (!session.isFinished || session.total === 0 || sessaoGravadaRef.current) return;
+    sessaoGravadaRef.current = true;
+    void savePassiveSession({
+      mode: 'flashcards',
+      startedAtMs: inicioRef.current,
+      itemsLabel: `Flashcards: ${session.total} card${session.total === 1 ? '' : 's'} revisado${session.total === 1 ? '' : 's'}.`,
+    });
+  }, [session.isFinished, session.total]);
 
   const liftingRef = useRef(false);
   const [lifting, setLifting] = useState(false);

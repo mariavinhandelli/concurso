@@ -4,7 +4,7 @@
 'use client';
 
 import { Skeleton } from '@/components/ui/Skeleton';
-import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import {
   getAccuracyBySubject, type AccuracyPoint,
@@ -14,22 +14,25 @@ import { PerfInsight } from './PerfInsight';
 
 // Abaixo disso a matéria precisa de atenção (mesma régua do perfColor: <65%).
 const LIMIAR_ATENCAO = 65;
+// Amostra mínima para RECOMENDAR uma matéria. Sem isso, uma única questão
+// errada colocava a matéria no topo da lista (ordenada por % asc) e virava o
+// insight principal da plataforma: "Reforçar X — é sua menor taxa (0%)".
+// Mesmo limiar de metrics.service (<30 questões → margem de erro ±16%).
+const MIN_QUESTOES_CONFIAVEL = 30;
 
 export function AccuracyChart() {
   const router = useRouter();
-  const [data, setData] = useState<AccuracyPoint[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
+  const { data = [], isLoading: loading, isError: error } = useQuery<AccuracyPoint[]>({
+    queryKey: ['accuracy-by-subject'],
+    queryFn: getAccuracyBySubject,
+    staleTime: 5 * 60_000,
+  });
 
-  useEffect(() => {
-    getAccuracyBySubject()
-      .then(setData)
-      .catch(() => setError(true))
-      .finally(() => setLoading(false));
-  }, []);
-
-  // data já vem ordenada da menor taxa para a maior.
-  const pior = data[0] ?? null;
+  // data já vem ordenada da menor taxa para a maior, mas só matérias com
+  // amostra suficiente podem virar recomendação.
+  const confiaveis = data.filter((d) => d.total >= MIN_QUESTOES_CONFIAVEL);
+  const pior = confiaveis[0] ?? null;
+  const temAmostraCurta = data.length > 0 && confiaveis.length === 0;
 
   return (
     <div style={styles.wrap}>
@@ -66,6 +69,15 @@ export function AccuracyChart() {
             );
           })}
         </div>
+      )}
+
+      {/* Amostra insuficiente em todas as matérias: dizer isso é mais honesto
+          que apontar uma "pior matéria" baseada em meia dúzia de questões. */}
+      {!loading && !error && temAmostraCurta && (
+        <PerfInsight tone="info">
+          Ainda são poucas questões por matéria para uma leitura confiável.
+          A partir de {MIN_QUESTOES_CONFIAVEL} questões numa matéria, apontamos onde focar.
+        </PerfInsight>
       )}
 
       {/* Insight acionável: aponta a matéria mais fraca e leva direto a ela. */}

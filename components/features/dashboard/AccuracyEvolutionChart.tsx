@@ -4,6 +4,7 @@
 
 import { Skeleton } from '@/components/ui/Skeleton';
 import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { useToast } from '@/components/ui/ToastProvider';
 import {
   Line, Area, ComposedChart, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -17,24 +18,26 @@ import { Select } from '@/components/ui/Select';
 
 export function AccuracyEvolutionChart() {
   const toast = useToast();
-  const [subjects, setSubjects] = useState<SubjectOption[]>([]);
   const [selected, setSelected] = useState<string>('');
-  const [data, setData] = useState<EvolutionPoint[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
 
+  // React Query: a key inclui o filtro, então trocar de matéria não tem race
+  // (cada resposta cai na sua key) e voltar a um filtro já visto é instantâneo.
+  const { data: subjects = [], isError: subjectsError } = useQuery<SubjectOption[]>({
+    queryKey: ['subjects-with-questions'],
+    queryFn: listSubjectsWithQuestions,
+    staleTime: 5 * 60_000,
+  });
+  // Filtro é acessório: se falhar, o gráfico "Geral" continua funcionando —
+  // avisa uma vez em vez de quebrar o card.
   useEffect(() => {
-    listSubjectsWithQuestions().then(setSubjects).catch((e) => toast.error(e instanceof Error ? e.message : 'Erro ao carregar filtro de matérias.'));
-  }, [toast]);
+    if (subjectsError) toast.error('Erro ao carregar filtro de matérias.');
+  }, [subjectsError, toast]);
 
-  useEffect(() => {
-    setLoading(true);
-    setError(false);
-    getAccuracyEvolution(selected || null)
-      .then(setData)
-      .catch(() => setError(true))
-      .finally(() => setLoading(false));
-  }, [selected]);
+  const { data = [], isLoading: loading, isError: error } = useQuery<EvolutionPoint[]>({
+    queryKey: ['accuracy-evolution', selected || 'geral'],
+    queryFn: () => getAccuracyEvolution(selected || null),
+    staleTime: 5 * 60_000,
+  });
 
   const hasData = data.some((d) => d.total > 0);
 
@@ -80,8 +83,10 @@ export function AccuracyEvolutionChart() {
                 return [`${v}% (${total} questões)`, 'Acerto'];
               }}
             />
-            <Area type="monotone" dataKey="pct" stroke="none" fill="url(#accEvo)" />
-            <Line type="monotone" dataKey="pct" name="Acerto"
+            {/* connectNulls: semanas sem questões são lacuna (null), não zero —
+                a linha atravessa por cima em vez de mergulhar até o eixo. */}
+            <Area type="monotone" dataKey="pct" stroke="none" fill="url(#accEvo)" connectNulls />
+            <Line type="monotone" dataKey="pct" name="Acerto" connectNulls
               stroke={theme.teal} strokeWidth={2.5}
               dot={{ r: 3, fill: theme.teal, strokeWidth: 0 }}
               activeDot={{ r: 5, fill: theme.teal, strokeWidth: 0 }} />

@@ -3,32 +3,69 @@
 'use client';
 
 import { Skeleton } from '@/components/ui/Skeleton';
-import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { getConstanciaResumo, type ConstanciaResumo as Resumo } from '@/services/performance.service';
 import { theme } from '@/lib/theme';
 import { useUI } from '@/components/layout/UIContext';
 
 function formataHoras(h: number): string {
   if (h < 1) return `${Math.round(h * 60)} min`;
-  return `${h.toFixed(1)}h`;
+  return `${h.toFixed(1).replace('.', ',')}h`;
+}
+
+// M5 — delta "você vs. você" (30 dias vs. os 30 anteriores). Subir é verde;
+// descer é neutro (informar sem punir — quem caiu já sabe que caiu).
+function Delta({ atual, anterior, fmt }: {
+  atual: number; anterior: number; fmt: (diff: number) => string;
+}) {
+  const diff = atual - anterior;
+  if (diff === 0) return null;
+  const sobe = diff > 0;
+  return (
+    <span style={{ ...styles.delta, color: sobe ? theme.okDeep : theme.inkFaint }}>
+      {sobe ? '▲' : '▼'} {fmt(Math.abs(diff))} vs. 30 anteriores
+    </span>
+  );
 }
 
 export function ConstanciaResumo() {
   const { isMobile } = useUI();
-  const [data, setData] = useState<Resumo | null>(null);
-  const [loading, setLoading] = useState(true);
+  // React Query: cache entre navegações, dedupe com a Home e invalidação por
+  // refreshHomeAfterSession — antes era useEffect cru, refazia tudo a cada visita.
+  const { data, isLoading } = useQuery<Resumo | null>({
+    queryKey: ['constancia-resumo', 30],
+    queryFn: () => getConstanciaResumo(30),
+    staleTime: 5 * 60_000,
+  });
 
-  useEffect(() => {
-    getConstanciaResumo(30).then((r) => { setData(r); setLoading(false); });
-  }, []);
-
-  if (loading) return <Skeleton height={64} borderRadius={12} />;
+  if (isLoading) return <Skeleton height={64} borderRadius={12} />;
   if (!data) return <p style={styles.muted}>Sem dados de estudo ainda.</p>;
 
-  const metricasPeriodo = [
-    { valor: formataHoras(data.horasPeriodo), rotulo: 'horas em 30 dias' },
-    { valor: formataHoras(data.mediaHorasDia), rotulo: 'média por dia' },
-    { valor: data.sessoesPorSemana.toFixed(1), rotulo: 'sessões / semana' },
+  // Deltas só quando a janela anterior teve QUALQUER atividade — comparar com
+  // o vazio ("+2h vs. nada") é ruído, não leitura.
+  const temJanelaAnterior = data.prevHorasPeriodo > 0 || data.prevDiasAtivos > 0;
+
+  const metricasPeriodo: { valor: string; rotulo: string; delta?: React.ReactNode }[] = [
+    // "tempo", não "horas": com pouco volume o valor renderiza em minutos
+    // ("2 min") e o rótulo antigo contradizia o número.
+    {
+      valor: formataHoras(data.horasPeriodo), rotulo: 'tempo em 30 dias',
+      delta: temJanelaAnterior && <Delta atual={data.horasPeriodo} anterior={data.prevHorasPeriodo} fmt={formataHoras} />,
+    },
+    // "dias ativos" em vez de média diluída em 30 dias corridos: é o número que
+    // o usuário reconhece como o próprio ritmo.
+    {
+      valor: `${data.diasAtivosPeriodo}`, rotulo: data.diasAtivosPeriodo === 1 ? 'dia estudado' : 'dias estudados',
+      delta: temJanelaAnterior && <Delta atual={data.diasAtivosPeriodo} anterior={data.prevDiasAtivos} fmt={(d) => `${d} ${d === 1 ? 'dia' : 'dias'}`} />,
+    },
+    // Acerto entrou no lugar de "média por dia estudado" (derivada de tempo ÷
+    // dias — decorativa). Acerto é a métrica que muda decisão.
+    {
+      valor: data.acertoPct !== null ? `${data.acertoPct}%` : '—',
+      rotulo: 'acerto em questões',
+      delta: data.acertoPct !== null && data.prevAcertoPct !== null
+        && <Delta atual={data.acertoPct} anterior={data.prevAcertoPct} fmt={(d) => `${d} pp`} />,
+    },
     { valor: `${data.sequenciaAtual}`, rotulo: data.sequenciaAtual === 1 ? 'dia seguido' : 'dias seguidos' },
   ];
 
@@ -44,6 +81,7 @@ export function ConstanciaResumo() {
           <div key={m.rotulo} style={styles.metric}>
             <span style={styles.metricValue}>{m.valor}</span>
             <span style={styles.metricLabel}>{m.rotulo}</span>
+            {m.delta || null}
           </div>
         ))}
       </div>
@@ -58,7 +96,8 @@ export function ConstanciaResumo() {
         </span>
         <span style={styles.totalSep}>·</span>
         <span style={styles.totalItem}>
-          recorde anual de <b style={styles.totalNum}>{data.recorde}</b> dias
+          {/* "recorde anual" era falso: getStreak calcula sobre ~3 anos. */}
+          recorde de <b style={styles.totalNum}>{data.recorde}</b> {data.recorde === 1 ? 'dia' : 'dias'}
         </span>
       </div>
     </div>
@@ -74,6 +113,7 @@ const styles: Record<string, React.CSSProperties> = {
   metric: { display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0 },
   metricValue: { fontSize: 24, fontWeight: 800, color: theme.teal, letterSpacing: -0.6 },
   metricLabel: { fontSize: 12, color: theme.inkSoft, fontWeight: 500 },
+  delta: { fontSize: 11, fontWeight: 600, lineHeight: 1.3 },
   totalRow: { display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', paddingTop: 16, borderTop: `0.5px solid ${theme.line}` },
   totalItem: { fontSize: 13, color: theme.inkSoft, fontWeight: 500 },
   totalNum: { color: theme.ink, fontWeight: 700 },

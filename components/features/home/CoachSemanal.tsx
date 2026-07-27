@@ -173,7 +173,7 @@ export function CoachSemanal({ variant = 'banner' }: { variant?: 'banner' | 'row
 
             <div style={s.actions}>
               <Button variant="outline" onClick={fecharModal}>Fechar</Button>
-              <Button onClick={() => { fecharModal(); router.push('/performance'); }}>Ver desempenho completo →</Button>
+              <Button onClick={() => { fecharModal(); router.push('/progresso'); }}>Ver desempenho completo →</Button>
             </div>
         </Overlay>
       )}

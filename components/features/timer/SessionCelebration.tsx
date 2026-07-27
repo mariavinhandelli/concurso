@@ -8,9 +8,10 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { Check } from 'lucide-react';
+import { Check, Trophy } from 'lucide-react';
 import { getStreak, type StreakInfo } from '@/services/streak.service';
 import { getGoalsSummary, type GoalsSummary } from '@/services/goals.service';
+import { getBadgeState, type Badge } from '@/services/badges.service';
 import { SESSION_SAVED_EVENT, type SessionSavedDetail } from '@/lib/session-celebration';
 import { toLocalDateString } from '@/lib/local-date';
 import { track, EV } from '@/lib/analytics';
@@ -23,6 +24,7 @@ interface CelebrationData {
   retroDate: string | null; // preenchido quando o registro é de um dia passado
   streak: StreakInfo | null;
   goals: GoalsSummary | null;
+  badges: Badge[];          // conquistas desbloqueadas POR ESTA sessão
 }
 
 export function SessionCelebration() {
@@ -43,16 +45,23 @@ export function SessionCelebration() {
 
       // Registro retroativo: celebração simples, sem streak/meta (que são de hoje).
       if (!isToday) {
-        setData({ minutes: detail.minutes, retroDate: detail.dateLocal, streak: null, goals: null });
+        setData({ minutes: detail.minutes, retroDate: detail.dateLocal, streak: null, goals: null, badges: [] });
         return;
       }
 
       // Dados frescos direto do serviço (o save acabou de acontecer).
-      const [streak, goals] = await Promise.all([
+      // getBadgeState também PERSISTE desbloqueios novos (user_badges) — é aqui
+      // que a conquista aparece no instante em que aconteceu, não numa visita
+      // futura a /conquistas.
+      const [streak, goals, badgeState] = await Promise.all([
         getStreak().catch(() => null),
         getGoalsSummary().catch(() => null),
+        getBadgeState().catch(() => null),
       ]);
-      setData({ minutes: detail.minutes, retroDate: null, streak, goals });
+      setData({
+        minutes: detail.minutes, retroDate: null, streak, goals,
+        badges: badgeState?.newlyUnlocked ?? [],
+      });
       track(EV.celebrationShown, {
         minutes: detail.minutes,
         dayGuaranteed: !!streak?.studiedToday,
@@ -81,7 +90,7 @@ export function SessionCelebration() {
 
   if (!data) return null;
 
-  const { minutes, retroDate, streak, goals } = data;
+  const { minutes, retroDate, streak, goals, badges } = data;
 
   // ── Linha da sequência: dia garantido / escada até os 30 min ──
   let streakLine: { emoji: string; text: string; strong?: boolean } | null = null;
@@ -133,6 +142,14 @@ export function SessionCelebration() {
         <p style={s.subtitle}>
           {retroLabel ? `Sessão registrada em ${retroLabel}.` : 'Sessão registrada. Bom trabalho.'}
         </p>
+
+        {/* Conquista desbloqueada POR esta sessão — o momento que faltava */}
+        {badges.map((b) => (
+          <div key={b.id} style={s.badgeLine}>
+            <Trophy size={16} strokeWidth={2} style={{ flexShrink: 0 }} />
+            <span>Conquista desbloqueada: <b>{b.label}</b></span>
+          </div>
+        ))}
 
         {streakLine && (
           <div style={{ ...s.line, ...(streakLine.strong ? s.lineStrong : {}) }}>
@@ -189,6 +206,12 @@ const s: Record<string, React.CSSProperties> = {
   },
   lineStrong: { color: theme.ink, fontWeight: 700, background: theme.tealBg },
   lineEmoji: { fontSize: 16 },
+  badgeLine: {
+    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+    fontSize: 14, color: theme.warnDeep, fontWeight: 600,
+    padding: '9px 12px', borderRadius: theme.radiusSm, background: theme.warnBg,
+    marginBottom: 8,
+  },
   record: { fontSize: 13, fontWeight: 700, color: theme.warn, marginBottom: 8 },
   metaWrap: { marginTop: 6, marginBottom: 4, textAlign: 'left' },
   metaHead: { display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 6 },

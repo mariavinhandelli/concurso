@@ -4,7 +4,7 @@
 'use client';
 
 import { Skeleton } from '@/components/ui/Skeleton';
-import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell, Tooltip } from 'recharts';
 import { getEnergiaDesempenho, type EnergiaPonto } from '@/services/performance.service';
 import { theme } from '@/lib/theme';
@@ -19,12 +19,11 @@ const ENERGIA_LABEL: Record<number, string> = {
 };
 
 export function EnergiaDesempenho() {
-  const [pontos, setPontos] = useState<EnergiaPonto[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    getEnergiaDesempenho().then((p) => { setPontos(p); setLoading(false); });
-  }, []);
+  const { data: pontos = [], isLoading: loading } = useQuery<EnergiaPonto[]>({
+    queryKey: ['energia-desempenho'],
+    queryFn: getEnergiaDesempenho,
+    staleTime: 5 * 60_000,
+  });
 
   const dados = pontos.map((p) => ({
     nome: ENERGIA_LABEL[p.energia] ?? `Nível ${p.energia}`,

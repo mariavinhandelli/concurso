@@ -15,6 +15,7 @@ import {
   getQuestoesLei, embaralhar, saveLeiSimuladoSession, listLeiSimuladoSessions,
   type LeiQuestao, type LeiSimuladoResposta, type LeiSimuladoSession,
 } from '@/services/leiQuestoes.service';
+import { savePassiveSession } from '@/services/passiveSession.service';
 import { useUI } from '@/components/layout/UIContext';
 import { theme } from '@/lib/theme';
 import { Button } from '@/components/ui/Button';
@@ -125,7 +126,18 @@ function SimuladoContent() {
       .then(() => listLeiSimuladoSessions(chave))
       .then(setSessoesAnteriores)
       .catch(() => { /* não bloqueia a visualização do resultado */ });
-  }, [acabou, fila, historico, acertos, chave]);
+    // Sessão passiva (mode: questoes): o simulado é treino de questões de
+    // verdade — acerto agregado entra no streak, metas, conquistas e na
+    // evolução geral da Performance. Sem subject_id (questões de lei não têm
+    // matéria do usuário), então não contamina o gráfico por matéria.
+    void savePassiveSession({
+      mode: 'questoes',
+      startedAtMs: startedAtRef.current,
+      itemsLabel: `Simulado do Vade Mecum (${titulo}): ${acertos}/${fila.length}.`,
+      questionsTotal: fila.length,
+      questionsCorrect: acertos,
+    });
+  }, [acabou, fila, historico, acertos, chave, titulo]);
 
   function responder(valor: boolean) {
     if (!atual || resposta !== null) return;

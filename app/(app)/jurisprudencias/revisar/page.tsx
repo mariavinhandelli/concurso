@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/components/ui/ToastProvider';
+import { savePassiveSession } from '@/services/passiveSession.service';
 import {
   listRevisoesHoje, submitRevisao,
   type JurisComInteracao,
@@ -27,6 +28,21 @@ export default function RevisarPage() {
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
   const [feitas, setFeitas] = useState(0); // avaliadas de fato — pulos não contam
+  // Sessão passiva (mode: jurisprudencia) gravada uma única vez na conclusão.
+  // Início setado no efeito (Date.now() no render viola pureza).
+  const inicioRef = useRef(0);
+  const sessaoGravadaRef = useRef(false);
+  useEffect(() => { if (!inicioRef.current) inicioRef.current = Date.now(); }, []);
+
+  useEffect(() => {
+    if (!done || feitas === 0 || sessaoGravadaRef.current) return;
+    sessaoGravadaRef.current = true;
+    void savePassiveSession({
+      mode: 'jurisprudencia',
+      startedAtMs: inicioRef.current,
+      itemsLabel: `Revisão de jurisprudências: ${feitas} julgado${feitas === 1 ? '' : 's'}.`,
+    });
+  }, [done, feitas]);
 
   useEffect(() => {
     listRevisoesHoje()

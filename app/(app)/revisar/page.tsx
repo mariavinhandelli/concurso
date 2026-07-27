@@ -22,6 +22,7 @@ import {
 } from '@/lib/juris-review';
 import { GRIFO_CORES, SUBLINHADO_COR, segmentarBloco } from '@/lib/lei-grifos';
 import { refreshHomeAfterSession } from '@/lib/home-refresh';
+import { savePassiveSession } from '@/services/passiveSession.service';
 import { fmtInterval } from '@/lib/interval-format';
 import { ReviewCard } from '@/components/features/reviews/ReviewCard';
 import { useUI } from '@/components/layout/UIContext';
@@ -102,6 +103,12 @@ export default function RevisarUnificadoPage() {
   const [adiadas, setAdiadas] = useState(0); // tópicos reagendados manualmente — não voltam à fila de hoje
   const [adiarAberto, setAdiarAberto] = useState(false);
   const [proximaData, setProximaData] = useState<string | null>(null); // só preenchida quando a fila nasce vazia
+  // Início do lote atual do player — base da sessão passiva (mode: revisao)
+  // gravada na conclusão. Ref, não estado: mudar não deve re-renderizar.
+  // Inicializada no efeito de montagem (Date.now() no render viola pureza).
+  const loteInicioRef = useRef(0);
+  const sessaoGravadaRef = useRef(false);
+  useEffect(() => { if (!loteInicioRef.current) loteInicioRef.current = Date.now(); }, []);
 
   // Modo Retomada envia ?limite=N para um "recomeço leve" sem encarar a pilha toda.
   const limite = useMemo(() => {
@@ -142,6 +149,9 @@ export default function RevisarUnificadoPage() {
     setPuladas(0);
     setAdiadas(0);
     setProximaData(null);
+    // Novo lote = nova sessão passiva (novo início, nova gravação ao concluir).
+    loteInicioRef.current = Date.now();
+    sessaoGravadaRef.current = false;
     fetchFila();
   }, [fetchFila]);
 
@@ -260,6 +270,24 @@ export default function RevisarUnificadoPage() {
     return () => window.removeEventListener('keydown', onKey);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [current, revealed]);
+
+  // ── Sessão passiva: revisar CONTA como estudo ──────────────────────────────
+  // Ao concluir o lote com pelo menos 1 item avaliado, grava UMA study_log
+  // agregada (mode: revisao). Antes, zerar a fila inteira não movia streak,
+  // metas nem conquistas — só o timer contava. A ref evita gravação dupla
+  // (re-render do done) e o service já deduplica reenvios e ignora <30s.
+  useEffect(() => {
+    if (!done || feitas === 0 || sessaoGravadaRef.current) return;
+    sessaoGravadaRef.current = true;
+    const partes = (Object.keys(tally) as UnifiedKind[])
+      .filter((k) => tally[k] > 0)
+      .map((k) => `${tally[k]} ${tally[k] === 1 ? KIND_META[k].label.toLowerCase() : KIND_META[k].plural.toLowerCase()}`);
+    void savePassiveSession({
+      mode: 'revisao',
+      startedAtMs: loteInicioRef.current,
+      itemsLabel: `Fila de revisão: ${partes.join(', ')}.`,
+    }).then((gravou) => { if (gravou) refreshHomeAfterSession(queryClient); });
+  }, [done, feitas, tally, queryClient]);
 
   // ── Estados de borda ───────────────────────────────────────────────────────
   if (erro) {

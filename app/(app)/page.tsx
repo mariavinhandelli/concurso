@@ -19,11 +19,8 @@ import { CoachSlot } from '@/components/features/home/CoachSlot';
 import { PlanoHoje } from '@/components/features/home/PlanoHoje';
 import { TodayBlock } from '@/components/features/home/TodayBlock';
 import { MetaSugeridaHint } from '@/components/features/home/MetaSugeridaHint';
-import { CoberturaEdital } from '@/components/features/home/CoberturaEdital';
 import { MarcoEditalCelebracao } from '@/components/features/home/MarcoEditalCelebracao';
-import { RaioXCard } from '@/components/features/home/RaioXCard';
 import { UltimaNotaCard } from '@/components/features/home/UltimaNotaCard';
-import { TimePieCard } from '@/components/features/home/TimePieCard';
 import { JourneyStats } from '@/components/features/home/JourneyStats';
 import { PlanoProntoBanner } from '@/components/features/home/PlanoProntoBanner';
 import { ExamCountdown } from '@/components/features/dashboard/ExamCountdown';
@@ -94,7 +91,7 @@ function HomeContent() {
   useEffect(() => {
     router.prefetch('/revisar');
     router.prefetch('/flashcards');
-    router.prefetch('/conquistas');
+    router.prefetch('/progresso');
   }, [router]);
 
   // H16 — useLocalToday re-renderiza exatamente à meia-noite; sem isso, uma
@@ -158,11 +155,13 @@ function HomeContent() {
           </div>
           <SemanaPanel />
 
-          {/* ── ZONA 3 · Panorama — progresso e estatísticas (colapsável) ── */}
+          {/* ── ZONA 3 · Panorama — enxuto (M1): Cobertura, Raio-X e TimePie
+              moraram para /progresso; a Home guarda o atalho de retomada
+              (última nota) e os 4 chips com o link "ver progresso". ── */}
           <div style={{ marginTop: 28 }}>
             <ZoneHeader
               label="Panorama"
-              hint={panoramaOpen ? undefined : 'progresso, cobertura e estatísticas'}
+              hint={panoramaOpen ? undefined : 'sua jornada em números'}
               collapsible
               open={panoramaOpen}
               onToggle={() => setPanorama(panoramaOpen ? 'closed' : 'open')}
@@ -170,16 +169,7 @@ function HomeContent() {
           </div>
           {panoramaOpen && (
             <div style={{ marginTop: 4 }}>
-              <CoberturaEdital />
-              <div style={{ marginTop: 16 }}>
-                <RaioXCard />
-              </div>
-              <div style={{ marginTop: 16 }}>
-                <UltimaNotaCard />
-              </div>
-              <div style={{ marginTop: 16 }}>
-                <TimePieCard />
-              </div>
+              <UltimaNotaCard />
               <div style={{ marginTop: 16 }}>
                 <JourneyStats />
               </div>

@@ -3,6 +3,7 @@
 // matéria vinculada e questões registradas.
 
 import { createClient } from '@/lib/supabase/client';
+import { getCachedUser } from '@/lib/supabase/authCache';
 
 export interface AccuracyPoint {
   subjectId: string;   // para ações (reforçar / abrir a matéria)
@@ -15,7 +16,7 @@ export interface AccuracyPoint {
 
 export async function getAccuracyBySubject(): Promise<AccuracyPoint[]> {
   const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getCachedUser();
   if (!user) return [];
 
   // Busca logs de questões com matéria e ao menos 1 questão registrada.

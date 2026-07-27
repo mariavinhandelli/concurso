@@ -140,9 +140,8 @@ export const RaioXCard = memo(function RaioXCard() {
         </button>
       )}
 
-      <button style={styles.analiseLink} onClick={() => router.push('/performance')}>
-        ver análise completa →
-      </button>
+      {/* M1: o card agora mora em /progresso — o link "ver análise completa"
+          apontava para a própria página e saiu. */}
     </div>
   );
 });

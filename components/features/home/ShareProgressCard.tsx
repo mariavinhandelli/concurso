@@ -53,11 +53,21 @@ function loadImage(src: string): Promise<HTMLImageElement | null> {
   });
 }
 
+// M4 — variante de CONQUISTA: a imagem celebra um badge específico em vez do
+// panorama de cobertura. Mesma moldura de marca (faixa, logo, rodapé).
+export interface ShareBadgeInfo {
+  label: string;          // "Metade do edital"
+  description: string;
+  unlockedAt?: string;    // ISO — vira "em 26 de julho de 2026"
+  unlockedCount: number;  // total de conquistas do usuário (3ª coluna)
+}
+
 interface Payload {
   firstName: string;
   coverage: EditalCoverage;
   streak: number;
   hours: number;
+  badge?: ShareBadgeInfo;
 }
 
 // Preenche um texto centrado com gradiente horizontal (assinatura verde→índigo).
@@ -114,8 +124,68 @@ function draw(canvas: HTMLCanvasElement, p: Payload, logo: HTMLImageElement | nu
   ctx.textAlign = 'left';
   ctx.fillStyle = INK_SOFT;
   ctx.font = `500 38px ${F}`;
-  const saud = p.firstName ? `${p.firstName}, sua jornada rumo à aprovação` : 'Minha jornada rumo à aprovação';
+  const saud = p.badge
+    ? (p.firstName ? `${p.firstName} desbloqueou uma conquista` : 'Conquista desbloqueada')
+    : (p.firstName ? `${p.firstName}, sua jornada rumo à aprovação` : 'Minha jornada rumo à aprovação');
   ctx.fillText(truncate(ctx, saud, W - 2 * P), P, 270);
+
+  // ── Variante CONQUISTA: badge como herói ──
+  if (p.badge) {
+    const b = p.badge;
+    // Eyebrow
+    ctx.textAlign = 'center';
+    ctx.fillStyle = INK_MUTED;
+    ctx.font = `600 34px ${F}`;
+    ctx.fillText('CONQUISTA DESBLOQUEADA', W / 2, 460);
+
+    // Nome do badge em gradiente — encolhe até caber ("Um quarto do edital").
+    let size = 120;
+    do {
+      ctx.font = `800 ${size}px ${F}`;
+      if (ctx.measureText(b.label).width <= W - 2 * P) break;
+      size -= 6;
+    } while (size > 48);
+    fillCentroGradiente(ctx, b.label, W / 2, 610, GREEN, INDIGO);
+
+    // Descrição + data
+    ctx.fillStyle = INK;
+    ctx.font = `500 36px ${F}`;
+    ctx.fillText(truncate(ctx, b.description, W - 2 * P), W / 2, 700);
+    if (b.unlockedAt) {
+      ctx.fillStyle = INK_MUTED;
+      ctx.font = `400 30px ${F}`;
+      const quando = new Date(b.unlockedAt).toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' });
+      ctx.fillText(`em ${quando}`, W / 2, 756);
+    }
+
+    // Três métricas: sequência · conquistas · horas
+    const statsY = 940;
+    const cols = [
+      { n: `${p.streak}`, l: p.streak === 1 ? 'dia seguido' : 'dias seguidos' },
+      { n: `${b.unlockedCount}`, l: b.unlockedCount === 1 ? 'conquista' : 'conquistas' },
+      { n: `${p.hours}h`, l: 'estudadas' },
+    ];
+    const cxs = [W * 0.2, W * 0.5, W * 0.8];
+    cols.forEach((c, i) => {
+      ctx.textAlign = 'center';
+      ctx.fillStyle = INK;
+      ctx.font = `700 76px ${F}`;
+      ctx.fillText(c.n, cxs[i], statsY + 76);
+      ctx.fillStyle = INK_SOFT;
+      ctx.font = `400 28px ${F}`;
+      ctx.fillText(c.l, cxs[i], statsY + 128);
+    });
+
+    // Rodapé (igual à variante padrão)
+    ctx.textAlign = 'center';
+    ctx.fillStyle = GREEN;
+    ctx.font = `600 38px ${F}`;
+    ctx.fillText('Constância que aprova.', W / 2, H - 120);
+    ctx.fillStyle = INK_MUTED;
+    ctx.font = `400 30px ${F}`;
+    ctx.fillText('feito com a Focali', W / 2, H - 70);
+    return;
+  }
 
   const temEdital = p.coverage.hasTarget && p.coverage.total > 0;
 
@@ -188,7 +258,7 @@ function draw(canvas: HTMLCanvasElement, p: Payload, logo: HTMLImageElement | nu
   ctx.fillText('feito com a Focali', W / 2, H - 70);
 }
 
-export function ShareProgressCard({ onClose }: { onClose: () => void }) {
+export function ShareProgressCard({ onClose, badge }: { onClose: () => void; badge?: ShareBadgeInfo }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { name } = useUser();
   const [canShare, setCanShare] = useState(false);
@@ -223,10 +293,11 @@ export function ShareProgressCard({ onClose }: { onClose: () => void }) {
         coverage: coverage!,
         streak: streak!.current,
         hours: Math.round(journey!.totalMinutes / 60),
+        badge,
       }, logo);
     })();
     return () => { cancelled = true; };
-  }, [ready, name, coverage, streak, journey]);
+  }, [ready, name, coverage, streak, journey, badge]);
 
   function withBlob(cb: (blob: Blob) => void) {
     canvasRef.current?.toBlob((blob) => { if (blob) cb(blob); }, 'image/png');
@@ -260,10 +331,14 @@ export function ShareProgressCard({ onClose }: { onClose: () => void }) {
   return (
     <Overlay onClose={onClose} maxWidth={420} labelledBy="share-progress-title" hideClose>
         <div style={styles.head}>
-          <h2 id="share-progress-title" style={styles.h2}>Compartilhar progresso</h2>
+          <h2 id="share-progress-title" style={styles.h2}>{badge ? 'Compartilhar conquista' : 'Compartilhar progresso'}</h2>
           <IconButton onClick={onClose} aria-label="Fechar" size="sm"><X size={16} strokeWidth={2} /></IconButton>
         </div>
-        <p style={styles.subtitle}>Mostre sua evolução — mande no grupo e inspire (ou provoque) a galera.</p>
+        <p style={styles.subtitle}>
+          {badge
+            ? 'Mostre a conquista — mande no grupo e inspire (ou provoque) a galera.'
+            : 'Mostre sua evolução — mande no grupo e inspire (ou provoque) a galera.'}
+        </p>
 
         <div style={styles.canvasWrap}>
           {!ready && <div style={styles.loading}>Gerando imagem…</div>}

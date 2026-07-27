@@ -4,7 +4,8 @@
 'use client';
 
 import { Skeleton } from '@/components/ui/Skeleton';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
 } from 'recharts';
@@ -22,15 +23,14 @@ const FILTERS: { key: Granularity; label: string }[] = [
 
 export function StudyTimeChart() {
   const [granularity, setGranularity] = useState<Granularity>('dia');
-  const [data, setData] = useState<TimePoint[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
-
-  useEffect(() => {
-    setLoading(true);
-    setError(false);
-    getTimeSeries(granularity).then(setData).catch(() => setError(true)).finally(() => setLoading(false));
-  }, [granularity]);
+  // React Query resolve as três dores do useEffect cru de uma vez: cache por
+  // granularidade (alternar Dia↔Semana não refaz a busca), sem race (a key
+  // muda junto com o filtro) e invalidação via refreshHomeAfterSession.
+  const { data = [], isLoading: loading, isError: error } = useQuery<TimePoint[]>({
+    queryKey: ['time-series', granularity],
+    queryFn: () => getTimeSeries(granularity),
+    staleTime: 5 * 60_000,
+  });
 
   return (
     <div style={styles.wrap}>

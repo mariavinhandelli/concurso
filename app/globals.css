@@ -439,6 +439,25 @@
   --warn-tint: rgba(251,191,107,.12);
 }
 /* ===================================================================
+   TIERS DE MAESTRIA — metálicos, independentes de paleta (bronze/prata/ouro
+   não são cor de marca). Antes eram hex cravados no TSX de /conquistas, que
+   não se adaptavam ao dark nem às paletas alternativas e reprovavam em
+   contraste AA no claro (#C9A227 dava ~2,4:1 sobre card branco, usado em
+   texto de 13px). Os valores abaixo passam AA (≥4,5:1) sobre o card do modo.
+   =================================================================== */
+:root,
+[data-mode="light"] {
+  --tier-bronze: #8A5227;  /* 6,3:1 sobre #FFF */
+  --tier-prata:  #5E6B77;  /* 5,5:1 */
+  --tier-ouro:   #8A6D1F;  /* 4,9:1 */
+}
+[data-mode="dark"] {
+  --tier-bronze: #D9A273;
+  --tier-prata:  #B8C4D0;
+  --tier-ouro:   #E5C158;
+}
+
+/* ===================================================================
    SIDEBAR — variáveis dedicadas por paleta × modo.
    Mantém contraste correto independentemente da primária.
    =================================================================== */
@@ -1032,6 +1051,29 @@ textarea:focus-visible {
   outline: 2px solid var(--teal);
   outline-offset: 2px;
 }
+/* M4 — botão de compartilhar no card desbloqueado: discreto até o hover. */
+.conquistas-share-btn {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ink-faint);
+  cursor: pointer;
+  transition: background .14s ease, color .14s ease;
+}
+.conquistas-share-btn:hover {
+  background: var(--muted);
+  color: var(--ink);
+}
+.conquistas-share-btn:focus-visible {
+  outline: 2px solid var(--teal);
+  outline-offset: 2px;
+}
 /* Touch: 33px de altura não bastam como alvo de toque.
    .touch-target também vale aqui — a regra do bloco mobile (767px) não
    cobre tablets, que são touch do mesmo jeito. */
@@ -1039,3 +1081,4 @@ textarea:focus-visible {
   .conquistas-filter-tab { min-height: 44px; }
   .touch-target { min-height: 44px; }
 }
+

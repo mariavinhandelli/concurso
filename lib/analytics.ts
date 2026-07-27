@@ -31,6 +31,10 @@ export const EV = {
   editalFollowed: 'edital_followed',
   editalUnfollowed: 'edital_unfollowed',
   pastPaperOpened: 'past_paper_opened',
+  // Progresso — sem estes, "o módulo de conquistas é usado?" não tinha resposta.
+  performanceViewed: 'performance_viewed',
+  achievementsViewed: 'achievements_viewed',
+  badgeUnlocked: 'badge_unlocked',
 } as const;
 
 export type EventName = typeof EV[keyof typeof EV];

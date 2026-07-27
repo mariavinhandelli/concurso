@@ -25,6 +25,17 @@ const HOME_KEYS: readonly (readonly string[])[] = [
   ['time-by-category'], // casa por prefixo com ['time-by-category', view, offset] (TimePieCard)
   ['journey-stats'],    // totais de horas/sessões da Jornada
   ['suggested-target'], // nudge da Meta Adaptativa depende de todayMinutes
+  ['badge-state'],      // /conquistas: sem isto, a sessão que DESBLOQUEIA a conquista
+                        // servia cache velho por até 5 min — o único instante em que a
+                        // recompensa importa era o único em que ela não aparecia
+  ['study-day-totals-heatmap'], // o quadradinho de hoje no YearHeatmap acende na hora
+  // /performance (Fase 2.4 — agora em React Query): a sessão recém-salva deve
+  // aparecer nos gráficos na próxima visita, não depois do staleTime.
+  ['constancia-resumo'],   // prefixo: ['constancia-resumo', dias]
+  ['time-series'],         // prefixo: ['time-series', granularidade]
+  ['accuracy-by-subject'],
+  ['accuracy-evolution'],  // prefixo: ['accuracy-evolution', subjectId|'geral']
+  ['energia-desempenho'],
 ];
 
 export function refreshHomeAfterSession(queryClient: QueryClient): void {
