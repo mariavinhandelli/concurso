@@ -9,6 +9,7 @@
 import { useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import { YearHeatmap } from '@/components/features/history/YearHeatmap';
+import { NarrativaMes } from '@/components/features/dashboard/NarrativaMes';
 import { ConstanciaResumo } from '@/components/features/dashboard/ConstanciaResumo';
 import { AccuracyChart } from '@/components/features/dashboard/AccuracyChart';
 import { RaioXCard } from '@/components/features/home/RaioXCard';
@@ -49,6 +50,11 @@ export default function EvolucaoPage() {
       {/* identidade do hábito — largura cheia, no topo */}
       <div style={{ gridColumn: '1 / -1' }}>
         <YearHeatmap />
+      </div>
+
+      {/* leitura do mês (M6) — só existe quando há narrativa gravada */}
+      <div style={{ gridColumn: '1 / -1' }}>
+        <NarrativaMes />
       </div>
 
       {/* ritmo de estudo */}
