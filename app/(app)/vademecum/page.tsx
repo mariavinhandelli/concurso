@@ -5,12 +5,12 @@
 // fixa ocupando a página).
 'use client';
 
-import { Suspense, useEffect, useMemo, useState, type CSSProperties } from 'react';
+import { Suspense, useMemo, useState, type CSSProperties } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { CircleHelp, AlarmClock } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { LEIS_CATALOG, getLei, type LeiMeta } from '@/services/leis.service';
-import { countRevisoesDue, countArtigosComGrifoPorLei } from '@/services/leiInteracoes.service';
+import { countRevisoesDuePorLei, countArtigosComGrifoPorLei } from '@/services/leiInteracoes.service';
 import { LEIS_COM_QUESTOES } from '@/services/leiQuestoes.service';
 import { VademecumSimuladoModal } from '@/components/features/vademecum/VademecumSimuladoModal';
 import { theme } from '@/lib/theme';
@@ -19,6 +19,17 @@ import { PageContainer, PageHeader } from '@/components/ui/Page';
 
 function normalizar(s: string): string {
   return s.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();
+}
+
+// Rótulo do chip: "Direito Processual Penal Militar" tem 32 caracteres e sozinho
+// consumia uma linha inteira no celular. O prefixo "Direito " é redundante num
+// filtro de matéria jurídica; o nome completo continua no aria-label.
+function rotuloCurto(disciplina: string): string {
+  return disciplina
+    .replace(/^Direito\s+/, '')
+    .replace(/^Legislação\s+Estadual\s+—\s+/, '')
+    .replace(/^Legislação\s+/, 'Leg. ')
+    .replace(/\s+da Criança e do Adolescente/, ' Criança e Adolescente');
 }
 
 // % da lei grifada (sobre artigos vigentes). Uma única query leve traz a
@@ -50,13 +61,19 @@ function usePctGrifado(slug: string, artigosComGrifo: number): number | null {
   return data ?? null;
 }
 
-function LeiCard({ lei, artigosComGrifo, onOpen }: { lei: LeiMeta; artigosComGrifo: number; onOpen: () => void }) {
+function LeiCard({ lei, artigosComGrifo, revisoesDue, onOpen }: { lei: LeiMeta; artigosComGrifo: number; revisoesDue: number; onOpen: () => void }) {
   const pct = usePctGrifado(lei.slug, artigosComGrifo);
   return (
     <button onClick={onOpen} style={s.card}>
       <div style={s.cardTop}>
         <span style={s.cardSigla}>{lei.nomeCurto}</span>
-        {pct !== null && pct > 0 && <Badge variant="brand">{pct}% grifado</Badge>}
+        {/* A revisão vencida vem antes do % grifado: é a única informação do
+            card que pede ação hoje. O banner do topo dá só o total — sem isto,
+            descobrir QUAL lei está atrasada exigia abrir a fila. */}
+        <span style={s.cardBadges}>
+          {revisoesDue > 0 && <Badge variant="danger">{revisoesDue} a revisar</Badge>}
+          {pct !== null && pct > 0 && <Badge variant="brand">{pct}% grifado</Badge>}
+        </span>
       </div>
       <div style={s.cardNome}>{lei.nome}</div>
       <div style={s.cardMeta}>{lei.disciplina} · {lei.totalArtigos} artigos</div>
@@ -70,7 +87,6 @@ function VademecumContent() {
   // ?disciplina= — deep-link vindo do Hub do Concurso ("revisar a lei seca
   // relacionada" chega já filtrado pela disciplina do edital).
   const searchParams = useSearchParams();
-  const [dueCount, setDueCount] = useState(0);
   const [busca, setBusca] = useState('');
   const [disciplina, setDisciplina] = useState(() => {
     const d = searchParams.get('disciplina');
@@ -78,16 +94,30 @@ function VademecumContent() {
   });
   const [showSimulado, setShowSimulado] = useState(false);
   const grifosPorLei = useGrifosPorLei();
+  // A mesma query serve o banner e os cards — o total sai do mapa, então
+  // saber a lei de cada revisão vencida não custa uma segunda ida ao banco.
+  const { data: duePorLei } = useQuery({
+    queryKey: ['vademecum-revisoes-por-lei'],
+    queryFn: countRevisoesDuePorLei,
+    staleTime: 60_000,
+  });
+  const dueCount = useMemo(() => {
+    let n = 0;
+    for (const qtd of duePorLei?.values() ?? []) n += qtd;
+    return n;
+  }, [duePorLei]);
 
-  useEffect(() => {
-    let cancelled = false;
-    countRevisoesDue().then((n) => { if (!cancelled) setDueCount(n); }).catch(() => {});
-    return () => { cancelled = true; };
-  }, []);
-
+  // Os 16 filtros com o nome completo ("Direito Processual Penal Militar") em
+  // wrap ocupavam 5+ linhas no celular — meia tela antes da primeira lei. Agora:
+  // rótulo curto, contagem por matéria e uma única linha rolável (mesmo padrão
+  // do Caderno no mobile).
   const disciplinas = useMemo(() => {
-    const set = new Set(LEIS_CATALOG.map((l) => l.disciplina));
-    return ['todas', ...set];
+    const contagem = new Map<string, number>();
+    for (const l of LEIS_CATALOG) contagem.set(l.disciplina, (contagem.get(l.disciplina) ?? 0) + 1);
+    const lista = [...contagem.entries()]
+      .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+      .map(([nome, qtd]) => ({ valor: nome, rotulo: rotuloCurto(nome), qtd }));
+    return [{ valor: 'todas', rotulo: 'Todas', qtd: LEIS_CATALOG.length }, ...lista];
   }, []);
 
   const leisFiltradas = useMemo(() => {
@@ -131,16 +161,22 @@ function VademecumContent() {
           aria-label="Buscar lei"
         />
       </div>
-      <div style={s.filtroRow}>
-        {disciplinas.map((d) => (
-          <button
-            key={d}
-            onClick={() => setDisciplina(d)}
-            style={{ ...s.filtroChip, ...(disciplina === d ? s.filtroChipOn : {}) }}
-          >
-            {d === 'todas' ? 'Todas' : d}
-          </button>
-        ))}
+      <div style={s.filtroRow} role="group" aria-label="Filtrar por matéria">
+        {disciplinas.map((d) => {
+          const ativo = disciplina === d.valor;
+          return (
+            <button
+              key={d.valor}
+              onClick={() => setDisciplina(d.valor)}
+              aria-pressed={ativo}
+              aria-label={d.valor === 'todas' ? `Todas as matérias (${d.qtd} leis)` : `${d.valor} (${d.qtd} ${d.qtd === 1 ? 'lei' : 'leis'})`}
+              style={{ ...s.filtroChip, ...(ativo ? s.filtroChipOn : {}) }}
+            >
+              {d.rotulo}
+              <span style={{ ...s.filtroQtd, ...(ativo ? s.filtroQtdOn : {}) }}>{d.qtd}</span>
+            </button>
+          );
+        })}
       </div>
 
       {leisFiltradas.length === 0 ? (
@@ -152,6 +188,7 @@ function VademecumContent() {
               key={lei.slug}
               lei={lei}
               artigosComGrifo={grifosPorLei?.get(lei.slug) ?? 0}
+              revisoesDue={duePorLei?.get(lei.slug) ?? 0}
               onOpen={() => router.push(`/vademecum/${lei.slug}`)}
             />
           ))}
@@ -182,14 +219,31 @@ const s: Record<string, CSSProperties> = {
 
   buscaRow: { marginBottom: 10 },
   buscaInput: { width: '100%', boxSizing: 'border-box', padding: '11px 16px', borderRadius: theme.radiusPill, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.card, fontSize: 14, color: theme.ink, fontFamily: 'inherit', outline: 'none' },
-  filtroRow: { display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 18 },
-  filtroChip: { fontSize: 13, color: theme.inkSoft, background: 'transparent', borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, borderRadius: theme.radiusPill, padding: '5px 13px', cursor: 'pointer', fontFamily: 'inherit' },
+  // Uma linha rolável em vez de wrap: no celular os 16 chips viravam 5+ linhas.
+  // `scrollbarWidth: none` esconde a barra (o gesto de arrastar continua), e o
+  // padding lateral evita que o chip ativo encoste na borda ao rolar.
+  filtroRow: {
+    display: 'flex', gap: 8, marginBottom: 18, overflowX: 'auto', paddingBottom: 4,
+    scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch',
+  },
+  filtroChip: {
+    display: 'inline-flex', alignItems: 'center', gap: 6, flexShrink: 0, whiteSpace: 'nowrap',
+    fontSize: 13, color: theme.inkSoft, background: 'transparent',
+    borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line,
+    borderRadius: theme.radiusPill, padding: '7px 13px', cursor: 'pointer', fontFamily: 'inherit',
+    // alvo de toque de 44px (mesmo padrão de Matérias/Concursos/Agenda); em uma
+    // linha rolável o dedo erra com facilidade se o chip for baixo
+    minHeight: 44, boxSizing: 'border-box',
+  },
   filtroChipOn: { borderColor: theme.teal, background: theme.tealBg, color: theme.tealDeep, fontWeight: 600 },
+  filtroQtd: { fontSize: 11, fontWeight: 600, color: theme.inkFaint, background: theme.muted, borderRadius: theme.radiusPill, padding: '1px 6px' },
+  filtroQtdOn: { color: theme.tealDeep, background: 'color-mix(in srgb, currentColor 12%, transparent)' },
   semResultado: { fontSize: 14, color: theme.inkFaint, textAlign: 'center', padding: '30px 0' },
 
   grid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 14 },
   card: { textAlign: 'left', background: theme.card, border: `0.5px solid ${theme.line}`, borderRadius: theme.radius, padding: '18px 20px', cursor: 'pointer', fontFamily: 'inherit' },
   cardTop: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
+  cardBadges: { display: 'inline-flex', alignItems: 'center', gap: 6, flexShrink: 0 },
   cardSigla: { fontSize: 13, fontWeight: 700, color: theme.teal },
   cardNome: { fontSize: 16, fontWeight: 600, color: theme.ink, lineHeight: 1.4, marginTop: 6 },
   cardMeta: { fontSize: 13, color: theme.inkFaint, margin: '6px 0 8px' },

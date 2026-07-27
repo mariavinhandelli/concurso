@@ -6,7 +6,7 @@
 
 import { useCallback, useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { Book } from 'lucide-react';
+import { Book, Star } from 'lucide-react';
 import { getLei, LEIS_CATALOG, type Lei, type LeiArtigo } from '@/services/leis.service';
 import { listInteracoesByLei, type LeiInteracao, type GrifoCor } from '@/services/leiInteracoes.service';
 import { getQuestoesLei, agruparPorArtigo, type LeiQuestao } from '@/services/leiQuestoes.service';
@@ -32,6 +32,17 @@ interface Grupo {
 function formatarDataGeracao(iso: string): string {
   const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso);
   return m ? `${m[3]}/${m[2]}/${m[1]}` : iso;
+}
+
+// Faixa de artigos do grupo ("Art. 1º–7"). O fim usa o `numero` cru, que só
+// funciona para artigo numerado: com os anexos (numero "Anexo-II") saía
+// "ANEXO I–Anexo-II". Fora da numeração comum, usa o rótulo — e grupo de um
+// artigo só mostra o rótulo, sem intervalo.
+function faixaDoGrupo(g: { artigos: LeiArtigo[] }): string {
+  const ini = g.artigos[0];
+  const fim = g.artigos[g.artigos.length - 1];
+  if (ini === fim) return ini.rotulo;
+  return `${ini.rotulo}–${/^\d/.test(fim.numero) ? fim.numero : fim.rotulo}`;
 }
 
 function emptyInteracao(artigoKey: string): LeiInteracao {
@@ -92,17 +103,77 @@ export default function LeiReaderPage() {
     return out;
   }, [lei]);
 
+  // Numa lei grande a lista plana de grupos era o principal obstáculo: o Código
+  // Civil abria com 316 cabeçalhos e ~19.500px de rolagem, e 312 deles repetiam
+  // o mesmo "LIVRO …" do anterior num breadcrumb de até 150 caracteres. Aqui os
+  // grupos passam a viver dentro do seu LIVRO/PARTE (primeiro segmento do
+  // caminho), e cada grupo exibe só o que muda em relação a ele.
+  // Leis pequenas não ganham esse nível a mais — abaixo do limiar o layout
+  // continua exatamente como era.
+  const LIMIAR_SECOES = 12;
+  const secoes = useMemo(() => {
+    if (grupos.length <= LIMIAR_SECOES) return null;
+    // O primeiro segmento sozinho não serve para todo código: no CC ele é
+    // "PARTE ESPECIAL", que sozinha juntaria 1.857 artigos numa seção só. Quando
+    // existe um LIVRO depois da PARTE, o título vai até ele.
+    const tituloDe = (caminho: string) => {
+      const partes = caminho.split('›').map((p) => p.trim()).filter(Boolean);
+      if (!partes.length) return 'Disposições';
+      const iLivro = partes.findIndex((p) => /^LIVRO\b/i.test(p));
+      return iLivro > 0 ? partes.slice(0, iLivro + 1).join(' › ') : partes[0];
+    };
+
+    const out: { titulo: string; grupos: { grupo: Grupo; indice: number }[] }[] = [];
+    grupos.forEach((grupo, indice) => {
+      const titulo = tituloDe(grupo.caminho);
+      const ultima = out[out.length - 1];
+      if (ultima && ultima.titulo === titulo) ultima.grupos.push({ grupo, indice });
+      else out.push({ titulo, grupos: [{ grupo, indice }] });
+    });
+    return out;
+  }, [grupos]);
+
+  // Uma seção só precisa estar aberta se o usuário pediu; a primeira abre por
+  // padrão para a lei não parecer vazia.
+  const [secoesAbertas, setSecoesAbertas] = useState<Set<number>>(new Set([0]));
+  function toggleSecao(i: number) {
+    setSecoesAbertas((prev) => {
+      const next = new Set(prev);
+      if (next.has(i)) next.delete(i); else next.add(i);
+      return next;
+    });
+  }
+
+  // rótulo do grupo sem o prefixo do livro em que ele já está
+  function caminhoRelativo(caminho: string, titulo: string): string {
+    const partes = caminho.split('›').map((p) => p.trim()).filter(Boolean);
+    const doTitulo = titulo.split('›').map((p) => p.trim()).filter(Boolean);
+    while (partes.length && doTitulo.length && partes[0] === doTitulo[0]) { partes.shift(); doTitulo.shift(); }
+    return partes.join(' › ') || titulo;
+  }
+
   // Filtro por cor: quando ativo, mostra lista plana dos artigos que têm ao
   // menos um grifo de alguma das cores selecionadas — útil pra "revisar só
   // meus prazos" ou "só minhas exceções" antes da prova.
-  const filtroAtivo = filtroCores.size > 0;
+  // Favoritar já existia, mas o favorito só aparecia no Ctrl+K — dentro do
+  // leitor não havia como reencontrá-lo. Este filtro fecha o ciclo: marcar aqui,
+  // reler aqui. Combina com o filtro de cor (interseção): "meus prazos favoritos".
+  const [soFavoritos, setSoFavoritos] = useState(false);
+  const totalFavoritos = useMemo(() => {
+    if (!lei) return 0;
+    return lei.artigos.reduce((n, a) => n + (interacoes.get(a.key)?.favorito ? 1 : 0), 0);
+  }, [lei, interacoes]);
+
+  const filtroAtivo = filtroCores.size > 0 || soFavoritos;
   const artigosFiltrados = useMemo(() => {
     if (!lei || !filtroAtivo) return [];
     return lei.artigos.filter((a) => {
-      const grifos = interacoes.get(a.key)?.grifos ?? [];
-      return grifos.some((g) => g.cor && filtroCores.has(g.cor));
+      const inter = interacoes.get(a.key);
+      if (soFavoritos && !inter?.favorito) return false;
+      if (filtroCores.size === 0) return true;
+      return (inter?.grifos ?? []).some((g) => g.cor && filtroCores.has(g.cor));
     });
-  }, [lei, filtroAtivo, filtroCores, interacoes]);
+  }, [lei, filtroAtivo, filtroCores, soFavoritos, interacoes]);
 
   function toggleCorFiltro(cor: GrifoCor) {
     setFiltroCores((prev) => {
@@ -131,9 +202,16 @@ export default function LeiReaderPage() {
 
     setAba('texto');
     setFiltroCores(new Set());
+    setSoFavoritos(false);
     setTermo('');
     const gi = grupos.findIndex((g) => g.artigos.some((a) => a.key === artigo.key));
     if (gi >= 0) setAbertos((prev) => new Set(prev).add(gi));
+    // com o nível de seção, abrir só o grupo não basta: ele fica dentro de um
+    // livro/parte que também pode estar fechado, e o scroll não acharia o alvo
+    if (secoes && gi >= 0) {
+      const si = secoes.findIndex((sec) => sec.grupos.some((x) => x.indice === gi));
+      if (si >= 0) setSecoesAbertas((prev) => new Set(prev).add(si));
+    }
     // Grupos grandes (ex.: art. 5º da CF, capítulos do CC) levam mais que um
     // frame para renderizar — tenta de novo até o elemento existir, senão o
     // scroll falhava em silêncio. Scroll instantâneo de propósito: o smooth é
@@ -144,7 +222,7 @@ export default function LeiReaderPage() {
       if (tentativa < 8) setTimeout(() => tentarScroll(tentativa + 1), 120 * (tentativa + 1));
     };
     setTimeout(() => tentarScroll(0), 80);
-  }, [lei, grupos, toast]);
+  }, [lei, grupos, secoes, toast]);
 
   // Busca textual: nº de artigo pula direto; qualquer outro texto vira busca
   // por termo no texto integral da lei (acentos e caixa ignorados).
@@ -274,7 +352,8 @@ export default function LeiReaderPage() {
                 <button
                   key={c}
                   onClick={() => toggleCorFiltro(c)}
-                  style={{ ...s.legChip, ...(ativo ? s.legChipOn : {}) }}
+                  aria-pressed={ativo}
+                  style={{ ...s.legChip, ...(isMobile ? s.legChipTouch : {}), ...(ativo ? s.legChipOn : {}) }}
                   title={`Mostrar só artigos com grifo "${GRIFO_CORES[c].label}"`}
                 >
                   <span style={{ ...s.legDot, background: GRIFO_CORES[c].chip }} />
@@ -282,8 +361,21 @@ export default function LeiReaderPage() {
                 </button>
               );
             })}
+            {/* Só aparece quando há favorito nesta lei: chip morto em lei sem
+                favorito seria mais um item competindo por espaço no mobile. */}
+            {totalFavoritos > 0 && (
+              <button
+                onClick={() => setSoFavoritos((v) => !v)}
+                aria-pressed={soFavoritos}
+                style={{ ...s.legChip, ...(isMobile ? s.legChipTouch : {}), ...(soFavoritos ? s.legChipOn : {}) }}
+                title={soFavoritos ? 'Mostrar todos os artigos' : `Mostrar só os ${totalFavoritos} artigos que você favoritou`}
+              >
+                <Star size={12} strokeWidth={2} fill={soFavoritos ? 'currentColor' : 'none'} />
+                Favoritos ({totalFavoritos})
+              </button>
+            )}
             {filtroAtivo && (
-              <button onClick={() => setFiltroCores(new Set())} style={s.limparFiltro}>limpar filtro</button>
+              <button onClick={() => { setFiltroCores(new Set()); setSoFavoritos(false); }} style={s.limparFiltro}>limpar filtro</button>
             )}
           </div>
 
@@ -311,10 +403,19 @@ export default function LeiReaderPage() {
           ) : filtroAtivo ? (
             <>
               <p style={s.filtroResumo}>
-                {artigosFiltrados.length} artigo{artigosFiltrados.length === 1 ? '' : 's'} com marcações desse tipo
+                {artigosFiltrados.length} artigo{artigosFiltrados.length === 1 ? '' : 's'}
+                {soFavoritos && filtroCores.size > 0
+                  ? ' favorito(s) com marcações desse tipo'
+                  : soFavoritos ? ' favoritado' + (artigosFiltrados.length === 1 ? '' : 's')
+                  : ' com marcações desse tipo'}
               </p>
               {artigosFiltrados.length === 0 ? (
-                <p style={s.filtroVazio}>Nenhum artigo grifado com essa cor ainda.</p>
+                <p style={s.filtroVazio}>
+                  {soFavoritos && filtroCores.size > 0
+                    ? 'Nenhum favorito tem grifo dessa cor.'
+                    : soFavoritos ? 'Você ainda não favoritou nenhum artigo desta lei.'
+                    : 'Nenhum artigo grifado com essa cor ainda.'}
+                </p>
               ) : (
                 artigosFiltrados.map((a) => (
                   <ArtigoCard
@@ -327,17 +428,17 @@ export default function LeiReaderPage() {
                 ))
               )}
             </>
-          ) : (
-            grupos.map((g, i) => {
+          ) : (() => {
+            const renderGrupo = (g: Grupo, i: number, rotulo: string) => {
               const aberto = abertos.has(i);
               const grifados = g.artigos.filter((a) => (interacoes.get(a.key)?.grifos.length ?? 0) > 0).length;
               return (
                 <div key={i} style={s.grupo}>
-                  <button onClick={() => toggleGrupo(i)} style={s.grupoHead}>
+                  <button onClick={() => toggleGrupo(i)} aria-expanded={aberto} style={s.grupoHead}>
                     <span style={{ ...s.seta, transform: aberto ? 'rotate(90deg)' : 'none' }}>▸</span>
-                    <span style={s.grupoNome}>{g.caminho}</span>
+                    <span style={s.grupoNome}>{rotulo}</span>
                     <span style={s.grupoMeta}>
-                      {g.artigos[0].rotulo}–{g.artigos[g.artigos.length - 1].numero}
+                      {faixaDoGrupo(g)}
                       {grifados > 0 && ` · ${grifados} grifado${grifados === 1 ? '' : 's'}`}
                     </span>
                   </button>
@@ -356,8 +457,31 @@ export default function LeiReaderPage() {
                   )}
                 </div>
               );
-            })
-          )}
+            };
+
+            // lei pequena: lista plana, como sempre foi
+            if (!secoes) return grupos.map((g, i) => renderGrupo(g, i, g.caminho));
+
+            return secoes.map((sec, si) => {
+              const abertaSec = secoesAbertas.has(si);
+              const artigos = sec.grupos.reduce((n, x) => n + x.grupo.artigos.length, 0);
+              return (
+                <div key={sec.titulo + si} style={s.secao}>
+                  <button onClick={() => toggleSecao(si)} aria-expanded={abertaSec} style={s.secaoHead}>
+                    <span style={{ ...s.seta, transform: abertaSec ? 'rotate(90deg)' : 'none' }}>▸</span>
+                    <span style={s.secaoNome}>{sec.titulo}</span>
+                    <span style={s.secaoMeta}>{artigos} {artigos === 1 ? 'artigo' : 'artigos'}</span>
+                  </button>
+                  {abertaSec && (
+                    <div style={s.secaoCorpo}>
+                      {sec.grupos.map(({ grupo, indice }) =>
+                        renderGrupo(grupo, indice, caminhoRelativo(grupo.caminho, sec.titulo)))}
+                    </div>
+                  )}
+                </div>
+              );
+            });
+          })()}
         </>
       )}
     </PageContainer>
@@ -376,6 +500,9 @@ const s: Record<string, CSSProperties> = {
   legenda: { display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center', marginBottom: 14 },
   legHint: { fontSize: 13, color: theme.inkFaint },
   legChip: { display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 12, color: theme.inkSoft, background: 'transparent', border: `0.5px solid ${theme.line}`, borderRadius: theme.radiusPill, padding: '4px 10px', cursor: 'pointer', fontFamily: 'inherit' },
+  // No celular estes chips ficavam com 28px de altura — abaixo do alvo de toque
+  // de 44px que o resto do app já adota (Matérias, Concursos, Agenda).
+  legChipTouch: { minHeight: 44, padding: '8px 14px', fontSize: 13 },
   legChipOn: { borderColor: theme.teal, background: theme.tealBg, color: theme.tealDeep, fontWeight: 600 },
   legDot: { width: 12, height: 12, borderRadius: 4, display: 'inline-block' },
   limparFiltro: { fontSize: 12, color: theme.inkFaint, border: 'none', background: 'transparent', cursor: 'pointer', fontFamily: 'inherit', textDecoration: 'underline', padding: 0 },
@@ -383,6 +510,13 @@ const s: Record<string, CSSProperties> = {
   filtroVazio: { fontSize: 14, color: theme.inkFaint, textAlign: 'center', padding: '30px 0' },
   grupo: { marginBottom: 8 },
   grupoHead: { display: 'flex', alignItems: 'center', gap: 8, width: '100%', textAlign: 'left', background: theme.card, border: `0.5px solid ${theme.line}`, borderRadius: theme.radius, padding: '11px 14px', cursor: 'pointer', fontFamily: 'inherit' },
+
+  // Nível de LIVRO/PARTE — só existe em lei grande (acima de 12 grupos).
+  secao: { marginBottom: 10 },
+  secaoHead: { display: 'flex', alignItems: 'center', gap: 8, width: '100%', minHeight: 44, textAlign: 'left', background: theme.muted, border: `0.5px solid ${theme.line}`, borderRadius: theme.radius, padding: '12px 14px', cursor: 'pointer', fontFamily: 'inherit' },
+  secaoNome: { flex: 1, minWidth: 0, fontSize: 14, fontWeight: 700, color: theme.ink, lineHeight: 1.35 },
+  secaoMeta: { fontSize: 12, color: theme.inkFaint, flexShrink: 0 },
+  secaoCorpo: { marginTop: 8, paddingLeft: 10, borderLeft: `2px solid ${theme.line}` },
   seta: { fontSize: 12, color: theme.inkFaint, transition: 'transform .15s', flexShrink: 0 },
   grupoNome: { fontSize: 13, fontWeight: 600, color: theme.ink, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
   grupoMeta: { fontSize: 12, color: theme.inkFaint, marginLeft: 'auto', flexShrink: 0 },

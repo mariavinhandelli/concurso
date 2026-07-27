@@ -8,6 +8,7 @@ import { memo, useEffect, useRef, useState, type CSSProperties } from 'react';
 import { AlarmClock, RefreshCw, Info, Pencil, Check, X, Star, Layers } from 'lucide-react';
 import { LEIS_CATALOG, type LeiArtigo } from '@/services/leis.service';
 import { createFlashcard } from '@/services/flashcards.service';
+import { listSubjects } from '@/services/subjects.service';
 import {
   addGrifo, removeGrifo, saveAnotacaoArtigo, toggleFavoritoArtigo,
   ativarRevisaoArtigo, desativarRevisaoArtigo,
@@ -236,13 +237,35 @@ export const ArtigoCard = memo(function ArtigoCard({ artigo, interacao, onUpdate
     setFlashOpen((v) => !v);
   }
 
+  // Card criado aqui nascia sem matéria: sumia dos filtros de /flashcards e não
+  // contava para a cobertura. Liga na matéria da aluna equivalente à disciplina
+  // da lei — se ela não tiver essa matéria, segue sem vínculo (não inventa
+  // taxonomia paralela).
+  async function subjectIdDaLei(): Promise<string | null> {
+    const meta = LEIS_CATALOG.find((l) => artigo.key.startsWith(l.slug + ':'));
+    if (!meta) return null;
+    try {
+      const subjects = await listSubjects();
+      const norm = (v: string) =>
+        v.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase()
+          .replace(/\s*\([^)]*\)\s*$/, '').replace(/^direito\s+/, '').trim();
+      const alvo = norm(meta.disciplina);
+      const hit = subjects.find((s) => norm(s.name) === alvo)
+        ?? subjects.find((s) => alvo.startsWith(norm(s.name) + ' '));
+      return hit?.id ?? null;
+    } catch {
+      return null; // vincular é um bônus; nunca pode impedir a criação do card
+    }
+  }
+
   async function salvarFlashcard() {
     const front = flashFront.trim();
     const back = flashBack.trim();
     if (!front || !back) { toast.info('Preencha a frente e o verso do flashcard.'); return; }
     setFlashSaving(true);
     try {
-      await createFlashcard({ front, back, topicId: null, subjectId: null, sourceErrorId: null, addToReview: true });
+      const subjectId = await subjectIdDaLei();
+      await createFlashcard({ front, back, topicId: null, subjectId, sourceErrorId: null, addToReview: true });
       setFlashOpen(false);
       toast.success('Flashcard criado — ele já entra na sua fila de revisão.');
     } catch (e) {
@@ -361,7 +384,7 @@ export const ArtigoCard = memo(function ArtigoCard({ artigo, interacao, onUpdate
         ))}
       </div>
 
-      <div style={s.footer}>
+      <div style={{ ...s.footer, ...(touch ? s.footerTouch : {}) }}>
         <button
           onClick={() => { setNotasOpen((v) => !v); setNotaDraft(null); }}
           style={{ ...s.footBtn, ...(touch ? s.footBtnTouch : {}), ...(temNota ? s.footBtnOn : {}) }}
@@ -395,7 +418,11 @@ export const ArtigoCard = memo(function ArtigoCard({ artigo, interacao, onUpdate
             <Check size={13} strokeWidth={2} /> Questão C/E {questoes!.length > 1 ? `(${questoes!.length})` : ''}
           </button>
         )}
-        {temGrifos && <span style={s.grifoCount}>{grifos.length} marca{grifos.length === 1 ? '' : 'ções'}</span>}
+        {temGrifos && (
+          <span style={{ ...s.grifoCount, ...(touch ? s.grifoCountTouch : {}) }}>
+            {grifos.length} marca{grifos.length === 1 ? '' : 'ções'}
+          </span>
+        )}
       </div>
 
       {notasOpen && (
@@ -513,10 +540,16 @@ const s: Record<string, CSSProperties> = {
   bloco: { margin: '0 0 8px' },
   blocoRotulo: { fontWeight: 600, color: theme.inkSoft },
   footer: { display: 'flex', alignItems: 'center', gap: 8, marginTop: 10, paddingTop: 10, borderTop: `0.5px solid ${theme.line}`, flexWrap: 'wrap' },
+  // No celular as 5 ações com alvo de 44px quebravam em duas linhas — ~96px de
+  // rodapé por artigo, numa lista de centenas. Uma única linha rolável (mesmo
+  // padrão dos filtros da biblioteca) mantém rótulo e alvo de toque sem dobrar
+  // a altura; no desktop segue com wrap, que ali cabe numa linha só.
+  footerTouch: { flexWrap: 'nowrap', overflowX: 'auto', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' },
   footBtn: { border: `0.5px solid ${theme.line}`, background: 'transparent', color: theme.inkSoft, fontSize: 13, fontWeight: 600, borderRadius: theme.radiusPill, padding: '5px 12px', cursor: 'pointer', fontFamily: 'inherit', display: 'inline-flex', alignItems: 'center', gap: 5 },
-  footBtnTouch: { minHeight: 44, padding: '5px 14px' },
+  footBtnTouch: { minHeight: 44, padding: '5px 14px', flexShrink: 0, whiteSpace: 'nowrap' },
   footBtnOn: { borderColor: theme.teal, color: theme.tealDeep, background: theme.tealBg },
   grifoCount: { fontSize: 12, color: theme.inkFaint, marginLeft: 'auto' },
+  grifoCountTouch: { marginLeft: 4, flexShrink: 0, whiteSpace: 'nowrap' },
   notaBox: { marginTop: 10 },
   notaActions: { display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 8 },
   notaCancel: { padding: '7px 14px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: 'transparent', color: theme.inkSoft, fontSize: 13, cursor: 'pointer', fontFamily: 'inherit' },

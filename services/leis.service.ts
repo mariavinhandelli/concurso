@@ -57,7 +57,7 @@ export const LEIS_CATALOG: LeiMeta[] = [
     nomeCurto: 'CF/88',
     ano: 1988,
     disciplina: 'Direito Constitucional',
-    descricao: 'Texto compilado e atualizado (fonte: Planalto). Corpo permanente — arts. 1º a 250.',
+    descricao: 'Texto compilado e atualizado (fonte: Planalto). Corpo permanente — arts. 1º a 250, sem o ADCT.',
     arquivo: '/leis/cf-88.json',
     totalArtigos: 276,
   },
@@ -67,7 +67,7 @@ export const LEIS_CATALOG: LeiMeta[] = [
     nomeCurto: 'Lei 14.133/21',
     ano: 2021,
     disciplina: 'Direito Administrativo',
-    descricao: 'Nova Lei de Licitações. Texto compilado e atualizado (fonte: Planalto), com alterações até a Lei 15.266/2025.',
+    descricao: 'Nova Lei de Licitações. Texto compilado e atualizado (fonte: Planalto), com alterações até a Lei 15.471/2026.',
     arquivo: '/leis/lei-14133.json',
     totalArtigos: 196,
   },
@@ -129,7 +129,7 @@ export const LEIS_CATALOG: LeiMeta[] = [
     disciplina: 'Direito Penal',
     descricao: 'Texto compilado e atualizado (fonte: Planalto), gerado direto do compilado vigente — inclui os arts. 121-A (feminicídio) e 359-M-A/M-B.',
     arquivo: '/leis/cp.json',
-    totalArtigos: 424,
+    totalArtigos: 434,
   },
   {
     slug: 'cpp',
@@ -139,7 +139,7 @@ export const LEIS_CATALOG: LeiMeta[] = [
     disciplina: 'Direito Processual Penal',
     descricao: 'Texto compilado e atualizado (fonte: Planalto) — inclui juiz das garantias (arts. 3º-A a 3º-F) e ANPP (art. 28-A).',
     arquivo: '/leis/cpp.json',
-    totalArtigos: 845,
+    totalArtigos: 853,
   },
   {
     slug: 'cpm',
@@ -159,7 +159,7 @@ export const LEIS_CATALOG: LeiMeta[] = [
     disciplina: 'Direito Processual Penal Militar',
     descricao: 'Texto compilado e atualizado (fonte: Planalto).',
     arquivo: '/leis/cppm.json',
-    totalArtigos: 716,
+    totalArtigos: 719,
   },
   {
     slug: 'lei-8987',
@@ -199,7 +199,7 @@ export const LEIS_CATALOG: LeiMeta[] = [
     disciplina: 'Direito Administrativo',
     descricao: 'Dispõe sobre a qualificação de entidades como Organizações Sociais e o contrato de gestão. Texto compilado e atualizado (fonte: Planalto).',
     arquivo: '/leis/lei-9637.json',
-    totalArtigos: 26,
+    totalArtigos: 28,
   },
   {
     slug: 'lei-9790',
@@ -249,7 +249,7 @@ export const LEIS_CATALOG: LeiMeta[] = [
     disciplina: 'Direito Tributário',
     descricao: 'Texto compilado e atualizado (fonte: Planalto).',
     arquivo: '/leis/ctn.json',
-    totalArtigos: 211,
+    totalArtigos: 225,
   },
   {
     slug: 'cc',
@@ -329,7 +329,7 @@ export const LEIS_CATALOG: LeiMeta[] = [
     disciplina: 'Legislação Penal Especial',
     descricao: 'Registro, posse e comercialização de armas de fogo e munição; Sinarm; crimes. Texto atualizado (fonte: Planalto).',
     arquivo: '/leis/lei-10826.json',
-    totalArtigos: 41,
+    totalArtigos: 42,
   },
   {
     slug: 'lei-11340',
@@ -461,8 +461,27 @@ export function leiDisciplinaForSubject(subjectName: string): string | null {
     v.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase().replace(/^direito\s+/, '').trim();
   const alvo = norm(subjectName);
   if (!alvo) return null;
-  const hit = LEIS_CATALOG.find((l) => norm(l.disciplina) === alvo);
-  return hit?.disciplina ?? null;
+
+  const exato = LEIS_CATALOG.find((l) => norm(l.disciplina) === alvo);
+  if (exato) return exato.disciplina;
+
+  // A matéria costuma trazer uma sigla entre parênteses que a disciplina não tem:
+  // "Direito da Criança e do Adolescente (ECA)" deixava de achar o ECA, que está
+  // no acervo.
+  const semSigla = norm(subjectName.replace(/\s*\([^)]*\)\s*$/, ''));
+  if (semSigla && semSigla !== alvo) {
+    const hit = LEIS_CATALOG.find((l) => norm(l.disciplina) === semSigla);
+    if (hit) return hit.disciplina;
+  }
+
+  // Disciplina qualificada por região usa travessão: a matéria "Legislação
+  // Estadual" precisa alcançar "Legislação Estadual — Goiás". O travessão é
+  // exigido de propósito — sem ele, "Penal" casaria "Penal Militar".
+  const porRegiao = LEIS_CATALOG.find((l) => {
+    const d = norm(l.disciplina);
+    return d.startsWith(alvo + ' ') && /[—–-]/.test(l.disciplina.slice(subjectName.length - 2));
+  });
+  return porRegiao?.disciplina ?? null;
 }
 
 export const INCIDENCIA_LABEL: Record<LeiIncidencia, string> = {
