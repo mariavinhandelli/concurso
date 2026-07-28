@@ -194,7 +194,40 @@ Verificado ao vivo: as duas fotos carregam (512×512 e 2364×1330).
 
 ---
 
-## 7. Recomendação
+## 7. O2 e O3 — entregues em 28/07
+
+Migrations `20260728120000_social_consistencia_e_pares.sql` e
+`20260728130000_fix_peer_comparison_median_cast.sql`.
+
+**O2.** O pódio deixou de ordenar por minutos. A métrica é `days_on_target`: em quantos dos últimos
+7 dias a pessoa bateu a **própria** meta diária (`profiles.settings.dailyTargetMinutes`, com piso de
+30 min para quem nunca configurou meta — o mesmo limiar que já define "dia que conta" na sequência).
+Os minutos viraram contexto na linha; o `% do edital` saiu, porque comparava concursos diferentes.
+
+Consequência assumida e dita na tela: quem definiu 240 min tem uma barra mais alta que quem não
+definiu nada. É proposital — o número responde *"você cumpriu o que combinou consigo?"*, não *"quem
+estudou mais"*. Por isso o card diz "bateu a **própria** meta — não é uma corrida de horas".
+
+Verificado com 6 casos sintéticos (meta batida na régua exata, 1 minuto abaixo, piso de 30 min,
+semana cheia, janela de 7 dias).
+
+**O3.** `get_peer_comparison()` devolve rótulo do edital, tamanho do grupo, seus dias na meta e a
+**mediana** do grupo. Três travas: só entra quem ativou o perfil social (consentimento), nada
+individual sai, e grupo mínimo de 5 pessoas — abaixo disso "a mediana das outras 2" é identificação
+disfarçada de agregado. **Com 3 perfis ativos hoje o card corretamente não aparece**; verificado nos
+dois lados (silêncio abaixo de 5; mediana 4 sobre `{6,5,4,2,1}` num grupo de 5).
+
+> Um bug que só apareceu por testar acima do mínimo: `percentile_cont` sobre `int` devolve
+> `double precision`, e o retorno declarado era `numeric`. A função teria quebrado em produção
+> exatamente no dia em que o 5º usuário entrasse num edital — até lá a guarda de grupo mínimo
+> escondia o erro.
+
+Fica de fora, como planejado: **O1** (turma pública por edital) e **O4** (sala de estudo, que
+depende de densidade).
+
+---
+
+## 8. Recomendação
 
 Se a régua continua sendo a da due diligence — *só entra feature que traga estranhos usando ou
 pagando* — então a resposta honesta é:
