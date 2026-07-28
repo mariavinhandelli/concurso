@@ -5,11 +5,14 @@
 'use client';
 
 import { useEffect } from 'react';
-import { pushMyStats } from '@/services/social.service';
+import { pushMyStats, syncMySocialIdentity } from '@/services/social.service';
 
 export function SocialStatsSync() {
   useEffect(() => {
+    // Números e identidade (nome + foto) andam juntos: sem o segundo, trocar a
+    // foto no perfil não mudava nada do que os amigos viam.
     pushMyStats().catch(() => { /* silencioso — sync social é best-effort */ });
+    syncMySocialIdentity().catch(() => { /* idem */ });
   }, []);
   return null;
 }

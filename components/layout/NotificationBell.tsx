@@ -1,5 +1,8 @@
 // components/layout/NotificationBell.tsx
-// Sino de notificações: agrega lembretes (tabela `reminders`) com data <= hoje.
+// Sino de notificações: agrega lembretes (tabela `reminders`) com data <= hoje
+// e pedidos de amizade esperando resposta. Antes só lia `reminders`, então um
+// pedido de amizade não avisava em lugar nenhum — a pessoa só descobria se
+// entrasse em /amigos por conta própria (auditoria de Amigos, P2-8).
 // Badge com contagem + dropdown no mesmo estilo do menu da conta. Sem estado "lida".
 'use client';
 
@@ -7,6 +10,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Bell } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+import { getPendingRequestCount } from '@/services/social.service';
 import { theme, zIndex } from '@/lib/theme';
 
 type Reminder = {
@@ -40,6 +44,7 @@ export function NotificationBell() {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState<Reminder[]>([]);
+  const [pedidos, setPedidos] = useState(0);
   const ref = useRef<HTMLDivElement>(null);
 
   async function load() {
@@ -59,6 +64,7 @@ export function NotificationBell() {
       .order('date', { ascending: false });
 
     setItems((data as Reminder[]) ?? []);
+    setPedidos(await getPendingRequestCount());
   }
 
   useEffect(() => {
@@ -78,7 +84,7 @@ export function NotificationBell() {
     return () => document.removeEventListener('mousedown', onClick);
   }, []);
 
-  const count = items.length;
+  const count = items.length + pedidos;
 
   return (
     <div ref={ref} style={{ position: 'relative' }}>
@@ -96,9 +102,9 @@ export function NotificationBell() {
       </button>
 
       {open && (
-        <div className="notification-menu" style={styles.menu} role="dialog" aria-label="Lembretes">
+        <div className="notification-menu" style={styles.menu} role="dialog" aria-label="Notificações">
           <div style={styles.menuHead}>
-            <div style={styles.menuName}>Lembretes</div>
+            <div style={styles.menuName}>Notificações</div>
             <div style={styles.menuSub}>
               {count > 0 ? `${count} pendente${count > 1 ? 's' : ''}` : 'Nada pendente'}
             </div>
@@ -108,6 +114,20 @@ export function NotificationBell() {
             <div style={styles.empty}>Você está em dia.</div>
           ) : (
             <div style={styles.list}>
+              {pedidos > 0 && (
+                <button
+                  style={styles.item}
+                  onClick={() => { setOpen(false); router.push('/amigos'); }}
+                >
+                  <span style={styles.dot} />
+                  <span style={styles.itemBody}>
+                    <span style={styles.itemTitle}>
+                      {pedidos === 1 ? '1 pedido de amizade' : `${pedidos} pedidos de amizade`}
+                    </span>
+                    <span style={styles.itemDate}>Esperando sua resposta</span>
+                  </span>
+                </button>
+              )}
               {items.map((r) => (
                 <button
                   key={r.id}

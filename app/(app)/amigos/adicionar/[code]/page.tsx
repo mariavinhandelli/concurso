@@ -70,7 +70,14 @@ export default function AdicionarAmigoPage() {
           <>
             <span style={s.avatarBig}>{(prof.name?.[0] ?? '?').toUpperCase()}</span>
             <h1 style={s.h1}>{prof.name}</h1>
-            <p style={s.body}>quer estudar junto com você no Focali. Adicionar como amigo?</p>
+            {/* A copy anterior dizia "quer estudar junto com você", o que o
+                sistema não sabe: qualquer pessoa com o link vê esta tela, e
+                quem convidou não escolheu VOCÊ. Era pressão social inventada
+                sobre um fato inexistente (auditoria de Amigos, P2-11). */}
+            <p style={s.body}>
+              Este é o convite de <b style={s.strong}>{prof.name}</b> no Focali.
+              Quer adicionar como amigo? O pedido só vira amizade depois que a pessoa aceitar.
+            </p>
             {!jaAtivo && (
               <p style={s.note}>Ao adicionar, seu perfil social é ativado — amigos veem só seus números (sequência, minutos, % do edital), nunca seu conteúdo.</p>
             )}

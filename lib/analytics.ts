@@ -24,6 +24,18 @@ export const EV = {
   friendAccepted: 'friend_accepted',
   turmaCreated: 'turma_created',
   turmaJoined: 'turma_joined',
+  // Atrito da camada social — só o lado feliz era instrumentado, então não dava
+  // para medir churn nem abuso (auditoria de 27/07, P3-14).
+  socialDisabled: 'social_disabled',
+  socialDataDeleted: 'social_data_deleted',
+  friendDeclined: 'friend_declined',
+  friendRemoved: 'friend_removed',
+  friendRequestCanceled: 'friend_request_canceled',
+  userBlocked: 'user_blocked',
+  userUnblocked: 'user_unblocked',
+  userReported: 'user_reported',
+  inviteCodeRotated: 'invite_code_rotated',
+  turmaLeft: 'turma_left',
   editalViewed: 'edital_viewed',
   editalActivated: 'edital_activated',
   editalCompared: 'edital_compared',

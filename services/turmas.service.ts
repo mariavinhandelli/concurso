@@ -23,11 +23,24 @@ export interface TurmaMemberRank {
   streak: number;
   weekMinutes: number;
   coveragePct: number;
+  daysOnTarget: number;
   role: string;
   isMe?: boolean;
+  // false = membro desativou o perfil social. A RPC zera os agregados dele
+  // (migration 20260727120000); a tela o tira do pódio em vez de exibir 0 min.
+  enabled: boolean;
 }
 
 const NOME_PADRAO = 'Concurseiro(a)';
+
+// P3-15 — antes o error.message cru do PostgREST ia para o toast (foi assim que
+// "column reference \"turma_id\" is ambiguous" apareceu para o usuário).
+function erroAmigavel(error: { message: string }, fallback: string): string {
+  console.error('[turmas]', error);
+  if (/permission denied|row-level security/i.test(error.message)) return 'Você não tem permissão para isso.';
+  if (/Failed to fetch|NetworkError/i.test(error.message)) return 'Sem conexão. Tente de novo.';
+  return fallback;
+}
 
 // Código de 8 chars, sem caracteres ambíguos (mesmo alfabeto do convite de amigo).
 function genCode(): string {
@@ -62,7 +75,7 @@ export async function createTurma(name: string): Promise<Turma> {
         return { id: r.id, name: r.name, joinCode: r.join_code, memberCount: 1, isOwner: true };
       }
     } else if (!/duplicate|unique/i.test(error.message)) {
-      throw new Error('Erro ao criar turma: ' + error.message);
+      throw new Error(erroAmigavel(error, 'Não foi possível criar a turma.'));
     }
   }
   throw new Error('Não foi possível gerar um código único. Tente novamente.');
@@ -80,7 +93,7 @@ export async function joinTurmaByCode(code: string): Promise<{ turmaId: string; 
   const supabase = createClient();
   await ensureSocial();
   const { data, error } = await supabase.rpc('join_turma_by_code', { p_code: code.trim().toUpperCase() });
-  if (error) throw new Error('Erro ao entrar na turma: ' + error.message);
+  if (error) throw new Error(erroAmigavel(error, 'Não foi possível entrar na turma.'));
   const rows = (data ?? []) as { turma_id: string; name: string }[];
   if (rows.length === 0) return null;
   track(EV.turmaJoined);
@@ -98,11 +111,12 @@ export async function getTurmaRanking(turmaId: string): Promise<TurmaMemberRank[
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
   const { data } = await supabase.rpc('get_turma_ranking', { p_turma_id: turmaId });
-  return ((data ?? []) as { user_id: string; name: string | null; avatar_url: string | null; streak_current: number; week_minutes: number; coverage_pct: number; role: string }[])
+  return ((data ?? []) as { user_id: string; name: string | null; avatar_url: string | null; streak_current: number; week_minutes: number; coverage_pct: number; days_on_target: number; role: string; enabled: boolean }[])
     .map((r) => ({
       userId: r.user_id, name: r.name ?? NOME_PADRAO, avatarUrl: r.avatar_url,
       streak: r.streak_current, weekMinutes: r.week_minutes, coveragePct: r.coverage_pct,
-      role: r.role, isMe: r.user_id === user?.id,
+      daysOnTarget: r.days_on_target,
+      role: r.role, isMe: r.user_id === user?.id, enabled: r.enabled,
     }));
 }
 
@@ -111,17 +125,18 @@ export async function leaveTurma(turmaId: string): Promise<void> {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
   const { error } = await supabase.from('turma_members').delete().eq('turma_id', turmaId).eq('user_id', user.id);
-  if (error) throw new Error('Erro ao sair da turma: ' + error.message);
+  if (error) throw new Error(erroAmigavel(error, 'Não foi possível sair da turma.'));
+  track(EV.turmaLeft);
 }
 
 export async function removeMember(turmaId: string, userId: string): Promise<void> {
   const supabase = createClient();
   const { error } = await supabase.from('turma_members').delete().eq('turma_id', turmaId).eq('user_id', userId);
-  if (error) throw new Error('Erro ao remover membro: ' + error.message);
+  if (error) throw new Error(erroAmigavel(error, 'Não foi possível remover o membro.'));
 }
 
 export async function deleteTurma(turmaId: string): Promise<void> {
   const supabase = createClient();
   const { error } = await supabase.from('turmas').delete().eq('id', turmaId);
-  if (error) throw new Error('Erro ao apagar turma: ' + error.message);
+  if (error) throw new Error(erroAmigavel(error, 'Não foi possível apagar a turma.'));
 }

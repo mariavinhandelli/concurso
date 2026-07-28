@@ -2,8 +2,8 @@
 // Primitivos visuais compartilhados entre o ranking de Amigos e o de Turmas.
 'use client';
 
-import type { CSSProperties, ReactNode } from 'react';
-import { X, Flame } from 'lucide-react';
+import { useState, type CSSProperties, type ReactNode } from 'react';
+import { Flame } from 'lucide-react';
 import { fmtMin } from '@/lib/format/time';
 import { theme } from '@/lib/theme';
 import { Badge } from '@/components/ui/Badge';
@@ -11,18 +11,47 @@ import { Badge } from '@/components/ui/Badge';
 const MEDALHAS = ['🥇', '🥈', '🥉'];
 
 export function Avatar({ name, url, size = 40, ring }: { name: string; url: string | null; size?: number; ring?: boolean }) {
+  // Até 28/07 nenhum avatar chegava aqui (o perfil social lia de uma coluna
+  // sempre vazia), então a foto nunca tinha sido exercitada de verdade. Com
+  // imagem real vem o caso da imagem que não carrega — arquivo apagado do
+  // bucket, URL antiga, offline — e um <img> quebrado é pior que a inicial.
+  const [falhou, setFalhou] = useState(false);
   const initial = (name?.[0] ?? '?').toUpperCase();
   const border = ring ? `2px solid ${theme.teal}` : 'none';
-  return url ? (
+  const base: CSSProperties = { width: size, height: size, borderRadius: '50%', flexShrink: 0, border };
+
+  return url && !falhou ? (
     // eslint-disable-next-line @next/next/no-img-element
-    <img src={url} alt={name} width={size} height={size} style={{ width: size, height: size, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, border }} />
+    <img
+      src={url}
+      alt={name}
+      width={size}
+      height={size}
+      // Sem loading="lazy": para um avatar de 28-40px numa lista curta ele não
+      // economiza nada e atrasa a linha, além de nunca disparar quando o
+      // elemento não é considerado visível.
+      decoding="async"
+      onError={() => setFalhou(true)}
+      style={{ ...base, objectFit: 'cover', background: theme.bg }}
+    />
   ) : (
-    <span style={{ width: size, height: size, borderRadius: '50%', flexShrink: 0, background: theme.primary, color: theme.onPrimary, display: 'grid', placeItems: 'center', fontWeight: 700, fontSize: size * 0.4, border }}>{initial}</span>
+    <span style={{ ...base, background: theme.primary, color: theme.onPrimary, display: 'grid', placeItems: 'center', fontWeight: 700, fontSize: size * 0.4 }}>{initial}</span>
   );
 }
 
+// `actions` substituiu o antigo `onRemove`: era um "X" de 13px que desfazia a
+// amizade num clique, sem confirmação e sem desfazer (P2-9), e não havia onde
+// pendurar bloquear/denunciar (P1-5). Agora cada tela compõe o próprio menu.
+// O número ranqueado é CONSTÂNCIA (dias na própria meta, 0..7), não volume.
+// Antes era `fmtMin(weekMinutes)`: um pódio de horas absoluto, que é o formato
+// que a pesquisa de gamificação aponta como desmotivador justamente para quem
+// está embaixo. Os minutos continuam visíveis como contexto, mas não ordenam.
+//
+// `% do edital` saiu da linha: comparava pessoas de concursos DIFERENTES, onde
+// o número não quer dizer a mesma coisa. Esse dado migrou para a comparação com
+// pares do mesmo edital, onde ele de fato significa algo.
 export function RankRow({
-  position, name, avatarUrl, isMe, streak, weekMinutes, coveragePct, badge, onRemove,
+  position, name, avatarUrl, isMe, streak, weekMinutes, daysOnTarget, badge, actions,
 }: {
   position: number;
   name: string;
@@ -30,9 +59,9 @@ export function RankRow({
   isMe?: boolean;
   streak: number;
   weekMinutes: number;
-  coveragePct: number;
+  daysOnTarget: number;
   badge?: ReactNode;
-  onRemove?: () => void;
+  actions?: ReactNode;
 }) {
   return (
     <div style={{ ...s.row, ...(isMe ? s.rowMe : {}) }}>
@@ -44,13 +73,32 @@ export function RankRow({
           {badge && <Badge variant="brand" style={{ textTransform: 'uppercase' }}>{badge}</Badge>}
         </span>
         <span style={{ ...s.meta, display: 'inline-flex', alignItems: 'center', gap: 3 }}>
-          <Flame size={11} strokeWidth={2} /> {streak} {streak === 1 ? 'dia' : 'dias'} · {coveragePct}% do edital
+          <Flame size={11} strokeWidth={2} /> {streak} {streak === 1 ? 'dia' : 'dias'} · {fmtMin(weekMinutes)} na semana
         </span>
       </div>
-      <span style={s.min}>{fmtMin(weekMinutes)}</span>
-      {onRemove && (
-        <button onClick={onRemove} style={s.remove} title="Remover" aria-label="Remover"><X size={13} strokeWidth={2} /></button>
-      )}
+      <span style={s.dias} title="dias em que bateu a própria meta, nos últimos 7">
+        {daysOnTarget}<span style={s.diasDe}>/7</span>
+      </span>
+      {actions}
+    </div>
+  );
+}
+
+// Linha de quem está na sua lista mas sem números para mostrar (perfil social
+// desativado). Fora do pódio de propósito: 0 min ali seria comparação falsa.
+export function QuietRow({ name, avatarUrl, isMe, nota, actions }: {
+  name: string;
+  avatarUrl: string | null;
+  isMe?: boolean;
+  nota: string;
+  actions?: ReactNode;
+}) {
+  return (
+    <div style={s.quietRow}>
+      <Avatar name={name} url={avatarUrl} size={28} />
+      <span style={s.quietName}>{isMe ? 'Você' : name}</span>
+      <span style={s.quietTag}>{nota}</span>
+      {actions}
     </div>
   );
 }
@@ -62,6 +110,10 @@ const s: Record<string, CSSProperties> = {
   info: { display: 'flex', flexDirection: 'column', minWidth: 0, flex: 1, gap: 2 },
   name: { fontSize: 15, fontWeight: 700, color: theme.ink, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: 6 },
   meta: { fontSize: 12, color: theme.inkSoft, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
-  min: { fontSize: 15, fontWeight: 800, color: theme.tealDeep, flexShrink: 0, fontVariantNumeric: 'tabular-nums' },
-  remove: { border: 'none', background: 'transparent', color: theme.inkFaint, fontSize: 13, cursor: 'pointer', flexShrink: 0, padding: 4, opacity: 0.6 },
+  dias: { fontSize: 17, fontWeight: 800, color: theme.tealDeep, flexShrink: 0, fontVariantNumeric: 'tabular-nums', lineHeight: 1 },
+  diasDe: { fontSize: 12, fontWeight: 700, color: theme.inkFaint },
+
+  quietRow: { display: 'flex', alignItems: 'center', gap: 10, padding: '4px 2px' },
+  quietName: { fontSize: 14, fontWeight: 600, color: theme.inkSoft, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
+  quietTag: { fontSize: 12, color: theme.inkFaint, marginRight: 'auto', whiteSpace: 'nowrap' },
 };

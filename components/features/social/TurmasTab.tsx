@@ -5,17 +5,22 @@
 
 import { useState, type CSSProperties } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, MoreHorizontal } from 'lucide-react';
 import { useToast } from '@/components/ui/ToastProvider';
 import {
   listMyTurmas, createTurma, joinTurmaByCode, getTurmaRanking, leaveTurma, removeMember, deleteTurma,
   type Turma, type TurmaMemberRank,
 } from '@/services/turmas.service';
-import { RankRow } from './SocialUI';
+import { reportUser } from '@/services/social.service';
+import { RankRow, QuietRow } from './SocialUI';
+import { ReportDialog } from './ReportDialog';
 import { theme } from '@/lib/theme';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { Menu, MenuItem } from '@/components/ui/Menu';
+import { IconButton } from '@/components/ui/IconButton';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 
 function turmaInviteUrl(code: string): string {
   const origin = typeof window !== 'undefined' ? window.location.origin : '';
@@ -30,6 +35,8 @@ export function TurmasTab() {
   const [code, setCode] = useState('');
   const [selected, setSelected] = useState<Turma | null>(null);
   const [copiado, setCopiado] = useState(false);
+  const [confirmacao, setConfirmacao] = useState<{ titulo: string; descricao: string; rotulo: string; acao: () => Promise<void> } | null>(null);
+  const [denunciando, setDenunciando] = useState<{ userId: string; nome: string } | null>(null);
 
   const { data: turmas, isLoading } = useQuery<Turma[]>({ queryKey: ['my-turmas'], queryFn: listMyTurmas });
   const { data: ranking } = useQuery<TurmaMemberRank[]>({
@@ -77,6 +84,65 @@ export function TurmasTab() {
     else copiarLink(link);
   }
 
+  const ativos = (ranking ?? []).filter((m) => m.enabled);
+  const inativos = (ranking ?? []).filter((m) => !m.enabled);
+
+  // Ações sobre um membro. Denunciar vale para qualquer um (P1-5) — numa turma
+  // você convive com gente que não é sua amiga e que você não escolheu.
+  // Remover é só do dono, e agora pede confirmação em vez do "X" de um clique.
+  function menuMembro(m: TurmaMemberRank) {
+    if (m.isMe) return undefined;
+    const podeRemover = !!selected?.isOwner;
+    return (
+      <Menu
+        trigger={({ onClick }) => (
+          <IconButton size="sm" aria-label={`Ações para ${m.name}`} onClick={onClick} disabled={busy}>
+            <MoreHorizontal size={16} strokeWidth={2} />
+          </IconButton>
+        )}
+      >
+        {podeRemover && (
+          <MenuItem onClick={() => setConfirmacao({
+            titulo: `Remover ${m.name} da turma?`,
+            descricao: 'A pessoa perde acesso ao ranking do grupo. Ela pode entrar de novo se ainda tiver o código — gere um código novo se não for isso que você quer.',
+            rotulo: 'Remover',
+            acao: () => removeMember(selected!.id, m.userId),
+          })}>Remover da turma</MenuItem>
+        )}
+        <MenuItem onClick={() => setDenunciando({ userId: m.userId, nome: m.name })}>Denunciar</MenuItem>
+      </Menu>
+    );
+  }
+
+  // Os diálogos vivem nos dois ramos do return (lista e ranking), então ficam
+  // num fragmento único em vez de duplicados.
+  const dialogs = (
+    <>
+      {confirmacao && (
+        <ConfirmDialog
+          title={confirmacao.titulo}
+          description={confirmacao.descricao}
+          confirmLabel={confirmacao.rotulo}
+          danger
+          onCancel={() => setConfirmacao(null)}
+          onConfirm={() => { const { acao } = confirmacao; setConfirmacao(null); void run(acao); }}
+        />
+      )}
+      {denunciando && (
+        <ReportDialog
+          nome={denunciando.nome}
+          busy={busy}
+          onCancel={() => setDenunciando(null)}
+          onSubmit={(reason, details) => run(async () => {
+            await reportUser(denunciando.userId, reason, details);
+            setDenunciando(null);
+            toast.success('Denúncia enviada. Obrigado por avisar.');
+          })}
+        />
+      )}
+    </>
+  );
+
   // ── Ranking de uma turma ──
   if (selected) {
     return (
@@ -95,9 +161,13 @@ export function TurmasTab() {
         </section>
 
         <section style={s.card}>
-          <div style={s.cardTitle}>Ranking da semana · minutos estudados</div>
+          <div style={s.cardTitle}>Constância da semana</div>
+          <p style={{ ...s.body, marginBottom: 14 }}>
+            Dias em que cada um bateu a <b style={{ color: theme.ink, fontWeight: 700 }}>própria</b> meta
+            diária — não é uma corrida de horas.
+          </p>
           <div style={s.rankList}>
-            {(ranking ?? []).map((m, i) => (
+            {ativos.map((m, i) => (
               <RankRow
                 key={m.userId}
                 position={i}
@@ -106,19 +176,55 @@ export function TurmasTab() {
                 isMe={m.isMe}
                 streak={m.streak}
                 weekMinutes={m.weekMinutes}
-                coveragePct={m.coveragePct}
+                daysOnTarget={m.daysOnTarget}
                 badge={m.role === 'owner' ? 'dono' : undefined}
-                onRemove={selected.isOwner && !m.isMe ? () => run(() => removeMember(selected.id, m.userId)) : undefined}
+                actions={menuMembro(m)}
               />
             ))}
           </div>
+
+          {/* Membros com o perfil social desativado: seguem na turma, mas sem
+              números. Fora do pódio — 0 min aqui seria uma comparação falsa. */}
+          {inativos.length > 0 && (
+            <div style={s.quietBlock}>
+              {inativos.map((m) => (
+                <QuietRow
+                  key={m.userId}
+                  name={m.name}
+                  avatarUrl={m.avatarUrl}
+                  isMe={m.isMe}
+                  nota="perfil social desativado"
+                  actions={menuMembro(m)}
+                />
+              ))}
+            </div>
+          )}
         </section>
 
         {selected.isOwner ? (
-          <button onClick={() => run(async () => { await deleteTurma(selected.id); setSelected(null); toast.success('Turma apagada.'); })} style={s.dangerBtn} disabled={busy}>Apagar turma</button>
+          <button
+            onClick={() => setConfirmacao({
+              titulo: `Apagar a turma "${selected.name}"?`,
+              descricao: 'A turma some para TODOS os membros, junto com o ranking do grupo. Não dá para desfazer.',
+              rotulo: 'Apagar turma',
+              acao: async () => { await deleteTurma(selected.id); setSelected(null); toast.success('Turma apagada.'); },
+            })}
+            style={s.dangerBtn}
+            disabled={busy}
+          >Apagar turma</button>
         ) : (
-          <button onClick={() => run(async () => { await leaveTurma(selected.id); setSelected(null); toast.success('Você saiu da turma.'); })} style={s.dangerBtn} disabled={busy}>Sair da turma</button>
+          <button
+            onClick={() => setConfirmacao({
+              titulo: `Sair da turma "${selected.name}"?`,
+              descricao: 'Você some do ranking do grupo. Dá para entrar de novo se ainda tiver o código.',
+              rotulo: 'Sair da turma',
+              acao: async () => { await leaveTurma(selected.id); setSelected(null); toast.success('Você saiu da turma.'); },
+            })}
+            style={s.dangerBtn}
+            disabled={busy}
+          >Sair da turma</button>
         )}
+        {dialogs}
       </>
     );
   }
@@ -159,6 +265,7 @@ export function TurmasTab() {
           </div>
         )}
       </section>
+      {dialogs}
     </>
   );
 }
@@ -185,6 +292,8 @@ const s: Record<string, CSSProperties> = {
   codeBox: { fontFamily: 'ui-monospace, monospace', fontSize: 16, fontWeight: 700, letterSpacing: 2, color: theme.ink, background: theme.bg, border: `0.5px solid ${theme.line}`, borderRadius: theme.radiusSm, padding: '10px 14px', flex: 1, minWidth: 110, textAlign: 'center' },
 
   rankList: { display: 'flex', flexDirection: 'column', gap: 6 },
+
+  quietBlock: { display: 'flex', flexDirection: 'column', gap: 2, marginTop: 14, paddingTop: 12, borderTop: `0.5px solid ${theme.line}` },
 
   primary: { padding: '10px 18px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
   secondary: { padding: '10px 16px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.ink, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
