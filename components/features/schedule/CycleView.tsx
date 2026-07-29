@@ -49,7 +49,13 @@ export function CycleView({
   const [loadError, setLoadError] = useState('');
   const [error, setError] = useState('');
   const [completing, setCompleting] = useState<string | null>(null);
-  const [popupItem, setPopupItem] = useState<{ itemId: string; subjectId: string; planned: number } | null>(null);
+  // `token` nasce ao ABRIR o popup e é reusado em cada tentativa de confirmar:
+  // vira o client_session_id, e o índice único (user_id, client_session_id)
+  // transforma duplo clique/reenvio em no-op. Sem ele o registro manual era o
+  // único caminho de crédito sem nenhuma proteção contra duplicata.
+  const [popupItem, setPopupItem] = useState<
+    { itemId: string; subjectId: string; subjectName: string; planned: number; token: string } | null
+  >(null);
 
   const load = useCallback(async () => {
     setLoadError('');
@@ -71,7 +77,7 @@ export function CycleView({
     try {
       await completeCycleSubject({
         ruleId, itemId: popupItem.itemId, subjectId: popupItem.subjectId,
-        minutes, source: 'manual',
+        minutes, source: 'manual', clientSessionId: popupItem.token,
       });
       setPopupItem(null);
       await load();
@@ -82,7 +88,15 @@ export function CycleView({
     }
   }
 
-  async function handleUndo(subjectId: string) {
+  // Desfazer apaga o registro mais recente DA MATÉRIA — inclusive um vindo do
+  // timer, e sem apagar a sessão correspondente. Por isso confirma nomeando o
+  // que sai, em vez de agir direto num link de 11px.
+  async function handleUndo(subjectId: string, subjectName: string) {
+    const ok = await confirm({
+      title: `Desfazer o último registro de ${subjectName}?`,
+      description: 'Sai só do ciclo. Se veio de uma sessão cronometrada, a sessão continua no seu histórico e nas estatísticas.',
+    });
+    if (!ok) return;
     setError('');
     try {
       await undoLastCompletion(ruleId, subjectId);
@@ -160,7 +174,9 @@ export function CycleView({
               <text x="60" y="56" textAnchor="middle" fontSize="20" fontWeight="700" fontFamily="inherit" fill={theme.ink}>{fmtH(state.todayMinutes)}</text>
               <text x="60" y="76" textAnchor="middle" fontSize="11" fontFamily="inherit" fill={theme.inkSoft}>de {fmtH(state.dailyMinutes)}</text>
             </svg>
-            <div style={styles.compassLabel}>Meta de hoje</div>
+            {/* "Meta de hoje" dava a entender TODO o estudo do dia; este número
+                conta só o que entrou no ciclo. */}
+            <div style={styles.compassLabel}>Ciclo hoje</div>
             <div style={styles.compassLap}>
               <span style={styles.lapNum}>{state.totalLaps + 1}ª</span> volta do ciclo
             </div>
@@ -178,7 +194,17 @@ export function CycleView({
                     <div style={{ ...styles.rowName, ...(isSug ? { fontWeight: 700 } : {}) }}>
                       {s.subjectName}
                       {isSug && <span style={styles.suggestedTag}>→ agora</span>}
-                      {s.laps > 0 && <span style={styles.lapBadge}>{s.laps} {s.laps === 1 ? 'volta' : 'voltas'}</span>}
+                      {/* "volta" aqui significava "cumpri os minutos DESTA matéria",
+                          a 40px do rótulo do donut, onde significa "volta do ciclo
+                          inteiro". Duas coisas diferentes, mesma palavra. */}
+                      {s.laps > 0 && (
+                        <span
+                          style={styles.lapBadge}
+                          title={`Você já cumpriu ${fmtH(s.plannedMinutes)} desta matéria ${s.laps}${s.laps === 1 ? ' vez' : ' vezes'} neste ciclo.`}
+                        >
+                          {s.laps}× concluída
+                        </span>
+                      )}
                     </div>
                     <div style={styles.progressLine}>
                       <div style={styles.progressTrack}>
@@ -187,14 +213,17 @@ export function CycleView({
                       <span style={styles.progressText}>{fmtH(s.lapProgress)} de {fmtH(s.plannedMinutes)}</span>
                     </div>
                     {!isArchived && s.totalMinutes > 0 && (
-                      <button onClick={() => handleUndo(s.subjectId)} style={styles.undoBtn} title="Desfazer último registro">
+                      <button onClick={() => handleUndo(s.subjectId, s.subjectName)} style={styles.undoBtn} title="Desfazer último registro">
                         ↩ desfazer
                       </button>
                     )}
                   </div>
                   {!isArchived && (
                     <button
-                      onClick={() => setPopupItem({ itemId: s.itemId, subjectId: s.subjectId, planned: s.plannedMinutes })}
+                      onClick={() => setPopupItem({
+                        itemId: s.itemId, subjectId: s.subjectId, subjectName: s.subjectName,
+                        planned: s.plannedMinutes, token: `manual-${s.itemId}-${Date.now()}`,
+                      })}
                       disabled={completing === s.itemId}
                       style={{ ...styles.completeBtn, ...(isSug ? styles.completeBtnPrimary : {}) }}
                     >

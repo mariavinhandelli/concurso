@@ -27,10 +27,19 @@ export interface SessionFeedback {
   reviewIntent?: { active: boolean; was: boolean } | null;
 }
 
+/** Por que a sessão não entrou no ciclo. `materia_fora_do_ciclo` é o caso comum
+ *  e legítimo (estudou algo que não está no ciclo); `erro` é falha real. */
+export type CycleSkipReason = 'sem_materia' | 'materia_fora_do_ciclo' | 'curta_demais' | 'erro';
+
+export interface SaveStudyLogResult {
+  cycleCredited: boolean;
+  cycleSkipReason?: CycleSkipReason;
+}
+
 export async function saveStudyLog(
   session: PendingSession,
   feedback: SessionFeedback,
-) {
+): Promise<SaveStudyLogResult> {
   validateStudyLogInput(session, feedback);
   const supabase = createClient();
 
@@ -110,28 +119,39 @@ export async function saveStudyLog(
 
   // Se a matéria estudada pertence a um ciclo ativo, soma os minutos da sessão
   // ao ciclo (modelo de acúmulo). Isolado em try/catch — nunca bloqueia o save.
+  // O motivo de NÃO ter creditado é devolvido ao chamador: engolir isso num
+  // console.error deixava o usuário com a sessão salva e o ciclo parado, sem
+  // nenhuma explicação possível do lado dele.
   const subjectIdUsed = feedback.subjectId ?? session.subjectId;
+  const minutos = Math.round(session.durationSec / 60);
+  let cycleResult: SaveStudyLogResult = { cycleCredited: false, cycleSkipReason: 'sem_materia' };
+
   if (subjectIdUsed) {
     try {
       const cycleItem = await findCycleItemForSubject(subjectIdUsed);
-      if (cycleItem) {
-        const minutos = Math.round(session.durationSec / 60);
-        if (minutos > 0) {
-          await completeCycleSubject({
-            ruleId: cycleItem.ruleId,
-            itemId: cycleItem.itemId,
-            subjectId: subjectIdUsed,
-            minutes: minutos,
-            source: session.source ?? 'timer',
-            clientSessionId: session.sessionId,
-          });
-        }
+      if (!cycleItem) {
+        cycleResult = { cycleCredited: false, cycleSkipReason: 'materia_fora_do_ciclo' };
+      } else if (minutos <= 0) {
+        cycleResult = { cycleCredited: false, cycleSkipReason: 'curta_demais' };
+      } else {
+        await completeCycleSubject({
+          ruleId: cycleItem.ruleId,
+          itemId: cycleItem.itemId,
+          subjectId: subjectIdUsed,
+          minutes: minutos,
+          source: session.source ?? 'timer',
+          clientSessionId: session.sessionId,
+          sessionDate: toLocalDateString(new Date(session.startedAt)),
+        });
+        cycleResult = { cycleCredited: true };
       }
     } catch (e) {
       console.error('Ciclo não atualizado (sessão salva mesmo assim):', e);
+      cycleResult = { cycleCredited: false, cycleSkipReason: 'erro' };
     }
   }
 
+  return cycleResult;
 }
 
 // ─── Correções pós-registro (Histórico) ─────────────────────────────────────
@@ -167,15 +187,18 @@ export async function updateStudyLogDuration(logId: string, durationMinutes: num
   if (error) throw new Error('Erro ao corrigir a duração: ' + error.message);
 
   // Propaga para o ciclo, se esta sessão gerou uma completion.
+  // supabase-js NÃO lança em erro de banco — devolve { error }. O try/catch
+  // sozinho era decorativo e engolia falha (ex.: violar o CHECK de 1440 min).
   if (log.client_session_id) {
-    try {
-      await supabase
-        .from('cycle_completions')
-        .update({ minutes: Math.round(durationMinutes) })
-        .eq('user_id', user.id)
-        .eq('client_session_id', log.client_session_id);
-    } catch (e) {
-      console.error('Ciclo não ajustado (duração corrigida mesmo assim):', e);
+    const { error: cycleErr } = await supabase
+      .from('cycle_completions')
+      .update({ minutes: Math.round(durationMinutes) })
+      .eq('user_id', user.id)
+      .eq('client_session_id', log.client_session_id);
+    if (cycleErr) {
+      throw new Error(
+        'A duração foi corrigida, mas o ciclo não pôde ser ajustado: ' + cycleErr.message,
+      );
     }
   }
 
@@ -204,15 +227,18 @@ export async function deleteStudyLog(logId: string): Promise<void> {
     .eq('user_id', user.id);
   if (error) throw new Error('Erro ao apagar a sessão: ' + error.message);
 
+  // Mesmo motivo do update acima: sem checar `error`, a sessão sumia e o ciclo
+  // seguia contando os minutos dela para sempre.
   if (log.client_session_id) {
-    try {
-      await supabase
-        .from('cycle_completions')
-        .delete()
-        .eq('user_id', user.id)
-        .eq('client_session_id', log.client_session_id);
-    } catch (e) {
-      console.error('Completion do ciclo não removida (sessão apagada mesmo assim):', e);
+    const { error: cycleErr } = await supabase
+      .from('cycle_completions')
+      .delete()
+      .eq('user_id', user.id)
+      .eq('client_session_id', log.client_session_id);
+    if (cycleErr) {
+      throw new Error(
+        'A sessão foi apagada, mas o ciclo não pôde ser atualizado: ' + cycleErr.message,
+      );
     }
   }
 

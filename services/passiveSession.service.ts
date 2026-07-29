@@ -14,8 +14,11 @@
 // - Dedupe pelo mesmo mecanismo do timer: upsert por (user_id,
 //   client_session_id) com ignoreDuplicates — reenvio/duplo clique não duplica.
 // - NÃO passa por saveStudyLog: os efeitos colaterais de lá (auto-completar
-//   bloco, somar em ciclo, recalcular saúde de tópico) pressupõem tópico/matéria
-//   escolhidos pelo usuário; a sessão passiva é agregada e sem tópico.
+//   bloco, recalcular saúde de tópico) pressupõem tópico escolhido pelo usuário;
+//   a sessão passiva é agregada e sem tópico. EXCEÇÃO: o ciclo é creditado aqui
+//   mesmo (quando a sessão inteira é de uma matéria só), porque estudo real da
+//   matéria não pode ficar de fora do ciclo — a Home dizia "2h30 hoje" e o ciclo
+//   "0min" logo abaixo, sem explicação possível para o usuário.
 // - questions_total/correct só para modos onde acerto agregado faz sentido
 //   (simulado de lei). Avaliações de SRS (fácil/difícil) NÃO são "questões".
 
@@ -24,6 +27,7 @@ import { getCachedUser } from '@/lib/supabase/authCache';
 import { track, EV } from '@/lib/analytics';
 import { emitSessionSaved } from '@/lib/session-celebration';
 import { toLocalDateString } from '@/lib/local-date';
+import { findCycleItemForSubject, completeCycleSubject } from '@/services/cycleEngine.service';
 
 export type PassiveMode = 'revisao' | 'leitura_lei' | 'jurisprudencia' | 'flashcards' | 'questoes';
 
@@ -85,6 +89,30 @@ export async function savePassiveSession(input: PassiveSessionInput): Promise<bo
     if (error) {
       console.error('Sessão passiva não registrada:', error.message);
       return false;
+    }
+
+    // Credita o ciclo quando a sessão toda é de uma matéria só. Mesmo
+    // clientSessionId da study_log: o índice único (user_id, client_session_id)
+    // impede crédito duplo em reenvio, e editar/apagar a sessão propaga.
+    const minutos = Math.round(durationSec / 60);
+    if (input.subjectId && minutos > 0) {
+      try {
+        const cycleItem = await findCycleItemForSubject(input.subjectId);
+        if (cycleItem) {
+          await completeCycleSubject({
+            ruleId: cycleItem.ruleId,
+            itemId: cycleItem.itemId,
+            subjectId: input.subjectId,
+            minutes: minutos,
+            source: 'timer',
+            clientSessionId,
+            sessionDate: toLocalDateString(new Date(input.startedAtMs)),
+          });
+        }
+      } catch (e) {
+        // Nunca quebra a tela de conclusão do player.
+        console.error('Ciclo não atualizado (sessão passiva registrada mesmo assim):', e);
+      }
     }
 
     track(EV.studyCompleted, {

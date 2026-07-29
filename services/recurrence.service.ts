@@ -215,26 +215,41 @@ export async function listRuleSummaries(): Promise<RuleSummary[]> {
   for (const s of subjects ?? []) subjMap[s.id] = { name: s.name, color: s.color ?? '#C9B8DD', archived: s.status === 'arquivado' };
 
   return (rules ?? []).map((r) => {
-    const porMateria = new Map<string, { weekdays: number[]; minutes: number; cycleOrder: number }>();
-    for (const it of (r.recurrence_items ?? []) as {
+    const rawItems = (r.recurrence_items ?? []) as {
       subject_id: string; weekday: number | null; planned_minutes: number; cycle_order: number | null;
-    }[]) {
-      const cur = porMateria.get(it.subject_id) ?? { weekdays: [], minutes: it.planned_minutes, cycleOrder: it.cycle_order ?? 0 };
-      if (it.weekday !== null) cur.weekdays.push(it.weekday);
-      cur.minutes = it.planned_minutes;
-      if (it.cycle_order !== null) cur.cycleOrder = it.cycle_order;
-      porMateria.set(it.subject_id, cur);
-    }
-    let materias = Array.from(porMateria.entries()).map(([subjectId, v]) => ({
+    }[];
+    const mk = (subjectId: string, weekdays: number[], minutes: number, cycleOrder: number) => ({
       subjectId,
       subjectName: subjMap[subjectId]?.name ?? 'Matéria',
       subjectColor: subjMap[subjectId]?.color ?? '#C9B8DD',
-      weekdays: v.weekdays.sort(),
-      minutes: v.minutes,
-      cycleOrder: v.cycleOrder,
+      weekdays,
+      minutes,
+      cycleOrder,
       archived: subjMap[subjectId]?.archived ?? false,
-    }));
-    if (r.mode === 'ciclo') materias = materias.sort((a, b) => a.cycleOrder - b.cycleOrder);
+    });
+
+    let materias: RuleSummary['materias'];
+    if (r.mode === 'ciclo') {
+      // No ciclo cada item é um SLOT da sequência, e a mesma matéria pode
+      // ocupar vários (ex.: Direito Adm nas posições 0 e 5). Agrupar por
+      // matéria — como o dia_fixo precisa — colapsava 11 slots em 8, e abrir
+      // "Editar" e salvar sem mexer em nada encolhia o ciclo em silêncio.
+      materias = rawItems
+        .map((it) => mk(it.subject_id, [], it.planned_minutes, it.cycle_order ?? 0))
+        .sort((a, b) => a.cycleOrder - b.cycleOrder);
+    } else {
+      // dia_fixo: uma linha por matéria, juntando os dias da semana dela.
+      const porMateria = new Map<string, { weekdays: number[]; minutes: number; cycleOrder: number }>();
+      for (const it of rawItems) {
+        const cur = porMateria.get(it.subject_id) ?? { weekdays: [], minutes: it.planned_minutes, cycleOrder: it.cycle_order ?? 0 };
+        if (it.weekday !== null) cur.weekdays.push(it.weekday);
+        cur.minutes = it.planned_minutes;
+        if (it.cycle_order !== null) cur.cycleOrder = it.cycle_order;
+        porMateria.set(it.subject_id, cur);
+      }
+      materias = Array.from(porMateria.entries()).map(([subjectId, v]) =>
+        mk(subjectId, v.weekdays.sort(), v.minutes, v.cycleOrder));
+    }
 
     return {
       id: r.id,

@@ -5,6 +5,7 @@
 
 import { requireUser, tryGetUser } from '@/lib/supabase/requireUser';
 import { toLocalDateString as localDateStr } from '@/lib/local-date';
+import { distributeMinutesAcrossSlots } from '@/lib/cycle-distribution';
 
 export interface CycleSubject {
   itemId: string;
@@ -69,9 +70,12 @@ export async function getCycleState(ruleId: string): Promise<CycleState | null> 
   const subjMap: Record<string, { name: string; color: string }> = {};
   for (const s of subjects ?? []) subjMap[s.id] = { name: s.name, color: s.color ?? '#C9B8DD' };
 
-  // Limita pelo created_at da regra: completions anteriores à criação do ciclo
-  // não são possíveis; o filtro evita payload ilimitado com o uso prolongado.
-  const cycleStart = rule.created_at ? (rule.created_at as string).split('T')[0] : '2000-01-01';
+  // Limita pelo start_date da regra (data civil local, mesma régua de
+  // completed_date). Usar created_at cortava em UTC: ciclo criado depois das 21h
+  // no Brasil nascia com cycleStart no dia seguinte e escondia para sempre o
+  // crédito do próprio dia da criação.
+  const cycleStart = (rule.start_date as string | null)
+    ?? (rule.created_at ? localDateStr(new Date(rule.created_at as string)) : '2000-01-01');
 
   const { data: completions, error: completionsError } = await supabase
     .from('cycle_completions')
@@ -94,9 +98,29 @@ export async function getCycleState(ruleId: string): Promise<CycleState | null> 
     id: string; subject_id: string; planned_minutes: number; cycle_order: number | null;
   }[]).sort((a, b) => (a.cycle_order ?? 0) - (b.cycle_order ?? 0));
 
+  // Uma matéria pode ocupar VÁRIOS slots do ciclo (ex.: Direito Adm nas posições
+  // 0 e 5). Os minutos dela são DISTRIBUÍDOS entre esses slots em ordem — enche
+  // um antes de passar ao próximo — em vez de replicados em cada um. Replicar
+  // fazia a mesma hora estudada aparecer como duas voltas cumpridas, e a volta
+  // do ciclo fechava com menos estudo do que o planejado.
+  const slotsBySubject = new Map<string, typeof items>();
+  for (const it of items) {
+    const arr = slotsBySubject.get(it.subject_id);
+    if (arr) arr.push(it);
+    else slotsBySubject.set(it.subject_id, [it]);
+  }
+
+  const minutesByItem: Record<string, number> = {};
+  for (const [subjectId, slots] of slotsBySubject) {
+    Object.assign(minutesByItem, distributeMinutesAcrossSlots(
+      minutesBySubject[subjectId] ?? 0,
+      slots.map((it) => ({ id: it.id, plannedMinutes: it.planned_minutes || 60 })),
+    ));
+  }
+
   const subjectsOut: CycleSubject[] = items.map((it) => {
     const planned = it.planned_minutes || 60;
-    const total = minutesBySubject[it.subject_id] ?? 0;
+    const total = minutesByItem[it.id] ?? 0;
     const laps = Math.floor(total / planned);
     const lapProgress = total % planned;
     return {
@@ -135,6 +159,10 @@ export async function completeCycleSubject(input: {
   minutes?: number;
   source?: 'manual' | 'timer';
   clientSessionId?: string;
+  /** Data civil (YYYY-MM-DD) da SESSÃO. Sem isso, uma sessão retroativa de
+   *  domingo registrada na segunda creditava o ciclo na segunda, enquanto meta e
+   *  streak creditavam no domingo. Omitido = hoje. */
+  sessionDate?: string;
 }): Promise<void> {
   const { supabase, userId } = await requireUser();
 
@@ -143,7 +171,7 @@ export async function completeCycleSubject(input: {
     rule_id: input.ruleId,
     item_id: input.itemId,
     subject_id: input.subjectId,
-    completed_date: localDateStr(new Date()),
+    completed_date: input.sessionDate ?? localDateStr(new Date()),
     minutes: input.minutes ?? 0,
     source: input.source ?? 'manual',
     client_session_id: input.clientSessionId ?? null,
@@ -180,11 +208,14 @@ export async function findCycleItemForSubject(subjectId: string): Promise<{ rule
   const ruleId = await getActiveCycleRule();
   if (!ruleId) return null;
 
+  // Ordena por cycle_order: sem ORDER BY, a matéria que ocupa mais de um slot
+  // gravava o crédito num item arbitrário a cada sessão.
   const { data: items } = await supabase
     .from('recurrence_items')
     .select('id, subject_id, planned_minutes')
     .eq('rule_id', ruleId)
     .eq('subject_id', subjectId)
+    .order('cycle_order', { ascending: true, nullsFirst: false })
     .limit(1);
 
   if (!items || items.length === 0) return null;
