@@ -107,7 +107,14 @@ export async function unarchiveSubject(subjectId: string): Promise<void> {
     .update({ status: 'ativo' })
     .eq('id', subjectId)
     .eq('user_id', user.id);
-  if (error) throw new Error('Erro ao reativar matéria: ' + error.message);
+  // "23505" = já existe outra matéria (ativa) com esse nome — o índice único
+  // impede reativar uma arquivada por cima de uma homônima já em uso.
+  if (error) {
+    if (error.code === '23505') {
+      throw new Error('Já existe uma matéria ativa com esse nome. Renomeie uma delas antes de reativar.');
+    }
+    throw new Error('Erro ao reativar matéria: ' + error.message);
+  }
   invalidateArchivedCache();
   invalidateCatalogCache(); // reativada volta a aparecer como ativada no "explorar"
 }

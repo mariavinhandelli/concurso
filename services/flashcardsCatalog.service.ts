@@ -75,13 +75,27 @@ export async function listCatalogFlashcardDecks(): Promise<CatalogFlashcardDeck[
   });
 }
 
-// Ativa um deck do banco. Retorna quantos cards novos foram copiados para
-// os flashcards pessoais do usuário (0 se já tinha todos — idempotente).
-export async function activateCatalogFlashcardDeck(deckId: string): Promise<number> {
+export interface ActivateDeckResult {
+  inserted: number;         // cards novos copiados (0 se já tinha todos — idempotente)
+  subjectId: string;
+  subjectName: string;
+  subjectWasNew: boolean;   // a matéria não existia antes desta ativação (criada ou adotada)
+}
+
+// Ativa um deck do banco. Por baixo, também ativa a matéria de catálogo do deck
+// (activate_catalog_subject) — a UI precisa saber disso para não pegar o
+// usuário de surpresa quando uma matéria nova aparece em Minhas Matérias.
+export async function activateCatalogFlashcardDeck(deckId: string): Promise<ActivateDeckResult> {
   const supabase = createClient();
   const { data, error } = await supabase.rpc('activate_catalog_flashcard_deck', { p_deck_id: deckId });
   if (error) throw new Error('Erro ao ativar deck de flashcards: ' + error.message);
-  return data as number;
+  const result = data as { inserted: number; subject_id: string; subject_name: string; subject_was_new: boolean };
+  return {
+    inserted: result.inserted,
+    subjectId: result.subject_id,
+    subjectName: result.subject_name,
+    subjectWasNew: result.subject_was_new,
+  };
 }
 
 export interface CatalogFlashcardSample {

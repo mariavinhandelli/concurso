@@ -51,6 +51,14 @@ export async function listSubjects(): Promise<Subject[]> {
   return data ?? [];
 }
 
+// "23505" = índice único (user_id, nome normalizado) — última linha de defesa
+// contra duplicata, caso o guard client-side do formulário não tenha pego
+// (nome com acento diferente, ou corrida entre duas abas).
+function friendlyDuplicateNameError(error: { code?: string; message: string }, fallback: string): Error {
+  if (error.code === '23505') return new Error('Você já tem uma matéria com esse nome (ativa ou arquivada).');
+  return new Error(fallback + error.message);
+}
+
 export async function createSubject(name: string, color: string): Promise<Subject> {
   const { supabase, userId } = await requireUser();
   const { data, error } = await supabase
@@ -58,7 +66,7 @@ export async function createSubject(name: string, color: string): Promise<Subjec
     .insert({ user_id: userId, name: name.trim(), color })
     .select()
     .single();
-  if (error) throw new Error('Erro ao criar matéria: ' + error.message);
+  if (error) throw friendlyDuplicateNameError(error, 'Erro ao criar matéria: ');
   return data;
 }
 
@@ -77,7 +85,7 @@ export async function updateSubject(
     .eq('user_id', userId)
     .select()
     .single();
-  if (error) throw new Error('Erro ao atualizar matéria: ' + error.message);
+  if (error) throw friendlyDuplicateNameError(error, 'Erro ao atualizar matéria: ');
   return data;
 }
 

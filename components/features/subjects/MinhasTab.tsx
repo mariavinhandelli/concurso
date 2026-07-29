@@ -69,14 +69,16 @@ export function MinhasTab({ isMobile, onError }: Props) {
   }, []);
   useEffect(() => { load(); }, [load]);
 
-  // Duplicata exata (case-insensitive) — evita segunda "Direito Penal" por engano.
-  // Retorna mensagem de bloqueio ou null se o nome está livre.
+  // Duplicata por nome (ignora acento/caixa) — mesmo critério do índice único
+  // do banco (subjects_user_name_unique) e da adoção por nome do catálogo, para
+  // o aviso aparecer na hora de digitar em vez de um erro genérico do banco.
+  const normName = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').trim().toLowerCase();
   function duplicateMsg(name: string, ignoreId?: string): string | null {
-    const alvo = name.trim().toLowerCase();
-    if (ativas.some((s) => s.id !== ignoreId && s.name.toLowerCase() === alvo)) {
+    const alvo = normName(name);
+    if (ativas.some((s) => s.id !== ignoreId && normName(s.name) === alvo)) {
       return 'Você já tem uma matéria ativa com esse nome.';
     }
-    if (arquivadas.some((s) => s.id !== ignoreId && s.name.toLowerCase() === alvo)) {
+    if (arquivadas.some((s) => s.id !== ignoreId && normName(s.name) === alvo)) {
       return 'Existe uma matéria arquivada com esse nome — reative-a na aba Arquivadas.';
     }
     return null;

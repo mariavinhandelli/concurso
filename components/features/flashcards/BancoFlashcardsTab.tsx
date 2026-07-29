@@ -30,13 +30,19 @@ export function BancoFlashcardsTab() {
   async function handleActivate(deck: CatalogFlashcardDeck) {
     setActivatingId(deck.id);
     try {
-      const inserted = await activateCatalogFlashcardDeck(deck.id);
+      const { inserted, subjectName, subjectWasNew } = await activateCatalogFlashcardDeck(deck.id);
       await queryClient.invalidateQueries({ queryKey: ['catalog-flashcard-decks'] });
       await queryClient.invalidateQueries({ queryKey: ['flashcards'] });
+      await queryClient.invalidateQueries({ queryKey: ['subjects'] });
+      // Sempre nomeia a matéria — ativar um deck também ativa a matéria dele em
+      // Minhas Matérias, e isso não pode acontecer sem o usuário saber.
+      const matéria = subjectWasNew
+        ? `Criamos a matéria "${subjectName}" para receber os cards.`
+        : `Adicionado à sua matéria "${subjectName}".`;
       if (inserted > 0) {
-        toast.success(`${inserted} card${inserted === 1 ? '' : 's'} adicionado${inserted === 1 ? '' : 's'} a "${deck.name}" em Meus Cards.`);
+        toast.success(`${inserted} card${inserted === 1 ? '' : 's'} adicionado${inserted === 1 ? '' : 's'} de "${deck.name}". ${matéria}`);
       } else {
-        toast.success('Você já tinha todos os cards deste deck.');
+        toast.success(`Você já tinha todos os cards deste deck. ${matéria}`);
       }
       // Só fecha a amostra em caso de sucesso — em erro, o usuário mantém o
       // contexto do deck que estava vendo e pode tentar de novo.
