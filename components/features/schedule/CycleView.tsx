@@ -186,7 +186,13 @@ export function CycleView({
           <div style={styles.list}>
             {state.subjects.map((s) => {
               const isSug = s.isSuggested;
-              const progPct = s.plannedMinutes > 0 ? Math.round((s.lapProgress / s.plannedMinutes) * 100) : 0;
+              // Um slot que fechou EXATAMENTE o planejado tem resto 0 (60 % 60),
+              // e a barra mostrava "0min de 1h" logo abaixo de "1× concluída" —
+              // lia-se como contradição. Nesse caso a barra fica cheia; ela só
+              // recomeça do zero quando minutos novos entram na matéria.
+              const fechadoExato = s.laps > 0 && s.lapProgress === 0;
+              const progMin = fechadoExato ? s.plannedMinutes : s.lapProgress;
+              const progPct = s.plannedMinutes > 0 ? Math.round((progMin / s.plannedMinutes) * 100) : 0;
               return (
                 <div key={s.itemId} style={{ ...styles.row, ...(isSug ? styles.rowSuggested : {}) }}>
                   <span style={{ ...styles.dot, background: s.subjectColor }} />
@@ -210,7 +216,7 @@ export function CycleView({
                       <div style={styles.progressTrack}>
                         <div style={{ ...styles.progressFill, width: `${progPct}%`, background: s.subjectColor }} />
                       </div>
-                      <span style={styles.progressText}>{fmtH(s.lapProgress)} de {fmtH(s.plannedMinutes)}</span>
+                      <span style={styles.progressText}>{fmtH(progMin)} de {fmtH(s.plannedMinutes)}</span>
                     </div>
                     {!isArchived && s.totalMinutes > 0 && (
                       <button onClick={() => handleUndo(s.subjectId, s.subjectName)} style={styles.undoBtn} title="Desfazer último registro">
