@@ -188,7 +188,7 @@ export const ArtigoCard = memo(function ArtigoCard({ artigo, interacao, onUpdate
   async function aplicarGrifo(
     cor: GrifoCor | null,
     estilo: 'grifo' | 'sublinhado',
-    extra?: { corHex: string; label: string },
+    extra?: { corHex: string; label: string | null },
   ) {
     if (!pendingSel) return;
     const { bloco, start, end } = pendingSel;
@@ -218,9 +218,9 @@ export const ArtigoCard = memo(function ArtigoCard({ artigo, interacao, onUpdate
   }
 
   function confirmarLivre() {
-    const label = livreLabel.trim();
-    if (!label) { toast.info('Dê um nome curto pro marcador (ex.: "já caiu na prova").'); return; }
-    aplicarGrifo('livre', 'grifo', { corHex: livreCor, label });
+    // Nome é opcional: sem ele o grifo fica só com a cor (aparece como
+    // "Marcador livre" no popover e fora dos filtros por rótulo).
+    aplicarGrifo('livre', 'grifo', { corHex: livreCor, label: livreLabel.trim() || null });
   }
 
   async function handleRemoverGrifo(grifo: LeiGrifo) {
@@ -603,16 +603,14 @@ export const ArtigoCard = memo(function ArtigoCard({ artigo, interacao, onUpdate
             value={livreLabel}
             onChange={(e) => setLivreLabel(e.target.value)}
             onKeyDown={(e) => { if (e.key === 'Enter') confirmarLivre(); }}
-            placeholder='Nome do marcador — ex.: "já caiu na prova"'
+            placeholder='Nome (opcional) — ex.: "já caiu na prova"'
             maxLength={40}
             autoFocus
             style={s.livreInput}
           />
           <div style={s.livreActions}>
             <button onClick={() => setPendingSel(null)} style={s.subBtnText}>Cancelar</button>
-            <button onClick={confirmarLivre} disabled={!livreLabel.trim()} style={{ ...s.livreConfirm, opacity: livreLabel.trim() ? 1 : 0.5 }}>
-              Marcar
-            </button>
+            <button onClick={confirmarLivre} style={s.livreConfirm}>Marcar</button>
           </div>
         </div>
       )}
