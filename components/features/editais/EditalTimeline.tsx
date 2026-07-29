@@ -56,7 +56,7 @@ export function EditalTimeline({ updates }: { updates: EditalUpdate[] }) {
                 <a
                   href={u.url} target="_blank" rel="noopener noreferrer"
                   onClick={(e) => e.stopPropagation()}
-                  style={s.srcLink} title="Abrir fonte oficial" aria-label="Abrir fonte oficial"
+                  style={s.srcLink} title="Abrir fonte da notícia" aria-label="Abrir fonte da notícia"
                 >
                   <ExternalLink size={13} strokeWidth={2} />
                 </a>

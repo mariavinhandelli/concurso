@@ -16,6 +16,14 @@ function fmt(n: number | null): string {
 }
 
 export function ConcursoStatsTable({ stats }: { stats: ConcursoStat[] }) {
+  // Coluna 100% vazia sai da tabela: um histórico cheio de "—" promete um dado
+  // que a curadoria não tem — melhor mostrar só o que existe.
+  const has = {
+    inscritos: stats.some((st) => st.inscritos != null),
+    notaCorte: stats.some((st) => st.notaCorte != null),
+    nomeados: stats.some((st) => st.nomeados != null),
+    fonte: stats.some((st) => st.fonteUrl != null),
+  };
   return (
     <div className="table-scroll" style={{ marginTop: 12 }}>
       <table style={s.table}>
@@ -24,10 +32,10 @@ export function ConcursoStatsTable({ stats }: { stats: ConcursoStat[] }) {
           <tr>
             <th scope="col" style={s.th}>Ano</th>
             <th scope="col" style={s.th}>Vagas</th>
-            <th scope="col" style={s.th}>Inscritos</th>
-            <th scope="col" style={s.th}>Nota de corte</th>
-            <th scope="col" style={s.th}>Nomeados</th>
-            <th scope="col" style={s.th} aria-label="Fonte" />
+            {has.inscritos && <th scope="col" style={s.th}>Inscritos</th>}
+            {has.notaCorte && <th scope="col" style={s.th}>Nota de corte</th>}
+            {has.nomeados && <th scope="col" style={s.th}>Nomeados</th>}
+            {has.fonte && <th scope="col" style={s.th} aria-label="Fonte" />}
           </tr>
         </thead>
         <tbody>
@@ -35,16 +43,18 @@ export function ConcursoStatsTable({ stats }: { stats: ConcursoStat[] }) {
             <tr key={st.ano}>
               <td style={{ ...s.td, fontWeight: 700 }}>{st.ano}</td>
               <td style={s.td}>{fmt(st.vagas)}</td>
-              <td style={s.td}>{fmt(st.inscritos)}</td>
-              <td style={s.td}>{st.notaCorte == null ? '—' : st.notaCorte.toLocaleString('pt-BR')}</td>
-              <td style={s.td}>{fmt(st.nomeados)}</td>
-              <td style={s.td}>
-                {st.fonteUrl && (
-                  <a href={st.fonteUrl} target="_blank" rel="noopener noreferrer" style={s.fonteLink} title="Abrir fonte oficial" aria-label={`Fonte oficial ${st.ano}`}>
-                    <ExternalLink size={13} strokeWidth={2} />
-                  </a>
-                )}
-              </td>
+              {has.inscritos && <td style={s.td}>{fmt(st.inscritos)}</td>}
+              {has.notaCorte && <td style={s.td}>{st.notaCorte == null ? '—' : st.notaCorte.toLocaleString('pt-BR')}</td>}
+              {has.nomeados && <td style={s.td}>{fmt(st.nomeados)}</td>}
+              {has.fonte && (
+                <td style={s.td}>
+                  {st.fonteUrl && (
+                    <a href={st.fonteUrl} target="_blank" rel="noopener noreferrer" style={s.fonteLink} title="Abrir fonte" aria-label={`Fonte do dado de ${st.ano}`}>
+                      <ExternalLink size={13} strokeWidth={2} />
+                    </a>
+                  )}
+                </td>
+              )}
             </tr>
           ))}
         </tbody>

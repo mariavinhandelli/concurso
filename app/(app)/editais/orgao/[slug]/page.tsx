@@ -74,7 +74,7 @@ export default function OrgaoPage() {
   if (isError || !orgao) {
     return (
       <PageContainer width="narrow">
-        <button onClick={() => router.push('/targets')} style={s.back}>← Banco de editais</button>
+        <button onClick={() => router.push('/editais')} style={s.back}>← Banco de editais</button>
         <p style={{ color: theme.inkFaint, fontSize: 14 }}>
           {isError ? 'Não foi possível carregar o órgão. Tente de novo.' : 'Órgão não encontrado.'}
         </p>
@@ -86,7 +86,7 @@ export default function OrgaoPage() {
 
   return (
     <PageContainer width="narrow">
-      <button onClick={() => router.push('/targets')} style={s.back}>← Banco de editais</button>
+      <button onClick={() => router.push('/editais')} style={s.back}>← Banco de editais</button>
 
       {/* ── Ficha do órgão ── */}
       <div style={s.headerRow}>

@@ -137,6 +137,11 @@ export interface CatalogEditalInfo {
   inscricoesAte: string | null;
   editalUrl: string | null;
   aviso: string | null;
+  // Existência real das seções da página do edital — o checklist da Central de
+  // preparação usa isto para não navegar para âncora que não renderiza.
+  subjectCount: number;
+  statsCount: number;
+  papersCount: number;
 }
 
 // Conteúdo programático de um edital do catálogo — para o painel de detalhes
@@ -220,10 +225,18 @@ export async function getCatalogEditalInfo(catalogEditalId: string): Promise<Cat
   const supabase = createClient();
   const { data, error } = await supabase
     .from('editais_catalog')
-    .select('slug, situacao, banca, ultima_edicao, vagas, remuneracao, exam_date, inscricoes_ate, edital_url, aviso')
+    .select('slug, situacao, banca, ultima_edicao, vagas, remuneracao, exam_date, inscricoes_ate, edital_url, aviso, concurso_key')
     .eq('id', catalogEditalId)
     .maybeSingle();
   if (error || !data) return null;
+  // Contagens head-only: histórico e provas são chaveados por concurso_key
+  // (compartilhado entre edições); '' nunca casa e devolve 0 sem erro.
+  const key = data.concurso_key ?? '';
+  const [subjRes, statsRes, papersRes] = await Promise.all([
+    supabase.from('edital_catalog_subjects').select('id', { count: 'exact', head: true }).eq('edital_catalog_id', catalogEditalId),
+    supabase.from('edital_concurso_stats').select('id', { count: 'exact', head: true }).eq('concurso_key', key),
+    supabase.from('edital_past_papers').select('id', { count: 'exact', head: true }).eq('concurso_key', key),
+  ]);
   return {
     slug: data.slug,
     situacao: data.situacao,
@@ -235,6 +248,9 @@ export async function getCatalogEditalInfo(catalogEditalId: string): Promise<Cat
     inscricoesAte: data.inscricoes_ate,
     editalUrl: data.edital_url,
     aviso: data.aviso,
+    subjectCount: subjRes.count ?? 0,
+    statsCount: statsRes.count ?? 0,
+    papersCount: papersRes.count ?? 0,
   };
 }
 

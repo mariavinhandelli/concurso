@@ -10,7 +10,7 @@ import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Bell, BellRing, Check, Download, FileDown } from 'lucide-react';
+import { Bell, BellRing, Check, Download, ExternalLink, FileDown } from 'lucide-react';
 import {
   activateCatalogEdital, followEdital, getCatalogEditalBySlug, getCatalogEditalSubjects,
   isFollowingEdital, listCatalogEditais, listConcursoStats, listEdicoes, listEditalUpdates,
@@ -220,7 +220,7 @@ export default function EditalDetailPage() {
   if (isError || !edital) {
     return (
       <PageContainer width="narrow">
-        <button onClick={() => router.push('/targets')} style={s.back}>← Banco de editais</button>
+        <button onClick={() => router.push('/editais')} style={s.back}>← Banco de editais</button>
         <p style={{ color: theme.inkFaint, fontSize: 14 }}>
           {isError ? 'Não foi possível carregar o edital. Tente de novo.' : 'Edital não encontrado.'}
         </p>
@@ -257,7 +257,7 @@ export default function EditalDetailPage() {
 
   return (
     <PageContainer width="narrow">
-      <button onClick={() => router.push('/targets')} style={s.back}>← Banco de editais</button>
+      <button onClick={() => router.push('/editais')} style={s.back}>← Banco de editais</button>
 
       {/* ── Header ── */}
       <div style={s.headerRow}>
@@ -310,14 +310,28 @@ export default function EditalDetailPage() {
           {edital.isActivated ? 'Abrir meu concurso →' : 'Ativar edital'}
         </Button>
         {edital.editalUrl && (
-          <a
-            href={edital.editalUrl} target="_blank" rel="noopener noreferrer"
-            onClick={() => track(EV.editalPdfDownloaded, { slug: edital.slug })}
-            style={s.downloadBtn}
-          >
-            <Download size={15} strokeWidth={2} style={{ marginRight: 6 }} />
-            Baixar edital (PDF)
-          </a>
+          // Rótulo honesto: "Baixar edital (PDF)" só quando o link é o documento;
+          // quando o edital ainda não saiu, o destino é a página oficial do
+          // concurso — e o botão diz isso. O evento de download só dispara
+          // quando há download de verdade.
+          /\.pdf($|\?)/i.test(edital.editalUrl) ? (
+            <a
+              href={edital.editalUrl} target="_blank" rel="noopener noreferrer"
+              onClick={() => track(EV.editalPdfDownloaded, { slug: edital.slug })}
+              style={s.downloadBtn}
+            >
+              <Download size={15} strokeWidth={2} style={{ marginRight: 6 }} />
+              Baixar edital (PDF)
+            </a>
+          ) : (
+            <a
+              href={edital.editalUrl} target="_blank" rel="noopener noreferrer"
+              style={s.downloadBtn}
+            >
+              <ExternalLink size={15} strokeWidth={2} style={{ marginRight: 6 }} />
+              Página oficial do concurso
+            </a>
+          )
         )}
         {edital.targetId ? (
           <span style={s.followingHint} title="Você ativou este concurso — novidades chegam por notificação.">
@@ -384,7 +398,7 @@ export default function EditalDetailPage() {
           {edital.aviso && <p style={s.avisoText}>{edital.aviso}</p>}
           {edital.verificadoEm && (
             <p style={s.verificadoText}>
-              Informações verificadas em {formatDateBR(edital.verificadoEm)} — fontes oficiais e portais especializados.
+              Informações verificadas em {formatDateBR(edital.verificadoEm)}.
             </p>
           )}
         </section>

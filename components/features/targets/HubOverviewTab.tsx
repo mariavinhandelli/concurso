@@ -8,7 +8,7 @@
 import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
-import { Check, Download, X } from 'lucide-react';
+import { Check, Download, ExternalLink, X } from 'lucide-react';
 import { type TargetExam, updateTargetPrepChecklist } from '@/services/targetExams.service';
 import { useToast } from '@/components/ui/ToastProvider';
 import { type CatalogEditalInfo, type EditalUpdate, type EditalUpdateTipo } from '@/services/editaisCatalog.service';
@@ -27,7 +27,7 @@ const PREP_KEY_PREFIX = 'focali_prep_';
 // - catalog: a ação vive na página do edital (/editais/[slug]) — comparador,
 //   estatística de disciplinas, histórico do concurso, provas anteriores.
 //   Só fica disponível quando o concurso está vinculado a um edital do banco;
-//   sem vínculo, aparece como "em breve" e sai do cálculo de % para não
+//   sem vínculo, aparece como "requer vínculo" e sai do cálculo de % para não
 //   fingir progresso que não depende da usuária.
 const PREP_ITEMS: { key: string; label: string; auto?: boolean; catalog?: boolean; anchor?: string }[] = [
   { key: 'prova-ultima', label: 'Resolver a última prova aplicada neste concurso' },
@@ -195,26 +195,49 @@ export function HubOverviewTab({
     ? `/vademecum?disciplina=${encodeURIComponent(topLeiDisciplina)}`
     : '/vademecum';
 
-  function handlePrepClick(item: (typeof PREP_ITEMS)[number]) {
+  // Existência real do destino de cada etapa de catálogo — sem isso o clique
+  // navegaria para âncora que não renderiza (ex.: #historico de um concurso
+  // sem histórico curado) e o usuário cairia no topo da página sem nada lá.
+  const hasDestination = (item: (typeof PREP_ITEMS)[number]): boolean => {
+    if (!catalogSlug || !catalogInfo) return false;
+    switch (item.key) {
+      case 'comparar-editais':
+      case 'mapa-incidencia':
+        return catalogInfo.subjectCount > 0;
+      case 'estilo-banca':
+        return catalogInfo.statsCount > 0;
+      case 'prova-ultima':
+        return catalogInfo.papersCount > 0;
+      default:
+        return false;
+    }
+  };
+
+  // Navegar NUNCA marca a etapa: visitar uma tela não é concluir a tarefa.
+  // Concluir é sempre gesto explícito no círculo de check (handlePrepCheck) —
+  // exceto "cronograma", que é marcado pelo hub quando o cronograma é gerado
+  // de fato, e os itens `auto`, derivados de estado real.
+  function handlePrepNav(item: (typeof PREP_ITEMS)[number]) {
     if (isItemDisabled(item)) return;
-    // Ações que vivem na página do edital: marca a etapa e leva à seção certa.
-    if (item.catalog && catalogSlug) {
-      togglePrep(item.key);
-      router.push(`/editais/${catalogSlug}${item.anchor ?? ''}`);
-      return;
-    }
-    if (item.key === 'prova-ultima' && catalogSlug) {
-      togglePrep(item.key);
-      router.push(`/editais/${catalogSlug}#provas`);
-      return;
-    }
     if (item.key === 'montar-edital' || item.key === 'pesos') { onGoMontar(); return; }
-    if (item.key === 'cronograma') { onGenerate(); togglePrep(item.key); return; }
+    if (item.key === 'cronograma') { onGenerate(); return; }
     if (item.key === 'juris') {
       router.push(topDisciplina ? `/jurisprudencias/lista?disciplina=${encodeURIComponent(topDisciplina)}` : '/jurisprudencias');
       return;
     }
     if (item.key === 'lei-seca') { router.push(vademecumHref); return; }
+    if (item.key === 'estudar-edital' && catalogSlug) { router.push(`/editais/${catalogSlug}`); return; }
+    if ((item.catalog || item.key === 'prova-ultima') && hasDestination(item)) {
+      router.push(`/editais/${catalogSlug}${item.anchor ?? '#provas'}`);
+      return;
+    }
+    // Sem destino real (dado ainda não curado, ou concurso manual): o clique
+    // na linha vira o próprio toggle — a etapa continua fazível por fora.
+    togglePrep(item.key);
+  }
+
+  function handlePrepCheck(item: (typeof PREP_ITEMS)[number]) {
+    if (isItemDisabled(item) || item.auto) return;
     togglePrep(item.key);
   }
 
@@ -327,10 +350,20 @@ export function HubOverviewTab({
                 Página do edital →
               </button>
               {catalogInfo.editalUrl && (
-                <a href={catalogInfo.editalUrl} target="_blank" rel="noopener noreferrer" style={s.downloadBtn}>
-                  <Download size={14} strokeWidth={2} style={{ marginRight: 6, verticalAlign: -2 }} />
-                  Baixar edital
-                </a>
+                // Rótulo honesto: "Baixar edital" só quando o destino é o PDF;
+                // página institucional (ex.: edital ainda não publicado) é
+                // apresentada como o que é.
+                /\.pdf($|\?)/i.test(catalogInfo.editalUrl) ? (
+                  <a href={catalogInfo.editalUrl} target="_blank" rel="noopener noreferrer" style={s.downloadBtn}>
+                    <Download size={14} strokeWidth={2} style={{ marginRight: 6, verticalAlign: -2 }} />
+                    Baixar edital
+                  </a>
+                ) : (
+                  <a href={catalogInfo.editalUrl} target="_blank" rel="noopener noreferrer" style={s.downloadBtn}>
+                    <ExternalLink size={14} strokeWidth={2} style={{ marginRight: 6, verticalAlign: -2 }} />
+                    Página oficial
+                  </a>
+                )
               )}
             </div>
           </div>
@@ -398,7 +431,7 @@ export function HubOverviewTab({
                 </>
               );
               return u.url ? (
-                <a key={u.id} href={u.url} target="_blank" rel="noopener noreferrer" style={s.updateRow} title="Abrir fonte oficial">
+                <a key={u.id} href={u.url} target="_blank" rel="noopener noreferrer" style={s.updateRow} title="Abrir fonte da notícia">
                   {inner}
                 </a>
               ) : (
@@ -437,30 +470,44 @@ export function HubOverviewTab({
                 const itemDisabled = isItemDisabled(item);
                 const checked = !itemDisabled && isChecked(item);
                 return (
-                  <button
+                  <div
                     key={item.key}
-                    onClick={() => handlePrepClick(item)}
-                    disabled={itemDisabled}
-                    aria-pressed={checked}
                     style={{
                       ...s.prepRow,
                       ...(checked ? s.prepRowDone : {}),
                       ...(itemDisabled ? s.prepRowDisabled : {}),
                     }}
-                    title={
-                      itemDisabled ? 'Disponível quando o concurso estiver vinculado a um edital do banco'
-                        : item.auto ? 'Marcado automaticamente com base no que você já configurou'
-                        : item.catalog ? 'Abre a seção correspondente na página do edital'
-                        : undefined
-                    }
                   >
-                    <span style={{ ...s.prepCheck, ...(checked ? s.prepCheckOn : {}) }}>{checked && <Check size={13} strokeWidth={2.5} />}</span>
-                    <span style={{ ...s.prepLabel, ...(checked ? s.prepLabelDone : {}), ...(itemDisabled ? s.prepLabelDisabled : {}) }}>
-                      {item.label}
-                    </span>
+                    <button
+                      onClick={() => handlePrepCheck(item)}
+                      disabled={itemDisabled || Boolean(item.auto)}
+                      aria-pressed={checked}
+                      aria-label={`Marcar "${item.label}" como ${checked ? 'pendente' : 'concluída'}`}
+                      title={item.auto ? 'Marcado automaticamente com base no que você já configurou'
+                        : checked ? 'Desmarcar etapa' : 'Marcar etapa como concluída'}
+                      style={{ ...s.prepCheckBtn, cursor: itemDisabled || item.auto ? 'default' : 'pointer' }}
+                    >
+                      <span style={{ ...s.prepCheck, ...(checked ? s.prepCheckOn : {}) }}>{checked && <Check size={13} strokeWidth={2.5} />}</span>
+                    </button>
+                    <button
+                      onClick={() => handlePrepNav(item)}
+                      disabled={itemDisabled}
+                      style={{ ...s.prepLabelBtn, cursor: itemDisabled ? 'not-allowed' : 'pointer' }}
+                      title={
+                        itemDisabled ? 'Disponível quando o concurso estiver vinculado a um edital do banco'
+                          : item.catalog && !hasDestination(item) ? 'Ainda sem dados desta seção no banco — faça por fora e marque no círculo'
+                          : item.auto ? 'Marcado automaticamente com base no que você já configurou'
+                          : item.catalog ? 'Abre a seção correspondente na página do edital'
+                          : undefined
+                      }
+                    >
+                      <span style={{ ...s.prepLabel, ...(checked ? s.prepLabelDone : {}), ...(itemDisabled ? s.prepLabelDisabled : {}) }}>
+                        {item.label}
+                      </span>
+                    </button>
                     {item.auto && <span style={s.autoTag}>auto</span>}
-                    {itemDisabled && <span style={s.embreveTag}>em breve</span>}
-                  </button>
+                    {itemDisabled && <span style={s.embreveTag}>requer vínculo</span>}
+                  </div>
                 );
               })}
             </div>
@@ -581,7 +628,10 @@ const s: Record<string, CSSProperties> = {
   prepTrack: { height: 6, background: theme.muted, borderRadius: theme.radiusPill, overflow: 'hidden', marginTop: 12 },
   prepFill: { height: '100%', background: theme.teal, borderRadius: theme.radiusPill, transition: 'width 0.4s ease' },
   prepList: { display: 'flex', flexDirection: 'column', gap: 6, marginTop: 12 },
-  prepRow: { display: 'flex', alignItems: 'center', gap: 10, padding: '9px 12px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.card, cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit', width: '100%', minWidth: 0, transition: 'background .12s' },
+  prepRow: { display: 'flex', alignItems: 'center', gap: 10, padding: '9px 12px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.card, textAlign: 'left', width: '100%', minWidth: 0, transition: 'background .12s' },
+  // Área de toque 44px do check sem inflar a linha (margens negativas).
+  prepCheckBtn: { border: 'none', background: 'transparent', padding: 0, minWidth: 44, minHeight: 44, margin: '-10px 0 -10px -12px', display: 'grid', placeItems: 'center', flexShrink: 0, fontFamily: 'inherit' },
+  prepLabelBtn: { flex: 1, minWidth: 0, border: 'none', background: 'transparent', padding: '4px 0', textAlign: 'left', fontFamily: 'inherit', display: 'block' },
   prepRowDone: { background: theme.tealBg, border: `1px solid ${theme.teal}` },
   prepCheck: { width: 20, height: 20, borderRadius: theme.radiusXs, border: `1.5px solid ${theme.lineStrong}`, background: theme.card, color: 'transparent', fontSize: 12, display: 'grid', placeItems: 'center', flexShrink: 0 },
   prepCheckOn: { background: theme.teal, border: `1.5px solid ${theme.teal}`, color: theme.onTeal },
