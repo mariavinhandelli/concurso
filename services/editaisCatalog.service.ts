@@ -41,6 +41,37 @@ export interface CatalogEdital {
   isActivated: boolean;   // usuário já ativou este edital (tem alvo com o mesmo slug)?
 }
 
+// URL pública da nossa cópia do edital oficial. Serve o PDF mesmo que o
+// servidor do órgão saia do ar ou reorganize o site (Lei 9.610 art. 8º, IV —
+// ato oficial não tem proteção autoral). A fonte original continua exibida.
+export function editalMirrorUrl(storagePath: string): string {
+  const base = process.env.NEXT_PUBLIC_SUPABASE_URL ?? '';
+  return `${base}/storage/v1/object/public/editais-oficiais/${storagePath}`;
+}
+
+export interface EditalPdfMirror {
+  url: string;
+  bytes: number;
+  capturedAt: string;
+  sourceUrl: string;
+}
+
+export async function getEditalPdfMirror(catalogEditalId: string): Promise<EditalPdfMirror | null> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from('edital_pdf_mirrors')
+    .select('storage_path, bytes, captured_at, source_url')
+    .eq('edital_catalog_id', catalogEditalId)
+    .maybeSingle();
+  if (error || !data) return null;
+  return {
+    url: editalMirrorUrl(data.storage_path),
+    bytes: data.bytes,
+    capturedAt: data.captured_at,
+    sourceUrl: data.source_url,
+  };
+}
+
 type EmbeddedCount = { count: number }[] | null;
 interface EditalRow {
   id: string;

@@ -13,10 +13,10 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Bell, BellRing, Check, Download, ExternalLink, FileDown } from 'lucide-react';
 import {
   activateCatalogEdital, followEdital, getCatalogEditalBySlug, getCatalogEditalSubjects,
-  isFollowingEdital, listCatalogEditais, listConcursoStats, listEdicoes, listEditalUpdates,
-  listPastPapers, unfollowEdital,
+  getEditalPdfMirror, isFollowingEdital, listCatalogEditais, listConcursoStats, listEdicoes,
+  listEditalUpdates, listPastPapers, unfollowEdital,
   type CatalogEdital, type CatalogEditalDetail, type CatalogEditalSubject,
-  type ConcursoStat, type EditalEdicao, type EditalUpdate, type PastPaper,
+  type ConcursoStat, type EditalEdicao, type EditalPdfMirror, type EditalUpdate, type PastPaper,
 } from '@/services/editaisCatalog.service';
 import { getTargetTopicProgress } from '@/services/targetTopics.service';
 import { tryGetUser } from '@/lib/supabase/requireUser';
@@ -82,6 +82,13 @@ export default function EditalDetailPage() {
     queryKey: ['edital-stats', concursoKey],
     queryFn: () => listConcursoStats(concursoKey!),
     enabled: Boolean(concursoKey),
+  });
+  // Nossa cópia do PDF oficial: é ela que o botão baixa, para o edital não
+  // depender de o servidor do órgão continuar de pé.
+  const { data: mirror } = useQuery<EditalPdfMirror | null>({
+    queryKey: ['edital-pdf-mirror', editalId],
+    queryFn: () => getEditalPdfMirror(editalId!),
+    enabled: Boolean(editalId),
   });
   const { data: papers } = useQuery<PastPaper[]>({
     queryKey: ['edital-papers', concursoKey],
@@ -259,6 +266,19 @@ export default function EditalDetailPage() {
 
   const progressoPct = progresso && progresso.total > 0 ? Math.round((progresso.done / progresso.total) * 100) : 0;
 
+  // Destino do botão do edital, em ordem de preferência:
+  // 1. nossa cópia do PDF oficial — não depende do servidor do órgão estar de pé;
+  // 2. o PDF na origem, se ainda não espelhamos;
+  // 3. a página oficial do concurso, quando o edital nem saiu — e aí o rótulo
+  //    diz isso, em vez de prometer um PDF que não existe.
+  const editalLink: { href: string; label: string; isPdf: boolean } | null = mirror
+    ? { href: mirror.url, label: 'Baixar edital (PDF)', isPdf: true }
+    : edital.editalUrl
+      ? /\.pdf($|\?)/i.test(edital.editalUrl)
+        ? { href: edital.editalUrl, label: 'Baixar edital (PDF)', isPdf: true }
+        : { href: edital.editalUrl, label: 'Página oficial do concurso', isPdf: false }
+      : null;
+
   return (
     <PageContainer width="narrow">
       <button onClick={() => router.push('/editais')} style={s.back}>← Banco de editais</button>
@@ -313,29 +333,17 @@ export default function EditalDetailPage() {
         >
           {edital.isActivated ? 'Abrir meu concurso →' : 'Ativar edital'}
         </Button>
-        {edital.editalUrl && (
-          // Rótulo honesto: "Baixar edital (PDF)" só quando o link é o documento;
-          // quando o edital ainda não saiu, o destino é a página oficial do
-          // concurso — e o botão diz isso. O evento de download só dispara
-          // quando há download de verdade.
-          /\.pdf($|\?)/i.test(edital.editalUrl) ? (
-            <a
-              href={edital.editalUrl} target="_blank" rel="noopener noreferrer"
-              onClick={() => track(EV.editalPdfDownloaded, { slug: edital.slug })}
-              style={s.downloadBtn}
-            >
-              <Download size={15} strokeWidth={2} style={{ marginRight: 6 }} />
-              Baixar edital (PDF)
-            </a>
-          ) : (
-            <a
-              href={edital.editalUrl} target="_blank" rel="noopener noreferrer"
-              style={s.downloadBtn}
-            >
-              <ExternalLink size={15} strokeWidth={2} style={{ marginRight: 6 }} />
-              Página oficial do concurso
-            </a>
-          )
+        {editalLink && (
+          <a
+            href={editalLink.href} target="_blank" rel="noopener noreferrer"
+            onClick={editalLink.isPdf ? () => track(EV.editalPdfDownloaded, { slug: edital.slug }) : undefined}
+            style={s.downloadBtn}
+          >
+            {editalLink.isPdf
+              ? <Download size={15} strokeWidth={2} style={{ marginRight: 6 }} />
+              : <ExternalLink size={15} strokeWidth={2} style={{ marginRight: 6 }} />}
+            {editalLink.label}
+          </a>
         )}
         {edital.targetId ? (
           <span style={s.followingHint} title="Você ativou este concurso — novidades chegam por notificação.">
@@ -403,6 +411,18 @@ export default function EditalDetailPage() {
           {edital.verificadoEm && (
             <p style={s.verificadoText}>
               Informações verificadas em {formatDateBR(edital.verificadoEm)}.
+            </p>
+          )}
+          {/* Proveniência da cópia: quem baixa tem direito de saber que o
+              arquivo é nosso espelho e de onde ele veio. */}
+          {mirror && (
+            <p style={s.verificadoText}>
+              O PDF do edital é uma cópia hospedada por nós, capturada em{' '}
+              {formatDateBR(mirror.capturedAt.slice(0, 10))} de{' '}
+              <a href={mirror.sourceUrl} target="_blank" rel="noopener noreferrer" style={s.fonteInlineLink}>
+                {(() => { try { return new URL(mirror.sourceUrl).hostname; } catch { return 'fonte oficial'; } })()}
+              </a>
+              {' '}({Math.round(mirror.bytes / 1024).toLocaleString('pt-BR')} KB).
             </p>
           )}
         </section>
@@ -598,7 +618,8 @@ const s: Record<string, CSSProperties> = {
   factValue: { fontSize: 14, fontWeight: 600, color: theme.ink, overflowWrap: 'break-word' },
   avisoText: { fontSize: 12, color: theme.inkFaint, margin: '12px 0 0', lineHeight: 1.5, fontStyle: 'italic' },
   provisoriaHint: { fontSize: 12, color: theme.inkSoft, lineHeight: 1.55, margin: '12px 0 0', padding: '10px 12px', borderRadius: theme.radiusSm, background: theme.warnBg, border: `0.5px solid ${theme.warn}` },
-  verificadoText: { fontSize: 11, color: theme.inkFaint, margin: '10px 0 0', paddingTop: 10, borderTop: `0.5px solid ${theme.line}` },
+  verificadoText: { fontSize: 11, color: theme.inkFaint, margin: '10px 0 0', paddingTop: 10, borderTop: `0.5px solid ${theme.line}`, lineHeight: 1.5 },
+  fonteInlineLink: { color: theme.teal, fontWeight: 600, textDecoration: 'none' },
 
   subjectList: { display: 'flex', flexDirection: 'column', gap: 8, marginTop: 12 },
   subjectRow: { padding: '11px 14px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.bg, minWidth: 0 },
