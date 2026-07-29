@@ -24,6 +24,9 @@ export interface CatalogEdital {
   concursoKey: string | null;    // agrupa edições do mesmo concurso
   orgaoSlug: string | null;      // órgão do catálogo (rota /editais/orgao/[slug])
   verificadoEm: string | null;   // data em que a ficha foi conferida contra as fontes
+  // Conteúdo programático é PREVISÃO (edital não publicado) e não curadoria de
+  // edital oficial — a UI precisa dizer isso em voz alta.
+  gradeProvisoria: boolean;
   areaName: string | null;
   situacao: EditalSituacao;
   ultimaEdicao: number | null;
@@ -58,6 +61,7 @@ interface EditalRow {
   edital_url: string | null;
   aviso: string | null;
   verificado_em: string | null;
+  grade_provisoria: boolean | null;
   catalog_areas: { name: string } | { name: string }[] | null;
   orgaos_catalog: { slug: string } | { slug: string }[] | null;
   edital_catalog_subjects: EmbeddedCount;
@@ -80,7 +84,7 @@ export async function listCatalogEditais(): Promise<CatalogEdital[]> {
   const [editaisRes, minhasRes] = await Promise.all([
     supabase
       .from('editais_catalog')
-      .select('id, slug, orgao, cargo, banca, ano, uf, nivel, concurso_key, situacao, ultima_edicao, vagas, remuneracao, exam_date, inscricoes_ate, edital_url, aviso, verificado_em, catalog_areas(name), orgaos_catalog(slug), edital_catalog_subjects(count), edital_catalog_topics(count)')
+      .select('id, slug, orgao, cargo, banca, ano, uf, nivel, concurso_key, situacao, ultima_edicao, vagas, remuneracao, exam_date, inscricoes_ate, edital_url, aviso, verificado_em, grade_provisoria, catalog_areas(name), orgaos_catalog(slug), edital_catalog_subjects(count), edital_catalog_topics(count)')
       .eq('is_active', true)
       .order('position', { ascending: true }),
     user
@@ -108,6 +112,7 @@ export async function listCatalogEditais(): Promise<CatalogEdital[]> {
         concursoKey: e.concurso_key,
         orgaoSlug: orgaoSlugOf(e.orgaos_catalog),
         verificadoEm: e.verificado_em,
+        gradeProvisoria: e.grade_provisoria ?? false,
         areaName: area?.name ?? null,
         situacao: e.situacao,
         ultimaEdicao: e.ultima_edicao,
@@ -408,7 +413,7 @@ export async function getCatalogEditalBySlug(slug: string): Promise<CatalogEdita
   const [editalRes, targetRes] = await Promise.all([
     supabase
       .from('editais_catalog')
-      .select('id, slug, orgao, cargo, banca, ano, uf, nivel, concurso_key, situacao, ultima_edicao, vagas, remuneracao, exam_date, inscricoes_ate, edital_url, aviso, verificado_em, catalog_areas(name), orgaos_catalog(slug), edital_catalog_subjects(count), edital_catalog_topics(count)')
+      .select('id, slug, orgao, cargo, banca, ano, uf, nivel, concurso_key, situacao, ultima_edicao, vagas, remuneracao, exam_date, inscricoes_ate, edital_url, aviso, verificado_em, grade_provisoria, catalog_areas(name), orgaos_catalog(slug), edital_catalog_subjects(count), edital_catalog_topics(count)')
       .eq('slug', slug)
       .maybeSingle(),
     user
@@ -434,6 +439,7 @@ export async function getCatalogEditalBySlug(slug: string): Promise<CatalogEdita
     concursoKey: e.concurso_key,
     orgaoSlug: orgaoSlugOf(e.orgaos_catalog),
     verificadoEm: e.verificado_em,
+    gradeProvisoria: e.grade_provisoria ?? false,
     areaName: area?.name ?? null,
     situacao: e.situacao,
     ultimaEdicao: e.ultima_edicao,

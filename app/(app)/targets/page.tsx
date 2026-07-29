@@ -7,7 +7,7 @@
 import { memo, useCallback, useEffect, useRef, useState, type CSSProperties } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { ChevronDown, Star, Trash2, TriangleAlert, ExternalLink, Archive, Check, X, Calendar } from 'lucide-react';
+import { ChevronDown, Star, Trash2, TriangleAlert, Archive, Check, X, Calendar } from 'lucide-react';
 import { useTargetList } from '@/hooks/useTargetList';
 import { usePersistedState } from '@/hooks/usePersistedState';
 import { formatTargetLabel, daysUntilExam, countdownInfo } from '@/lib/targets';
@@ -513,16 +513,8 @@ const TargetRow = memo(function TargetRow({
         {t.phase === 'pre' && (
           <Button variant="outline" size="sm" style={{ padding: '6px 14px', fontSize: 13, borderColor: theme.teal, background: theme.tealBg, color: theme.teal }} onClick={onPromote}>Edital publicado?</Button>
         )}
-        <button
-          onClick={onOpen}
-          style={{ ...s.iconBtn, background: iconHover === 'open' ? theme.muted : 'transparent' }}
-          onMouseEnter={() => setIconHover('open')}
-          onMouseLeave={() => setIconHover(null)}
-          title="Abrir concurso"
-          aria-label="Abrir concurso"
-        >
-          <ExternalLink size={16} color={theme.inkSoft} strokeWidth={1.8} />
-        </button>
+        {/* O corpo da linha inteiro já abre o concurso — um ícone só para isso
+            era ruído e roubava espaço dos dois destrutivos. */}
         <button
           onClick={onArchive}
           style={{ ...s.iconBtn, background: iconHover === 'arch' ? theme.muted : 'transparent' }}

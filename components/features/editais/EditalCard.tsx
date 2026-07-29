@@ -44,7 +44,11 @@ export function EditalCard({ edital: e, hideOrgao }: Props) {
     e.uf,
     e.situacao === 'em_expectativa' && e.ultimaEdicao ? `última edição ${e.ultimaEdicao}` : e.ano ? String(e.ano) : null,
     // Edital sem conteúdo programático curado é sinalizado — não escondido.
-    e.subjectCount > 0 ? `${e.subjectCount} matéria${e.subjectCount === 1 ? '' : 's'}` : 'grade em preparação',
+    // Grade prevista (edital não publicado) também: no card ela é indistinguível
+    // de uma curada de edital oficial se não dissermos.
+    e.subjectCount > 0
+      ? `${e.subjectCount} matéria${e.subjectCount === 1 ? '' : 's'}${e.gradeProvisoria ? ' (grade prevista)' : ''}`
+      : 'grade em preparação',
     e.topicCount > 0 ? `${e.topicCount} tópicos` : null,
   ].filter(Boolean).join(' · ');
 

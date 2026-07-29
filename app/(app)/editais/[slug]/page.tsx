@@ -168,7 +168,11 @@ export default function EditalDetailPage() {
     const outroOpts: ComparadorOption[] = (todosEditais ?? [])
       // Sem conteúdo programático curado não há o que comparar — o diff sairia
       // "tudo adicionado", que é enganoso.
-      .filter((e) => e.id !== edital.id && e.subjectCount > 0 && (e.concursoKey == null || e.concursoKey !== edital.concursoKey))
+      // E só faz sentido comparar cargos do MESMO órgão: o diff entre editais
+      // de órgãos diferentes é quase 100% de diferença, sem informação útil.
+      .filter((e) => e.id !== edital.id && e.subjectCount > 0
+        && e.orgaoSlug != null && e.orgaoSlug === edital.orgaoSlug
+        && (e.concursoKey == null || e.concursoKey !== edital.concursoKey))
       .map((e) => ({
         id: e.id,
         label: [e.orgao, e.cargo].filter(Boolean).join(' · '),
@@ -412,6 +416,16 @@ export default function EditalDetailPage() {
               {totalQuestions > 0 && ` · ${totalQuestions} questões`}
             </span>
           </div>
+          {/* Previsão não pode se passar por edital: sem este aviso a grade do
+              TCE-GO ficaria visualmente idêntica às de PC-GO/PM-GO, que vêm de
+              editais realmente publicados. */}
+          {edital.gradeProvisoria && (subjects?.length ?? 0) > 0 && (
+            <p style={s.provisoriaHint}>
+              <strong>Grade prevista, não oficial.</strong> O edital deste concurso ainda não foi publicado —
+              estas disciplinas e pesos são uma projeção a partir do formato já definido em contrato e do padrão
+              da banca. Serve para começar a estudar hoje; confirme tudo quando o edital sair.
+            </p>
+          )}
           {subjectsError ? (
             // Erro ≠ vazio: sem isto o skeleton ficaria girando para sempre.
             <p style={s.mutedText}>Não foi possível carregar as disciplinas. Recarregue a página para tentar de novo.</p>
@@ -583,6 +597,7 @@ const s: Record<string, CSSProperties> = {
   factLabel: { fontSize: 11, fontWeight: 600, color: theme.inkFaint, textTransform: 'uppercase', letterSpacing: 0.4 },
   factValue: { fontSize: 14, fontWeight: 600, color: theme.ink, overflowWrap: 'break-word' },
   avisoText: { fontSize: 12, color: theme.inkFaint, margin: '12px 0 0', lineHeight: 1.5, fontStyle: 'italic' },
+  provisoriaHint: { fontSize: 12, color: theme.inkSoft, lineHeight: 1.55, margin: '12px 0 0', padding: '10px 12px', borderRadius: theme.radiusSm, background: theme.warnBg, border: `0.5px solid ${theme.warn}` },
   verificadoText: { fontSize: 11, color: theme.inkFaint, margin: '10px 0 0', paddingTop: 10, borderTop: `0.5px solid ${theme.line}` },
 
   subjectList: { display: 'flex', flexDirection: 'column', gap: 8, marginTop: 12 },

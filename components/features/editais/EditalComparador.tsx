@@ -78,7 +78,7 @@ export function EditalComparador({ editalAtualId, editalAtualSlug, options }: Pr
             </optgroup>
           )}
           {outros.length > 0 && (
-            <optgroup label="Outros editais do banco">
+            <optgroup label="Outros cargos deste órgão">
               {outros.map((o) => <option key={o.id} value={o.id}>{o.label}</option>)}
             </optgroup>
           )}

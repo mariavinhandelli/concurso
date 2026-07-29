@@ -9,6 +9,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import dynamic from 'next/dynamic';
 import { Sparkles, Pencil } from 'lucide-react';
 import { useTargetDetail } from '@/hooks/useTargetDetail';
+import { usePersistedState } from '@/hooks/usePersistedState';
 import { formatTargetLabel } from '@/lib/targets';
 import { updateTargetExamDate, promoteToPos, updateTargetExam, demoteToPre, updateTargetPrepChecklist } from '@/services/targetExams.service';
 import { listAllBoards, type Board } from '@/services/boards.service';
@@ -61,6 +62,10 @@ function SkeletonList() {
 
 type Tab = 'visao' | 'montar' | 'vertical';
 
+// Mesma régua da aba de /targets: quem está montando o edital volta ao hub
+// várias vezes seguidas e não quer recomeçar da "Visão geral" toda vez.
+const parseTab = (v: string | null): Tab => (v === 'montar' || v === 'vertical' ? v : 'visao');
+
 export default function TargetDetailPage() {
   const params = useParams();
   const router = useRouter();
@@ -83,7 +88,7 @@ export default function TargetDetailPage() {
     }
   };
 
-  const [tab, setTab] = useState<Tab>('visao');
+  const [tab, setTab] = usePersistedState<Tab>('target_hub_tab', 'visao', parseTab);
   const [generatorOpen, setGeneratorOpen] = useState(false);
   const [promoteOpen, setPromoteOpen] = useState(false);
   const [promoteBoards, setPromoteBoards] = useState<Board[]>([]);
