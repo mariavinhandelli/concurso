@@ -20,7 +20,7 @@ import {
   RATING_LABEL, calculateNextJurisReview, fromJurisDbRow, INITIAL_JURIS_STATE,
   type JurisRating, type JurisReviewState,
 } from '@/lib/juris-review';
-import { GRIFO_CORES, SUBLINHADO_COR, segmentarBloco } from '@/lib/lei-grifos';
+import { SUBLINHADO_COR, segmentarBloco, grifoVisual } from '@/lib/lei-grifos';
 import { refreshHomeAfterSession } from '@/lib/home-refresh';
 import { savePassiveSession } from '@/services/passiveSession.service';
 import { fmtInterval } from '@/lib/interval-format';
@@ -549,7 +549,7 @@ function LeiBody({
               }
               const estilo: CSSProperties = seg.grifo.estilo === 'sublinhado'
                 ? { borderBottom: `2px solid ${SUBLINHADO_COR}` }
-                : { background: GRIFO_CORES[seg.grifo.cor ?? 'regra'].bg, borderRadius: 3 };
+                : { background: grifoVisual(seg.grifo).bg, borderRadius: 3 };
               return <span key={i} style={estilo}>{seg.texto}</span>;
             })}
           </p>

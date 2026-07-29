@@ -5,7 +5,7 @@
 'use client';
 
 import { memo, useEffect, useRef, useState, type CSSProperties } from 'react';
-import { AlarmClock, RefreshCw, Info, Pencil, Check, X, Star, Layers } from 'lucide-react';
+import { AlarmClock, RefreshCw, Info, Pencil, Check, X, Star, Layers, Palette, ArrowLeft } from 'lucide-react';
 import { LEIS_CATALOG, type LeiArtigo } from '@/services/leis.service';
 import { createFlashcard } from '@/services/flashcards.service';
 import { listSubjects } from '@/services/subjects.service';
@@ -17,8 +17,8 @@ import {
 import { useUI } from '@/components/layout/UIContext';
 import { isJurisDue } from '@/lib/juris-review';
 import {
-  GRIFO_CORES, GRIFO_CORES_ORDEM, SUBLINHADO_COR,
-  segmentarBloco, temSobreposicao, findBlocoSelecionado,
+  GRIFO_CORES, GRIFO_CORES_ORDEM, GRIFO_LIVRE_PALETA, SUBLINHADO_COR,
+  segmentarBloco, temSobreposicao, findBlocoSelecionado, grifoVisual,
 } from '@/lib/lei-grifos';
 import type { LeiQuestao } from '@/services/leiQuestoes.service';
 import { useToast } from '@/components/ui/ToastProvider';
@@ -62,6 +62,9 @@ export const ArtigoCard = memo(function ArtigoCard({ artigo, interacao, onUpdate
   const popoverRef = useRef<HTMLDivElement>(null);
   const [pendingSel, setPendingSel] = useState<PendingSel | null>(null);
   const [popover, setPopover] = useState<GrifoPopover | null>(null);
+  const [livreAberto, setLivreAberto] = useState(false);
+  const [livreCor, setLivreCor] = useState(GRIFO_LIVRE_PALETA[0]);
+  const [livreLabel, setLivreLabel] = useState('');
   const [notasOpen, setNotasOpen] = useState(false);
   const [notaDraft, setNotaDraft] = useState<string | null>(null);
   const [savingNota, setSavingNota] = useState(false);
@@ -119,10 +122,21 @@ export const ArtigoCard = memo(function ArtigoCard({ artigo, interacao, onUpdate
           return;
         }
 
+        // A barra virou uma lista vertical (mais alta que a régua de dots
+        // antiga) — se não sobrar espaço abaixo da seleção, abre pra cima em
+        // vez de deixar o painel cortado no fim da tela. Em touch as linhas
+        // têm 44px (alvo de toque) em vez de ~30px, então a lista real fica
+        // bem mais alta — usar a mesma estimativa das duas plataformas
+        // deixava o painel cortado embaixo no mobile.
         const rect = sel.getRangeAt(0).getBoundingClientRect();
-        const x = Math.max(8, Math.min(rect.left, window.innerWidth - 250));
-        const y = Math.min(rect.bottom + 12, window.innerHeight - 60);
+        const alturaEstimada = touch ? 340 : 230;
+        const x = Math.max(8, Math.min(rect.left, window.innerWidth - 230));
+        const y = window.innerHeight - rect.bottom > alturaEstimada + 20
+          ? rect.bottom + 12
+          : Math.max(8, rect.top - alturaEstimada - 12);
         setPopover(null);
+        setLivreAberto(false);
+        setLivreLabel('');
         setPendingSel({ bloco: blocoId, start: resultado.start, end: resultado.end, x, y });
       } catch {
         // Seleção anômala (comum em touch, Range com âncora/foco invertidos) —
@@ -141,7 +155,7 @@ export const ArtigoCard = memo(function ArtigoCard({ artigo, interacao, onUpdate
       document.removeEventListener('selectionchange', onSelectionChange);
       if (timer) clearTimeout(timer);
     };
-  }, [grifos, toast]);
+  }, [grifos, toast, touch]);
 
   // Fecha a toolbar de grifo e o popover ao clicar fora deles — sem isso, um
   // clique em "Anotar"/"Questão C/E" com a seleção do browser ainda "viva"
@@ -154,12 +168,17 @@ export const ArtigoCard = memo(function ArtigoCard({ artigo, interacao, onUpdate
       if (popoverRef.current?.contains(target)) return;
       setPendingSel(null);
       setPopover(null);
+      setLivreAberto(false);
     }
     document.addEventListener('mousedown', onMouseDown);
     return () => document.removeEventListener('mousedown', onMouseDown);
   }, [pendingSel, popover]);
 
-  async function aplicarGrifo(cor: GrifoCor | null, estilo: 'grifo' | 'sublinhado') {
+  async function aplicarGrifo(
+    cor: GrifoCor | null,
+    estilo: 'grifo' | 'sublinhado',
+    extra?: { corHex: string; label: string },
+  ) {
     if (!pendingSel) return;
     const { bloco, start, end } = pendingSel;
     // Revalida contra o estado ATUAL de grifos — pendingSel pode ter sido
@@ -167,17 +186,30 @@ export const ArtigoCard = memo(function ArtigoCard({ artigo, interacao, onUpdate
     // intervalo até o clique.
     if (temSobreposicao(grifos, bloco, start, end)) {
       setPendingSel(null);
+      setLivreAberto(false);
       toast.error('Esse trecho passou a cruzar uma marcação existente. Selecione de novo.');
       return;
     }
     setPendingSel(null);
+    setLivreAberto(false);
+    setLivreLabel('');
     window.getSelection()?.removeAllRanges();
     try {
-      const novos = await addGrifo(artigo.key, { bloco, start, end, cor, estilo, nota: null });
+      const novos = await addGrifo(artigo.key, {
+        bloco, start, end, cor, estilo, nota: null,
+        corHex: extra?.corHex ?? null,
+        label: extra?.label ?? null,
+      });
       onUpdate(artigo.key, { grifos: novos });
     } catch (e) {
       toast.error(e instanceof Error ? e.message : 'Erro ao salvar grifo.');
     }
+  }
+
+  function confirmarLivre() {
+    const label = livreLabel.trim();
+    if (!label) { toast.info('Dê um nome curto pro marcador (ex.: "já caiu na prova").'); return; }
+    aplicarGrifo('livre', 'grifo', { corHex: livreCor, label });
   }
 
   async function handleRemoverGrifo(grifo: LeiGrifo) {
@@ -348,9 +380,10 @@ export const ArtigoCard = memo(function ArtigoCard({ artigo, interacao, onUpdate
             <span data-bloco={b.id}>
               {segmentarBloco(b.texto, grifos, b.id).map((seg, i) => {
                 if (!seg.grifo) return <span key={i}>{seg.texto}</span>;
+                const visual = grifoVisual(seg.grifo);
                 const estiloSeg: CSSProperties = seg.grifo.estilo === 'sublinhado'
                   ? { borderBottom: `2px solid ${SUBLINHADO_COR}`, cursor: 'pointer' }
-                  : { background: GRIFO_CORES[seg.grifo.cor ?? 'regra'].bg, borderRadius: 3, cursor: 'pointer' };
+                  : { background: visual.bg, borderRadius: 3, cursor: 'pointer' };
                 const abrirPopover = (x: number, y: number) => setPopover({
                   grifo: seg.grifo!,
                   x: Math.min(x, window.innerWidth - 230),
@@ -362,7 +395,7 @@ export const ArtigoCard = memo(function ArtigoCard({ artigo, interacao, onUpdate
                     style={estiloSeg}
                     tabIndex={0}
                     role="button"
-                    aria-label={`Grifo: ${seg.grifo.estilo === 'sublinhado' ? 'sublinhado' : GRIFO_CORES[seg.grifo.cor ?? 'regra'].label}. Ativar para remover.`}
+                    aria-label={`Grifo: ${visual.label}. Ativar para remover.`}
                     onClick={(e) => {
                       e.stopPropagation();
                       abrirPopover(e.clientX, e.clientY);
@@ -499,30 +532,85 @@ export const ArtigoCard = memo(function ArtigoCard({ artigo, interacao, onUpdate
         </div>
       )}
 
-      {/* Barra de marcação (aparece ao selecionar) */}
-      {pendingSel && (
-        <div ref={toolbarRef} style={{ ...s.toolbar, left: pendingSel.x, top: pendingSel.y }} onMouseUp={(e) => e.stopPropagation()}>
+      {/* Barra de marcação (aparece ao selecionar) — lista vertical com rótulo
+          visível em cada categoria, pra não depender de hover (não existe em
+          touch) pra saber o que cada cor significa. */}
+      {pendingSel && !livreAberto && (
+        <div ref={toolbarRef} style={{ ...s.toolbarV, left: pendingSel.x, top: pendingSel.y }} onMouseUp={(e) => e.stopPropagation()}>
           {GRIFO_CORES_ORDEM.map((cor) => (
             <button
               key={cor}
-              title={GRIFO_CORES[cor].label}
               aria-label={`Grifar: ${GRIFO_CORES[cor].label}`}
               onClick={() => aplicarGrifo(cor, 'grifo')}
-              style={{ ...s.corBtn, ...(touch ? s.corBtnTouch : {}), background: GRIFO_CORES[cor].chip }}
-            />
+              style={{ ...s.corRow, ...(touch ? s.corRowTouch : {}) }}
+            >
+              <span style={{ ...s.corDot, background: GRIFO_CORES[cor].chip }} />
+              {GRIFO_CORES[cor].label}
+            </button>
           ))}
-          <span style={s.toolbarSep} />
-          <button title="Sublinhar" aria-label="Sublinhar" onClick={() => aplicarGrifo(null, 'sublinhado')} style={s.subBtn}>S̲</button>
-          <button title="Cancelar" aria-label="Cancelar" onClick={() => setPendingSel(null)} style={s.subBtn}><X size={14} strokeWidth={2} /></button>
+          <button
+            aria-label="Marcador livre — escolher cor e nome"
+            onClick={() => setLivreAberto(true)}
+            style={{ ...s.corRow, ...(touch ? s.corRowTouch : {}) }}
+          >
+            <Palette size={14} strokeWidth={2} style={{ flexShrink: 0 }} />
+            Marcador livre…
+          </button>
+          <span style={s.toolbarSepH} />
+          <button aria-label="Sublinhar" onClick={() => aplicarGrifo(null, 'sublinhado')} style={{ ...s.corRow, ...(touch ? s.corRowTouch : {}) }}>
+            <span style={{ ...s.corDot, background: 'transparent', borderBottom: `2px solid ${SUBLINHADO_COR}`, borderRadius: 0 }} />
+            Sublinhar
+          </button>
+          <button aria-label="Cancelar" onClick={() => setPendingSel(null)} style={{ ...s.corRowCancel, ...(touch ? s.corRowTouch : {}) }}>
+            <X size={13} strokeWidth={2} /> Cancelar
+          </button>
+        </div>
+      )}
+
+      {/* Painel do marcador livre: cor + nome custom, antes de aplicar */}
+      {pendingSel && livreAberto && (
+        <div ref={toolbarRef} style={{ ...s.toolbarV, left: pendingSel.x, top: pendingSel.y }} onMouseUp={(e) => e.stopPropagation()}>
+          <div style={s.livreHead}>
+            <button aria-label="Voltar" onClick={() => setLivreAberto(false)} style={s.livreBack}><ArrowLeft size={14} strokeWidth={2} /></button>
+            <span style={s.toolbarTitle}>Marcador livre</span>
+          </div>
+          <div style={s.livreSwatches}>
+            {GRIFO_LIVRE_PALETA.map((hex) => (
+              <button
+                key={hex}
+                aria-label={`Cor ${hex}`}
+                aria-pressed={livreCor === hex}
+                onClick={() => setLivreCor(hex)}
+                style={{
+                  ...s.corBtn, ...(touch ? s.corBtnTouch : {}), background: hex,
+                  outline: livreCor === hex ? `2px solid ${theme.ink}` : 'none', outlineOffset: 2,
+                }}
+              />
+            ))}
+          </div>
+          <input
+            value={livreLabel}
+            onChange={(e) => setLivreLabel(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter') confirmarLivre(); }}
+            placeholder='Nome do marcador — ex.: "já caiu na prova"'
+            maxLength={40}
+            autoFocus
+            style={s.livreInput}
+          />
+          <div style={s.livreActions}>
+            <button onClick={() => setPendingSel(null)} style={s.subBtnText}>Cancelar</button>
+            <button onClick={confirmarLivre} disabled={!livreLabel.trim()} style={{ ...s.livreConfirm, opacity: livreLabel.trim() ? 1 : 0.5 }}>
+              Marcar
+            </button>
+          </div>
         </div>
       )}
 
       {/* Popover de grifo existente */}
       {popover && (
         <div ref={popoverRef} style={{ ...s.toolbar, left: popover.x, top: popover.y }}>
-          <span style={s.popLabel}>
-            {popover.grifo.estilo === 'sublinhado' ? 'Sublinhado' : GRIFO_CORES[popover.grifo.cor ?? 'regra'].label}
-          </span>
+          <span style={{ ...s.legDotSmall, background: grifoVisual(popover.grifo).chip }} />
+          <span style={s.popLabel}>{grifoVisual(popover.grifo).label}</span>
           <button onClick={() => handleRemoverGrifo(popover.grifo)} style={s.popRemove}>Remover</button>
           <button onClick={() => setPopover(null)} style={s.subBtn}><X size={14} strokeWidth={2} /></button>
         </div>
@@ -571,4 +659,25 @@ const s: Record<string, CSSProperties> = {
   subBtn: { border: 'none', background: 'transparent', color: theme.inkSoft, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', padding: '2px 4px' },
   popLabel: { fontSize: 13, fontWeight: 600, color: theme.ink, padding: '0 2px' },
   popRemove: { border: 'none', background: 'transparent', color: theme.danger, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
+  legDotSmall: { width: 10, height: 10, borderRadius: 3, flexShrink: 0, display: 'inline-block' },
+
+  // Lista vertical da barra de marcação — cada categoria mostra cor + nome,
+  // em vez de dots sem rótulo (não dava pra saber o que era sem hover, que
+  // nem existe em touch).
+  toolbarV: { position: 'fixed', zIndex: zIndex.menu, display: 'flex', flexDirection: 'column', gap: 1, background: theme.card, border: `0.5px solid ${theme.line}`, borderRadius: theme.radiusSm, padding: 6, boxShadow: theme.shadowHover, width: 210 },
+  corRow: { display: 'flex', alignItems: 'center', gap: 9, border: 'none', background: 'transparent', color: theme.ink, fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit', padding: '7px 8px', borderRadius: theme.radiusSm, textAlign: 'left', width: '100%', boxSizing: 'border-box' },
+  corRowTouch: { minHeight: 44 },
+  corRowCancel: { display: 'flex', alignItems: 'center', gap: 9, border: 'none', background: 'transparent', color: theme.inkFaint, fontSize: 13, cursor: 'pointer', fontFamily: 'inherit', padding: '7px 8px', borderRadius: theme.radiusSm, textAlign: 'left', width: '100%', boxSizing: 'border-box' },
+  corDot: { width: 14, height: 14, borderRadius: 4, flexShrink: 0, display: 'inline-block' },
+  toolbarSepH: { height: 1, background: theme.line, margin: '4px 2px' },
+
+  // Painel do marcador livre (segunda etapa da barra de marcação)
+  livreHead: { display: 'flex', alignItems: 'center', gap: 8, padding: '2px 4px 6px' },
+  livreBack: { border: 'none', background: 'transparent', color: theme.inkSoft, cursor: 'pointer', padding: 0, display: 'flex' },
+  toolbarTitle: { fontSize: 12, fontWeight: 700, color: theme.inkSoft, textTransform: 'uppercase', letterSpacing: 0.3 },
+  livreSwatches: { display: 'flex', flexWrap: 'wrap', gap: 6, padding: '2px 4px 10px' },
+  livreInput: { width: '100%', boxSizing: 'border-box', padding: '7px 9px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.bg, fontSize: 13, color: theme.ink, fontFamily: 'inherit', outline: 'none', marginBottom: 8 },
+  livreActions: { display: 'flex', justifyContent: 'flex-end', gap: 8, padding: '0 2px' },
+  livreConfirm: { border: 'none', borderRadius: theme.radiusPill, background: theme.primary, color: theme.onTeal, fontSize: 13, fontWeight: 600, padding: '6px 14px', cursor: 'pointer', fontFamily: 'inherit' },
+  subBtnText: { border: 'none', background: 'transparent', color: theme.inkSoft, fontSize: 13, cursor: 'pointer', fontFamily: 'inherit', padding: '6px 8px' },
 };

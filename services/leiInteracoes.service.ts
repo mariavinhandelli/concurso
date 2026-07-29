@@ -12,7 +12,7 @@ import {
 import { toLocalDateString } from '@/lib/local-date';
 import { getLei, LEIS_CATALOG, type Lei, type LeiArtigo } from '@/services/leis.service';
 
-export type GrifoCor = 'regra' | 'prazo' | 'competencia' | 'excecao';
+export type GrifoCor = 'regra' | 'prazo' | 'competencia' | 'excecao' | 'livre';
 export type GrifoEstilo = 'grifo' | 'sublinhado';
 
 export interface LeiGrifo {
@@ -23,6 +23,8 @@ export interface LeiGrifo {
   cor: GrifoCor | null; // null quando estilo = 'sublinhado'
   estilo: GrifoEstilo;
   nota: string | null;
+  corHex?: string | null; // hex escolhido pelo usuário — só quando cor = 'livre'
+  label?: string | null;  // rótulo custom — só quando cor = 'livre'
   criado_em: string;
 }
 

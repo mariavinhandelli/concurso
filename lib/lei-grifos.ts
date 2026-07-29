@@ -3,8 +3,12 @@
 // grifos e conversão de seleção do DOM em offsets do texto plano do bloco.
 import type { LeiGrifo, GrifoCor } from '@/services/leiInteracoes.service';
 
+// As 4 categorias fixas (com significado) — 'livre' é tratado à parte porque
+// sua cor/rótulo vêm do próprio grifo (corHex/label), não desta tabela.
+export type GrifoCorFixa = Exclude<GrifoCor, 'livre'>;
+
 // Cores fixas com significado — rgba funciona em light e dark mode.
-export const GRIFO_CORES: Record<GrifoCor, { bg: string; label: string; chip: string }> = {
+export const GRIFO_CORES: Record<GrifoCorFixa, { bg: string; label: string; chip: string }> = {
   regra:       { bg: 'rgba(245, 199, 117, 0.45)', chip: '#EF9F27', label: 'Regra geral' },
   prazo:       { bg: 'rgba(151, 196, 89, 0.40)',  chip: '#639922', label: 'Prazo' },
   competencia: { bg: 'rgba(133, 183, 235, 0.40)', chip: '#378ADD', label: 'Competência' },
@@ -13,7 +17,35 @@ export const GRIFO_CORES: Record<GrifoCor, { bg: string; label: string; chip: st
 
 export const SUBLINHADO_COR = '#D85A30';
 
-export const GRIFO_CORES_ORDEM: GrifoCor[] = ['regra', 'prazo', 'competencia', 'excecao'];
+export const GRIFO_CORES_ORDEM: GrifoCorFixa[] = ['regra', 'prazo', 'competencia', 'excecao'];
+
+// Paleta do marcador "livre" — cores deliberadamente diferentes das 4 fixas
+// acima, pra não parecer mais uma categoria semântica pré-definida.
+export const GRIFO_LIVRE_PALETA: string[] = [
+  '#8B5CF6', '#14B8A6', '#EC4899', '#6366F1',
+  '#A16207', '#06B6D4', '#65A30D', '#64748B',
+];
+
+export function hexToRgba(hex: string, alpha: number): string {
+  const h = hex.replace('#', '');
+  const full = h.length === 3 ? h.split('').map((c) => c + c).join('') : h;
+  const r = parseInt(full.slice(0, 2), 16);
+  const g = parseInt(full.slice(2, 4), 16);
+  const b = parseInt(full.slice(4, 6), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+// Cor/rótulo efetivos de um grifo, cobrindo as 4 categorias fixas, o
+// sublinhado e o marcador livre (cor+nome escolhidos pelo usuário) num só
+// lugar — evita reimplementar esse fallback em cada tela que lê grifos.
+export function grifoVisual(g: LeiGrifo): { bg: string; chip: string; label: string } {
+  if (g.estilo === 'sublinhado') return { bg: 'transparent', chip: SUBLINHADO_COR, label: 'Sublinhado' };
+  if (g.cor === 'livre') {
+    const chip = g.corHex || '#64748B';
+    return { bg: hexToRgba(chip, 0.35), chip, label: g.label?.trim() || 'Marcador livre' };
+  }
+  return GRIFO_CORES[(g.cor ?? 'regra') as GrifoCorFixa];
+}
 
 // ─── Segmentação ─────────────────────────────────────────────────────────────
 // Divide o texto de um bloco nos trechos grifados e não-grifados, em ordem.

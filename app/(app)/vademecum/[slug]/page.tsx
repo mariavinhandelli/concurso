@@ -70,6 +70,9 @@ export default function LeiReaderPage() {
   const [busca, setBusca] = useState('');
   const [termo, setTermo] = useState(''); // busca textual ativa (quando o input não é nº de artigo)
   const [filtroCores, setFiltroCores] = useState<Set<GrifoCor>>(new Set());
+  // Marcadores livres têm rótulo escolhido pela usuária, não uma das 4 cores
+  // fixas — o filtro por eles é por texto do rótulo (normalizado), não por cor.
+  const [filtroLabels, setFiltroLabels] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     let cancelled = false;
@@ -164,21 +167,51 @@ export default function LeiReaderPage() {
     return lei.artigos.reduce((n, a) => n + (interacoes.get(a.key)?.favorito ? 1 : 0), 0);
   }, [lei, interacoes]);
 
-  const filtroAtivo = filtroCores.size > 0 || soFavoritos;
+  // Rótulos únicos de marcadores livres nesta lei (texto normalizado → dados
+  // pra render do chip) — vira mais uma opção de filtro, ao lado das 4 cores
+  // fixas, ordenada pelas mais usadas primeiro.
+  const labelsLivres = useMemo(() => {
+    if (!lei) return [] as { key: string; label: string; corHex: string; count: number }[];
+    const map = new Map<string, { key: string; label: string; corHex: string; count: number }>();
+    for (const inter of interacoes.values()) {
+      for (const g of inter.grifos) {
+        if (g.cor !== 'livre' || !g.label?.trim()) continue;
+        const key = g.label.trim().toLowerCase();
+        const existente = map.get(key);
+        if (existente) existente.count += 1;
+        else map.set(key, { key, label: g.label.trim(), corHex: g.corHex || '#64748B', count: 1 });
+      }
+    }
+    return [...map.values()].sort((a, b) => b.count - a.count);
+  }, [lei, interacoes]);
+
+  const filtroAtivo = filtroCores.size > 0 || filtroLabels.size > 0 || soFavoritos;
   const artigosFiltrados = useMemo(() => {
     if (!lei || !filtroAtivo) return [];
     return lei.artigos.filter((a) => {
       const inter = interacoes.get(a.key);
       if (soFavoritos && !inter?.favorito) return false;
-      if (filtroCores.size === 0) return true;
-      return (inter?.grifos ?? []).some((g) => g.cor && filtroCores.has(g.cor));
+      if (filtroCores.size === 0 && filtroLabels.size === 0) return true;
+      return (inter?.grifos ?? []).some((g) => {
+        if (g.cor && g.cor !== 'livre' && filtroCores.has(g.cor)) return true;
+        if (g.cor === 'livre' && g.label && filtroLabels.has(g.label.trim().toLowerCase())) return true;
+        return false;
+      });
     });
-  }, [lei, filtroAtivo, filtroCores, soFavoritos, interacoes]);
+  }, [lei, filtroAtivo, filtroCores, filtroLabels, soFavoritos, interacoes]);
 
   function toggleCorFiltro(cor: GrifoCor) {
     setFiltroCores((prev) => {
       const next = new Set(prev);
       if (next.has(cor)) next.delete(cor); else next.add(cor);
+      return next;
+    });
+  }
+
+  function toggleLabelFiltro(key: string) {
+    setFiltroLabels((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key); else next.add(key);
       return next;
     });
   }
@@ -202,6 +235,7 @@ export default function LeiReaderPage() {
 
     setAba('texto');
     setFiltroCores(new Set());
+    setFiltroLabels(new Set());
     setSoFavoritos(false);
     setTermo('');
     const gi = grupos.findIndex((g) => g.artigos.some((a) => a.key === artigo.key));
@@ -233,6 +267,7 @@ export default function LeiReaderPage() {
     if (pareceArtigo) { jumpTo(v); return; }
     setAba('texto');
     setFiltroCores(new Set());
+    setFiltroLabels(new Set());
     setTermo(v);
   }, [jumpTo]);
 
@@ -361,6 +396,21 @@ export default function LeiReaderPage() {
                 </button>
               );
             })}
+            {labelsLivres.map((l) => {
+              const ativo = filtroLabels.has(l.key);
+              return (
+                <button
+                  key={l.key}
+                  onClick={() => toggleLabelFiltro(l.key)}
+                  aria-pressed={ativo}
+                  style={{ ...s.legChip, ...(isMobile ? s.legChipTouch : {}), ...(ativo ? s.legChipOn : {}) }}
+                  title={`Mostrar só artigos com o marcador "${l.label}"`}
+                >
+                  <span style={{ ...s.legDot, background: l.corHex }} />
+                  {l.label} ({l.count})
+                </button>
+              );
+            })}
             {/* Só aparece quando há favorito nesta lei: chip morto em lei sem
                 favorito seria mais um item competindo por espaço no mobile. */}
             {totalFavoritos > 0 && (
@@ -375,7 +425,7 @@ export default function LeiReaderPage() {
               </button>
             )}
             {filtroAtivo && (
-              <button onClick={() => { setFiltroCores(new Set()); setSoFavoritos(false); }} style={s.limparFiltro}>limpar filtro</button>
+              <button onClick={() => { setFiltroCores(new Set()); setFiltroLabels(new Set()); setSoFavoritos(false); }} style={s.limparFiltro}>limpar filtro</button>
             )}
           </div>
 
