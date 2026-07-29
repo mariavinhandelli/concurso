@@ -65,6 +65,13 @@ export const ArtigoCard = memo(function ArtigoCard({ artigo, interacao, onUpdate
   const [livreAberto, setLivreAberto] = useState(false);
   const [livreCor, setLivreCor] = useState(GRIFO_LIVRE_PALETA[0]);
   const [livreLabel, setLivreLabel] = useState('');
+  // Espelho do livreAberto para o listener de selectionchange (que vive num
+  // closure com deps próprias): com o painel aberto, tocar num swatch ou focar
+  // o input colapsa a seleção do texto → o listener rodava e matava o
+  // pendingSel, fechando o painel no meio do uso (pior no touch, onde
+  // qualquer tap derruba a seleção).
+  const livreAbertoRef = useRef(false);
+  useEffect(() => { livreAbertoRef.current = livreAberto; }, [livreAberto]);
   const [notasOpen, setNotasOpen] = useState(false);
   const [notaDraft, setNotaDraft] = useState<string | null>(null);
   const [savingNota, setSavingNota] = useState(false);
@@ -98,6 +105,10 @@ export const ArtigoCard = memo(function ArtigoCard({ artigo, interacao, onUpdate
     function processarSelecao() {
       const root = rootRef.current;
       if (!root) return;
+      // Painel do marcador livre aberto: a seleção original já cumpriu o
+      // papel (o trecho está congelado em pendingSel) — mudanças de seleção
+      // agora são só efeito colateral de interagir com o painel.
+      if (livreAbertoRef.current) return;
 
       try {
         const sel = window.getSelection();
