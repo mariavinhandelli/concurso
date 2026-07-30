@@ -461,13 +461,19 @@ const styles: Record<string, React.CSSProperties> = {
 
   steps: { display: 'flex', flexDirection: 'column', gap: 8 },
   step: {
-    display: 'flex', alignItems: 'center', gap: 12,
+    // flexWrap: sem espaço pra manter texto legível E o CTA ao lado (célular
+    // estreito), o botão cai pra linha de baixo em vez de espremer o texto —
+    // era o que sobrava com "Estudar agora" fixo e o subtítulo em 112px.
+    display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 12,
     padding: '10px 12px', borderRadius: theme.radiusSm,
     border: `0.5px solid ${theme.line}`, background: theme.bg,
     cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit', width: '100%', minWidth: 0,
   },
   stepStudy: { border: `0.5px solid ${theme.line}`, background: theme.tealBg },
-  stepText: { flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 1 },
+  // flex-basis 200 (não 0): o texto só encolhe abaixo de ~200px depois que o
+  // wrap do `step` já jogou o botão pra baixo — então o piso de 200px nunca
+  // "briga" com o botão pela mesma linha, só define quando o wrap dispara.
+  stepText: { flex: '1 1 200px', minWidth: 0, display: 'flex', flexDirection: 'column', gap: 1 },
   studyTop: { display: 'flex', alignItems: 'center', gap: 8, minWidth: 0, overflow: 'hidden' },
   stepLabel: { fontSize: 15, fontWeight: 600, color: theme.ink, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
   stepLabelDone: { color: theme.inkSoft, textDecoration: 'line-through' },

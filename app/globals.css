@@ -939,12 +939,16 @@ img, video, canvas {
 /* Chips de filtro, presets e botões de texto ficavam entre 18px e 37px espalhados
    por ~30 arquivos (Matérias, Caderno, Agenda, Concursos, Vade Mecum, Juris,
    Amigos, Home). Uma regra só resolve todos sem caçar cada style inline.
-   Escopo em min-width:768px de propósito: o mobile já passou por auditoria de
-   toque e tem suas próprias réguas — alargar lá arriscaria regressão de layout
-   denso sem necessidade. Botões `display:inline` no meio de texto não são
-   afetados (min-height não se aplica a caixa inline).
-   .block-check fica fora: tem área invisível de 44px via ::after (densidade da grade). */
-@media (pointer: coarse) and (min-width: 768px) {
+   Vale para tablet E mobile: a 2ª auditoria mobile achou os MESMOS alvos
+   pequenos lá (Certo/Errado do simulado C/E em 96×35 é o pior — ação
+   principal, repetida em toda questão). O escopo min-width:768px original
+   deixava o mobile de fora "pra não arriscar regressão de layout denso" —
+   mas isso deixava exatamente os achados mais graves sem correção; um botão
+   de toque pequeno demais é a regressão, não o oposto.
+   Botões `display:inline` no meio de texto não são afetados (min-height não
+   se aplica a caixa inline). .block-check fica fora: tem área invisível de
+   44px via ::after (densidade da grade). */
+@media (pointer: coarse) {
   :where(.shell-main, .floating-root) button:not(.block-check) {
     min-height: 44px;
   }
@@ -1105,6 +1109,22 @@ textarea:focus-visible {
 @media (pointer: coarse) {
   .conquistas-filter-tab { min-height: 44px; }
   .touch-target { min-height: 44px; }
+}
+
+/* Hub Caderno — card de item das listas (Tudo/Anotações/Erros). Hover não é
+   expressável em style inline; o estado ativo continua vindo do inline. */
+.caderno-item-card {
+  transition: border-color .14s ease, box-shadow .14s ease;
+}
+@media (hover: hover) {
+  .caderno-item-card:hover {
+    border-color: var(--teal);
+    box-shadow: var(--shadow);
+  }
+}
+.caderno-item-card:focus-visible {
+  outline: 2px solid var(--teal);
+  outline-offset: 2px;
 }
 
 

@@ -94,7 +94,7 @@ function TopicFolderRowFn({
   return (
     <div style={styles.folderWrap}>
       {/* Cabeçalho da pasta */}
-      <div style={styles.folderHead}>
+      <div style={{ ...styles.folderHead, flexWrap: isMobile ? 'wrap' : 'nowrap' }}>
         <button
           onClick={() => onToggleCollapse(topic.id)}
           style={caretBtn}
@@ -130,8 +130,11 @@ function TopicFolderRowFn({
           <div style={styles.folderMeta}>{kidsPct}% · {kidsDone}/{kids.length} subtópicos</div>
         </div>
 
-        {/* Ações da pasta: + (adicionar filho), editar, apagar */}
-        <div style={styles.folderActions}>
+        {/* Ações da pasta: + (adicionar filho), editar, apagar.
+            Em mobile, caem pra linha de baixo (mesmo padrão do TopicLeafRow):
+            3 botões de 44px inline com o caret deixavam só ~130px pro nome —
+            "Formação Histórica do Estado" (244px) virava reticência quase pura. */}
+        <div style={{ ...styles.folderActions, ...(isMobile ? styles.folderActionsMobile : {}) }}>
           {/* Botão "+" agora no header — mais acessível que no rodapé da lista */}
           <button
             onClick={() => { if (isCollapsed) onToggleCollapse(topic.id); onStartAddChild(topic.id); }}
@@ -221,6 +224,7 @@ const styles: Record<string, React.CSSProperties> = {
   folderMeta: { fontSize: 12, color: theme.inkSoft, marginTop: 4 },
   folderBody: { padding: '4px 12px 12px 40px', display: 'flex', flexDirection: 'column', gap: 6 },
   folderActions: { display: 'flex', alignItems: 'center', gap: 2, flexShrink: 0 },
+  folderActionsMobile: { width: '100%', justifyContent: 'flex-end', marginTop: 4 },
   row: {
     display: 'flex', alignItems: 'center', gap: 10,
     background: theme.card, borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`,

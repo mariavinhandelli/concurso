@@ -123,7 +123,7 @@ export function Sidebar() {
           </div>
         )}
         {isMobile ? (
-          <button onClick={() => setMobileOpen(false)} style={styles.collapseBtn} aria-label="Fechar menu">
+          <button className="icon-touch-target" onClick={() => setMobileOpen(false)} style={styles.collapseBtn} aria-label="Fechar menu">
             <X size={20} color={SB.iconIdle} strokeWidth={1.9} />
           </button>
         ) : (

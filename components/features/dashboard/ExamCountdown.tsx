@@ -306,9 +306,17 @@ const styles: Record<string, React.CSSProperties> = {
     cursor: 'pointer', flexShrink: 0,
   },
   nameWrap: { flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'center' },
+  // whiteSpace:'nowrap' + ellipsis parecia mais seguro, mas o preferred width de
+  // um span de linha única é o texto INTEIRO sem quebra — isso vira o piso de
+  // largura de toda a cadeia de ancestrais (wrap tem minWidth:220, mas o nome
+  // de concurso comprido "vencia" e esticava o card além do piso). Abaixo de
+  // ~358px de viewport isso estourava a página inteira na horizontal. Clamp de
+  // 2 linhas via -webkit-box: o preferred width passa a ser o da MAIOR
+  // PALAVRA, não da frase toda, e o card volta a caber na viewport.
   examName: {
     fontSize: 13, fontWeight: 600, color: theme.ink, textAlign: 'center',
-    overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', width: '100%',
+    display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
+    overflow: 'hidden', textOverflow: 'ellipsis', width: '100%',
   },
   dots: { display: 'flex', gap: 4, alignItems: 'center' },
   dotHit: { display: 'grid', placeItems: 'center', padding: '19px 10px', border: 'none', background: 'transparent', cursor: 'pointer' },
