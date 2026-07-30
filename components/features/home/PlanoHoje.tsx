@@ -318,7 +318,7 @@ export const PlanoHoje = memo(function PlanoHoje() {
         {/* 3 · Estudar / Cronograma — CTA segue o plano quando ele existe */}
         <div style={{ ...styles.step, ...styles.stepStudy, cursor: 'default' }}>
           <StepMarker index={3} done={estudoDone} />
-          <div style={styles.stepText}>
+          <div style={{ ...styles.stepText, ...styles.stepTextStudy }}>
             <div style={styles.studyTop}>
               <span style={{ ...styles.stepLabel, ...(estudoDone ? styles.stepLabelDone : {}) }}>{estudoLabel}</span>
               {temCronograma
@@ -461,19 +461,20 @@ const styles: Record<string, React.CSSProperties> = {
 
   steps: { display: 'flex', flexDirection: 'column', gap: 8 },
   step: {
-    // flexWrap: sem espaço pra manter texto legível E o CTA ao lado (célular
-    // estreito), o botão cai pra linha de baixo em vez de espremer o texto —
-    // era o que sobrava com "Estudar agora" fixo e o subtítulo em 112px.
-    display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 12,
+    display: 'flex', alignItems: 'center', gap: 12,
     padding: '10px 12px', borderRadius: theme.radiusSm,
     border: `0.5px solid ${theme.line}`, background: theme.bg,
     cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit', width: '100%', minWidth: 0,
   },
-  stepStudy: { border: `0.5px solid ${theme.line}`, background: theme.tealBg },
-  // flex-basis 200 (não 0): o texto só encolhe abaixo de ~200px depois que o
-  // wrap do `step` já jogou o botão pra baixo — então o piso de 200px nunca
-  // "briga" com o botão pela mesma linha, só define quando o wrap dispara.
-  stepText: { flex: '1 1 200px', minWidth: 0, display: 'flex', flexDirection: 'column', gap: 1 },
+  // flexWrap + flex-basis 200 (não 0) SÓ no passo "Estudar": ele é o único com
+  // um CTA de largura fixa ("Estudar agora", 133px) grande o bastante pra
+  // brigar com o texto em tela estreita. Extrair pro `step` base quebrava
+  // Revisar/Flashcards — o Chevron (16px) já cabia de sobra, mas o basis de
+  // 200px forçava wrap mesmo assim, empilhando marcador/texto/chevron em 3
+  // linhas soltas (regressão pega em revisão, nunca visitada por usuário real).
+  stepStudy: { border: `0.5px solid ${theme.line}`, background: theme.tealBg, flexWrap: 'wrap' },
+  stepText: { flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 1 },
+  stepTextStudy: { flex: '1 1 200px' },
   studyTop: { display: 'flex', alignItems: 'center', gap: 8, minWidth: 0, overflow: 'hidden' },
   stepLabel: { fontSize: 15, fontWeight: 600, color: theme.ink, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
   stepLabelDone: { color: theme.inkSoft, textDecoration: 'line-through' },

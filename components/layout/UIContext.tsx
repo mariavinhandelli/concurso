@@ -150,6 +150,21 @@ function ShellProvider({ children }: { children: ReactNode }) {
     if (mqTabletList?.matches) setCollapsed(true);
   }, []);
 
+  // Sem isto, o auto-colapso de tablet só rodava no mount: redimensionar a
+  // janela ao vivo através de 768–1199px (arrastar a borda, encaixar em split
+  // screen) atravessava o breakpoint sem nunca recolher a sidebar — o lock por
+  // CSS que fazia isso saiu junto com o resto daquele bloco. Só ajusta quando
+  // não há preferência salva; o toggle manual do usuário nunca é sobrescrito.
+  useEffect(() => {
+    if (!mqTabletList) return;
+    function onTabletChange(e: MediaQueryListEvent) {
+      if (localStorage.getItem('ui:collapsed') !== null) return;
+      setCollapsed(e.matches);
+    }
+    mqTabletList.addEventListener('change', onTabletChange);
+    return () => mqTabletList!.removeEventListener('change', onTabletChange);
+  }, []);
+
   // Trava o scroll quando o drawer mobile está aberto
   const { isMobile } = useBreakpoints();
   useEffect(() => {
