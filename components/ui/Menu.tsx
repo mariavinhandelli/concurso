@@ -38,6 +38,7 @@ export function Menu({ trigger, children, align = 'right', width = 200 }: MenuPr
       {open && (
         <div
           role="menu"
+          className="floating-root"
           style={{
             position: 'absolute', top: '100%', [align]: 0, marginTop: 6,
             background: theme.card, border: `0.5px solid ${theme.line}`,

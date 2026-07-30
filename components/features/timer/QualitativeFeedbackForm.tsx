@@ -117,7 +117,15 @@ export function QualitativeFeedbackForm({ session, onSubmit, onDiscard, saving }
           </div>
           <div style={styles.col}>
             <label style={styles.label}>Energia: {energy === 0 ? '—' : `${energy}/5`}</label>
-            <input type="range" min="0" max="5" value={energy} onChange={(e) => setEnergy(Number(e.target.value))} style={styles.range} />
+            {/* O <label> acima não está associado ao input (sem htmlFor/id), então
+                o slider ficava sem nome acessível nenhum. */}
+            <input
+              type="range" min="0" max="5" value={energy}
+              onChange={(e) => setEnergy(Number(e.target.value))}
+              style={styles.range}
+              aria-label="Energia da sessão, de 0 a 5"
+              aria-valuetext={energy === 0 ? 'não informada' : `${energy} de 5`}
+            />
           </div>
         </div>
 

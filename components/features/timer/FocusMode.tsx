@@ -85,8 +85,8 @@ export function FocusMode() {
   const showSubjectLine = ctx?.topicName && ctx?.subjectName;
 
   return (
-    <div style={s.overlay}>
-      <button onClick={() => setOpen(false)} style={s.exit} title="Sair do foco (Esc)">
+    <div className="floating-root" style={s.overlay}>
+      <button className="touch-target" onClick={() => setOpen(false)} style={s.exit} title="Sair do foco (Esc)">
         <Shrink size={16} strokeWidth={1.9} />
         Sair do foco
       </button>
@@ -113,7 +113,9 @@ export function FocusMode() {
           <button onClick={timer.stop} style={s.primary}>Encerrar</button>
         </div>
 
-        <p style={s.hint}>
+        {/* Atalhos só existem com teclado — num tablet/celular a dica mentia
+            (não há Esc nem espaço no teclado virtual). */}
+        <p className="focus-hint" style={s.hint}>
           <kbd style={s.kbd}>espaço</kbd> pausar · <kbd style={s.kbd}>esc</kbd> sair do foco
         </p>
       </div>

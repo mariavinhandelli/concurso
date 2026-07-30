@@ -46,7 +46,7 @@ export default function EvolucaoPage() {
   useEffect(() => { track(EV.performanceViewed); }, []);
 
   return (
-    <div style={{ ...styles.grid, gridTemplateColumns: umaColuna ? '1fr' : 'repeat(2, 1fr)' }}>
+    <div style={{ ...styles.grid, gridTemplateColumns: umaColuna ? 'minmax(0, 1fr)' : 'repeat(2, minmax(0, 1fr))' }}>
       {/* identidade do hábito — largura cheia, no topo */}
       <div style={{ gridColumn: '1 / -1' }}>
         <YearHeatmap />
@@ -98,6 +98,10 @@ export default function EvolucaoPage() {
 }
 
 const styles: Record<string, React.CSSProperties> = {
-  grid: { display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 18, minWidth: 0 },
+  // minmax(0, 1fr) e não 1fr: o mínimo automático de `1fr` é `auto`, então um
+  // filho com min-content largo (o YearHeatmap, 52 semanas ≈ 763px) esticava a
+  // trilha além do container e a página inteira rolava na horizontal em tablet
+  // portrait (768–914px). Com minmax(0,…) o heatmap rola dentro do próprio card.
+  grid: { display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 18, minWidth: 0 },
   card: { background: theme.card, border: `0.5px solid ${theme.line}`, borderRadius: theme.radius, boxShadow: theme.shadow, padding: 24, minWidth: 0, overflow: 'hidden' },
 };

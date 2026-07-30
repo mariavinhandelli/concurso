@@ -857,20 +857,14 @@ img, video, canvas {
   padding-bottom: 88px;
 }
 
-/* ── Tablet / desktop estreito (768–1199px): sidebar compacta ── */
+/* ── Tablet / desktop estreito (768–1199px) ── */
+/* A sidebar compacta AQUI era um lock por CSS (width 72px !important + seta de
+   colapso em display:none). Num tablet o resultado era 11 ícones sem rótulo
+   nenhum — o único label era o atributo `title`, que exige hover e não existe
+   no toque — e sem jeito de expandir. Agora o colapso é estado de verdade
+   (ShellProvider inicia colapsado em tablet, e a seta volta a aparecer), então
+   estas regras saíram: largura e alinhamento vêm do inline style do Sidebar. */
 @media (min-width: 768px) and (max-width: 1199px) {
-  /* Sidebar reduzida a 72 px (ícones); labels e seta de colapso ocultos */
-  .app-sidebar          { width: 72px !important; overflow: hidden; }
-  .sidebar-label        { display: none; }
-  .sidebar-item         { justify-content: center !important; }
-  .sidebar-brand        { justify-content: center !important; }
-  .sidebar-brand-name   { display: none; }
-  .sidebar-collapse-btn { display: none !important; }
-  .sidebar-nav .sidebar-label { display: none; }
-
-  /* Conteúdo empurrado para depois dos 72 px */
-  .shell-main { margin-left: 72px !important; }
-
   /* Grade semanal: scroll horizontal em vez de quebrar layout */
   .schedule-week-grid {
     overflow-x: auto;
@@ -914,13 +908,44 @@ img, video, canvas {
     min-width: 44px !important;
     min-height: 44px !important;
   }
-  .shell-main :where(input, select, textarea) {
+  /* .floating-root marca a raiz de todo painel flutuante (Overlay, ConfirmDialog,
+     CommandPalette, FocusMode, FloatingTimer, Menu, NotificationBell,
+     SessionCelebration). Sem ele as regras abaixo, escopadas em .shell-main,
+     não alcançavam NENHUM modal — todos são filhos diretos do <body>, então
+     no tablet o slider de energia ficava com 16px e as linhas da paleta com 39px. */
+  :where(.shell-main, .floating-root) :where(input, select, textarea) {
     min-height: 44px;
   }
-  .shell-main button[aria-label]:not(.block-check),
-  .shell-main button[title]:not(.block-check),
+  :where(.shell-main, .floating-root) button[aria-label]:not(.block-check),
+  :where(.shell-main, .floating-root) button[title]:not(.block-check),
   .topbar-bar button {
     min-width: 44px;
+    min-height: 44px;
+  }
+  /* Abas segmentadas (SegmentedControl), item de nav da sidebar compacta (41×40),
+     linha da paleta e item de menu (39px) — todos alvos de navegação primária. */
+  .segmented-tab,
+  .sidebar-item,
+  .ui-menu-item,
+  .cmd-item {
+    min-height: 44px;
+  }
+  /* Atalhos de teclado não existem no toque. */
+  .focus-hint {
+    display: none;
+  }
+}
+
+/* Chips de filtro, presets e botões de texto ficavam entre 18px e 37px espalhados
+   por ~30 arquivos (Matérias, Caderno, Agenda, Concursos, Vade Mecum, Juris,
+   Amigos, Home). Uma regra só resolve todos sem caçar cada style inline.
+   Escopo em min-width:768px de propósito: o mobile já passou por auditoria de
+   toque e tem suas próprias réguas — alargar lá arriscaria regressão de layout
+   denso sem necessidade. Botões `display:inline` no meio de texto não são
+   afetados (min-height não se aplica a caixa inline).
+   .block-check fica fora: tem área invisível de 44px via ::after (densidade da grade). */
+@media (pointer: coarse) and (min-width: 768px) {
+  :where(.shell-main, .floating-root) button:not(.block-check) {
     min-height: 44px;
   }
 }
@@ -1081,4 +1106,5 @@ textarea:focus-visible {
   .conquistas-filter-tab { min-height: 44px; }
   .touch-target { min-height: 44px; }
 }
+
 

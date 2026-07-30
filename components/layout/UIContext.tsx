@@ -144,7 +144,10 @@ function ShellProvider({ children }: { children: ReactNode }) {
   // Restaura preferência salva
   useEffect(() => {
     const c = localStorage.getItem('ui:collapsed');
-    if (c !== null) setCollapsed(c === '1');
+    if (c !== null) { setCollapsed(c === '1'); return; }
+    // Sem preferência salva, tablet começa compacto (72px) — mantém o visual
+    // que o lock por CSS dava, mas agora expansível pelo botão da sidebar.
+    if (mqTabletList?.matches) setCollapsed(true);
   }, []);
 
   // Trava o scroll quando o drawer mobile está aberto

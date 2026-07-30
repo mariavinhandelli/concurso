@@ -57,8 +57,9 @@ export function Sidebar() {
   const [hover, setHover] = useState<string | null>(null);
 
   // No mobile o drawer é sempre largura cheia (nunca "só ícones").
-  // O auto-colapso em tablet (768–899 px) é feito via CSS (.app-sidebar).
-  const isCollapsed = isMobile ? false : (isTablet || collapsed);
+  // Em tablet o padrão é compacto, mas via estado (ShellProvider) e não via CSS:
+  // antes o `isTablet ||` forçava ícones sem rótulo sem opção de expandir.
+  const isCollapsed = isMobile ? false : collapsed;
   const W = isMobile ? 244 : (isCollapsed ? 72 : 244);
 
   function go(href: string) {
@@ -126,8 +127,8 @@ export function Sidebar() {
             <X size={20} color={SB.iconIdle} strokeWidth={1.9} />
           </button>
         ) : (
-          // sidebar-collapse-btn: oculto em tablet via CSS (auto-colapso por CSS já faz o trabalho)
-          <button className="sidebar-collapse-btn" onClick={toggleCollapsed} style={styles.collapseBtn} aria-label="Recolher menu">
+          // Visível também em tablet: é o único jeito de ver os rótulos no toque.
+          <button className="sidebar-collapse-btn icon-touch-target" onClick={toggleCollapsed} style={styles.collapseBtn} aria-label={collapsed ? 'Expandir menu' : 'Recolher menu'}>
             <ChevronLeft size={18} color={SB.iconIdle} strokeWidth={1.8} style={{ transform: collapsed ? 'rotate(180deg)' : 'none', transition: 'transform .2s' }} />
           </button>
         )}

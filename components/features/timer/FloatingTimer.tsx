@@ -102,7 +102,7 @@ export function FloatingTimer() {
   if (timer.status === 'idle') {
     if (showPicker) {
       return (
-        <div ref={pickerRef} style={{ ...styles.card, ...pos, width: isMobile ? 'calc(100vw - 32px)' : 236, maxWidth: 340 }}>
+        <div ref={pickerRef} className="floating-root" style={{ ...styles.card, ...pos, width: isMobile ? 'calc(100vw - 32px)' : 236, maxWidth: 340 }}>
           <div style={styles.cardHead}>
             <span style={styles.eyebrow}>Iniciar sessão</span>
             <button className="icon-touch-target" onClick={() => setShowPicker(false)} style={styles.collapseBtn} aria-label="Fechar">
@@ -150,10 +150,10 @@ export function FloatingTimer() {
 
   // EXPANDIDO: cartão com controles.
   return (
-    <div style={{ ...styles.card, ...pos, width: isMobile ? 'calc(100vw - 32px)' : 220, maxWidth: 340 }}>
+    <div className="floating-root" style={{ ...styles.card, ...pos, width: isMobile ? 'calc(100vw - 32px)' : 220, maxWidth: 340 }}>
       <div style={styles.cardHead}>
         <span style={styles.eyebrow}>Sessão de estudo</span>
-        <button onClick={() => setExpanded(false)} style={styles.collapseBtn} aria-label="Recolher">
+        <button className="icon-touch-target" onClick={() => setExpanded(false)} style={styles.collapseBtn} aria-label="Recolher">
           <ChevronDown size={16} strokeWidth={2} />
         </button>
       </div>
@@ -164,6 +164,7 @@ export function FloatingTimer() {
         {timer.isRunning ? 'em andamento' : 'pausado'}
       </div>
       <button
+        className="touch-target"
         onClick={() => window.dispatchEvent(new CustomEvent('focali:open-focus'))}
         style={styles.focusBtn}
       >
@@ -172,11 +173,11 @@ export function FloatingTimer() {
       </button>
       <div style={styles.cardActions}>
         {timer.isRunning ? (
-          <button onClick={timer.pause} style={styles.secondary}>Pausar</button>
+          <button className="touch-target" onClick={timer.pause} style={styles.secondary}>Pausar</button>
         ) : (
-          <button onClick={timer.resume} style={styles.secondary}>Retomar</button>
+          <button className="touch-target" onClick={timer.resume} style={styles.secondary}>Retomar</button>
         )}
-        <button onClick={timer.stop} style={styles.primary}>Encerrar</button>
+        <button className="touch-target" onClick={timer.stop} style={styles.primary}>Encerrar</button>
       </div>
     </div>
   );

@@ -102,7 +102,7 @@ export function NotificationBell() {
       </button>
 
       {open && (
-        <div className="notification-menu" style={styles.menu} role="dialog" aria-label="Notificações">
+        <div className="notification-menu floating-root" style={styles.menu} role="dialog" aria-label="Notificações">
           <div style={styles.menuHead}>
             <div style={styles.menuName}>Notificações</div>
             <div style={styles.menuSub}>

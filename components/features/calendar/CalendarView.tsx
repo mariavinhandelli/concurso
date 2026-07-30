@@ -67,7 +67,7 @@ function tipoLabel(type: EvType): string {
 }
 
 export function CalendarView() {
-  const { isMobile } = useUI();
+  const { isMobile, isTablet } = useUI();
   const { confirm, dialog } = useConfirm();
   const toast = useToast();
   const queryClient = useQueryClient();
@@ -171,6 +171,11 @@ export function CalendarView() {
   const cellMinHeight = isMobile ? 58 : 96;
   const gridGap = isMobile ? 4 : 8;
   const maxEventsShown = isMobile ? 3 : 4;
+  // Rótulo do evento só cabe em desktop. Com 7 colunas, um tablet portrait dá
+  // ~79px por célula e sobram 31px pro texto — "Direito Administrativo · 30min"
+  // virava reticências. Abaixo de desktop fica só o ícone do tipo na cor da
+  // matéria; o detalhe completo sai ao tocar no dia (abre a folha do dia).
+  const cabeRotulo = !isMobile && !isTablet;
 
   const selectedEvents = selectedDay ? eventsForDay(selectedDay) : [];
 
@@ -239,7 +244,7 @@ export function CalendarView() {
                     {/* Ícone do TIPO na cor da matéria: a cor sozinha não distinguia
                         bloco de revisão (ambas usam a cor da matéria). */}
                     <EventIcon type={e.type} color={e.color} size={isMobile ? 10 : 11} />
-                    {!isMobile && <span style={styles.eventLabel}>{e.label}</span>}
+                    {cabeRotulo && <span style={styles.eventLabel}>{e.label}</span>}
                   </div>
                 ))}
                 {dayEvents.length > maxEventsShown && (

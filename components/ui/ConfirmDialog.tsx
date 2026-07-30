@@ -30,7 +30,7 @@ export function ConfirmDialog({
   }, [onCancel]);
 
   return (
-    <div style={styles.overlay} onClick={onCancel}>
+    <div className="floating-root" style={styles.overlay} onClick={onCancel}>
       <div
         style={styles.modal}
         onClick={(e) => e.stopPropagation()}

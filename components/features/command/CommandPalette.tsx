@@ -72,14 +72,23 @@ export function CommandPalette() {
   const close = useCallback(() => { setOpen(false); setQ(''); setActive(0); }, []);
 
   // Abre por atalho (Ctrl/Cmd+K) ou por evento (botão de busca na Topbar).
+  // Com um modal aberto o atalho fica inerte: a paleta e o ConfirmDialog dividem
+  // o mesmo z-index (zIndex.dialog), então quem vem depois no DOM é pintado por
+  // cima — mas o foco de teclado ia pro input da paleta. O usuário via o diálogo
+  // e digitava num campo invisível embaixo dele.
   useEffect(() => {
+    // aria-modal e não role=dialog: o painel de notificações usa role=dialog sem
+    // ser modal, e bloquear o Ctrl+K por causa dele seria over-block.
+    function modalAberto() {
+      return document.querySelector('[aria-modal="true"]') !== null;
+    }
     function onKey(e: KeyboardEvent) {
       if ((e.ctrlKey || e.metaKey) && (e.key === 'k' || e.key === 'K')) {
         e.preventDefault();
-        setOpen((v) => !v);
+        setOpen((v) => (v ? false : (modalAberto() ? false : true)));
       }
     }
-    function onOpenEvent() { setOpen(true); }
+    function onOpenEvent() { if (!modalAberto()) setOpen(true); }
     window.addEventListener('keydown', onKey);
     window.addEventListener(OPEN_COMMAND_EVENT, onOpenEvent);
     return () => {
@@ -237,7 +246,7 @@ export function CommandPalette() {
   const groupsInOrder: Group[] = ['Recentes', 'Favoritos', 'Ações', 'Ir para', 'Matérias', 'Tópicos', 'Erros', 'Editais', 'Leis'];
 
   return (
-    <div style={s.backdrop} onClick={close}>
+    <div className="floating-root" style={s.backdrop} onClick={close}>
       <div style={s.panel} onClick={(e) => e.stopPropagation()} role="dialog" aria-label="Busca de comandos">
         <div style={s.inputRow}>
           <Search size={18} color={theme.inkFaint} strokeWidth={2} />
@@ -270,6 +279,7 @@ export function CommandPalette() {
                     return (
                       <button
                         key={it.key}
+                        className="cmd-item"
                         data-idx={idx}
                         onMouseMove={() => setActive(idx)}
                         onClick={it.run}

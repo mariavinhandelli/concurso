@@ -51,6 +51,7 @@ export function Overlay({ children, onClose, labelledBy, maxWidth = 680, hideClo
 
   return (
     <div
+      className="floating-root"
       onClick={closeOnBackdrop ? (e) => { if (e.target === e.currentTarget) onClose(); } : undefined}
       style={{
         position: 'fixed', inset: 0,

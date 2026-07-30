@@ -463,14 +463,23 @@ const TargetRow = memo(function TargetRow({
       </button>
 
       <div style={s.targetMain} onClick={onOpen}>
-        <span style={s.targetLabel}>
-          {formatTargetLabel(t)}
-          {!t.board_id && (
-            <span title="Banca não definida" style={{ marginLeft: 6, verticalAlign: 'middle' }}>
-              <TriangleAlert size={13} color={theme.warn} strokeWidth={2} />
-            </span>
-          )}
-        </span>
+        {/* O rótulo é um <button> de verdade: a área clicável do card é um div
+            com onClick, então sem isto a entrada principal do Hub do Concurso
+            não tinha foco por teclado nem era anunciada como acionável.
+            stopPropagation evita que o clique dispare onOpen duas vezes. */}
+        <button
+          onClick={(e) => { e.stopPropagation(); onOpen(); }}
+          style={s.targetLabelBtn}
+        >
+          <span style={s.targetLabel}>
+            {formatTargetLabel(t)}
+            {!t.board_id && (
+              <span title="Banca não definida" style={{ marginLeft: 6, verticalAlign: 'middle' }}>
+                <TriangleAlert size={13} color={theme.warn} strokeWidth={2} />
+              </span>
+            )}
+          </span>
+        </button>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
           <span style={{ ...s.phaseTag, ...(t.phase === 'pos' ? s.phaseTagPos : s.phaseTagPre) }}>
             {t.phase === 'pos' ? 'Pós-edital' : 'Pré-edital'}
@@ -587,6 +596,7 @@ const s: Record<string, CSSProperties> = {
   starBtn: { border: 'none', background: 'transparent', cursor: 'pointer', minWidth: 44, minHeight: 44, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginLeft: -8 },
   targetMain: { flex: 1, display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', cursor: 'pointer', minWidth: 0 },
   targetLabel: { fontSize: 15, color: theme.ink, fontWeight: 600 },
+  targetLabelBtn: { border: 'none', background: 'transparent', padding: 0, margin: 0, cursor: 'pointer', font: 'inherit', textAlign: 'left', minWidth: 0 },
   phaseTag: { fontSize: 11, fontWeight: 600, borderRadius: theme.radiusXs, padding: '3px 8px', flexShrink: 0 },
   phaseTagPre: { color: theme.inkSoft, background: theme.muted },
   phaseTagPos: { color: theme.onTeal, background: theme.teal },

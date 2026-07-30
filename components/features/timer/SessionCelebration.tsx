@@ -147,6 +147,7 @@ export function SessionCelebration() {
 
   return (
     <div
+      className="floating-root"
       style={{ ...s.overlay, opacity: visible ? 1 : 0 }}
       onClick={close}
       role="dialog"

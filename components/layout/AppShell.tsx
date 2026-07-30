@@ -13,14 +13,15 @@ import { track, EV } from '@/lib/analytics';
 import { theme, zIndex } from '@/lib/theme';
 
 export function AppShell({ children }: { children: ReactNode }) {
-  const { collapsed, isMobile, isTablet, mobileOpen, setMobileOpen } = useUI();
+  const { collapsed, isMobile, mobileOpen, setMobileOpen } = useUI();
 
   // Instrumentação: 1 evento por carga do app (Rodada 3).
   useEffect(() => { track(EV.appOpened); }, []);
 
-  // marginLeft controlado por JS apenas para desktop (colapsado vs expandido).
+  // marginLeft controlado por JS (colapsado vs expandido), tablet incluído — o
+  // `isTablet ||` daqui existia pra casar com o lock de 72px por CSS, que saiu.
   // O reset para 0 no mobile é feito via CSS (.shell-main) para evitar FOIC.
-  const marginLeft = isMobile ? 0 : (isTablet || collapsed ? 72 : 244);
+  const marginLeft = isMobile ? 0 : (collapsed ? 72 : 244);
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: theme.bg }}>
