@@ -1,75 +1,89 @@
 // components/features/notebook/ErrosView.tsx
-// Aba "Erros" do hub Caderno: log estruturado de erros (Navegar/Recentes/
-// Críticos + banca), extraído da antiga página /notebook SEM alterar a lógica.
-// O hub cuida de header/abas e passa `openNoteId` para abrir um erro vindo da
-// aba "Tudo". O botão "+ Adicionar erro" fica numa barra de ações da própria view.
+// Aba "Erros" do hub Caderno sobre o CadernoShell (rail | lista | editor) —
+// mesmo layout das outras abas. O antigo drill-down de 3 níveis (matéria →
+// tópico → erros espremido na sidebar de 300px, com o painel grande vazio)
+// virou filtros compostos: rail plano de matérias com contadores + visões
+// Recentes/Críticos + selects de tópico/banca. Filtros não se limpam entre si;
+// a lista vive na coluna central e o editor abre o primeiro erro sozinho.
+// O hub cuida de header/abas e passa `openNoteId` (deep-link da aba "Tudo").
 'use client';
 
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import Link from 'next/link';
-import { X } from 'lucide-react';
+import { ClipboardX } from 'lucide-react';
 import { useConfirm } from '@/hooks/useConfirm';
 import { useToast } from '@/components/ui/ToastProvider';
-import { searchNotes, listNotes, getNote, deleteNote, countNotesBySubject, listNotesByBoard, listRecentNotes, listCriticalTopics, listBoards, type ErrorNote, type CriticalTopic } from '@/services/notebook.service';
+import { listNotes, getNote, deleteNote, listCriticalTopics, listBoards, type ErrorNote, type CriticalTopic } from '@/services/notebook.service';
 import { listActiveWithColor, type SubjectColorOption } from '@/services/subjects.service';
 import { listLeaves as listTopicOptions, type PickerOption } from '@/services/topics.service';
 import { scheduleReviewFromError } from '@/services/reviews.service';
 import { NoteEditor } from '@/components/features/notebook/NoteEditor';
+import { CadernoShell } from '@/components/features/caderno/CadernoShell';
+import { ItemCard } from '@/components/features/caderno/ItemCard';
+import { ListPanel } from '@/components/features/caderno/ListPanel';
 import { SubjectPill } from '@/components/features/caderno/SubjectPill';
+import { cutoffDaysAgo } from '@/lib/relative-time';
 import { theme } from '@/lib/theme';
 import { useUI } from '@/components/layout/UIContext';
 import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
+import { SegmentedControl } from '@/components/ui/SegmentedControl';
 
-type Level = 'subjects' | 'topics' | 'notes';
-type ViewMode = 'navegar' | 'recentes' | 'criticos';
+type Modo = 'todos' | 'recentes' | 'criticos';
+type Periodo = '7' | '15' | '30';
 
-const PERIODOS = [7, 15, 30];
+const PERIODOS: { value: Periodo; label: string }[] = [
+  { value: '7', label: '7 dias' },
+  { value: '15', label: '15 dias' },
+  { value: '30', label: '30 dias' },
+];
 
 export function ErrosView({ openNoteId }: { openNoteId?: string | null }) {
-  const { isMobile, isTablet } = useUI();
-  const [viewMode, setViewMode] = useState<ViewMode>('navegar');
-  const [periodo, setPeriodo] = useState(7);
-  const [recentNotes, setRecentNotes] = useState<ErrorNote[]>([]);
-  const [criticals, setCriticals] = useState<CriticalTopic[]>([]);
-
-  const [level, setLevel] = useState<Level>('subjects');
-  const [subjects, setSubjects] = useState<SubjectColorOption[]>([]);
-  const [topics, setTopics] = useState<PickerOption[]>([]);
-  const [notes, setNotes] = useState<ErrorNote[]>([]);
-  const [counts, setCounts] = useState<Record<string, number>>({});
-
-  const [curSubject, setCurSubject] = useState<PickerOption | null>(null);
-  const [curTopic, setCurTopic] = useState<PickerOption | null | 'none'>(null);
-
-  const [term, setTerm] = useState('');
-  const [searchResults, setSearchResults] = useState<ErrorNote[] | null>(null);
-  const [boards, setBoards] = useState<{ id: string; name: string; color: string }[]>([]);
-  const [boardFilter, setBoardFilter] = useState('');
-  const [boardResults, setBoardResults] = useState<ErrorNote[] | null>(null);
-  const [boardLoading, setBoardLoading] = useState(false);
-  const [selected, setSelected] = useState<ErrorNote | null>(null);
-  const [editing, setEditing] = useState(false);
-  const [blankEditor, setBlankEditor] = useState(false);
+  const { isMobile } = useUI();
   const { confirm, dialog } = useConfirm();
   const toast = useToast();
-  const [loadingSubjects, setLoadingSubjects] = useState(true);
-  const [loadingNotes, setLoadingNotes] = useState(false);
-  const [pageError, setPageError] = useState<string | null>(null);
+
+  const [subjects, setSubjects] = useState<SubjectColorOption[]>([]);
+  const [boards, setBoards] = useState<{ id: string; name: string; color: string }[]>([]);
+  const [erros, setErros] = useState<ErrorNote[] | null>(null);
+  const [criticals, setCriticals] = useState<CriticalTopic[]>([]);
+  const [topics, setTopics] = useState<PickerOption[]>([]);
+
+  const [filtroMateria, setFiltroMateria] = useState<'all' | 'none' | string>('all');
+  const [filtroTopico, setFiltroTopico] = useState<'' | 'none' | string>('');
+  const [filtroBanca, setFiltroBanca] = useState('');
+  const [modo, setModo] = useState<Modo>('todos');
+  const [periodo, setPeriodo] = useState<Periodo>('7');
+  const [busca, setBusca] = useState('');
+
+  const [selected, setSelected] = useState<ErrorNote | null>(null);
+  const [creating, setCreating] = useState(false);
+  // Bump força remount do editor no "Cancelar" (descarta alterações não salvas).
+  const [editorEpoch, setEditorEpoch] = useState(0);
   const loadingSubjectIdRef = useRef<string | null>(null);
 
-  useEffect(() => {
-    Promise.all([
-      listActiveWithColor().then(setSubjects),
-      countNotesBySubject().then(setCounts),
-    ])
-      .catch(() => setPageError('Erro ao carregar matérias. Recarregue a página.'))
-      .finally(() => setLoadingSubjects(false));
+  const recarregar = useCallback(async () => {
+    const [ns, cs] = await Promise.all([listNotes(), listCriticalTopics()]);
+    setErros(ns);
+    setCriticals(cs);
+    return ns;
   }, []);
+
   useEffect(() => {
-    listBoards().then(setBoards).catch((e) => toast.error(e instanceof Error ? e.message : 'Erro ao carregar bancas.'));
-  }, [toast]);
+    let cancelled = false;
+    Promise.all([listActiveWithColor(), listBoards(), listNotes(), listCriticalTopics()])
+      .then(([subs, bs, ns, cs]) => {
+        if (cancelled) return;
+        setSubjects(subs); setBoards(bs); setErros(ns); setCriticals(cs);
+      })
+      .catch((e) => {
+        if (cancelled) return;
+        setErros([]);
+        toast.error(e instanceof Error ? e.message : 'Erro ao carregar o caderno de erros.');
+      });
+    return () => { cancelled = true; };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Abre um erro específico (deep-link da aba "Tudo").
   useEffect(() => {
@@ -78,153 +92,120 @@ export function ErrosView({ openNoteId }: { openNoteId?: string | null }) {
     getNote(openNoteId).then((n) => {
       if (cancelled || !n) return;
       setSelected(n);
-      setBlankEditor(false);
-      setEditing(true);
+      setCreating(false);
     }).catch(() => {});
     return () => { cancelled = true; };
   }, [openNoteId]);
 
+  // Tópicos da matéria filtrada (para o select e para nomear tópicos nos cards).
+  // O reset de filtroTopico fica nos handlers (mudarMateria), NÃO aqui: um effect
+  // rodaria depois de abrirCritico e apagaria o tópico que ele acabou de definir.
   useEffect(() => {
-    if (viewMode !== 'recentes') return;
-    listRecentNotes(periodo).then(setRecentNotes).catch((e) => { toast.error(e instanceof Error ? e.message : 'Erro ao carregar notas recentes.'); setRecentNotes([]); });
-  }, [viewMode, periodo, toast]);
-
-  useEffect(() => {
-    if (viewMode !== 'criticos') return;
-    listCriticalTopics().then(setCriticals).catch((e) => { toast.error(e instanceof Error ? e.message : 'Erro ao carregar tópicos críticos.'); setCriticals([]); });
-  }, [viewMode, toast]);
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- reset ao limpar o filtro de banca
-    if (!boardFilter) { setBoardResults(null); setBoardLoading(false); return; }
-    setBoardLoading(true);
-    listNotesByBoard(boardFilter)
-      .then(setBoardResults)
-      .catch((e) => { toast.error(e instanceof Error ? e.message : 'Erro ao filtrar por banca.'); setBoardResults([]); })
-      .finally(() => setBoardLoading(false));
-  }, [boardFilter, toast]);
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- reset ao limpar a busca
-    if (!term.trim()) { setSearchResults(null); return; }
-    const t = setTimeout(() => {
-      searchNotes(term).then(setSearchResults).catch((e) => { toast.error(e instanceof Error ? e.message : 'Erro na busca.'); setSearchResults([]); });
-    }, 300);
-    return () => clearTimeout(t);
-  }, [term, toast]);
-
-  const loadNotes = useCallback(async (subjectId: string, topicId: string | null) => {
-    setLoadingNotes(true);
-    try {
-      const data = await listNotes({ subjectId, topicId });
-      setNotes(data);
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : 'Erro ao carregar anotações. Tente novamente.');
-    } finally {
-      setLoadingNotes(false);
-    }
-  }, [toast]);
-
-  function openSubject(sub: PickerOption) {
-    setCurSubject(sub);
-    setLevel('topics');
-    loadingSubjectIdRef.current = sub.id;
-    listTopicOptions(sub.id)
-      .then((ts) => { if (loadingSubjectIdRef.current === sub.id) setTopics(ts); })
+    if (filtroMateria === 'all' || filtroMateria === 'none') { setTopics([]); return; }
+    loadingSubjectIdRef.current = filtroMateria;
+    listTopicOptions(filtroMateria)
+      .then((ts) => { if (loadingSubjectIdRef.current === filtroMateria) setTopics(ts); })
       .catch((e) => toast.error(e instanceof Error ? e.message : 'Erro ao carregar tópicos.'));
+  }, [filtroMateria, toast]);
+
+  function mudarMateria(m: 'all' | 'none' | string) {
+    setFiltroMateria(m);
+    setFiltroTopico('');
   }
 
-  function openTopic(t: PickerOption | 'none') {
-    setCurTopic(t);
-    const topicId = t === 'none' ? null : t.id;
-    loadNotes(curSubject!.id, topicId);
-    setLevel('notes');
-  }
+  const subjectNameById = useMemo(() => new Map(subjects.map((s) => [s.id, s.name])), [subjects]);
+  const boardNameById = useMemo(() => new Map(boards.map((b) => [b.id, b.name])), [boards]);
+  const topicNameById = useMemo(() => new Map(topics.map((t) => [t.id, t.name])), [topics]);
 
-  async function openCriticalTopic(c: CriticalTopic) {
-    setViewMode('navegar');
-    setCurSubject({ id: c.subjectId, name: c.subjectName });
-    setCurTopic({ id: c.topicId, name: c.topicName });
-    setLevel('notes');
-    setLoadingNotes(true);
-    try {
-      const [data, topicList] = await Promise.all([
-        listNotes({ subjectId: c.subjectId, topicId: c.topicId }),
-        listTopicOptions(c.subjectId),
-      ]);
-      setNotes(data);
-      setTopics(topicList);
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : 'Erro ao carregar notas.');
-    } finally {
-      setLoadingNotes(false);
+  const countPorMateria = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const n of erros ?? []) {
+      const k = n.subject_id ?? 'none';
+      map.set(k, (map.get(k) ?? 0) + 1);
     }
+    return map;
+  }, [erros]);
+
+  const errosFiltrados = useMemo(() => {
+    let out = erros ?? [];
+    if (filtroMateria === 'none') out = out.filter((n) => !n.subject_id);
+    else if (filtroMateria !== 'all') out = out.filter((n) => n.subject_id === filtroMateria);
+    if (filtroTopico === 'none') out = out.filter((n) => !n.topic_id);
+    else if (filtroTopico) out = out.filter((n) => n.topic_id === filtroTopico);
+    if (filtroBanca) out = out.filter((n) => n.board_id === filtroBanca);
+    if (modo === 'recentes') {
+      const corte = cutoffDaysAgo(Number(periodo));
+      out = out.filter((n) => new Date(n.created_at).getTime() >= corte);
+    }
+    const termo = busca.trim().toLowerCase();
+    if (termo) {
+      out = out.filter((n) =>
+        (n.title ?? '').toLowerCase().includes(termo)
+        || (n.content_text ?? '').toLowerCase().includes(termo));
+    }
+    return out;
+  }, [erros, filtroMateria, filtroTopico, filtroBanca, modo, periodo, busca]);
+
+  const criticalsFiltrados = useMemo(() => {
+    if (filtroMateria === 'all') return criticals;
+    if (filtroMateria === 'none') return [];
+    return criticals.filter((c) => c.subjectId === filtroMateria);
+  }, [criticals, filtroMateria]);
+
+  // Painel de detalhe nunca fica estruturalmente vazio: com a lista carregada e
+  // nada aberto, abre o primeiro erro (padrão Gmail). Mobile fica de fora — lá
+  // abrir significa trocar de tela.
+  useEffect(() => {
+    if (isMobile || openNoteId || selected || creating || modo === 'criticos') return;
+    if (!erros || errosFiltrados.length === 0) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- seleção derivada da lista carregada
+    setSelected(errosFiltrados[0]);
+  }, [isMobile, openNoteId, selected, creating, modo, erros, errosFiltrados]);
+
+  function abrirCritico(c: CriticalTopic) {
+    setModo('todos');
+    setFiltroMateria(c.subjectId);
+    setFiltroTopico(c.topicId);
   }
 
-  function handleNew() {
+  function handleNovo() {
     setSelected(null);
-    setBlankEditor(false);
-    setEditing(true);
-  }
-
-  function handleNewGlobal() {
-    setSelected(null);
-    setBlankEditor(true);
-    setEditing(true);
-  }
-
-  function handleSelectNote(n: ErrorNote) {
-    setSelected(n);
-    setBlankEditor(false);
-    setEditing(true);
-  }
-
-  function refreshAux() {
-    if (viewMode === 'recentes') listRecentNotes(periodo).then(setRecentNotes).catch((e) => toast.error(e instanceof Error ? e.message : 'Erro ao atualizar recentes.'));
-    if (viewMode === 'criticos') listCriticalTopics().then(setCriticals).catch((e) => toast.error(e instanceof Error ? e.message : 'Erro ao atualizar críticos.'));
+    setCreating(true);
   }
 
   async function handleSaved() {
     toast.success('Erro salvo no caderno.');
-    setEditing(false);
-    setSelected(null);
-    setBlankEditor(false);
-    if (curSubject) {
-      const topicId = curTopic === 'none' ? null : (curTopic?.id ?? null);
-      loadNotes(curSubject.id, topicId);
+    try {
+      const fresh = await recarregar();
+      if (creating) {
+        setCreating(false);
+        setSelected(fresh[0] ?? null);
+      } else if (selected) {
+        setSelected(fresh.find((n) => n.id === selected.id) ?? null);
+      }
+    } catch {
+      // lista fica como está; o save em si já foi confirmado
     }
-    if (boardFilter) {
-      listNotesByBoard(boardFilter).then(setBoardResults).catch(() => {});
-    }
-    if (!selected) countNotesBySubject().then(setCounts).catch(() => {});
-    refreshAux();
   }
 
-  async function handleDelete(id: string, e: React.MouseEvent) {
-    e.stopPropagation();
-    const snapshotSubject = curSubject;
-    const snapshotTopic = curTopic;
+  async function handleDelete(id: string) {
     if (!await confirm({ title: 'Apagar este erro?', confirmLabel: 'Apagar', danger: true })) return;
     try {
       await deleteNote(id);
       toast.success('Erro apagado.');
-      if (selected?.id === id) { setSelected(null); setEditing(false); }
-      if (snapshotSubject) {
-        const topicId = snapshotTopic === 'none' ? null : (snapshotTopic?.id ?? null);
-        loadNotes(snapshotSubject.id, topicId);
-      }
-      if (searchResults) setSearchResults(searchResults.filter((n) => n.id !== id));
-      if (boardResults) setBoardResults(boardResults.filter((n) => n.id !== id));
-      setRecentNotes((prev) => prev.filter((n) => n.id !== id));
-      countNotesBySubject().then(setCounts).catch(() => {});
-      listCriticalTopics().then(setCriticals).catch(() => {});
+      setSelected(null);
+      setCreating(false);
+      await recarregar();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Erro ao apagar a anotação. Tente novamente.');
     }
   }
 
-  const presetSubjectId = blankEditor ? null : (curSubject?.id || null);
-  const presetTopicId = blankEditor ? null : (curTopic === 'none' ? null : (curTopic?.id ?? null));
+  function handleCancel() {
+    if (creating) { setCreating(false); return; }
+    // Descartar alterações do erro aberto: remonta o editor no estado salvo.
+    setEditorEpoch((e) => e + 1);
+  }
 
   function acColor(pct: number): string {
     if (pct >= 75) return theme.ok;
@@ -232,241 +213,198 @@ export function ErrosView({ openNoteId }: { openNoteId?: string | null }) {
     return theme.crit;
   }
 
-  const showSidebar = !isMobile || !editing;
-  const showMain = !isMobile || editing;
+  const totalErros = erros?.length ?? 0;
 
-  return (
-    <div>
-      <div style={styles.actionsRow}>
-        <p style={styles.sub}>Registre o erro. Revise os recentes e ataque os críticos.</p>
-        <Button onClick={handleNewGlobal} style={{ width: isMobile ? '100%' : undefined }}>+ Adicionar erro</Button>
-      </div>
-
-      {dialog}
-      {pageError && (
-        <p role="alert" aria-live="polite" style={styles.pageError}>{pageError}</p>
+  const rail = (
+    <>
+      <SubjectPill
+        className="touch-target"
+        name="Todos"
+        count={totalErros}
+        alwaysShowCount
+        active={filtroMateria === 'all'}
+        onClick={() => mudarMateria('all')}
+      />
+      {subjects.map((sub) => (
+        <SubjectPill
+          className="touch-target"
+          key={sub.id}
+          color={sub.color}
+          name={sub.name}
+          count={countPorMateria.get(sub.id) ?? 0}
+          active={filtroMateria === sub.id}
+          onClick={() => mudarMateria(sub.id)}
+        />
+      ))}
+      {(countPorMateria.get('none') ?? 0) > 0 && (
+        <SubjectPill
+          className="touch-target"
+          name="Sem matéria"
+          count={countPorMateria.get('none')}
+          active={filtroMateria === 'none'}
+          onClick={() => mudarMateria('none')}
+        />
       )}
+      {subjects.length === 0 && erros !== null && (
+        <Link href="/subjects" style={s.railLink}>Adicionar matéria →</Link>
+      )}
+      <span style={s.railCrumb}>Visões</span>
+      <SubjectPill
+        className="touch-target"
+        name="Recentes"
+        active={modo === 'recentes'}
+        onClick={() => setModo(modo === 'recentes' ? 'todos' : 'recentes')}
+      />
+      <SubjectPill
+        className="touch-target"
+        name="Críticos"
+        color={theme.crit}
+        count={criticals.length}
+        active={modo === 'criticos'}
+        onClick={() => setModo(modo === 'criticos' ? 'todos' : 'criticos')}
+      />
+    </>
+  );
 
-      <div style={{ ...styles.layout, flexDirection: isMobile ? 'column' : 'row' }}>
-        {showSidebar && (
-        <aside style={{ ...styles.sidebar, width: isMobile ? '100%' : isTablet ? 240 : 300 }}>
-          <div style={styles.tabs}>
-            {(['navegar', 'recentes', 'criticos'] as ViewMode[]).map((m) => (
-              <button key={m} onClick={() => {
-                if (m !== 'navegar') { setTerm(''); setBoardFilter(''); }
-                setViewMode(m);
-              }} style={{ ...styles.tab, ...(viewMode === m ? styles.tabOn : {}) }}>
-                {m === 'navegar' ? 'Navegar' : m === 'recentes' ? 'Recentes' : 'Críticos'}
-              </button>
-            ))}
+  const materiEspecifica = filtroMateria !== 'all' && filtroMateria !== 'none';
+
+  const extraTools = modo === 'criticos' ? null : (
+    <div style={s.filtrosRow}>
+      {materiEspecifica && topics.length > 0 && (
+        <Select value={filtroTopico} onChange={(e) => setFiltroTopico(e.target.value)} style={{ flex: '1 1 0', minWidth: 120, fontSize: 13 }} aria-label="Filtrar por tópico">
+          <option value="">Todos os tópicos</option>
+          {topics.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
+          <option value="none">Sem tópico</option>
+        </Select>
+      )}
+      <Select value={filtroBanca} onChange={(e) => setFiltroBanca(e.target.value)} style={{ flex: '1 1 0', minWidth: 120, fontSize: 13 }} aria-label="Filtrar por banca">
+        <option value="">Todas as bancas</option>
+        {boards.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
+      </Select>
+      {modo === 'recentes' && (
+        <SegmentedControl options={PERIODOS} value={periodo} onChange={setPeriodo} equalWidth={false} />
+      )}
+    </div>
+  );
+
+  const lista = (
+    <ListPanel
+      busca={busca}
+      onBusca={setBusca}
+      placeholder="Buscar nos erros…"
+      onNovo={handleNovo}
+      novoLabel="+ Novo"
+      extraTools={extraTools}
+    >
+      {erros === null ? (
+        <p style={s.vazio}>Abrindo seu caderno de erros…</p>
+      ) : modo === 'criticos' ? (
+        criticalsFiltrados.length === 0 ? (
+          <p style={s.muted}>Nenhum erro com tópico ainda. Registre erros vinculados a tópicos para ver suas prioridades.</p>
+        ) : criticalsFiltrados.map((c) => (
+          <div key={c.topicId} onClick={() => abrirCritico(c)} role="button" tabIndex={0}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); abrirCritico(c); } }}
+            className="caderno-item-card"
+            style={{ ...s.critItem, ...(c.isAlert ? s.critAlert : {}) }}>
+            <div style={s.critTop}>
+              <span style={s.critName}>{c.topicName}</span>
+              {c.isAlert && <span style={s.critBadge}>crítico</span>}
+            </div>
+            <span style={s.critSubject}>{c.subjectName}</span>
+            <div style={s.critStats}>
+              <span style={s.critErrors}>{c.errorCount} {c.errorCount === 1 ? 'erro' : 'erros'}</span>
+              <span style={s.critDot}>·</span>
+              <span style={s.critAcerto}>
+                {c.acertoPct === null ? '— acerto' : (
+                  <>acerto <b style={{ color: acColor(c.acertoPct) }}>{c.acertoPct}%</b></>
+                )}
+              </span>
+            </div>
           </div>
-
-          {viewMode === 'recentes' ? (
-            <>
-              <div style={styles.periodRow}>
-                {PERIODOS.map((p) => (
-                  <button key={p} onClick={() => setPeriodo(p)}
-                    style={{ ...styles.periodBtn, ...(periodo === p ? styles.periodBtnOn : {}) }}>
-                    {p} dias
-                  </button>
-                ))}
-              </div>
-              <div style={styles.list}>
-                <p style={styles.crumb}>Erros dos últimos {periodo} dias</p>
-                {recentNotes.length === 0 ? (
-                  <p style={styles.muted}>Nenhum erro registrado neste período.</p>
-                ) : recentNotes.map((n) => (
-                  <NoteItem key={n.id} note={n} active={selected?.id === n.id}
-                    onClick={() => handleSelectNote(n)} onDelete={(e) => handleDelete(n.id, e)} />
-                ))}
-              </div>
-            </>
-          ) : viewMode === 'criticos' ? (
-            <div style={styles.list}>
-              <p style={styles.crumb}>Tópicos por prioridade</p>
-              {criticals.length === 0 ? (
-                <p style={styles.muted}>Nenhum erro com tópico ainda. Registre erros vinculados a tópicos para ver suas prioridades.</p>
-              ) : criticals.map((c) => (
-                <div key={c.topicId} onClick={() => openCriticalTopic(c)}
-                  style={{ ...styles.critItem, ...(c.isAlert ? styles.critAlert : {}) }}>
-                  <div style={styles.critTop}>
-                    <span style={styles.critName}>{c.topicName}</span>
-                    {c.isAlert && <span style={styles.critBadge}>crítico</span>}
-                  </div>
-                  <span style={styles.critSubject}>{c.subjectName}</span>
-                  <div style={styles.critStats}>
-                    <span style={styles.critErrors}>{c.errorCount} {c.errorCount === 1 ? 'erro' : 'erros'}</span>
-                    <span style={styles.critDot}>·</span>
-                    <span style={styles.critAcerto}>
-                      {c.acertoPct === null ? '— acerto' : (
-                        <>acerto <b style={{ color: acColor(c.acertoPct) }}>{c.acertoPct}%</b></>
-                      )}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <>
-              <Input value={term} onChange={(e) => setTerm(e.target.value)}
-                placeholder="Buscar em todos os erros…" />
-              <Select value={boardFilter} onChange={(e) => setBoardFilter(e.target.value)}>
-                <option value="">Todas as bancas</option>
-                {boards.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
-              </Select>
-
-              {boardFilter && (boardLoading || boardResults !== null) ? (
-                <div style={styles.list}>
-                  <p style={styles.crumb}>Erros da banca selecionada</p>
-                  {boardLoading ? (
-                    <p style={styles.muted}>Carregando…</p>
-                  ) : boardResults?.length === 0 ? (
-                    <p style={styles.muted}>Nenhum erro nesta banca.</p>
-                  ) : boardResults?.map((n) => (
-                    <NoteItem key={n.id} note={n} active={selected?.id === n.id}
-                      onClick={() => handleSelectNote(n)} onDelete={(e) => handleDelete(n.id, e)} />
-                  ))}
-                </div>
-              ) : searchResults !== null ? (
-                <div style={styles.list}>
-                  <p style={styles.crumb}>Resultados da busca</p>
-                  {searchResults.length === 0 ? (
-                    <p style={styles.muted}>Nada encontrado.</p>
-                  ) : searchResults.map((n) => (
-                    <NoteItem key={n.id} note={n} active={selected?.id === n.id}
-                      onClick={() => handleSelectNote(n)} onDelete={(e) => handleDelete(n.id, e)} />
-                  ))}
-                </div>
-              ) : (
-                <>
-                  {level === 'subjects' && (
-                    <div style={styles.list}>
-                      <p style={styles.crumb}>Matérias</p>
-                      {loadingSubjects ? (
-                        <p style={styles.muted}>Carregando…</p>
-                      ) : subjects.length === 0 ? (
-                        <div>
-                          <p style={styles.muted}>Nenhuma matéria cadastrada ainda.</p>
-                          <Link href="/subjects" style={{ display: 'inline-block', marginTop: 10, fontSize: 14, color: theme.teal, fontWeight: 600, textDecoration: 'none' }}>Adicionar matéria →</Link>
-                        </div>
-                      ) : subjects.map((sub) => (
-                        <SubjectPill
-                          key={sub.id}
-                          color={sub.color}
-                          name={sub.name}
-                          count={counts[sub.id] ?? 0}
-                          active={curSubject?.id === sub.id}
-                          onClick={() => openSubject(sub)}
-                        />
-                      ))}
-                    </div>
-                  )}
-
-                  {level === 'topics' && curSubject && (
-                    <div style={styles.list}>
-                      <button onClick={() => { setLevel('subjects'); setCurSubject(null); }} style={styles.back}>← Matérias</button>
-                      <p style={styles.crumbSubject}>{curSubject.name}</p>
-                      {topics.map((t) => (
-                        <div key={t.id} onClick={() => openTopic(t)} style={styles.navItem}>
-                          <span style={styles.navItemName}>{t.name}</span>
-                        </div>
-                      ))}
-                      <div onClick={() => openTopic('none')} style={{ ...styles.navItem }}>
-                        <span style={{ ...styles.navItemName, fontStyle: 'italic', color: theme.inkFaint }}>Sem tópico específico</span>
-                      </div>
-                    </div>
-                  )}
-
-                  {level === 'notes' && curSubject && (
-                    <div style={styles.list}>
-                      <button onClick={() => setLevel('topics')} style={styles.back}>← Tópicos</button>
-                      <p style={styles.crumbSubject}>
-                        {curTopic === 'none' ? 'Sem tópico' : (curTopic as PickerOption)?.name}
-                      </p>
-                      <Button fullWidth onClick={handleNew}>+ Novo erro</Button>
-                      {loadingNotes ? (
-                        <p style={styles.muted}>Carregando…</p>
-                      ) : notes.length === 0 ? (
-                        <p style={styles.muted}>Nenhum erro aqui ainda.</p>
-                      ) : notes.map((n) => (
-                        <NoteItem key={n.id} note={n} active={selected?.id === n.id}
-                          onClick={() => handleSelectNote(n)} onDelete={(e) => handleDelete(n.id, e)} />
-                      ))}
-                    </div>
-                  )}
-                </>
-              )}
-            </>
+        ))
+      ) : errosFiltrados.length === 0 ? (
+        <div style={s.vazioBox}>
+          <p style={s.vazioTitulo}>{busca ? 'Nada encontrado.' : 'Nenhum erro aqui ainda.'}</p>
+          {!busca && (
+            <p style={s.vazioSub}>Registre o que você errou — com matéria, tópico e banca — e ataque os críticos. Comece com “+ Novo”.</p>
           )}
-        </aside>
-        )}
+        </div>
+      ) : (
+        errosFiltrados.map((n) => (
+          <ItemCard
+            key={n.id}
+            title={n.title || '(sem título)'}
+            preview={(n.content_text ?? '').trim().slice(0, 130)}
+            chip={{ label: n.error_type ?? 'Erro', bg: theme.clayBg, ink: theme.clayDeep }}
+            meta={[
+              filtroMateria === 'all' ? (n.subject_id ? subjectNameById.get(n.subject_id) : null) : (n.topic_id ? topicNameById.get(n.topic_id) : null),
+              n.board_id ? boardNameById.get(n.board_id) : null,
+            ]}
+            when={n.updated_at}
+            active={!creating && selected?.id === n.id}
+            onClick={() => { setCreating(false); setSelected(n); }}
+          />
+        ))
+      )}
+    </ListPanel>
+  );
 
-        {showMain && (
-        <section style={styles.main}>
-          {editing ? (
-            <>
-              {isMobile && (
-                <button onClick={() => { setEditing(false); setSelected(null); setBlankEditor(false); }} style={styles.backToList}>
-                  ← Voltar à lista
-                </button>
-              )}
-              <NoteEditor
-                note={selected}
-                presetSubjectId={presetSubjectId}
-                presetTopicId={presetTopicId}
-                onSaved={handleSaved}
-                onCancel={() => { setEditing(false); setSelected(null); setBlankEditor(false); }}
-                onScheduleReview={(topicId, days) => scheduleReviewFromError(topicId, days)}
-              />
-            </>
-          ) : (
-            <div style={styles.empty}>
-              <p style={styles.muted}>Navegue até um tópico e crie ou selecione um erro — ou use “Adicionar erro” no topo.</p>
-            </div>
-          )}
-        </section>
-        )}
-      </div>
+  const detalhe = (creating || selected) ? (
+    <>
+      {isMobile && (
+        <button onClick={() => { setSelected(null); setCreating(false); }} style={s.backToList}>
+          ← Voltar à lista
+        </button>
+      )}
+      <NoteEditor
+        key={creating ? 'novo' : `${selected!.id}-${editorEpoch}`}
+        note={creating ? null : selected}
+        presetSubjectId={creating && materiEspecifica ? filtroMateria : null}
+        presetTopicId={creating && filtroTopico && filtroTopico !== 'none' ? filtroTopico : null}
+        onSaved={handleSaved}
+        onCancel={handleCancel}
+        onDelete={handleDelete}
+        onScheduleReview={(topicId, days) => scheduleReviewFromError(topicId, days)}
+      />
+    </>
+  ) : (
+    <div style={s.editorVazio}>
+      <ClipboardX size={34} strokeWidth={1.3} style={{ marginBottom: 8 }} />
+      <p style={s.vazioTitulo}>Erro registrado é erro que não se repete.</p>
+      <p style={s.vazioSub}>
+        Selecione um erro ao lado para revisar — ou registre um novo com matéria,
+        tópico e banca.
+      </p>
+      <Button style={{ marginTop: 16 }} onClick={handleNovo}>+ Novo erro</Button>
     </div>
   );
-}
 
-function NoteItem({ note, active, onClick, onDelete }: {
-  note: ErrorNote; active: boolean;
-  onClick: () => void; onDelete: (e: React.MouseEvent) => void;
-}) {
   return (
-    <div onClick={onClick} style={{ ...styles.item, ...(active ? styles.itemActive : {}) }}>
-      <div style={styles.itemTitle}>{note.title || '(sem título)'}</div>
-      {note.error_type && <div style={styles.itemMeta}><span style={styles.tag}>{note.error_type}</span></div>}
-      <button onClick={onDelete} style={styles.delBtn} aria-label="Apagar erro"><X size={13} strokeWidth={2} /></button>
-    </div>
+    <>
+      {dialog}
+      <CadernoShell
+        rail={rail}
+        lista={lista}
+        detalhe={detalhe}
+        mobileDetalhe={isMobile && (creating || selected !== null)}
+      />
+    </>
   );
 }
 
-const styles: Record<string, React.CSSProperties> = {
-  sub: { fontSize: 14, color: theme.inkSoft, margin: 0, fontWeight: 500 },
-  actionsRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16, flexWrap: 'wrap', marginBottom: 18 },
-  addTopBtn: { padding: '11px 20px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap', flexShrink: 0 },
-  layout: { display: 'flex', gap: 20, alignItems: 'flex-start', width: '100%', minWidth: 0 },
-  sidebar: { width: 300, flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 10, minWidth: 0 },
-  tabs: { display: 'flex', gap: 4, background: 'rgba(15,23,42,.06)', borderRadius: theme.radiusSm, padding: 4 },
-  tab: { flex: 1, padding: '8px 0', border: 'none', background: 'transparent', color: theme.inkSoft, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', borderRadius: theme.radiusSm - 2 },
-  tabOn: { background: theme.card, color: theme.ink, boxShadow: theme.shadow },
-  periodRow: { display: 'flex', gap: 6 },
-  periodBtn: { flex: 1, padding: '7px 0', borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.card, color: theme.inkSoft, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
-  periodBtnOn: { background: theme.card, borderColor: theme.teal, color: theme.ink, boxShadow: theme.shadow },
-  crumb: { fontSize: 11, color: theme.inkFaint, fontWeight: 600, margin: '4px 0', textTransform: 'uppercase', letterSpacing: 0.6 },
-  crumbSubject: { fontSize: 15, color: theme.ink, fontWeight: 700, margin: '6px 0 4px', lineHeight: 1.4 },
-  back: { border: 'none', background: 'transparent', color: theme.teal, fontSize: 13, fontWeight: 500, cursor: 'pointer', padding: 0, textAlign: 'left', fontFamily: 'inherit' },
-  backToList: { border: 'none', background: 'transparent', color: theme.teal, fontSize: 14, fontWeight: 600, cursor: 'pointer', padding: 0, textAlign: 'left', fontFamily: 'inherit', marginBottom: 14 },
-  newBtn: { padding: '11px 14px', width: '100%', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', marginBottom: 4, fontFamily: 'inherit' },
-  muted: { color: theme.inkFaint, fontSize: 14, lineHeight: 1.5 },
-  pageError: { fontSize: 13, color: theme.danger, background: theme.dangerTint, borderRadius: theme.radiusXs, padding: '8px 14px', marginBottom: 12 },
-  list: { display: 'flex', flexDirection: 'column', gap: 8 },
-  navItem: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, background: theme.card, borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, padding: '13px 15px', cursor: 'pointer' },
-  navItemName: { fontSize: 14, color: theme.ink, fontWeight: 500, lineHeight: 1.45 },
-  critItem: { display: 'flex', flexDirection: 'column', gap: 3, background: theme.card, borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, padding: '13px 15px', cursor: 'pointer' },
+const s: Record<string, CSSProperties> = {
+  railCrumb: { fontSize: 11, color: theme.inkFaint, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.6, padding: '10px 10px 2px', flexShrink: 0, alignSelf: 'center' },
+  railLink: { display: 'inline-block', padding: '8px 10px', fontSize: 13, color: theme.teal, fontWeight: 600, textDecoration: 'none', whiteSpace: 'nowrap' },
+  filtrosRow: { display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' },
+
+  vazio: { fontSize: 13, color: theme.inkFaint, padding: '16px 4px' },
+  muted: { color: theme.inkFaint, fontSize: 14, lineHeight: 1.5, padding: '8px 4px' },
+  vazioBox: { textAlign: 'center', padding: '28px 12px' },
+  vazioTitulo: { fontSize: 15, fontWeight: 700, color: theme.ink, margin: '0 0 6px' },
+  vazioSub: { fontSize: 13, color: theme.inkSoft, lineHeight: 1.55, maxWidth: 320, margin: '0 auto' },
+  editorVazio: { display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', height: '100%', padding: 24, color: theme.inkSoft },
+
+  critItem: { display: 'flex', flexDirection: 'column', gap: 3, background: theme.card, borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, padding: '11px 13px', cursor: 'pointer' },
   critAlert: { borderWidth: 1.5, borderColor: theme.crit, background: theme.bg },
   critTop: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
   critName: { fontSize: 14, color: theme.ink, fontWeight: 600, lineHeight: 1.35 },
@@ -476,12 +414,6 @@ const styles: Record<string, React.CSSProperties> = {
   critErrors: { fontWeight: 600, color: theme.ink },
   critDot: { color: theme.inkFaint },
   critAcerto: { color: theme.inkSoft },
-  item: { position: 'relative', background: theme.card, borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, padding: '13px 15px', cursor: 'pointer', transition: 'border-color .15s' },
-  itemActive: { borderColor: theme.teal, background: theme.tealBg },
-  itemTitle: { fontSize: 14, color: theme.ink, fontWeight: 500, paddingRight: 20, lineHeight: 1.4 },
-  itemMeta: { marginTop: 6 },
-  tag: { fontSize: 11, color: theme.tealDeep, background: theme.tealBg, padding: '2px 8px', borderRadius: 6, fontWeight: 600 },
-  delBtn: { position: 'absolute', top: 10, right: 10, border: 'none', background: 'transparent', color: theme.inkFaint, fontSize: 12, cursor: 'pointer', opacity: 0.6 },
-  main: { flex: '1 1 0', minWidth: 0, maxWidth: '100%', width: '100%', background: theme.card, borderRadius: theme.radius, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, boxShadow: theme.shadow, padding: 24, minHeight: 440, overflowX: 'hidden', boxSizing: 'border-box' },
-  empty: { display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 392, textAlign: 'center' },
+
+  backToList: { border: 'none', background: 'transparent', color: theme.teal, fontSize: 14, fontWeight: 600, cursor: 'pointer', padding: 0, textAlign: 'left', fontFamily: 'inherit', marginBottom: 14 },
 };

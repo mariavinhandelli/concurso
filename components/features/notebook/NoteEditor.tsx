@@ -31,9 +31,11 @@ interface Props {
   onCancel: () => void;
   /** Chamado quando o usuário confirma o agendamento de revisão pós-save. Responsabilidade do pai. */
   onScheduleReview?: (topicId: string, days: number) => Promise<void>;
+  /** Excluir o erro aberto — confirmação e efeito são responsabilidade do pai. */
+  onDelete?: (id: string) => void;
 }
 
-export function NoteEditor({ note, presetSubjectId = null, presetTopicId = null, onSaved, onCancel, onScheduleReview }: Props) {
+export function NoteEditor({ note, presetSubjectId = null, presetTopicId = null, onSaved, onCancel, onScheduleReview, onDelete }: Props) {
   const toast = useToast();
   const [title, setTitle] = useState('');
   const [content, setContent] = useState<object>({});
@@ -283,6 +285,11 @@ export function NoteEditor({ note, presetSubjectId = null, presetTopicId = null,
       {error && <p style={styles.error}>{error}</p>}
 
       <div style={styles.actions}>
+        {note && onDelete && (
+          <Button variant="dangerSoft" onClick={() => onDelete(note.id)} style={{ marginRight: 'auto' }}>
+            Apagar
+          </Button>
+        )}
         <Button variant="outline" onClick={onCancel}>Cancelar</Button>
         <Button onClick={handleSave} disabled={!canSave || saving}>
           {saving ? 'Salvando…' : note ? 'Atualizar' : 'Salvar erro'}
