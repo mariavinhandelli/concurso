@@ -170,22 +170,38 @@ export default function EditalDetailPage() {
       .map((e) => ({
         id: e.id,
         label: `Edição ${e.ano ?? e.ultimaEdicao ?? '—'}${e.banca ? ` · ${e.banca}` : ''}`,
-        mesmoConcurso: true,
+        grupo: 'edicao' as const,
       }));
-    const outroOpts: ComparadorOption[] = (todosEditais ?? [])
-      // Sem conteúdo programático curado não há o que comparar — o diff sairia
-      // "tudo adicionado", que é enganoso.
-      // E só faz sentido comparar cargos do MESMO órgão: o diff entre editais
-      // de órgãos diferentes é quase 100% de diferença, sem informação útil.
-      .filter((e) => e.id !== edital.id && e.subjectCount > 0
-        && e.orgaoSlug != null && e.orgaoSlug === edital.orgaoSlug
-        && (e.concursoKey == null || e.concursoKey !== edital.concursoKey))
+    // Banco inteiro, não só o mesmo órgão (aberto em 31/07): com federais no
+    // catálogo, a pergunta real é "quanto do que já estudo aproveita para
+    // aquele outro concurso?" — INSS × BB × Correios é comparação útil.
+    // O select hierarquiza (órgão primeiro, mesma área antes do resto) para o
+    // caso ruidoso ficar explícito, não proibido. Só fica de fora quem não
+    // tem conteúdo programático curado: o diff sairia "tudo adicionado".
+    const candidatos = (todosEditais ?? []).filter((e) =>
+      e.id !== edital.id && e.subjectCount > 0
+      && (e.concursoKey == null || e.concursoKey !== edital.concursoKey));
+    const orgaoOpts: ComparadorOption[] = candidatos
+      .filter((e) => e.orgaoSlug != null && e.orgaoSlug === edital.orgaoSlug)
       .map((e) => ({
         id: e.id,
         label: [e.orgao, e.cargo].filter(Boolean).join(' · '),
-        mesmoConcurso: false,
+        grupo: 'orgao' as const,
       }));
-    return [...edicaoOpts, ...outroOpts];
+    const bancoOpts: ComparadorOption[] = candidatos
+      .filter((e) => e.orgaoSlug == null || e.orgaoSlug !== edital.orgaoSlug)
+      .sort((a, b) => {
+        // Mesma área primeiro: é onde o aproveitamento tende a ser real.
+        const aMesma = a.areaName != null && a.areaName === edital.areaName ? 0 : 1;
+        const bMesma = b.areaName != null && b.areaName === edital.areaName ? 0 : 1;
+        return aMesma - bMesma || (a.orgao + a.cargo).localeCompare(b.orgao + b.cargo);
+      })
+      .map((e) => ({
+        id: e.id,
+        label: [e.orgao, e.cargo].filter(Boolean).join(' · '),
+        grupo: 'banco' as const,
+      }));
+    return [...edicaoOpts, ...orgaoOpts, ...bancoOpts];
   }, [edital, edicoes, todosEditais]);
 
   async function handleActivate() {

@@ -18,7 +18,10 @@ import { Skeleton } from '@/components/ui/Skeleton';
 export interface ComparadorOption {
   id: string;
   label: string;
-  mesmoConcurso: boolean;
+  // Hierarquia do select: outra edição do mesmo concurso, outro cargo do
+  // mesmo órgão, ou qualquer edital do banco (aberto em 31/07 — com federais
+  // no catálogo, comparar entre órgãos responde "quanto aproveita?").
+  grupo: 'edicao' | 'orgao' | 'banco';
 }
 
 interface Props {
@@ -80,8 +83,8 @@ export function EditalComparador({ editalAtualId, editalAtualSlug, options }: Pr
   if (options.length === 0) {
     return (
       <p style={s.hint}>
-        Ainda não há outro edital deste órgão (nem outra edição deste concurso) com
-        grade curada para comparar. Quando houver, o comparador aparece aqui.
+        Ainda não há outro edital com grade curada no banco para comparar.
+        Quando houver, o comparador aparece aqui.
       </p>
     );
   }
@@ -91,8 +94,9 @@ export function EditalComparador({ editalAtualId, editalAtualSlug, options }: Pr
     if (id) track(EV.editalCompared, { slug: editalAtualSlug, otherId: id });
   }
 
-  const mesmasEdicoes = options.filter((o) => o.mesmoConcurso);
-  const outros = options.filter((o) => !o.mesmoConcurso);
+  const mesmasEdicoes = options.filter((o) => o.grupo === 'edicao');
+  const mesmoOrgao = options.filter((o) => o.grupo === 'orgao');
+  const outros = options.filter((o) => o.grupo === 'banco');
   const semMudancas = comparison
     && comparison.totalAdded === 0 && comparison.totalRemoved === 0 && comparison.totalChanged === 0;
 
@@ -113,8 +117,13 @@ export function EditalComparador({ editalAtualId, editalAtualSlug, options }: Pr
               {mesmasEdicoes.map((o) => <option key={o.id} value={o.id}>{o.label}</option>)}
             </optgroup>
           )}
-          {outros.length > 0 && (
+          {mesmoOrgao.length > 0 && (
             <optgroup label="Outros cargos deste órgão">
+              {mesmoOrgao.map((o) => <option key={o.id} value={o.id}>{o.label}</option>)}
+            </optgroup>
+          )}
+          {outros.length > 0 && (
+            <optgroup label="Outros editais do banco (mesma área primeiro)">
               {outros.map((o) => <option key={o.id} value={o.id}>{o.label}</option>)}
             </optgroup>
           )}
