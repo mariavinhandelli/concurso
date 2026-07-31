@@ -501,8 +501,12 @@ export default function EditalDetailPage() {
           </section>
         )}
 
-        {/* ── Comparador ── */}
-        {comparadorOptions.length > 0 && edital.subjectCount > 0 && (
+        {/* ── Comparador ──
+            Renderiza sempre que este edital tem grade — mesmo sem opções: a
+            Central de preparação linka para #comparar, e âncora para seção
+            inexistente deixa o usuário no topo da página sem explicação.
+            Sem opções, o EditalComparador mostra o estado vazio honesto. */}
+        {edital.subjectCount > 0 && (
           <section id="comparar" style={s.card}>
             <h2 style={{ ...s.cardTitle, marginBottom: 12 }}>Comparar editais</h2>
             <EditalComparador
@@ -560,7 +564,7 @@ export default function EditalDetailPage() {
           <section id="historico" style={s.card}>
             <div style={s.cardHead}>
               <h2 style={s.cardTitle}>Histórico do concurso</h2>
-              <span style={s.sectionMeta}>nota de corte, inscritos e nomeações por ano</span>
+              <span style={s.sectionMeta}>vagas e inscritos por ano</span>
             </div>
             <ConcursoStatsTable stats={stats!} />
           </section>

@@ -576,14 +576,14 @@ export async function listEdicoes(concursoKey: string): Promise<EditalEdicao[]> 
     .sort((a, b) => (b.ano ?? b.ultimaEdicao ?? 0) - (a.ano ?? a.ultimaEdicao ?? 0));
 }
 
-// Estatísticas históricas do concurso (nota de corte, nomeações…), quando
-// curadas com dado real. Sem linhas = a seção não aparece.
+// Estatísticas históricas do concurso, quando curadas com dado real. Sem
+// linhas = a seção não aparece. Nota de corte e nomeados saíram da UI em
+// 31/07 (decisão de produto: curadoria cara demais para manter honesta) —
+// as colunas seguem no banco para quando a curadoria der conta.
 export interface ConcursoStat {
   ano: number;
   inscritos: number | null;
   vagas: number | null;
-  notaCorte: number | null;
-  nomeados: number | null;
   fonteUrl: string | null;
 }
 
@@ -591,14 +591,12 @@ export async function listConcursoStats(concursoKey: string): Promise<ConcursoSt
   const supabase = createClient();
   const { data, error } = await supabase
     .from('edital_concurso_stats')
-    .select('ano, inscritos, vagas, nota_corte, nomeados, fonte_url')
+    .select('ano, inscritos, vagas, fonte_url')
     .eq('concurso_key', concursoKey)
     .order('ano', { ascending: false });
   if (error) throw new Error('Erro ao listar histórico do concurso: ' + error.message);
   return (data ?? []).map((r) => ({
-    ano: r.ano, inscritos: r.inscritos, vagas: r.vagas,
-    notaCorte: r.nota_corte == null ? null : Number(r.nota_corte),
-    nomeados: r.nomeados, fonteUrl: r.fonte_url,
+    ano: r.ano, inscritos: r.inscritos, vagas: r.vagas, fonteUrl: r.fonte_url,
   }));
 }
 
@@ -630,6 +628,11 @@ export async function listPastPapers(concursoKey: string): Promise<PastPaper[]> 
 export interface EditalComparisonSubject {
   name: string;
   status: 'adicionada' | 'removida' | 'mantida';
+  // true quando a disciplina mantida mudou (peso, questões ou tópicos).
+  // Única fonte da verdade: o resumo ("N alteradas") e as linhas exibidas
+  // usam ESTE campo — quando eram dois cálculos separados, o resumo dizia
+  // "6 alteradas" e as linhas diziam "Mantida" (bug de 31/07).
+  changed: boolean;
   weightAtual: number | null;
   weightAnterior: number | null;
   numQuestionsAtual: number | null;
@@ -705,11 +708,14 @@ export async function compareEditais(editalAtualId: string, editalAnteriorId: st
     if (status === 'removida') totalRemoved += 1;
     // Mudança de nº de questões também conta como alteração — sem isso uma
     // disciplina que só mudou de 10 para 12 questões sumiria do diff.
-    if (status === 'mantida' && (a!.weight !== b!.weight || a!.numQuestions !== b!.numQuestions || topicsAdded.length > 0 || topicsRemoved.length > 0)) totalChanged += 1;
+    const changed = status === 'mantida'
+      && (a!.weight !== b!.weight || a!.numQuestions !== b!.numQuestions || topicsAdded.length > 0 || topicsRemoved.length > 0);
+    if (changed) totalChanged += 1;
 
     subjects.push({
       name,
       status,
+      changed,
       weightAtual: a?.weight ?? null,
       weightAnterior: b?.weight ?? null,
       numQuestionsAtual: a?.numQuestions ?? null,
