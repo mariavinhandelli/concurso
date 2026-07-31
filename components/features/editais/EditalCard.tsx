@@ -5,8 +5,8 @@
 
 import { useState, type CSSProperties } from 'react';
 import Link from 'next/link';
-import { Check } from 'lucide-react';
-import { type CatalogEdital } from '@/services/editaisCatalog.service';
+import { Check, Users } from 'lucide-react';
+import { STUDYING_BADGE_MIN, type CatalogEdital } from '@/services/editaisCatalog.service';
 import { formatDateBR } from '@/lib/targets';
 import { theme } from '@/lib/theme';
 
@@ -35,9 +35,11 @@ interface Props {
   edital: CatalogEdital;
   /** Oculta o órgão no título (página do órgão já o exibe no header). */
   hideOrgao?: boolean;
+  /** Pessoas estudando este edital nos últimos 30 dias (prova social). */
+  estudando?: number;
 }
 
-export function EditalCard({ edital: e, hideOrgao }: Props) {
+export function EditalCard({ edital: e, hideOrgao, estudando }: Props) {
   const [hov, setHov] = useState(false);
   const meta = [
     e.banca,
@@ -82,6 +84,13 @@ export function EditalCard({ edital: e, hideOrgao }: Props) {
           <span style={s.cardTitle}>{titulo}</span>
           <SituacaoTag situacao={e.situacao} />
           {e.isActivated && <span style={{ ...s.activatedTag, display: 'inline-flex', alignItems: 'center', gap: 4 }}>Ativado <Check size={12} strokeWidth={2.5} /></span>}
+          {/* Prova social só acima da régua: "1 pessoa estudando" depõe contra. */}
+          {(estudando ?? 0) >= STUDYING_BADGE_MIN && (
+            <span style={s.estudandoTag}>
+              <Users size={11} strokeWidth={2.2} />
+              {estudando} estudando
+            </span>
+          )}
         </div>
         <div style={s.cardMeta}>{meta}</div>
         {extra && <div style={s.cardExtra}>{extra}</div>}
@@ -106,6 +115,7 @@ const s: Record<string, CSSProperties> = {
   // paletas do dark mode; inkSoft passa em todas menos menta (dívida de paleta).
   situacaoEncerrado: { color: theme.inkSoft, background: theme.muted },
   activatedTag: { fontSize: 11, fontWeight: 700, color: theme.teal, background: theme.tealBg, borderRadius: theme.radiusXs, padding: '2px 8px', flexShrink: 0 },
+  estudandoTag: { display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 700, color: theme.teal, background: theme.tealBg, borderRadius: theme.radiusPill, padding: '2px 9px', flexShrink: 0, fontVariantNumeric: 'tabular-nums' },
   cardMeta: { fontSize: 13, color: theme.inkSoft, marginTop: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
   cardExtra: { fontSize: 12, color: theme.inkFaint, marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
   cardArrow: { fontSize: 13, fontWeight: 600, flexShrink: 0, whiteSpace: 'nowrap', transition: 'color .15s' },

@@ -12,10 +12,11 @@ import { useQuery } from '@tanstack/react-query';
 import { usePersistedState } from '@/hooks/usePersistedState';
 import { ChevronDown, ChevronRight, Funnel, Landmark, Search } from 'lucide-react';
 import {
-  listCatalogEditais, listOrgaos, SITUACAO_ORDER,
+  getEditalStudyingCounts, listCatalogEditais, listOrgaos, SITUACAO_ORDER,
   type CatalogEdital, type OrgaoCatalog,
 } from '@/services/editaisCatalog.service';
 import { EditalCard } from '@/components/features/editais/EditalCard';
+import { PedirEditalModal } from '@/components/features/editais/PedirEditalModal';
 import { theme } from '@/lib/theme';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
@@ -65,6 +66,14 @@ export function BancoEditaisTab({ onImportar, onImportarPdf }: Props) {
     queryFn: listOrgaos,
     staleTime: 60_000,
   });
+  // Prova social: quem está estudando cada edital (30d). Falha em silêncio —
+  // o banco funciona igual sem o número.
+  const { data: estudandoPorEdital } = useQuery<Record<string, number>>({
+    queryKey: ['edital-studying-counts'],
+    queryFn: getEditalStudyingCounts,
+    staleTime: 5 * 60_000,
+  });
+  const [pedirOpen, setPedirOpen] = useState(false);
 
   const orgaoBySlug = useMemo(() => {
     const m = new Map<string, OrgaoCatalog>();
@@ -113,7 +122,9 @@ export function BancoEditaisTab({ onImportar, onImportarPdf }: Props) {
   }, [editais, area, q, filters]);
 
   // Agrupa por órgão (fallback: texto do órgão, para editais sem vínculo).
-  // Grupos ordenados pela melhor situação interna (vigente primeiro).
+  // Ordem: melhor situação interna (vigente primeiro), depois popularidade
+  // (quem tem mais gente estudando sobe — a escolha vira "onde a concorrência
+  // está", não uma lista fria), e nome como desempate estável.
   const grupos = useMemo(() => {
     const map = new Map<string, { key: string; sigla: string; orgaoSlug: string | null; editais: CatalogEdital[] }>();
     for (const e of filtered) {
@@ -122,12 +133,14 @@ export function BancoEditaisTab({ onImportar, onImportarPdf }: Props) {
       if (g) g.editais.push(e);
       else map.set(key, { key, sigla: e.orgao, orgaoSlug: e.orgaoSlug, editais: [e] });
     }
+    const popularidade = (g: { editais: CatalogEdital[] }) =>
+      g.editais.reduce((acc, e) => acc + (estudandoPorEdital?.[e.id] ?? 0), 0);
     return [...map.values()].sort((a, b) => {
       const sa = Math.min(...a.editais.map((e) => SITUACAO_ORDER[e.situacao]));
       const sb = Math.min(...b.editais.map((e) => SITUACAO_ORDER[e.situacao]));
-      return sa - sb || a.sigla.localeCompare(b.sigla);
+      return sa - sb || popularidade(b) - popularidade(a) || a.sigla.localeCompare(b.sigla);
     });
-  }, [filtered]);
+  }, [filtered, estudandoPorEdital]);
 
   function set<K extends keyof FilterValues>(key: K, value: string) {
     setFilters((prev) => ({ ...prev, [key]: value }));
@@ -255,7 +268,17 @@ export function BancoEditaisTab({ onImportar, onImportarPdf }: Props) {
       )}
 
       {grupos.length === 0 ? (
-        <p style={s.muted}>Nenhum edital encontrado com esses filtros.</p>
+        // Busca sem resultado NÃO é beco sem saída: a lacuna vira pedido.
+        <div style={s.noResult}>
+          <p style={s.muted}>Nenhum edital encontrado com esses filtros.</p>
+          <Button
+            variant="outline"
+            style={{ borderColor: theme.teal, background: theme.tealBg, color: theme.teal }}
+            onClick={() => setPedirOpen(true)}
+          >
+            Pedir este edital →
+          </Button>
+        </div>
       ) : (
         <div style={s.groupList}>
           {grupos.map((g) => {
@@ -294,7 +317,7 @@ export function BancoEditaisTab({ onImportar, onImportarPdf }: Props) {
                 {open && (
                   <div style={{ ...s.list, animation: 'focali-slide-down 0.18s ease' }}>
                     {g.editais.map((e) => (
-                      <EditalCard key={e.id} edital={e} hideOrgao />
+                      <EditalCard key={e.id} edital={e} hideOrgao estudando={estudandoPorEdital?.[e.id]} />
                     ))}
                   </div>
                 )}
@@ -306,16 +329,26 @@ export function BancoEditaisTab({ onImportar, onImportarPdf }: Props) {
 
       <p style={s.footerHint}>
         Não achou seu concurso?{' '}
-        <button className="touch-target" onClick={onImportarPdf} style={s.footerLink}>Importe um PDF →</button>
+        <button className="touch-target" onClick={() => setPedirOpen(true)} style={s.footerLink}>Peça o edital →</button>
+        {', '}
+        <button className="touch-target" onClick={onImportarPdf} style={s.footerLink}>importe um PDF →</button>
         {' ou '}
         <button className="touch-target" onClick={onImportar} style={s.footerLink}>cole o edital →</button>
       </p>
+
+      {pedirOpen && (
+        <PedirEditalModal
+          initialConcurso={q.trim() || undefined}
+          onClose={() => setPedirOpen(false)}
+        />
+      )}
     </>
   );
 }
 
 const s: Record<string, CSSProperties> = {
   muted: { fontSize: 14, color: theme.inkSoft, padding: '12px 0' },
+  noResult: { display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 4 },
   empty: { textAlign: 'center', padding: '40px 12px' },
   emptyTitle: { fontSize: 15, fontWeight: 600, color: theme.inkSoft, margin: '0 0 6px' },
   emptyHint: { fontSize: 13, color: theme.inkFaint, maxWidth: 360, margin: '0 auto 16px', lineHeight: 1.6 },

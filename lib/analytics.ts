@@ -42,6 +42,7 @@ export const EV = {
   editalPdfDownloaded: 'edital_pdf_downloaded',
   editalFollowed: 'edital_followed',
   editalUnfollowed: 'edital_unfollowed',
+  editalRequested: 'edital_requested',
   pastPaperOpened: 'past_paper_opened',
   // Progresso — sem estes, "o módulo de conquistas é usado?" não tinha resposta.
   performanceViewed: 'performance_viewed',

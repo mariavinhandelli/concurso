@@ -358,6 +358,64 @@ export async function getOrgaoBySlug(slug: string): Promise<OrgaoCatalog | null>
   return data ? mapOrgao(data as unknown as OrgaoRow) : null;
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Escolha do usuário: pedido de edital (fila de demanda) e prova social
+// ─────────────────────────────────────────────────────────────────────────────
+
+export interface EditalRequestInput {
+  concurso: string;
+  cargo?: string;
+  uf?: string;
+  detalhes?: string;
+}
+
+// Registra a lacuna do catálogo como demanda. A curadoria prioriza por aqui —
+// cada linha é alguém que procurou e não achou.
+export async function requestEdital(input: EditalRequestInput): Promise<void> {
+  const supabase = createClient();
+  const user = await getCachedUser();
+  if (!user) throw new Error('Entre na sua conta para pedir um edital.');
+  const { error } = await supabase.from('edital_requests').insert({
+    user_id: user.id,
+    concurso: input.concurso.trim(),
+    cargo: input.cargo?.trim() || null,
+    uf: input.uf || null,
+    detalhes: input.detalhes?.trim() || null,
+  });
+  if (error) throw new Error(error.message.includes('10 pedidos')
+    ? error.message
+    : 'Erro ao registrar o pedido: ' + error.message);
+}
+
+export async function listMyEditalRequests(): Promise<{ concurso: string; status: string }[]> {
+  const supabase = createClient();
+  const user = await getCachedUser();
+  if (!user) return [];
+  const { data, error } = await supabase
+    .from('edital_requests')
+    .select('concurso, status')
+    .eq('user_id', user.id)
+    .order('created_at', { ascending: false });
+  if (error) return [];
+  return data ?? [];
+}
+
+// "N pessoas estudando" por edital (ativos nos últimos 30 dias). O RPC devolve
+// o número cru; o LIMIAR de exibição é decisão da UI — contagem pequena não
+// aparece porque "1 pessoa estudando" depõe contra o produto.
+export const STUDYING_BADGE_MIN = 3;
+
+export async function getEditalStudyingCounts(): Promise<Record<string, number>> {
+  const supabase = createClient();
+  const { data, error } = await supabase.rpc('edital_studying_counts');
+  if (error) return {};
+  const map: Record<string, number> = {};
+  for (const row of (data ?? []) as { edital_catalog_id: string; estudando: number }[]) {
+    map[row.edital_catalog_id] = row.estudando;
+  }
+  return map;
+}
+
 // ── Seguir concurso (push de novidades) ──
 // Seguidor explícito recebe web push quando sai edital_update novo. Quem
 // ativou o concurso é seguidor implícito (a Edge Function notify-edital-updates
