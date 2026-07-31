@@ -42,7 +42,7 @@ export function VademecumSimuladoModal({ onClose }: { onClose: () => void }) {
     [],
   );
   const [selecionadas, setSelecionadas] = useState<Set<string>>(new Set());
-  // 0 = todas. Marcar as 37 leis dá 1000+ questões — sem um teto, o simulado
+  // 0 = todas. Marcar todas as leis dá 1000+ questões — sem um teto, o simulado
   // vira maratona impossível de terminar (e sessão não salva se abandonar).
   const [maxQuestoes, setMaxQuestoes] = useState(0);
 

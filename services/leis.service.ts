@@ -421,6 +421,26 @@ export const LEIS_CATALOG: LeiMeta[] = [
     arquivo: '/leis/lei-9296.json',
     totalArtigos: 14,
   },
+  {
+    slug: 'lrf',
+    nome: 'Lei Complementar nº 101, de 4 de maio de 2000 — Lei de Responsabilidade Fiscal (LRF)',
+    nomeCurto: 'LRF (LC 101/00)',
+    ano: 2000,
+    disciplina: 'Direito Financeiro',
+    descricao: 'Normas de finanças públicas voltadas para a responsabilidade na gestão fiscal: planejamento, receita, despesa com pessoal, dívida, transparência e prestação de contas. Texto compilado e atualizado (fonte: Planalto).',
+    arquivo: '/leis/lrf.json',
+    totalArtigos: 83,
+  },
+  {
+    slug: 'lei-4320',
+    nome: 'Lei nº 4.320, de 17 de março de 1964 — Normas Gerais de Direito Financeiro',
+    nomeCurto: 'Lei 4.320/64',
+    ano: 1964,
+    disciplina: 'Direito Financeiro',
+    descricao: 'Normas gerais de direito financeiro para elaboração e controle dos orçamentos e balanços da União, Estados, Municípios e DF. Texto compilado e atualizado (fonte: Planalto) — os anexos são publicados em arquivo à parte pelo Planalto e não integram esta versão.',
+    arquivo: '/leis/lei-4320.json',
+    totalArtigos: 116,
+  },
 ];
 
 const _cache = new Map<string, Promise<Lei>>();

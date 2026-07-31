@@ -1,0 +1,546 @@
+[
+ {
+  "id": "l4320-q1",
+  "artigoKey": "lei-4320:2",
+  "enunciado": "A Lei do Orçamento conterá a discriminação da receita e despesa de forma a evidenciar a política econômica financeira e o programa de trabalho do Governo, obedecidos os princípios de unidade, universalidade e anualidade.",
+  "gabarito": true,
+  "comentario": "Literal do art. 2º, caput.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l4320-q2",
+  "artigoKey": "lei-4320:2",
+  "enunciado": "O Quadro demonstrativo da Receita e Despesa segundo as Categorias Econômicas, na forma do Anexo nº 1, apenas acompanha a Lei de Orçamento, sem integrá-la.",
+  "gabarito": false,
+  "comentario": "Art. 2º, § 1º, II: esse quadro INTEGRA a Lei de Orçamento. O § 2º é que lista o que apenas a acompanha (quadros de fundos especiais, Anexos 6 a 9 e programa anual de trabalho).",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l4320-q3",
+  "artigoKey": "lei-4320:3",
+  "enunciado": "A Lei de Orçamento compreenderá todas as receitas, inclusive as de operações de crédito autorizadas em lei.",
+  "gabarito": true,
+  "comentario": "Literal do art. 3º, caput.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l4320-q4",
+  "artigoKey": "lei-4320:3",
+  "enunciado": "Para os fins do art. 3º, consideram-se receitas orçamentárias as operações de crédito por antecipação da receita, as emissões de papel-moeda e outras entradas compensatórias no ativo e passivo financeiros.",
+  "gabarito": false,
+  "comentario": "Art. 3º, parágrafo único: essas entradas NÃO se consideram para os fins do artigo — são ingressos extraorçamentários.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l4320-q5",
+  "artigoKey": "lei-4320:5",
+  "enunciado": "A Lei de Orçamento não consignará dotações globais destinadas a atender indiferentemente a despesas de pessoal, material, serviços de terceiros, transferências ou quaisquer outras.",
+  "gabarito": true,
+  "comentario": "Literal do art. 5º, ressalvado o disposto no art. 20 e seu parágrafo único.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l4320-q6",
+  "artigoKey": "lei-4320:6",
+  "enunciado": "Todas as receitas e despesas constarão da Lei de Orçamento pelos seus totais, vedadas quaisquer deduções.",
+  "gabarito": true,
+  "comentario": "Literal do art. 6º, caput — princípio do orçamento bruto.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l4320-q7",
+  "artigoKey": "lei-4320:7",
+  "enunciado": "A Lei de Orçamento poderá conter autorização ao Executivo para realizar, em qualquer mês do exercício financeiro, operações de crédito por antecipação da receita, para atender a insuficiências de caixa.",
+  "gabarito": true,
+  "comentario": "Literal do art. 7º, II.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l4320-q8",
+  "artigoKey": "lei-4320:9",
+  "enunciado": "Tributo é a receita derivada instituída pelas entidades de direito público, compreendendo os impostos, as taxas e contribuições, destinando-se o seu produto ao custeio de atividades gerais ou específicas exercidas por essas entidades.",
+  "gabarito": true,
+  "comentario": "Literal do art. 9º — dispositivo restaurado pelo Congresso Nacional na rejeição do veto.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l4320-q9",
+  "artigoKey": "lei-4320:11",
+  "enunciado": "A receita classificar-se-á nas seguintes categorias econômicas: Receitas Correntes e Receitas de Capital.",
+  "gabarito": true,
+  "comentario": "Literal do art. 11, caput.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l4320-q10",
+  "artigoKey": "lei-4320:11",
+  "enunciado": "As receitas provenientes de operações de crédito e da alienação de bens classificam-se como Receitas Correntes.",
+  "gabarito": false,
+  "comentario": "Art. 11, § 2º: são Receitas de Capital as provenientes da constituição de dívidas (operações de crédito) e da conversão em espécie de bens e direitos (alienação de bens).",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l4320-q11",
+  "artigoKey": "lei-4320:11",
+  "enunciado": "O superávit do Orçamento Corrente, resultante do balanceamento dos totais das receitas e despesas correntes, não constituirá item de receita orçamentária.",
+  "gabarito": true,
+  "comentario": "Literal do art. 11, § 3º — embora o § 2º o arrole entre as receitas de capital para fins de classificação.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l4320-q12",
+  "artigoKey": "lei-4320:12",
+  "enunciado": "As Despesas Correntes compreendem as Despesas de Custeio e as Transferências Correntes, ao passo que as Despesas de Capital compreendem os Investimentos, as Inversões Financeiras e as Transferências de Capital.",
+  "gabarito": true,
+  "comentario": "Esquema de classificação do art. 12, caput.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l4320-q13",
+  "artigoKey": "lei-4320:12",
+  "enunciado": "A aquisição de imóveis ou de bens de capital já em utilização classifica-se como investimento.",
+  "gabarito": false,
+  "comentario": "Art. 12, § 5º, I: a aquisição de imóveis ou de bens de capital JÁ EM UTILIZAÇÃO é Inversão Financeira. Investimento (§ 4º) alcança o planejamento e a execução de obras e a aquisição de instalações, equipamentos e material permanente.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l4320-q14",
+  "artigoKey": "lei-4320:12",
+  "enunciado": "Consideram-se subvenções as transferências destinadas a cobrir despesas de custeio das entidades beneficiadas, distinguindo-se em sociais, destinadas a instituições públicas ou privadas de caráter assistencial ou cultural sem finalidade lucrativa, e econômicas, destinadas a empresas públicas ou privadas de caráter industrial, comercial, agrícola ou pastoril.",
+  "gabarito": true,
+  "comentario": "Literal do art. 12, § 3º, I e II.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l4320-q15",
+  "artigoKey": "lei-4320:12",
+  "enunciado": "Classificam-se como Despesas de Custeio as dotações para manutenção de serviços anteriormente criados, inclusive as destinadas a atender a obras de conservação e adaptação de bens imóveis.",
+  "gabarito": true,
+  "comentario": "Literal do art. 12, § 1º.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l4320-q16",
+  "artigoKey": "lei-4320:14",
+  "enunciado": "Constitui unidade orçamentária o agrupamento de serviços subordinados ao mesmo órgão ou repartição a que serão consignadas dotações próprias.",
+  "gabarito": true,
+  "comentario": "Literal do art. 14, caput.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l4320-q17",
+  "artigoKey": "lei-4320:30",
+  "enunciado": "A estimativa da receita terá por base as demonstrações do artigo anterior, a arrecadação dos três últimos exercícios, pelo menos, bem como as circunstâncias de ordem conjuntural e outras que possam afetar a produtividade de cada fonte de receita.",
+  "gabarito": true,
+  "comentario": "Literal do art. 30.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l4320-q18",
+  "artigoKey": "lei-4320:34",
+  "enunciado": "O exercício financeiro coincidirá com o ano civil.",
+  "gabarito": true,
+  "comentario": "Literal do art. 34.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l4320-q19",
+  "artigoKey": "lei-4320:35",
+  "enunciado": "Pertencem ao exercício financeiro as receitas nele arrecadadas e as despesas nele legalmente empenhadas.",
+  "gabarito": true,
+  "comentario": "Literal do art. 35, I e II — regime contábil misto: caixa para a receita, competência para a despesa.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l4320-q20",
+  "artigoKey": "lei-4320:35",
+  "enunciado": "A Lei 4.320/64 adota, para as receitas, o regime de competência e, para as despesas, o regime de caixa.",
+  "gabarito": false,
+  "comentario": "Art. 35: é exatamente o inverso — as receitas pertencem ao exercício em que forem ARRECADADAS (caixa) e as despesas ao exercício em que forem legalmente EMPENHADAS (competência).",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l4320-q21",
+  "artigoKey": "lei-4320:36",
+  "enunciado": "Consideram-se Restos a Pagar as despesas empenhadas mas não pagas até o dia 31 de dezembro, distinguindo-se as processadas das não processadas.",
+  "gabarito": true,
+  "comentario": "Literal do art. 36, caput.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l4320-q22",
+  "artigoKey": "lei-4320:38",
+  "enunciado": "Reverte à dotação a importância de despesa anulada no exercício; quando a anulação ocorrer após o encerramento deste, considerar-se-á receita do ano em que se efetivar.",
+  "gabarito": true,
+  "comentario": "Literal do art. 38.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l4320-q23",
+  "artigoKey": "lei-4320:40",
+  "enunciado": "São créditos adicionais as autorizações de despesas não computadas ou insuficientemente dotadas na Lei de Orçamento.",
+  "gabarito": true,
+  "comentario": "Literal do art. 40.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l4320-q24",
+  "artigoKey": "lei-4320:41",
+  "enunciado": "Créditos especiais são os destinados a reforço de dotação orçamentária, e créditos suplementares os destinados a despesas para as quais não haja dotação orçamentária específica.",
+  "gabarito": false,
+  "comentario": "Art. 41, I e II: está invertido — SUPLEMENTARES reforçam dotação existente; ESPECIAIS atendem despesas sem dotação específica.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l4320-q25",
+  "artigoKey": "lei-4320:41",
+  "enunciado": "Créditos extraordinários são os destinados a despesas urgentes e imprevistas, em caso de guerra, comoção intestina ou calamidade pública.",
+  "gabarito": true,
+  "comentario": "Literal do art. 41, III.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l4320-q26",
+  "artigoKey": "lei-4320:42",
+  "enunciado": "Os créditos suplementares e especiais serão autorizados por lei e abertos por decreto executivo.",
+  "gabarito": true,
+  "comentario": "Literal do art. 42. Os extraordinários seguem regra diversa (art. 44): abertos por decreto do Executivo, que dele dará imediato conhecimento ao Legislativo.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l4320-q27",
+  "artigoKey": "lei-4320:43",
+  "enunciado": "Consideram-se recursos para abertura de créditos suplementares e especiais, desde que não comprometidos, o superávit financeiro apurado em balanço patrimonial do exercício anterior, os provenientes de excesso de arrecadação, os resultantes de anulação parcial ou total de dotações e o produto de operações de crédito autorizadas.",
+  "gabarito": true,
+  "comentario": "Literal do art. 43, § 1º, I a IV.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l4320-q28",
+  "artigoKey": "lei-4320:43",
+  "enunciado": "Entende-se por superávit financeiro a diferença positiva entre o ativo financeiro e o passivo financeiro, conjugando-se ainda os saldos dos créditos adicionais transferidos e as operações de crédito a eles vinculadas.",
+  "gabarito": true,
+  "comentario": "Literal do art. 43, § 2º.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l4320-q29",
+  "artigoKey": "lei-4320:45",
+  "enunciado": "Os créditos adicionais terão vigência adstrita ao exercício financeiro em que forem abertos, salvo expressa disposição legal em contrário quanto aos especiais e extraordinários.",
+  "gabarito": true,
+  "comentario": "Literal do art. 45.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l4320-q30",
+  "artigoKey": "lei-4320:47",
+  "enunciado": "Imediatamente após a promulgação da Lei de Orçamento, o Poder Executivo aprovará um quadro de cotas mensais da despesa que cada unidade orçamentária fica autorizada a utilizar.",
+  "gabarito": false,
+  "comentario": "Art. 47: as cotas são TRIMESTRAIS.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l4320-q31",
+  "artigoKey": "lei-4320:56",
+  "enunciado": "O recolhimento de todas as receitas far-se-á em estrita observância ao princípio de unidade de tesouraria, vedada qualquer fragmentação para criação de caixas especiais.",
+  "gabarito": true,
+  "comentario": "Literal do art. 56.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l4320-q32",
+  "artigoKey": "lei-4320:57",
+  "enunciado": "Serão classificadas como receita orçamentária, sob as rubricas próprias, todas as receitas arrecadadas, inclusive as provenientes de operações de crédito, ainda que não previstas no Orçamento.",
+  "gabarito": true,
+  "comentario": "Literal do art. 57, ressalvado o disposto no parágrafo único do art. 3º.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l4320-q33",
+  "artigoKey": "lei-4320:58",
+  "enunciado": "O empenho de despesa é o ato emanado de autoridade competente que cria para o Estado obrigação de pagamento pendente ou não de implemento de condição.",
+  "gabarito": true,
+  "comentario": "Literal do art. 58.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l4320-q34",
+  "artigoKey": "lei-4320:60",
+  "enunciado": "Em casos especiais previstos na legislação específica, será dispensado o prévio empenho da despesa.",
+  "gabarito": false,
+  "comentario": "Art. 60, caput e § 1º: o que se dispensa em casos especiais é a EMISSÃO DA NOTA DE EMPENHO — a realização de despesa sem prévio empenho continua vedada.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l4320-q35",
+  "artigoKey": "lei-4320:61",
+  "enunciado": "Para cada empenho será extraído um documento denominado \"nota de empenho\", que indicará o nome do credor, a especificação e a importância da despesa, bem como a dedução desta do saldo da dotação própria.",
+  "gabarito": true,
+  "comentario": "Literal do art. 61.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l4320-q36",
+  "artigoKey": "lei-4320:62",
+  "enunciado": "O pagamento da despesa só será efetuado quando ordenado após sua regular liquidação.",
+  "gabarito": true,
+  "comentario": "Literal do art. 62.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l4320-q37",
+  "artigoKey": "lei-4320:63",
+  "enunciado": "A liquidação da despesa consiste na verificação do direito adquirido pelo credor, tendo por base os títulos e documentos comprobatórios do respectivo crédito, e tem por fim apurar a origem e o objeto do que se deve pagar, a importância exata a pagar e a quem se deve pagar.",
+  "gabarito": true,
+  "comentario": "Art. 63, caput e § 1º.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l4320-q38",
+  "artigoKey": "lei-4320:59",
+  "enunciado": "É vedado aos Municípios empenhar, no último mês do mandato do Prefeito, mais do que o duodécimo da despesa prevista no orçamento vigente.",
+  "gabarito": true,
+  "comentario": "Literal do art. 59, § 1º, ressalvado o disposto no art. 67 da Constituição Federal.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l4320-q39",
+  "artigoKey": "lei-4320:75",
+  "enunciado": "O controle da execução orçamentária compreenderá a legalidade dos atos de que resultem a arrecadação da receita ou a realização da despesa, a fidelidade funcional dos agentes da administração e o cumprimento do programa de trabalho.",
+  "gabarito": true,
+  "comentario": "Literal do art. 75, I a III.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l4320-q40",
+  "artigoKey": "lei-4320:77",
+  "enunciado": "A verificação da legalidade dos atos de execução orçamentária será prévia, concomitante e subsequente.",
+  "gabarito": true,
+  "comentario": "Literal do art. 77.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l4320-q41",
+  "artigoKey": "lei-4320:82",
+  "enunciado": "As contas do Poder Executivo serão submetidas ao Poder Legislativo com parecer prévio do Tribunal de Contas ou órgão equivalente.",
+  "gabarito": true,
+  "comentario": "Literal do art. 82, § 1º.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l4320-q42",
+  "artigoKey": "lei-4320:92",
+  "enunciado": "A dívida flutuante compreende os restos a pagar, excluídos os serviços da dívida, os serviços da dívida a pagar, os depósitos e os débitos de tesouraria.",
+  "gabarito": true,
+  "comentario": "Literal do art. 92, I a IV.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l4320-q43",
+  "artigoKey": "lei-4320:101",
+  "enunciado": "Os resultados gerais do exercício serão demonstrados no Balanço Orçamentário, no Balanço Financeiro, no Balanço Patrimonial e na Demonstração das Variações Patrimoniais.",
+  "gabarito": true,
+  "comentario": "Literal do art. 101.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l4320-q44",
+  "artigoKey": "lei-4320:102",
+  "enunciado": "O Balanço Orçamentário demonstrará as receitas e despesas previstas em confronto com as realizadas.",
+  "gabarito": true,
+  "comentario": "Literal do art. 102.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l4320-q45",
+  "artigoKey": "lei-4320:103",
+  "enunciado": "Os Restos a Pagar do exercício serão computados na receita extraorçamentária para compensar sua inclusão na despesa orçamentária.",
+  "gabarito": true,
+  "comentario": "Literal do art. 103, parágrafo único.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l4320-q46",
+  "artigoKey": "lei-4320:104",
+  "enunciado": "A Demonstração das Variações Patrimoniais evidenciará as alterações verificadas no patrimônio, resultantes ou independentes da execução orçamentária, e indicará o resultado patrimonial do exercício.",
+  "gabarito": true,
+  "comentario": "Literal do art. 104.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l4320-q47",
+  "artigoKey": "lei-4320:105",
+  "enunciado": "O Balanço Patrimonial demonstrará o Ativo Financeiro, o Ativo Permanente, o Passivo Financeiro, o Passivo Permanente, o Saldo Patrimonial e as Contas de Compensação.",
+  "gabarito": true,
+  "comentario": "Literal do art. 105, I a VI.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l4320-q48",
+  "artigoKey": "lei-4320:105",
+  "enunciado": "O Ativo Financeiro compreenderá os bens, créditos e valores cuja mobilização ou alienação dependa de autorização legislativa.",
+  "gabarito": false,
+  "comentario": "Art. 105, §§ 1º e 2º: essa é a definição do Ativo PERMANENTE. O Ativo Financeiro compreende os créditos e valores realizáveis independentemente de autorização orçamentária e os valores numerários.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l4320-q49",
+  "artigoKey": "lei-4320:106",
+  "enunciado": "Na avaliação dos elementos patrimoniais, os bens móveis e imóveis são registrados pelo valor de aquisição ou pelo custo de produção ou de construção, e os bens de almoxarifado pelo preço médio ponderado das compras.",
+  "gabarito": true,
+  "comentario": "Literal do art. 106, II e III.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l4320-q50",
+  "artigoKey": "lei-4320:107",
+  "enunciado": "As entidades autárquicas ou paraestatais terão seus orçamentos aprovados por decreto do Poder Executivo, salvo se disposição legal expressa determinar que o sejam pelo Poder Legislativo.",
+  "gabarito": true,
+  "comentario": "Literal do art. 107, caput.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l4320-q51",
+  "artigoKey": "lei-4320:2",
+  "enunciado": "A Lei do Orçamento obedecerá aos princípios de unidade, universalidade e exclusividade.",
+  "gabarito": false,
+  "comentario": "Art. 2º, caput: os três princípios expressamente positivados são unidade, universalidade e ANUALIDADE. A exclusividade é princípio constitucional (art. 165, § 8º), não do art. 2º da Lei 4.320.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l4320-q52",
+  "artigoKey": "lei-4320:6",
+  "enunciado": "As cotas de receitas que uma entidade pública deva transferir a outra incluir-se-ão como despesa somente no orçamento da entidade que as deva receber.",
+  "gabarito": false,
+  "comentario": "Art. 6º, § 1º: a cota entra como DESPESA no orçamento da entidade obrigada à transferência e como RECEITA no orçamento da que as deva receber.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l4320-q53",
+  "artigoKey": "lei-4320:7",
+  "enunciado": "A Lei de Orçamento poderá conter autorização ao Executivo para abrir créditos especiais até determinada importância.",
+  "gabarito": false,
+  "comentario": "Art. 7º, I: a autorização que pode constar da própria Lei de Orçamento é para abrir créditos SUPLEMENTARES. Créditos especiais dependem de lei específica.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l4320-q54",
+  "artigoKey": "lei-4320:12",
+  "enunciado": "São Transferências de Capital as dotações para despesas às quais não corresponda contraprestação direta em bens ou serviços, inclusive as contribuições e subvenções destinadas a atender à manutenção de outras entidades de direito público ou privado.",
+  "gabarito": false,
+  "comentario": "Art. 12, § 2º: essa é a definição de Transferências CORRENTES. As Transferências de Capital (§ 6º) são as dotações para investimentos ou inversões financeiras que outras pessoas devam realizar, além das dotações para amortização da dívida pública.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l4320-q55",
+  "artigoKey": "lei-4320:22",
+  "enunciado": "A proposta orçamentária compor-se-á de Mensagem, Projeto de Lei de Orçamento e tabelas explicativas, sendo dispensada a especificação dos programas especiais de trabalho custeados por dotações globais.",
+  "gabarito": false,
+  "comentario": "Art. 22, IV: a proposta deve conter também a especificação dos programas especiais de trabalho custeados por dotações globais, em termos de metas visadas.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l4320-q56",
+  "artigoKey": "lei-4320:33",
+  "enunciado": "Admitem-se emendas ao projeto de Lei de Orçamento que concedam dotação para o início de obra cujo projeto ainda não esteja aprovado pelos órgãos competentes, desde que haja disponibilidade de recursos.",
+  "gabarito": false,
+  "comentario": "Art. 33, \"b\": não se admitem emendas com esse objeto, independentemente de disponibilidade de recursos.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l4320-q57",
+  "artigoKey": "lei-4320:34",
+  "enunciado": "O exercício financeiro coincidirá com o ano civil, admitida sua prorrogação por decreto do Poder Executivo em caso de calamidade pública.",
+  "gabarito": false,
+  "comentario": "Art. 34: a norma é fechada — o exercício financeiro coincidirá com o ano civil, sem ressalva de prorrogação.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l4320-q58",
+  "artigoKey": "lei-4320:44",
+  "enunciado": "Os créditos extraordinários serão autorizados por lei e abertos por decreto do Poder Executivo.",
+  "gabarito": false,
+  "comentario": "Art. 44: os créditos extraordinários são abertos por decreto do Poder Executivo, que deles dará imediato conhecimento ao Poder Legislativo — não dependem de lei autorizativa prévia. A regra de autorização por lei é a dos suplementares e especiais (art. 42).",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l4320-q59",
+  "artigoKey": "lei-4320:45",
+  "enunciado": "Os créditos adicionais terão sempre vigência adstrita ao exercício financeiro em que forem abertos, sem qualquer exceção.",
+  "gabarito": false,
+  "comentario": "Art. 45: há exceção expressa — salvo disposição legal em contrário quanto aos créditos especiais e extraordinários.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l4320-q60",
+  "artigoKey": "lei-4320:57",
+  "enunciado": "As receitas provenientes de operações de crédito só serão classificadas como receita orçamentária quando estiverem previstas no Orçamento.",
+  "gabarito": false,
+  "comentario": "Art. 57: são classificadas como receita orçamentária todas as receitas arrecadadas, inclusive as provenientes de operações de crédito, AINDA QUE NÃO PREVISTAS no Orçamento.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l4320-q61",
+  "artigoKey": "lei-4320:64",
+  "enunciado": "A ordem de pagamento poderá ser exarada em qualquer documento, tenha ou não sido processado pelos serviços de contabilidade.",
+  "gabarito": false,
+  "comentario": "Art. 64, parágrafo único: a ordem de pagamento só poderá ser exarada em documentos processados pelos serviços de contabilidade.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l4320-q62",
+  "artigoKey": "lei-4320:76",
+  "enunciado": "O Poder Executivo exerce apenas o controle da legalidade dos atos de execução orçamentária, cabendo os demais tipos de controle exclusivamente ao Tribunal de Contas ou órgão equivalente.",
+  "gabarito": false,
+  "comentario": "Art. 76: o Poder Executivo exercerá os TRÊS tipos de controle do art. 75 (legalidade, fidelidade funcional e cumprimento do programa de trabalho), sem prejuízo das atribuições do Tribunal de Contas.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l4320-q63",
+  "artigoKey": "lei-4320:82",
+  "enunciado": "Quando no Município não houver Tribunal de Contas ou órgão equivalente, é vedado à Câmara de Vereadores designar peritos contadores para verificar as contas do prefeito.",
+  "gabarito": false,
+  "comentario": "Art. 82, § 2º: nessa hipótese a Câmara de Vereadores PODERÁ designar peritos contadores para verificarem as contas do prefeito e sobre elas emitirem parecer.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l4320-q64",
+  "artigoKey": "lei-4320:92",
+  "enunciado": "A dívida flutuante compreende os restos a pagar, inclusive os serviços da dívida, os depósitos e os débitos de tesouraria.",
+  "gabarito": false,
+  "comentario": "Art. 92, I: os restos a pagar entram na dívida flutuante com os serviços da dívida EXCLUÍDOS — estes constam de inciso próprio (II, \"serviços da dívida a pagar\").",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l4320-q65",
+  "artigoKey": "lei-4320:103",
+  "enunciado": "O Balanço Financeiro demonstrará as receitas e despesas previstas em confronto com as realizadas.",
+  "gabarito": false,
+  "comentario": "Art. 103: quem confronta previsto com realizado é o Balanço ORÇAMENTÁRIO (art. 102). O Balanço Financeiro demonstra a receita e a despesa orçamentárias e os recebimentos e pagamentos extraorçamentários, conjugados com os saldos em espécie.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l4320-q66",
+  "artigoKey": "lei-4320:106",
+  "enunciado": "Na avaliação dos elementos patrimoniais, os débitos e créditos, bem como os títulos de renda, são registrados pelo valor de mercado na data do balanço.",
+  "gabarito": false,
+  "comentario": "Art. 106, I: são registrados pelo seu valor NOMINAL, feita a conversão à taxa de câmbio vigente na data do balanço quando em moeda estrangeira.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "l4320-q67",
+  "artigoKey": "lei-4320:85",
+  "enunciado": "Os serviços de contabilidade serão organizados de forma a permitirem o acompanhamento da execução orçamentária, o conhecimento da composição patrimonial, a determinação dos custos dos serviços industriais, o levantamento dos balanços gerais e a análise e interpretação dos resultados econômicos e financeiros.",
+  "gabarito": true,
+  "comentario": "Literal do art. 85.",
+  "tipo": "literal"
+ },
+ {
+  "id": "l4320-q68",
+  "artigoKey": "lei-4320:89",
+  "enunciado": "A contabilidade evidenciará os fatos ligados à administração orçamentária, financeira, patrimonial e industrial.",
+  "gabarito": true,
+  "comentario": "Literal do art. 89.",
+  "tipo": "literal"
+ }
+]

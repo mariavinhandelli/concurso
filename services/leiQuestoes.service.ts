@@ -57,6 +57,8 @@ const QUESTOES_ARQUIVO: Record<string, string> = {
   'lei-9613': '/leis/lei-9613-questoes.json',
   'lei-9296': '/leis/lei-9296-questoes.json',
   'lei-9099': '/leis/lei-9099-questoes.json',
+  'lrf': '/leis/lrf-questoes.json',
+  'lei-4320': '/leis/lei-4320-questoes.json',
 };
 
 // Slugs que têm banco de questões — usado para montar o composer de simulado
@@ -71,8 +73,8 @@ const _cache = new Map<string, Promise<LeiQuestao[]>>();
 // falhar por qualquer motivo, degrada silenciosamente para só as questões
 // estáticas — geração nunca pode quebrar o banco de questões.
 // Uma ÚNICA leitura de ai_artifacts para todas as leis (o modal de simulado
-// pede as questões das 37 leis de uma vez — sem este cache eram 37 queries
-// idênticas trazendo a tabela publicada inteira cada uma).
+// pede as questões de todas as leis do acervo de uma vez — sem este cache era
+// uma query idêntica por lei, cada uma trazendo a tabela publicada inteira).
 let _geradasTodas: Promise<{ leiSlug?: string; questao: LeiQuestao }[]> | null = null;
 
 function getTodasQuestoesGeradas(): Promise<{ leiSlug?: string; questao: LeiQuestao }[]> {

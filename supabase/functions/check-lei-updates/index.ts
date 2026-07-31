@@ -1,7 +1,7 @@
 // supabase/functions/check-lei-updates/index.ts
 // Check semanal de atualização de legislação. Roda via pg_cron toda
 // segunda-feira. Busca o texto da fonte oficial (Planalto / Casa Civil GO) de
-// cada uma das 37 leis do Vade Mecum, compara com o hash salvo na última
+// cada uma das 39 leis do Vade Mecum, compara com o hash salvo na última
 // verificação e, se mudou, grava um alerta com um trecho do diff e tenta
 // avisar a Maria por push (best-effort — funciona mesmo sem subscription
 // ativa, já que o alerta fica sempre gravado em lei_source_checks).
@@ -73,6 +73,8 @@ const LEIS: { slug: string; nome: string; url: string }[] = [
   { slug: 'lei-7210', nome: 'LEP (Lei 7.210/84)', url: 'https://www.planalto.gov.br/ccivil_03/leis/l7210compilado.htm' },
   { slug: 'lei-9099', nome: 'Lei 9.099/95 (JECrim)', url: 'https://www.planalto.gov.br/ccivil_03/leis/l9099.htm' },
   { slug: 'lei-9296', nome: 'Lei 9.296/96 (Interceptação)', url: 'https://www.planalto.gov.br/ccivil_03/leis/l9296.htm' },
+  { slug: 'lrf', nome: 'LRF (LC 101/00)', url: 'https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp101.htm' },
+  { slug: 'lei-4320', nome: 'Lei 4.320/64', url: 'https://www.planalto.gov.br/ccivil_03/leis/l4320compilado.htm' },
 ];
 
 // O Planalto declara ISO-8859-1 mas serve Windows-1252. Decodificar como UTF-8
@@ -230,11 +232,11 @@ async function verificarLei(lei: { slug: string; nome: string; url: string }): P
   }
 }
 
-// Quantas leis por execução. As 37 fontes somam ~30 MB de HTML; baixar,
+// Quantas leis por execução. As 39 fontes somam ~30 MB de HTML; baixar,
 // decodificar, limpar tags e hashear tudo de uma vez estoura o limite de CPU da
-// função (a tentativa com as 37 morreu no primeiro lote). Por isso cada execução
+// função (a tentativa com todas de uma vez morreu no primeiro lote). Por isso cada execução
 // cuida de uma FATIA — as menos recentemente verificadas — e o cron roda todo
-// dia, de modo que as 37 são cobertas a cada ~5 dias.
+// dia, de modo que as 39 são cobertas a cada ~5 dias.
 const POR_EXECUCAO = 8;
 // Requisições simultâneas dentro da fatia: com 6, o Planalto recusou 5 de 6.
 const LOTE = 4;

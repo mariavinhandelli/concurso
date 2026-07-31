@@ -177,7 +177,7 @@ async function verificarFonte(fonte: Fonte): Promise<Resultado> {
 
 Deno.serve(async () => {
   // São poucas fontes (4) e páginas de listagem são leves — cabem todas numa
-  // execução, diferente das 37 leis. Se a lista crescer, fatiar como lá.
+  // execução, diferente das leis do Vade Mecum. Se a lista crescer, fatiar como lá.
   const { data: fontes, error } = await supabase
     .from('edital_source_checks')
     .select('slug, label, source_url, source_hash')

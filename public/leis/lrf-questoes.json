@@ -1,0 +1,434 @@
+[
+ {
+  "id": "lrf-q1",
+  "artigoKey": "lrf:1",
+  "enunciado": "A responsabilidade na gestão fiscal pressupõe a ação planejada e transparente, em que se previnem riscos e corrigem desvios capazes de afetar o equilíbrio das contas públicas, mediante o cumprimento de metas de resultados entre receitas e despesas e a obediência a limites e condições quanto a renúncia de receita, geração de despesas, dívidas, operações de crédito, concessão de garantia e inscrição em Restos a Pagar.",
+  "gabarito": true,
+  "comentario": "Literal do art. 1º, § 1º.",
+  "tipo": "literal"
+ },
+ {
+  "id": "lrf-q2",
+  "artigoKey": "lrf:1",
+  "enunciado": "Para os efeitos da Lei de Responsabilidade Fiscal, a referência aos entes da Federação abrange o Poder Executivo, o Poder Judiciário e o Ministério Público, mas não os Tribunais de Contas, que possuem autonomia própria.",
+  "gabarito": false,
+  "comentario": "Art. 1º, § 3º, I, \"a\": os Tribunais de Contas estão expressamente abrangidos no Poder Legislativo. O inciso III ainda detalha quais são (TCU, TCE e, quando houver, TCM).",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "lrf-q3",
+  "artigoKey": "lrf:1",
+  "enunciado": "As empresas estatais dependentes integram o alcance das disposições da Lei de Responsabilidade Fiscal.",
+  "gabarito": true,
+  "comentario": "Art. 1º, § 3º, I, \"b\": estão compreendidas as administrações diretas, fundos, autarquias, fundações e empresas estatais dependentes.",
+  "tipo": "literal"
+ },
+ {
+  "id": "lrf-q4",
+  "artigoKey": "lrf:4",
+  "enunciado": "Integrará o projeto de lei de diretrizes orçamentárias Anexo de Metas Fiscais, em que serão estabelecidas metas anuais, em valores correntes e constantes, relativas a receitas, despesas, resultados nominal e primário e montante da dívida pública, para o exercício a que se referirem e para os dois seguintes.",
+  "gabarito": true,
+  "comentario": "Literal do art. 4º, § 1º.",
+  "tipo": "literal"
+ },
+ {
+  "id": "lrf-q5",
+  "artigoKey": "lrf:4",
+  "enunciado": "O Anexo de Riscos Fiscais, em que são avaliados os passivos contingentes e outros riscos capazes de afetar as contas públicas, integra a lei orçamentária anual.",
+  "gabarito": false,
+  "comentario": "Art. 4º, § 3º: o Anexo de Riscos Fiscais consta da lei de diretrizes orçamentárias, não da LOA. Trocar o instrumento é pegadinha recorrente.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "lrf-q6",
+  "artigoKey": "lrf:4",
+  "enunciado": "A lei de diretrizes orçamentárias não poderá dispor sobre a exclusão de quaisquer despesas primárias da apuração da meta de resultado primário dos orçamentos fiscal e da seguridade social.",
+  "gabarito": true,
+  "comentario": "Literal do art. 4º, § 7º.",
+  "tipo": "literal"
+ },
+ {
+  "id": "lrf-q7",
+  "artigoKey": "lrf:5",
+  "enunciado": "O projeto de lei orçamentária anual conterá reserva de contingência, cuja forma de utilização e montante, definido com base na receita corrente líquida, serão estabelecidos na lei de diretrizes orçamentárias, destinada ao atendimento de passivos contingentes e outros riscos e eventos fiscais imprevistos.",
+  "gabarito": true,
+  "comentario": "Literal do art. 5º, III, \"b\".",
+  "tipo": "literal"
+ },
+ {
+  "id": "lrf-q8",
+  "artigoKey": "lrf:5",
+  "enunciado": "É vedado consignar na lei orçamentária crédito com finalidade imprecisa ou com dotação ilimitada.",
+  "gabarito": true,
+  "comentario": "Literal do art. 5º, § 4º.",
+  "tipo": "literal"
+ },
+ {
+  "id": "lrf-q9",
+  "artigoKey": "lrf:9",
+  "enunciado": "Verificado, ao final de um semestre, que a realização da receita poderá não comportar o cumprimento das metas de resultado primário ou nominal, os Poderes e o Ministério Público promoverão, nos sessenta dias subsequentes, limitação de empenho e movimentação financeira.",
+  "gabarito": false,
+  "comentario": "Art. 9º, caput: a verificação é BIMESTRAL e o prazo para promover a limitação é de TRINTA dias subsequentes.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "lrf-q10",
+  "artigoKey": "lrf:9",
+  "enunciado": "Não serão objeto de limitação de empenho as despesas que constituam obrigações constitucionais e legais do ente, inclusive aquelas destinadas ao pagamento do serviço da dívida, e as ressalvadas pela lei de diretrizes orçamentárias.",
+  "gabarito": true,
+  "comentario": "Literal do art. 9º, § 2º.",
+  "tipo": "literal"
+ },
+ {
+  "id": "lrf-q11",
+  "artigoKey": "lrf:11",
+  "enunciado": "Constituem requisitos essenciais da responsabilidade na gestão fiscal a instituição, previsão e efetiva arrecadação de todos os tributos da competência constitucional do ente da Federação.",
+  "gabarito": true,
+  "comentario": "Literal do art. 11, caput.",
+  "tipo": "literal"
+ },
+ {
+  "id": "lrf-q12",
+  "artigoKey": "lrf:11",
+  "enunciado": "É vedada a realização de transferências voluntárias para o ente que deixar de instituir, prever e arrecadar qualquer tributo de sua competência constitucional.",
+  "gabarito": false,
+  "comentario": "Art. 11, parágrafo único: a vedação de transferências voluntárias alcança apenas o descumprimento no que se refere aos IMPOSTOS, e não a todos os tributos.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "lrf-q13",
+  "artigoKey": "lrf:14",
+  "enunciado": "A concessão de incentivo de natureza tributária da qual decorra renúncia de receita deverá estar acompanhada de estimativa do impacto orçamentário-financeiro e atender, cumulativamente, tanto à demonstração de que a renúncia foi considerada na estimativa de receita quanto às medidas de compensação.",
+  "gabarito": false,
+  "comentario": "Art. 14, caput: além da estimativa de impacto, exige-se o atendimento de pelo menos UMA das condições dos incisos I e II — são alternativas, não cumulativas.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "lrf-q14",
+  "artigoKey": "lrf:14",
+  "enunciado": "A renúncia de receita compreende anistia, remissão, subsídio, crédito presumido, concessão de isenção em caráter não geral, alteração de alíquota ou modificação de base de cálculo que implique redução discriminada de tributos ou contribuições, e outros benefícios que correspondam a tratamento diferenciado.",
+  "gabarito": true,
+  "comentario": "Literal do art. 14, § 1º.",
+  "tipo": "literal"
+ },
+ {
+  "id": "lrf-q15",
+  "artigoKey": "lrf:14",
+  "enunciado": "As exigências do art. 14 da LRF não se aplicam às alterações das alíquotas do imposto de importação, do imposto de exportação, do IPI e do IOF, nem ao cancelamento de débito cujo montante seja inferior ao dos respectivos custos de cobrança.",
+  "gabarito": true,
+  "comentario": "Art. 14, § 3º, I e II — os impostos referidos são os dos incisos I, II, IV e V do art. 153 da Constituição.",
+  "tipo": "literal"
+ },
+ {
+  "id": "lrf-q16",
+  "artigoKey": "lrf:16",
+  "enunciado": "A criação, expansão ou aperfeiçoamento de ação governamental que acarrete aumento da despesa será acompanhada de declaração do ordenador da despesa de que o aumento tem adequação orçamentária e financeira com a lei orçamentária anual e compatibilidade com o plano plurianual e com a lei de diretrizes orçamentárias.",
+  "gabarito": true,
+  "comentario": "Literal do art. 16, II.",
+  "tipo": "literal"
+ },
+ {
+  "id": "lrf-q17",
+  "artigoKey": "lrf:16",
+  "enunciado": "Ressalva-se das exigências do art. 16 da LRF a despesa considerada irrelevante, nos termos em que dispuser a lei de diretrizes orçamentárias.",
+  "gabarito": true,
+  "comentario": "Literal do art. 16, § 3º.",
+  "tipo": "literal"
+ },
+ {
+  "id": "lrf-q18",
+  "artigoKey": "lrf:17",
+  "enunciado": "Considera-se obrigatória de caráter continuado a despesa corrente derivada de lei, medida provisória ou ato administrativo normativo que fixem para o ente a obrigação legal de sua execução por um período superior a um exercício.",
+  "gabarito": false,
+  "comentario": "Art. 17, caput: o período é superior a DOIS exercícios.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "lrf-q19",
+  "artigoKey": "lrf:17",
+  "enunciado": "Considera-se aumento de despesa a prorrogação daquela criada por prazo determinado.",
+  "gabarito": true,
+  "comentario": "Literal do art. 17, § 7º.",
+  "tipo": "literal"
+ },
+ {
+  "id": "lrf-q20",
+  "artigoKey": "lrf:18",
+  "enunciado": "Os valores dos contratos de terceirização de mão de obra que se referem à substituição de servidores e empregados públicos serão contabilizados como \"Outras Despesas de Pessoal\".",
+  "gabarito": true,
+  "comentario": "Literal do art. 18, § 1º.",
+  "tipo": "literal"
+ },
+ {
+  "id": "lrf-q21",
+  "artigoKey": "lrf:18",
+  "enunciado": "A despesa total com pessoal será apurada somando-se a realizada no mês em referência com as dos onze imediatamente anteriores, adotando-se o regime de caixa.",
+  "gabarito": false,
+  "comentario": "Art. 18, § 2º: a apuração dos doze meses adota o regime de COMPETÊNCIA, independentemente de empenho.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "lrf-q22",
+  "artigoKey": "lrf:19",
+  "enunciado": "A despesa total com pessoal não poderá exceder, em cada período de apuração, 50% da receita corrente líquida na União e 60% nos Estados e nos Municípios.",
+  "gabarito": true,
+  "comentario": "Literal do art. 19, I a III.",
+  "tipo": "literal"
+ },
+ {
+  "id": "lrf-q23",
+  "artigoKey": "lrf:20",
+  "enunciado": "Na esfera estadual, a repartição do limite global de despesa com pessoal reserva 3% para o Legislativo, incluído o Tribunal de Contas do Estado, 6% para o Judiciário, 54% para o Executivo e 2% para o Ministério Público.",
+  "gabarito": false,
+  "comentario": "Art. 20, II: na esfera estadual o Executivo tem 49%. O percentual de 54% é o do Executivo MUNICIPAL (inciso III, \"b\").",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "lrf-q24",
+  "artigoKey": "lrf:20",
+  "enunciado": "Na esfera municipal, os limites de despesa com pessoal são de 6% para o Legislativo, incluído o Tribunal de Contas do Município quando houver, e de 54% para o Executivo.",
+  "gabarito": true,
+  "comentario": "Literal do art. 20, III.",
+  "tipo": "literal"
+ },
+ {
+  "id": "lrf-q25",
+  "artigoKey": "lrf:22",
+  "enunciado": "A verificação do cumprimento dos limites de despesa total com pessoal será realizada ao final de cada quadrimestre.",
+  "gabarito": true,
+  "comentario": "Literal do art. 22, caput.",
+  "tipo": "literal"
+ },
+ {
+  "id": "lrf-q26",
+  "artigoKey": "lrf:22",
+  "enunciado": "Se a despesa total com pessoal exceder 90% do limite, ficam vedados ao Poder ou órgão que houver incorrido no excesso, entre outras medidas, a criação de cargo, emprego ou função e a concessão de vantagem ou aumento de remuneração.",
+  "gabarito": false,
+  "comentario": "Art. 22, parágrafo único: o limite prudencial que dispara essas vedações é de 95% do limite. Os 90% são o patamar do alerta dos Tribunais de Contas (art. 59, § 1º, II).",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "lrf-q27",
+  "artigoKey": "lrf:22",
+  "enunciado": "Ultrapassado o limite prudencial, é vedado o provimento de cargo público, admissão ou contratação de pessoal a qualquer título, ressalvada a reposição decorrente de aposentadoria ou falecimento de servidores das áreas de educação, saúde e segurança.",
+  "gabarito": true,
+  "comentario": "Literal do art. 22, parágrafo único, IV.",
+  "tipo": "literal"
+ },
+ {
+  "id": "lrf-q28",
+  "artigoKey": "lrf:23",
+  "enunciado": "Ultrapassados os limites de despesa com pessoal, o percentual excedente terá de ser eliminado nos dois quadrimestres seguintes, sendo pelo menos um terço no primeiro.",
+  "gabarito": true,
+  "comentario": "Literal do art. 23, caput.",
+  "tipo": "literal"
+ },
+ {
+  "id": "lrf-q29",
+  "artigoKey": "lrf:23",
+  "enunciado": "Não alcançada a redução da despesa com pessoal no prazo, e enquanto perdurar o excesso, o Poder ou órgão não poderá receber transferências voluntárias, obter garantia de outro ente nem contratar operações de crédito, ressalvadas as destinadas ao pagamento da dívida mobiliária e as que visem à redução das despesas com pessoal.",
+  "gabarito": true,
+  "comentario": "Literal do art. 23, § 3º.",
+  "tipo": "literal"
+ },
+ {
+  "id": "lrf-q30",
+  "artigoKey": "lrf:25",
+  "enunciado": "Entende-se por transferência voluntária a entrega de recursos correntes ou de capital a outro ente da Federação a título de cooperação, auxílio ou assistência financeira, incluídos os recursos destinados ao Sistema Único de Saúde.",
+  "gabarito": false,
+  "comentario": "Art. 25, caput: são excluídas do conceito as transferências que decorram de determinação constitucional ou legal e as destinadas ao SUS.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "lrf-q31",
+  "artigoKey": "lrf:25",
+  "enunciado": "Para fins de aplicação das sanções de suspensão de transferências voluntárias previstas na LRF, excetuam-se aquelas relativas a ações de educação, saúde e assistência social.",
+  "gabarito": true,
+  "comentario": "Literal do art. 25, § 3º.",
+  "tipo": "literal"
+ },
+ {
+  "id": "lrf-q32",
+  "artigoKey": "lrf:29",
+  "enunciado": "Dívida pública consolidada ou fundada é o montante total, apurado sem duplicidade, das obrigações financeiras do ente assumidas em virtude de leis, contratos, convênios ou tratados e da realização de operações de crédito, para amortização em prazo superior a doze meses.",
+  "gabarito": true,
+  "comentario": "Literal do art. 29, I.",
+  "tipo": "literal"
+ },
+ {
+  "id": "lrf-q33",
+  "artigoKey": "lrf:29",
+  "enunciado": "Integram também a dívida pública consolidada as operações de crédito de prazo inferior a doze meses cujas receitas tenham constado do orçamento.",
+  "gabarito": true,
+  "comentario": "Literal do art. 29, § 3º.",
+  "tipo": "literal"
+ },
+ {
+  "id": "lrf-q34",
+  "artigoKey": "lrf:31",
+  "enunciado": "Se a dívida consolidada ultrapassar o respectivo limite ao final de um quadrimestre, deverá ser a ele reconduzida até o término dos dois quadrimestres subsequentes, reduzindo-se o excedente em pelo menos um terço no primeiro.",
+  "gabarito": false,
+  "comentario": "Art. 31, caput: a recondução da dívida ocorre em TRÊS quadrimestres, com redução de pelo menos 25% no primeiro. O prazo de dois quadrimestres com um terço no primeiro é o da despesa com pessoal (art. 23).",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "lrf-q35",
+  "artigoKey": "lrf:35",
+  "enunciado": "É vedada a realização de operação de crédito entre um ente da Federação e outro, inclusive suas entidades da administração indireta, ainda que sob a forma de novação, refinanciamento ou postergação de dívida contraída anteriormente.",
+  "gabarito": true,
+  "comentario": "Literal do art. 35, caput.",
+  "tipo": "literal"
+ },
+ {
+  "id": "lrf-q36",
+  "artigoKey": "lrf:35",
+  "enunciado": "A vedação de operação de crédito entre entes impede que Estados e Municípios comprem títulos da dívida da União como aplicação de suas disponibilidades.",
+  "gabarito": false,
+  "comentario": "Art. 35, § 2º: o caput não impede Estados e Municípios de comprar títulos da dívida da União como aplicação de suas disponibilidades.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "lrf-q37",
+  "artigoKey": "lrf:38",
+  "enunciado": "A operação de crédito por antecipação de receita destina-se a atender insuficiência de caixa durante o exercício financeiro, realizando-se somente a partir do décimo dia do início do exercício e devendo ser liquidada, com juros e outros encargos, até 31 de dezembro de cada ano.",
+  "gabarito": false,
+  "comentario": "Art. 38, II: a liquidação deve ocorrer até o dia DEZ DE DEZEMBRO, e não até 31 de dezembro.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "lrf-q38",
+  "artigoKey": "lrf:38",
+  "enunciado": "A operação de crédito por antecipação de receita orçamentária está proibida no último ano de mandato do Presidente, Governador ou Prefeito Municipal.",
+  "gabarito": true,
+  "comentario": "Literal do art. 38, IV, \"b\".",
+  "tipo": "literal"
+ },
+ {
+  "id": "lrf-q39",
+  "artigoKey": "lrf:42",
+  "enunciado": "É vedado ao titular de Poder ou órgão, nos últimos dois quadrimestres do seu mandato, contrair obrigação de despesa que não possa ser cumprida integralmente dentro dele, ou que tenha parcelas a serem pagas no exercício seguinte sem que haja suficiente disponibilidade de caixa para este efeito.",
+  "gabarito": true,
+  "comentario": "Literal do art. 42, caput.",
+  "tipo": "literal"
+ },
+ {
+  "id": "lrf-q40",
+  "artigoKey": "lrf:44",
+  "enunciado": "É vedada a aplicação da receita de capital derivada da alienação de bens e direitos que integram o patrimônio público para o financiamento de despesa corrente, salvo se destinada por lei aos regimes de previdência social, geral e próprio dos servidores públicos.",
+  "gabarito": true,
+  "comentario": "Literal do art. 44.",
+  "tipo": "literal"
+ },
+ {
+  "id": "lrf-q41",
+  "artigoKey": "lrf:48",
+  "enunciado": "A transparência da gestão fiscal será assegurada, entre outros meios, pela liberação ao pleno conhecimento e acompanhamento da sociedade, em tempo real, de informações pormenorizadas sobre a execução orçamentária e financeira, em meios eletrônicos de acesso público.",
+  "gabarito": true,
+  "comentario": "Literal do art. 48, § 1º, II, com a redação da LC 131/2009.",
+  "tipo": "literal"
+ },
+ {
+  "id": "lrf-q42",
+  "artigoKey": "lrf:52",
+  "enunciado": "O Relatório Resumido da Execução Orçamentária abrangerá todos os Poderes e o Ministério Público e será publicado até trinta dias após o encerramento de cada quadrimestre.",
+  "gabarito": false,
+  "comentario": "Art. 52, caput: o RREO é BIMESTRAL — publicado até trinta dias após o encerramento de cada bimestre. Quem é quadrimestral é o Relatório de Gestão Fiscal (art. 54).",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "lrf-q43",
+  "artigoKey": "lrf:54",
+  "enunciado": "Ao final de cada quadrimestre será emitido pelos titulares dos Poderes e órgãos referidos no art. 20 o Relatório de Gestão Fiscal.",
+  "gabarito": true,
+  "comentario": "Literal do art. 54, caput.",
+  "tipo": "literal"
+ },
+ {
+  "id": "lrf-q44",
+  "artigoKey": "lrf:55",
+  "enunciado": "O Relatório de Gestão Fiscal será publicado até trinta dias após o encerramento do período a que corresponder, com amplo acesso ao público, inclusive por meio eletrônico.",
+  "gabarito": true,
+  "comentario": "Literal do art. 55, § 2º.",
+  "tipo": "literal"
+ },
+ {
+  "id": "lrf-q45",
+  "artigoKey": "lrf:59",
+  "enunciado": "Os Tribunais de Contas alertarão os Poderes ou órgãos quando constatarem que o montante da despesa total com pessoal ultrapassou 90% do limite.",
+  "gabarito": true,
+  "comentario": "Literal do art. 59, § 1º, II.",
+  "tipo": "literal"
+ },
+ {
+  "id": "lrf-q46",
+  "artigoKey": "lrf:73-A",
+  "enunciado": "Qualquer cidadão, partido político, associação ou sindicato é parte legítima para denunciar ao respectivo Tribunal de Contas e ao órgão competente do Ministério Público o descumprimento das prescrições estabelecidas na Lei de Responsabilidade Fiscal.",
+  "gabarito": true,
+  "comentario": "Literal do art. 73-A.",
+  "tipo": "literal"
+ },
+ {
+  "id": "lrf-q47",
+  "artigoKey": "lrf:5",
+  "enunciado": "A lei orçamentária poderá consignar dotação para investimento com duração superior a um exercício financeiro ainda que não previsto no plano plurianual, desde que a inclusão seja autorizada por decreto do Poder Executivo.",
+  "gabarito": false,
+  "comentario": "Art. 5º, § 5º: a LOA não consignará dotação para investimento com duração superior a um exercício que não esteja previsto no plano plurianual ou em LEI que autorize a sua inclusão.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "lrf-q48",
+  "artigoKey": "lrf:19",
+  "enunciado": "Na verificação do atendimento dos limites de despesa total com pessoal, computam-se as despesas de indenização por demissão de servidores ou empregados e as relativas a incentivos à demissão voluntária.",
+  "gabarito": false,
+  "comentario": "Art. 19, § 1º, I e II: essas despesas NÃO são computadas na verificação dos limites.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "lrf-q49",
+  "artigoKey": "lrf:20",
+  "enunciado": "Na esfera federal, o limite de despesa com pessoal do Poder Legislativo, incluído o Tribunal de Contas da União, é de 6% da receita corrente líquida.",
+  "gabarito": false,
+  "comentario": "Art. 20, I, \"a\": o limite do Legislativo federal é de 2,5%. Os 6% são o limite do Poder Judiciário da União (alínea \"b\").",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "lrf-q50",
+  "artigoKey": "lrf:29",
+  "enunciado": "Considera-se operação de crédito o compromisso financeiro assumido em razão de mútuo, abertura de crédito, emissão e aceite de título, aquisição financiada de bens e arrendamento mercantil, excluídas as operações realizadas com o uso de derivativos financeiros.",
+  "gabarito": false,
+  "comentario": "Art. 29, III: o conceito alcança \"outras operações assemelhadas, INCLUSIVE com o uso de derivativos financeiros\".",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "lrf-q51",
+  "artigoKey": "lrf:42",
+  "enunciado": "Na determinação da disponibilidade de caixa de que trata a vedação do fim de mandato, não serão considerados os encargos e despesas compromissadas a pagar até o final do exercício.",
+  "gabarito": false,
+  "comentario": "Art. 42, parágrafo único: esses encargos e despesas compromissadas SERÃO considerados — é justamente o que impede o gestor de inflar a disponibilidade aparente.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "lrf-q52",
+  "artigoKey": "lrf:48-A",
+  "enunciado": "Quanto à despesa, os entes da Federação disponibilizarão informações sobre todos os atos praticados pelas unidades gestoras somente ao final do exercício, por ocasião da prestação de contas consolidada.",
+  "gabarito": false,
+  "comentario": "Art. 48-A, I: a disponibilização se dá no MOMENTO DA REALIZAÇÃO da despesa, com o número do processo, o bem ou serviço, o beneficiário do pagamento e, se for o caso, o procedimento licitatório.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "lrf-q53",
+  "artigoKey": "lrf:54",
+  "enunciado": "O Relatório de Gestão Fiscal é assinado exclusivamente pelo Chefe do Poder Executivo do ente da Federação.",
+  "gabarito": false,
+  "comentario": "Art. 54, I a IV e parágrafo único: também assinam os titulares do Legislativo, do Judiciário e do Ministério Público, além das autoridades responsáveis pela administração financeira e pelo controle interno.",
+  "tipo": "pegadinha"
+ },
+ {
+  "id": "lrf-q54",
+  "artigoKey": "lrf:23",
+  "enunciado": "As restrições aplicáveis ao Poder ou órgão que não reconduzir a despesa com pessoal ao limite incidem imediatamente se o excesso ocorrer no primeiro quadrimestre do último ano do mandato de seus titulares.",
+  "gabarito": true,
+  "comentario": "Literal do art. 23, § 4º.",
+  "tipo": "literal"
+ }
+]

@@ -288,6 +288,24 @@ const LEIS = {
     descricao: 'Regulamenta a interceptação de comunicações telefônicas e de sistemas de informática/telemática para prova em investigação criminal. Texto atualizado (fonte: Planalto).',
     fonteUrl: 'https://www.planalto.gov.br/ccivil_03/leis/l9296.htm',
   },
+  lrf: {
+    slug: 'lrf',
+    nome: 'Lei Complementar nº 101, de 4 de maio de 2000 — Lei de Responsabilidade Fiscal (LRF)',
+    nomeCurto: 'LRF (LC 101/00)',
+    ano: 2000,
+    disciplina: 'Direito Financeiro',
+    descricao: 'Normas de finanças públicas voltadas para a responsabilidade na gestão fiscal: planejamento, receita, despesa com pessoal, dívida, transparência e prestação de contas. Texto compilado e atualizado (fonte: Planalto).',
+    fonteUrl: 'https://www.planalto.gov.br/ccivil_03/leis/lcp/lcp101.htm',
+  },
+  'lei-4320': {
+    slug: 'lei-4320',
+    nome: 'Lei nº 4.320, de 17 de março de 1964 — Normas Gerais de Direito Financeiro',
+    nomeCurto: 'Lei 4.320/64',
+    ano: 1964,
+    disciplina: 'Direito Financeiro',
+    descricao: 'Normas gerais de direito financeiro para elaboração e controle dos orçamentos e balanços da União, Estados, Municípios e Distrito Federal. Texto compilado e atualizado (fonte: Planalto).',
+    fonteUrl: 'https://www.planalto.gov.br/ccivil_03/leis/l4320compilado.htm',
+  },
 };
 
 // ─── Entrada ─────────────────────────────────────────────────────────────────
@@ -331,11 +349,19 @@ function collapse(s) {
 
 // Anotações de compilação que não são texto de lei. "(VETADO)" e "(Revogado...)"
 // são preservados — carregam informação (o tratamento de revogado vem depois).
-const ANOTACAO = /\s*\((?:Reda[çc][ãa]o dada|Reda[çc][ãa]o determinada|Inclu[íi]d[oa]s?|Acrescentad[oa]|Acrescid[oa]|Vide|Vig[êe]ncia|Renumerad[oa]|Restaurada|Regulamento|Reda[çc][ãa]o original|Alterad[oa]|Retifica[çc][ãa]o|Promulga[çc][ãa]o)[^()]*\)\s*/gi;
+const ANOTACAO = /\s*\((?:Reda[çc][ãa]o dada|Reda[çc][ãa]o determinada|Inclu[íi]d[oa]s?|Acrescentad[oa]|Acrescid[oa]|Vide|Vig[êe]ncia|Renumerad[oa]|Restaurada|Regulamento|Reda[çc][ãa]o original|Alterad[oa]|Retifica[çc][ãa]o|Promulga[çc][ãa]o|Veto rejeitado)[^()]*\)\s*/gi;
 
 function limparAnotacoes(s) {
   let out = s;
   for (let i = 0; i < 4; i++) out = out.replace(ANOTACAO, ' '); // aninhadas/repetidas
+  out = out.replace(/\(\s*\)/g, ' '); // parêntese que ficou vazio
+  // Às vezes o Planalto deixa o ponto final FORA do parêntese da anotação
+  // ("...nesta Lei Complementar. (Incluído pela LC 131, de 2009)."), então
+  // removê-la sobra um ponto órfão que o collapse cola na pontuação anterior
+  // ("...Complementar..", "...orçamentos;.", "...referentes a:."). Exigir o
+  // espaço entre os dois sinais preserva as linhas de reticências dos artigos
+  // que alteram outras leis ("Art. 1.048.........").
+  out = out.replace(/([.;:,])\s+\.\s*$/, '$1');
   return collapse(out);
 }
 
@@ -349,8 +375,16 @@ function limparAnotacoes(s) {
 // ("Seção VIII" + "Vigência" + "Da Habilitação..."). Removido por palavra
 // inteira com V maiúsculo para não afetar "vigência" (minúsculo) usado como
 // palavra comum no meio de frases (ex.: "prova de vigência").
+// "Produção de efeitos" é o mesmo artefato com outro rótulo (LRF: 26
+// ocorrências, todas de link sobrescrito) — idem, só com P maiúsculo.
+// O lookaround protege a forma ENTRE PARÊNTESES, que é anotação de verdade e
+// cabe a limparAnotacoes remover inteira: esta função roda ANTES dela, e sem o
+// lookaround "(Vigência)" virava um "( )" órfão no caput (LRF, art. 42).
 function limparVigenciaResidual(s) {
-  return collapse(s.replace(/\bVig[êe]ncia\b/g, ' '));
+  return collapse(
+    s.replace(/(?<!\()\bVig[êe]ncia\b(?!\))/g, ' ')
+     .replace(/(?<!\()\bProdu[çc][ãa]o de efeitos\b(?!\))/g, ' '),
+  );
 }
 
 // ─── Parser ──────────────────────────────────────────────────────────────────
@@ -425,8 +459,16 @@ function parseLei(html) {
           const sep = path[lastHeadingLevel].includes(' — ') ? ' ' : ' — ';
           path[lastHeadingLevel] = `${path[lastHeadingLevel]}${sep}${nome}`;
         }
+      } else if (atual) {
+        // Centrado, não é heading estrutural e não há heading esperando nome:
+        // é conteúdo do artigo diagramado ao centro. Os esquemas de
+        // classificação da Lei 4.320 (arts. 12 e 13) trazem justamente assim os
+        // grupos "DESPESAS CORRENTES" e "DESPESAS DE CAPITAL" — sem isto, os
+        // itens ficavam no JSON e os grupos que os organizam sumiam.
+        const corpo = limparAnotacoes(joined);
+        if (corpo) atual.blocos.push({ id: `b${++atual._b}`, rotulo: null, texto: corpo, nivel: 0 });
       }
-      continue; // centrado nunca é corpo de artigo
+      continue; // centrado nunca abre artigo
     }
     lastHeadingLevel = null;
 
@@ -435,7 +477,11 @@ function parseLei(html) {
     // Novo artigo: "Art. 121." / "Art. 121-A" / "Art. 359-M-A" / "Art 1º".
     // Sufixo de letra: hífen COLADO ao número ("121-A") e sem letra minúscula
     // depois — "Art. 1º - Não há crime" tem espaço antes do hífen e não é sufixo.
-    const mArt = text.match(/^Art\.?\s*(\d+(?:\.\d{3})*)\s*[ºo°]?((?:-[A-Z]{1,2}(?![a-zA-Zà-öø-ÿ]))*)\s*[.:–-]?\s*/);
+    // Leis antigas alternam a abreviação com a palavra por extenso no meio do
+    // texto (a Lei 4.320/64 escreve "Artigo 69." em 24 dos 115 artigos, que
+    // sumiam do JSON) — o rótulo gerado é sempre "Art. N", uniforme com o resto
+    // do acervo. "Artigos 1º e 2º" não casa: depois de "Artigo" vem um "s".
+    const mArt = text.match(/^Art(?:igo)?\.?\s*(\d+(?:\.\d{3})*)\s*[ºo°]?((?:-[A-Z]{1,2}(?![a-zA-Zà-öø-ÿ]))*)\s*[.:–-]?\s*/);
     if (mArt) {
       pushArtigo();
       const num = mArt[1].replace(/\./g, '');
@@ -476,6 +522,18 @@ function parseLei(html) {
     if (!texto) continue;
     // Restos de anotação sem parênteses ("Vigência", "Texto compilado").
     if (/^\(?\s*(Vig[êe]ncia|Texto compilado|Mensagem de veto)\s*\)?$/i.test(texto)) continue;
+    // Links do cabeçalho do Planalto. Na Lei 4.320 os dois caem no MESMO
+    // parágrafo ("Mensagem de veto Partes mantidas pelo Congresso Nacional") e
+    // viravam a rubrica do art. 1º.
+    if (/^(Mensagem de veto|Partes mantidas pelo Congresso)\b/i.test(texto)) continue;
+
+    // Divisão interna rotulada com romano e parêntese ("I) Das Subvenções
+    // Sociais", Lei 4.320 arts. 15/17): é o TÍTULO da divisão que começa no
+    // próximo artigo, não corpo do artigo anterior — vira rubrica pendente.
+    if (/^[IVXLCDM]{1,4}\)\s+\S/.test(texto) && ehRubrica(texto)) {
+      rubricaPendente = texto;
+      continue;
+    }
 
     // Blocos do artigo corrente.
     if (atual) {
@@ -483,7 +541,10 @@ function parseLei(html) {
 
       const mPar = texto.match(/^§\s*(\d+)\s*[ºo°]?\s*[.:–-]?\s*/);
       const mPU = texto.match(/^Par[áa]grafo [úu]nico\s*[.:–-]?\s*/i);
-      const mInc = texto.match(/^([IVXLCDM]{1,8})\s*[-–—.]\s+/);
+      // Leis antigas às vezes trocam o travessão do inciso por parêntese no
+      // meio da mesma lista (Lei 4.320, art. 108: "I) como receita..." seguido
+      // de "II - como subvenção..."); sem isto o primeiro inciso perdia o rótulo.
+      const mInc = texto.match(/^([IVXLCDM]{1,8})\s*(?:[-–—.]|\))\s+/);
       const mAli = texto.match(/^([a-z])\s*\)\s+/);
 
       if (mPar) {
@@ -593,7 +654,13 @@ async function main() {
     disciplina: meta.disciplina,
     descricao: meta.descricao,
     fonteUrl: meta.fonteUrl,
-    geradoEm: new Date().toISOString().slice(0, 10),
+    // Data LOCAL, não UTC: o leitor exibe isso como "atualizada em" para uma
+    // usuária no Brasil (UTC-3), e depois das 21h o toISOString() já devolvia
+    // o dia seguinte — a lei aparecia atualizada numa data futura.
+    geradoEm: (() => {
+      const d = new Date();
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    })(),
     artigos,
   };
 
