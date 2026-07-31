@@ -278,7 +278,6 @@ export default function EditalDetailPage() {
   const totalQuestions = contagemCompleta
     ? (subjects ?? []).reduce((acc, sub) => acc + (sub.numQuestions ?? 0), 0)
     : 0;
-  const maxWeight = Math.max(1, ...(subjects ?? []).map((sub) => sub.weight));
 
   const facts: { label: string; value: string }[] = [
     { label: 'Status', value: SITUACAO_LABEL[edital.situacao] },
@@ -488,6 +487,17 @@ export default function EditalDetailPage() {
               da banca. Serve para começar a estudar hoje; confirme tudo quando o edital sair.
             </p>
           )}
+          {/* A barra só existe quando há nº de questões oficial — sem isso
+              (grade só com peso 1-5) ela virava uma barra "de progresso" com
+              % inventado (peso/maior peso), sem rótulo, sem explicação, e
+              quase sempre curta (com 10+ matérias nenhuma chega perto de
+              100%) — ilegível por padrão de design, não só por falta de
+              legenda. Auditoria pedida pela Maria em 31/07. */}
+          {contagemCompleta && (
+            <p style={s.shareLegend}>
+              A barra mostra quanto cada disciplina vale na prova — nº de questões dela dividido pelo total.
+            </p>
+          )}
           {subjectsError ? (
             // Erro ≠ vazio: sem isto o skeleton ficaria girando para sempre.
             <p style={s.mutedText}>Não foi possível carregar as disciplinas. Recarregue a página para tentar de novo.</p>
@@ -500,11 +510,13 @@ export default function EditalDetailPage() {
           ) : (
             <div style={s.subjectList}>
               {subjects.map((sub) => {
-                // Barra = participação da disciplina na prova: por questões
-                // quando o edital fixa o nº, senão pelo peso curado (1–5).
-                const share = totalQuestions > 0
-                  ? (sub.numQuestions ?? 0) / totalQuestions
-                  : sub.weight / maxWeight;
+                // % real da prova — só existe quando o edital fixa o nº de
+                // questões de TODAS as disciplinas (contagemCompleta). Sem
+                // isso não há proporção verdadeira para mostrar: peso/maior
+                // peso não é "participação na prova", é só o mesmo peso dos
+                // pontinhos redesenhado como barra — informação duplicada, e
+                // pior, fingindo ser uma medida que não é.
+                const sharePct = contagemCompleta ? Math.round(((sub.numQuestions ?? 0) / totalQuestions) * 100) : null;
                 return (
                   <div key={sub.name} style={s.subjectRow}>
                     <div style={s.subjectTop}>
@@ -523,9 +535,14 @@ export default function EditalDetailPage() {
                       </div>
                     </div>
                     <div style={s.subjectMetaRow}>
-                      <div style={s.shareTrack}>
-                        <div style={{ ...s.shareFill, width: `${Math.round(share * 100)}%` }} />
-                      </div>
+                      {sharePct != null && (
+                        <>
+                          <div style={s.shareTrack}>
+                            <div style={{ ...s.shareFill, width: `${sharePct}%` }} />
+                          </div>
+                          <span style={s.sharePct}>{sharePct}%</span>
+                        </>
+                      )}
                       <span style={s.subjectSub}>{sub.topicCount} tópico{sub.topicCount === 1 ? '' : 's'}</span>
                     </div>
                   </div>
@@ -667,6 +684,7 @@ const s: Record<string, CSSProperties> = {
   factValue: { fontSize: 14, fontWeight: 600, color: theme.ink, overflowWrap: 'break-word' },
   avisoText: { fontSize: 12, color: theme.inkFaint, margin: '12px 0 0', lineHeight: 1.5, fontStyle: 'italic' },
   provisoriaHint: { fontSize: 12, color: theme.inkSoft, lineHeight: 1.55, margin: '12px 0 0', padding: '10px 12px', borderRadius: theme.radiusSm, background: theme.warnBg, border: `0.5px solid ${theme.warn}` },
+  shareLegend: { fontSize: 12, color: theme.inkFaint, margin: '8px 0 0', lineHeight: 1.5 },
   verificadoText: { fontSize: 11, color: theme.inkFaint, margin: '10px 0 0', paddingTop: 10, borderTop: `0.5px solid ${theme.line}`, lineHeight: 1.5 },
   fonteInlineLink: { color: theme.teal, fontWeight: 600, textDecoration: 'none' },
 
@@ -678,6 +696,10 @@ const s: Record<string, CSSProperties> = {
   subjectMetaRow: { display: 'flex', alignItems: 'center', gap: 10, marginTop: 8 },
   shareTrack: { flex: 1, height: 5, background: theme.muted, borderRadius: theme.radiusPill, overflow: 'hidden' },
   shareFill: { height: '100%', background: theme.teal, borderRadius: theme.radiusPill, transition: 'width 0.4s ease' },
+  // Rótulo numérico ao lado da barra — sem isto a única leitura possível era
+  // comparar comprimentos de olho, e como o valor real quase nunca passa de
+  // ~15% (edital com 10+ matérias), a barra parecia "travada perto do zero".
+  sharePct: { fontSize: 12, fontWeight: 700, color: theme.teal, fontVariantNumeric: 'tabular-nums', flexShrink: 0, minWidth: 30, textAlign: 'right' },
   subjectSub: { fontSize: 12, color: theme.inkFaint, fontVariantNumeric: 'tabular-nums', flexShrink: 0 },
   weightDots: { display: 'inline-flex', gap: 3, alignItems: 'center' },
   weightDot: { width: 6, height: 6, borderRadius: '50%', display: 'inline-block' },
