@@ -13,10 +13,10 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Bell, BellRing, Check, Download, ExternalLink, FileDown } from 'lucide-react';
 import {
   activateCatalogEdital, followEdital, getCatalogEditalBySlug, getCatalogEditalSubjects,
-  getEditalPdfMirror, isFollowingEdital, listCatalogEditais, listConcursoStats, listEdicoes,
+  getEditalPdfMirror, isFollowingEdital, listCatalogEditais, listConcursoStats,
   listEditalUpdates, listPastPapers, unfollowEdital,
   type CatalogEdital, type CatalogEditalDetail, type CatalogEditalSubject,
-  type ConcursoStat, type EditalEdicao, type EditalPdfMirror, type EditalUpdate, type PastPaper,
+  type ConcursoStat, type EditalPdfMirror, type EditalUpdate, type PastPaper,
 } from '@/services/editaisCatalog.service';
 import { getTargetTopicProgress } from '@/services/targetTopics.service';
 import { tryGetUser } from '@/lib/supabase/requireUser';
@@ -73,11 +73,6 @@ export default function EditalDetailPage() {
     queryFn: () => listEditalUpdates(editalId!),
     enabled: Boolean(editalId),
   });
-  const { data: edicoes } = useQuery<EditalEdicao[]>({
-    queryKey: ['edital-edicoes', concursoKey],
-    queryFn: () => listEdicoes(concursoKey!),
-    enabled: Boolean(concursoKey),
-  });
   const { data: stats } = useQuery<ConcursoStat[]>({
     queryKey: ['edital-stats', concursoKey],
     queryFn: () => listConcursoStats(concursoKey!),
@@ -91,9 +86,9 @@ export default function EditalDetailPage() {
     enabled: Boolean(editalId),
   });
   const { data: papers } = useQuery<PastPaper[]>({
-    queryKey: ['edital-papers', concursoKey],
-    queryFn: () => listPastPapers(concursoKey!),
-    enabled: Boolean(concursoKey),
+    queryKey: ['edital-papers', editalId],
+    queryFn: () => listPastPapers(editalId!),
+    enabled: Boolean(editalId),
   });
   // Catálogo inteiro só para popular o comparador — lista pequena e cacheada.
   const { data: todosEditais } = useQuery<CatalogEdital[]>({
@@ -163,15 +158,26 @@ export default function EditalDetailPage() {
     [todosEditais, edital],
   );
 
+  // Edições ANTERIORES DO MESMO CARGO — não "do mesmo concurso". Um concurso
+  // unificado põe vários cargos diferentes na mesma edição (o TJ-GO 2024 tem
+  // três, o de 2021 outros dois, sem repetir nenhum): agrupar por
+  // concurso_key fazia "Oficial de Justiça · 2024" aparecer como se fosse uma
+  // "edição" de "Área Judiciária" — carreira diferente, não o mesmo cargo em
+  // outro ano (bug reportado pela Maria em 31/07). O cargo idêntico é o único
+  // critério que sustenta a palavra "edição".
+  const edicoesMesmoCargo = useMemo(
+    () => (todosEditais ?? []).filter((e) =>
+      edital != null && e.id !== edital.id && e.orgaoSlug === edital.orgaoSlug && e.cargo === edital.cargo),
+    [todosEditais, edital],
+  );
+
   const comparadorOptions = useMemo<ComparadorOption[]>(() => {
     if (!edital) return [];
-    const edicaoOpts: ComparadorOption[] = (edicoes ?? [])
-      .filter((e) => e.id !== edital.id)
-      .map((e) => ({
-        id: e.id,
-        label: `Edição ${e.ano ?? e.ultimaEdicao ?? '—'}${e.banca ? ` · ${e.banca}` : ''}`,
-        grupo: 'edicao' as const,
-      }));
+    const edicaoOpts: ComparadorOption[] = edicoesMesmoCargo.map((e) => ({
+      id: e.id,
+      label: `Edição ${e.ano ?? e.ultimaEdicao ?? '—'}${e.banca ? ` · ${e.banca}` : ''}`,
+      grupo: 'edicao' as const,
+    }));
     // Banco inteiro, não só o mesmo órgão (aberto em 31/07): com federais no
     // catálogo, a pergunta real é "quanto do que já estudo aproveita para
     // aquele outro concurso?" — INSS × BB × Correios é comparação útil.
@@ -180,7 +186,7 @@ export default function EditalDetailPage() {
     // tem conteúdo programático curado: o diff sairia "tudo adicionado".
     const candidatos = (todosEditais ?? []).filter((e) =>
       e.id !== edital.id && e.subjectCount > 0
-      && (e.concursoKey == null || e.concursoKey !== edital.concursoKey));
+      && !(e.orgaoSlug === edital.orgaoSlug && e.cargo === edital.cargo));
     const orgaoOpts: ComparadorOption[] = candidatos
       .filter((e) => e.orgaoSlug != null && e.orgaoSlug === edital.orgaoSlug)
       .map((e) => ({
@@ -202,7 +208,7 @@ export default function EditalDetailPage() {
         grupo: 'banco' as const,
       }));
     return [...edicaoOpts, ...orgaoOpts, ...bancoOpts];
-  }, [edital, edicoes, todosEditais]);
+  }, [edital, edicoesMesmoCargo, todosEditais]);
 
   async function handleActivate() {
     if (!edital || activating) return;
@@ -259,7 +265,19 @@ export default function EditalDetailPage() {
   const cd = days !== null ? countdownInfo(days) : null;
   const cdColor = cd ? { danger: theme.danger, warn: theme.warn, ok: theme.teal, past: theme.inkFaint }[cd.tone] : theme.inkFaint;
 
-  const totalQuestions = (subjects ?? []).reduce((acc, sub) => acc + (sub.numQuestions ?? 0), 0);
+  // Grade MISTA (TJ-GO 2024): o edital publica a quantidade de questões de
+  // algumas disciplinas e não de outras — Oficial de Justiça tem 30 questões
+  // de "Conhecimentos Específicos" que o edital não divide entre os 6 ramos
+  // do Direito. Somar só o que é conhecido daria "30 questões" numa prova de
+  // 60, e a barra das disciplinas sem número ficaria zerada justamente onde
+  // elas pesam mais. Então o total só aparece quando a contagem está
+  // completa; fora isso, tudo se orienta pelo peso.
+  const contagemCompleta = (subjects?.length ?? 0) > 0
+    && (subjects ?? []).every((sub) => sub.numQuestions != null);
+  const algumaComQuestoes = (subjects ?? []).some((sub) => sub.numQuestions != null);
+  const totalQuestions = contagemCompleta
+    ? (subjects ?? []).reduce((acc, sub) => acc + (sub.numQuestions ?? 0), 0)
+    : 0;
   const maxWeight = Math.max(1, ...(subjects ?? []).map((sub) => sub.weight));
 
   const facts: { label: string; value: string }[] = [
@@ -287,11 +305,19 @@ export default function EditalDetailPage() {
   // 2. o PDF na origem, se ainda não espelhamos;
   // 3. a página oficial do concurso, quando o edital nem saiu — e aí o rótulo
   //    diz isso, em vez de prometer um PDF que não existe.
+  //
+  // Em concurso que NÃO está vigente o PDF é o da última edição, não o do
+  // certame que a pessoa vai prestar. O rótulo precisa dizer isso: sem o ano,
+  // "Baixar edital" faz uma grade de 2021 passar por edital atual.
+  const editalDeEdicaoPassada = edital.situacao !== 'vigente' && edital.ultimaEdicao != null;
+  const labelPdf = editalDeEdicaoPassada
+    ? `Baixar edital do último concurso (${edital.ultimaEdicao})`
+    : 'Baixar edital (PDF)';
   const editalLink: { href: string; label: string; isPdf: boolean } | null = mirror
-    ? { href: mirror.url, label: 'Baixar edital (PDF)', isPdf: true }
+    ? { href: mirror.url, label: labelPdf, isPdf: true }
     : edital.editalUrl
       ? /\.pdf($|\?)/i.test(edital.editalUrl)
-        ? { href: edital.editalUrl, label: 'Baixar edital (PDF)', isPdf: true }
+        ? { href: edital.editalUrl, label: labelPdf, isPdf: true }
         : { href: edital.editalUrl, label: 'Página oficial do concurso', isPdf: false }
       : null;
 
@@ -487,7 +513,7 @@ export default function EditalDetailPage() {
                         <WeightDots weight={sub.weight} />
                         {sub.numQuestions != null ? (
                           <span style={s.questionBadge}>{sub.numQuestions} questões</span>
-                        ) : totalQuestions > 0 ? (
+                        ) : algumaComQuestoes ? (
                           // Só faz sentido apontar a exceção quando OUTRAS
                           // disciplinas têm nº fixo; se nenhuma tem (ex.: TJ-GO
                           // Juiz), repetir "sem questões fixas" 15× é ruído — o
@@ -533,12 +559,15 @@ export default function EditalDetailPage() {
           </section>
         )}
 
-        {/* ── Edições anteriores ── */}
-        {(edicoes?.filter((e) => e.id !== edital.id).length ?? 0) > 0 && (
+        {/* ── Edições anteriores DO MESMO CARGO — nunca de outro cargo, mesmo
+            que do mesmo concurso unificado. Outros cargos aparecem só na
+            seção "Outros cargos de {órgão}", mais abaixo, que já diz o que
+            são (com a tag de situação de cada um). ── */}
+        {edicoesMesmoCargo.length > 0 && (
           <section style={s.card}>
-            <h2 style={{ ...s.cardTitle, marginBottom: 12 }}>Edições deste concurso</h2>
+            <h2 style={{ ...s.cardTitle, marginBottom: 12 }}>Outras edições deste cargo</h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {edicoes!.filter((e) => e.id !== edital.id).map((e) => (
+              {edicoesMesmoCargo.map((e) => (
                 <div key={e.id} style={s.edicaoRow}>
                   <span style={s.edicaoLabel}>
                     Edição {e.ano ?? e.ultimaEdicao ?? '—'}{e.banca ? ` · ${e.banca}` : ''}

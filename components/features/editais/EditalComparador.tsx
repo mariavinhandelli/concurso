@@ -5,15 +5,20 @@
 // pesos alterados e tópicos que entraram/saíram — é calculado no cliente a
 // partir do conteúdo programático curado dos dois editais.
 
-import { useState, type CSSProperties } from 'react';
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { ArrowLeftRight } from 'lucide-react';
+import { ArrowLeftRight, Search } from 'lucide-react';
 import { compareEditais, type EditalComparison, type EditalComparisonSubject } from '@/services/editaisCatalog.service';
 import { track, EV } from '@/lib/analytics';
-import { theme } from '@/lib/theme';
-import { Select } from '@/components/ui/Select';
+import { theme, zIndex } from '@/lib/theme';
 import { Badge } from '@/components/ui/Badge';
 import { Skeleton } from '@/components/ui/Skeleton';
+
+// Remove acentos e caixa — mesmo normalizador do BancoEditaisTab, para "tecnico"
+// casar com "Técnico" na busca.
+function norm(v: string): string {
+  return v.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();
+}
 
 export interface ComparadorOption {
   id: string;
@@ -66,6 +71,142 @@ function TopicChips({ added, removed }: { added: string[]; removed: string[] }) 
   );
 }
 
+interface EditalPickerProps {
+  options: ComparadorOption[];
+  value: string;
+  onChange: (id: string) => void;
+}
+
+const GROUP_LABEL: Record<ComparadorOption['grupo'], string> = {
+  edicao: 'Edições deste concurso',
+  orgao: 'Outros cargos deste órgão',
+  // Sem "(mesma área primeiro)" — a ordenação já vem assim do chamador
+  // (page.tsx) e falar isso em voz alta não ajuda quem está escolhendo;
+  // fica implícito, como qualquer outra lista ordenada por relevância.
+  banco: 'Outros editais do banco',
+};
+
+// Combobox com busca por texto — troca o <select> nativo (que virava uma
+// lista longa sem filtro, ~20 itens com o catálogo de 25 editais) por um
+// campo que filtra ao digitar, mantendo os mesmos 3 grupos e a navegação
+// por teclado (setas + Enter, mesmo padrão do CommandPalette).
+function EditalPicker({ options, value, onChange }: EditalPickerProps) {
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState('');
+  const [highlighted, setHighlighted] = useState(0);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const selected = options.find((o) => o.id === value) ?? null;
+
+  useEffect(() => {
+    if (!open) return;
+    function onDocClick(e: MouseEvent) {
+      if (rootRef.current && !rootRef.current.contains(e.target as Node)) {
+        setOpen(false);
+        setQuery('');
+      }
+    }
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') { setOpen(false); setQuery(''); inputRef.current?.blur(); }
+    }
+    document.addEventListener('mousedown', onDocClick);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onDocClick);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [open]);
+
+  const groups = useMemo(() => {
+    const nq = norm(query.trim());
+    const match = (o: ComparadorOption) => !nq || norm(o.label).includes(nq);
+    return (['edicao', 'orgao', 'banco'] as const)
+      .map((grupo) => ({ grupo, label: GROUP_LABEL[grupo], items: options.filter((o) => o.grupo === grupo && match(o)) }))
+      .filter((g) => g.items.length > 0);
+  }, [options, query]);
+
+  const flat = useMemo(() => groups.flatMap((g) => g.items), [groups]);
+
+  useEffect(() => { setHighlighted(0); }, [query, open]);
+
+  function select(o: ComparadorOption) {
+    onChange(o.id);
+    setQuery('');
+    setOpen(false);
+    inputRef.current?.blur();
+  }
+
+  function handleKeyDown(e: React.KeyboardEvent) {
+    if (!open) {
+      if (e.key === 'ArrowDown' || e.key === 'Enter') { e.preventDefault(); setOpen(true); }
+      return;
+    }
+    if (e.key === 'ArrowDown') { e.preventDefault(); setHighlighted((h) => Math.min(h + 1, flat.length - 1)); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); setHighlighted((h) => Math.max(h - 1, 0)); }
+    else if (e.key === 'Enter') { e.preventDefault(); if (flat[highlighted]) select(flat[highlighted]); }
+  }
+
+  return (
+    <div ref={rootRef} style={{ position: 'relative', flex: 1, minWidth: 200 }}>
+      <div style={{ position: 'relative' }}>
+        <span aria-hidden="true" style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: theme.inkFaint, display: 'flex' }}>
+          <Search size={14} strokeWidth={2} />
+        </span>
+        <input
+          ref={inputRef}
+          type="text"
+          role="combobox"
+          aria-expanded={open}
+          aria-autocomplete="list"
+          aria-label="Buscar edital para comparar"
+          value={open ? query : (selected?.label ?? '')}
+          placeholder="Buscar edital…"
+          onFocus={() => { setOpen(true); setQuery(''); }}
+          onChange={(e) => { setQuery(e.target.value); if (!open) setOpen(true); }}
+          onKeyDown={handleKeyDown}
+          style={s.pickerInput}
+        />
+      </div>
+      {open && (
+        <div className="floating-root" role="listbox" style={s.pickerPanel}>
+          {flat.length === 0 ? (
+            <p style={{ fontSize: 13, color: theme.inkFaint, padding: '8px 10px', margin: 0 }}>
+              Nenhum edital encontrado.
+            </p>
+          ) : groups.map((g) => (
+            <div key={g.grupo}>
+              <div style={s.pickerGroupLabel}>{g.label}</div>
+              {g.items.map((o) => {
+                const idx = flat.indexOf(o);
+                const isHighlighted = idx === highlighted;
+                return (
+                  <button
+                    key={o.id}
+                    type="button"
+                    role="option"
+                    aria-selected={o.id === value}
+                    onMouseEnter={() => setHighlighted(idx)}
+                    onClick={() => select(o)}
+                    style={{
+                      ...s.pickerOption,
+                      background: isHighlighted ? theme.tealBg : 'transparent',
+                      color: isHighlighted ? theme.teal : theme.ink,
+                      fontWeight: o.id === value ? 700 : 500,
+                    }}
+                  >
+                    {o.label}
+                  </button>
+                );
+              })}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function EditalComparador({ editalAtualId, editalAtualSlug, options }: Props) {
   const [otherId, setOtherId] = useState('');
 
@@ -94,9 +235,6 @@ export function EditalComparador({ editalAtualId, editalAtualSlug, options }: Pr
     if (id) track(EV.editalCompared, { slug: editalAtualSlug, otherId: id });
   }
 
-  const mesmasEdicoes = options.filter((o) => o.grupo === 'edicao');
-  const mesmoOrgao = options.filter((o) => o.grupo === 'orgao');
-  const outros = options.filter((o) => o.grupo === 'banco');
   const semMudancas = comparison
     && comparison.totalAdded === 0 && comparison.totalRemoved === 0 && comparison.totalChanged === 0;
 
@@ -105,29 +243,7 @@ export function EditalComparador({ editalAtualId, editalAtualSlug, options }: Pr
       <div style={s.selectorRow}>
         <ArrowLeftRight size={15} color={theme.inkSoft} strokeWidth={2} style={{ flexShrink: 0 }} />
         <span style={s.selectorLabel}>Comparar com</span>
-        <Select
-          value={otherId}
-          onChange={(e) => handleSelect(e.target.value)}
-          style={{ width: 'auto', minWidth: 200, flex: 1, padding: '7px 28px 7px 10px', fontSize: 13 }}
-          aria-label="Escolher edital para comparar"
-        >
-          <option value="">Escolher edital…</option>
-          {mesmasEdicoes.length > 0 && (
-            <optgroup label="Edições deste concurso">
-              {mesmasEdicoes.map((o) => <option key={o.id} value={o.id}>{o.label}</option>)}
-            </optgroup>
-          )}
-          {mesmoOrgao.length > 0 && (
-            <optgroup label="Outros cargos deste órgão">
-              {mesmoOrgao.map((o) => <option key={o.id} value={o.id}>{o.label}</option>)}
-            </optgroup>
-          )}
-          {outros.length > 0 && (
-            <optgroup label="Outros editais do banco (mesma área primeiro)">
-              {outros.map((o) => <option key={o.id} value={o.id}>{o.label}</option>)}
-            </optgroup>
-          )}
-        </Select>
+        <EditalPicker options={options} value={otherId} onChange={handleSelect} />
       </div>
 
       {!otherId && (
@@ -227,4 +343,19 @@ const s: Record<string, CSSProperties> = {
   chipDel: { fontSize: 12, fontWeight: 500, color: theme.danger, background: theme.dangerBg, borderRadius: theme.radiusXs, padding: '2px 8px', textDecoration: 'line-through' },
   chipMore: { fontSize: 12, fontWeight: 600, color: theme.teal, background: 'transparent', border: `1px dashed ${theme.teal}`, borderRadius: theme.radiusXs, padding: '2px 8px', cursor: 'pointer', fontFamily: 'inherit' },
   unchangedNote: { fontSize: 12, color: theme.inkFaint, margin: '4px 0 0' },
+
+  pickerInput: {
+    width: '100%', boxSizing: 'border-box', padding: '7px 10px 7px 30px',
+    borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`,
+    background: theme.card, fontSize: 13, color: theme.ink,
+    fontFamily: 'inherit', outline: 'none',
+  },
+  pickerPanel: {
+    position: 'absolute', top: '100%', left: 0, right: 0, marginTop: 4,
+    background: theme.card, border: `0.5px solid ${theme.line}`,
+    borderRadius: theme.radiusSm, boxShadow: theme.shadowHover,
+    maxHeight: 280, overflowY: 'auto', zIndex: zIndex.menu, padding: 4,
+  },
+  pickerGroupLabel: { fontSize: 11, fontWeight: 700, color: theme.inkFaint, textTransform: 'uppercase', letterSpacing: 0.4, padding: '6px 10px 4px' },
+  pickerOption: { display: 'block', width: '100%', textAlign: 'left', padding: '8px 10px', borderRadius: theme.radiusXs, border: 'none', fontSize: 13, cursor: 'pointer', fontFamily: 'inherit' },
 };
