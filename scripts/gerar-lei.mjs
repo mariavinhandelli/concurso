@@ -192,7 +192,7 @@ const LEIS = {
   'lei-11343': {
     slug: 'lei-11343',
     nome: 'Lei nº 11.343, de 23 de agosto de 2006 — Lei de Drogas',
-    nomeCurto: 'Lei 11.343/06 (Drogas)',
+    nomeCurto: 'Lei 11.343/06 (Lei de Drogas)',
     ano: 2006,
     disciplina: 'Legislação Penal Especial',
     descricao: 'Sistema Nacional de Políticas Públicas sobre Drogas (Sisnad); tipos penais e procedimento. Texto atualizado (fonte: Planalto).',
@@ -201,7 +201,7 @@ const LEIS = {
   'lei-10826': {
     slug: 'lei-10826',
     nome: 'Lei nº 10.826, de 22 de dezembro de 2003 — Estatuto do Desarmamento',
-    nomeCurto: 'Lei 10.826/03 (Desarmamento)',
+    nomeCurto: 'Lei 10.826/03 (Estatuto do Desarmamento)',
     ano: 2003,
     disciplina: 'Legislação Penal Especial',
     descricao: 'Registro, posse e comercialização de armas de fogo e munição; Sinarm; crimes. Texto atualizado (fonte: Planalto).',
@@ -219,7 +219,7 @@ const LEIS = {
   'lei-8072': {
     slug: 'lei-8072',
     nome: 'Lei nº 8.072, de 25 de julho de 1990 — Crimes Hediondos',
-    nomeCurto: 'Lei 8.072/90 (Hediondos)',
+    nomeCurto: 'Lei 8.072/90 (Crimes Hediondos)',
     ano: 1990,
     disciplina: 'Legislação Penal Especial',
     descricao: 'Dispõe sobre os crimes hediondos e seu regime jurídico diferenciado. Texto atualizado (fonte: Planalto).',
@@ -228,7 +228,7 @@ const LEIS = {
   'lei-9455': {
     slug: 'lei-9455',
     nome: 'Lei nº 9.455, de 7 de abril de 1997 — Lei de Tortura',
-    nomeCurto: 'Lei 9.455/97 (Tortura)',
+    nomeCurto: 'Lei 9.455/97 (Lei de Tortura)',
     ano: 1997,
     disciplina: 'Legislação Penal Especial',
     descricao: 'Define os crimes de tortura. Texto atualizado (fonte: Planalto).',
@@ -246,7 +246,7 @@ const LEIS = {
   'lei-13869': {
     slug: 'lei-13869',
     nome: 'Lei nº 13.869, de 5 de setembro de 2019 — Lei de Abuso de Autoridade',
-    nomeCurto: 'Lei 13.869/19 (Abuso)',
+    nomeCurto: 'Lei 13.869/19 (Abuso de Autoridade)',
     ano: 2019,
     disciplina: 'Legislação Penal Especial',
     descricao: 'Define os crimes de abuso de autoridade cometidos por agente público. Texto atualizado (fonte: Planalto).',
@@ -255,7 +255,7 @@ const LEIS = {
   'lei-9613': {
     slug: 'lei-9613',
     nome: 'Lei nº 9.613, de 3 de março de 1998 — Lavagem de Dinheiro',
-    nomeCurto: 'Lei 9.613/98 (Lavagem)',
+    nomeCurto: 'Lei 9.613/98 (Lavagem de Dinheiro)',
     ano: 1998,
     disciplina: 'Legislação Penal Especial',
     descricao: 'Crimes de "lavagem" ou ocultação de bens, direitos e valores; COAF. Texto compilado e atualizado (fonte: Planalto).',
@@ -282,7 +282,7 @@ const LEIS = {
   'lei-9296': {
     slug: 'lei-9296',
     nome: 'Lei nº 9.296, de 24 de julho de 1996 — Interceptação Telefônica',
-    nomeCurto: 'Lei 9.296/96 (Interceptação)',
+    nomeCurto: 'Lei 9.296/96 (Interceptação Telefônica)',
     ano: 1996,
     disciplina: 'Legislação Penal Especial',
     descricao: 'Regulamenta a interceptação de comunicações telefônicas e de sistemas de informática/telemática para prova em investigação criminal. Texto atualizado (fonte: Planalto).',
