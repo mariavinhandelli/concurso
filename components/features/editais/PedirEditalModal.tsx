@@ -47,7 +47,7 @@ export function PedirEditalModal({ initialConcurso, onClose }: Props) {
     try {
       await requestEdital({ concurso, cargo: cargo || undefined, uf: uf || undefined });
       track(EV.editalRequested, { concurso: concurso.trim() });
-      toast.success('Pedido registrado! Você será avisada quando o edital entrar no banco.');
+      toast.success('Pedido registrado! Quando o edital entrar no banco, você passa a acompanhá-lo automaticamente.');
       onClose();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : 'Erro ao registrar o pedido.');
@@ -60,8 +60,9 @@ export function PedirEditalModal({ initialConcurso, onClose }: Props) {
     <Overlay onClose={onClose} maxWidth={440} labelledBy="pedir-edital-title">
       <h3 id="pedir-edital-title" style={s.title}>Pedir um edital</h3>
       <p style={s.sub}>
-        Não achou seu concurso no banco? Conta qual é — a gente cadastra com fonte
-        oficial e te avisa quando estiver pronto.
+        Não achou seu concurso no banco? Conta qual é — os pedidos definem o que
+        a curadoria cadastra primeiro. Quando o edital entrar, você passa a
+        acompanhá-lo automaticamente e recebe as novidades dele.
       </p>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         <Input
