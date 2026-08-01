@@ -52,9 +52,13 @@ export function ItemCard({
 const s: Record<string, CSSProperties> = {
   card: { display: 'flex', flexDirection: 'column', gap: 4, width: '100%', textAlign: 'left', padding: '11px 13px', borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.card, cursor: 'pointer', fontFamily: 'inherit', minWidth: 0 },
   cardOn: { borderColor: theme.teal, background: theme.tealBg },
-  titulo: { fontSize: 14, fontWeight: 700, color: theme.ink, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
-  preview: { fontSize: 12, color: theme.inkSoft, lineHeight: 1.45, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const, overflow: 'hidden' },
-  metaRow: { display: 'flex', alignItems: 'center', gap: 8, marginTop: 2, minWidth: 0 },
+  // flexShrink: 0 nas três linhas: o min-height de toque (44px) num <button>
+  // flex-column faz o Chromium tratar 44px como altura definida e ESPREMER os
+  // filhos com overflow hidden (título ficava com 9px, cortado ao meio no
+  // tablet). Sem shrink, o botão cresce com o conteúdo como no desktop.
+  titulo: { fontSize: 14, fontWeight: 700, color: theme.ink, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flexShrink: 0 },
+  preview: { fontSize: 12, color: theme.inkSoft, lineHeight: 1.45, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const, overflow: 'hidden', flexShrink: 0 },
+  metaRow: { display: 'flex', alignItems: 'center', gap: 8, marginTop: 2, minWidth: 0, flexShrink: 0 },
   chip: { fontSize: 10, fontWeight: 700, borderRadius: theme.radiusPill, padding: '2px 8px', flexShrink: 0 },
   metaTexto: { fontSize: 11, color: theme.inkFaint, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 },
   quando: { fontSize: 11, color: theme.inkFaint, marginLeft: 'auto', flexShrink: 0 },

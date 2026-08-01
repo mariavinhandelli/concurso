@@ -1,12 +1,12 @@
 // components/features/caderno/AnotacoesView.tsx
 // Aba "Anotações" do hub Caderno: notas livres ricas (resumos, dicas, esquemas)
-// por matéria/tópico, sobre o CadernoShell (rail | lista | editor) compartilhado
-// com as demais abas. O hub cuida de header/abas e passa `openNotaId` para
-// abrir uma nota vinda do deep-link ?nota= ou da aba "Tudo".
+// por matéria/tópico, sobre o CadernoShell (pills no topo + lista centralizada;
+// editor em tela cheia com "← Voltar" ao abrir) compartilhado com as demais
+// abas. O hub cuida de header/abas e passa `openNotaId` para abrir uma nota
+// vinda do deep-link ?nota= ou da aba "Tudo".
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
-import { Pencil } from 'lucide-react';
 import { listSubjects, type Subject } from '@/services/subjects.service';
 import {
   listStudyNotes, getStudyNote, createStudyNote,
@@ -16,12 +16,12 @@ import { CadernoShell } from '@/components/features/caderno/CadernoShell';
 import { ItemCard } from '@/components/features/caderno/ItemCard';
 import { ListPanel } from '@/components/features/caderno/ListPanel';
 import { NotaEditor } from '@/components/features/caderno/NotaEditor';
+import { RailToggle } from '@/components/features/caderno/RailToggle';
 import { SubjectPill } from '@/components/features/caderno/SubjectPill';
 import { KIND_CORES } from '@/components/features/caderno/notaCores';
 import { useUI } from '@/components/layout/UIContext';
 import { useToast } from '@/components/ui/ToastProvider';
 import { theme } from '@/lib/theme';
-import { Button } from '@/components/ui/Button';
 
 const KIND_LABEL: Record<NotaKind, string> = {
   resumo: 'Resumo', dica: 'Dica', esquema: 'Esquema', outro: 'Outro',
@@ -34,6 +34,10 @@ function ordena(notas: StudyNoteMeta[]): StudyNoteMeta[] {
 
 type Filtro = 'all' | 'none' | string;
 
+// Além de "Todas", quantas matérias mostrar antes de colapsar atrás do "+N".
+// Sem isto, muitas matérias acumulavam em várias linhas de forma desorganizada.
+const RAIL_LIMIT = 5;
+
 export function AnotacoesView({ openNotaId }: { openNotaId?: string | null }) {
   const { isMobile } = useUI();
   const toast = useToast();
@@ -43,6 +47,7 @@ export function AnotacoesView({ openNotaId }: { openNotaId?: string | null }) {
   const [filtro, setFiltro] = useState<Filtro>('all');
   const [busca, setBusca] = useState('');
   const [notaAberta, setNotaAberta] = useState<StudyNote | null>(null);
+  const [railExpanded, setRailExpanded] = useState(false);
   const abrindoRef = useRef(false);
 
   useEffect(() => {
@@ -96,15 +101,6 @@ export function AnotacoesView({ openNotaId }: { openNotaId?: string | null }) {
     return out;
   }, [notas, filtro, busca]);
 
-  // Painel de detalhe nunca fica estruturalmente vazio: com a lista carregada e
-  // nada aberto (nem deep-link pendente), abre a primeira nota — padrão Gmail.
-  // Mobile fica de fora: lá abrir = trocar de tela.
-  useEffect(() => {
-    if (isMobile || openNotaId || notaAberta || !notas || notasFiltradas.length === 0) return;
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- seleção derivada da lista carregada (setState é assíncrono, após o fetch)
-    void abrirNota(notasFiltradas[0].id);
-  }, [isMobile, openNotaId, notaAberta, notas, notasFiltradas, abrirNota]);
-
   async function novaNota() {
     try {
       const criada = await createStudyNote({
@@ -128,6 +124,48 @@ export function AnotacoesView({ openNotaId }: { openNotaId?: string | null }) {
 
   const totalNotas = notas?.length ?? 0;
 
+  // Pills além de "Todas": matérias + "Sem matéria" (se houver), na mesma
+  // lista para colapsar juntas atrás do "+N".
+  const extraPills = useMemo(() => {
+    const list = subjects.map((sub) => ({
+      key: sub.id,
+      node: (
+        <SubjectPill
+          className="touch-target"
+          key={sub.id}
+          color={sub.color ?? '#C9B8DD'}
+          name={sub.name}
+          count={countPorMateria.get(sub.id) ?? 0}
+          active={filtro === sub.id}
+          onClick={() => setFiltro(sub.id)}
+        />
+      ),
+    }));
+    if ((countPorMateria.get('none') ?? 0) > 0) {
+      list.push({
+        key: 'none',
+        node: (
+          <SubjectPill
+            className="touch-target"
+            key="none"
+            name="Sem matéria"
+            count={countPorMateria.get('none')}
+            active={filtro === 'none'}
+            onClick={() => setFiltro('none')}
+          />
+        ),
+      });
+    }
+    return list;
+  }, [subjects, countPorMateria, filtro]);
+
+  // No mobile o rail já rola horizontal sem desorganizar a tela — colapsar lá
+  // só esconderia matérias hoje alcançáveis com um scroll, sem ganho algum.
+  const pillsVisiveis = (isMobile || railExpanded) ? extraPills : extraPills.slice(0, RAIL_LIMIT);
+  // Conta o que HAVERIA de oculto se colapsado — não o que está oculto agora
+  // (que é 0 quando expandido), senão o toggle "Mostrar menos" some ao expandir.
+  const pillsOcultas = isMobile ? 0 : Math.max(0, extraPills.length - RAIL_LIMIT);
+
   const rail = (
     <>
       <SubjectPill
@@ -138,25 +176,9 @@ export function AnotacoesView({ openNotaId }: { openNotaId?: string | null }) {
         active={filtro === 'all'}
         onClick={() => setFiltro('all')}
       />
-      {subjects.map((sub) => (
-        <SubjectPill
-          className="touch-target"
-          key={sub.id}
-          color={sub.color ?? '#C9B8DD'}
-          name={sub.name}
-          count={countPorMateria.get(sub.id) ?? 0}
-          active={filtro === sub.id}
-          onClick={() => setFiltro(sub.id)}
-        />
-      ))}
-      {(countPorMateria.get('none') ?? 0) > 0 && (
-        <SubjectPill
-          className="touch-target"
-          name="Sem matéria"
-          count={countPorMateria.get('none')}
-          active={filtro === 'none'}
-          onClick={() => setFiltro('none')}
-        />
+      {pillsVisiveis.map((p) => p.node)}
+      {pillsOcultas > 0 && (
+        <RailToggle expanded={railExpanded} hiddenCount={pillsOcultas} onClick={() => setRailExpanded((e) => !e)} />
       )}
     </>
   );
@@ -206,32 +228,22 @@ export function AnotacoesView({ openNotaId }: { openNotaId?: string | null }) {
       subjects={subjects}
       onPatched={handlePatched}
       onDeleted={handleDeleted}
-      onVoltar={isMobile ? () => setNotaAberta(null) : undefined}
     />
-  ) : (
-    <div style={s.editorVazio}>
-      <Pencil size={34} strokeWidth={1.3} style={{ marginBottom: 8 }} />
-      <p style={s.vazioTitulo}>Seu caderno, do seu jeito.</p>
-      <p style={s.vazioSub}>
-        Escolha uma anotação ao lado — ou crie uma nova. Selecione qualquer trecho
-        do texto para transformá-lo em flashcard.
-      </p>
-      <Button style={{ marginTop: 16 }} onClick={novaNota}>+ Nova anotação</Button>
-    </div>
-  );
+  ) : null;
 
   return (
     <CadernoShell
       rail={rail}
       lista={lista}
       detalhe={detalhe}
-      mobileDetalhe={isMobile && notaAberta !== null}
+      detalheAberto={notaAberta !== null}
+      onVoltar={() => setNotaAberta(null)}
+      voltarLabel="Voltar para Anotações"
     />
   );
 }
 
 const s: Record<string, CSSProperties> = {
-  editorVazio: { display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', height: '100%', padding: 24, color: theme.inkSoft },
   vazio: { fontSize: 13, color: theme.inkFaint, padding: '16px 4px' },
   vazioBox: { textAlign: 'center', padding: '28px 12px' },
   vazioTitulo: { fontSize: 15, fontWeight: 700, color: theme.ink, margin: '0 0 6px' },

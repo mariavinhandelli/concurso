@@ -78,7 +78,18 @@ export function Sidebar() {
         transition: 'width .24s cubic-bezier(.2,.7,.3,1), transform .26s cubic-bezier(.2,.7,.3,1)',
       }}
     >
-      <div className="sidebar-brand" style={{ ...styles.brand, justifyContent: isCollapsed ? 'center' : 'space-between' }}>
+      {/* Colapsado: logo e botão empilham em coluna — lado a lado eles somavam
+          76px (32 + 44 de touch target) dentro de 44px úteis e a logo saía
+          espremida pro canto (a "decisão de produto" que o gap:4 adiava). */}
+      <div
+        className="sidebar-brand"
+        style={{
+          ...styles.brand,
+          ...(isCollapsed
+            ? { flexDirection: 'column', height: 'auto', justifyContent: 'center', gap: 2 }
+            : { justifyContent: 'space-between' }),
+        }}
+      >
         {!isCollapsed && (
           <div style={styles.brandInner}>
             <div style={styles.logo}>
@@ -184,15 +195,6 @@ export function Sidebar() {
 
 const styles: Record<string, CSSProperties> = {
   aside: { flexShrink: 0, height: '100dvh', position: 'fixed', top: 0, left: 0, zIndex: zIndex.drawer, background: SB.bg, borderRight: `0.5px solid ${SB.border}`, padding: '20px 14px max(20px, env(safe-area-inset-bottom))', display: 'flex', flexDirection: 'column', gap: 4, fontFamily: 'var(--font-poppins), sans-serif', overflow: 'hidden' },
-  // gap: só importa no colapsado — expandido usa space-between (2 blocos nas
-  // pontas, gap não entra em jogo) e o colapsado centraliza logo (32px) + botão
-  // de recolher (30px, 44px sob toque via .icon-touch-target) como par, dentro
-  // de uma aside de só 72px. Auditoria: logo+botão JÁ excediam os 72px sob
-  // toque mesmo com gap:0 (a barra tocando o dedo já "vazava" a borda por
-  // conta própria) — um gap de 8 quase triplicava esse vazamento. 4 é o
-  // meio-termo: dá respiro real no mouse sem agravar tanto o caso de toque.
-  // Resolver de vez exige uma decisão de produto (alargar a aside colapsada,
-  // ou não colocar os dois lado a lado sob toque) — fora do escopo de um gap.
   brand: { display: 'flex', alignItems: 'center', height: 40, marginBottom: 18, padding: '0 4px', flexShrink: 0, gap: 4 },
   brandInner: { display: 'flex', alignItems: 'center', gap: 10 },
   logo: { width: 32, height: 32, borderRadius: 9, background: '#fff', display: 'grid', placeItems: 'center', flexShrink: 0, boxShadow: '0 1px 6px rgba(0,0,0,0.18)' },

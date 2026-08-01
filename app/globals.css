@@ -949,9 +949,18 @@ img, video, canvas {
    se aplica a caixa inline). .block-check fica fora: tem área invisível de
    44px via ::after (densidade da grade). */
 @media (pointer: coarse) {
-  :where(.shell-main, .floating-root) button:not(.block-check) {
+  /* ⚠️ Quirk do Chromium: num <button> flex-column, este min-height vira
+     altura DEFINIDA para os filhos e os que têm overflow hidden são
+     espremidos (título de card cortado ao meio no tablet). Botão-card em
+     coluna precisa de flex-shrink: 0 nos filhos — ver ItemCard do Caderno. */
+  :where(.shell-main, .floating-root) button:not(.block-check):not(.rte-swatch) {
     min-height: 44px;
   }
+  /* Swatches de cor do editor mantêm o visual de 22px do desktop; o alvo de
+     toque é compensado por área invisível (gap da grade é 6px → inset -3
+     não sobrepõe o vizinho). */
+  .rte-swatch { position: relative; }
+  .rte-swatch::after { content: ''; position: absolute; inset: -3px; }
 }
 
 /* Em tablets menores a lista preserva contexto e evita uma grade de 888px. */
@@ -1109,6 +1118,24 @@ textarea:focus-visible {
 @media (pointer: coarse) {
   .conquistas-filter-tab { min-height: 44px; }
   .touch-target { min-height: 44px; }
+}
+
+/* Hub Caderno — rail de filtros (pills) acima da lista centralizada. No
+   mobile rola horizontal (padrão que já existia); de 768px pra cima quebra
+   linha para nenhum filtro ficar escondido. */
+.caderno-rail {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  margin-bottom: 10px;
+  min-width: 0;
+}
+@media (min-width: 768px) {
+  .caderno-rail {
+    flex-wrap: wrap;
+    overflow-x: visible;
+  }
 }
 
 /* Hub Caderno — card de item das listas (Tudo/Anotações/Erros). Hover não é

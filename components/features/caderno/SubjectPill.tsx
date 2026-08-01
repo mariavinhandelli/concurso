@@ -34,10 +34,12 @@ export function SubjectPill({
   );
 }
 
+// Chip com borda e fundo de card: sem eles, no rail que quebra linha as pills
+// liam como texto solto na página ("tudo meio jogado ali").
 const s: Record<string, CSSProperties> = {
-  item: { display: 'flex', alignItems: 'center', gap: 8, textAlign: 'left', padding: '8px 10px', borderRadius: 9, border: 'none', background: 'transparent', cursor: 'pointer', fontFamily: 'inherit', minWidth: 0, flexShrink: 0, whiteSpace: 'nowrap' },
-  itemOn: { background: theme.tealBg },
-  dot: { width: 8, height: 8, borderRadius: '50%', flexShrink: 0 },
-  name: { fontSize: 13, fontWeight: 600, color: theme.ink, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 },
-  count: { fontSize: 12, color: theme.inkFaint, flexShrink: 0, fontVariantNumeric: 'tabular-nums' },
+  item: { display: 'flex', alignItems: 'center', gap: 6, textAlign: 'left', padding: '5px 11px', borderRadius: theme.radiusPill, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.card, cursor: 'pointer', fontFamily: 'inherit', minWidth: 0, flexShrink: 0, whiteSpace: 'nowrap' },
+  itemOn: { background: theme.tealBg, borderColor: theme.teal },
+  dot: { width: 7, height: 7, borderRadius: '50%', flexShrink: 0 },
+  name: { fontSize: 12.5, fontWeight: 600, color: theme.ink, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 },
+  count: { fontSize: 11.5, color: theme.inkFaint, flexShrink: 0, fontVariantNumeric: 'tabular-nums' },
 };

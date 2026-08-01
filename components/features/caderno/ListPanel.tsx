@@ -26,14 +26,20 @@ export function ListPanel({
     <>
       <div style={s.tools}>
         <div style={s.toolsRow}>
-          <Input
-            value={busca}
-            onChange={(e) => onBusca(e.target.value)}
-            placeholder={placeholder}
-            aria-label={placeholder}
-            icon={<Search size={15} strokeWidth={2} />}
-            style={{ fontSize: 13, padding: '9px 12px 9px 36px' }}
-          />
+          {/* Input com ícone devolve um wrapper interno sem flex:1 — sem este
+              div ele encolhe ao conteúdo em vez de ir até a largura dos cards
+              (o "buscador curto" que sobrava ao lado do "+ Nova", ou ficava
+              minúsculo sozinho na aba Tudo, que não tem botão ao lado). */}
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <Input
+              value={busca}
+              onChange={(e) => onBusca(e.target.value)}
+              placeholder={placeholder}
+              aria-label={placeholder}
+              icon={<Search size={15} strokeWidth={2} />}
+              style={{ fontSize: 13, padding: '9px 12px 9px 36px' }}
+            />
+          </div>
           {onNovo && (
             <Button size="sm" className="touch-target" onClick={onNovo} title={novoLabel}>{novoLabel}</Button>
           )}

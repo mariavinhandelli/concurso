@@ -9,10 +9,11 @@
 'use client';
 
 import { useEffect, useMemo, useState, type CSSProperties } from 'react';
+import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
-import { NotebookPen, ArrowUpRight } from 'lucide-react';
-import { listStudyNotes, type NotaKind } from '@/services/studyNotes.service';
-import { listRecentNotes } from '@/services/notebook.service';
+import { ArrowUpRight } from 'lucide-react';
+import { getStudyNote, listStudyNotes, type NotaKind } from '@/services/studyNotes.service';
+import { getNote, listRecentNotes } from '@/services/notebook.service';
 import { listAnotacoesLei } from '@/services/leiInteracoes.service';
 import { listAnotacoesJuris } from '@/services/jurisInteracoes.service';
 import { LEIS_CATALOG } from '@/services/leis.service';
@@ -21,11 +22,16 @@ import { ItemCard } from '@/components/features/caderno/ItemCard';
 import { ListPanel } from '@/components/features/caderno/ListPanel';
 import { SubjectPill } from '@/components/features/caderno/SubjectPill';
 import { KIND_CORES } from '@/components/features/caderno/notaCores';
-import { useUI } from '@/components/layout/UIContext';
 import { useToast } from '@/components/ui/ToastProvider';
 import { fmtRelative } from '@/lib/relative-time';
 import { theme } from '@/lib/theme';
 import { Button } from '@/components/ui/Button';
+
+// Tiptap só entra no bundle quando uma nota/erro é aberta na prévia.
+const RichPreview = dynamic(
+  () => import('@/components/features/caderno/RichPreview').then((m) => ({ default: m.RichPreview })),
+  { ssr: false },
+);
 
 // 'lei'/'juris' são anotações que vivem no Vade Mecum/Jurisprudências — aqui
 // aparecem para busca/leitura e o "Abrir" navega ao artigo/julgado.
@@ -78,7 +84,6 @@ const ABRIR_LABEL: Record<Fonte, string> = {
 };
 
 export function TudoView({ onAbrir }: { onAbrir: (item: { fonte: 'nota' | 'erro'; id: string }) => void }) {
-  const { isMobile } = useUI();
   const router = useRouter();
   const toast = useToast();
   const [itens, setItens] = useState<Item[] | null>(null);
@@ -160,14 +165,25 @@ export function TudoView({ onAbrir }: { onAbrir: (item: { fonte: 'nota' | 'erro'
     [filtrados, selecionadoKey],
   );
 
-  // Preview nunca fica estruturalmente vazio: seleciona o primeiro item da lista
-  // quando nada (visível) está selecionado. Mobile fica de fora — lá o clique
-  // abre direto no destino nativo, como antes.
+  // Conteúdo rico (JSON Tiptap) do item aberto — a lista só carrega o texto
+  // puro (content_text); sem isto a prévia perdia negrito/marca-texto/listas
+  // e as quebras da extração viravam buracos ("toda desconfigurada").
+  const [richContent, setRichContent] = useState<{ key: string; content: object } | null>(null);
   useEffect(() => {
-    if (isMobile || selecionado || !itens || filtrados.length === 0) return;
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- seleção derivada da lista carregada
-    setSelecionadoKey(keyDe(filtrados[0]));
-  }, [isMobile, selecionado, itens, filtrados]);
+    if (!selecionado || (selecionado.fonte !== 'nota' && selecionado.fonte !== 'erro')) return;
+    const key = keyDe(selecionado);
+    let cancelled = false;
+    const fetchFull = selecionado.fonte === 'nota'
+      ? getStudyNote(selecionado.id).then((n) => n?.content ?? null)
+      : getNote(selecionado.id).then((n) => n?.content ?? null);
+    fetchFull
+      .then((content) => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- resposta assíncrona do fetch
+        if (!cancelled && content) setRichContent({ key, content });
+      })
+      .catch(() => { /* prévia cai no texto puro */ });
+    return () => { cancelled = true; };
+  }, [selecionado]);
 
   const rail = (
     <>
@@ -210,8 +226,7 @@ export function TudoView({ onAbrir }: { onAbrir: (item: { fonte: 'nota' | 'erro'
               chip={{ label: TIPO_LABEL[i.tipo], bg: cor.bg, ink: cor.ink }}
               meta={[i.topicName]}
               when={i.updated}
-              active={!isMobile && keyDe(i) === selecionadoKey}
-              onClick={() => (isMobile ? abrir(i) : setSelecionadoKey(keyDe(i)))}
+              onClick={() => setSelecionadoKey(keyDe(i))}
             />
           );
         })
@@ -229,7 +244,9 @@ export function TudoView({ onAbrir }: { onAbrir: (item: { fonte: 'nota' | 'erro'
         <span style={s.previewQuando}>{fmtRelative(selecionado.updated)}</span>
       </div>
       <h3 style={s.previewTitulo}>{selecionado.title}</h3>
-      {selecionado.texto ? (
+      {richContent?.key === keyDe(selecionado) ? (
+        <div style={s.previewRich}><RichPreview content={richContent.content} /></div>
+      ) : selecionado.texto ? (
         <p style={s.previewTexto}>{selecionado.texto}</p>
       ) : (
         <p style={s.muted}>Sem texto — o conteúdo completo está no destino.</p>
@@ -241,16 +258,17 @@ export function TudoView({ onAbrir }: { onAbrir: (item: { fonte: 'nota' | 'erro'
         </Button>
       </div>
     </div>
-  ) : (
-    <div style={s.previewVazio}>
-      <NotebookPen size={34} strokeWidth={1.3} style={{ marginBottom: 8 }} />
-      <p style={s.vazioTitulo}>Tudo que você escreveu, num lugar só.</p>
-      <p style={s.vazioSub}>Selecione um item ao lado para ler aqui — ou use as abas Anotações e Erros para criar.</p>
-    </div>
-  );
+  ) : null;
 
   return (
-    <CadernoShell rail={rail} lista={lista} detalhe={detalhe} />
+    <CadernoShell
+      rail={rail}
+      lista={lista}
+      detalhe={detalhe}
+      detalheAberto={selecionado !== null}
+      onVoltar={() => setSelecionadoKey(null)}
+      voltarLabel="Voltar para o Caderno"
+    />
   );
 }
 
@@ -267,6 +285,6 @@ const s: Record<string, CSSProperties> = {
   previewQuando: { fontSize: 12, color: theme.inkFaint, marginLeft: 'auto', flexShrink: 0 },
   previewTitulo: { fontSize: 20, fontWeight: 700, color: theme.ink, margin: 0, lineHeight: 1.3 },
   previewTexto: { fontSize: 14, color: theme.ink, lineHeight: 1.65, margin: 0, whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' },
+  previewRich: { fontSize: 15, color: theme.ink, lineHeight: 1.7, minWidth: 0 },
   previewAcoes: { marginTop: 6 },
-  previewVazio: { display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', height: '100%', padding: 24, color: theme.inkSoft },
 };

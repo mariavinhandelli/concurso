@@ -12,7 +12,6 @@ import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties }
 import { useQueryClient } from '@tanstack/react-query';
 import { invalidateReviewCounts } from '@/lib/review-counts';
 import Link from 'next/link';
-import { ClipboardX } from 'lucide-react';
 import { useConfirm } from '@/hooks/useConfirm';
 import { useToast } from '@/components/ui/ToastProvider';
 import { listNotes, getNote, deleteNote, listCriticalTopics, listBoards, type ErrorNote, type CriticalTopic } from '@/services/notebook.service';
@@ -23,11 +22,11 @@ import { NoteEditor } from '@/components/features/notebook/NoteEditor';
 import { CadernoShell } from '@/components/features/caderno/CadernoShell';
 import { ItemCard } from '@/components/features/caderno/ItemCard';
 import { ListPanel } from '@/components/features/caderno/ListPanel';
+import { RailToggle } from '@/components/features/caderno/RailToggle';
 import { SubjectPill } from '@/components/features/caderno/SubjectPill';
+import { useUI } from '@/components/layout/UIContext';
 import { cutoffDaysAgo } from '@/lib/relative-time';
 import { theme } from '@/lib/theme';
-import { useUI } from '@/components/layout/UIContext';
-import { Button } from '@/components/ui/Button';
 import { Select } from '@/components/ui/Select';
 import { SegmentedControl } from '@/components/ui/SegmentedControl';
 
@@ -39,6 +38,15 @@ const PERIODOS: { value: Periodo; label: string }[] = [
   { value: '15', label: '15 dias' },
   { value: '30', label: '30 dias' },
 ];
+
+const MODOS: { value: Modo; label: string }[] = [
+  { value: 'todos', label: 'Todos' },
+  { value: 'recentes', label: 'Recentes' },
+  { value: 'criticos', label: 'Críticos' },
+];
+
+// Além de "Todos", quantas matérias mostrar antes de colapsar atrás do "+N".
+const RAIL_LIMIT = 5;
 
 export function ErrosView({ openNoteId }: { openNoteId?: string | null }) {
   const { isMobile } = useUI();
@@ -61,6 +69,7 @@ export function ErrosView({ openNoteId }: { openNoteId?: string | null }) {
 
   const [selected, setSelected] = useState<ErrorNote | null>(null);
   const [creating, setCreating] = useState(false);
+  const [railExpanded, setRailExpanded] = useState(false);
   // Bump força remount do editor no "Cancelar" (descarta alterações não salvas).
   const [editorEpoch, setEditorEpoch] = useState(0);
   const loadingSubjectIdRef = useRef<string | null>(null);
@@ -155,16 +164,6 @@ export function ErrosView({ openNoteId }: { openNoteId?: string | null }) {
     return criticals.filter((c) => c.subjectId === filtroMateria);
   }, [criticals, filtroMateria]);
 
-  // Painel de detalhe nunca fica estruturalmente vazio: com a lista carregada e
-  // nada aberto, abre o primeiro erro (padrão Gmail). Mobile fica de fora — lá
-  // abrir significa trocar de tela.
-  useEffect(() => {
-    if (isMobile || openNoteId || selected || creating || modo === 'criticos') return;
-    if (!erros || errosFiltrados.length === 0) return;
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- seleção derivada da lista carregada
-    setSelected(errosFiltrados[0]);
-  }, [isMobile, openNoteId, selected, creating, modo, erros, errosFiltrados]);
-
   function abrirCritico(c: CriticalTopic) {
     setModo('todos');
     setFiltroMateria(c.subjectId);
@@ -218,6 +217,49 @@ export function ErrosView({ openNoteId }: { openNoteId?: string | null }) {
 
   const totalErros = erros?.length ?? 0;
 
+  // Pills além de "Todos": matérias + "Sem matéria" (se houver), na mesma
+  // lista para colapsar juntas atrás do "+N".
+  const extraPills = useMemo(() => {
+    const list = subjects.map((sub) => ({
+      key: sub.id,
+      node: (
+        <SubjectPill
+          className="touch-target"
+          key={sub.id}
+          color={sub.color}
+          name={sub.name}
+          count={countPorMateria.get(sub.id) ?? 0}
+          active={filtroMateria === sub.id}
+          onClick={() => mudarMateria(sub.id)}
+        />
+      ),
+    }));
+    if ((countPorMateria.get('none') ?? 0) > 0) {
+      list.push({
+        key: 'none',
+        node: (
+          <SubjectPill
+            className="touch-target"
+            key="none"
+            name="Sem matéria"
+            count={countPorMateria.get('none')}
+            active={filtroMateria === 'none'}
+            onClick={() => mudarMateria('none')}
+          />
+        ),
+      });
+    }
+    return list;
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- mudarMateria é estável (definida no corpo, sem deps externas voláteis)
+  }, [subjects, countPorMateria, filtroMateria]);
+
+  // No mobile o rail já rola horizontal sem desorganizar a tela — colapsar lá
+  // só esconderia matérias hoje alcançáveis com um scroll, sem ganho algum.
+  const pillsVisiveis = (isMobile || railExpanded) ? extraPills : extraPills.slice(0, RAIL_LIMIT);
+  // Conta o que HAVERIA de oculto se colapsado — não o que está oculto agora
+  // (que é 0 quando expandido), senão o toggle "Mostrar menos" some ao expandir.
+  const pillsOcultas = isMobile ? 0 : Math.max(0, extraPills.length - RAIL_LIMIT);
+
   const rail = (
     <>
       <SubjectPill
@@ -228,64 +270,40 @@ export function ErrosView({ openNoteId }: { openNoteId?: string | null }) {
         active={filtroMateria === 'all'}
         onClick={() => mudarMateria('all')}
       />
-      {subjects.map((sub) => (
-        <SubjectPill
-          className="touch-target"
-          key={sub.id}
-          color={sub.color}
-          name={sub.name}
-          count={countPorMateria.get(sub.id) ?? 0}
-          active={filtroMateria === sub.id}
-          onClick={() => mudarMateria(sub.id)}
-        />
-      ))}
-      {(countPorMateria.get('none') ?? 0) > 0 && (
-        <SubjectPill
-          className="touch-target"
-          name="Sem matéria"
-          count={countPorMateria.get('none')}
-          active={filtroMateria === 'none'}
-          onClick={() => mudarMateria('none')}
-        />
+      {pillsVisiveis.map((p) => p.node)}
+      {pillsOcultas > 0 && (
+        <RailToggle expanded={railExpanded} hiddenCount={pillsOcultas} onClick={() => setRailExpanded((e) => !e)} />
       )}
       {subjects.length === 0 && erros !== null && (
         <Link href="/subjects" style={s.railLink}>Adicionar matéria →</Link>
       )}
-      <span style={s.railCrumb}>Visões</span>
-      <SubjectPill
-        className="touch-target"
-        name="Recentes"
-        active={modo === 'recentes'}
-        onClick={() => setModo(modo === 'recentes' ? 'todos' : 'recentes')}
-      />
-      <SubjectPill
-        className="touch-target"
-        name="Críticos"
-        color={theme.crit}
-        count={criticals.length}
-        active={modo === 'criticos'}
-        onClick={() => setModo(modo === 'criticos' ? 'todos' : 'criticos')}
-      />
     </>
   );
 
   const materiEspecifica = filtroMateria !== 'all' && filtroMateria !== 'none';
 
-  const extraTools = modo === 'criticos' ? null : (
+  // As visões saíram do rail de matérias (lá o rótulo "Visões" se perdia no
+  // meio dos chips) e viraram um segmented junto dos demais filtros.
+  const extraTools = (
     <div style={s.filtrosRow}>
-      {materiEspecifica && topics.length > 0 && (
-        <Select value={filtroTopico} onChange={(e) => setFiltroTopico(e.target.value)} style={{ flex: '1 1 0', minWidth: 120, fontSize: 13 }} aria-label="Filtrar por tópico">
-          <option value="">Todos os tópicos</option>
-          {topics.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
-          <option value="none">Sem tópico</option>
-        </Select>
-      )}
-      <Select value={filtroBanca} onChange={(e) => setFiltroBanca(e.target.value)} style={{ flex: '1 1 0', minWidth: 120, fontSize: 13 }} aria-label="Filtrar por banca">
-        <option value="">Todas as bancas</option>
-        {boards.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
-      </Select>
+      <SegmentedControl options={MODOS} value={modo} onChange={setModo} equalWidth={false} />
       {modo === 'recentes' && (
         <SegmentedControl options={PERIODOS} value={periodo} onChange={setPeriodo} equalWidth={false} />
+      )}
+      {modo !== 'criticos' && (
+        <>
+          {materiEspecifica && topics.length > 0 && (
+            <Select value={filtroTopico} onChange={(e) => setFiltroTopico(e.target.value)} style={{ flex: '1 1 0', minWidth: 120, fontSize: 13 }} aria-label="Filtrar por tópico">
+              <option value="">Todos os tópicos</option>
+              {topics.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
+              <option value="none">Sem tópico</option>
+            </Select>
+          )}
+          <Select value={filtroBanca} onChange={(e) => setFiltroBanca(e.target.value)} style={{ flex: '1 1 0', minWidth: 120, fontSize: 13 }} aria-label="Filtrar por banca">
+            <option value="">Todas as bancas</option>
+            {boards.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
+          </Select>
+        </>
       )}
     </div>
   );
@@ -353,13 +371,7 @@ export function ErrosView({ openNoteId }: { openNoteId?: string | null }) {
   );
 
   const detalhe = (creating || selected) ? (
-    <>
-      {isMobile && (
-        <button onClick={() => { setSelected(null); setCreating(false); }} style={s.backToList}>
-          ← Voltar à lista
-        </button>
-      )}
-      <NoteEditor
+    <NoteEditor
         key={creating ? 'novo' : `${selected!.id}-${editorEpoch}`}
         note={creating ? null : selected}
         presetSubjectId={creating && materiEspecifica ? filtroMateria : null}
@@ -374,18 +386,7 @@ export function ErrosView({ openNoteId }: { openNoteId?: string | null }) {
           invalidateReviewCounts(queryClient);
         }}
       />
-    </>
-  ) : (
-    <div style={s.editorVazio}>
-      <ClipboardX size={34} strokeWidth={1.3} style={{ marginBottom: 8 }} />
-      <p style={s.vazioTitulo}>Erro registrado é erro que não se repete.</p>
-      <p style={s.vazioSub}>
-        Selecione um erro ao lado para revisar — ou registre um novo com matéria,
-        tópico e banca.
-      </p>
-      <Button style={{ marginTop: 16 }} onClick={handleNovo}>+ Novo erro</Button>
-    </div>
-  );
+  ) : null;
 
   return (
     <>
@@ -394,14 +395,15 @@ export function ErrosView({ openNoteId }: { openNoteId?: string | null }) {
         rail={rail}
         lista={lista}
         detalhe={detalhe}
-        mobileDetalhe={isMobile && (creating || selected !== null)}
+        detalheAberto={creating || selected !== null}
+        onVoltar={() => { setSelected(null); setCreating(false); }}
+        voltarLabel="Voltar para Erros"
       />
     </>
   );
 }
 
 const s: Record<string, CSSProperties> = {
-  railCrumb: { fontSize: 11, color: theme.inkFaint, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.6, padding: '10px 10px 2px', flexShrink: 0, alignSelf: 'center' },
   railLink: { display: 'inline-block', padding: '8px 10px', fontSize: 13, color: theme.teal, fontWeight: 600, textDecoration: 'none', whiteSpace: 'nowrap' },
   filtrosRow: { display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' },
 
@@ -410,7 +412,6 @@ const s: Record<string, CSSProperties> = {
   vazioBox: { textAlign: 'center', padding: '28px 12px' },
   vazioTitulo: { fontSize: 15, fontWeight: 700, color: theme.ink, margin: '0 0 6px' },
   vazioSub: { fontSize: 13, color: theme.inkSoft, lineHeight: 1.55, maxWidth: 320, margin: '0 auto' },
-  editorVazio: { display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', height: '100%', padding: 24, color: theme.inkSoft },
 
   critItem: { display: 'flex', flexDirection: 'column', gap: 3, background: theme.card, borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, padding: '11px 13px', cursor: 'pointer' },
   critAlert: { borderWidth: 1.5, borderColor: theme.crit, background: theme.bg },
@@ -423,5 +424,4 @@ const s: Record<string, CSSProperties> = {
   critDot: { color: theme.inkFaint },
   critAcerto: { color: theme.inkSoft },
 
-  backToList: { border: 'none', background: 'transparent', color: theme.teal, fontSize: 14, fontWeight: 600, cursor: 'pointer', padding: 0, textAlign: 'left', fontFamily: 'inherit', marginBottom: 14 },
 };

@@ -1,75 +1,55 @@
 // components/features/caderno/CadernoShell.tsx
-// Shell de layout único das abas do hub Caderno: [rail de navegação ~208px |
-// lista ~320px | detalhe flex], viewport-fit com scroll por painel (nunca a
-// página inteira). Antes cada aba tinha a própria estrutura — Erros era 2
-// colunas com a lista espremida na sidebar e a página rolando em dobro.
-// Tablet: rail vira linha horizontal de pills no topo (208+320 fixos deixariam
-// o detalhe com ~80px em 768px). Mobile: rail + lista empilhados; `detalhe`
-// substitui tudo quando `mobileDetalhe` está ativo.
+// Shell de layout único das abas do hub Caderno, igual em TODAS as larguras
+// (aprovado 01/08): rail de pills no topo + lista em coluna única (~560px),
+// alinhada à ESQUERDA junto do título "Caderno" — não centralizada dentro do
+// PageContainer "wide" (1080px), o que a fazia flutuar longe do cabeçalho no
+// desktop. Scroll natural da página; nada de painel de detalhe lateral — com
+// um item aberto (`detalheAberto`), o detalhe substitui rail+lista em largura
+// de leitura com "← Voltar". Antes era grid de 3 painéis viewport-fit no
+// desktop/tablet, com a lista espremida e o painel vazio dominando a tela.
 'use client';
 
 import type { CSSProperties, ReactNode } from 'react';
-import { useUI } from '@/components/layout/UIContext';
+import { theme } from '@/lib/theme';
 
 export function CadernoShell({
-  rail, lista, detalhe, mobileDetalhe,
+  rail, lista, detalhe, detalheAberto, onVoltar, voltarLabel = 'Voltar',
 }: {
   rail: ReactNode;
   lista: ReactNode;
   detalhe: ReactNode;
-  /** Mobile: true mostra só o painel de detalhe (item aberto) no lugar de rail+lista. */
-  mobileDetalhe?: boolean;
+  /** Item aberto: o detalhe substitui rail+lista (todas as larguras). */
+  detalheAberto?: boolean;
+  /** Fecha o detalhe e volta à lista. Sem ele o "← Voltar" não aparece. */
+  onVoltar?: () => void;
+  voltarLabel?: string;
 }) {
-  const { isMobile, isTablet } = useUI();
-
-  if (isMobile) {
-    return mobileDetalhe ? (
-      <div style={{ minWidth: 0 }}>{detalhe}</div>
-    ) : (
-      <>
-        <div style={s.railMobile}>{rail}</div>
-        <div style={{ minWidth: 0 }}>{lista}</div>
-      </>
-    );
-  }
-
-  if (isTablet) {
+  if (detalheAberto) {
     return (
-      <div style={s.gridTablet}>
-        <div style={s.railTablet}>{rail}</div>
-        <div style={s.painelLista}>{lista}</div>
-        <div style={s.painelDetalhe}>{detalhe}</div>
+      <div style={s.detalheWrap}>
+        {onVoltar && (
+          <button className="touch-target" onClick={onVoltar} style={s.voltar}>
+            ← {voltarLabel}
+          </button>
+        )}
+        {detalhe}
       </div>
     );
   }
 
+  // Rail dentro da mesma coluna de 560px da lista: filtros e cards alinhados
+  // num bloco só (na largura toda as pills pareciam soltas na página).
   return (
-    <div style={s.grid}>
-      <div style={s.painelRail}>{rail}</div>
-      <div style={s.painelLista}>{lista}</div>
-      <div style={s.painelDetalhe}>{detalhe}</div>
+    <div style={s.coluna}>
+      <div className="caderno-rail">{rail}</div>
+      <div style={s.listaWrap}>{lista}</div>
     </div>
   );
 }
 
 const s: Record<string, CSSProperties> = {
-  grid: {
-    display: 'grid', gridTemplateColumns: '208px 320px minmax(0, 1fr)',
-    // minmax(0,1fr) na linha: sem isso, conteúdo alto (editor com imagens) força
-    // a linha implícita além do container e a página volta a rolar em dobro.
-    gridTemplateRows: 'minmax(0, 1fr)', gap: 14,
-    height: 'calc(100vh - 258px)', minHeight: 460,
-  },
-  gridTablet: {
-    // 240px: com a sidebar do app expandida a 768px sobram ~429px de conteúdo —
-    // lista mais larga deixaria o detalhe espremido demais.
-    display: 'grid', gridTemplateColumns: '240px minmax(0, 1fr)',
-    gridTemplateRows: 'auto minmax(0, 1fr)', gap: 14,
-    height: 'calc(100vh - 258px)', minHeight: 460,
-  },
-  railTablet: { gridColumn: '1 / -1', display: 'flex', gap: 6, overflowX: 'auto', paddingBottom: 4, minWidth: 0 },
-  railMobile: { display: 'flex', gap: 6, overflowX: 'auto', paddingBottom: 10, marginBottom: 6 },
-  painelRail: { display: 'flex', flexDirection: 'column', gap: 2, overflowY: 'auto', paddingRight: 2, minHeight: 0 },
-  painelLista: { display: 'flex', flexDirection: 'column', gap: 8, overflowY: 'auto', paddingRight: 2, minWidth: 0, minHeight: 0 },
-  painelDetalhe: { overflowY: 'auto', paddingRight: 4, minWidth: 0, minHeight: 0 },
+  coluna: { maxWidth: 560, minWidth: 0 },
+  listaWrap: { display: 'flex', flexDirection: 'column', gap: 8, minWidth: 0 },
+  detalheWrap: { maxWidth: 720, minWidth: 0 },
+  voltar: { border: 'none', background: 'transparent', color: theme.teal, fontSize: 14, fontWeight: 600, cursor: 'pointer', padding: 0, textAlign: 'left', fontFamily: 'inherit', marginBottom: 14, display: 'block' },
 };

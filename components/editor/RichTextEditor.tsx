@@ -270,10 +270,10 @@ function Toolbar({ editor, onPickImage, uploading }: { editor: Editor; onPickIma
           {openPalette && (
             <div style={styles.palette}>
               {TEXT_COLORS.map((c) => (
-                <button key={c} onClick={() => { editor.chain().focus().setColor(c).run(); setOpenPalette(false); }}
+                <button key={c} className="rte-swatch" onClick={() => { editor.chain().focus().setColor(c).run(); setOpenPalette(false); }}
                   style={{ ...styles.swatch, background: c }} />
               ))}
-              <button onClick={() => { editor.chain().focus().unsetColor().run(); setOpenPalette(false); }}
+              <button className="rte-swatch" onClick={() => { editor.chain().focus().unsetColor().run(); setOpenPalette(false); }}
                 style={styles.clearSwatch} title="Remover cor">⊘</button>
             </div>
           )}
@@ -285,10 +285,10 @@ function Toolbar({ editor, onPickImage, uploading }: { editor: Editor; onPickIma
           {openHl && (
             <div style={styles.palette}>
               {HIGHLIGHT_COLORS.map((c) => (
-                <button key={c} onClick={() => { editor.chain().focus().toggleHighlight({ color: c }).run(); setOpenHl(false); }}
+                <button key={c} className="rte-swatch" onClick={() => { editor.chain().focus().toggleHighlight({ color: c }).run(); setOpenHl(false); }}
                   style={{ ...styles.swatch, background: c }} />
               ))}
-              <button onClick={() => { editor.chain().focus().unsetHighlight().run(); setOpenHl(false); }}
+              <button className="rte-swatch" onClick={() => { editor.chain().focus().unsetHighlight().run(); setOpenHl(false); }}
                 style={styles.clearSwatch} title="Remover marca">⊘</button>
             </div>
           )}
