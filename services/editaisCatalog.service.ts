@@ -520,7 +520,22 @@ export async function getCatalogEditalBySlug(slug: string): Promise<CatalogEdita
   if (!editalRes.data) return null;
   const e = editalRes.data as unknown as EditalRow;
   const area = Array.isArray(e.catalog_areas) ? e.catalog_areas[0] : e.catalog_areas;
-  const targetId = (targetRes.data as { id: string } | null)?.id ?? null;
+  let targetId = (targetRes.data as { id: string } | null)?.id ?? null;
+  // Alvo criado por importação/legado tem slug próprio, mas já aponta para
+  // este edital via catalog_edital_id. Sem esta segunda busca a página oferece
+  // "Ativar edital" a quem já tem o concurso — e o usuário acabava com dois
+  // cadastros do mesmo cargo (o RPC agora recusa o duplicado, mas o rótulo
+  // errado continuava mentindo).
+  if (!targetId && user) {
+    const { data: porVinculo } = await supabase
+      .from('target_exams')
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('catalog_edital_id', e.id)
+      .is('archived_at', null)
+      .maybeSingle();
+    targetId = (porVinculo as { id: string } | null)?.id ?? null;
+  }
 
   return {
     id: e.id,
