@@ -7,6 +7,7 @@ import { Check, Pencil, X } from 'lucide-react';
 import { useConfirm } from '@/hooks/useConfirm';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
+import { clearAllClientCaches } from '@/lib/client-caches';
 import { theme } from '@/lib/theme';
 import { useUI, PALETTES } from '@/components/layout/UIContext';
 import { listAllBoards, createBoard, updateBoard, deleteBoard, type Board } from '@/services/boards.service';
@@ -137,6 +138,10 @@ export default function SettingsPage() {
     if (!await showConfirm({ title: 'Encerrar a sessão em todos os dispositivos?', description: 'Você será desconectado em todos os lugares.', confirmLabel: 'Encerrar', danger: true })) return;
     setSigningOut(true);
     try {
+      // Mesma limpeza do logout da Topbar — sem isso, entrar com outra conta
+      // nesta mesma aba nos 30 s seguintes lia o alvo primário e a meta diária
+      // do usuário anterior (caches singleton de módulo).
+      clearAllClientCaches();
       await supabase.auth.signOut({ scope: 'global' });
       router.push('/login');
       router.refresh();

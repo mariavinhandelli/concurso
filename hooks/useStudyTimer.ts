@@ -187,10 +187,14 @@ export function useStudyTimer() {
     return () => window.removeEventListener('storage', handleStorage);
   }, [stopTicking, syncElapsed, startTicking]);
 
+  // Retorna false quando NÃO iniciou — ou porque já existe sessão em andamento,
+  // ou porque o id do usuário ainda não foi resolvido pelo onAuthStateChange.
+  // Sem esse retorno, quem chama (o auto-start da Home) não tinha como
+  // distinguir "iniciou" de "engoliu o pedido".
   const start = useCallback(
-    ({ mode, topicId = null, subjectId = null, boardId = null }: StartParams) => {
+    ({ mode, topicId = null, subjectId = null, boardId = null }: StartParams): boolean => {
       const uid = userIdRef.current;
-      if (!uid || timerRef.current) return;
+      if (!uid || timerRef.current) return false;
       const state: PersistedTimer = {
         userId: uid,
         sessionId: createSessionId(),
@@ -204,6 +208,7 @@ export function useStudyTimer() {
       setElapsedSec(0);
       setStatus('running');
       startTicking();
+      return true;
     },
     [startTicking],
   );

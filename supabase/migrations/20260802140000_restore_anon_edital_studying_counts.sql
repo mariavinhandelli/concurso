@@ -1,0 +1,16 @@
+-- CORRIGE REGRESSÃO da 20260801120000_revoke_public_execute_security_definer.
+--
+-- Aquela migration revogou EXECUTE de anon em edital_studying_counts seguindo o
+-- advisor — mas este grant era DELIBERADO (ver 20260729200000): /editais/** é
+-- página PÚBLICA (proxy.ts a isenta de login por SEO/aquisição) e o selo
+-- "N estudando" é prova social exatamente para o visitante DESLOGADO decidir
+-- criar conta. Como o serviço degrada em silêncio (`if (error) return {}`),
+-- o selo sumiu para anônimos sem nenhum erro visível.
+--
+-- Risco avaliado: a função é STABLE, devolve só agregados (contagem de usuários
+-- ativos por edital, régua mínima de exibição aplicada na UI) — nenhum dado
+-- individual. Superfície aceita conscientemente.
+--
+-- Lição para a próxima: antes de revogar anon de uma função, conferir se alguma
+-- página PÚBLICA (proxy.ts → isPublicPage) a consome.
+grant execute on function public.edital_studying_counts() to anon;

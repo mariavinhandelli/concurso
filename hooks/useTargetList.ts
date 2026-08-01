@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
+import { invalidateAfter } from '@/lib/cache-invalidation';
 import { useConfirm } from '@/hooks/useConfirm';
 import { useToast, TOAST_ACTION_DURATION_MS } from '@/components/ui/ToastProvider';
 import {
@@ -19,10 +20,9 @@ export function useTargetList() {
 
   // Home (ExamCountdown, CoberturaEdital, Raio-X) lê estes caches via React Query;
   // sem invalidar, mutações feitas aqui só apareceriam lá após refetch por acaso.
+  // A lista de chaves do domínio vive em lib/cache-invalidation.ts.
   const invalidateHomeCaches = useCallback(() => {
-    for (const key of [['target-exams'], ['edital-coverage'], ['raiox'], ['catalog-editais']]) {
-      queryClient.invalidateQueries({ queryKey: key });
-    }
+    invalidateAfter(queryClient, 'edital');
   }, [queryClient]);
 
   const [targets, setTargets] = useState<TargetExam[]>([]);

@@ -6,12 +6,19 @@
 'use client';
 
 import { createClient } from '@/lib/supabase/client';
+import { rpcErrorMessage } from '@/lib/rpc-error';
+
+// 'curadoria' = baralho montado à mão (Anki, etc.); 'lei_seca'/'jurisprudencia'
+// = gerado a partir do texto oficial da lei ou de um julgado do banco — dá o
+// selo de origem na aba Banco.
+export type CatalogDeckOrigin = 'curadoria' | 'lei_seca' | 'jurisprudencia';
 
 export interface CatalogFlashcardDeck {
   id: string;
   slug: string;
   name: string;
   description: string | null;
+  origin: CatalogDeckOrigin;
   cardCount: number;
   activatedCount: number; // quantos cards deste deck o usuário já tem
   isActivated: boolean;   // ativou ao menos uma vez (mesmo que incompleto)
@@ -22,6 +29,7 @@ interface DeckRow {
   slug: string;
   name: string;
   description: string | null;
+  origin: CatalogDeckOrigin;
   flashcard_catalog_cards: { count: number }[] | null;
 }
 
@@ -32,7 +40,7 @@ export async function listCatalogFlashcardDecks(): Promise<CatalogFlashcardDeck[
   const [decksRes, minhasRes] = await Promise.all([
     supabase
       .from('flashcard_deck_catalog')
-      .select('id, slug, name, description, flashcard_catalog_cards(count)')
+      .select('id, slug, name, description, origin, flashcard_catalog_cards(count)')
       .eq('is_active', true)
       .order('position', { ascending: true }),
     user
@@ -68,6 +76,7 @@ export async function listCatalogFlashcardDecks(): Promise<CatalogFlashcardDeck[
       slug: d.slug,
       name: d.name,
       description: d.description,
+      origin: d.origin,
       cardCount,
       activatedCount,
       isActivated: activatedCount > 0,
@@ -88,7 +97,13 @@ export interface ActivateDeckResult {
 export async function activateCatalogFlashcardDeck(deckId: string): Promise<ActivateDeckResult> {
   const supabase = createClient();
   const { data, error } = await supabase.rpc('activate_catalog_flashcard_deck', { p_deck_id: deckId });
-  if (error) throw new Error('Erro ao ativar deck de flashcards: ' + error.message);
+  if (error) {
+    throw new Error(rpcErrorMessage(
+      error,
+      'Não foi possível ativar este deck agora. Nenhum card foi copiado — tente de novo em instantes.',
+      'activate_catalog_flashcard_deck',
+    ));
+  }
   const result = data as { inserted: number; subject_id: string; subject_name: string; subject_was_new: boolean };
   return {
     inserted: result.inserted,

@@ -176,7 +176,13 @@ export async function queryNoteSubjectIds(
     .from('error_notebooks')
     .select('subject_id')
     .eq('user_id', userId);
-  if (archivedIds.length > 0) query = query.not('subject_id', 'in', `(${archivedIds.join(',')})`);
+  // NULL-safe: anotação sem matéria (subject_id NULL) é caso legítimo — o
+  // próprio countNotesBySubject tem o balde 'none'. Com `not.in` puro, NULL NOT
+  // IN (…) é NULL/false em SQL e essas anotações SUMIAM da contagem assim que o
+  // usuário arquivasse qualquer matéria. Mesmo padrão de flashcards.repository.
+  if (archivedIds.length > 0) {
+    query = query.or(`subject_id.is.null,subject_id.not.in.(${archivedIds.join(',')})`);
+  }
   const { data, error } = await query;
   if (error) throw new Error('Erro ao contar: ' + error.message);
   return data ?? [];
@@ -210,7 +216,11 @@ export async function queryRecentNotes(
     .gte('created_at', sinceIso)
     .order('created_at', { ascending: false });
 
-  if (archivedIds.length > 0) query = query.not('subject_id', 'in', `(${archivedIds.join(',')})`);
+  // Mesma correção NULL-safe de queryNoteSubjectIds: sem isto, uma anotação sem
+  // matéria desaparecia da aba "Recentes" ao arquivar qualquer outra matéria.
+  if (archivedIds.length > 0) {
+    query = query.or(`subject_id.is.null,subject_id.not.in.(${archivedIds.join(',')})`);
+  }
   const { data, error } = await query;
   if (error) throw new Error('Erro ao listar recentes: ' + error.message);
   return data ?? [];

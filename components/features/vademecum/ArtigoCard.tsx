@@ -21,6 +21,8 @@ import {
   segmentarBloco, temSobreposicao, findBlocoSelecionado, grifoVisual,
 } from '@/lib/lei-grifos';
 import type { LeiQuestao } from '@/services/leiQuestoes.service';
+import { useQueryClient } from '@tanstack/react-query';
+import { invalidateReviewCounts } from '@/lib/review-counts';
 import { useToast } from '@/components/ui/ToastProvider';
 import { theme, zIndex } from '@/lib/theme';
 import { Button } from '@/components/ui/Button';
@@ -55,6 +57,7 @@ interface GrifoPopover {
 
 export const ArtigoCard = memo(function ArtigoCard({ artigo, interacao, onUpdate, questoes }: Props) {
   const toast = useToast();
+  const queryClient = useQueryClient();
   const { isMobile, isTablet } = useUI();
   const touch = isMobile || isTablet;
   const rootRef = useRef<HTMLDivElement>(null);
@@ -309,6 +312,8 @@ export const ArtigoCard = memo(function ArtigoCard({ artigo, interacao, onUpdate
     try {
       const subjectId = await subjectIdDaLei();
       await createFlashcard({ front, back, topicId: null, subjectId, sourceErrorId: null, addToReview: true });
+      // O toast promete "já entra na sua fila" — o contador tem que concordar.
+      invalidateReviewCounts(queryClient);
       setFlashOpen(false);
       toast.success('Flashcard criado — ele já entra na sua fila de revisão.');
     } catch (e) {
@@ -333,6 +338,9 @@ export const ArtigoCard = memo(function ArtigoCard({ artigo, interacao, onUpdate
           repetitions: row.repetitions,
         });
       }
+      // Sem isto, agendar a revisão de um artigo não aparecia no Plano de Hoje
+      // por até 60s (ver lib/review-counts.ts).
+      invalidateReviewCounts(queryClient);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : 'Erro ao atualizar revisão.');
     }

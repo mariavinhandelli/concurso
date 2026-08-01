@@ -2,7 +2,9 @@
 
 import { useEffect, useRef, useCallback, useMemo, useState } from 'react';
 import { X, CheckCircle2, ChevronDown, Undo2 } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { refreshHomeAfterSession } from '@/lib/home-refresh';
+import { invalidateReviewCounts } from '@/lib/review-counts';
 import { useStudySession } from '@/hooks/useStudySession';
 import { useToast } from '@/components/ui/ToastProvider';
 import { useConfirm } from '@/hooks/useConfirm';
@@ -38,6 +40,7 @@ function formatDays(days: number): string {
 
 export function FlashcardEngine({ queue, onFinish, onExit }: Props) {
   const toast = useToast();
+  const queryClient = useQueryClient();
   const { confirm, dialog: confirmDialog } = useConfirm();
   const onError = useCallback((msg: string) => toast.error(msg), [toast]);
 
@@ -61,12 +64,16 @@ export function FlashcardEngine({ queue, onFinish, onExit }: Props) {
   useEffect(() => {
     if (!session.isFinished || session.total === 0 || sessaoGravadaRef.current) return;
     sessaoGravadaRef.current = true;
+    // Os cards avaliados saíram da fila — contadores mudam mesmo se a sessão
+    // passiva não gravar (< 30s). E se gravar, a Home inteira precisa saber
+    // (streak, metas, heatmap) — mesmo padrão dos players de lei e juris.
+    invalidateReviewCounts(queryClient);
     void savePassiveSession({
       mode: 'flashcards',
       startedAtMs: inicioRef.current,
       itemsLabel: `Flashcards: ${session.total} card${session.total === 1 ? '' : 's'} revisado${session.total === 1 ? '' : 's'}.`,
-    });
-  }, [session.isFinished, session.total]);
+    }).then((gravou) => { if (gravou) refreshHomeAfterSession(queryClient); });
+  }, [session.isFinished, session.total, queryClient]);
 
   const liftingRef = useRef(false);
   const [lifting, setLifting] = useState(false);

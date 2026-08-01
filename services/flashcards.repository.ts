@@ -7,6 +7,12 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 
 // ---------- Tipos de linha do banco ----------
 
+// Origem do deck do Banco de onde este card veio, quando veio de lá
+// (catalog_card_id não nulo) — join de 2 saltos só para exibir o selo em
+// "Meus Cards". Card criado direto pela usuária nunca tem catalog_card_id.
+interface DeckOriginRef { origin: string }
+interface CatalogCardOriginRef { flashcard_deck_catalog: DeckOriginRef | DeckOriginRef[] | null }
+
 export interface FlashcardRow {
   id: string;
   front: string;
@@ -14,9 +20,11 @@ export interface FlashcardRow {
   topic_id: string | null;
   subject_id: string | null;
   source_error_id: string | null;
+  catalog_card_id?: string | null;
   is_review_active: boolean;
   next_review_date: string | null;
   created_at: string;
+  flashcard_catalog_cards?: CatalogCardOriginRef | CatalogCardOriginRef[] | null;
 }
 
 export interface FlashcardSRStateRow {
@@ -56,7 +64,7 @@ export async function fetchFlashcards(
 ): Promise<FlashcardRow[]> {
   let query = supabase
     .from('flashcards')
-    .select('id, front, back, topic_id, subject_id, source_error_id, is_review_active, next_review_date, created_at')
+    .select('id, front, back, topic_id, subject_id, source_error_id, catalog_card_id, is_review_active, next_review_date, created_at, flashcard_catalog_cards(flashcard_deck_catalog(origin))')
     .eq('user_id', userId)
     .order('created_at', { ascending: false });
 

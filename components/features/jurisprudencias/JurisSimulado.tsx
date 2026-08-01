@@ -7,7 +7,10 @@ import { Button } from '@/components/ui/Button';
 import { Overlay } from '@/components/ui/Overlay';
 import type { Jurisprudencia } from '@/services/jurisprudencias.service';
 import { useConfirm } from '@/hooks/useConfirm';
+import { useQueryClient } from '@tanstack/react-query';
+import { refreshHomeAfterSession } from '@/lib/home-refresh';
 import { saveSimuladoSession, type SimuladoResposta } from '@/services/jurisInteracoes.service';
+import { savePassiveSession } from '@/services/passiveSession.service';
 import { useToast } from '@/components/ui/ToastProvider';
 
 interface Props {
@@ -40,6 +43,7 @@ export function JurisSimulado({ items, onClose }: Props) {
   const startedAt = useRef(Date.now());
   const { confirm, dialog } = useConfirm();
   const toast = useToast();
+  const queryClient = useQueryClient();
   const savedRef = useRef(false);
 
   function iniciar(n: number | null) {
@@ -164,6 +168,18 @@ export function JurisSimulado({ items, onClose }: Props) {
         })
           .then(() => { savedRef.current = true; })
           .catch(() => toast.error('Não foi possível salvar o resultado.'));
+
+        // Simulado de juris é treino de questões DE VERDADE — era o único player
+        // que não gravava a sessão passiva: o simulado equivalente do Vade Mecum
+        // já contava para streak/metas/acerto do dia, e este ficava invisível.
+        // O service deduplica pelo startedAtMs, então refazer não conta duas vezes.
+        void savePassiveSession({
+          mode: 'questoes',
+          startedAtMs: startedAt.current,
+          itemsLabel: `Simulado de jurisprudências: ${novos.filter(Boolean).length}/${questoes.length}.`,
+          questionsTotal: questoes.length,
+          questionsCorrect: novos.filter(Boolean).length,
+        }).then((gravou) => { if (gravou) refreshHomeAfterSession(queryClient); });
       }
     }
   }

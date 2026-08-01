@@ -6,15 +6,22 @@
 
 import { useState, type CSSProperties } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Check, Layers } from 'lucide-react';
+import { Check, Layers, Book, Gavel } from 'lucide-react';
 import {
   listCatalogFlashcardDecks, activateCatalogFlashcardDeck,
-  type CatalogFlashcardDeck,
+  type CatalogFlashcardDeck, type CatalogDeckOrigin,
 } from '@/services/flashcardsCatalog.service';
 import { FlashcardBankPreviewModal } from '@/components/features/flashcards/FlashcardBankPreviewModal';
 import { useToast } from '@/components/ui/ToastProvider';
 import { theme } from '@/lib/theme';
 import { Button } from '@/components/ui/Button';
+
+// Selo de origem: só aparece para conteúdo gerado a partir de lei/julgado —
+// um deck de curadoria manual não precisa de rótulo (é o padrão implícito).
+const ORIGIN_SELO: Partial<Record<CatalogDeckOrigin, { label: string; icon: typeof Book }>> = {
+  lei_seca: { label: 'Lei seca', icon: Book },
+  jurisprudencia: { label: 'Jurisprudência', icon: Gavel },
+};
 
 export function BancoFlashcardsTab() {
   const toast = useToast();
@@ -82,12 +89,16 @@ export function BancoFlashcardsTab() {
       {decks!.map((d) => {
         const complete = d.cardCount > 0 && d.activatedCount >= d.cardCount;
         const partial = d.activatedCount > 0 && !complete;
+        const selo = ORIGIN_SELO[d.origin];
         return (
           <div key={d.id} style={s.card}>
-            <div style={s.iconWrap}><Layers size={18} color={theme.teal} strokeWidth={1.8} /></div>
+            <div style={s.iconWrap}>
+              {selo ? <selo.icon size={18} color={theme.teal} strokeWidth={1.8} /> : <Layers size={18} color={theme.teal} strokeWidth={1.8} />}
+            </div>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={s.titleRow}>
                 <span style={s.title}>{d.name}</span>
+                {selo && <span style={s.originTag}>{selo.label}</span>}
                 {complete && <span style={s.activatedTag}>Ativado <Check size={12} strokeWidth={2.5} /></span>}
                 {partial && <span style={s.partialTag}>{d.activatedCount}/{d.cardCount} adicionados</span>}
               </div>
@@ -135,6 +146,7 @@ const s: Record<string, CSSProperties> = {
   title: { fontSize: 15, fontWeight: 600, color: theme.ink },
   description: { fontSize: 13, color: theme.inkSoft, marginTop: 3 },
   meta: { fontSize: 12, color: theme.inkFaint, marginTop: 4 },
+  originTag: { fontSize: 11, fontWeight: 700, color: theme.inkSoft, background: theme.muted, borderRadius: theme.radiusXs, padding: '2px 8px' },
   activatedTag: { fontSize: 11, fontWeight: 700, color: theme.teal, background: theme.tealBg, borderRadius: theme.radiusXs, padding: '2px 8px', display: 'inline-flex', alignItems: 'center', gap: 4 },
   partialTag: { fontSize: 11, fontWeight: 700, color: theme.warn, background: theme.warnBg, borderRadius: theme.radiusXs, padding: '2px 8px' },
 };

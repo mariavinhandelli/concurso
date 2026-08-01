@@ -11,7 +11,7 @@ import { Search, Menu, Plus, Zap, Clock, Moon, Sun, User, Settings, LogOut } fro
 import { refreshHomeAfterSession } from '@/lib/home-refresh';
 import Image from 'next/image';
 import { createClient } from '@/lib/supabase/client';
-import { invalidateArchivedCache } from '@/services/archivedCache';
+import { clearAllClientCaches } from '@/lib/client-caches';
 import { theme, zIndex } from '@/lib/theme';
 import { useUI } from './UIContext';
 import { useUser } from './UserContext';
@@ -56,7 +56,10 @@ export function Topbar() {
     // Limpa o timer ANTES de navegar — o router.push desmonta o componente
     // antes do onAuthStateChange disparar, então o abandon() precisa ser síncrono aqui.
     timer.abandon();
-    invalidateArchivedCache();
+    // Limpa TODOS os caches singleton do browser (não só o de arquivadas):
+    // ver lib/client-caches.ts. O onAuthStateChange do QueryProvider também
+    // limpa, mas ele só dispara depois da navegação — aqui é síncrono.
+    clearAllClientCaches();
     try {
       const supabase = createClient();
       const { error } = await supabase.auth.signOut();

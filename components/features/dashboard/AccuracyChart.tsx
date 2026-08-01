@@ -3,6 +3,7 @@
 // A cor reflete o desempenho: vermelho (crítico) → âmbar → verde.
 'use client';
 
+import { useState } from 'react';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
@@ -20,11 +21,21 @@ const LIMIAR_ATENCAO = 65;
 // Mesmo limiar de metrics.service (<30 questões → margem de erro ±16%).
 const MIN_QUESTOES_CONFIAVEL = 30;
 
+// undefined = todo o histórico. Sem filtro, uma matéria estudada há 8 meses e
+// abandonada ficava eternamente marcada como "reforçar aqui" mesmo depois de
+// já ter sido corrigida — o histórico todo pesava igual ao que aconteceu ontem.
+const PERIODOS: { dias: number | undefined; label: string }[] = [
+  { dias: 30, label: '30d' },
+  { dias: 90, label: '90d' },
+  { dias: undefined, label: 'Tudo' },
+];
+
 export function AccuracyChart() {
   const router = useRouter();
+  const [periodo, setPeriodo] = useState<number | undefined>(undefined);
   const { data = [], isLoading: loading, isError: error } = useQuery<AccuracyPoint[]>({
-    queryKey: ['accuracy-by-subject'],
-    queryFn: getAccuracyBySubject,
+    queryKey: ['accuracy-by-subject', periodo ?? 'total'],
+    queryFn: () => getAccuracyBySubject(periodo),
     staleTime: 5 * 60_000,
   });
 
@@ -37,8 +48,23 @@ export function AccuracyChart() {
   return (
     <div style={styles.wrap}>
       <div style={styles.head}>
-        <h2 style={styles.title}>Acertos por matéria</h2>
-        <span style={styles.subtitle}>da menor taxa — onde focar primeiro</span>
+        <div>
+          <h2 style={styles.title}>Acertos por matéria</h2>
+          <span style={styles.subtitle}>da menor taxa — onde focar primeiro</span>
+        </div>
+        <div style={styles.filtros}>
+          {PERIODOS.map((p) => (
+            <button
+              key={p.label}
+              className="touch-target"
+              onClick={() => setPeriodo(p.dias)}
+              style={{ ...styles.filtroBtn, ...(periodo === p.dias ? styles.filtroBtnAtivo : {}) }}
+              aria-pressed={periodo === p.dias}
+            >
+              {p.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {loading ? (
@@ -107,6 +133,9 @@ const styles: Record<string, React.CSSProperties> = {
   head: { display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 20, gap: 8, flexWrap: 'wrap' },
   title: { fontSize: 16, fontWeight: 700, color: theme.ink, margin: 0, letterSpacing: -0.3 },
   subtitle: { fontSize: 13, color: theme.inkFaint, fontWeight: 500 },
+  filtros: { display: 'flex', gap: 4, padding: 3, background: 'rgba(15,23,42,.06)', borderRadius: theme.radiusSm, flexShrink: 0 },
+  filtroBtn: { padding: '5px 11px', borderRadius: 9, border: 'none', background: 'transparent', color: theme.inkSoft, fontSize: 12, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit', transition: 'all .15s' },
+  filtroBtnAtivo: { background: theme.card, color: theme.ink, boxShadow: theme.shadow },
   muted: { color: theme.inkFaint, fontSize: 14 },
   list: { display: 'flex', flexDirection: 'column', gap: 16 },
   row: {},

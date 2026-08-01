@@ -10,6 +10,7 @@
 // Cache de tópicos:  permanente por sessão (topics_catalog é imutável pós-deploy).
 
 import { createClient } from '@/lib/supabase/client';
+import { rpcErrorMessage } from '@/lib/rpc-error';
 import { tryGetUser, requireUser } from '@/lib/supabase/requireUser';
 
 // ---------- Tipos ----------
@@ -188,7 +189,13 @@ export async function activateSubject(catalogId: string): Promise<string> {
   const { data, error } = await supabase.rpc('activate_catalog_subject', {
     p_catalog_id: catalogId,
   });
-  if (error) throw new Error('Erro ao ativar matéria: ' + error.message);
+  if (error) {
+    throw new Error(rpcErrorMessage(
+      error,
+      'Não foi possível ativar esta matéria agora. Nada foi criado na sua biblioteca — tente de novo em instantes.',
+      'activate_catalog_subject',
+    ));
+  }
   // Invalida o cache de matérias: is_activated mudou para esta entry
   invalidateCatalogCache();
   return data as string;

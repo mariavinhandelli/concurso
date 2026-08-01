@@ -111,7 +111,14 @@ export async function saveStudyLog(
   // Também não deve impedir o save — try/catch isolado.
   if (topicId) {
     try {
-      await autoCompleteByTopic(topicId, session.sessionId);
+      // Data LOCAL da sessão (não "hoje"): registro retroativo precisa cumprir o
+      // bloco daquele dia, e uma sessão virada de meia-noite pertence ao dia em
+      // que começou — mesma referência usada no crédito do ciclo abaixo.
+      await autoCompleteByTopic(
+        topicId,
+        session.sessionId,
+        toLocalDateString(new Date(session.startedAt)),
+      );
     } catch (e) {
       console.error('Bloco não auto-cumprido (sessão salva mesmo assim):', e);
     }

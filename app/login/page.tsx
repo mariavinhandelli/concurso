@@ -107,12 +107,26 @@ export default function LoginPage() {
         router.refresh();
       }
     } else {
-      const { error } = await supabase.auth.signUp({ email, password, options: { data: { full_name: name.trim() } } });
+      const { data, error } = await supabase.auth.signUp({ email, password, options: { data: { full_name: name.trim() } } });
       setLoading(false);
       if (error) {
         setFeedback({ kind: 'error', text: traduzErro(error.message) });
+      } else if (data.session) {
+        // Confirmação de e-mail desligada: o signUp JÁ criou a sessão — o
+        // usuário está logado. Mandá-lo "entrar" de novo (comportamento
+        // anterior) era um beco: ele digitava tudo outra vez à toa.
+        router.push('/');
+        router.refresh();
+      } else if (data.user && data.user.identities?.length === 0) {
+        // E-mail já cadastrado com confirmação LIGADA: o Supabase não devolve
+        // erro (anti-enumeração), devolve um user sem identities. Sem este
+        // ramo, quem já tinha conta via "Conta criada!" e nenhum e-mail chegava.
+        setFeedback({ kind: 'error', text: 'Este e-mail já tem cadastro. Faça login ou use "Esqueci minha senha".' });
+        setMode('login');
       } else {
-        setFeedback({ kind: 'ok', text: 'Conta criada! Já pode entrar.' });
+        // Confirmação ligada, conta realmente nova: a promessa certa é o e-mail,
+        // não "já pode entrar" (entrar antes de confirmar falharia).
+        setFeedback({ kind: 'ok', text: 'Conta criada! Enviamos um link de confirmação para o seu e-mail.' });
         setPassword('');
         setMode('login');
       }

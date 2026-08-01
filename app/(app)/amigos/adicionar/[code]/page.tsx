@@ -6,9 +6,10 @@
 
 import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Search } from 'lucide-react';
 import { useToast } from '@/components/ui/ToastProvider';
+import { invalidateAfter } from '@/lib/cache-invalidation';
 import {
   findProfileByCode, getMySocialProfile, enableSocial, sendFriendRequest, type SocialProfile,
 } from '@/services/social.service';
@@ -20,6 +21,7 @@ export default function AdicionarAmigoPage() {
   const code = (params?.code ?? '').toUpperCase();
   const router = useRouter();
   const toast = useToast();
+  const queryClient = useQueryClient();
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
 
@@ -38,6 +40,9 @@ export default function AdicionarAmigoPage() {
     try {
       if (!jaAtivo) await enableSocial();
       const res = await sendFriendRequest(prof.userId);
+      // /amigos (destino do botão "Ver meus amigos") pode ter cache anterior à
+      // ativação/pedido — sem isto, mostrava o gate ou a lista velha por 60s.
+      invalidateAfter(queryClient, 'social');
       setDone(true);
       toast.success(res === 'accepted' ? 'Vocês já são amigos! 🎉' : `Pedido enviado para ${prof.name}.`);
     } catch (e) {

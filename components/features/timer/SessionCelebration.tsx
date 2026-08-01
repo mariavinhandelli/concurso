@@ -116,12 +116,21 @@ export function SessionCelebration() {
   const { minutes, retroDate, streak, goals, badges, teaser } = data;
 
   // ── Linha da sequência: dia garantido / escada até os 30 min ──
+  // "Garantido" é sobre a SEQUÊNCIA (piso de 30 min), não sobre a meta pessoal
+  // — as duas coisas usam limiares diferentes. "Sequência" no texto (em vez de
+  // "dia garantido" sozinho) evita que isso leia como "bati minha meta"; quando
+  // há meta configurada e ainda não foi batida hoje, streakNote reforça a
+  // diferença sem repetir números (a barra da meta, logo abaixo, já mostra o real).
   let streakLine: { emoji: string; text: string; strong?: boolean } | null = null;
+  let streakNote: string | null = null;
   if (streak) {
     if (streak.studiedToday) {
       streakLine = streak.current > 1
-        ? { emoji: '🔥', text: `Dia garantido — ${streak.current} dias de sequência`, strong: true }
-        : { emoji: '🔥', text: 'Dia garantido — sequência iniciada', strong: true };
+        ? { emoji: '🔥', text: `Sequência de ${streak.current} dias seguidos`, strong: true }
+        : { emoji: '🔥', text: 'Sequência iniciada', strong: true };
+      if (goals && goals.targetMinutesPerDay > 0 && goals.todayMinutes < goals.targetMinutesPerDay) {
+        streakNote = 'A sequência pede 30 min por dia — sua meta é outra, veja abaixo.';
+      }
     } else if (goals && goals.todayMinutes > 0 && goals.todayMinutes < MIN_DIA) {
       streakLine = { emoji: '⏳', text: `Faltam ${MIN_DIA - goals.todayMinutes} min para o dia contar na sequência` };
     }
@@ -192,6 +201,7 @@ export function SessionCelebration() {
             <span>{streakLine.text}</span>
           </div>
         )}
+        {streakNote && <p style={s.streakNote}>{streakNote}</p>}
 
         {recordLine && (
           <div style={s.record}>{recordLine}</div>
@@ -241,6 +251,7 @@ const s: Record<string, React.CSSProperties> = {
   },
   lineStrong: { color: theme.ink, fontWeight: 700, background: theme.tealBg },
   lineEmoji: { fontSize: 16 },
+  streakNote: { fontSize: 11, color: theme.inkFaint, margin: '-4px 0 8px', lineHeight: 1.3 },
   badgeLine: {
     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
     fontSize: 14, color: theme.warnDeep, fontWeight: 600,

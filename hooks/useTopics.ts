@@ -11,6 +11,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
 import {
   listTopics, createTopic, createTopicsTree, updateTopic,
   toggleCompleted, deleteTopic, type Topic,
@@ -21,6 +22,7 @@ import { activateReview, deactivateReview } from '@/services/reviews.service';
 import { getSaudeMap } from '@/services/metrics.service';
 import { countNotesByTopics } from '@/services/studyNotes.service';
 import { buildTopicTree, calcLeafProgress, type TopicTree } from '@/lib/topic-tree';
+import { invalidateReviewCounts } from '@/lib/review-counts';
 
 export interface UseTopicsReturn {
   topics: Topic[];
@@ -46,6 +48,7 @@ export interface UseTopicsReturn {
 
 export function useTopics(subjectId: string, initialSubject?: Subject): UseTopicsReturn {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [topics, setTopics] = useState<Topic[]>([]);
   const [saudeMap, setSaudeMap] = useState<Record<string, number>>({});
   const [noteCountMap, setNoteCountMap] = useState<Record<string, number>>({});
@@ -141,20 +144,27 @@ export function useTopics(subjectId: string, initialSubject?: Subject): UseTopic
     catch (e) { refresh(); setError(e instanceof Error ? e.message : 'Erro ao marcar.'); }
   }, [refresh]);
 
+  // Ver lib/review-counts.ts: os contadores de revisão vivem no React Query e
+  // esta tela guarda os tópicos em estado local — sem invalidar, ativar uma
+  // revisão aqui não mexia no Plano de Hoje por até 60s.
+  const invalidateCounts = useCallback(() => invalidateReviewCounts(queryClient), [queryClient]);
+
   const handleToggleReview = useCallback(async (topic: Topic) => {
     const novo = !topic.is_review_active;
     setTopics((prev) => prev.map((t) => (t.id === topic.id ? { ...t, is_review_active: novo } : t)));
     try {
       if (novo) await activateReview(topic.id);
       else await deactivateReview(topic.id);
+      invalidateCounts();
     } catch (e) { refresh(); setError(e instanceof Error ? e.message : 'Erro na revisão.'); }
-  }, [refresh]);
+  }, [refresh, invalidateCounts]);
 
   const handleDelete = useCallback(async (id: string) => {
     setError('');
-    try { await deleteTopic(id); await refresh(); }
+    // Apagar um tópico em revisão também tira itens da fila (cascata no banco).
+    try { await deleteTopic(id); await refresh(); invalidateCounts(); }
     catch (e) { setError(e instanceof Error ? e.message : 'Erro ao apagar.'); }
-  }, [refresh]);
+  }, [refresh, invalidateCounts]);
 
   const handleUpdate = useCallback(async (id: string, name: string) => {
     setError('');

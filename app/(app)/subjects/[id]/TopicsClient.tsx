@@ -121,8 +121,21 @@ export function TopicsClient({ subjectId, initialSubject }: Props) {
   // Virtualização com window scroll
   const listRef = useRef<HTMLDivElement>(null);
   const [scrollMargin, setScrollMargin] = useState(0);
+  // Remedir, não medir uma vez só: o que vem ANTES da lista muda de altura
+  // depois do primeiro paint — os chips "Nos editais" chegam por fetch, o campo
+  // de filtro só aparece quando há tópicos, e o título quebra em mais linhas
+  // conforme a largura. Com a medida congelada, o scrollMargin ficava menor que
+  // o offset real e a lista aparecia deslocada (visível no tablet, onde o
+  // cabeçalho é mais alto).
   useEffect(() => {
-    if (!loading && listRef.current) setScrollMargin(listRef.current.offsetTop);
+    const el = listRef.current;
+    if (!el) return;
+    const measure = () => setScrollMargin((prev) => (prev === el.offsetTop ? prev : el.offsetTop));
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(document.body);
+    window.addEventListener('resize', measure);
+    return () => { ro.disconnect(); window.removeEventListener('resize', measure); };
   }, [loading]);
 
   const rowVirtualizer = useWindowVirtualizer({
@@ -323,7 +336,11 @@ export function TopicsClient({ subjectId, initialSubject }: Props) {
                   key={virtualRow.key}
                   data-index={virtualRow.index}
                   ref={rowVirtualizer.measureElement}
-                  style={{ position: 'absolute', top: 0, left: 0, width: '100%', transform: `translateY(${virtualRow.start}px)`, paddingBottom: 8 }}
+                  // `start` é medido a partir do topo do DOCUMENTO (o scroller é
+                  // a janela), mas o container já está posicionado em offsetTop.
+                  // Sem descontar o scrollMargin o deslocamento entra duas vezes
+                  // e a lista nasce ~1 tela abaixo de onde deveria.
+                  style={{ position: 'absolute', top: 0, left: 0, width: '100%', transform: `translateY(${virtualRow.start - rowVirtualizer.options.scrollMargin}px)`, paddingBottom: 8 }}
                 >
                   {kids.length > 0 ? (
                     <TopicFolderRow

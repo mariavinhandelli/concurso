@@ -14,19 +14,28 @@ export interface AccuracyPoint {
   color: string;       // cor pastel da matéria
 }
 
-export async function getAccuracyBySubject(): Promise<AccuracyPoint[]> {
+// undefined = todo o histórico (comportamento original). Um número filtra aos
+// últimos N dias — para responder "como ANDO agora", não só "como fui sempre".
+export async function getAccuracyBySubject(dias?: number): Promise<AccuracyPoint[]> {
   const supabase = createClient();
   const user = await getCachedUser();
   if (!user) return [];
 
   // Busca logs de questões com matéria e ao menos 1 questão registrada.
-  const { data: logs, error } = await supabase
+  let query = supabase
     .from('study_logs')
     .select('subject_id, questions_total, questions_correct')
     .eq('user_id', user.id)
     .eq('mode', 'questoes')
     .not('subject_id', 'is', null)
     .gt('questions_total', 0);
+  if (dias) {
+    const corte = new Date();
+    corte.setDate(corte.getDate() - dias);
+    corte.setHours(0, 0, 0, 0);
+    query = query.gte('started_at', corte.toISOString());
+  }
+  const { data: logs, error } = await query;
 
   if (error) throw new Error('Erro ao buscar acertos: ' + error.message);
   if (!logs || logs.length === 0) return [];

@@ -3,7 +3,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { clearAuthCache } from '@/lib/supabase/authCache';
+import { clearAllClientCaches } from '@/lib/client-caches';
 
 export function QueryProvider({ children }: { children: React.ReactNode }) {
   const [client] = useState(
@@ -19,10 +19,14 @@ export function QueryProvider({ children }: { children: React.ReactNode }) {
       }),
   );
 
-  // Segurança multiusuário: o cache do React Query sobrevive a logout/login na
-  // mesma aba. Sem esta limpeza, dados do usuário anterior (retomada, metas,
-  // onboarding-status…) vazam para a conta seguinte até o staleTime vencer —
-  // ex.: usuário novo via "Bem-vindo de volta, foram N dias" do dono anterior.
+  // Segurança multiusuário: o cache do React Query E os caches singleton de
+  // módulo (auth, arquivadas, alvo primário, settings do perfil) sobrevivem a
+  // logout/login na mesma aba. Sem esta limpeza, dados do usuário anterior
+  // (retomada, metas, onboarding-status, concurso-alvo…) vazam para a conta
+  // seguinte até o TTL vencer — ex.: usuário novo via "Bem-vindo de volta, foram
+  // N dias" do dono anterior, ou o edital do dono anterior no Raio-X.
+  // Este handler é o ÚNICO ponto que precisa saber disso: vale para qualquer
+  // caminho de saída (Topbar, Configurações, expiração de sessão).
   const lastUserId = useRef<string | null | undefined>(undefined);
   useEffect(() => {
     const supabase = createClient();
@@ -34,7 +38,7 @@ export function QueryProvider({ children }: { children: React.ReactNode }) {
       }
       if (uid !== lastUserId.current) {
         lastUserId.current = uid;
-        clearAuthCache();
+        clearAllClientCaches();
         client.clear();
       }
     });

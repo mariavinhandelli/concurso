@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useRef, useMemo, useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { invalidateAfter } from '@/lib/cache-invalidation';
 import { useConfirm } from '@/hooks/useConfirm';
 import { useUI } from '@/components/layout/UIContext';
 import { useToast } from '@/components/ui/ToastProvider';
@@ -66,17 +67,33 @@ export function useSchedulePage() {
     gcTime: 10 * 60_000,
   });
 
-  const { data: rules = [] } = useQuery({
+  const { data: rules = [], isLoading: rulesLoading } = useQuery({
     queryKey: ['schedule-rules'],
     queryFn: listRuleSummaries,
     staleTime: 5 * 60_000,
   });
 
-  const { data: cycleRuleId = null } = useQuery({
+  const { data: cycleRuleId = null, isLoading: cycleLoading } = useQuery({
     queryKey: ['active-cycle'],
     queryFn: getActiveCycleRule,
     staleTime: 5 * 60_000,
   });
+
+  // Ciclo como padrão de entrada: quem tem ciclo ativo e NENHUM cronograma em
+  // blocos/dia-fixo (a semana Grade/Lista nasceria vazia) já entra vendo o
+  // ciclo — é ali que o plano dele realmente vive. Só decide uma vez por
+  // visita à página: depois disso o usuário pode trocar de aba livremente sem
+  // ser "puxado de volta" pelo efeito a cada refetch.
+  const viewDecidedRef = useRef(false);
+  useEffect(() => {
+    if (viewDecidedRef.current) return;
+    if (loading || rulesLoading || cycleLoading) return;
+    viewDecidedRef.current = true;
+    const temDiaFixo = rules.some((r) => r.mode === 'dia_fixo');
+    if (cycleRuleId && !temDiaFixo && blocks.length === 0) {
+      setView('ciclo');
+    }
+  }, [loading, rulesLoading, cycleLoading, rules, cycleRuleId, blocks]);
 
   // Ref para handlers estáveis que precisam ler `rules` sem se tornar instáveis.
   const rulesRef = useRef(rules);
@@ -115,6 +132,14 @@ export function useSchedulePage() {
 
   const loadRules = useCallback(() => {
     queryClient.invalidateQueries({ queryKey: ['schedule-rules'] });
+  }, [queryClient]);
+
+  // Consumidores dos MESMOS blocos fora da aba Semana (aba Mês, Plano de Hoje).
+  // Cumprir/excluir/pular escrevia só em ['schedule', weekKey], então eles
+  // ficavam com o estado antigo por até 60s. Quem sabe a lista é
+  // lib/cache-invalidation.ts — aqui só se declara o domínio tocado.
+  const invalidateBlockConsumers = useCallback(() => {
+    invalidateAfter(queryClient, 'blocks');
   }, [queryClient]);
 
   const checkCycle = useCallback(() => {
@@ -271,13 +296,15 @@ export function useSchedulePage() {
         // rápido reutiliza o id virtual sintético contra o override recém-criado.
         await queryClient.invalidateQueries({ queryKey: ['schedule', weekKey] });
       }
+      invalidateBlockConsumers();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : 'Erro ao atualizar bloco.');
       await queryClient.invalidateQueries({ queryKey: ['schedule', weekKey] });
+      invalidateBlockConsumers();
     } finally {
       pendingTogglesRef.current.delete(b.id);
     }
-  }, [queryClient, weekKey, toast]);
+  }, [queryClient, weekKey, toast, invalidateBlockConsumers]);
 
   const handleDelete = useCallback(async (b: ScheduleBlock) => {
     if (b.origin !== 'manual') return;
@@ -293,20 +320,23 @@ export function useSchedulePage() {
     );
     try {
       await deleteBlock(b.id);
+      invalidateBlockConsumers();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : 'Erro ao excluir bloco.');
       queryClient.invalidateQueries({ queryKey: ['schedule', weekKey] });
+      invalidateBlockConsumers();
     }
-  }, [queryClient, weekKey, confirm, toast]);
+  }, [queryClient, weekKey, confirm, toast, invalidateBlockConsumers]);
 
   const handleSkip = useCallback(async (b: ScheduleBlock) => {
     try {
       await skipOccurrence(b);
       queryClient.invalidateQueries({ queryKey: ['schedule', weekKey] });
+      invalidateBlockConsumers();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : 'Erro ao pular bloco.');
     }
-  }, [queryClient, weekKey, toast]);
+  }, [queryClient, weekKey, toast, invalidateBlockConsumers]);
 
   const handleEditRule = useCallback(async (b: ScheduleBlock) => {
     if (!b.rule_id) return;

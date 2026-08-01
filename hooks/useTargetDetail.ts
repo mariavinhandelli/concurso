@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import { invalidateAfter } from '@/lib/cache-invalidation';
 import { useToast } from '@/components/ui/ToastProvider';
 import { listSubjects } from '@/services/subjects.service';
 import { listAllTopics, type Topic } from '@/services/topics.service';
@@ -18,6 +20,15 @@ import { type SubjectTree } from '@/lib/targets';
 
 export function useTargetDetail(targetId: string) {
   const toast = useToast();
+  const queryClient = useQueryClient();
+
+  // O que se edita aqui É o insumo da Cobertura (tópicos vinculados = denominador)
+  // e do Raio-X (pesos das disciplinas) — sem invalidar, o usuário ajustava o
+  // edital e ia conferir a Cobertura vendo ainda o número antigo.
+  // Domínio 'edital' — a lista de chaves vive em lib/cache-invalidation.ts.
+  const invalidateDerived = useCallback(() => {
+    invalidateAfter(queryClient, 'edital');
+  }, [queryClient]);
 
   const [target, setTarget] = useState<TargetExam | null>(null);
   const [catalogInfo, setCatalogInfo] = useState<CatalogEditalInfo | null>(null);
@@ -125,6 +136,7 @@ export function useTargetDetail(targetId: string) {
     try {
       if (estava) await unlinkTopic(topicId, targetId);
       else await linkTopic(topicId, targetId);
+      invalidateDerived();
     } catch (e) {
       load().catch(() => {});
       toast.error(e instanceof Error ? e.message : 'Erro ao vincular tópico.');
@@ -132,7 +144,7 @@ export function useTargetDetail(targetId: string) {
       inFlight.current.delete(topicId);
       setInFlightTopics((prev) => { const n = new Set(prev); n.delete(topicId); return n; });
     }
-  }, [targetId, linked, load, toast]);
+  }, [targetId, linked, load, toast, invalidateDerived]);
 
   const toggleAllOfSubject = useCallback(async (node: SubjectTree, marcar: boolean) => {
     const ids = node.topics.map((t) => t.id);
@@ -144,11 +156,12 @@ export function useTargetDetail(targetId: string) {
     try {
       if (marcar) await linkTopicsBulk(ids, targetId);
       else await unlinkTopicsBulk(ids, targetId);
+      invalidateDerived();
     } catch (e) {
       load().catch(() => {});
       toast.error(e instanceof Error ? e.message : 'Erro ao vincular em lote.');
     }
-  }, [targetId, load, toast]);
+  }, [targetId, load, toast, invalidateDerived]);
 
   const changeTopicWeight = useCallback(async (topicId: string, weight: number | null) => {
     setTopicWeights((prev) => ({ ...prev, [topicId]: weight }));
@@ -173,11 +186,11 @@ export function useTargetDetail(targetId: string) {
     upsertBlueprint({
       targetExamId: targetId, subjectId,
       weight: pending.weight, numQuestionsExpected: pending.numQuestions,
-    }).catch((e) => {
+    }).then(invalidateDerived).catch((e) => {
       load().catch(() => {});
       toast.error(e instanceof Error ? e.message : 'Erro ao salvar peso da disciplina.');
     });
-  }, [targetId, load, toast]);
+  }, [targetId, load, toast, invalidateDerived]);
 
   useEffect(() => {
     const timers = weightTimers.current;

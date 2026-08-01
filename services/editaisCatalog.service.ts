@@ -6,6 +6,7 @@
 import { createClient } from '@/lib/supabase/client';
 import { getCachedUser } from '@/lib/supabase/authCache';
 import { invalidatePrimaryTargetCache } from '@/services/primaryTargetCache';
+import { rpcErrorMessage } from '@/lib/rpc-error';
 
 export type EditalSituacao = 'vigente' | 'em_expectativa' | 'encerrado';
 
@@ -305,7 +306,13 @@ export async function getCatalogEditalInfo(catalogEditalId: string): Promise<Cat
 export async function activateCatalogEdital(editalId: string): Promise<string> {
   const supabase = createClient();
   const { data, error } = await supabase.rpc('activate_catalog_edital', { p_edital_id: editalId });
-  if (error) throw new Error('Erro ao ativar edital: ' + error.message);
+  if (error) {
+    throw new Error(rpcErrorMessage(
+      error,
+      'Não foi possível ativar este edital agora. Nada foi criado na sua conta — tente de novo em instantes e, se persistir, me avise.',
+      'activate_catalog_edital',
+    ));
+  }
   invalidatePrimaryTargetCache();
   return data as string;
 }

@@ -8,6 +8,8 @@ import {
   type JurisInteracao,
 } from '@/services/jurisInteracoes.service';
 import { INTERVALOS_RAPIDOS } from '@/lib/juris-review';
+import { useQueryClient } from '@tanstack/react-query';
+import { invalidateReviewCounts } from '@/lib/review-counts';
 import { useToast } from '@/components/ui/ToastProvider';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
@@ -25,6 +27,7 @@ function fmtDate(d: string | null): string {
 
 export function JurisInteracoesPanel({ jurisId }: Props) {
   const toast = useToast();
+  const queryClient = useQueryClient();
   const toastRef = useRef(toast);
   useEffect(() => { toastRef.current = toast; });
   const [interacao, setInteracao] = useState<JurisInteracao | null>(null);
@@ -140,6 +143,9 @@ export function JurisInteracoesPanel({ jurisId }: Props) {
       await activateRevisao(jurisId, days);
       const updated = await getInteracao(jurisId);
       setInteracao(updated);
+      // Ver lib/review-counts.ts — sem isto o Plano de Hoje ignorava a
+      // jurisprudência recém-agendada por até 60s.
+      invalidateReviewCounts(queryClient);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : 'Erro ao ativar revisão. Tente novamente.');
     } finally { setSavingRev(false); }
@@ -150,6 +156,7 @@ export function JurisInteracoesPanel({ jurisId }: Props) {
     try {
       await desativarRevisao(jurisId);
       setInteracao((v) => v ? { ...v, is_review_active: false, next_review_date: null } : v);
+      invalidateReviewCounts(queryClient);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : 'Erro ao desativar revisão. Tente novamente.');
     } finally { setSavingRev(false); }

@@ -10,6 +10,7 @@ import { usePersistedState } from '@/hooks/usePersistedState';
 import { useUI } from '@/components/layout/UIContext';
 import { useUser } from '@/components/layout/UserContext';
 import { useTimer } from '@/components/features/timer/TimerContext';
+import { useToast } from '@/components/ui/ToastProvider';
 import { useCoachDecision } from '@/hooks/useCoach';
 import { useLocalToday } from '@/hooks/useLocalToday';
 import { parseLocalDate } from '@/lib/local-date';
@@ -30,17 +31,43 @@ import { ExamCountdown } from '@/components/features/dashboard/ExamCountdown';
 function TimerAutoStart() {
   const params = useSearchParams();
   const { status, start } = useTimer();
+  const toast = useToast();
   const didAutoStart = useRef(false);
 
   useEffect(() => {
     const topicId = params.get('topicId');
-    if (topicId && !didAutoStart.current && status === 'idle') {
+    if (!topicId || didAutoStart.current) return;
+
+    // Já existe sessão em andamento: start() é no-op por desenho. Antes disso o
+    // clique em "estudar este tópico" (vindo de Matérias) não produzia NENHUM
+    // feedback — a URL era limpa e nada acontecia.
+    if (status !== 'idle') {
       didAutoStart.current = true;
-      start({ mode: 'teoria', topicId, subjectId: params.get('subjectId') });
       window.history.replaceState(null, '', '/');
+      toast.info('Você já tem uma sessão em andamento. Encerre-a para começar outra.');
+      return;
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [params, status]);
+
+    // start() também é no-op enquanto o id do usuário não foi resolvido pelo
+    // onAuthStateChange — o que acontece ao ABRIR a URL direto (refresh, link
+    // colado, PWA), não na navegação interna. Antes, o pedido era marcado como
+    // atendido e descartado nesse intervalo. Agora insiste por ~3s.
+    const subjectId = params.get('subjectId');
+    const attempt = () => {
+      if (didAutoStart.current) return true;
+      if (!start({ mode: 'teoria', topicId, subjectId })) return false;
+      didAutoStart.current = true;
+      window.history.replaceState(null, '', '/');
+      return true;
+    };
+    if (attempt()) return;
+
+    let tries = 0;
+    const id = setInterval(() => {
+      if (attempt() || ++tries >= 15) clearInterval(id);
+    }, 200);
+    return () => clearInterval(id);
+  }, [params, status, start, toast]);
 
   return null;
 }

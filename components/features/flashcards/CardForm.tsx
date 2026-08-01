@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import { invalidateReviewCounts } from '@/lib/review-counts';
 import { createFlashcard, updateFlashcardContent, type Flashcard } from '@/services/flashcards.service';
 import { theme } from '@/lib/theme';
 import { Button } from '@/components/ui/Button';
@@ -17,6 +19,7 @@ interface Props {
 
 export function CardForm({ subjectId, topicId, card, onSaved, onCreatedAndNew, onCancel }: Props) {
   const isEdit = Boolean(card);
+  const queryClient = useQueryClient();
   const [front, setFront] = useState(card?.front ?? '');
   const [back, setBack] = useState(card?.back ?? '');
   const [addToReview, setAddToReview] = useState(true);
@@ -37,6 +40,9 @@ export function CardForm({ subjectId, topicId, card, onSaved, onCreatedAndNew, o
         await updateFlashcardContent(card.id, front, back);
       } else {
         await createFlashcard({ front: front.trim(), back: back.trim(), topicId, subjectId, sourceErrorId: null, addToReview });
+        // Card criado JÁ em revisão entra na fila de amanhã — o contador do
+        // Plano de Hoje precisa saber (ver lib/review-counts.ts).
+        if (addToReview) invalidateReviewCounts(queryClient);
       }
       onSaved();
     } catch (e) {

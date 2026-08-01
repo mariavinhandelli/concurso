@@ -9,6 +9,8 @@
 
 import { Suspense, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
+import { refreshHomeAfterSession } from '@/lib/home-refresh';
 import { Check, X } from 'lucide-react';
 import { LEIS_CATALOG, artigoNumeroFromKey, type LeiMeta } from '@/services/leis.service';
 import {
@@ -39,6 +41,7 @@ function fmtData(iso: string): string {
 function SimuladoContent() {
   const params = useSearchParams();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { isMobile } = useUI();
 
   const slugsPedidos = useMemo(
@@ -136,8 +139,13 @@ function SimuladoContent() {
       itemsLabel: `Simulado do Vade Mecum (${titulo}): ${acertos}/${fila.length}.`,
       questionsTotal: fila.length,
       questionsCorrect: acertos,
+    }).then((gravou) => {
+      // Sem isto, o simulado gravava a sessão mas a Home (metas, acerto do dia,
+      // streak, heatmap) só percebia depois do staleTime — único player que
+      // ainda não fazia o refresh.
+      if (gravou) refreshHomeAfterSession(queryClient);
     });
-  }, [acabou, fila, historico, acertos, chave, titulo]);
+  }, [acabou, fila, historico, acertos, chave, titulo, queryClient]);
 
   function responder(valor: boolean) {
     if (!atual || resposta !== null) return;

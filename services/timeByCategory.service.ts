@@ -5,7 +5,14 @@
 import { createClient } from '@/lib/supabase/client';
 import { getCachedUser } from '@/lib/supabase/authCache';
 
-export type PeriodView = 'dia' | 'semana' | 'mes' | 'total';
+// 'custom' = intervalo escolhido no calendário (duas datas livres). Ignora o
+// offset — quem navega são as datas.
+export type PeriodView = 'dia' | 'semana' | 'mes' | 'total' | 'custom';
+
+export interface DateRange {
+  start: string; // 'YYYY-MM-DD' (local)
+  end: string;   // 'YYYY-MM-DD' (local, inclusivo)
+}
 
 export interface CategorySlice {
   subjectId: string;
@@ -30,10 +37,33 @@ function endOfDay(d: Date): Date {
 function fmtDay(d: Date): string {
   return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
 }
+function toIsoDay(d: Date): string {
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  return `${d.getFullYear()}-${mm}-${dd}`;
+}
 
 // Calcula o intervalo [início, fim] do período, dado a visão e o offset.
-function periodRange(view: PeriodView, offset: number): { start: Date; end: Date; label: string; canGoForward: boolean } {
+function periodRange(view: PeriodView, offset: number, range?: DateRange): { start: Date; end: Date; label: string; canGoForward: boolean } {
   const hoje = new Date();
+
+  if (view === 'custom') {
+    // Datas locais montadas componente a componente: `new Date('2026-08-01')`
+    // é interpretado como UTC e, em fuso negativo, volta um dia.
+    const parse = (s: string) => {
+      const [y, m, d] = s.split('-').map(Number);
+      return new Date(y, (m ?? 1) - 1, d ?? 1);
+    };
+    const a = parse(range?.start ?? toIsoDay(hoje));
+    const b = parse(range?.end ?? toIsoDay(hoje));
+    // Datas invertidas pelo usuário: normaliza em vez de devolver período vazio.
+    const [ini, fim] = a <= b ? [a, b] : [b, a];
+    return {
+      start: startOfDay(ini), end: endOfDay(fim),
+      label: fmtDay(ini) === fmtDay(fim) ? fmtDay(ini) : `${fmtDay(ini)}–${fmtDay(fim)}`,
+      canGoForward: false,
+    };
+  }
 
   if (view === 'total') {
     const start = new Date(2000, 0, 1);
@@ -78,13 +108,13 @@ function periodRange(view: PeriodView, offset: number): { start: Date; end: Date
 }
 
 export async function getTimeByCategory(
-  view: PeriodView, offset: number,
+  view: PeriodView, offset: number, range?: DateRange,
 ): Promise<TimeByCategoryResult> {
   const supabase = createClient();
   const user = await getCachedUser();
   if (!user) return { slices: [], totalMinutes: 0, periodLabel: '', canGoForward: false };
 
-  const { start, end, label, canGoForward } = periodRange(view, offset);
+  const { start, end, label, canGoForward } = periodRange(view, offset, range);
 
   // Sessões do período, com a matéria e a cor.
   const { data: logs, error } = await supabase

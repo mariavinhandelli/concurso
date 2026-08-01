@@ -69,15 +69,22 @@ export function RankRow({
       <Avatar name={name} url={avatarUrl} size={38} ring={isMe} />
       <div style={s.info}>
         <span style={s.name}>
-          {isMe ? 'Você' : name}
+          {/* text-overflow não se aplica a uma caixa flex (s.name) — só a uma
+              caixa de texto simples. Sem este span interno, um nome comprido
+              cortava sem "…" em vez de truncar. */}
+          <span style={s.nameText}>{isMe ? 'Você' : name}</span>
           {badge && <Badge variant="brand" style={{ textTransform: 'uppercase' }}>{badge}</Badge>}
         </span>
-        <span style={{ ...s.meta, display: 'inline-flex', alignItems: 'center', gap: 3 }}>
-          <Flame size={11} strokeWidth={2} /> {streak} {streak === 1 ? 'dia' : 'dias'} · {fmtMin(weekMinutes)} na semana
+        <span
+          style={{ ...s.meta, display: 'inline-flex', alignItems: 'center', gap: 3 }}
+          title="sequência: dias seguidos com pelo menos 30 min — não é a meta pessoal"
+        >
+          <Flame size={11} strokeWidth={2} /> {streak} {streak === 1 ? 'dia' : 'dias'} seguidos · {fmtMin(weekMinutes)} na semana
         </span>
       </div>
-      <span style={s.dias} title="dias em que bateu a própria meta, nos últimos 7">
-        {daysOnTarget}<span style={s.diasDe}>/7</span>
+      <span style={s.diasWrap} title="dias em que bateu a própria meta, nos últimos 7">
+        <span style={s.dias}>{daysOnTarget}<span style={s.diasDe}>/7</span></span>
+        <span style={s.diasCaption}>na meta</span>
       </span>
       {actions}
     </div>
@@ -108,12 +115,15 @@ const s: Record<string, CSSProperties> = {
   rowMe: { background: theme.tealBg, borderColor: theme.teal },
   pos: { fontSize: 16, fontWeight: 800, color: theme.inkSoft, width: 30, textAlign: 'center', flexShrink: 0 },
   info: { display: 'flex', flexDirection: 'column', minWidth: 0, flex: 1, gap: 2 },
-  name: { fontSize: 15, fontWeight: 700, color: theme.ink, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: 6 },
+  name: { fontSize: 15, fontWeight: 700, color: theme.ink, display: 'flex', alignItems: 'center', gap: 6, minWidth: 0 },
+  nameText: { overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 },
   meta: { fontSize: 12, color: theme.inkSoft, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
-  dias: { fontSize: 17, fontWeight: 800, color: theme.tealDeep, flexShrink: 0, fontVariantNumeric: 'tabular-nums', lineHeight: 1 },
+  diasWrap: { display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0, gap: 1 },
+  dias: { fontSize: 17, fontWeight: 800, color: theme.tealDeep, fontVariantNumeric: 'tabular-nums', lineHeight: 1 },
   diasDe: { fontSize: 12, fontWeight: 700, color: theme.inkFaint },
+  diasCaption: { fontSize: 9, fontWeight: 700, color: theme.inkFaint, textTransform: 'uppercase', letterSpacing: 0.3 },
 
   quietRow: { display: 'flex', alignItems: 'center', gap: 10, padding: '4px 2px' },
-  quietName: { fontSize: 14, fontWeight: 600, color: theme.inkSoft, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
+  quietName: { fontSize: 14, fontWeight: 600, color: theme.inkSoft, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 },
   quietTag: { fontSize: 12, color: theme.inkFaint, marginRight: 'auto', whiteSpace: 'nowrap' },
 };

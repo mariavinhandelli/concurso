@@ -131,8 +131,12 @@ function sanitizeAvatarUrl(raw: string | null | undefined): string | null {
 // P3-15 — os services concatenavam error.message do PostgREST direto na tela
 // ("column reference \"turma_id\" is ambiguous" apareceu num toast). O usuário
 // recebe uma frase útil; o detalhe técnico vai para o console.
-function mensagemAmigavel(error: { message: string; code?: string }, fallback: string): string {
-  console.error('[social]', error);
+function mensagemAmigavel(error: { message: string; code?: string; details?: string | null; hint?: string | null }, fallback: string): string {
+  // Objeto de erro do Postgrest/Error tem `message` não-enumerável — dar
+  // console.error(error) direto vira "{}" no console (message some do
+  // JSON.stringify/serialização), o mesmo defeito que lib/rpc-error.ts já
+  // resolve para as RPCs migradas. Loga os campos separados.
+  console.error('[social]', error.code, error.message, error.details ?? '', error.hint ?? '');
   if (/friendship_blocked/i.test(error.message)) return 'Não foi possível enviar o pedido.';
   if (/idx_friendships_unique_pair|duplicate key/i.test(error.message)) return 'Vocês já têm um pedido ou amizade em aberto.';
   if (/permission denied|row-level security/i.test(error.message)) return 'Você não tem permissão para isso.';
@@ -152,7 +156,12 @@ type AuthUser = { email?: string; user_metadata?: Record<string, unknown> };
 
 function identidadeDe(user: AuthUser, prof: PerfilRow) {
   const meta = user.user_metadata ?? {};
-  const nome = prof?.full_name
+  // display_name PRIMEIRO: é o campo que a tela Perfil edita e o que a saudação
+  // da Home usa (UserContext). Sem ele aqui, trocar o nome no Perfil mudava o
+  // "Olá, X" mas o ranking dos amigos ficava com o nome de cadastro para
+  // sempre — e o syncMySocialIdentity ainda revertia qualquer acerto manual.
+  const nome = (typeof meta.display_name === 'string' && meta.display_name.trim() ? meta.display_name : '')
+    || prof?.full_name
     || (typeof meta.full_name === 'string' ? meta.full_name : '')
     || user.email?.split('@')[0];
   const foto = (typeof meta.avatar_url === 'string' ? meta.avatar_url : null) ?? prof?.avatar_url;
@@ -409,7 +418,7 @@ export interface PeerComparison {
 export async function getPeerComparison(): Promise<PeerComparison | null> {
   const supabase = createClient();
   const { data, error } = await supabase.rpc('get_peer_comparison');
-  if (error) { console.error('[social]', error); return null; }
+  if (error) { console.error('[social]', error.code, error.message, error.details ?? '', error.hint ?? ''); return null; }
   const rows = (data ?? []) as {
     edital_label: string; peers_total: number; my_days_on_target: number; median_days_on_target: number | string;
   }[];

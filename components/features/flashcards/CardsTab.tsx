@@ -1,6 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import { invalidateReviewCounts } from '@/lib/review-counts';
 import Link from 'next/link';
 import { ChevronLeft, Pencil, Trash2 } from 'lucide-react';
 import { useToast } from '@/components/ui/ToastProvider';
@@ -22,6 +24,7 @@ interface Props {
 
 export function CardsTab({ onStudy }: Props) {
   const toast = useToast();
+  const queryClient = useQueryClient();
   const { confirm, dialog } = useConfirm();
   const [creating, setCreating] = useState(false);
   const [editingCard, setEditingCard] = useState<Flashcard | null>(null);
@@ -55,6 +58,9 @@ export function CardsTab({ onStudy }: Props) {
       await deleteFlashcard(c.id);
       toast.success('Card apagado.');
       nav.reloadCards(msg => toast.error(msg));
+      // Apagar um card que estava em revisão tira um item da fila — o Plano de
+      // Hoje seguia cobrando o card apagado (ver lib/review-counts.ts).
+      invalidateReviewCounts(queryClient);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : 'Erro ao apagar o card. Tente novamente.');
     }
@@ -201,6 +207,9 @@ export function CardsTab({ onStudy }: Props) {
               >
                 <div style={styles.cardFront}>{c.front}</div>
                 <div style={styles.cardBack}>{c.back}</div>
+                {c.origin && c.origin !== 'curadoria' && (
+                  <span style={styles.originTag}>{c.origin === 'lei_seca' ? 'Lei seca' : 'Jurisprudência'}</span>
+                )}
                 <div style={styles.cardActions}>
                   <button
                     onClick={() => { setCreating(false); setEditingCard(c); }}
@@ -242,6 +251,7 @@ const styles: Record<string, React.CSSProperties> = {
   cardItemHover: { boxShadow: 'var(--shadow-hover)' },
   cardFront: { fontSize: 14, color: theme.ink, fontWeight: 600 },
   cardBack: { fontSize: 13, color: theme.inkSoft, marginTop: 4 },
+  originTag: { display: 'inline-block', fontSize: 10, fontWeight: 700, color: theme.inkSoft, background: theme.muted, borderRadius: theme.radiusXs, padding: '2px 7px', marginTop: 6 },
   cardActions: { position: 'absolute', top: 10, right: 10, display: 'flex', gap: 2 },
   editBtn: { border: 'none', background: 'transparent', color: theme.inkSoft, fontSize: 13, cursor: 'pointer', padding: '3px 6px', borderRadius: 6 },
   delBtn: { border: 'none', background: 'transparent', color: theme.inkFaint, fontSize: 12, cursor: 'pointer', padding: '3px 6px', borderRadius: 6 },

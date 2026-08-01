@@ -105,14 +105,20 @@ export async function getRaioX(): Promise<RaioX> {
 
   const subjectIds = blueprints.map((b) => b.subjectId);
 
+  // Nem os tópicos nem as sessões são buscados com `.in(linkedIds)`: editais
+  // grandes (300+ tópicos vinculados já existem em produção) gerariam uma URL
+  // com todos os UUIDs, na fronteira do limite de URI do gateway — e uma falha
+  // aqui derruba o Raio-X inteiro. Busca-se pelas MATÉRIAS do edital (lista
+  // curta) e a interseção com os tópicos vinculados é feita em memória.
+  const linkedSet = new Set(linkedIds);
   const [
-    { data: topicRows, error: topicsError },
+    { data: topicRowsRaw, error: topicsError },
     { data: studiedRows, error: studiedError },
     { data: accRows, error: accError },
     saudeMap,
   ] = await Promise.all([
-    supabase.from('topics').select('id, subject_id').in('id', linkedIds),
-    supabase.from('study_logs').select('topic_id').eq('user_id', userId).in('topic_id', linkedIds),
+    supabase.from('topics').select('id, subject_id').in('subject_id', subjectIds),
+    supabase.from('study_logs').select('topic_id').eq('user_id', userId).not('topic_id', 'is', null),
     supabase.from('study_logs').select('subject_id, questions_total, questions_correct')
       .eq('user_id', userId).eq('mode', 'questoes').in('subject_id', subjectIds),
     getSaudeMap(linkedIds),
@@ -121,7 +127,10 @@ export async function getRaioX(): Promise<RaioX> {
   if (studiedError) throw new Error('Erro ao buscar tópicos estudados: ' + studiedError.message);
   if (accError) throw new Error('Erro ao buscar acerto em questões: ' + accError.message);
 
-  const coveredSet = new Set((studiedRows ?? []).map((r) => r.topic_id as string));
+  const topicRows = (topicRowsRaw ?? []).filter((t) => linkedSet.has(t.id as string));
+  const coveredSet = new Set(
+    (studiedRows ?? []).map((r) => r.topic_id as string).filter((id) => linkedSet.has(id)),
+  );
 
   const accBySubject = new Map<string, { total: number; correct: number }>();
   for (const r of accRows ?? []) {
@@ -132,7 +141,7 @@ export async function getRaioX(): Promise<RaioX> {
   }
 
   const materias: RaioXMateria[] = blueprints.map((b) => {
-    const topicIds = (topicRows ?? []).filter((t) => t.subject_id === b.subjectId).map((t) => t.id as string);
+    const topicIds = topicRows.filter((t) => t.subject_id === b.subjectId).map((t) => t.id as string);
     const topicosTotal = topicIds.length;
     const semTopicosVinculados = topicosTotal === 0;
 

@@ -2,7 +2,10 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/components/ui/ToastProvider';
+import { refreshHomeAfterSession } from '@/lib/home-refresh';
+import { invalidateReviewCounts } from '@/lib/review-counts';
 import { savePassiveSession } from '@/services/passiveSession.service';
 import {
   listRevisoesHoje, submitRevisao,
@@ -21,6 +24,7 @@ export default function RevisarPage() {
   const router = useRouter();
   const { isMobile } = useUI();
   const toast = useToast();
+  const queryClient = useQueryClient();
 
   const [items, setItems] = useState<JurisComInteracao[] | null>(null);
   const [idx, setIdx] = useState(0);
@@ -37,12 +41,16 @@ export default function RevisarPage() {
   useEffect(() => {
     if (!done || feitas === 0 || sessaoGravadaRef.current) return;
     sessaoGravadaRef.current = true;
+    // Avaliar julgados esvazia a fila de juris — os contadores do Plano de Hoje
+    // mudaram MESMO se a sessão passiva não gravar (< 30s). O player unificado e
+    // o do Vade Mecum já faziam isso; este era o único que não invalidava nada.
+    invalidateReviewCounts(queryClient);
     void savePassiveSession({
       mode: 'jurisprudencia',
       startedAtMs: inicioRef.current,
       itemsLabel: `Revisão de jurisprudências: ${feitas} julgado${feitas === 1 ? '' : 's'}.`,
-    });
-  }, [done, feitas]);
+    }).then((gravou) => { if (gravou) refreshHomeAfterSession(queryClient); });
+  }, [done, feitas, queryClient]);
 
   useEffect(() => {
     listRevisoesHoje()

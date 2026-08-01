@@ -282,11 +282,15 @@ const s: Record<string, CSSProperties> = {
 
   turmaList: { display: 'flex', flexDirection: 'column', gap: 8 },
   turmaCard: { display: 'flex', alignItems: 'center', gap: 12, width: '100%', textAlign: 'left', padding: '12px 14px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.bg, cursor: 'pointer', fontFamily: 'inherit' },
-  turmaCardName: { fontSize: 15, fontWeight: 700, color: theme.ink, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
+  // minWidth:0: sem isto, um nome de turma comprido não encolhia e empurrava
+  // o contador de membros e a seta para fora do botão.
+  turmaCardName: { fontSize: 15, fontWeight: 700, color: theme.ink, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0, flexShrink: 1 },
   turmaCardMeta: { fontSize: 13, color: theme.inkFaint, marginLeft: 'auto', whiteSpace: 'nowrap', flexShrink: 0 },
 
-  turmaHead: { display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 12, marginBottom: 14 },
-  turmaName: { fontSize: 18, fontWeight: 800, color: theme.ink, margin: 0, letterSpacing: -0.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
+  turmaHead: { display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 12, marginBottom: 14, minWidth: 0 },
+  // minWidth:0: mesmo problema de turmaCardName — nome comprido empurrava o
+  // contador de membros para fora do cabeçalho em vez de truncar.
+  turmaName: { fontSize: 18, fontWeight: 800, color: theme.ink, margin: 0, letterSpacing: -0.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0, flexShrink: 1 },
   turmaMeta: { fontSize: 13, color: theme.inkFaint, flexShrink: 0 },
   inviteRow: { display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' },
   codeBox: { fontFamily: 'ui-monospace, monospace', fontSize: 16, fontWeight: 700, letterSpacing: 2, color: theme.ink, background: theme.bg, border: `0.5px solid ${theme.line}`, borderRadius: theme.radiusSm, padding: '10px 14px', flex: 1, minWidth: 110, textAlign: 'center' },

@@ -11,6 +11,7 @@ import { Suspense, useRef, useState, type CSSProperties } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Check, X, MoreHorizontal, ShieldOff } from 'lucide-react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { invalidateAfter } from '@/lib/cache-invalidation';
 import { useToast } from '@/components/ui/ToastProvider';
 import {
   getSocialOverview, enableSocial, disableSocial, findProfileByCode, sendFriendRequest,
@@ -80,9 +81,10 @@ function AmigosContent() {
   });
 
   function invalidate() {
-    qc.invalidateQueries({ queryKey: ['social-overview'] });
-    qc.invalidateQueries({ queryKey: ['social-blocks'] });
-    qc.invalidateQueries({ queryKey: ['pending-friend-requests'] });
+    // Inclui a comparação com os pares: ela é calculada sobre o conjunto de
+    // amigos, então aceitar/recusar/bloquear muda o resultado. A lista completa
+    // do domínio 'social' vive em lib/cache-invalidation.ts.
+    invalidateAfter(qc, 'social');
   }
 
   async function run(fn: () => Promise<void>) {
@@ -429,7 +431,12 @@ const s: Record<string, CSSProperties> = {
   linkBtn: { border: 'none', background: 'transparent', color: theme.inkFaint, fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit', padding: '10px 2px 0', textDecoration: 'underline', display: 'block' },
 
   reqRow: { display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderTop: `0.5px solid ${theme.line}` },
-  reqName: { fontSize: 14, fontWeight: 600, color: theme.ink, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' },
+  // minWidth:0: min-width:auto de um item flex com white-space:nowrap é o
+  // próprio texto inteiro (não há quebra possível), então sem isto o nome
+  // nunca encolhia — empurrava os botões Aceitar/Recusar para fora da linha
+  // em vez de truncar com "…". reqTag (marginRight:auto) segue empurrando os
+  // botões para a direita normalmente.
+  reqName: { fontSize: 14, fontWeight: 600, color: theme.ink, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 0 },
   reqTag: { fontSize: 12, color: theme.inkFaint, marginRight: 'auto' },
 
   rankList: { display: 'flex', flexDirection: 'column', gap: 6 },

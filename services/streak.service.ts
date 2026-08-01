@@ -27,7 +27,8 @@ function diasEntre(a: string, b: string): number {
 export interface DayStudy {
   date: string;        // 'YYYY-MM-DD'
   minutes: number;
-  metGoal: boolean;    // bateu a meta diária?
+  metGoal: boolean;    // bateu a meta diária EFETIVA (nunca abaixo do mínimo de 30 min)
+  countsForStreak: boolean; // atingiu o mínimo de 30 min, ou seja, sustentou a sequência
   forgiven?: boolean;  // folga "escudada": dia sem estudo perdoado na sequência atual
 }
 
@@ -120,10 +121,18 @@ export async function getStreak(_supabase?: SupabaseClient, _userId?: string): P
     const key = localDateStr(d);
     const sec = byDay.get(key) ?? 0;
     const min = Math.round(sec / 60);
+    // A meta efetiva nunca fica abaixo do mínimo que sustenta a sequência.
+    // Com meta de 20 min, um dia de 22 min era pintado de verde ("bateu a meta")
+    // ao mesmo tempo em que QUEBRAVA a sequência (que exige 30 min) e consumia o
+    // escudo semanal — duas leituras opostas do mesmo dia, no mesmo componente.
+    // É a mesma régua do ranking social (refresh_my_social_stats usa
+    // greatest(meta, 30)), então "dias na meta" passa a bater entre as telas.
+    const metaEfetiva = dailyTarget > 0 ? Math.max(dailyTarget, MIN_SEGUNDOS_DIA / 60) : 0;
     lastDays.push({
       date: key,
       minutes: min,
-      metGoal: dailyTarget > 0 && min >= dailyTarget,
+      metGoal: metaEfetiva > 0 && min >= metaEfetiva,
+      countsForStreak: diaConta(sec),
       forgiven: perdoadosSet.has(key),
     });
   }

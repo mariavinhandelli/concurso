@@ -1,45 +1,16 @@
 // lib/home-refresh.ts
-// Invalida as queries da Home após salvar uma sessão de estudo, para que o
-// Plano de Hoje (revisões, flashcards, sugestões, cronograma, metas, streak)
-// reflita o progresso na hora — sem depender de refetch ao focar a janela.
+// Invalida as queries afetadas por uma sessão de estudo salva (timer, registro
+// manual, quick log ou sessão passiva), para que o Plano de Hoje, o streak, as
+// metas, as conquistas e os gráficos reflitam o progresso na hora.
+//
+// A LISTA DE CHAVES NÃO MORA MAIS AQUI: vive em lib/cache-invalidation.ts, no
+// domínio 'session', junto com os outros domínios do app. Esta função continua
+// existindo porque o nome diz a intenção no ponto de chamada — mas ela é só um
+// atalho para invalidateAfter(qc, 'session').
 
 import type { QueryClient } from '@tanstack/react-query';
-
-const HOME_KEYS: readonly (readonly string[])[] = [
-  ['due-reviews-count'],
-  ['due-cards-count'],
-  ['home-suggestions'],
-  ['today-blocks'],     // casa por prefixo com ['today-blocks', <data>]
-  ['edital-coverage'],
-  ['raiox'],
-  ['missoes-semana'],
-  ['coach-semanal'],
-  ['goals-summary'],
-  ['questions-summary'],
-  ['streak'],
-  ['due-lei-count'],
-  ['due-juris-count'],  // o passo "Revisar" soma juris — sem isto a parcela ficava defasada
-  ['due-oldest-date'],  // "mais antiga há N dias" — senão fica com a data vencida antiga por até 60s
-  ['cycle-state'],      // casa por prefixo com ['cycle-state', <ruleId>] (passo Ciclo do Plano de Hoje)
-  ['retomada'],         // estudar encerra o hiato — o card "Bem-vindo de volta" deve sumir na hora
-  ['time-by-category'], // casa por prefixo com ['time-by-category', view, offset] (TimePieCard)
-  ['journey-stats'],    // totais de horas/sessões da Jornada
-  ['suggested-target'], // nudge da Meta Adaptativa depende de todayMinutes
-  ['badge-state'],      // /conquistas: sem isto, a sessão que DESBLOQUEIA a conquista
-                        // servia cache velho por até 5 min — o único instante em que a
-                        // recompensa importa era o único em que ela não aparecia
-  ['study-day-totals-heatmap'], // o quadradinho de hoje no YearHeatmap acende na hora
-  // /performance (Fase 2.4 — agora em React Query): a sessão recém-salva deve
-  // aparecer nos gráficos na próxima visita, não depois do staleTime.
-  ['constancia-resumo'],   // prefixo: ['constancia-resumo', dias]
-  ['time-series'],         // prefixo: ['time-series', granularidade]
-  ['accuracy-by-subject'],
-  ['accuracy-evolution'],  // prefixo: ['accuracy-evolution', subjectId|'geral']
-  ['energia-desempenho'],
-];
+import { invalidateAfter } from '@/lib/cache-invalidation';
 
 export function refreshHomeAfterSession(queryClient: QueryClient): void {
-  for (const key of HOME_KEYS) {
-    queryClient.invalidateQueries({ queryKey: key });
-  }
+  invalidateAfter(queryClient, 'session');
 }

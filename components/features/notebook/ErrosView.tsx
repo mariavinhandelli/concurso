@@ -9,6 +9,8 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import { invalidateReviewCounts } from '@/lib/review-counts';
 import Link from 'next/link';
 import { ClipboardX } from 'lucide-react';
 import { useConfirm } from '@/hooks/useConfirm';
@@ -42,6 +44,7 @@ export function ErrosView({ openNoteId }: { openNoteId?: string | null }) {
   const { isMobile } = useUI();
   const { confirm, dialog } = useConfirm();
   const toast = useToast();
+  const queryClient = useQueryClient();
 
   const [subjects, setSubjects] = useState<SubjectColorOption[]>([]);
   const [boards, setBoards] = useState<{ id: string; name: string; color: string }[]>([]);
@@ -364,7 +367,12 @@ export function ErrosView({ openNoteId }: { openNoteId?: string | null }) {
         onSaved={handleSaved}
         onCancel={handleCancel}
         onDelete={handleDelete}
-        onScheduleReview={(topicId, days) => scheduleReviewFromError(topicId, days)}
+        onScheduleReview={async (topicId, days) => {
+          await scheduleReviewFromError(topicId, days);
+          // Agendar revisão pelo erro ativa o tópico na fila — o Plano de Hoje
+          // precisa recontar (ver lib/review-counts.ts).
+          invalidateReviewCounts(queryClient);
+        }}
       />
     </>
   ) : (

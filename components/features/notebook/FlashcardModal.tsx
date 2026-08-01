@@ -5,6 +5,8 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { Sparkles } from 'lucide-react';
+import { useQueryClient } from '@tanstack/react-query';
+import { invalidateReviewCounts } from '@/lib/review-counts';
 import { createFlashcard } from '@/services/flashcards.service';
 import { theme } from '@/lib/theme';
 import { Button } from '@/components/ui/Button';
@@ -22,6 +24,7 @@ interface Props {
 }
 
 export function FlashcardModal({ frontText, sourceErrorId, subjectId, topicId, onClose, onCreated }: Props) {
+  const queryClient = useQueryClient();
   const [front, setFront] = useState(frontText);
   const [back, setBack] = useState('');
   const [addToReview, setAddToReview] = useState(false);
@@ -47,6 +50,9 @@ export function FlashcardModal({ frontText, sourceErrorId, subjectId, topicId, o
         sourceErrorId,
         addToReview,
       });
+      // Card criado a partir de um erro do Caderno já nasce em revisão — o
+      // Plano de Hoje precisa contá-lo (ver lib/review-counts.ts).
+      if (addToReview) invalidateReviewCounts(queryClient);
       onCreated();
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Erro ao criar flashcard.');

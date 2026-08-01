@@ -54,17 +54,26 @@ export async function getEditalCoverage(): Promise<EditalCoverage> {
   if (total === 0) return { ...EMPTY, hasTarget: true, targetId: target.id, targetName };
 
   // Estudados ≥1 vez (interseção com study_logs) + saúde em lote.
+  // A interseção é feita em memória: mandar os ids do edital num `.in()` gerava
+  // uma URL com 300+ UUIDs (editais grandes já existem em produção), perto do
+  // limite de URI do gateway. As sessões do próprio usuário são um conjunto
+  // pequeno e já filtrado por RLS — trazer só a coluna topic_id sai mais barato.
   const [{ data: studiedRows, error: studiedError }, saudeMap] = await Promise.all([
     supabase
       .from('study_logs')
       .select('topic_id')
       .eq('user_id', userId)
-      .in('topic_id', linkedIds),
+      .not('topic_id', 'is', null),
     getSaudeMap(linkedIds),
   ]);
   if (studiedError) throw new Error('Erro ao buscar tópicos estudados: ' + studiedError.message);
 
-  const coveredSet = new Set((studiedRows ?? []).map((r) => r.topic_id as string));
+  const linkedSet = new Set(linkedIds);
+  const coveredSet = new Set(
+    (studiedRows ?? [])
+      .map((r) => r.topic_id as string)
+      .filter((id) => linkedSet.has(id)),
+  );
   const covered = coveredSet.size;
   const mastered = linkedIds.filter(
     (id) => coveredSet.has(id) && (saudeMap[id] ?? 0) >= LIMIAR_DOMINIO,

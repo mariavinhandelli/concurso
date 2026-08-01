@@ -21,6 +21,11 @@ const DAILY_NEW_LIMIT = 20;
 
 // ---------- Tipos de domínio ----------
 
+// undefined = query não pediu a origem (ex.: fila de revisão) ou card manual
+// (nunca passou pelo Banco). 'curadoria' também não exibe selo (é o padrão
+// implícito) — só 'lei_seca'/'jurisprudencia' rendem algo.
+export type FlashcardOrigin = 'curadoria' | 'lei_seca' | 'jurisprudencia' | undefined;
+
 export interface Flashcard {
   id: string;
   front: string;
@@ -31,6 +36,7 @@ export interface Flashcard {
   is_review_active: boolean;
   next_review_date: string | null;
   created_at: string;
+  origin?: FlashcardOrigin;
 }
 
 export interface FlashcardInput {
@@ -138,13 +144,37 @@ export async function deleteFlashcard(id: string): Promise<void> {
 
 // ---------- Queries ----------
 
+// PostgREST embed vem ora como objeto, ora como array de 1 — depende de como o
+// engine resolve a FK. 'curadoria' não gera selo (é o padrão implícito de
+// quem não é lei_seca/jurisprudencia).
+function extractOrigin(row: repo.FlashcardRow): FlashcardOrigin {
+  const cardRef = Array.isArray(row.flashcard_catalog_cards) ? row.flashcard_catalog_cards[0] : row.flashcard_catalog_cards;
+  if (!cardRef) return undefined;
+  const deckRef = Array.isArray(cardRef.flashcard_deck_catalog) ? cardRef.flashcard_deck_catalog[0] : cardRef.flashcard_deck_catalog;
+  const origin = deckRef?.origin;
+  return origin === 'lei_seca' || origin === 'jurisprudencia' ? origin : 'curadoria';
+}
+
+function toFlashcard(row: repo.FlashcardRow): Flashcard {
+  return {
+    id: row.id, front: row.front, back: row.back,
+    topic_id: row.topic_id, subject_id: row.subject_id,
+    source_error_id: row.source_error_id,
+    is_review_active: row.is_review_active,
+    next_review_date: row.next_review_date,
+    created_at: row.created_at,
+    origin: extractOrigin(row),
+  };
+}
+
 export async function listFlashcards(filters?: {
   subjectId?: string | null;
   topicId?: string | null;
 }): Promise<Flashcard[]> {
   const auth = await tryGetUser();
   if (!auth) return [];
-  return repo.fetchFlashcards(auth.supabase, auth.userId, filters);
+  const rows = await repo.fetchFlashcards(auth.supabase, auth.userId, filters);
+  return rows.map(toFlashcard);
 }
 
 export async function countFlashcardsBySubject(): Promise<Record<string, number>> {
@@ -258,22 +288,18 @@ export async function buildDailyQueue(): Promise<QueueCard[]> {
   const auth = await tryGetUser();
   if (!auth) return [];
   const today = toLocalDateString();
-  // Paralelo: archived IDs + fetches simultâneos; filtra archived em JS depois
-  const [archivedIds, pendingRaw, newsRaw] = await Promise.all([
-    getArchivedSubjectIds(),
-    repo.fetchPendingCards(auth.supabase, auth.userId, today, []),
-    repo.fetchNewCards(auth.supabase, auth.userId, DAILY_NEW_LIMIT, []),
+  // As arquivadas são resolvidas ANTES das buscas (cache em memória, sem custo
+  // real) e passadas ao repositório. Filtrar em JS depois quebrava os NOVOS: o
+  // limite de 20 é aplicado no banco, então se os 20 primeiros novos fossem de
+  // matéria arquivada, a fila vinha sem nenhum novo enquanto countDailyQueue —
+  // que já excluía as arquivadas no próprio COUNT — anunciava "N novos".
+  const archivedIds = await getArchivedSubjectIds();
+  const [pendingRaw, newsRaw] = await Promise.all([
+    repo.fetchPendingCards(auth.supabase, auth.userId, today, archivedIds),
+    repo.fetchNewCards(auth.supabase, auth.userId, DAILY_NEW_LIMIT, archivedIds),
   ]);
 
-  if (archivedIds.length === 0) {
-    return [...pendingRaw.map(toQueueCard), ...newsRaw.map(toQueueCard)];
-  }
-  const excluded = new Set(archivedIds);
-  const filterCard = (c: repo.FlashcardQueueRow) => !c.subject_id || !excluded.has(c.subject_id);
-  return [
-    ...pendingRaw.filter(filterCard).map(toQueueCard),
-    ...newsRaw.filter(filterCard).map(toQueueCard),
-  ];
+  return [...pendingRaw.map(toQueueCard), ...newsRaw.map(toQueueCard)];
 }
 
 // Fila de revisão restrita às matérias de um concurso-alvo (ex.: botão
@@ -283,21 +309,14 @@ export async function buildTargetQueue(subjectIds: string[]): Promise<QueueCard[
   const auth = await tryGetUser();
   if (!auth || subjectIds.length === 0) return [];
   const today = toLocalDateString();
-  const [archivedIds, pendingRaw, newsRaw] = await Promise.all([
-    getArchivedSubjectIds(),
-    repo.fetchPendingCards(auth.supabase, auth.userId, today, [], subjectIds),
-    repo.fetchNewCards(auth.supabase, auth.userId, DAILY_NEW_LIMIT, [], subjectIds),
+  // Mesma correção de buildDailyQueue: exclusão de arquivadas ANTES do limite.
+  const archivedIds = await getArchivedSubjectIds();
+  const [pendingRaw, newsRaw] = await Promise.all([
+    repo.fetchPendingCards(auth.supabase, auth.userId, today, archivedIds, subjectIds),
+    repo.fetchNewCards(auth.supabase, auth.userId, DAILY_NEW_LIMIT, archivedIds, subjectIds),
   ]);
 
-  if (archivedIds.length === 0) {
-    return [...pendingRaw.map(toQueueCard), ...newsRaw.map(toQueueCard)];
-  }
-  const excluded = new Set(archivedIds);
-  const filterCard = (c: repo.FlashcardQueueRow) => !c.subject_id || !excluded.has(c.subject_id);
-  return [
-    ...pendingRaw.filter(filterCard).map(toQueueCard),
-    ...newsRaw.filter(filterCard).map(toQueueCard),
-  ];
+  return [...pendingRaw.map(toQueueCard), ...newsRaw.map(toQueueCard)];
 }
 
 export async function buildTopicQueue(

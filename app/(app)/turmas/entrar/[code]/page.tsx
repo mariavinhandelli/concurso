@@ -6,11 +6,12 @@
 
 import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Search, Users } from 'lucide-react';
 import { useToast } from '@/components/ui/ToastProvider';
+import { invalidateAfter } from '@/lib/cache-invalidation';
 import { findTurmaByCode, joinTurmaByCode } from '@/services/turmas.service';
-import { getMySocialProfile, type SocialProfile } from '@/services/social.service';
+import { getMySocialProfile, enableSocial, type SocialProfile } from '@/services/social.service';
 import { theme } from '@/lib/theme';
 import { Button } from '@/components/ui/Button';
 
@@ -19,6 +20,7 @@ export default function EntrarTurmaPage() {
   const code = (params?.code ?? '').toUpperCase();
   const router = useRouter();
   const toast = useToast();
+  const queryClient = useQueryClient();
   const [busy, setBusy] = useState(false);
 
   const { data: turma, isLoading } = useQuery({
@@ -33,8 +35,17 @@ export default function EntrarTurmaPage() {
     if (!turma || busy) return;
     setBusy(true);
     try {
+      // A tela avisa "seu perfil social é ativado" e o botão diz "Ativar e
+      // entrar" — mas a RPC join_turma_by_code só insere a associação. Sem esta
+      // chamada, quem entrava por convite ficava na turma como membro
+      // "silencioso" (enabled=false, zerado no fim do ranking), contradizendo
+      // a promessa. Mesmo padrão do deep-link de amigo.
+      if (!jaAtivo) await enableSocial();
       const res = await joinTurmaByCode(code);
       if (!res) throw new Error('Turma não encontrada.');
+      // /amigos pode ter cache de antes ("ative seu perfil", lista de turmas) —
+      // invalidar ANTES de navegar, senão a tela de destino mente por até 60s.
+      invalidateAfter(queryClient, 'social');
       toast.success(`Você entrou na turma "${res.name}"!`);
       router.push('/amigos?tab=turmas');
     } catch (e) {

@@ -72,11 +72,15 @@ export const StreakBar = memo(function StreakBar() {
         <div style={styles.header}>
           <span style={styles.phrase}>Comece hoje a construir sua sequência de estudos! 🔥</span>
         </div>
-        <div style={styles.bar}>
+        {/* Teto de largura por célula: com `flex: 1` puro, as 7 células dividiam
+            a largura TODA do card e viravam blocos de ~85px no tablet — nada a
+            ver com as barrinhas finas que aparecem depois do primeiro estudo.
+            Continuam encolhendo em telas estreitas (flex: 1 + minWidth: 0). */}
+        <div style={{ ...styles.bar, justifyContent: 'flex-start' }}>
           {semana.map((d) => (
             <div
               key={d.date}
-              style={{ ...styles.cell, height: isMobile ? 30 : 26, background: COR.vazio, flex: 1 }}
+              style={{ ...styles.cell, height: isMobile ? 30 : 26, background: COR.vazio, maxWidth: 44 }}
             />
           ))}
         </div>
@@ -88,7 +92,7 @@ export const StreakBar = memo(function StreakBar() {
     );
   }
 
-  function corDoDia(d: { minutes: number; metGoal: boolean; forgiven?: boolean }, idx: number): string {
+  function corDoDia(d: { minutes: number; metGoal: boolean; countsForStreak?: boolean; forgiven?: boolean }, idx: number): string {
     if (d.minutes > 0) return d.metGoal ? COR.meta : COR.estudou;
     if (d.forgiven) return COR.escudo;   // folga perdoada não conta como falha
     if (idx > primeiroEstudo) return COR.falhou;
@@ -128,7 +132,12 @@ export const StreakBar = memo(function StreakBar() {
         {dias.map((d, idx) => (
           <div
             key={d.date}
-            title={`${new Date(d.date + 'T00:00:00').toLocaleDateString('pt-BR')} · ${d.minutes} min`}
+            title={
+              `${new Date(d.date + 'T00:00:00').toLocaleDateString('pt-BR')} · ${d.minutes} min`
+              // Sem isto, um dia de 15 min aparecia igual a um de 45 e o usuário
+              // não tinha como saber por que a sequência não subiu.
+              + (d.minutes > 0 && !d.countsForStreak ? ' · não contou para a sequência (mínimo 30 min)' : '')
+            }
             style={{
               ...styles.cell,
               height: isMobile ? 30 : 26,

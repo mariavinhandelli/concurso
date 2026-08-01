@@ -36,6 +36,11 @@ export function MinhasTab({ isMobile, onError }: Props) {
 
   const [newName, setNewName] = useState('');
   const [newColor, setNewColor] = useState(SUBJECT_COLORS[0]);
+  // Enquanto o usuário não escolher uma cor, a sugestão acompanha a lista: a
+  // primeira da paleta que ele ainda não usa. Sem isto, criar 5 matérias em
+  // sequência dava 5 matérias verde-claro (o default era sempre o índice 0) e
+  // pizza/ciclo/agenda ficavam monocromáticos.
+  const [colorTouched, setColorTouched] = useState(false);
   const [creating, setCreating] = useState(false);
   // Ref além do estado: cliques no mesmo tick veem o state antigo (setState é
   // assíncrono) — só o ref bloqueia reentrada de forma síncrona.
@@ -69,6 +74,14 @@ export function MinhasTab({ isMobile, onError }: Props) {
   }, []);
   useEffect(() => { load(); }, [load]);
 
+  const corSugerida = useMemo(() => {
+    const usadas = new Set([...ativas, ...arquivadas].map((s) => (s.color ?? '').toLowerCase()));
+    return SUBJECT_COLORS.find((c) => !usadas.has(c.toLowerCase())) ?? SUBJECT_COLORS[0];
+  }, [ativas, arquivadas]);
+  useEffect(() => {
+    if (!colorTouched) setNewColor(corSugerida);
+  }, [corSugerida, colorTouched]);
+
   // Duplicata por nome (ignora acento/caixa) — mesmo critério do índice único
   // do banco (subjects_user_name_unique) e da adoção por nome do catálogo, para
   // o aviso aparecer na hora de digitar em vez de um erro genérico do banco.
@@ -96,6 +109,8 @@ export function MinhasTab({ isMobile, onError }: Props) {
     try {
       await createSubject(newName, newColor);
       setNewName('');
+      // Volta a seguir a sugestão: criar várias em sequência sai colorido.
+      setColorTouched(false);
       await load();
     } catch (e) {
       onError(e instanceof Error ? e.message : 'Erro ao criar.');
@@ -196,7 +211,7 @@ export function MinhasTab({ isMobile, onError }: Props) {
           {SUBJECT_COLORS.map((c) => (
             <button
               key={c}
-              onClick={() => setNewColor(c)}
+              onClick={() => { setNewColor(c); setColorTouched(true); }}
               style={{ ...styles.colorDot, background: c, outline: newColor === c ? `2px solid ${theme.ink}` : 'none', outlineOffset: 2 }}
               aria-label={`Cor ${subjectColorName(c)}`}
               aria-pressed={newColor === c}
@@ -377,8 +392,10 @@ const styles: Record<string, React.CSSProperties> = {
   myCard: { display: 'flex', alignItems: 'center', gap: 8, background: theme.card, borderRadius: 14, border: `0.5px solid ${theme.line}`, padding: '13px 15px', minWidth: 0 },
   myCardMain: { flex: 1, display: 'flex', alignItems: 'center', gap: 13, cursor: 'pointer', minWidth: 0 },
   colorBar: { width: 10, height: 36, borderRadius: 3, flexShrink: 0 },
-  myCardTop: { display: 'flex', alignItems: 'center', gap: 8 },
-  myCardName: { fontSize: 15, color: theme.ink, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
+  myCardTop: { display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 },
+  // minWidth:0: sem isto, o nome não encolhia ao lado do badge "própria" e
+  // ultrapassava a largura do card em vez de truncar.
+  myCardName: { fontSize: 15, color: theme.ink, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 },
   myTrack: { height: 6, background: theme.muted, borderRadius: theme.radiusPill, overflow: 'hidden', marginTop: 8 },
   myFill: { height: '100%', borderRadius: theme.radiusPill, transition: 'width 0.4s cubic-bezier(.2,.7,.3,1)' },
   myMeta: { fontSize: 12, color: theme.inkSoft, marginTop: 4 },

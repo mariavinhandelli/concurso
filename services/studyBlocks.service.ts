@@ -111,16 +111,21 @@ export async function updateBlock(
 }
 
 // AUTO-CUMPRIR por tópico exato: chamado pelo timer ao encerrar uma sessão.
+// sessionDate é a data LOCAL em que a sessão aconteceu ('YYYY-MM-DD'). Antes a
+// função assumia "hoje": um registro retroativo (Registrar estudo com data de
+// ontem, ou uma sessão iniciada 23h50 e salva 00h10) procurava o bloco do dia
+// errado e o bloco planejado ficava eternamente em aberto no cronograma.
 export async function autoCompleteByTopic(
   topicId: string | null,
   clientSessionId: string,
+  sessionDate?: string,
 ): Promise<void> {
   if (!topicId) return;
   const ctx = await tryGetUser();
   if (!ctx) return;
   const { supabase, userId } = ctx;
 
-  const hoje = localDateStr(new Date());
+  const hoje = sessionDate ?? localDateStr(new Date());
 
   const { data: jaConcluido } = await supabase
     .from('study_blocks')
