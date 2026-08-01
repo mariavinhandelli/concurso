@@ -103,9 +103,12 @@ export function useTargetDetail(targetId: string) {
       setBlueprints(bpMap);
       setNQInputs(nqInit);
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Erro ao carregar.');
+      if (!isStale()) setError(e instanceof Error ? e.message : 'Erro ao carregar.');
     } finally {
-      setLoading(false);
+      // Load descartado (o usuário já navegou para outro concurso) não pode
+      // zerar o loading: o carregamento do concurso NOVO ainda está no ar e a
+      // página renderizaria "Concurso não encontrado" no intervalo.
+      if (!isStale()) setLoading(false);
     }
   }, [targetId]);
 

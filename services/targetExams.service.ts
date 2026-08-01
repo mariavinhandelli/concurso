@@ -183,11 +183,38 @@ export async function demoteToPre(targetExamId: string): Promise<void> {
 }
 
 // Persiste as chaves marcadas manualmente na Central de preparação.
+// Substitui o array inteiro — só use com a lista completa e ATUAL em mãos
+// (é o caso do toggle, que parte do estado renderizado). Para marcar UMA
+// etapa a partir de outro ponto da tela, use addTargetPrepChecklistItem.
 export async function updateTargetPrepChecklist(targetExamId: string, items: string[]): Promise<void> {
   const { supabase, userId } = await requireUser();
   const { error } = await supabase
     .from('target_exams')
     .update({ prep_checklist: items })
+    .eq('id', targetExamId)
+    .eq('user_id', userId);
+  if (error) throw new Error('Erro ao salvar checklist: ' + error.message);
+}
+
+// Marca UMA etapa relendo o estado atual do banco antes de gravar.
+// O hub marca "cronograma" quando o cronograma é gerado, mas o `target` em
+// memória pode estar defasado (o toggle da Central grava direto no banco sem
+// recarregar) — escrever `[...targetEmMemoria, 'cronograma']` apagava tudo o
+// que a usuária tinha marcado desde o último load.
+export async function addTargetPrepChecklistItem(targetExamId: string, key: string): Promise<void> {
+  const { supabase, userId } = await requireUser();
+  const { data, error: readErr } = await supabase
+    .from('target_exams')
+    .select('prep_checklist')
+    .eq('id', targetExamId)
+    .eq('user_id', userId)
+    .maybeSingle();
+  if (readErr) throw new Error('Erro ao ler checklist: ' + readErr.message);
+  const atual: string[] = Array.isArray(data?.prep_checklist) ? data!.prep_checklist : [];
+  if (atual.includes(key)) return;
+  const { error } = await supabase
+    .from('target_exams')
+    .update({ prep_checklist: [...atual, key] })
     .eq('id', targetExamId)
     .eq('user_id', userId);
   if (error) throw new Error('Erro ao salvar checklist: ' + error.message);

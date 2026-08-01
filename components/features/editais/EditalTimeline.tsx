@@ -46,7 +46,14 @@ export function EditalTimeline({ updates }: { updates: EditalUpdate[] }) {
               tabIndex={expandable ? 0 : undefined}
               aria-expanded={expandable ? open : undefined}
               onClick={expandable ? () => toggle(u.id) : undefined}
-              onKeyDown={expandable ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(u.id); } } : undefined}
+              // Só reage à tecla quando o alvo é a própria linha: sem este
+              // guarda, o Enter no link "Abrir fonte" borbulhava até aqui e o
+              // preventDefault cancelava a navegação — o link ficava
+              // inalcançável por teclado em itens expansíveis.
+              onKeyDown={expandable ? (e) => {
+                if (e.target !== e.currentTarget) return;
+                if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(u.id); }
+              } : undefined}
               style={{ ...s.row, cursor: expandable ? 'pointer' : 'default' }}
             >
               <span style={{ ...s.badge, color: meta.fg, background: meta.bg }}>{meta.label}</span>

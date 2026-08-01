@@ -11,7 +11,7 @@ import { Sparkles, Pencil } from 'lucide-react';
 import { useTargetDetail } from '@/hooks/useTargetDetail';
 import { usePersistedState } from '@/hooks/usePersistedState';
 import { formatTargetLabel } from '@/lib/targets';
-import { updateTargetExamDate, promoteToPos, updateTargetExam, demoteToPre, updateTargetPrepChecklist } from '@/services/targetExams.service';
+import { updateTargetExamDate, promoteToPos, updateTargetExam, demoteToPre, addTargetPrepChecklistItem } from '@/services/targetExams.service';
 import { listAllBoards, type Board } from '@/services/boards.service';
 import { useToast } from '@/components/ui/ToastProvider';
 import { theme } from '@/lib/theme';
@@ -356,10 +356,9 @@ export default function TargetDetailPage() {
             setGeneratorOpen(false);
             // Cronograma gerado de fato → marca a etapa da Central de preparação
             // (o clique no item só abre o modal; cancelar não marca nada).
-            const done = target?.prep_checklist ?? [];
-            if (target && !done.includes('cronograma')) {
-              updateTargetPrepChecklist(targetId, [...done, 'cronograma']).catch(() => {});
-            }
+            // Relê o checklist do banco antes de gravar: o `target` em memória
+            // fica defasado porque o toggle da Central persiste sem recarregar.
+            addTargetPrepChecklistItem(targetId, 'cronograma').catch(() => {});
             router.push('/schedule');
           }}
         />

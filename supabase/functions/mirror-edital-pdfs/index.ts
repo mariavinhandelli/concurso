@@ -116,23 +116,47 @@ async function espelhar(row: Row, jaTem: Map<string, { sha256: string; storage_p
   };
 }
 
+// Teto por execução. O loop é sequencial (servidor de órgão não gosta de
+// rajada) e cada download pode levar segundos; sem teto, um catálogo grande
+// estoura o wall-clock da Edge Function e a invocação inteira se perde — os
+// editais do fim da lista nunca seriam espelhados. Com o teto + ordenação por
+// last_checked_at, cada execução pega os mais desatualizados e o cron semanal
+// cobre o catálogo em poucas rodadas.
+const BATCH = 8;
+
 Deno.serve(async () => {
+  const { data: mirrors } = await supabase
+    .from('edital_pdf_mirrors')
+    .select('edital_catalog_id, sha256, storage_path, last_checked_at');
+  const jaTem = new Map((mirrors ?? []).map((m) => [m.edital_catalog_id, { sha256: m.sha256, storage_path: m.storage_path }]));
+  const checadoEm = new Map((mirrors ?? []).map((m) => [m.edital_catalog_id, m.last_checked_at as string | null]));
+
   const { data: editais, error } = await supabase
     .from('editais_catalog')
     .select('id, slug, edital_url')
+    .eq('is_active', true)
     .not('edital_url', 'is', null);
   if (error) return new Response(JSON.stringify({ error: error.message }), { status: 500 });
 
-  const { data: mirrors } = await supabase
-    .from('edital_pdf_mirrors')
-    .select('edital_catalog_id, sha256, storage_path');
-  const jaTem = new Map((mirrors ?? []).map((m) => [m.edital_catalog_id, { sha256: m.sha256, storage_path: m.storage_path }]));
+  // Só entra na fila quem TEM PDF. Sem este filtro, os editais cuja URL é
+  // página institucional (a maioria hoje) nunca ganham last_checked_at, ficam
+  // eternamente no topo da ordenação e consomem o lote inteiro em "pulado" —
+  // os PDFs de verdade nunca seriam reconferidos por retificação.
+  const mirroraveis = ((editais ?? []) as Row[]).filter((r) => /\.pdf($|\?)/i.test(r.edital_url));
+
+  // Nunca espelhado primeiro; depois o checado há mais tempo.
+  const fila = mirroraveis
+    .sort((a, b) => {
+      const ca = checadoEm.get(a.id) ?? '';
+      const cb = checadoEm.get(b.id) ?? '';
+      return ca.localeCompare(cb);
+    })
+    .slice(0, BATCH);
 
   const results: Record<string, string> = {};
   let novos = 0, inalterados = 0, atualizados = 0, falhas = 0;
 
-  // Sequencial: são poucos arquivos e servidor de órgão não gosta de rajada.
-  for (const row of (editais ?? []) as Row[]) {
+  for (const row of fila) {
     const r = await espelhar(row, jaTem);
     results[r.slug] = r.status;
     if (r.tipo === 'novo') novos++;
@@ -141,7 +165,11 @@ Deno.serve(async () => {
     else falhas++;
   }
 
-  return new Response(JSON.stringify({ novos, atualizados, inalterados, falhas, results }), {
+  return new Response(JSON.stringify({
+    novos, atualizados, inalterados, falhas,
+    comPdf: mirroraveis.length, processados: fila.length,
+    semPdf: (editais ?? []).length - mirroraveis.length, results,
+  }), {
     headers: { 'Content-Type': 'application/json' },
   });
 });

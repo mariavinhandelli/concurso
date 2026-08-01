@@ -272,8 +272,11 @@ export default function EditalDetailPage() {
   // 60, e a barra das disciplinas sem número ficaria zerada justamente onde
   // elas pesam mais. Então o total só aparece quando a contagem está
   // completa; fora isso, tudo se orienta pelo peso.
+  // `> 0`, não só `!= null`: num_questions_expected aceita 0, e uma grade toda
+  // zerada faria totalQuestions = 0 → divisão por zero → "NaN%" na barra.
   const contagemCompleta = (subjects?.length ?? 0) > 0
-    && (subjects ?? []).every((sub) => sub.numQuestions != null);
+    && (subjects ?? []).every((sub) => sub.numQuestions != null)
+    && (subjects ?? []).reduce((acc, sub) => acc + (sub.numQuestions ?? 0), 0) > 0;
   const algumaComQuestoes = (subjects ?? []).some((sub) => sub.numQuestions != null);
   const totalQuestions = contagemCompleta
     ? (subjects ?? []).reduce((acc, sub) => acc + (sub.numQuestions ?? 0), 0)
@@ -585,7 +588,10 @@ export default function EditalDetailPage() {
         {edital.subjectCount > 0 && (
           <section id="comparar" style={s.card}>
             <h2 style={{ ...s.cardTitle, marginBottom: 12 }}>Comparar editais</h2>
+            {/* key por edital: sem isso o `otherId` selecionado sobrevive à
+                navegação entre editais e o painel abre com o diff do anterior. */}
             <EditalComparador
+              key={edital.id}
               editalAtualId={edital.id}
               editalAtualSlug={edital.slug}
               options={comparadorOptions}

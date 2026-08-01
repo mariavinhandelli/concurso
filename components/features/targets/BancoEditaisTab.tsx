@@ -218,30 +218,33 @@ export function BancoEditaisTab({ onImportar, onImportarPdf }: Props) {
         {filtersOpen && (
           <div style={s.filterBody}>
             <div style={s.filterGrid}>
+              {/* aria-label em vez de <label> solto: o label não envolvia o
+                  Select nem tinha htmlFor, então o leitor de tela anunciava
+                  quatro combos sem nome. */}
               <div>
-                <label style={s.filterLabel}>Banca</label>
-                <Select value={filters.banca} onChange={(e) => set('banca', e.target.value)}>
+                <label style={s.filterLabel} aria-hidden="true">Banca</label>
+                <Select value={filters.banca} onChange={(e) => set('banca', e.target.value)} aria-label="Filtrar por banca">
                   <option value="">Todas</option>
                   {options.bancas.map((b) => <option key={b} value={b}>{b}</option>)}
                 </Select>
               </div>
               <div>
-                <label style={s.filterLabel}>Estado (UF)</label>
-                <Select value={filters.uf} onChange={(e) => set('uf', e.target.value)}>
+                <label style={s.filterLabel} aria-hidden="true">Estado (UF)</label>
+                <Select value={filters.uf} onChange={(e) => set('uf', e.target.value)} aria-label="Filtrar por estado (UF)">
                   <option value="">Todos</option>
                   {options.ufs.map((u) => <option key={u} value={u}>{u}</option>)}
                 </Select>
               </div>
               <div>
-                <label style={s.filterLabel}>Escolaridade</label>
-                <Select value={filters.nivel} onChange={(e) => set('nivel', e.target.value)}>
+                <label style={s.filterLabel} aria-hidden="true">Escolaridade</label>
+                <Select value={filters.nivel} onChange={(e) => set('nivel', e.target.value)} aria-label="Filtrar por escolaridade">
                   <option value="">Todas</option>
                   {options.niveis.map((n) => <option key={n} value={n}>Nível {n}</option>)}
                 </Select>
               </div>
               <div>
-                <label style={s.filterLabel}>Situação</label>
-                <Select value={filters.situacao} onChange={(e) => set('situacao', e.target.value)}>
+                <label style={s.filterLabel} aria-hidden="true">Situação</label>
+                <Select value={filters.situacao} onChange={(e) => set('situacao', e.target.value)} aria-label="Filtrar por situação do edital">
                   <option value="">Todas</option>
                   <option value="vigente">Edital vigente</option>
                   <option value="em_expectativa">Em expectativa</option>

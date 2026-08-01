@@ -5,7 +5,7 @@
 // pesos alterados e tópicos que entraram/saíram — é calculado no cliente a
 // partir do conteúdo programático curado dos dois editais.
 
-import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
+import { useEffect, useId, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { ArrowLeftRight, Search } from 'lucide-react';
 import { compareEditais, type EditalComparison, type EditalComparisonSubject } from '@/services/editaisCatalog.service';
@@ -96,6 +96,7 @@ function EditalPicker({ options, value, onChange }: EditalPickerProps) {
   const [highlighted, setHighlighted] = useState(0);
   const rootRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const listboxId = useId();
 
   const selected = options.find((o) => o.id === value) ?? null;
 
@@ -160,6 +161,10 @@ function EditalPicker({ options, value, onChange }: EditalPickerProps) {
           aria-expanded={open}
           aria-autocomplete="list"
           aria-label="Buscar edital para comparar"
+          // Sem controls/activedescendant, navegar com as setas não anunciava
+          // nada no leitor de tela: a seleção só era visual (fundo teal).
+          aria-controls={listboxId}
+          aria-activedescendant={open && flat[highlighted] ? `${listboxId}-${flat[highlighted].id}` : undefined}
           value={open ? query : (selected?.label ?? '')}
           placeholder="Buscar edital…"
           onFocus={() => { setOpen(true); setQuery(''); }}
@@ -169,7 +174,7 @@ function EditalPicker({ options, value, onChange }: EditalPickerProps) {
         />
       </div>
       {open && (
-        <div className="floating-root" role="listbox" style={s.pickerPanel}>
+        <div className="floating-root" id={listboxId} role="listbox" style={s.pickerPanel}>
           {flat.length === 0 ? (
             <p style={{ fontSize: 13, color: theme.inkFaint, padding: '8px 10px', margin: 0 }}>
               Nenhum edital encontrado.
@@ -183,6 +188,7 @@ function EditalPicker({ options, value, onChange }: EditalPickerProps) {
                 return (
                   <button
                     key={o.id}
+                    id={`${listboxId}-${o.id}`}
                     type="button"
                     role="option"
                     aria-selected={o.id === value}

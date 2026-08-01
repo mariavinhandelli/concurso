@@ -271,13 +271,18 @@ export async function getCatalogEditalInfo(catalogEditalId: string): Promise<Cat
     .eq('id', catalogEditalId)
     .maybeSingle();
   if (error || !data) return null;
-  // Contagens head-only: histórico e provas são chaveados por concurso_key
-  // (compartilhado entre edições); '' nunca casa e devolve 0 sem erro.
+  // Contagens head-only. Chaves DIFERENTES de propósito: o histórico segue por
+  // concurso_key (compartilhado entre edições do mesmo concurso), mas as provas
+  // passaram a ser por edital_catalog_id — cada cargo tem a sua (migration
+  // 20260731210000 dropou past_papers.concurso_key). Consultar a coluna morta
+  // devolvia erro do PostgREST que o `?? 0` engolia, zerando papersCount para
+  // sempre e quebrando o item "Resolver a última prova" da Central de
+  // preparação, que nunca navegava. '' nunca casa e devolve 0 sem erro.
   const key = data.concurso_key ?? '';
   const [subjRes, statsRes, papersRes] = await Promise.all([
     supabase.from('edital_catalog_subjects').select('id', { count: 'exact', head: true }).eq('edital_catalog_id', catalogEditalId),
     supabase.from('edital_concurso_stats').select('id', { count: 'exact', head: true }).eq('concurso_key', key),
-    supabase.from('edital_past_papers').select('id', { count: 'exact', head: true }).eq('concurso_key', key),
+    supabase.from('edital_past_papers').select('id', { count: 'exact', head: true }).eq('edital_catalog_id', catalogEditalId),
   ]);
   return {
     slug: data.slug,
@@ -485,11 +490,23 @@ export function matchCatalogEdital(
   // caso os modais vinculam a importação ao catálogo em vez de oferecer a
   // ativação (que criaria um concurso vazio, perdendo a grade importada).
   if (!nOrgao || !nCargo) return null;
-  return editais.find((e) => {
+  const candidatos = editais.filter((e) => {
     const eOrgao = normalizeMatch(e.orgao);
     const eCargo = normalizeMatch(e.cargo);
     return eOrgao === nOrgao && (eCargo === nCargo || eCargo.includes(nCargo) || nCargo.includes(eCargo));
-  }) ?? null;
+  });
+  if (candidatos.length === 0) return null;
+  // Match exato ganha de match por prefixo/contido.
+  const exato = candidatos.filter((e) => normalizeMatch(e.cargo) === nCargo);
+  if (exato.length === 1) return exato[0];
+  // AMBIGUIDADE: mais de um cargo do mesmo órgão casa com o texto. Desde que a
+  // PM-GO passou a ter "Soldado Combatente" E "Soldado Músico", digitar só
+  // "Soldado" casava com o primeiro por ordem de position — e um candidato a
+  // Músico receberia a grade do Combatente (sem Teoria Musical, com Direito
+  // Penal que não cai na prova dele). Não sugerir é melhor do que sugerir o
+  // errado, que é o contrato desta função.
+  if (exato.length > 1 || candidatos.length > 1) return null;
+  return candidatos[0];
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
