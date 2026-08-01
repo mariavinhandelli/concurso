@@ -19,11 +19,13 @@ export const SUBLINHADO_COR = '#D85A30';
 
 export const GRIFO_CORES_ORDEM: GrifoCorFixa[] = ['regra', 'prazo', 'competencia', 'excecao'];
 
-// Paleta do marcador "livre" — cores deliberadamente diferentes das 4 fixas
-// acima, pra não parecer mais uma categoria semântica pré-definida.
+// Paleta do marcador "livre" — mesmas cores do marca-texto do Caderno
+// (HIGHLIGHT_COLORS em components/editor/RichTextEditor.tsx), pra manter os
+// dois marcadores da plataforma visualmente consistentes.
 export const GRIFO_LIVRE_PALETA: string[] = [
-  '#8B5CF6', '#14B8A6', '#EC4899', '#6366F1',
-  '#A16207', '#06B6D4', '#65A30D', '#64748B',
+  '#FFF3A3', '#FFD8A8', '#cb9278', '#FFC9C9',
+  '#FCC2D7', '#ffa6a6', '#D8C2FF', '#b8a6be',
+  '#C5E0FF', '#C3FAE8', '#D3F9D8', '#a1feb0',
 ];
 
 export function hexToRgba(hex: string, alpha: number): string {
@@ -41,8 +43,11 @@ export function hexToRgba(hex: string, alpha: number): string {
 export function grifoVisual(g: LeiGrifo): { bg: string; chip: string; label: string } {
   if (g.estilo === 'sublinhado') return { bg: 'transparent', chip: SUBLINHADO_COR, label: 'Sublinhado' };
   if (g.cor === 'livre') {
-    const chip = g.corHex || '#64748B';
-    return { bg: hexToRgba(chip, 0.35), chip, label: g.label?.trim() || 'Marcador livre' };
+    // Mesma cor sólida do marca-texto do Caderno (sem diluir com alpha) —
+    // a paleta em GRIFO_LIVRE_PALETA já é pastel o suficiente pra contrastar
+    // com o texto sem precisar de translucidez.
+    const chip = g.corHex || GRIFO_LIVRE_PALETA[0];
+    return { bg: chip, chip, label: g.label?.trim() || 'Marcador livre' };
   }
   return GRIFO_CORES[(g.cor ?? 'regra') as GrifoCorFixa];
 }

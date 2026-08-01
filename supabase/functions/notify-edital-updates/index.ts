@@ -1,11 +1,13 @@
 // supabase/functions/notify-edital-updates/index.ts
-// Hub de Editais — push de novidades. Roda de hora em hora (pg_cron) e envia
-// web push para quem SEGUE o edital (edital_follows) ou já ATIVOU o concurso
-// (target_exams.catalog_edital_id) sempre que a curadoria publica um
-// edital_update novo (notified_at is null). Idempotente: o update é marcado
-// como notificado mesmo sem destinatários, para nunca reenviar.
-// Assinaturas mortas (404/410) são removidas — mesmo padrão do
-// send-daily-reminders. Segredo necessário: VAPID_PRIVATE_KEY.
+// Hub de Editais — aviso de novidades. Roda de hora em hora (pg_cron) e avisa
+// no sino (canal principal) quem SEGUE o edital (edital_follows) ou já ATIVOU
+// o concurso (target_exams.catalog_edital_id) sempre que a curadoria publica
+// um edital_update novo (notified_at is null); quem também tem assinatura de
+// push do navegador recebe o mesmo aviso por lá (canal secundário).
+// Idempotente: o update é marcado como notificado mesmo sem destinatários,
+// para nunca reenviar. Assinaturas mortas (404/410) são removidas — mesmo
+// padrão do send-daily-reminders. VAPID_PRIVATE_KEY é opcional (só o push
+// depende dela).
 
 import webpush from 'npm:web-push@3.6.7';
 import { createClient } from 'jsr:@supabase/supabase-js@2';
@@ -29,10 +31,9 @@ const TIPO_LABEL: Record<string, string> = {
 const BATCH = 20; // updates por execução — backstop contra enxurrada de curadoria
 
 Deno.serve(async () => {
-  if (!VAPID_PRIVATE) {
-    return new Response(JSON.stringify({ error: 'VAPID_PRIVATE_KEY não configurada' }), { status: 500 });
-  }
-  webpush.setVapidDetails(VAPID_SUBJECT, VAPID_PUBLIC, VAPID_PRIVATE);
+  // VAPID só é necessária pro push (canal secundário) — sem ela, o sino
+  // (canal principal) continua funcionando normalmente.
+  if (VAPID_PRIVATE) webpush.setVapidDetails(VAPID_SUBJECT, VAPID_PUBLIC, VAPID_PRIVATE);
 
   const { data: updates, error } = await supabase
     .from('edital_updates')
@@ -58,31 +59,38 @@ Deno.serve(async () => {
     ]);
 
     if (userIds.size > 0 && edital) {
-      const { data: subs } = await supabase
-        .from('push_subscriptions')
-        .select('id, endpoint, p256dh, auth')
-        .in('user_id', [...userIds]);
-
       const label = TIPO_LABEL[u.tipo] ?? 'Novidade';
-      const payload = JSON.stringify({
-        title: `${label} — ${[edital.orgao, edital.cargo].filter(Boolean).join(' · ')}`,
-        body: u.titulo,
-        url: `/editais/${edital.slug}`,
-        tag: `focali-edital-${u.id}`,
-      });
+      const title = `${label} — ${[edital.orgao, edital.cargo].filter(Boolean).join(' · ')}`;
+      const link = `/editais/${edital.slug}`;
 
-      for (const sub of subs ?? []) {
-        try {
-          await webpush.sendNotification(
-            { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
-            payload,
-          );
-          sent++;
-        } catch (e) {
-          const code = (e as { statusCode?: number }).statusCode ?? 0;
-          if (code === 404 || code === 410) {
-            await supabase.from('push_subscriptions').delete().eq('id', sub.id);
-            cleaned++;
+      // Sino — canal principal. Um aviso por seguidor/ativador, sempre.
+      const { error: sinoError } = await supabase.from('notifications').insert(
+        [...userIds].map((uid) => ({ user_id: uid, type: 'edital_update', title, body: u.titulo, link })),
+      );
+      if (sinoError) console.error(`Aviso no sino falhou (update ${u.id}): ${sinoError.message}`);
+
+      // Push — canal secundário, só entrega a quem tem assinatura de navegador.
+      if (VAPID_PRIVATE) {
+        const { data: subs } = await supabase
+          .from('push_subscriptions')
+          .select('id, endpoint, p256dh, auth')
+          .in('user_id', [...userIds]);
+
+        const payload = JSON.stringify({ title, body: u.titulo, url: link, tag: `focali-edital-${u.id}` });
+
+        for (const sub of subs ?? []) {
+          try {
+            await webpush.sendNotification(
+              { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
+              payload,
+            );
+            sent++;
+          } catch (e) {
+            const code = (e as { statusCode?: number }).statusCode ?? 0;
+            if (code === 404 || code === 410) {
+              await supabase.from('push_subscriptions').delete().eq('id', sub.id);
+              cleaned++;
+            }
           }
         }
       }

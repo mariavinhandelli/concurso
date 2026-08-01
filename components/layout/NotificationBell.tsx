@@ -1,9 +1,16 @@
 // components/layout/NotificationBell.tsx
-// Sino de notificações: agrega lembretes (tabela `reminders`) com data <= hoje
-// e pedidos de amizade esperando resposta. Antes só lia `reminders`, então um
-// pedido de amizade não avisava em lugar nenhum — a pessoa só descobria se
-// entrasse em /amigos por conta própria (auditoria de Amigos, P2-8).
-// Badge com contagem + dropdown no mesmo estilo do menu da conta. Sem estado "lida".
+// Sino de notificações: agrega lembretes manuais (tabela `reminders`) com
+// data <= hoje, pedidos de amizade esperando resposta, e avisos do sistema
+// (tabela `notifications` — lembrete diário de estudo, novidade de edital
+// seguido, leitura do mês pronta). O sino é o CANAL PRINCIPAL de notificação
+// da plataforma (não há PWA/app nativo ainda, então o web push do navegador é
+// só um canal secundário best-effort — ver supabase/functions/send-daily-reminders
+// e notify-edital-updates). Antes só lia `reminders`, então um pedido de
+// amizade não avisava em lugar nenhum — a pessoa só descobria se entrasse em
+// /amigos por conta própria (auditoria de Amigos, P2-8).
+// Badge com contagem + dropdown no mesmo estilo do menu da conta. Avisos do
+// sistema são marcados como lidos (e somem do sino) ao abrir o dropdown;
+// lembretes manuais só somem quando apagados na Agenda.
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
@@ -17,6 +24,14 @@ type Reminder = {
   id: string;
   title: string;
   date: string; // 'YYYY-MM-DD'
+};
+
+type Notice = {
+  id: string;
+  title: string;
+  body: string | null;
+  link: string | null;
+  created_at: string; // timestamptz ISO
 };
 
 // Parse de 'YYYY-MM-DD' como data LOCAL (evita deslocamento UTC).
@@ -40,14 +55,30 @@ function relativeLabel(dateStr: string): string {
   return `Atrasado há ${diffDays} dias`;
 }
 
+// Rótulo relativo p/ avisos do sistema: "Hoje", "Ontem", "Há N dias".
+function sinceLabel(iso: string): string {
+  const today = startOfToday();
+  const d = new Date(iso);
+  const dLocal = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const diffDays = Math.round((today.getTime() - dLocal.getTime()) / 86400000);
+  if (diffDays <= 0) return 'Hoje';
+  if (diffDays === 1) return 'Ontem';
+  return `Há ${diffDays} dias`;
+}
+
 export function NotificationBell() {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState<Reminder[]>([]);
+  const [notices, setNotices] = useState<Notice[]>([]);
+  const [noticesCount, setNoticesCount] = useState(0);
   const [pedidos, setPedidos] = useState(0);
   const ref = useRef<HTMLDivElement>(null);
 
-  async function load() {
+  // markSeen: marca os avisos do sistema recém-carregados como lidos (some do
+  // sino da próxima vez). Só faz sentido quando o dropdown está de fato sendo
+  // aberto — no load do mount, é só pra montar o badge.
+  async function load(markSeen = false) {
     const supabase = createClient();
     const { data: auth } = await supabase.auth.getUser();
     if (!auth.user) return;
@@ -56,24 +87,50 @@ export function NotificationBell() {
     const t = startOfToday();
     const todayStr = `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, '0')}-${String(t.getDate()).padStart(2, '0')}`;
 
-    const { data } = await supabase
-      .from('reminders')
-      .select('id, title, date')
-      .eq('user_id', auth.user.id)
-      .lte('date', todayStr)
-      .order('date', { ascending: false });
+    const [{ data: reminders }, { data: sysNotices }, { count: sysCount }, pendentes] = await Promise.all([
+      supabase
+        .from('reminders')
+        .select('id, title, date')
+        .eq('user_id', auth.user.id)
+        .lte('date', todayStr)
+        .order('date', { ascending: false }),
+      supabase
+        .from('notifications')
+        .select('id, title, body, link, created_at')
+        .eq('user_id', auth.user.id)
+        .is('read_at', null)
+        .order('created_at', { ascending: false })
+        .limit(20),
+      // Contagem exata separada da lista (capada em 20): sem isto, o badge
+      // subestimaria sempre que houvesse mais de 20 avisos não lidos.
+      supabase
+        .from('notifications')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', auth.user.id)
+        .is('read_at', null),
+      getPendingRequestCount(),
+    ]);
 
-    setItems((data as Reminder[]) ?? []);
-    setPedidos(await getPendingRequestCount());
+    setItems((reminders as Reminder[]) ?? []);
+    setNotices((sysNotices as Notice[]) ?? []);
+    setNoticesCount(sysCount ?? 0);
+    setPedidos(pendentes);
+
+    if (markSeen && sysNotices?.length) {
+      const ids = sysNotices.map((n) => n.id);
+      // Fire-and-forget: não trava a UI: some do sino só na próxima carga.
+      supabase.from('notifications').update({ read_at: new Date().toISOString() }).in('id', ids);
+    }
   }
 
   useEffect(() => {
     load();
   }, []);
 
-  // Recarrega ao abrir, para refletir lembretes recém-criados/deletados.
+  // Recarrega ao abrir (lembretes recém-criados/deletados) e marca os avisos
+  // do sistema mostrados agora como lidos.
   useEffect(() => {
-    if (open) load();
+    if (open) load(true);
   }, [open]);
 
   useEffect(() => {
@@ -84,7 +141,7 @@ export function NotificationBell() {
     return () => document.removeEventListener('mousedown', onClick);
   }, []);
 
-  const count = items.length + pedidos;
+  const count = items.length + noticesCount + pedidos;
 
   return (
     <div ref={ref} style={{ position: 'relative' }}>
@@ -128,6 +185,24 @@ export function NotificationBell() {
                   </span>
                 </button>
               )}
+              {notices.map((n) => (
+                <button
+                  key={n.id}
+                  style={styles.item}
+                  onClick={() => {
+                    setOpen(false);
+                    router.push(n.link || '/');
+                  }}
+                >
+                  <span style={styles.dot} />
+                  <span style={styles.itemBody}>
+                    <span style={styles.itemTitle}>{n.title}</span>
+                    <span style={styles.itemDate}>
+                      {n.body ? `${n.body} · ${sinceLabel(n.created_at)}` : sinceLabel(n.created_at)}
+                    </span>
+                  </span>
+                </button>
+              ))}
               {items.map((r) => (
                 <button
                   key={r.id}

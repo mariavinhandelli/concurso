@@ -1,9 +1,11 @@
 // supabase/functions/send-daily-reminders/index.ts
-// N1 (web push) — disparo dos lembretes diários. Roda de hora em hora (pg_cron).
+// Disparo dos lembretes diários. Roda de hora em hora (pg_cron).
 // Para cada usuário com lembrete ativo cujo horário local bate com a hora atual,
-// que AINDA não estudou hoje e que ainda NÃO foi lembrado hoje, envia um push a
-// todas as suas assinaturas. Idempotente por dia (settings.lastRemindedDate) —
-// por isso é seguro rodar com verify_jwt=false: não há dado exposto nem spam.
+// que AINDA não estudou hoje e que ainda NÃO foi lembrado hoje, grava o aviso no
+// sino (canal principal — não há PWA/app nativo ainda) e, se houver assinatura
+// de push do navegador, também envia web push (canal secundário). Idempotente
+// por dia (settings.lastRemindedDate) — por isso é seguro rodar com
+// verify_jwt=false: não há dado exposto nem spam.
 // Assinaturas mortas (404/410) são removidas.
 //
 // Lembrete ÉTICO (referência Duolingo): a mensagem se adapta a quantos dias a
@@ -49,10 +51,9 @@ function localDateOf(when: Date, tz: string): string {
 }
 
 Deno.serve(async () => {
-  if (!VAPID_PRIVATE) {
-    return new Response(JSON.stringify({ error: 'VAPID_PRIVATE_KEY não configurada' }), { status: 500 });
-  }
-  webpush.setVapidDetails(VAPID_SUBJECT, VAPID_PUBLIC, VAPID_PRIVATE);
+  // VAPID só é necessário pro push (canal secundário) — sem ela, o sino
+  // (canal principal) continua funcionando normalmente.
+  if (VAPID_PRIVATE) webpush.setVapidDetails(VAPID_SUBJECT, VAPID_PUBLIC, VAPID_PRIVATE);
 
   const { data: profiles, error } = await supabase
     .from('profiles')
@@ -125,11 +126,6 @@ Deno.serve(async () => {
       } else { skipped++; continue; }
     }
 
-    const { data: subs } = await supabase
-      .from('push_subscriptions').select('id, endpoint, p256dh, auth')
-      .eq('user_id', p.id);
-    if (!subs?.length) { skipped++; continue; }
-
     // Mensagem adaptada ao contexto — sempre honesta, nunca alarmista.
     const pausarAgora = diasSem >= PAUSA_APOS_DIAS || diasLembrado >= PAUSA_APOS_DIAS;
     let title = 'Hora de estudar 🔥';
@@ -152,34 +148,42 @@ Deno.serve(async () => {
       body = 'Um bloco curto hoje evita o efeito bola de neve de revisões.';
     }
 
-    const payload = JSON.stringify({ title, body, url, tag: 'focali-lembrete' });
+    // Sino — canal principal. Grava sempre, com ou sem assinatura de push.
+    const { error: sinoError } = await supabase.from('notifications').insert({
+      user_id: p.id, type: 'daily_reminder', title, body, link: url,
+    });
+    if (sinoError) console.error(`Aviso no sino falhou (${p.id}): ${sinoError.message}`);
 
-    let enviouAlgum = false;
-    for (const sub of subs) {
-      try {
-        await webpush.sendNotification(
-          { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
-          payload,
-        );
-        sent++;
-        enviouAlgum = true;
-      } catch (e) {
-        const code = (e as { statusCode?: number }).statusCode ?? 0;
-        if (code === 404 || code === 410) {
-          await supabase.from('push_subscriptions').delete().eq('id', sub.id);
-          cleaned++;
+    // Push — canal secundário, só entrega a quem tem assinatura de navegador.
+    const { data: subs } = await supabase
+      .from('push_subscriptions').select('id, endpoint, p256dh, auth')
+      .eq('user_id', p.id);
+    if (subs?.length && VAPID_PRIVATE) {
+      const payload = JSON.stringify({ title, body, url, tag: 'focali-lembrete' });
+      for (const sub of subs) {
+        try {
+          await webpush.sendNotification(
+            { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
+            payload,
+          );
+          sent++;
+        } catch (e) {
+          const code = (e as { statusCode?: number }).statusCode ?? 0;
+          if (code === 404 || code === 410) {
+            await supabase.from('push_subscriptions').delete().eq('id', sub.id);
+            cleaned++;
+          }
         }
       }
     }
 
-    // Marca como lembrado hoje (idempotência) — só se algo saiu de fato.
+    // Marca como lembrado hoje (idempotência) — o sino já disparou de qualquer
+    // forma, então isto vale independente de haver assinatura de push.
     // Se esta foi a mensagem de despedida, pausa os lembretes até a pessoa voltar.
-    if (enviouAlgum) {
-      const patch: Record<string, unknown> = { lastRemindedDate: today };
-      if (!s.firstRemindedDate) patch.firstRemindedDate = today; // régua p/ quem nunca estudou
-      if (pausarAgora) patch.reminderPaused = true;
-      await supabase.rpc('merge_profile_settings', { p_user_id: p.id, p_patch: patch });
-    }
+    const patch: Record<string, unknown> = { lastRemindedDate: today };
+    if (!s.firstRemindedDate) patch.firstRemindedDate = today; // régua p/ quem nunca estudou
+    if (pausarAgora) patch.reminderPaused = true;
+    await supabase.rpc('merge_profile_settings', { p_user_id: p.id, p_patch: patch });
   }
 
   return new Response(JSON.stringify({ sent, skipped, cleaned }), {

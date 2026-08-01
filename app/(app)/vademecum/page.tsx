@@ -16,6 +16,7 @@ import { VademecumSimuladoModal } from '@/components/features/vademecum/Vademecu
 import { theme } from '@/lib/theme';
 import { Badge } from '@/components/ui/Badge';
 import { PageContainer, PageHeader } from '@/components/ui/Page';
+import { useBreakpoints } from '@/components/layout/UIContext';
 
 function normalizar(s: string): string {
   return s.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();
@@ -113,6 +114,7 @@ function LeiCard({ lei, artigosComGrifo, revisoesDue, onOpen }: { lei: LeiMeta; 
 
 function VademecumContent() {
   const router = useRouter();
+  const { isMobile } = useBreakpoints();
   // ?disciplina= — deep-link vindo do Hub do Concurso ("revisar a lei seca
   // relacionada" chega já filtrado pela disciplina do edital).
   const searchParams = useSearchParams();
@@ -203,7 +205,7 @@ function VademecumContent() {
           aria-label="Buscar lei"
         />
       </div>
-      <div style={s.filtroRow} role="group" aria-label="Filtrar por matéria">
+      <div style={{ ...s.filtroRow, ...(isMobile ? {} : s.filtroRowWrap) }} role="group" aria-label="Filtrar por matéria">
         {disciplinas.map((d) => {
           const ativo = disciplina === d.valor;
           return (
@@ -268,13 +270,16 @@ const s: Record<string, CSSProperties> = {
 
   buscaRow: { marginBottom: 10 },
   buscaInput: { width: '100%', boxSizing: 'border-box', padding: '11px 16px', borderRadius: theme.radiusPill, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.card, fontSize: 14, color: theme.ink, fontFamily: 'inherit', outline: 'none' },
-  // Uma linha rolável em vez de wrap: no celular os 16 chips viravam 5+ linhas.
-  // `scrollbarWidth: none` esconde a barra (o gesto de arrastar continua), e o
-  // padding lateral evita que o chip ativo encoste na borda ao rolar.
+  // No celular, uma linha rolável em vez de wrap: os 16 chips virariam 5+
+  // linhas. `scrollbarWidth: none` esconde a barra (o gesto de arrastar
+  // continua). Em tablet/desktop há espaço de sobra — ali usamos
+  // `filtroRowWrap` para quebrar em várias linhas e mostrar todos os chips
+  // de uma vez, sem depender do usuário descobrir que dá pra rolar.
   filtroRow: {
     display: 'flex', gap: 8, marginBottom: 18, overflowX: 'auto', paddingBottom: 4,
     scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch',
   },
+  filtroRowWrap: { flexWrap: 'wrap', overflowX: 'visible', paddingBottom: 0 },
   filtroChip: {
     display: 'inline-flex', alignItems: 'center', gap: 6, flexShrink: 0, whiteSpace: 'nowrap',
     fontSize: 13, color: theme.inkSoft, background: 'transparent',

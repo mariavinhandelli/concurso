@@ -1,13 +1,17 @@
 // components/features/settings/NotificacoesCard.tsx
-// N1 (web push) — opt-in de lembretes diários nas Configurações. Ativa/desativa a
-// assinatura de push do navegador, escolhe o horário e permite um teste local.
-// Não envia nada sozinho: o disparo diário é feito pela Edge Function (backend).
+// Opt-in de lembrete diário nas Configurações. O switch grava a preferência
+// (profiles.settings.reminderEnabled), que é o que o SINO da topbar usa —
+// funciona em qualquer navegador, sempre. Quando o navegador suporta push e
+// concede permissão, a plataforma também assina push como bônus (não há
+// PWA/app nativo ainda, então isso é só um alcance extra pra quem instala e
+// concede permissão de propósito). Não envia nada sozinho: o disparo diário é
+// feito pela Edge Function (backend).
 'use client';
 
 import { useState, useSyncExternalStore } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
-  getPushState, enablePush, disablePush, setReminderHour, isPushSupported, type PushState,
+  getReminderState, setReminderEnabled, setReminderHour, isPushSupported, type ReminderState,
 } from '@/services/push.service';
 import { useToast } from '@/components/ui/ToastProvider';
 import { theme } from '@/lib/theme';
@@ -26,9 +30,9 @@ export function NotificacoesCard() {
   const [busy, setBusy] = useState(false);
   const isClient = useSyncExternalStore(emptySubscribe, () => true, () => false);
 
-  const { data: st, refetch, isLoading } = useQuery<PushState>({
-    queryKey: ['push-state'],
-    queryFn: getPushState,
+  const { data: st, refetch, isLoading } = useQuery<ReminderState>({
+    queryKey: ['reminder-state'],
+    queryFn: getReminderState,
     staleTime: 30_000,
   });
 
@@ -36,12 +40,12 @@ export function NotificacoesCard() {
     if (!st || busy) return;
     setBusy(true);
     try {
-      if (st.enabled) {
-        await disablePush();
+      if (st.reminderEnabled) {
+        await setReminderEnabled(false);
         toast.success('Lembretes diários desativados.');
       } else {
-        await enablePush(st.hour);
-        toast.success('Lembretes diários ativados! 🔔');
+        await setReminderEnabled(true, st.hour);
+        toast.success('Lembretes diários ativados! Você vai receber um aviso no sino.');
       }
       await refetch();
     } catch (e) {
@@ -85,62 +89,70 @@ export function NotificacoesCard() {
     }
   }
 
-  const supported = isPushSupported();
-  const enabled = !!st?.enabled;
-  const blocked = st?.permission === 'denied';
+  const enabled = !!st?.reminderEnabled;
+  const pushSupported = isClient && isPushSupported();
+  const pushBonusAtivo = pushSupported && !!st?.pushSubscribed;
+  const pushBloqueado = st?.permission === 'denied';
 
   return (
     <section style={styles.card}>
       <div style={styles.cardTitle}>Lembretes</div>
       <p style={styles.intro}>
-        Receba um lembrete diário no seu horário de estudo — o empurrãozinho que mantém a
-        sequência viva mesmo nos dias corridos.
+        Receba um lembrete diário no seu horário de estudo, no sino de notificações — o
+        empurrãozinho que mantém a sequência viva mesmo nos dias corridos.
       </p>
 
-      {!isClient ? null : !supported ? (
-        <p style={styles.muted}>Seu navegador não suporta notificações push.</p>
-      ) : (
-        <>
-          <div style={styles.row}>
-            <div>
-              <div style={styles.rowLabel}>Lembrete diário de estudo</div>
-              <div style={styles.rowHint}>
-                {blocked
-                  ? 'Notificações bloqueadas no navegador — libere nas permissões do site.'
-                  : enabled ? 'Ativo neste dispositivo.' : 'Desligado.'}
-              </div>
-            </div>
-            <Switch
-              checked={enabled}
-              onChange={toggle}
-              disabled={busy || blocked || isLoading}
-              aria-label="Ativar lembretes diários"
-            />
+      <div style={styles.row}>
+        <div>
+          <div style={styles.rowLabel}>Lembrete diário de estudo</div>
+          <div style={styles.rowHint}>
+            {enabled ? 'Ativo — avisa no sino, todo dia.' : 'Desligado.'}
           </div>
+        </div>
+        <Switch
+          checked={enabled}
+          onChange={toggle}
+          disabled={busy || isLoading}
+          aria-label="Ativar lembretes diários"
+        />
+      </div>
 
-          {enabled && (
-            <div style={{ ...styles.row, marginTop: 18, paddingTop: 16, borderTop: `0.5px solid ${theme.line}` }}>
-              <div>
-                <div style={styles.rowLabel}>Horário</div>
-                <div style={styles.rowHint}>Quando você quer ser lembrado.</div>
-              </div>
-              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                <Select
-                  value={st?.hour ?? 19}
-                  onChange={(e) => changeHour(Number(e.target.value))}
-                  disabled={busy}
-                  style={{ width: 'auto' }}
-                  aria-label="Horário do lembrete"
-                >
-                  {HORAS.map((h) => (
-                    <option key={h} value={h}>{String(h).padStart(2, '0')}:00</option>
-                  ))}
-                </Select>
-                <button onClick={testar} style={styles.testBtn}>Enviar teste</button>
-              </div>
+      {enabled && (
+        <div style={{ ...styles.row, marginTop: 18, paddingTop: 16, borderTop: `0.5px solid ${theme.line}` }}>
+          <div>
+            <div style={styles.rowLabel}>Horário</div>
+            <div style={styles.rowHint}>Quando você quer ser lembrado.</div>
+          </div>
+          <Select
+            value={st?.hour ?? 19}
+            onChange={(e) => changeHour(Number(e.target.value))}
+            disabled={busy}
+            style={{ width: 'auto' }}
+            aria-label="Horário do lembrete"
+          >
+            {HORAS.map((h) => (
+              <option key={h} value={h}>{String(h).padStart(2, '0')}:00</option>
+            ))}
+          </Select>
+        </div>
+      )}
+
+      {enabled && pushSupported && (
+        <div style={{ ...styles.row, marginTop: 18, paddingTop: 16, borderTop: `0.5px solid ${theme.line}` }}>
+          <div>
+            <div style={styles.rowLabel}>Notificação do navegador (extra)</div>
+            <div style={styles.rowHint}>
+              {pushBloqueado
+                ? 'Bloqueada nas permissões do site — o lembrete continua chegando no sino.'
+                : pushBonusAtivo
+                  ? 'Também ativa neste navegador, além do sino.'
+                  : 'Não ativada neste navegador — o lembrete continua chegando no sino.'}
             </div>
+          </div>
+          {pushBonusAtivo && (
+            <button onClick={testar} style={styles.testBtn}>Enviar teste</button>
           )}
-        </>
+        </div>
       )}
     </section>
   );
@@ -154,5 +166,4 @@ const styles: Record<string, React.CSSProperties> = {
   rowLabel: { fontSize: 15, fontWeight: 600, color: theme.ink },
   rowHint: { fontSize: 13, color: theme.inkFaint, marginTop: 3, maxWidth: 380 },
   testBtn: { padding: '8px 12px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.bg, color: theme.inkSoft, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
-  muted: { color: theme.inkFaint, fontSize: 14 },
 };

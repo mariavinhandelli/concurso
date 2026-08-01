@@ -181,8 +181,19 @@ async function judgeNarrative(mesLabel: string, s: MonthStats, frases: string[])
 
 const MESES = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
 
-// Envia "sua leitura está pronta" para as inscrições da usuária. Nunca lança.
+// Avisa "sua leitura está pronta": sino (canal principal, sempre) + push pra
+// quem tem assinatura de navegador (canal secundário, best-effort).
 async function pushLeituraPronta(userId: string, mesLabel: string): Promise<void> {
+  const title = `Sua leitura de ${mesLabel.split(' ')[0]} está pronta`;
+  const body = 'Como foi seu mês de estudos, em poucas frases — a partir dos seus números.';
+  const link = '/progresso';
+
+  try {
+    await supabase.from('notifications').insert({ user_id: userId, type: 'narrative_ready', title, body, link });
+  } catch (e) {
+    console.error(`Aviso da leitura no sino falhou (${userId}):`, e);
+  }
+
   if (!VAPID_PRIVATE) return;
   try {
     const { data: subs } = await supabase
@@ -190,12 +201,7 @@ async function pushLeituraPronta(userId: string, mesLabel: string): Promise<void
       .select('id, endpoint, p256dh, auth')
       .eq('user_id', userId);
     if (!subs?.length) return;
-    const payload = JSON.stringify({
-      title: `Sua leitura de ${mesLabel.split(' ')[0]} está pronta`,
-      body: 'Como foi seu mês de estudos, em poucas frases — a partir dos seus números.',
-      url: '/progresso',
-      tag: 'focali-leitura-mes',
-    });
+    const payload = JSON.stringify({ title, body, url: link, tag: 'focali-leitura-mes' });
     for (const sub of subs) {
       try {
         await webpush.sendNotification(
