@@ -245,15 +245,12 @@ export function EditalComparador({ editalAtualId, editalAtualSlug, options }: Pr
     ? comparison.subjects.reduce((acc, x) => acc + (x.numQuestionsAtual ?? 0), 0) : null;
   const qOutro = comparison?.subjects.every((x) => x.status === 'adicionada' || x.numQuestionsAnterior != null)
     ? comparison.subjects.reduce((acc, x) => acc + (x.numQuestionsAnterior ?? 0), 0) : null;
-  // Nenhum tópico entrou ou saiu em NENHUMA disciplina compartilhada: isso
-  // quase sempre significa que as duas grades usam a mesma lista padrão do
-  // catálogo, não que os editais tenham programas idênticos. Dizer isso em voz
-  // alta evita a leitura "conferi e é igual" sobre um dado que não sustenta
-  // essa conclusão (auditoria PM-GO, 31/07: "Noções de Direito Constitucional"
-  // do Soldado × "Direito Constitucional" do CFO têm profundidade bem diferente
-  // no edital oficial, e o diff não mostrava nada).
-  const semDiffDeTopicos = (comparison?.subjects.length ?? 0) > 0
-    && comparison!.subjects.every((x) => x.topicsAdded.length === 0 && x.topicsRemoved.length === 0);
+  // A ressalva sobre tópicos só vale quando pelo menos um dos editais NÃO teve
+  // a grade conferida contra o conteúdo programático oficial: aí a lista de
+  // tópicos é a padrão do catálogo e o diff sai vazio por construção, não por
+  // apuração. Com os dois curados (`ambosCurados`), zero tópico significa zero
+  // tópico de verdade.
+  const precisaRessalvaDeTopicos = comparison != null && !comparison.ambosCurados;
 
   return (
     <div>
@@ -360,14 +357,19 @@ export function EditalComparador({ editalAtualId, editalAtualSlug, options }: Pr
             </div>
           )}
 
-          {/* Limite conhecido do dado, dito em voz alta. */}
-          {semDiffDeTopicos && (
+          {/* Limite conhecido do dado, dito em voz alta — e só quando existe. */}
+          {precisaRessalvaDeTopicos ? (
             <p style={s.topicCaveat}>
-              Nenhum tópico entra ou sai nesta comparação porque as duas grades usam a
-              mesma lista de tópicos do catálogo para cada disciplina. Editais podem cobrar
-              a mesma matéria com profundidades diferentes (ex.: “Noções de Direito
-              Constitucional” × “Direito Constitucional”) — para ver isso, confira o
-              conteúdo programático de cada edital no PDF oficial.
+              A comparação de tópicos aqui é aproximada: pelo menos um destes editais ainda
+              usa a lista padrão do catálogo para cada disciplina, em vez do conteúdo
+              programático oficial dele. Editais cobram a mesma matéria com profundidades
+              diferentes (ex.: “Noções de Direito Constitucional” × “Direito
+              Constitucional”) — confira o PDF oficial para o detalhe fino.
+            </p>
+          ) : (
+            <p style={s.topicCaveat}>
+              Comparação de tópicos conferida: as duas grades foram checadas contra o
+              conteúdo programático oficial de cada edital.
             </p>
           )}
         </>

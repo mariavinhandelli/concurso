@@ -498,6 +498,23 @@ export default function EditalDetailPage() {
               A barra mostra quanto cada disciplina vale na prova — nº de questões dela dividido pelo total.
             </p>
           )}
+          {/* Origem da lista de tópicos: conferida contra o Anexo II deste
+              edital, ou lista padrão do catálogo para a matéria. Sem dizer,
+              as duas ficam visualmente idênticas — e só uma é a grade real. */}
+          {(subjects?.length ?? 0) > 0 && (
+            subjects!.every((sub) => sub.topicosCurados) ? (
+              <p style={s.curadoHint}>
+                <Check size={13} strokeWidth={2.5} style={{ verticalAlign: -2, marginRight: 4 }} />
+                Tópicos conferidos contra o conteúdo programático oficial deste edital.
+              </p>
+            ) : (
+              <p style={s.shareLegend}>
+                Os tópicos abaixo são a lista padrão do catálogo para cada matéria — ainda não
+                conferida contra o conteúdo programático oficial deste edital, que pode cobrar
+                menos (ou mais) dentro de cada disciplina.
+              </p>
+            )
+          )}
           {subjectsError ? (
             // Erro ≠ vazio: sem isto o skeleton ficaria girando para sempre.
             <p style={s.mutedText}>Não foi possível carregar as disciplinas. Recarregue a página para tentar de novo.</p>
@@ -685,6 +702,7 @@ const s: Record<string, CSSProperties> = {
   avisoText: { fontSize: 12, color: theme.inkFaint, margin: '12px 0 0', lineHeight: 1.5, fontStyle: 'italic' },
   provisoriaHint: { fontSize: 12, color: theme.inkSoft, lineHeight: 1.55, margin: '12px 0 0', padding: '10px 12px', borderRadius: theme.radiusSm, background: theme.warnBg, border: `0.5px solid ${theme.warn}` },
   shareLegend: { fontSize: 12, color: theme.inkFaint, margin: '8px 0 0', lineHeight: 1.5 },
+  curadoHint: { fontSize: 12, color: theme.teal, fontWeight: 600, margin: '8px 0 0', lineHeight: 1.5 },
   verificadoText: { fontSize: 11, color: theme.inkFaint, margin: '10px 0 0', paddingTop: 10, borderTop: `0.5px solid ${theme.line}`, lineHeight: 1.5 },
   fonteInlineLink: { color: theme.teal, fontWeight: 600, textDecoration: 'none' },
 

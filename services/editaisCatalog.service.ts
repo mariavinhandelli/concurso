@@ -187,6 +187,11 @@ export interface CatalogEditalSubject {
   weight: number;
   numQuestions: number | null;
   topicCount: number;
+  // Lista de tópicos conferida contra o conteúdo programático oficial DESTE
+  // edital (Anexo II), em vez da lista padrão do catálogo para a matéria.
+  // Sem isso a UI não tem como distinguir "esta é a grade do edital" de
+  // "estes são os tópicos que o catálogo tem para a matéria".
+  topicosCurados: boolean;
 }
 
 export async function getCatalogEditalSubjects(catalogEditalId: string): Promise<CatalogEditalSubject[]> {
@@ -194,7 +199,7 @@ export async function getCatalogEditalSubjects(catalogEditalId: string): Promise
   const [subjectsRes, topicsRes] = await Promise.all([
     supabase
       .from('edital_catalog_subjects')
-      .select('subject_catalog_id, weight, num_questions_expected, position, subjects_catalog(name)')
+      .select('subject_catalog_id, weight, num_questions_expected, position, topicos_curados, subjects_catalog(name)')
       .eq('edital_catalog_id', catalogEditalId)
       .order('position', { ascending: true }),
     supabase
@@ -219,6 +224,7 @@ export async function getCatalogEditalSubjects(catalogEditalId: string): Promise
       weight: row.weight,
       numQuestions: row.num_questions_expected,
       topicCount: countBySubject[row.subject_catalog_id] ?? 0,
+      topicosCurados: row.topicos_curados ?? false,
     };
   });
 }
@@ -545,36 +551,13 @@ export async function getCatalogEditalBySlug(slug: string): Promise<CatalogEdita
   };
 }
 
-// Outras edições do mesmo concurso (histórico) — inclui edições inativas,
-// que existem no catálogo só como memória histórica.
-export interface EditalEdicao {
-  id: string;
-  slug: string;
-  ano: number | null;
-  ultimaEdicao: number | null;
-  situacao: EditalSituacao;
-  banca: string | null;
-  vagas: number | null;
-  examDate: string | null;
-  editalUrl: string | null;
-  isActive: boolean;
-}
-
-export async function listEdicoes(concursoKey: string): Promise<EditalEdicao[]> {
-  const supabase = createClient();
-  const { data, error } = await supabase
-    .from('editais_catalog')
-    .select('id, slug, ano, ultima_edicao, situacao, banca, vagas, exam_date, edital_url, is_active')
-    .eq('concurso_key', concursoKey);
-  if (error) throw new Error('Erro ao listar edições: ' + error.message);
-  return (data ?? [])
-    .map((r) => ({
-      id: r.id, slug: r.slug, ano: r.ano, ultimaEdicao: r.ultima_edicao,
-      situacao: r.situacao as EditalSituacao, banca: r.banca, vagas: r.vagas,
-      examDate: r.exam_date, editalUrl: r.edital_url, isActive: r.is_active,
-    }))
-    .sort((a, b) => (b.ano ?? b.ultimaEdicao ?? 0) - (a.ano ?? a.ultimaEdicao ?? 0));
-}
+// "Edições do mesmo cargo" e o tier "edicao" do comparador são derivados no
+// cliente, direto do catálogo já cacheado (listCatalogEditais + filtro por
+// orgaoSlug+cargo em app/(app)/editais/[slug]/page.tsx) — não por
+// concurso_key. Um concurso unificado põe vários cargos diferentes na mesma
+// edição (ex.: TJ-GO 2024 tem três, o de 2021 outros dois, sem repetir
+// nenhum); agrupar por concurso_key fazia um cargo aparecer como "edição" de
+// outro cargo qualquer do mesmo concurso (bug reportado em 31/07).
 
 // Estatísticas históricas do concurso, quando curadas com dado real. Sem
 // linhas = a seção não aparece. Nota de corte e nomeados saíram da UI em
@@ -609,12 +592,16 @@ export interface PastPaper {
   gabaritoUrl: string | null;
 }
 
-export async function listPastPapers(concursoKey: string): Promise<PastPaper[]> {
+// Escopo é o CARGO, não o concurso: num concurso unificado cada cargo tem seu
+// próprio caderno, e as edições nem sequer ofertam os mesmos cargos (o TJ-GO
+// 2021 teve dois e o de 2024 outros três, sem repetir nenhum). Chavear por
+// concurso mostrava a prova de Contador para quem estuda Área Judiciária.
+export async function listPastPapers(editalCatalogId: string): Promise<PastPaper[]> {
   const supabase = createClient();
   const { data, error } = await supabase
     .from('edital_past_papers')
     .select('id, ano, banca, prova_url, gabarito_url')
-    .eq('concurso_key', concursoKey)
+    .eq('edital_catalog_id', editalCatalogId)
     .order('ano', { ascending: false });
   if (error) throw new Error('Erro ao listar provas anteriores: ' + error.message);
   return (data ?? []).map((r) => ({
@@ -646,11 +633,16 @@ export interface EditalComparison {
   totalAdded: number;
   totalRemoved: number;
   totalChanged: number;
+  // Só faz sentido afirmar diferença de tópicos quando OS DOIS editais tiveram
+  // a grade conferida contra o conteúdo programático oficial. Sem isso, ambos
+  // usam a lista padrão do catálogo e o diff sai vazio por construção.
+  ambosCurados: boolean;
 }
 
 interface ProgramaticContent {
   // por nome de disciplina: peso, questões e set de nomes de tópicos
   subjects: Map<string, { weight: number; numQuestions: number | null; topics: Set<string> }>;
+  todasCuradas: boolean;
 }
 
 async function fetchProgramaticContent(catalogEditalId: string): Promise<ProgramaticContent> {
@@ -658,7 +650,7 @@ async function fetchProgramaticContent(catalogEditalId: string): Promise<Program
   const [subjectsRes, topicsRes] = await Promise.all([
     supabase
       .from('edital_catalog_subjects')
-      .select('weight, num_questions_expected, position, subjects_catalog(name)')
+      .select('weight, num_questions_expected, position, topicos_curados, subjects_catalog(name)')
       .eq('edital_catalog_id', catalogEditalId)
       .order('position', { ascending: true }),
     supabase
@@ -684,7 +676,9 @@ async function fetchProgramaticContent(catalogEditalId: string): Promise<Program
     const entry = subjects.get(subjectName);
     if (entry) entry.topics.add(tc.name);
   }
-  return { subjects };
+  const linhas = subjectsRes.data ?? [];
+  const todasCuradas = linhas.length > 0 && linhas.every((r) => r.topicos_curados === true);
+  return { subjects, todasCuradas };
 }
 
 export async function compareEditais(editalAtualId: string, editalAnteriorId: string): Promise<EditalComparison> {
@@ -729,5 +723,8 @@ export async function compareEditais(editalAtualId: string, editalAnteriorId: st
   const ORDER: Record<EditalComparisonSubject['status'], number> = { adicionada: 0, mantida: 1, removida: 2 };
   subjects.sort((x, y) => ORDER[x.status] - ORDER[y.status] || x.name.localeCompare(y.name));
 
-  return { subjects, totalAdded, totalRemoved, totalChanged };
+  return {
+    subjects, totalAdded, totalRemoved, totalChanged,
+    ambosCurados: atual.todasCuradas && anterior.todasCuradas,
+  };
 }
