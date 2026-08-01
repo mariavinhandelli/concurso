@@ -238,6 +238,23 @@ export function EditalComparador({ editalAtualId, editalAtualSlug, options }: Pr
   const semMudancas = comparison
     && comparison.totalAdded === 0 && comparison.totalRemoved === 0 && comparison.totalChanged === 0;
 
+  const inalteradas = comparison?.subjects.filter((x) => !subjectChanged(x)) ?? [];
+  // Totais só valem quando os DOIS editais publicam nº de questões em todas as
+  // disciplinas; senão a soma compara peras com maçãs.
+  const qAtual = comparison?.subjects.every((x) => x.status === 'removida' || x.numQuestionsAtual != null)
+    ? comparison.subjects.reduce((acc, x) => acc + (x.numQuestionsAtual ?? 0), 0) : null;
+  const qOutro = comparison?.subjects.every((x) => x.status === 'adicionada' || x.numQuestionsAnterior != null)
+    ? comparison.subjects.reduce((acc, x) => acc + (x.numQuestionsAnterior ?? 0), 0) : null;
+  // Nenhum tópico entrou ou saiu em NENHUMA disciplina compartilhada: isso
+  // quase sempre significa que as duas grades usam a mesma lista padrão do
+  // catálogo, não que os editais tenham programas idênticos. Dizer isso em voz
+  // alta evita a leitura "conferi e é igual" sobre um dado que não sustenta
+  // essa conclusão (auditoria PM-GO, 31/07: "Noções de Direito Constitucional"
+  // do Soldado × "Direito Constitucional" do CFO têm profundidade bem diferente
+  // no edital oficial, e o diff não mostrava nada).
+  const semDiffDeTopicos = (comparison?.subjects.length ?? 0) > 0
+    && comparison!.subjects.every((x) => x.topicsAdded.length === 0 && x.topicsRemoved.length === 0);
+
   return (
     <div>
       <div style={s.selectorRow}>
@@ -271,6 +288,15 @@ export function EditalComparador({ editalAtualId, editalAtualSlug, options }: Pr
             <Badge variant="danger">{comparison.totalRemoved} removida{comparison.totalRemoved === 1 ? '' : 's'}</Badge>
             <Badge variant="info">{comparison.totalChanged} alterada{comparison.totalChanged === 1 ? '' : 's'}</Badge>
           </div>
+
+          {/* Tamanho das duas provas lado a lado: sem isto, "2 alteradas" não
+              dizia se as provas são do mesmo porte ou não. */}
+          {qAtual != null && qOutro != null && (
+            <p style={s.totaisNote}>
+              Prova deste edital: <b>{qAtual} questões</b> em {comparison.subjects.filter((x) => x.status !== 'removida').length} disciplinas ·
+              {' '}comparado: <b>{qOutro} questões</b> em {comparison.subjects.filter((x) => x.status !== 'adicionada').length} disciplinas.
+            </p>
+          )}
 
           {semMudancas ? (
             <p style={s.hint}>Nenhuma diferença no conteúdo programático entre os dois editais.</p>
@@ -313,12 +339,36 @@ export function EditalComparador({ editalAtualId, editalAtualSlug, options }: Pr
                   </div>
                 );
               })}
-              {comparison.subjects.filter((x) => !subjectChanged(x)).length > 0 && (
-                <p style={s.unchangedNote}>
-                  {comparison.subjects.filter((x) => !subjectChanged(x)).length} disciplina(s) sem mudanças.
-                </p>
+              {inalteradas.length > 0 && (
+                // Nomeadas, não só contadas: "7 disciplinas sem mudanças" não
+                // respondia "quais?" — e é justamente essa lista que diz o
+                // quanto do estudo aproveita de um edital para o outro.
+                <div style={s.unchangedBox}>
+                  <p style={s.unchangedTitle}>
+                    Igual nos dois ({inalteradas.length} disciplina{inalteradas.length === 1 ? '' : 's'}, mesmo peso e mesmo nº de questões)
+                  </p>
+                  <div style={s.unchangedChips}>
+                    {inalteradas.map((x) => (
+                      <span key={x.name} style={s.chipSame}>
+                        {x.name}
+                        {x.numQuestionsAtual != null && <span style={s.chipSameQ}> · {x.numQuestionsAtual}q</span>}
+                      </span>
+                    ))}
+                  </div>
+                </div>
               )}
             </div>
+          )}
+
+          {/* Limite conhecido do dado, dito em voz alta. */}
+          {semDiffDeTopicos && (
+            <p style={s.topicCaveat}>
+              Nenhum tópico entra ou sai nesta comparação porque as duas grades usam a
+              mesma lista de tópicos do catálogo para cada disciplina. Editais podem cobrar
+              a mesma matéria com profundidades diferentes (ex.: “Noções de Direito
+              Constitucional” × “Direito Constitucional”) — para ver isso, confira o
+              conteúdo programático de cada edital no PDF oficial.
+            </p>
           )}
         </>
       )}
@@ -343,6 +393,13 @@ const s: Record<string, CSSProperties> = {
   chipDel: { fontSize: 12, fontWeight: 500, color: theme.danger, background: theme.dangerBg, borderRadius: theme.radiusXs, padding: '2px 8px', textDecoration: 'line-through' },
   chipMore: { fontSize: 12, fontWeight: 600, color: theme.teal, background: 'transparent', border: `1px dashed ${theme.teal}`, borderRadius: theme.radiusXs, padding: '2px 8px', cursor: 'pointer', fontFamily: 'inherit' },
   unchangedNote: { fontSize: 12, color: theme.inkFaint, margin: '4px 0 0' },
+  totaisNote: { fontSize: 12, color: theme.inkSoft, margin: '8px 0 0', lineHeight: 1.55 },
+  unchangedBox: { marginTop: 4, paddingTop: 10, borderTop: `0.5px solid ${theme.line}` },
+  unchangedTitle: { fontSize: 12, fontWeight: 600, color: theme.inkSoft, margin: 0 },
+  unchangedChips: { display: 'flex', gap: 5, flexWrap: 'wrap', marginTop: 8 },
+  chipSame: { fontSize: 12, fontWeight: 500, color: theme.inkSoft, background: theme.muted, borderRadius: theme.radiusXs, padding: '3px 9px' },
+  chipSameQ: { fontVariantNumeric: 'tabular-nums', color: theme.inkFaint },
+  topicCaveat: { fontSize: 12, color: theme.inkFaint, lineHeight: 1.55, margin: '12px 0 0', paddingTop: 10, borderTop: `0.5px solid ${theme.line}` },
 
   pickerInput: {
     width: '100%', boxSizing: 'border-box', padding: '7px 10px 7px 30px',
