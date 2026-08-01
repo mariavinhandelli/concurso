@@ -193,7 +193,12 @@ function EditalPicker({ options, value, onChange }: EditalPickerProps) {
                     role="option"
                     aria-selected={o.id === value}
                     onMouseEnter={() => setHighlighted(idx)}
-                    onClick={() => select(o)}
+                    onClick={() => {
+                      onChange(o.id);
+                      setQuery('');
+                      setOpen(false);
+                      inputRef.current?.blur();
+                    }}
                     style={{
                       ...s.pickerOption,
                       background: isHighlighted ? theme.tealBg : 'transparent',
