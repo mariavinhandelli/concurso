@@ -89,7 +89,10 @@ export const TimePieCard = memo(function TimePieCard() {
               type="date"
               value={range.start}
               max={hoje}
-              onChange={(e) => e.target.value && setRange((r) => ({ ...r, start: e.target.value }))}
+              // Se a nova data inicial passar da final, empurra a final junto —
+              // o service já normalizava um intervalo invertido para a busca,
+              // mas os dois campos continuavam mostrando a inversão pro usuário.
+              onChange={(e) => { const v = e.target.value; if (v) setRange((r) => ({ start: v, end: v > r.end ? v : r.end })); }}
               style={styles.dateInput}
               aria-label="Data inicial"
             />
@@ -100,7 +103,7 @@ export const TimePieCard = memo(function TimePieCard() {
               type="date"
               value={range.end}
               max={hoje}
-              onChange={(e) => e.target.value && setRange((r) => ({ ...r, end: e.target.value }))}
+              onChange={(e) => { const v = e.target.value; if (v) setRange((r) => ({ start: v < r.start ? v : r.start, end: v })); }}
               style={styles.dateInput}
               aria-label="Data final"
             />

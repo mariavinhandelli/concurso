@@ -128,15 +128,23 @@ export function TopicsClient({ subjectId, initialSubject }: Props) {
   // o offset real e a lista aparecia deslocada (visível no tablet, onde o
   // cabeçalho é mais alto).
   useEffect(() => {
-    const el = listRef.current;
-    if (!el) return;
-    const measure = () => setScrollMargin((prev) => (prev === el.offsetTop ? prev : el.offsetTop));
+    // Lê listRef.current DENTRO de measure (não capturado no escopo do efeito):
+    // a div só existe quando filteredParents.length > 0, então filtrar pra um
+    // resultado vazio e depois limpar o filtro desmonta e remonta um nó NOVO.
+    // Um `el` fechado no momento em que o efeito rodou ficava apontando pro nó
+    // antigo e desconectado — offsetTop de um nó fora do DOM é sempre 0, e
+    // o próximo resize zerava scrollMargin de volta, reabrindo o bug original.
+    const measure = () => {
+      const el = listRef.current;
+      if (!el) return;
+      setScrollMargin((prev) => (prev === el.offsetTop ? prev : el.offsetTop));
+    };
     measure();
     const ro = new ResizeObserver(measure);
     ro.observe(document.body);
     window.addEventListener('resize', measure);
     return () => { ro.disconnect(); window.removeEventListener('resize', measure); };
-  }, [loading]);
+  }, [loading, filteredParents.length === 0]);
 
   const rowVirtualizer = useWindowVirtualizer({
     count: loading ? 0 : filteredParents.length,

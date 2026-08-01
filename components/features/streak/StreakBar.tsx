@@ -66,21 +66,22 @@ export const StreakBar = memo(function StreakBar() {
 
   // Sem nenhum estudo ainda (P3): mostrar estado inspiracional em vez de 60 barras cinzas
   if (primeiroEstudo === -1) {
-    const semana = dias.slice(-7);
+    // Mesma contagem de células da barra cheia (totalDias), não só 7: um
+    // subconjunto pequeno com flex:1 dentro do mesmo container vira blocos
+    // gigantes (era o bug original) OU, se limitado por maxWidth, deixa um
+    // vão vazio enorme à direita (o que isso virou depois do primeiro
+    // conserto — pior ainda). Com o mesmo número de dias, a proporção da
+    // célula é idêntica à da barra real; só a cor muda quando o estudo começa.
     return (
       <div style={styles.wrap}>
         <div style={styles.header}>
           <span style={styles.phrase}>Comece hoje a construir sua sequência de estudos! 🔥</span>
         </div>
-        {/* Teto de largura por célula: com `flex: 1` puro, as 7 células dividiam
-            a largura TODA do card e viravam blocos de ~85px no tablet — nada a
-            ver com as barrinhas finas que aparecem depois do primeiro estudo.
-            Continuam encolhendo em telas estreitas (flex: 1 + minWidth: 0). */}
-        <div style={{ ...styles.bar, justifyContent: 'flex-start' }}>
-          {semana.map((d) => (
+        <div style={styles.bar}>
+          {dias.map((d) => (
             <div
               key={d.date}
-              style={{ ...styles.cell, height: isMobile ? 30 : 26, background: COR.vazio, maxWidth: 44 }}
+              style={{ ...styles.cell, height: isMobile ? 30 : 26, background: COR.vazio }}
             />
           ))}
         </div>

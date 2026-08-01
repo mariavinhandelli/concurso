@@ -74,9 +74,21 @@ export function MinhasTab({ isMobile, onError }: Props) {
   }, []);
   useEffect(() => { load(); }, [load]);
 
+  // Cor MENOS usada (não só "a 1ª ainda não usada"): com .find() puro, depois
+  // que as 16 cores da paleta já apareceram pelo menos uma vez (plausível —
+  // esta mesma sessão fez backfill numa conta com 70+ matérias), toda
+  // sugestão futura convergia pra SUBJECT_COLORS[0] pra sempre, reproduzindo
+  // o bug que isto veio corrigir. Mesmo critério de pick_subject_color (SQL).
   const corSugerida = useMemo(() => {
-    const usadas = new Set([...ativas, ...arquivadas].map((s) => (s.color ?? '').toLowerCase()));
-    return SUBJECT_COLORS.find((c) => !usadas.has(c.toLowerCase())) ?? SUBJECT_COLORS[0];
+    const contagem = new Map<string, number>();
+    for (const c of SUBJECT_COLORS) contagem.set(c.toLowerCase(), 0);
+    for (const s of [...ativas, ...arquivadas]) {
+      const cor = (s.color ?? '').toLowerCase();
+      if (contagem.has(cor)) contagem.set(cor, (contagem.get(cor) ?? 0) + 1);
+    }
+    return SUBJECT_COLORS.reduce((menos, c) =>
+      (contagem.get(c.toLowerCase()) ?? 0) < (contagem.get(menos.toLowerCase()) ?? 0) ? c : menos
+    );
   }, [ativas, arquivadas]);
   useEffect(() => {
     if (!colorTouched) setNewColor(corSugerida);
@@ -109,9 +121,11 @@ export function MinhasTab({ isMobile, onError }: Props) {
     try {
       await createSubject(newName, newColor);
       setNewName('');
-      // Volta a seguir a sugestão: criar várias em sequência sai colorido.
-      setColorTouched(false);
       await load();
+      // Só depois do load(): ativas/arquivadas já incluem a matéria recém-criada,
+      // então corSugerida já é a PRÓXIMA cor — sem isto, o efeito calculava a
+      // sugestão contra a lista antiga e piscava a cor recém-usada por um frame.
+      setColorTouched(false);
     } catch (e) {
       onError(e instanceof Error ? e.message : 'Erro ao criar.');
     } finally {

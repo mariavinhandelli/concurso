@@ -1,0 +1,16 @@
+-- Fecha um buraco de acesso aberto pela migration anterior
+-- (20260802171000_cores_sortidas_materias.sql): revogou execute de PUBLIC mas
+-- não de anon/authenticated — e o Supabase concede grants próprios a esses
+-- roles independentes de PUBLIC, então anon continuava com EXECUTE. Achado
+-- pela auditoria de double-check (verificado ao vivo: has_function_privilege
+-- retornava true para anon).
+--
+-- pick_subject_color(p_user_id uuid) não verifica p_user_id = auth.uid() —
+-- é só um sorteador de cor, não haveria consequência grave em ler o resultado
+-- de outro usuário, mas ainda assim é uma função SECURITY DEFINER que aceita
+-- um uuid arbitrário sem checagem de autorização, e não deveria ser alcançável
+-- por ninguém de fora: só activate_catalog_subject a chama, e chamada de
+-- função dentro de outra SECURITY DEFINER roda sob o dono de quem chama, não
+-- precisa de grant explícito no role da sessão. Revoga de todos os roles de
+-- cliente — não sobra nenhum motivo para conceder de volta.
+revoke execute on function public.pick_subject_color(uuid) from public, anon, authenticated;

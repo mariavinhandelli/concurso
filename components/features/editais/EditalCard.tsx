@@ -105,11 +105,14 @@ export function EditalCard({ edital: e, hideOrgao, estudando }: Props) {
 const s: Record<string, CSSProperties> = {
   card: { display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.card, cursor: 'pointer', fontFamily: 'inherit', width: '100%', minWidth: 0, transition: 'border-color .15s, box-shadow .15s', textDecoration: 'none' },
   cardTitleRow: { display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', minWidth: 0 },
-  // minWidth:0: o min-width automático de um item flex com nowrap é o próprio
-  // texto inteiro (não há ponto de quebra), então sem isto o título nunca
-  // encolhia na mesma linha dos selos (Ativado/situação/"N estudando") — a
-  // ellipsis do CSS nunca tinha chance de entrar em ação.
-  cardTitle: { fontSize: 15, fontWeight: 600, color: theme.ink, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0, flexShrink: 1 },
+  // flexBasis:0 (não só minWidth:0): line-breaking do flex-wrap decide em QUAL
+  // linha cada item cai usando o tamanho hipotético ANTES do shrink — com
+  // flex-basis:auto (o padrão), o título contribui seu texto inteiro pra essa
+  // conta, "reserva" a linha 1 sozinho e empurra os selos pra linha 2 mesmo
+  // com minWidth:0 (isso só afeta o encolhimento DEPOIS de decidida a linha).
+  // Com basis 0, o título quase não pesa nessa decisão — os selos ficam na
+  // linha 1, e o título usa o espaço sobrando (via flexGrow) e trunca nele.
+  cardTitle: { fontSize: 15, fontWeight: 600, color: theme.ink, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: '1 1 0%', minWidth: '4ch' },
   situacaoTag: { fontSize: 11, fontWeight: 700, borderRadius: theme.radiusXs, padding: '2px 8px', flexShrink: 0, letterSpacing: 0.2 },
   situacaoVigente: { color: theme.onTeal, background: theme.teal },
   // warnDeep (não warn cru): warn sobre warnBg dá ~1,9:1 e reprova AA — mesma

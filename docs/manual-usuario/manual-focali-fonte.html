@@ -1,0 +1,1110 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Focali — Manual do Usuário</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --primary:#143D45; --primary-hover:#10363D;
+    --teal:#22C55E; --teal-soft:#DCFCE7; --mint:#A7F5D0;
+    --clay:#6366F1; --clay-soft:#EEF2FF;
+    --bg:#F8FAFC; --card:#FFFFFF;
+    --ink:#0F172A; --ink-soft:#475569; --ink-faint:#94A3B8;
+    --line:#E2E8F0; --line-strong:#CBD5E1;
+    --amber:#D97706; --amber-soft:#FEF3C7;
+    --danger:#DC2626; --danger-soft:#FEE2E2;
+    --blue:#93C5FD;
+  }
+  *{box-sizing:border-box; margin:0; padding:0; -webkit-print-color-adjust:exact; print-color-adjust:exact;}
+  html,body{font-family:'Poppins','Segoe UI',Inter,Arial,sans-serif; color:var(--ink); background:#fff; font-size:10.5pt; line-height:1.55;}
+  @page{ size:A4; margin:0; }
+  .page{ width:210mm; height:296mm; padding:16mm 17mm 16mm; position:relative; overflow:hidden; page-break-after:always; background:#fff;}
+  .page:last-child{page-break-after:auto;}
+
+  /* ───────── CAPA ───────── */
+  .cover{ background:var(--bg); display:flex; flex-direction:column; padding:14mm 17mm 12mm; }
+  .blob{ position:absolute; border-radius:50%; filter:blur(70px); z-index:0; }
+  .cover-content{ position:relative; z-index:1; flex:1; display:flex; flex-direction:column; }
+  .cover h1{ font-size:29pt; font-weight:700; letter-spacing:-1px; line-height:1.15; }
+  .cover .accent{ color:var(--teal); }
+  .badge-chip{ display:inline-block; background:var(--teal-soft); color:#15803D; font-weight:600; font-size:9pt; padding:4px 14px; border-radius:999px; }
+
+  /* ───────── TIPOGRAFIA ───────── */
+  h2.sec{ font-size:19pt; font-weight:700; letter-spacing:-0.5px; margin-bottom:4px; }
+  .sec-kicker{ font-size:8.5pt; font-weight:700; text-transform:uppercase; letter-spacing:2px; color:var(--teal); margin-bottom:6px;}
+  .sec-rule{ height:4px; width:64px; border-radius:99px; background:linear-gradient(90deg,#22C55E,#A7F5D0,#6366F1); margin:8px 0 14px; }
+  h3{ font-size:13pt; font-weight:700; letter-spacing:-0.3px; margin:12px 0 6px; color:var(--primary); }
+  h4{ font-size:10.5pt; font-weight:700; margin:12px 0 4px; }
+  p{ margin-bottom:8px; color:var(--ink-soft); }
+  p.lead{ font-size:11.5pt; color:var(--ink-soft); }
+  strong{ color:var(--ink); }
+  ul,ol{ margin:2px 0 10px 18px; color:var(--ink-soft); }
+  li{ margin-bottom:3px; }
+  .muted{ color:var(--ink-faint); }
+
+  /* ───────── COMPONENTES ───────── */
+  .callout{ border-radius:12px; padding:8px 13px; margin:8px 0; font-size:9.5pt; page-break-inside:avoid;}
+  .callout b{ display:block; margin-bottom:2px; font-size:9.5pt;}
+  .tip{ background:var(--teal-soft); border-left:4px solid var(--teal); color:#166534;}
+  .warn{ background:var(--amber-soft); border-left:4px solid var(--amber); color:#92400E;}
+  .err{ background:var(--danger-soft); border-left:4px solid var(--danger); color:#991B1B;}
+  .info{ background:var(--clay-soft); border-left:4px solid var(--clay); color:#3730A3;}
+
+  .modbox{ border:1px solid var(--line); border-radius:16px; padding:12px 14px; margin:8px 0; background:var(--card); page-break-inside:avoid;}
+  .steps{ counter-reset:step; margin:8px 0 10px; }
+  .step{ display:flex; gap:10px; margin-bottom:7px; align-items:flex-start;}
+  .step-n{ counter-increment:step; flex:0 0 20px; height:20px; border-radius:50%; background:var(--primary); color:#fff; font-size:8.5pt; font-weight:700; display:flex; align-items:center; justify-content:center; margin-top:2px;}
+  .step-n::before{ content:counter(step); }
+  .step div{ color:var(--ink-soft); font-size:9.8pt;}
+
+  table.tb{ width:100%; border-collapse:collapse; margin:6px 0 10px; font-size:9.3pt; page-break-inside:avoid;}
+  table.tb th{ background:var(--primary); color:#fff; text-align:left; padding:7px 10px; font-weight:600; font-size:8.8pt;}
+  table.tb td{ border-bottom:1px solid var(--line); padding:6px 10px; color:var(--ink-soft); vertical-align:top;}
+  table.tb tr:nth-child(even) td{ background:var(--bg); }
+  table.tb th:first-child{ border-radius:8px 0 0 0;} table.tb th:last-child{ border-radius:0 8px 0 0;}
+
+  /* mockups */
+  .mock{ background:var(--bg); border:1px solid var(--line-strong); border-radius:14px; padding:10px; margin:8px 0; page-break-inside:avoid; }
+  .mock-label{ font-size:8pt; font-weight:600; text-transform:uppercase; letter-spacing:1.5px; color:var(--ink-faint); margin-bottom:8px; display:flex; align-items:center; gap:6px;}
+  .mock-label::before{ content:''; width:8px; height:8px; border-radius:50%; background:var(--teal); display:inline-block;}
+  .mcard{ background:#fff; border:1px solid var(--line); border-radius:12px; padding:10px 12px; margin-bottom:8px; font-size:9pt; color:var(--ink-soft);}
+  .mcard:last-child{margin-bottom:0;}
+  .mrow{ display:flex; align-items:center; justify-content:space-between; gap:8px;}
+  .chip{ display:inline-block; font-size:7.8pt; font-weight:600; padding:2px 9px; border-radius:999px; }
+  .chip-green{ background:var(--teal-soft); color:#15803D;}
+  .chip-indigo{ background:var(--clay-soft); color:#4338CA;}
+  .chip-amber{ background:var(--amber-soft); color:#92400E;}
+  .chip-red{ background:var(--danger-soft); color:#991B1B;}
+  .chip-gray{ background:#F1F5F9; color:var(--ink-soft);}
+  .pbar{ height:7px; background:#E2E8F0; border-radius:99px; overflow:hidden; margin-top:5px;}
+  .pfill{ height:100%; border-radius:99px; background:linear-gradient(90deg,#22C55E,#A7F5D0);}
+  .btn-mock{ display:inline-block; padding:6px 16px; border-radius:10px; font-size:8.6pt; font-weight:600;}
+  .btn-primary{ background:linear-gradient(135deg,#143D45,#1D5560); color:#fff;}
+  .btn-ghost{ background:#fff; border:1.5px solid var(--line-strong); color:var(--ink-soft);}
+  .btn-green{ background:var(--teal); color:#fff;}
+  .btn-red{ background:#FCA5A5; color:#7F1D1D;}
+  .btn-amberb{ background:#FCD34D; color:#78350F;}
+
+  .two-col{ display:flex; gap:12px; }
+  .two-col > div{ flex:1; min-width:0;}
+
+  /* sumário */
+  .toc-item{ display:flex; align-items:baseline; gap:8px; margin-bottom:9px; font-size:10.5pt;}
+  .toc-item .n{ font-weight:700; color:var(--teal); flex:0 0 26px;}
+  .toc-item .dots{ flex:1; border-bottom:1.5px dotted var(--line-strong); transform:translateY(-3px);}
+  .toc-item .t{ font-weight:600; color:var(--ink);}
+  .toc-sub{ margin-left:34px; color:var(--ink-soft); font-size:9.3pt; margin-bottom:6px;}
+
+  /* fluxo circular */
+  .flow{ display:flex; align-items:stretch; gap:0; margin:16px 0; }
+  .flow-step{ flex:1; text-align:center; padding:14px 10px; border-radius:14px; position:relative;}
+  .flow-arrow{ align-self:center; font-size:16pt; color:var(--ink-faint); padding:0 4px; font-weight:700;}
+  .flow-step .fnum{ width:30px;height:30px;border-radius:50%;margin:0 auto 8px; display:flex;align-items:center;justify-content:center; font-weight:700; color:#fff; font-size:11pt;}
+  .flow-step b{ display:block; font-size:10.5pt; margin-bottom:3px; color:var(--ink);}
+  .flow-step span{ font-size:8.6pt; color:var(--ink-soft); line-height:1.4; display:block;}
+
+  .footer-note{ position:absolute; bottom:9mm; left:17mm; right:17mm; display:flex; justify-content:space-between; font-size:7.5pt; color:var(--ink-faint); border-top:1px solid var(--line); padding-top:5px;}
+
+  .heat{ display:inline-grid; grid-template-columns:repeat(26,9px); gap:2.5px; }
+  .heat i{ width:9px; height:9px; border-radius:2px; display:block;}
+  .h0{background:#E9EEF4;} .h1{background:#BBF0CE;} .h2{background:#6FDD9A;} .h3{background:#22C55E;} .h4{background:#15803D;}
+
+  .avatar{ width:24px; height:24px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:8pt; font-weight:700; color:#fff;}
+  .sidebar-mock{ background:linear-gradient(180deg,#143D45,#10363D); border-radius:14px; padding:8px 12px; color:#E6F0EF; font-size:8pt; width:200px;}
+  .sb-sep{ font-size:6.8pt; text-transform:uppercase; letter-spacing:1.5px; color:#7BA6A3; margin:5px 0 2px;}
+  .sb-item{ padding:2px 10px; border-radius:8px; margin-bottom:1px; display:flex; gap:8px; align-items:center;}
+  .sb-active{ background:rgba(34,197,94,.18); color:#A7F5D0; font-weight:600;}
+</style>
+</head>
+<body>
+
+<!-- ════════════════ CAPA ════════════════ -->
+<div class="page cover">
+  <div class="blob" style="bottom:-8%; left:-12%; width:65%; aspect-ratio:1; background:rgba(143,231,194,.55);"></div>
+  <div class="blob" style="bottom:-4%; left:30%; width:60%; aspect-ratio:1; background:rgba(154,166,255,.35);"></div>
+  <div class="blob" style="bottom:-18%; left:10%; width:45%; aspect-ratio:1; background:rgba(34,197,94,.4);"></div>
+  <div class="cover-content">
+    <div>
+      <svg width="180" viewBox="0 0 1200 320" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="cg1" x1="54" y1="48" x2="210" y2="163" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#22C55E"/><stop offset="1" stop-color="#A7F5D0"/></linearGradient>
+          <linearGradient id="cg2" x1="54" y1="160" x2="187" y2="208" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#A7F5D0"/><stop offset="1" stop-color="#93C5FD"/></linearGradient>
+          <linearGradient id="cg3" x1="98" y1="206" x2="204" y2="306" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#6366F1"/><stop offset="1" stop-color="#4338CA"/></linearGradient>
+        </defs>
+        <path d="M54 91C54 67.252 73.252 48 97 48H221C243.644 48 262 66.356 262 89C262 111.644 243.644 130 221 130H135C112.356 130 94 148.356 94 171H54V91Z" fill="url(#cg1)"/>
+        <path d="M94 171C94 148.356 112.356 130 135 130H190C212.644 130 231 148.356 231 171C231 193.644 212.644 212 190 212H94V171Z" fill="url(#cg2)"/>
+        <path d="M98 212H139V256C139 279.748 119.748 299 96 299C72.804 299 54 280.196 54 257C54 232.147 73.147 212 98 212Z" fill="url(#cg3)"/>
+        <text x="306" y="202" font-family="Poppins, Inter, Arial, sans-serif" font-size="150" font-weight="600" letter-spacing="-7" fill="#0F172A">focali</text>
+      </svg>
+    </div>
+    <div style="flex:1; display:flex; flex-direction:column; justify-content:center;">
+      <div class="badge-chip" style="margin-bottom:12px; width:fit-content;">Manual do Usuário</div>
+      <h1>Estude com foco e<br><span class="accent">direção.</span></h1>
+      <p style="font-size:11.5pt; margin-top:10px; max-width:120mm; color:var(--ink-soft);">
+        O guia completo para extrair o máximo da Focali — do primeiro login à sua rotina
+        de aprovação. Aprenda o método, domine cada módulo e transforme estudo em evolução real.
+      </p>
+      <div style="display:flex; gap:22px; margin-top:16px;">
+        <div style="display:flex; gap:10px; align-items:center;">
+          <div style="width:34px;height:34px;border-radius:10px;background:var(--teal-soft);display:flex;align-items:center;justify-content:center;font-size:13pt;">🗓️</div>
+          <div style="font-size:9pt;"><b>Organize</b><br><span class="muted">planeje sua rotina</span></div>
+        </div>
+        <div style="display:flex; gap:10px; align-items:center;">
+          <div style="width:34px;height:34px;border-radius:10px;background:var(--teal-soft);display:flex;align-items:center;justify-content:center;font-size:13pt;">📈</div>
+          <div style="font-size:9pt;"><b>Evolua</b><br><span class="muted">meça o que importa</span></div>
+        </div>
+        <div style="display:flex; gap:10px; align-items:center;">
+          <div style="width:34px;height:34px;border-radius:10px;background:var(--teal-soft);display:flex;align-items:center;justify-content:center;font-size:13pt;">🎯</div>
+          <div style="font-size:9pt;"><b>Aprove</b><br><span class="muted">estude com propósito</span></div>
+        </div>
+      </div>
+    </div>
+    <div style="font-size:8.5pt; color:var(--ink-faint);">focali · Clareza para evoluir. · Edição agosto/2026</div>
+  </div>
+</div>
+
+<!-- ════════════════ SUMÁRIO ════════════════ -->
+<div class="page">
+  <div class="sec-kicker">Sumário</div>
+  <h2 class="sec">O que você vai encontrar aqui</h2>
+  <div class="sec-rule"></div>
+
+  <div class="toc-item"><span class="n">01</span><span class="t">Introdução</span><span class="dots"></span></div>
+  <div class="toc-sub">O que é a Focali · para quem ela foi feita · como ela ajuda de verdade</div>
+  <div class="toc-item"><span class="n">02</span><span class="t">Primeiros passos</span><span class="dots"></span></div>
+  <div class="toc-sub">Criar conta · conhecer a navegação · entender a estrutura Concurso → Matéria → Tópico</div>
+  <div class="toc-item"><span class="n">03</span><span class="t">Home &amp; Plano de Hoje</span><span class="dots"></span></div>
+  <div class="toc-item"><span class="n">04</span><span class="t">Registrar estudo (timer e registro rápido)</span><span class="dots"></span></div>
+  <div class="toc-item"><span class="n">05</span><span class="t">Revisões — a fila que faz você lembrar</span><span class="dots"></span></div>
+  <div class="toc-item"><span class="n">06</span><span class="t">Flashcards &amp; Banco de Flashcards</span><span class="dots"></span></div>
+  <div class="toc-item"><span class="n">07</span><span class="t">Caderno — anotações e caderno de erros</span><span class="dots"></span></div>
+  <div class="toc-item"><span class="n">08</span><span class="t">Matérias &amp; tópicos</span><span class="dots"></span></div>
+  <div class="toc-item"><span class="n">09</span><span class="t">Agenda &amp; Ciclo de estudos</span><span class="dots"></span></div>
+  <div class="toc-item"><span class="n">10</span><span class="t">Concursos &amp; Hub de Editais</span><span class="dots"></span></div>
+  <div class="toc-item"><span class="n">11</span><span class="t">Vade Mecum &amp; Jurisprudências</span><span class="dots"></span></div>
+  <div class="toc-item"><span class="n">12</span><span class="t">Progresso — estatísticas, conquistas e histórico</span><span class="dots"></span></div>
+  <div class="toc-item"><span class="n">13</span><span class="t">Amigos, Turmas &amp; Ranking</span><span class="dots"></span></div>
+  <div class="toc-item"><span class="n">14</span><span class="t">O fluxo ideal: Estudar → Registrar → Revisar → Evoluir</span><span class="dots"></span></div>
+  <div class="toc-item"><span class="n">15</span><span class="t">Dicas de ouro</span><span class="dots"></span></div>
+  <div class="toc-item"><span class="n">16</span><span class="t">Boas práticas &amp; erros comuns</span><span class="dots"></span></div>
+  <div class="toc-item"><span class="n">17</span><span class="t">Sua primeira semana na Focali (checklist)</span><span class="dots"></span></div>
+
+  <div class="callout info" style="margin-top:26px;">
+    <b>💡 Como ler este manual</b>
+    Você não precisa ler tudo de uma vez. Comece pelas seções 01, 02 e 14 (o fluxo ideal) —
+    elas explicam o método. Depois, use as seções de módulos como consulta, conforme for
+    explorando a plataforma. Ao longo do manual, os exemplos usam a <strong>Ana</strong>,
+    uma estudante fictícia que se prepara para um concurso de Tribunal de Contas.
+  </div>
+  <div class="footer-note"><span>focali · Manual do Usuário</span><span>Sumário</span></div>
+</div>
+
+<!-- ════════════════ 01 INTRODUÇÃO ════════════════ -->
+<div class="page">
+  <div class="sec-kicker">Seção 01</div>
+  <h2 class="sec">Introdução</h2>
+  <div class="sec-rule"></div>
+
+  <h3>O que é a Focali?</h3>
+  <p class="lead">A Focali é uma plataforma completa de gestão de estudos para quem se prepara para
+  concursos públicos e provas de longo prazo. Ela reúne, em um só lugar, tudo o que costuma ficar
+  espalhado em planilhas, cadernos e aplicativos diferentes:</p>
+  <ul>
+    <li><strong>Planejamento</strong> — agenda, ciclo de estudos e plano diário automático;</li>
+    <li><strong>Execução</strong> — timer de estudo, modo foco e registro rápido de sessões;</li>
+    <li><strong>Memorização</strong> — revisões espaçadas, flashcards e caderno de erros;</li>
+    <li><strong>Conteúdo</strong> — Vade Mecum com dezenas de leis, jurisprudências curadas e catálogo de editais reais;</li>
+    <li><strong>Evolução</strong> — estatísticas, conquistas, sequência de dias (streak) e comparação com amigos.</li>
+  </ul>
+
+  <h3>Para quem é?</h3>
+  <p>Para <strong>concurseiros</strong> em qualquer fase — do iniciante que acabou de escolher um concurso
+  ao veterano na reta final de um edital publicado. Também funciona muito bem para estudantes de OAB,
+  residências e qualquer prova em que <em>constância + revisão</em> decidem o resultado.</p>
+
+  <h3>Como a Focali ajuda (de verdade)</h3>
+  <div class="two-col">
+    <div class="modbox">
+      <h4>🧭 Ela decide o "o que estudar agora" por você</h4>
+      <p style="font-size:9.3pt; margin:0;">Todo dia, o <strong>Plano de Hoje</strong> monta sua fila: revisões que vencem hoje,
+      matérias do seu ciclo e flashcards pendentes. Você abre a Home e começa — sem gastar energia decidindo.</p>
+    </div>
+    <div class="modbox">
+      <h4>🧠 Ela lembra pelo que você já estudou</h4>
+      <p style="font-size:9.3pt; margin:0;">Cada sessão registrada gera revisões futuras em intervalos crescentes
+      (revisão espaçada). O conteúdo volta para você na hora certa — antes de o esquecimento vencer.</p>
+    </div>
+  </div>
+  <div class="two-col">
+    <div class="modbox">
+      <h4>🎯 Ela conecta seu estudo ao edital</h4>
+      <p style="font-size:9.3pt; margin:0;">Ao ativar um concurso do catálogo, as matérias e tópicos do edital viram
+      sua estrutura de estudo. Você enxerga a <strong>cobertura</strong>: o que já viu, o que falta e onde está fraco.</p>
+    </div>
+    <div class="modbox">
+      <h4>🔥 Ela transforma constância em hábito</h4>
+      <p style="font-size:9.3pt; margin:0;">Sequência de dias com perdão, conquistas, heatmap anual e ranking de
+      consistência com amigos. A plataforma celebra o processo — porque é ele que aprova.</p>
+    </div>
+  </div>
+
+  <div class="callout tip">
+    <b>💡 A ideia central</b>
+    A Focali não é um "banco de videoaulas" — é o <strong>sistema operacional da sua aprovação</strong>.
+    Você estuda pelo material que preferir; a Focali garante que esse estudo seja planejado,
+    registrado, revisado e medido. É essa engrenagem que separa quem "estuda muito" de quem evolui.
+  </div>
+  <div class="footer-note"><span>focali · Manual do Usuário</span><span>01 · Introdução</span></div>
+</div>
+
+<!-- ════════════════ 02 PRIMEIROS PASSOS ════════════════ -->
+<div class="page">
+  <div class="sec-kicker">Seção 02</div>
+  <h2 class="sec">Primeiros passos</h2>
+  <div class="sec-rule"></div>
+
+  <h3>1. Criar sua conta</h3>
+  <div class="steps">
+    <div class="step"><span class="step-n"></span><div>Acesse a página de login e clique em <strong>Criar conta</strong> (canto superior direito).</div></div>
+    <div class="step"><span class="step-n"></span><div>Informe seu <strong>nome</strong>, <strong>e-mail</strong> e uma <strong>senha</strong> (mínimo de 6 caracteres).</div></div>
+    <div class="step"><span class="step-n"></span><div>Ao clicar em <strong>Criar conta</strong>, você concorda com os Termos de Uso e a Política de Privacidade — e já entra na plataforma.</div></div>
+    <div class="step"><span class="step-n"></span><div>Esqueceu a senha? Use <strong>"Esqueci minha senha"</strong> na tela de login para receber um link de redefinição por e-mail.</div></div>
+  </div>
+
+  <h3>2. Conhecer a navegação</h3>
+  <div class="two-col">
+    <div>
+      <p>A barra lateral esquerda organiza tudo em <strong>4 grupos que contam uma história</strong>:</p>
+      <ul style="font-size:9.5pt;">
+        <li><strong>Estudar hoje</strong> — o que fazer agora: Revisões e Flashcards;</li>
+        <li><strong>Organizar</strong> — seu planejamento: Agenda, Matérias e Concursos;</li>
+        <li><strong>Conteúdo</strong> — material de consulta: Jurisprudências, Vade Mecum e Caderno;</li>
+        <li><strong>Progresso</strong> — seus resultados: Progresso e Amigos.</li>
+      </ul>
+      <p style="font-size:9.5pt;">No topo, o botão <strong>+ Registrar</strong> lança sessões de qualquer lugar.</p>
+      <div class="callout tip" style="font-size:9pt;">
+        <b>⌨️ Atalho que muda o jogo</b>
+        <strong>Ctrl+K</strong> (⌘K no Mac) abre a paleta de comandos: pesquise telas,
+        veja <strong>recentes</strong> e fixe <strong>favoritos</strong>.
+      </div>
+    </div>
+    <div style="flex:0 0 210px;">
+      <div class="mock" style="background:#fff;">
+        <div class="mock-label">Barra lateral</div>
+        <div class="sidebar-mock">
+          <div style="font-weight:700; font-size:10pt; margin-bottom:4px;">focali</div>
+          <div class="sb-item sb-active">🏠 Home</div>
+          <div class="sb-sep">Estudar hoje</div>
+          <div class="sb-item">🔄 Revisões</div>
+          <div class="sb-item">🗂️ Flashcards</div>
+          <div class="sb-sep">Organizar</div>
+          <div class="sb-item">🗓️ Agenda</div>
+          <div class="sb-item">📁 Matérias</div>
+          <div class="sb-item">📋 Concursos</div>
+          <div class="sb-sep">Conteúdo</div>
+          <div class="sb-item">⚖️ Jurisprudências</div>
+          <div class="sb-item">📖 Vade Mecum</div>
+          <div class="sb-item">✏️ Caderno</div>
+          <div class="sb-sep">Progresso</div>
+          <div class="sb-item">📊 Progresso</div>
+          <div class="sb-item">👥 Amigos</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h3>3. Entender a estrutura</h3>
+  <p>Tudo na Focali se conecta em uma hierarquia simples:</p>
+  <div class="mock">
+    <div class="mrow" style="justify-content:flex-start; gap:6px; flex-wrap:wrap; font-size:9pt;">
+      <span class="chip chip-indigo" style="font-size:8.6pt; padding:5px 12px;">🎯 Concurso (ex.: TCE-GO)</span>
+      <span class="muted">→</span>
+      <span class="chip chip-green" style="font-size:8.6pt; padding:5px 12px;">📁 Matérias (ex.: Contabilidade)</span>
+      <span class="muted">→</span>
+      <span class="chip chip-gray" style="font-size:8.6pt; padding:5px 12px;">📌 Tópicos (ex.: Balanço Patrimonial)</span>
+      <span class="muted">→</span>
+      <span class="chip chip-amber" style="font-size:8.6pt; padding:5px 12px;">⏱️ Sessões &amp; 🔄 Revisões</span>
+    </div>
+  </div>
+  <p style="font-size:9.5pt;">Você pode começar de dois jeitos: <strong>ativar um concurso do catálogo</strong>
+  (matérias e tópicos do edital são criados automaticamente — o caminho recomendado) ou
+  <strong>criar suas matérias manualmente</strong> em Matérias.</p>
+  <div class="footer-note"><span>focali · Manual do Usuário</span><span>02 · Primeiros passos</span></div>
+</div>
+
+<!-- ════════════════ 03 HOME ════════════════ -->
+<div class="page">
+  <div class="sec-kicker">Seção 03 · Módulos</div>
+  <h2 class="sec">Home &amp; Plano de Hoje</h2>
+  <div class="sec-rule"></div>
+
+  <p><strong>O que é:</strong> a primeira tela após o login — seu painel de ação diária.
+  <strong>Para que serve:</strong> responder em segundos à pergunta "o que eu faço agora?".</p>
+
+  <div class="mock">
+    <div class="mock-label">Home da Ana — exemplo simulado</div>
+    <div class="mcard">
+      <div class="mrow">
+        <div style="font-weight:700; color:var(--ink); font-size:10.5pt;">Bom dia, Ana! 👋</div>
+        <span class="chip chip-amber">🔥 12 dias seguidos</span>
+      </div>
+      <div style="font-size:8.6pt; color:var(--ink-faint);">Faltam 87 dias para a sua prova · TCE-GO Técnico</div>
+    </div>
+    <div class="mcard">
+      <div style="font-weight:600; color:var(--ink); margin-bottom:6px;">📋 Plano de Hoje <span class="chip chip-gray">3 blocos · ~2h10</span></div>
+      <div class="mrow" style="margin-bottom:5px;"><span>🔄 Revisões vencendo hoje</span><span class="chip chip-red">18 itens</span></div>
+      <div class="mrow" style="margin-bottom:5px;"><span>📁 Contabilidade Pública — próxima do ciclo</span><span class="chip chip-green">50 min</span></div>
+      <div class="mrow"><span>🗂️ Flashcards pendentes</span><span class="chip chip-indigo">12 cards</span></div>
+    </div>
+    <div class="mcard">
+      <div class="mrow"><span style="font-weight:600; color:var(--ink);">Sua semana</span><span style="font-size:8.4pt;">Meta: 5 dias · <b style="color:#15803D;">4 concluídos</b></span></div>
+      <div class="pbar"><div class="pfill" style="width:80%;"></div></div>
+    </div>
+  </div>
+
+  <h4>Como usar (passo a passo)</h4>
+  <div class="steps">
+    <div class="step"><span class="step-n"></span><div>Abra a Home e leia o <strong>Plano de Hoje</strong> — ele já vem montado com revisões vencidas, a próxima matéria do seu ciclo (ou bloco da agenda) e flashcards pendentes.</div></div>
+    <div class="step"><span class="step-n"></span><div>Comece <strong>pelas revisões</strong> — elas têm prazo; o conteúdo novo pode esperar, o esquecimento não.</div></div>
+    <div class="step"><span class="step-n"></span><div>Clique em cada bloco para ir direto à ação (a fila de revisão, o timer da matéria, os flashcards).</div></div>
+    <div class="step"><span class="step-n"></span><div>Acompanhe o painel da semana: dias ativos vs. sua meta, tempo estudado e sequência.</div></div>
+  </div>
+
+  <h4>Dicas práticas</h4>
+  <ul style="font-size:9.5pt;">
+    <li>A Home tem um <strong>coach embutido</strong>: se você passar dias sem estudar, ela oferece o <strong>modo retomada</strong> — um plano leve para voltar sem culpa. Aceite; recomeçar pequeno vence recomeçar "perfeito".</li>
+    <li>Sua <strong>sequência (streak) tem perdão</strong>: um dia perdido de vez em quando não zera tudo. Use isso como rede de segurança, não como hábito.</li>
+    <li>Ficou 100% do plano concluído? A plataforma celebra com você — tire print e compartilhe o card de progresso.</li>
+  </ul>
+
+  <div class="callout err">
+    <b>❌ Erro comum</b>
+    Ignorar o Plano de Hoje e "estudar o que der vontade". O plano existe justamente para proteger
+    você da armadilha de estudar só o que gosta — e deixar as revisões (e as matérias chatas) acumularem.
+  </div>
+  <div class="footer-note"><span>focali · Manual do Usuário</span><span>03 · Home &amp; Plano de Hoje</span></div>
+</div>
+
+<!-- ════════════════ 04 REGISTRAR ════════════════ -->
+<div class="page">
+  <div class="sec-kicker">Seção 04 · Módulos</div>
+  <h2 class="sec">Registrar estudo</h2>
+  <div class="sec-rule"></div>
+
+  <p><strong>O que é:</strong> o coração da plataforma — toda sessão de estudo vira um registro com matéria,
+  tópico, tempo e (se quiser) questões feitas e nível de energia.
+  <strong>Para que serve:</strong> sem registro não há revisão agendada, estatística, streak nem ranking.
+  <em>O que não é registrado, para a Focali, não aconteceu.</em></p>
+
+  <h4>Dois jeitos de registrar</h4>
+  <div class="two-col">
+    <div class="modbox">
+      <h4 style="margin-top:0;">⏱️ Timer (ao vivo)</h4>
+      <p style="font-size:9.2pt; margin-bottom:4px;">Escolha a matéria/tópico e dê play. Ideal para a sessão que está acontecendo agora.</p>
+      <ul style="font-size:9pt; margin-bottom:0;">
+        <li>Ative o <strong>Modo Foco</strong> para uma tela limpa, sem distrações;</li>
+        <li>Ao parar, confirme os detalhes e salve.</li>
+      </ul>
+    </div>
+    <div class="modbox">
+      <h4 style="margin-top:0;">⚡ Registro rápido (+ Registrar)</h4>
+      <p style="font-size:9.2pt; margin-bottom:4px;">Estudou fora da plataforma (PDF, videoaula, aula presencial)? Lance depois, em segundos.</p>
+      <ul style="font-size:9pt; margin-bottom:0;">
+        <li>Botão <strong>+ Registrar</strong> no topo de qualquer tela;</li>
+        <li>Informe matéria, tópico, duração e pronto.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="mock">
+    <div class="mock-label">Registro de sessão — exemplo simulado</div>
+    <div class="mcard">
+      <div class="mrow" style="margin-bottom:6px;">
+        <span><b style="color:var(--ink);">Contabilidade Pública</b> · Balanço Patrimonial</span>
+        <span class="chip chip-green">50 min</span>
+      </div>
+      <div class="mrow" style="font-size:8.8pt; margin-bottom:8px;">
+        <span>Questões: <b style="color:var(--ink);">18 feitas · 14 acertos (78%)</b></span>
+        <span>Energia: ⚡⚡⚡</span>
+      </div>
+      <div style="display:flex; gap:8px;">
+        <span class="btn-mock btn-primary">Salvar sessão</span>
+        <span class="btn-mock btn-ghost">Cancelar</span>
+      </div>
+    </div>
+    <div style="font-size:8.4pt; color:var(--ink-faint); margin-top:6px;">→ Ao salvar: revisões futuras são agendadas, o Plano de Hoje é atualizado e a sessão entra nas estatísticas e no ranking.</div>
+  </div>
+
+  <h4>Dicas práticas</h4>
+  <ul style="font-size:9.5pt;">
+    <li><strong>Registre a quantidade de questões e acertos</strong> sempre que resolver exercícios — é esse dado que alimenta suas estatísticas de desempenho por matéria.</li>
+    <li>Escolha o <strong>tópico</strong>, não só a matéria. "Direito Administrativo — 50 min" diz pouco; "Atos administrativos — 50 min" permite que a revisão e a cobertura do edital funcionem com precisão.</li>
+    <li>Sessões passivas também contam: leituras no Vade Mecum, revisões e flashcards feitos dentro da plataforma são registrados automaticamente.</li>
+  </ul>
+
+  <div class="callout warn">
+    <b>⚠️ Atenção</b>
+    Não acumule registros para lançar "depois". A memória do fim do dia é generosa — a tendência é
+    superestimar tempo e esquecer tópicos. Registre logo após cada sessão (leva menos de 30 segundos).
+  </div>
+  <div class="callout err">
+    <b>❌ Erro comum</b>
+    Usar o timer e abandonar a aba sem salvar. A sessão só existe depois do <strong>Salvar</strong> —
+    confira o toast de confirmação antes de fechar.
+  </div>
+  <div class="footer-note"><span>focali · Manual do Usuário</span><span>04 · Registrar estudo</span></div>
+</div>
+
+<!-- ════════════════ 05 REVISÕES ════════════════ -->
+<div class="page">
+  <div class="sec-kicker">Seção 05 · Módulos</div>
+  <h2 class="sec">Revisões — a fila que faz você lembrar</h2>
+  <div class="sec-rule"></div>
+
+  <p><strong>O que é:</strong> uma fila única (<em>Revisões</em>, no menu) que reúne tudo o que vence hoje:
+  tópicos estudados, flashcards e itens de jurisprudência/lei seca.
+  <strong>Para que serve:</strong> vencer a curva do esquecimento. Sem revisão, você perde a maior parte
+  do que estudou em poucos dias — a fila devolve o conteúdo na hora certa, em intervalos crescentes.</p>
+
+  <div class="mock">
+    <div class="mock-label">Fila de revisão da Ana — exemplo simulado</div>
+    <div class="mcard">
+      <div class="mrow" style="margin-bottom:4px;">
+        <span class="chip chip-indigo">Direito Constitucional</span>
+        <span style="font-size:8.2pt;" class="muted">item 3 de 18</span>
+      </div>
+      <div style="font-weight:600; color:var(--ink); margin-bottom:8px;">Remédios constitucionais — quem pode impetrar habeas data?</div>
+      <div style="display:flex; gap:8px;">
+        <span class="btn-mock btn-red">Esqueci</span>
+        <span class="btn-mock btn-amberb">Errei</span>
+        <span class="btn-mock btn-green">Lembrei</span>
+      </div>
+    </div>
+    <div style="font-size:8.4pt; color:var(--ink-faint); margin-top:6px;">→ Sua resposta define quando o item volta: "Lembrei" espaça mais; "Errei" e "Esqueci" trazem o item de volta logo.</div>
+  </div>
+
+  <h4>Como usar (passo a passo)</h4>
+  <div class="steps">
+    <div class="step"><span class="step-n"></span><div>Abra <strong>Revisões</strong> (ou clique no bloco de revisões do Plano de Hoje).</div></div>
+    <div class="step"><span class="step-n"></span><div>Para cada item, <strong>tente lembrar antes de revelar</strong> — o esforço de recuperar da memória é exatamente o que fortalece a retenção.</div></div>
+    <div class="step"><span class="step-n"></span><div>Avalie com honestidade: <strong>Lembrei</strong>, <strong>Errei</strong> ou <strong>Esqueci</strong>. Não há nota — há calibragem do seu cronograma.</div></div>
+    <div class="step"><span class="step-n"></span><div>Precisa pular um item? Use <strong>pular</strong> — ele volta depois, sem travar a fila.</div></div>
+  </div>
+
+  <h4>Dicas práticas</h4>
+  <ul style="font-size:9.5pt;">
+    <li><strong>Zere a fila diariamente.</strong> 15 itens por dia é tranquilo; 150 acumulados em duas semanas é desanimador. Constância aqui vale mais que em qualquer outro módulo.</li>
+    <li>Marcar "Esqueci" <strong>não é fracasso</strong> — é informação. O sistema encurta o intervalo e o item volta mais cedo. Mentir "Lembrei" só engana seu cronograma.</li>
+    <li>Itens marcados como "Errei" voltam ainda na mesma sessão — encare como um mini-treino imediato.</li>
+  </ul>
+
+  <div class="callout tip">
+    <b>💡 Por que intervalos crescentes?</b>
+    Cada vez que você recupera uma informação com sucesso, ela pode esperar mais tempo até a próxima
+    revisão (1 dia → alguns dias → semanas...). É o método com mais evidência científica para retenção
+    de longo prazo — e a Focali faz toda a conta por você.
+  </div>
+  <div class="callout err">
+    <b>❌ Erro comum</b>
+    Estudar conteúdo novo todos os dias e "deixar as revisões para o fim de semana". No sábado a fila
+    estará gigante, você vai revisar no cansaço — ou não vai revisar. Revisão vem <strong>antes</strong> do conteúdo novo.
+  </div>
+  <div class="footer-note"><span>focali · Manual do Usuário</span><span>05 · Revisões</span></div>
+</div>
+
+<!-- ════════════════ 06 FLASHCARDS ════════════════ -->
+<div class="page">
+  <div class="sec-kicker">Seção 06 · Módulos</div>
+  <h2 class="sec">Flashcards &amp; Banco de Flashcards</h2>
+  <div class="sec-rule"></div>
+
+  <p><strong>O que é:</strong> cartões de pergunta-e-resposta organizados em baralhos (decks) por matéria,
+  revisados dentro da mesma lógica de repetição espaçada.
+  <strong>Para que serve:</strong> memorizar o que é "decoreba de alto valor" — prazos, competências,
+  exceções, súmulas, definições — em sessões curtas de altíssimo rendimento.</p>
+
+  <div class="two-col">
+    <div class="mock">
+      <div class="mock-label">Frente</div>
+      <div class="mcard" style="min-height:70px; display:flex; align-items:center; justify-content:center; text-align:center;">
+        <div style="font-weight:600; color:var(--ink);">Qual o prazo do mandado de segurança?</div>
+      </div>
+    </div>
+    <div class="mock">
+      <div class="mock-label">Verso</div>
+      <div class="mcard" style="min-height:70px; display:flex; align-items:center; justify-content:center; text-align:center; background:var(--teal-soft); border-color:#BBF0CE;">
+        <div style="color:#166534; font-size:9.4pt;"><b>120 dias</b>, contados da ciência do ato impugnado (prazo decadencial).</div>
+      </div>
+    </div>
+  </div>
+
+  <h4>Como usar (passo a passo)</h4>
+  <div class="steps">
+    <div class="step"><span class="step-n"></span><div>Em <strong>Flashcards</strong>, crie um baralho por matéria (ex.: "Constitucional — prazos e quóruns").</div></div>
+    <div class="step"><span class="step-n"></span><div>Crie cards curtos: <strong>uma pergunta, uma resposta</strong>. Card longo é resumo disfarçado — divida em vários.</div></div>
+    <div class="step"><span class="step-n"></span><div>Explore a aba <strong>Banco</strong>: baralhos prontos e curados (ex.: centenas de cards de Direito Constitucional) que você ativa com um clique.</div></div>
+    <div class="step"><span class="step-n"></span><div>Estude os cards do dia pela fila — responda mentalmente, revele e avalie com sinceridade.</div></div>
+  </div>
+
+  <h4>Dicas práticas</h4>
+  <ul style="font-size:9.5pt;">
+    <li>A regra de ouro: <strong>pergunta que cobra um fato só</strong>. "O que é X, quais os requisitos e exceções?" vira 3 cards, não 1.</li>
+    <li>Errou uma questão no simulado? Transforme o erro em flashcard na hora — a Focali inclusive <strong>sugere flashcards a partir dos erros do seu Caderno</strong>.</li>
+    <li>Flashcards são ótimos para "janelas mortas": fila, transporte, sala de espera. 10 minutos rendem 20–30 cards.</li>
+  </ul>
+
+  <div class="callout err">
+    <b>❌ Erro comum</b>
+    Criar 200 cards no primeiro dia e nunca revisá-los. O valor do flashcard está na <strong>revisão
+    repetida</strong>, não na criação. Prefira 10 cards por dia, todos revisados, a uma coleção intocada.
+  </div>
+  <div class="footer-note"><span>focali · Manual do Usuário</span><span>06 · Flashcards</span></div>
+</div>
+
+<!-- ════════════════ 07 CADERNO ════════════════ -->
+<div class="page">
+  <div class="sec-kicker">Seção 07 · Módulos</div>
+  <h2 class="sec">Caderno — anotações e caderno de erros</h2>
+  <div class="sec-rule"></div>
+
+  <p><strong>O que é:</strong> seu caderno digital unificado, com três abas: <strong>Tudo</strong> (busca em
+  todas as suas anotações, inclusive as feitas no Vade Mecum e nas Jurisprudências), <strong>Anotações</strong>
+  (notas por matéria/tópico com editor rico) e <strong>Erros</strong> (seu caderno de erros).
+  <strong>Para que serve:</strong> centralizar o que você produz estudando — e transformar erro em aprendizado.</p>
+
+  <div class="mock">
+    <div class="mock-label">Caderno de erros da Ana — exemplo simulado</div>
+    <div class="mcard">
+      <div class="mrow" style="margin-bottom:4px;">
+        <span><span class="chip chip-indigo">Contabilidade</span> <span class="chip chip-gray">FCC · 2024</span></span>
+        <span class="chip chip-red">Erro de conceito</span>
+      </div>
+      <div style="font-size:9.2pt; color:var(--ink); margin-bottom:4px;"><b>Questão:</b> classificação de restos a pagar processados vs. não processados.</div>
+      <div style="font-size:9pt;"><b>Por que errei:</b> confundi o momento da liquidação. <b>Como não errar mais:</b> processado = já liquidado (só falta pagar); não processado = empenhado, ainda não liquidado.</div>
+    </div>
+    <div style="font-size:8.4pt; color:var(--ink-faint); margin-top:6px;">→ Filtros por matéria, banca e tipo de erro ajudam a enxergar padrões antes da prova.</div>
+  </div>
+
+  <h4>Como usar (passo a passo)</h4>
+  <div class="steps">
+    <div class="step"><span class="step-n"></span><div><strong>Errou uma questão?</strong> Registre na aba Erros: enunciado (ou resumo), por que errou e como não errar de novo. Essa última parte é a mais importante.</div></div>
+    <div class="step"><span class="step-n"></span><div>Classifique o tipo de erro: falta de conteúdo, interpretação, desatenção, chute. Cada tipo pede um remédio diferente.</div></div>
+    <div class="step"><span class="step-n"></span><div>Nas <strong>Anotações</strong>, mantenha notas enxutas por tópico — o editor aceita formatação, listas e imagens.</div></div>
+    <div class="step"><span class="step-n"></span><div>Use a aba <strong>Tudo</strong> como buscador: um termo (ex.: "restos a pagar") encontra anotações, erros e notas feitas no Vade Mecum.</div></div>
+  </div>
+
+  <h4>Dicas práticas</h4>
+  <ul style="font-size:9.5pt;">
+    <li>Na semana da prova, <strong>releia só o caderno de erros</strong> — é o resumo mais personalizado que existe: 100% feito de lacunas suas.</li>
+    <li>Erro recorrente do mesmo tópico = sinal de revisão insuficiente. Volte ao tópico, refaça questões e crie flashcards (a plataforma sugere cards a partir dos erros).</li>
+    <li>Anote com suas palavras. Copiar e colar doutrina não gera retenção — reformular, sim.</li>
+  </ul>
+
+  <div class="callout err">
+    <b>❌ Erro comum</b>
+    Registrar apenas a questão errada, sem o "por que errei". Meses depois, você relê e não aprende nada.
+    O diagnóstico do erro vale mais que o enunciado.
+  </div>
+  <div class="footer-note"><span>focali · Manual do Usuário</span><span>07 · Caderno</span></div>
+</div>
+
+<!-- ════════════════ 08 MATÉRIAS ════════════════ -->
+<div class="page">
+  <div class="sec-kicker">Seção 08 · Módulos</div>
+  <h2 class="sec">Matérias &amp; tópicos</h2>
+  <div class="sec-rule"></div>
+
+  <p><strong>O que é:</strong> o cadastro-base da sua estrutura de estudo — cada matéria tem cor própria
+  e uma lista de tópicos. <strong>Para que serve:</strong> tudo na plataforma (sessões, revisões, agenda,
+  estatísticas, cobertura do edital) se organiza por matéria e tópico.</p>
+
+  <div class="mock">
+    <div class="mock-label">Matérias da Ana — exemplo simulado</div>
+    <div class="two-col">
+      <div class="mcard" style="border-left:4px solid #6366F1;">
+        <b style="color:var(--ink);">Direito Constitucional</b>
+        <div style="font-size:8.6pt;">24 tópicos · 18h estudadas</div>
+        <div class="pbar"><div class="pfill" style="width:62%;"></div></div>
+      </div>
+      <div class="mcard" style="border-left:4px solid #22C55E;">
+        <b style="color:var(--ink);">Contabilidade Pública</b>
+        <div style="font-size:8.6pt;">31 tópicos · 22h estudadas</div>
+        <div class="pbar"><div class="pfill" style="width:48%;"></div></div>
+      </div>
+      <div class="mcard" style="border-left:4px solid #D97706;">
+        <b style="color:var(--ink);">Português</b>
+        <div style="font-size:8.6pt;">15 tópicos · 9h estudadas</div>
+        <div class="pbar"><div class="pfill" style="width:75%;"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <h4>Como usar (passo a passo)</h4>
+  <div class="steps">
+    <div class="step"><span class="step-n"></span><div>O caminho recomendado: <strong>ative um concurso do catálogo</strong> (seção 10) — matérias e tópicos do edital são criados prontos.</div></div>
+    <div class="step"><span class="step-n"></span><div>Para conteúdo próprio, clique em <strong>Nova matéria</strong>, escolha nome e cor, e adicione os tópicos.</div></div>
+    <div class="step"><span class="step-n"></span><div>Terminou um assunto ou mudou de concurso? <strong>Arquive</strong> em vez de excluir — o histórico é preservado e a ação é reversível (com Desfazer).</div></div>
+  </div>
+
+  <h4>Dicas práticas</h4>
+  <ul style="font-size:9.5pt;">
+    <li>Tópicos no <strong>tamanho de uma sessão</strong> (45–90 min de estudo). Tópico gigante ("Direito Administrativo inteiro") impede a revisão espaçada de ser precisa.</li>
+    <li>A plataforma <strong>avisa se você tentar criar uma matéria duplicada</strong> — se ela já existir no catálogo do seu edital, prefira adotar a oficial.</li>
+    <li>Use as cores com intenção (ex.: tons frios para Direito, quentes para exatas) — elas aparecem na agenda, nos gráficos e nas revisões.</li>
+  </ul>
+
+  <div class="callout warn">
+    <b>⚠️ Atenção</b>
+    Não crie duas versões da mesma matéria (uma manual, outra do edital). Isso divide suas estatísticas
+    e sua fila de revisões em dois lugares. Se acontecer, unifique mantendo a versão ligada ao concurso.
+  </div>
+  <div class="footer-note"><span>focali · Manual do Usuário</span><span>08 · Matérias</span></div>
+</div>
+
+<!-- ════════════════ 09 AGENDA ════════════════ -->
+<div class="page">
+  <div class="sec-kicker">Seção 09 · Módulos</div>
+  <h2 class="sec">Agenda &amp; Ciclo de estudos</h2>
+  <div class="sec-rule"></div>
+
+  <p><strong>O que é:</strong> o módulo de planejamento, com as visões <strong>Cronograma</strong> (semana)
+  e <strong>Calendário</strong> (mês) — e a ferramenta favorita dos concurseiros: o <strong>ciclo de estudos</strong>.</p>
+
+  <h4>Agenda fixa ou ciclo? Entenda a diferença</h4>
+  <table class="tb">
+    <tr><th style="width:26%;">Modelo</th><th>Como funciona</th><th>Ideal para</th></tr>
+    <tr><td><b>Agenda fixa</b></td><td>Blocos de matéria em dias e horários definidos ("terça, 19h: Português").</td><td>Rotina previsível, mesmos horários toda semana.</td></tr>
+    <tr><td><b>Ciclo de estudos</b></td><td>Sequência de blocos por matéria (ex.: 50 min cada), <b>sem dia nem hora marcada</b> — estudou um bloco, avança para o próximo até completar a volta.</td><td>Rotina imprevisível. Você nunca "atrasa" — só continua de onde parou.</td></tr>
+  </table>
+
+  <div class="mock">
+    <div class="mock-label">Ciclo da Ana — 210 min por volta · exemplo simulado</div>
+    <div class="mcard">
+      <div style="display:flex; gap:4px; margin-bottom:8px;">
+        <div style="flex:5; background:#22C55E; height:16px; border-radius:6px 0 0 6px;"></div>
+        <div style="flex:5; background:#6366F1; height:16px;"></div>
+        <div style="flex:4; background:#D97706; height:16px;"></div>
+        <div style="flex:4; background:#CBD5E1; height:16px;"></div>
+        <div style="flex:3; background:#E2E8F0; height:16px; border-radius:0 6px 6px 0;"></div>
+      </div>
+      <div class="mrow" style="font-size:8.6pt; flex-wrap:wrap; gap:4px;">
+        <span>🟩 Contabilidade 50' ✓</span><span>🟪 Constitucional 50' ✓</span><span>🟧 Português 40' ✓</span><span>⬜ Controle Externo 40'</span><span>⬜ Informática 30'</span>
+      </div>
+      <div style="font-size:8.4pt; color:var(--ink-faint); margin-top:6px;">Volta atual: 140/210 min — faltam 2 blocos. Qualquer sessão registrada na matéria certa credita o bloco automaticamente.</div>
+    </div>
+  </div>
+
+  <h4>Como usar (passo a passo)</h4>
+  <div class="steps">
+    <div class="step"><span class="step-n"></span><div>Em <strong>Agenda</strong>, escolha seu modelo: monte blocos fixos no Cronograma ou configure seu ciclo com matérias e minutos por bloco.</div></div>
+    <div class="step"><span class="step-n"></span><div>Dimensione os blocos pelo <strong>peso da matéria no edital</strong> e pela sua dificuldade: matéria com mais questões (ou em que você é mais fraco) ganha mais minutos.</div></div>
+    <div class="step"><span class="step-n"></span><div>Estude e registre normalmente — o progresso do ciclo avança sozinho, e o Plano de Hoje sempre sugere o próximo bloco.</div></div>
+    <div class="step"><span class="step-n"></span><div>Não deu para cumprir o planejado? Use o <strong>replanejamento</strong> para redistribuir a semana sem culpa.</div></div>
+  </div>
+
+  <h4>Dicas práticas</h4>
+  <ul style="font-size:9.5pt;">
+    <li>No ciclo, <strong>nada "atrasa"</strong> — é acúmulo. Isso elimina a frustração do cronograma furado.</li>
+    <li>Revise o desenho do ciclo a cada 4–6 semanas (blocos de 40–60 min funcionam para a maioria).</li>
+  </ul>
+
+  <div class="callout err">
+    <b>❌ Erro comum</b>
+    Montar uma agenda "dos sonhos" com 8 horas diárias e abandoná-la na primeira semana. Planeje para a sua
+    semana <strong>real</strong> — meta cumprível gera constância; meta heroica gera desistência.
+  </div>
+  <div class="footer-note"><span>focali · Manual do Usuário</span><span>09 · Agenda &amp; Ciclo</span></div>
+</div>
+
+<!-- ════════════════ 10 CONCURSOS ════════════════ -->
+<div class="page">
+  <div class="sec-kicker">Seção 10 · Módulos</div>
+  <h2 class="sec">Concursos &amp; Hub de Editais</h2>
+  <div class="sec-rule"></div>
+
+  <p><strong>O que é:</strong> o módulo que liga seu estudo a um objetivo concreto. Em <strong>Concursos</strong>
+  você gerencia seus alvos; no <strong>Banco de Editais</strong> você explora um catálogo com dezenas de
+  editais reais (TCE-GO, TJ-GO, PM-GO, INSS, SEFAZ-GO, ALEGO e muitos outros), organizados por órgão,
+  com grade de matérias e tópicos curados a partir do edital oficial.</p>
+
+  <div class="mock">
+    <div class="mock-label">Hub do concurso da Ana — exemplo simulado</div>
+    <div class="mcard">
+      <div class="mrow" style="margin-bottom:6px;">
+        <div><b style="color:var(--ink); font-size:10pt;">TCE-GO — Técnico de Controle Externo</b><div style="font-size:8.4pt; color:var(--ink-faint);">Banca FCC · <span class="chip chip-green" style="font-size:7.4pt;">edital publicado</span> · 214 estudando</div></div>
+        <div style="text-align:center; background:var(--clay-soft); border-radius:10px; padding:4px 12px;"><b style="color:#4338CA; font-size:12pt;">87</b><div style="font-size:7.4pt; color:#4338CA;">dias p/ prova</div></div>
+      </div>
+      <div class="mrow" style="font-size:8.8pt; margin-bottom:4px;"><span>📚 Cobertura do edital</span><b style="color:var(--ink);">58% dos tópicos vistos</b></div>
+      <div class="pbar"><div class="pfill" style="width:58%;"></div></div>
+      <div style="font-size:8.6pt; margin-top:8px;">✅ Checklist: inscrição feita · ⬜ imprimir comprovante · ⬜ simulado 2 de véspera</div>
+    </div>
+  </div>
+
+  <h4>Como usar (passo a passo)</h4>
+  <div class="steps">
+    <div class="step"><span class="step-n"></span><div>Em <strong>Concursos</strong>, clique em adicionar e busque no <strong>catálogo</strong>. Achou seu edital? Ative — matérias e tópicos entram prontos, com os pesos do edital.</div></div>
+    <div class="step"><span class="step-n"></span><div>Seu concurso não está no catálogo? Use <strong>"Pedir edital"</strong> (a equipe prioriza a curadoria pelos pedidos) ou <strong>importe a grade</strong> manualmente.</div></div>
+    <div class="step"><span class="step-n"></span><div>Abra o hub do concurso para acompanhar: contagem regressiva, cobertura do edital, checklist de preparação e o Raio-X da sua prontidão.</div></div>
+    <div class="step"><span class="step-n"></span><div>A 30 dias da prova, a plataforma entra em clima de <strong>Reta Final</strong>: priorize revisões, caderno de erros e o checklist de véspera.</div></div>
+    <div class="step"><span class="step-n"></span><div>Prova feita? <strong>Arquive o concurso</strong> — as matérias exclusivas dele são arquivadas em cascata (e tudo volta se você restaurar).</div></div>
+  </div>
+
+  <h4>Dicas práticas</h4>
+  <ul style="font-size:9.5pt;">
+    <li>No Banco de Editais você também encontra <strong>comparador de editais</strong> e <strong>diff de retificação</strong> — útil para ver o que mudou quando sai edital novo do mesmo órgão.</li>
+    <li>Estude olhando os <strong>pesos</strong>: a grade curada reflete a proporção real de questões por matéria. Não dê o mesmo tempo para uma matéria de 5 questões e uma de 20.</li>
+    <li>Pode manter mais de um concurso ativo — mas eleja um <strong>principal</strong> e deixe os demais como "carona" (estude pelo edital mais completo).</li>
+  </ul>
+
+  <div class="callout tip">
+    <b>💡 Selo "N estudando"</b>
+    Os editais do catálogo mostram quantas pessoas estão estudando para eles na Focali — bom termômetro
+    de concorrência (e de companhia: você não está sozinho).
+  </div>
+  <div class="footer-note"><span>focali · Manual do Usuário</span><span>10 · Concursos &amp; Editais</span></div>
+</div>
+
+<!-- ════════════════ 11 VADE MECUM & JURIS ════════════════ -->
+<div class="page">
+  <div class="sec-kicker">Seção 11 · Módulos</div>
+  <h2 class="sec">Vade Mecum &amp; Jurisprudências</h2>
+  <div class="sec-rule"></div>
+
+  <h3 style="margin-top:6px;">📖 Vade Mecum</h3>
+  <p><strong>O que é:</strong> dezenas de leis essenciais (Constituição, códigos, leis penais e
+  administrativas, LRF e mais) em leitura limpa, organizada por disciplina, sincronizada com a fonte
+  oficial. <strong>Para que serve:</strong> lei seca é a maior fonte de questões de concurso — aqui você
+  lê, grifa, anota e treina no mesmo lugar.</p>
+
+  <div class="mock">
+    <div class="mock-label">Artigo com questão — exemplo simulado</div>
+    <div class="mcard">
+      <div style="font-size:8.4pt; color:var(--ink-faint); margin-bottom:2px;">CF/88 · Art. 37, caput</div>
+      <div style="font-size:9.2pt; color:var(--ink); margin-bottom:8px;">"A administração pública direta e indireta [...] obedecerá aos princípios de legalidade, impessoalidade, moralidade, publicidade e eficiência [...]"</div>
+      <div style="background:var(--clay-soft); border-radius:10px; padding:8px 10px; font-size:8.8pt; color:#3730A3;">
+        <b>⚡ Treine agora (Certo/Errado):</b> "O princípio da eficiência foi incluído no texto constitucional pela EC 19/1998."
+        <div style="margin-top:5px;"><span class="btn-mock btn-green" style="font-size:8pt; padding:3px 12px;">Certo</span> <span class="btn-mock btn-red" style="font-size:8pt; padding:3px 12px;">Errado</span></div>
+      </div>
+    </div>
+  </div>
+
+  <ul style="font-size:9.5pt;">
+    <li>Responda as <strong>questões Certo/Errado</strong> geradas por artigo — errou? O artigo entra no seu radar de revisão.</li>
+    <li>Suas <strong>anotações nos artigos</strong> aparecem também na busca do Caderno (aba Tudo).</li>
+    <li>Filtre por disciplina do seu edital e priorize os artigos com <strong>maior incidência</strong> em prova.</li>
+    <li>A legislação é <strong>monitorada contra a fonte oficial</strong> — quando uma lei muda, a plataforma sinaliza.</li>
+  </ul>
+
+  <h3>⚖️ Jurisprudências</h3>
+  <p><strong>O que é:</strong> banco curado com centenas de julgados e súmulas do STF e STJ, com busca,
+  filtros e avisos de superação (quando um entendimento deixou de valer). Você também pode cadastrar
+  julgados próprios. <strong>Para que serve:</strong> bancas adoram cobrar "conforme o entendimento do STF" —
+  aqui você estuda e revisa esses entendimentos com o mesmo sistema de repetição espaçada.</p>
+  <div class="steps">
+    <div class="step"><span class="step-n"></span><div>Explore o banco por tema, tribunal ou pesquisa livre.</div></div>
+    <div class="step"><span class="step-n"></span><div>Marque os julgados relevantes para o seu edital e <strong>adicione-os às suas revisões</strong>.</div></div>
+    <div class="step"><span class="step-n"></span><div>Fique atento ao aviso de <strong>entendimento superado</strong> — estudar jurisprudência velha é pior que não estudar.</div></div>
+  </div>
+
+  <div class="callout warn">
+    <b>⚠️ Atenção</b>
+    Vade Mecum e Jurisprudências são módulos de <strong>consulta ativa</strong>, não de leitura passiva sem fim.
+    Entre neles com missão (ex.: "ler os artigos de licitação do meu edital e responder as questões") — e saia.
+  </div>
+  <div class="footer-note"><span>focali · Manual do Usuário</span><span>11 · Vade Mecum &amp; Jurisprudências</span></div>
+</div>
+
+<!-- ════════════════ 12 PROGRESSO ════════════════ -->
+<div class="page">
+  <div class="sec-kicker">Seção 12 · Módulos</div>
+  <h2 class="sec">Progresso — estatísticas, conquistas e histórico</h2>
+  <div class="sec-rule"></div>
+
+  <p><strong>O que é:</strong> a tela <strong>Progresso</strong> reúne três abas: <strong>Performance</strong>
+  (tempo, questões e desempenho por matéria), <strong>Conquistas</strong> (suas medalhas) e
+  <strong>Histórico</strong> (todas as sessões). <strong>Para que serve:</strong> tirar decisões dos dados —
+  e manter a motivação com marcos visíveis.</p>
+
+  <div class="mock">
+    <div class="mock-label">Progresso da Ana — exemplo simulado</div>
+    <div class="mcard">
+      <div class="mrow" style="margin-bottom:8px; flex-wrap:wrap; gap:6px;">
+        <div style="text-align:center; flex:1;"><b style="color:var(--ink); font-size:12pt;">32h40</b><div style="font-size:7.8pt; color:var(--ink-faint);">este mês</div></div>
+        <div style="text-align:center; flex:1;"><b style="color:var(--ink); font-size:12pt;">412</b><div style="font-size:7.8pt; color:var(--ink-faint);">questões</div></div>
+        <div style="text-align:center; flex:1;"><b style="color:#15803D; font-size:12pt;">74%</b><div style="font-size:7.8pt; color:var(--ink-faint);">acerto (↑ 6 pts vs. mês passado)</div></div>
+        <div style="text-align:center; flex:1;"><b style="color:var(--ink); font-size:12pt;">22</b><div style="font-size:7.8pt; color:var(--ink-faint);">dias ativos</div></div>
+      </div>
+      <div style="font-size:8.2pt; color:var(--ink-faint); margin-bottom:4px;">Heatmap do semestre:</div>
+      <div class="heat">
+        <i class="h1"></i><i class="h2"></i><i class="h0"></i><i class="h3"></i><i class="h2"></i><i class="h4"></i><i class="h1"></i><i class="h0"></i><i class="h2"></i><i class="h3"></i><i class="h2"></i><i class="h1"></i><i class="h4"></i><i class="h3"></i><i class="h0"></i><i class="h1"></i><i class="h2"></i><i class="h2"></i><i class="h3"></i><i class="h1"></i><i class="h0"></i><i class="h2"></i><i class="h4"></i><i class="h3"></i><i class="h2"></i><i class="h1"></i>
+        <i class="h2"></i><i class="h3"></i><i class="h1"></i><i class="h2"></i><i class="h0"></i><i class="h3"></i><i class="h2"></i><i class="h1"></i><i class="h4"></i><i class="h2"></i><i class="h0"></i><i class="h3"></i><i class="h2"></i><i class="h1"></i><i class="h2"></i><i class="h4"></i><i class="h3"></i><i class="h0"></i><i class="h1"></i><i class="h2"></i><i class="h3"></i><i class="h1"></i><i class="h2"></i><i class="h0"></i><i class="h4"></i><i class="h2"></i>
+        <i class="h0"></i><i class="h1"></i><i class="h3"></i><i class="h2"></i><i class="h4"></i><i class="h1"></i><i class="h0"></i><i class="h2"></i><i class="h3"></i><i class="h1"></i><i class="h2"></i><i class="h2"></i><i class="h0"></i><i class="h4"></i><i class="h3"></i><i class="h2"></i><i class="h1"></i><i class="h3"></i><i class="h2"></i><i class="h0"></i><i class="h1"></i><i class="h4"></i><i class="h2"></i><i class="h3"></i><i class="h1"></i><i class="h2"></i>
+      </div>
+    </div>
+    <div class="mcard">
+      <div style="font-weight:600; color:var(--ink); margin-bottom:4px;">🏅 Conquistas recentes</div>
+      <div class="mrow" style="justify-content:flex-start; gap:6px; flex-wrap:wrap;">
+        <span class="chip chip-amber">🔥 30 dias de constância</span>
+        <span class="chip chip-indigo">📚 100 horas de estudo</span>
+        <span class="chip chip-green">🎯 Sem lacunas no edital</span>
+        <span class="chip chip-gray" style="opacity:.65;">🔒 Constância que aprova (365 dias) — quase lá!</span>
+      </div>
+    </div>
+  </div>
+
+  <h4>Como usar</h4>
+  <ul style="font-size:9.5pt;">
+    <li><strong>Toda semana</strong>, olhe a Performance com uma pergunta: "qual matéria tem o pior % de acerto?" — ela merece mais blocos no seu ciclo.</li>
+    <li>Compare <strong>você com você</strong>: a plataforma mostra deltas vs. o período anterior e uma narrativa do seu mês. Evolução pessoal &gt; comparação com os outros.</li>
+    <li>Acompanhe sua <strong>curva de retenção</strong> — ela mostra se as revisões estão funcionando de verdade.</li>
+    <li>As conquistas têm <strong>raridade</strong> e teaser de "quase lá" — use os degraus como metas de curto prazo (e compartilhe as que te orgulham).</li>
+  </ul>
+
+  <div class="callout err">
+    <b>❌ Erro comum</b>
+    Medir só "horas estudadas". Horas são esforço, não resultado. Olhe o trio completo:
+    horas + questões feitas + % de acerto por matéria. É aí que mora a decisão inteligente.
+  </div>
+  <div class="footer-note"><span>focali · Manual do Usuário</span><span>12 · Progresso</span></div>
+</div>
+
+<!-- ════════════════ 13 AMIGOS ════════════════ -->
+<div class="page">
+  <div class="sec-kicker">Seção 13 · Módulos</div>
+  <h2 class="sec">Amigos, Turmas &amp; Ranking</h2>
+  <div class="sec-rule"></div>
+
+  <p><strong>O que é:</strong> a camada social da Focali — adicione amigos, entre em turmas por código de
+  convite e acompanhe um ranking semanal. <strong>Para que serve:</strong> estudar acompanhado aumenta a
+  constância. Saber que seus amigos estudaram hoje é um empurrão que nenhuma notificação substitui.</p>
+
+  <div class="mock">
+    <div class="mock-label">Ranking semanal — turma "Rumo ao TCE" · exemplo simulado</div>
+    <div class="mcard">
+      <div class="mrow" style="margin-bottom:6px;">
+        <span><span class="avatar" style="background:#6366F1;">B</span>&nbsp; <b style="color:var(--ink);">Bruna</b></span>
+        <span style="font-size:8.6pt;">consistência <b style="color:#15803D;">5/5 dias</b> 🥇</span>
+      </div>
+      <div class="mrow" style="margin-bottom:6px;">
+        <span><span class="avatar" style="background:#22C55E;">A</span>&nbsp; <b style="color:var(--ink);">Ana (você)</b></span>
+        <span style="font-size:8.6pt;">consistência <b style="color:#15803D;">4/5 dias</b> 🥈</span>
+      </div>
+      <div class="mrow">
+        <span><span class="avatar" style="background:#D97706;">C</span>&nbsp; <b style="color:var(--ink);">Caio</b></span>
+        <span style="font-size:8.6pt;">consistência <b>3/5 dias</b> 🥉</span>
+      </div>
+      <div style="font-size:8.4pt; color:var(--ink-faint); margin-top:8px;">O ranking mede <b>consistência vs. a meta de cada um</b> — não horas brutas. Quem estuda 1h/dia com regularidade vence quem faz 10h no domingo.</div>
+    </div>
+  </div>
+
+  <h4>Como usar (passo a passo)</h4>
+  <div class="steps">
+    <div class="step"><span class="step-n"></span><div>Em <strong>Amigos</strong>, envie um convite pelo identificador do colega — ele precisa <strong>aceitar</strong> para vocês verem os dados um do outro.</div></div>
+    <div class="step"><span class="step-n"></span><div>Para grupos, crie uma <strong>turma</strong> e compartilhe o código de convite (ou entre com um código que recebeu).</div></div>
+    <div class="step"><span class="step-n"></span><div>Combine um <strong>pacto de estudo</strong> com um amigo — meta conjunta de dias na semana.</div></div>
+    <div class="step"><span class="step-n"></span><div>Privacidade em primeiro lugar: você controla o que compartilha, pode sair do ranking (opt-out), bloquear e denunciar.</div></div>
+  </div>
+
+  <h4>Como usar o ranking sem se frustrar</h4>
+  <ul style="font-size:9.5pt;">
+    <li>O ranking é de <strong>consistência</strong>, não de volume — a comparação justa é "cada um contra a própria meta".</li>
+    <li>Ficou atrás na semana? A pergunta certa não é "por que fulano estuda mais?", e sim "<strong>minha meta está realista?</strong>". Ajuste e siga.</li>
+    <li>Use o social como <strong>combustível, não como tribunal</strong>: comemore a semana do amigo, cobre presença no pacto — e nunca compare seu capítulo 2 com o capítulo 10 de alguém.</li>
+  </ul>
+
+  <div class="callout err">
+    <b>❌ Erro comum</b>
+    Competir por horas e inflar registros para "vencer". Você só engana suas próprias revisões e
+    estatísticas — o sistema todo depende de dados honestos. O adversário é a prova, não o amigo.
+  </div>
+  <div class="footer-note"><span>focali · Manual do Usuário</span><span>13 · Amigos &amp; Ranking</span></div>
+</div>
+
+<!-- ════════════════ 14 FLUXO IDEAL ════════════════ -->
+<div class="page">
+  <div class="sec-kicker">Seção 14 · O método</div>
+  <h2 class="sec">O fluxo ideal: o "jeito certo" de usar a Focali</h2>
+  <div class="sec-rule"></div>
+
+  <p class="lead">Todos os módulos servem a um único sistema contínuo, que se repete todos os dias:</p>
+
+  <div class="flow">
+    <div class="flow-step" style="background:var(--teal-soft);">
+      <div class="fnum" style="background:#22C55E;">1</div>
+      <b>Estudar</b>
+      <span>Siga o Plano de Hoje: teoria, lei seca, questões — pelo material que preferir.</span>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step" style="background:var(--clay-soft);">
+      <div class="fnum" style="background:#6366F1;">2</div>
+      <b>Registrar</b>
+      <span>Toda sessão vira registro: matéria, tópico, tempo, questões e acertos.</span>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step" style="background:var(--amber-soft);">
+      <div class="fnum" style="background:#D97706;">3</div>
+      <b>Revisar</b>
+      <span>Zere a fila diária: revisões espaçadas, flashcards e caderno de erros.</span>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step" style="background:#E0F2FE;">
+      <div class="fnum" style="background:#0284C7;">4</div>
+      <b>Evoluir</b>
+      <span>Leia seus dados, ajuste ciclo e prioridades — e recomece melhor.</span>
+    </div>
+  </div>
+  <p style="text-align:center; font-size:9pt; color:var(--ink-faint); margin-top:-4px;">↻ o passo 4 realimenta o passo 1 — é um ciclo, não uma linha</p>
+
+  <h4>O sistema na prática — um dia da Ana</h4>
+  <table class="tb">
+    <tr><th style="width:18%;">Momento</th><th>O que ela faz</th><th style="width:30%;">Onde</th></tr>
+    <tr><td>05h00</td><td>Abre a Home, vê o Plano de Hoje e zera as 18 revisões pendentes.</td><td>Home → Revisões</td></tr>
+    <tr><td>05h30</td><td>Estuda o bloco do ciclo (Contabilidade, 50 min) com o timer no Modo Foco.</td><td>Timer</td></tr>
+    <tr><td>06h20</td><td>Resolve 18 questões; registra 14 acertos na sessão. Erra 4 → registra 2 no caderno de erros (as que valem a pena).</td><td>Registro + Caderno</td></tr>
+    <tr><td>12h30 (almoço)</td><td>10 minutos de flashcards no celular.</td><td>Flashcards</td></tr>
+    <tr><td>19h00</td><td>Lê 6 artigos da Lei 8.666/14.133 do edital e responde as questões C/E.</td><td>Vade Mecum</td></tr>
+    <tr><td>Domingo</td><td>Revisa a semana no Progresso: acerto de Português caiu → +1 bloco de Português no ciclo.</td><td>Progresso → Agenda</td></tr>
+  </table>
+
+  <div class="callout tip">
+    <b>💡 A regra 80/20 da Focali</b>
+    Se você só tiver disciplina para duas coisas, que sejam estas: <strong>registrar toda sessão</strong> e
+    <strong>zerar a fila de revisões todo dia</strong>. Esses dois hábitos sozinhos colocam você na frente
+    da imensa maioria dos candidatos — todo o resto da plataforma potencializa, mas depende deles.
+  </div>
+
+  <div class="callout info">
+    <b>🧩 Por que o ciclo funciona</b>
+    Estudar sem registrar = esforço invisível. Registrar sem revisar = conhecimento com prazo de validade.
+    Revisar sem medir = voar às cegas. O fluxo completo fecha as três lacunas — e cada volta do ciclo
+    torna a próxima mais inteligente, porque o sistema aprende com seus dados.
+  </div>
+  <div class="footer-note"><span>focali · Manual do Usuário</span><span>14 · O fluxo ideal</span></div>
+</div>
+
+<!-- ════════════════ 15 DICAS GOLD ════════════════ -->
+<div class="page">
+  <div class="sec-kicker">Seção 15</div>
+  <h2 class="sec">Dicas de ouro 🥇</h2>
+  <div class="sec-rule"></div>
+
+  <h4>Como estudar melhor usando a plataforma</h4>
+  <ul style="font-size:9.6pt;">
+    <li><strong>Comece o dia pela fila, não pelo novo.</strong> Revisão vencida é dívida com juros; conteúdo novo é investimento. Pague a dívida primeiro.</li>
+    <li><strong>Estude com missão declarada.</strong> Antes de dar play no timer, diga em uma frase o que vai dominar ("entender empenho, liquidação e pagamento"). Sessão sem missão vira leitura passiva.</li>
+    <li><strong>Feche toda sessão de teoria com questões.</strong> O % de acerto registrado é o único feedback objetivo de que o estudo funcionou.</li>
+    <li><strong>Use o peso do edital como bússola.</strong> A grade curada mostra a proporção de questões por matéria — distribua seu ciclo proporcionalmente (com um bônus para seus pontos fracos).</li>
+  </ul>
+
+  <h4>Como revisar corretamente</h4>
+  <ul style="font-size:9.6pt;">
+    <li><strong>Recupere antes de revelar.</strong> Olhar a resposta sem tentar lembrar transforma revisão em releitura — e releitura retém pouco.</li>
+    <li><strong>Seja honesto nos botões.</strong> "Lembrei" de mentira volta como lacuna no dia da prova. "Esqueci" sincero volta como revisão amanhã. Escolha o segundo.</li>
+    <li><strong>Respeite o algoritmo.</strong> Não tente revisar tudo toda semana "por garantia" — o espaçamento crescente é o que consolida a memória de longo prazo. Confie no sistema.</li>
+  </ul>
+
+  <h4>Como manter consistência</h4>
+  <ul style="font-size:9.6pt;">
+    <li><strong>Defina uma meta semanal de dias, não de horas.</strong> "5 dias por semana" sobrevive a imprevistos; "30 horas" morre na primeira semana difícil.</li>
+    <li><strong>Nunca falhe duas vezes seguidas.</strong> Perdeu um dia? O perdão do streak segura sua sequência — mas o dia seguinte é inegociável, nem que sejam 15 minutos de flashcards.</li>
+    <li><strong>Dia caótico = sessão mínima.</strong> 15 minutos registrados mantêm o hábito, a sequência e a fila sob controle. O inimigo não é o dia fraco; é o zero.</li>
+    <li><strong>Ative as notificações e o pacto com um amigo.</strong> Ambiente que lembra + pessoa que cobra = constância terceirizada nos dias em que a motivação falta.</li>
+  </ul>
+
+  <div class="callout tip">
+    <b>💡 A métrica que mais prevê aprovação</b>
+    Não é horas totais, nem questões feitas: é <strong>semanas consecutivas cumprindo sua própria meta</strong>.
+    A Focali inteira — streak, ranking de consistência, heatmap, conquistas — foi desenhada para você
+    maximizar essa métrica. Estruture sua vida em torno dela.
+  </div>
+  <div class="footer-note"><span>focali · Manual do Usuário</span><span>15 · Dicas de ouro</span></div>
+</div>
+
+<!-- ════════════════ 16 BOAS PRÁTICAS + ERROS ════════════════ -->
+<div class="page">
+  <div class="sec-kicker">Seção 16</div>
+  <h2 class="sec">Boas práticas &amp; erros comuns</h2>
+  <div class="sec-rule"></div>
+
+  <h4>✅ Boas práticas</h4>
+  <table class="tb">
+    <tr><th style="width:22%;">Área</th><th>Prática recomendada</th></tr>
+    <tr><td><b>Organização</b></td><td>Um concurso principal ativo · matérias vindas do catálogo do edital · tópicos do tamanho de uma sessão · arquivar (nunca excluir) o que acabou.</td></tr>
+    <tr><td><b>Frequência</b></td><td>Meta semanal de dias realista · sessão mínima nos dias ruins · replanejar sem culpa quando a semana furar.</td></tr>
+    <tr><td><b>Revisão</b></td><td>Fila zerada diariamente · avaliação honesta · erros de questões viram registros no Caderno (e flashcards).</td></tr>
+    <tr><td><b>Registro</b></td><td>Toda sessão registrada na hora, com tópico e questões · usar + Registrar para estudos externos.</td></tr>
+    <tr><td><b>Dados</b></td><td>Check-in semanal no Progresso · ajustar o ciclo com base no % de acerto · acompanhar a cobertura do edital.</td></tr>
+    <tr><td><b>Recursos</b></td><td>Ctrl+K para navegar · favoritos nas telas mais usadas · Modo Foco nas sessões pesadas · Banco de Flashcards e de Editais antes de criar do zero.</td></tr>
+  </table>
+
+  <h4>❌ Os 6 erros que mais atrasam usuários</h4>
+  <div class="modbox" style="padding:12px 16px;">
+    <p style="font-size:9.4pt; margin-bottom:6px;"><b style="color:var(--danger);">1. Usar só metade da plataforma.</b> Registrar sessões mas ignorar revisões (ou vice-versa) quebra o sistema — os módulos foram feitos para se alimentarem entre si. O fluxo completo da seção 14 é o produto.</p>
+    <p style="font-size:9.4pt; margin-bottom:6px;"><b style="color:var(--danger);">2. Não revisar.</b> É o erro nº 1 do concurseiro em qualquer método. Na Focali ele é imperdoável, porque a fila está pronta todos os dias — basta abrir.</p>
+    <p style="font-size:9.4pt; margin-bottom:6px;"><b style="color:var(--danger);">3. Não registrar os erros.</b> Cada questão errada e não registrada é uma lacuna que voltará na prova. O caderno de erros é seu material de reta final — construa-o desde o dia 1.</p>
+    <p style="font-size:9.4pt; margin-bottom:6px;"><b style="color:var(--danger);">4. Usar sem estratégia.</b> Estudar "o que der vontade", sem concurso ativo, sem ciclo e sem olhar pesos do edital, é esforço sem direção. Configure o alvo primeiro (seções 08–10); depois estude.</p>
+    <p style="font-size:9.4pt; margin-bottom:6px;"><b style="color:var(--danger);">5. Planejar como herói, executar como humano.</b> Agenda de 8h/dia abandonada em uma semana perde para ciclo de 2h/dia mantido por 6 meses. Sempre.</p>
+    <p style="font-size:9.4pt; margin-bottom:0;"><b style="color:var(--danger);">6. Colecionar em vez de processar.</b> Centenas de flashcards não revisados, dezenas de julgados marcados e nunca relidos, anotações que viram arquivo morto. Menos volume, mais ciclo completo.</p>
+  </div>
+
+  <div class="callout warn">
+    <b>⚠️ Se você se reconheceu em algum erro…</b>
+    Ótimo — agora ele tem nome e solução (a seção correspondente deste manual). Nenhum hábito se corrige
+    de uma vez: escolha <strong>um</strong> erro, corrija por duas semanas, depois passe ao próximo.
+  </div>
+  <div class="footer-note"><span>focali · Manual do Usuário</span><span>16 · Boas práticas &amp; erros comuns</span></div>
+</div>
+
+<!-- ════════════════ 17 CHECKLIST ════════════════ -->
+<div class="page">
+  <div class="sec-kicker">Seção 17</div>
+  <h2 class="sec">Sua primeira semana na Focali ✅</h2>
+  <div class="sec-rule"></div>
+
+  <p class="lead">Siga este roteiro e, em 7 dias, o sistema completo estará girando:</p>
+
+  <table class="tb">
+    <tr><th style="width:14%;">Dia</th><th>Missão</th><th style="width:34%;">Onde</th></tr>
+    <tr><td><b>Dia 1</b></td><td>Criar conta · ativar seu concurso no catálogo (ou pedir o edital / criar matérias) · conhecer a Home.</td><td>Login → Concursos → Home</td></tr>
+    <tr><td><b>Dia 2</b></td><td>Montar seu ciclo de estudos (ou agenda fixa) com base nos pesos do edital · definir meta semanal de dias.</td><td>Agenda</td></tr>
+    <tr><td><b>Dia 3</b></td><td>Primeira sessão com timer + registro completo (tópico, questões, acertos). A partir daqui: registrar TUDO.</td><td>Timer / + Registrar</td></tr>
+    <tr><td><b>Dia 4</b></td><td>Zerar a primeira fila de revisões · criar seus 10 primeiros flashcards (ou ativar um deck do Banco).</td><td>Revisões → Flashcards</td></tr>
+    <tr><td><b>Dia 5</b></td><td>Registrar os primeiros erros de questões no Caderno · explorar o Vade Mecum da sua disciplina principal.</td><td>Caderno → Vade Mecum</td></tr>
+    <tr><td><b>Dia 6</b></td><td>Convidar um amigo (ou entrar numa turma) · propor um pacto de estudo · ativar notificações.</td><td>Amigos → Configurações</td></tr>
+    <tr><td><b>Dia 7</b></td><td>Primeiro check-in semanal: ler o Progresso, celebrar a semana e ajustar o ciclo para a próxima.</td><td>Progresso → Agenda</td></tr>
+  </table>
+
+  <h4>Personalize seu ambiente</h4>
+  <ul style="font-size:9.5pt;">
+    <li>Em <strong>Configurações</strong>, escolha sua paleta de cores e o modo claro/escuro;</li>
+    <li>Ative as <strong>notificações</strong> para lembretes de estudo éticos (sem spam);</li>
+    <li>Fixe suas telas favoritas no <strong>Ctrl+K</strong> para navegar em um toque.</li>
+  </ul>
+
+  <div class="callout tip" style="margin-top:14px;">
+    <b>💬 Precisa de ajuda?</b>
+    Reencontre este manual sempre que precisar — e lembre-se: você não precisa usar tudo desde o início.
+    Comece pelo fluxo <strong>Estudar → Registrar → Revisar → Evoluir</strong> e deixe os módulos
+    entrarem na sua rotina aos poucos, conforme fizerem sentido.
+  </div>
+
+  <div style="position:absolute; bottom:28mm; left:17mm; right:17mm; text-align:center;">
+    <svg width="120" viewBox="0 0 1200 320" fill="none" xmlns="http://www.w3.org/2000/svg" style="opacity:.95;">
+      <defs>
+        <linearGradient id="fg1" x1="54" y1="48" x2="210" y2="163" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#22C55E"/><stop offset="1" stop-color="#A7F5D0"/></linearGradient>
+        <linearGradient id="fg2" x1="54" y1="160" x2="187" y2="208" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#A7F5D0"/><stop offset="1" stop-color="#93C5FD"/></linearGradient>
+        <linearGradient id="fg3" x1="98" y1="206" x2="204" y2="306" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#6366F1"/><stop offset="1" stop-color="#4338CA"/></linearGradient>
+      </defs>
+      <path d="M54 91C54 67.252 73.252 48 97 48H221C243.644 48 262 66.356 262 89C262 111.644 243.644 130 221 130H135C112.356 130 94 148.356 94 171H54V91Z" fill="url(#fg1)"/>
+      <path d="M94 171C94 148.356 112.356 130 135 130H190C212.644 130 231 148.356 231 171C231 193.644 212.644 212 190 212H94V171Z" fill="url(#fg2)"/>
+      <path d="M98 212H139V256C139 279.748 119.748 299 96 299C72.804 299 54 280.196 54 257C54 232.147 73.147 212 98 212Z" fill="url(#fg3)"/>
+      <text x="306" y="202" font-family="Poppins, Inter, Arial, sans-serif" font-size="150" font-weight="600" letter-spacing="-7" fill="#0F172A">focali</text>    </svg>
+    <div style="font-size:9pt; color:var(--ink-faint); margin-top:4px;">Clareza para evoluir. Bons estudos — e boa aprovação. 🍀</div>
+  </div>
+  <div class="footer-note"><span>focali · Manual do Usuário</span><span>17 · Primeira semana</span></div>
+</div>
+
+</body>
+</html>

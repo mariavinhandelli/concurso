@@ -29,7 +29,17 @@ export function useSchedulePage() {
   // renderizava qua–ter com rótulos Seg–Dom e perdia os blocos de seg/ter).
   const [weekStart, setWeekStartRaw] = useState<Date>(() => mondayOf(new Date()));
   const setWeekStart = useCallback((d: Date) => setWeekStartRaw(mondayOf(d)), []);
-  const [view, setView] = useState<'semana' | 'lista' | 'ciclo'>('semana');
+  const [view, setViewRaw] = useState<'semana' | 'lista' | 'ciclo'>('semana');
+  // Ciclo como padrão de entrada (efeito abaixo) só deve agir se o usuário
+  // ainda não tiver escolhido nada — inclusive um clique manual disparado
+  // ENQUANTO as 3 queries que alimentam essa decisão ainda carregavam. Sem
+  // marcar o ref aqui também, o efeito chegava depois e revertia esse clique
+  // pra 'ciclo' silenciosamente, sem nenhum sinal de que algo mudou sozinho.
+  const viewDecidedRef = useRef(false);
+  const setView = useCallback((v: 'semana' | 'lista' | 'ciclo') => {
+    viewDecidedRef.current = true;
+    setViewRaw(v);
+  }, []);
   const [viewingArchivedId, setViewingArchivedId] = useState<string | null>(null);
   const [modalDate, setModalDate] = useState<string | null>(null);
   const [recurrenceOpen, setRecurrenceOpen] = useState(false);
@@ -82,16 +92,17 @@ export function useSchedulePage() {
   // Ciclo como padrão de entrada: quem tem ciclo ativo e NENHUM cronograma em
   // blocos/dia-fixo (a semana Grade/Lista nasceria vazia) já entra vendo o
   // ciclo — é ali que o plano dele realmente vive. Só decide uma vez por
-  // visita à página: depois disso o usuário pode trocar de aba livremente sem
-  // ser "puxado de volta" pelo efeito a cada refetch.
-  const viewDecidedRef = useRef(false);
+  // visita à página, e nunca depois que o usuário mexeu na view sozinho
+  // (viewDecidedRef também é marcado por setView — ver acima): sem essa
+  // segunda marcação, clicar em "Grade"/"Lista" enquanto as 3 queries ainda
+  // carregavam era silenciosamente desfeito assim que elas terminassem.
   useEffect(() => {
     if (viewDecidedRef.current) return;
     if (loading || rulesLoading || cycleLoading) return;
     viewDecidedRef.current = true;
     const temDiaFixo = rules.some((r) => r.mode === 'dia_fixo');
     if (cycleRuleId && !temDiaFixo && blocks.length === 0) {
-      setView('ciclo');
+      setViewRaw('ciclo');
     }
   }, [loading, rulesLoading, cycleLoading, rules, cycleRuleId, blocks]);
 
