@@ -21,6 +21,35 @@ function normalizar(s: string): string {
   return s.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();
 }
 
+// Ordem "temática" das matérias na grade: agrupa afins (todo o bloco penal em
+// sequência, Financeiro colado em Tributário etc.) em vez de alfabética pura,
+// que intercalava matérias sem nenhuma relação entre si (ex.: "Consumidor"
+// entre "Constitucional" e "Penal"). Disciplina fora da lista cai no fim,
+// ordenada entre si por ordem alfabética.
+const DISCIPLINA_ORDEM = [
+  'Direito Constitucional',
+  'Direito Administrativo',
+  'Direito Civil',
+  'Direito Processual Civil',
+  'Direito do Consumidor',
+  'Direito Penal',
+  'Direito Processual Penal',
+  'Legislação Penal Especial',
+  'Direito Penal Militar',
+  'Direito Processual Penal Militar',
+  'Direito Tributário',
+  'Direito Financeiro',
+  'Direito do Trabalho',
+  'Direito da Criança e do Adolescente',
+  'Legislação Especial',
+  'Legislação Estadual — Goiás',
+];
+
+function ordemDisciplina(disciplina: string): number {
+  const i = DISCIPLINA_ORDEM.indexOf(disciplina);
+  return i === -1 ? DISCIPLINA_ORDEM.length : i;
+}
+
 // Rótulo do chip: "Direito Processual Penal Militar" tem 32 caracteres e sozinho
 // consumia uma linha inteira no celular. O prefixo "Direito " é redundante num
 // filtro de matéria jurídica; o nome completo continua no aria-label.
@@ -122,12 +151,25 @@ function VademecumContent() {
 
   const leisFiltradas = useMemo(() => {
     const termo = normalizar(busca.trim());
-    return LEIS_CATALOG.filter((l) => {
+    const filtradas = LEIS_CATALOG.filter((l) => {
       if (disciplina !== 'todas' && l.disciplina !== disciplina) return false;
       if (!termo) return true;
       return normalizar(`${l.nome} ${l.nomeCurto} ${l.descricao}`).includes(termo);
     });
+    return [...filtradas].sort(
+      (a, b) => ordemDisciplina(a.disciplina) - ordemDisciplina(b.disciplina) || a.nome.localeCompare(b.nome, 'pt-BR')
+    );
   }, [busca, disciplina]);
+
+  const gruposPorDisciplina = useMemo(() => {
+    const grupos: { disciplina: string; leis: LeiMeta[] }[] = [];
+    for (const lei of leisFiltradas) {
+      const atual = grupos[grupos.length - 1];
+      if (atual && atual.disciplina === lei.disciplina) atual.leis.push(lei);
+      else grupos.push({ disciplina: lei.disciplina, leis: [lei] });
+    }
+    return grupos;
+  }, [leisFiltradas]);
 
   return (
     <PageContainer>
@@ -182,21 +224,28 @@ function VademecumContent() {
       {leisFiltradas.length === 0 ? (
         <p style={s.semResultado}>Nenhuma lei encontrada com esses filtros.</p>
       ) : (
-        <div style={s.grid}>
-          {leisFiltradas.map((lei) => (
-            <LeiCard
-              key={lei.slug}
-              lei={lei}
-              artigosComGrifo={grifosPorLei?.get(lei.slug) ?? 0}
-              revisoesDue={duePorLei?.get(lei.slug) ?? 0}
-              onOpen={() => router.push(`/vademecum/${lei.slug}`)}
-            />
-          ))}
-        </div>
+        gruposPorDisciplina.map((grupo) => (
+          <div key={grupo.disciplina} style={s.grupoWrap}>
+            {/* só mostra o título da matéria quando há mais de um grupo — com
+                o filtro de disciplina ativo o chip acima já diz a mesma coisa */}
+            {gruposPorDisciplina.length > 1 && <h2 style={s.grupoTitulo}>{grupo.disciplina}</h2>}
+            <div style={s.grid}>
+              {grupo.leis.map((lei) => (
+                <LeiCard
+                  key={lei.slug}
+                  lei={lei}
+                  artigosComGrifo={grifosPorLei?.get(lei.slug) ?? 0}
+                  revisoesDue={duePorLei?.get(lei.slug) ?? 0}
+                  onOpen={() => router.push(`/vademecum/${lei.slug}`)}
+                />
+              ))}
+            </div>
+          </div>
+        ))
       )}
 
       <p style={s.rodape}>
-        Mais leis em breve — a estrutura já aceita qualquer norma (estatutos, leis orgânicas, códigos).
+        Mais leis em breve.
       </p>
     </PageContainer>
   );
@@ -240,6 +289,8 @@ const s: Record<string, CSSProperties> = {
   filtroQtdOn: { color: theme.tealDeep, background: 'color-mix(in srgb, currentColor 12%, transparent)' },
   semResultado: { fontSize: 14, color: theme.inkFaint, textAlign: 'center', padding: '30px 0' },
 
+  grupoWrap: { marginBottom: 28 },
+  grupoTitulo: { fontSize: 15, fontWeight: 700, color: theme.ink, margin: '0 0 12px' },
   grid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 14 },
   card: { textAlign: 'left', background: theme.card, border: `0.5px solid ${theme.line}`, borderRadius: theme.radius, padding: '18px 20px', cursor: 'pointer', fontFamily: 'inherit' },
   cardTop: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
