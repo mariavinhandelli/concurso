@@ -142,6 +142,9 @@
   --danger-tint: rgba(248,113,113,.12);
   --ok-tint: rgba(74,222,128,.12);
   --warn-tint: rgba(251,191,36,.12);
+  --review-easy: #052e16;   --review-easy-text: #86efac;
+  --review-medium: #2D1B00; --review-medium-text: #fcd34d;
+  --review-hard: #3A1E1E;   --review-hard-text: #fca5a5;
 }
 
 /* ---- Rosé claro ---- */
@@ -194,6 +197,9 @@
   --warn: #ecb127;   --warn-bg: #FBF0E0;
   --crit: #DC2626;   --crit-bg: #FBE9E9;
   --info: #3B82F6;   --info-bg: #DBEAFE;
+  --review-easy: #E7F5EC;   --review-easy-text: #166534;
+  --review-medium: #FBF0E0; --review-medium-text: #92400E;
+  --review-hard: #F6E5E2;   --review-hard-text: #991B1B;
 
   --shadow: 0 1px 2px rgba(50,30,30,.04), 0 10px 30px -12px rgba(50,30,30,.16);
   --shadow-hover: 0 2px 6px rgba(50,30,30,.06), 0 18px 44px -18px rgba(50,30,30,.22);
@@ -255,6 +261,9 @@
   --danger-tint: rgba(240,138,126,.12);
   --ok-tint: rgba(74,222,128,.12);
   --warn-tint: rgba(251,191,107,.12);
+  --review-easy: #142A1C;   --review-easy-text: #86efac;
+  --review-medium: #332512; --review-medium-text: #fde68a;
+  --review-hard: #3A2422;   --review-hard-text: #fca5a5;
 }
 
 /* ---- Menta claro ---- */
@@ -306,6 +315,9 @@
   --warn: #ecb127;   --warn-bg: #FBF0E0;
   --crit: #DC2626;   --crit-bg: #FBE9E9;
   --info: #3B82F6;   --info-bg: #DBEAFE;
+  --review-easy: #E7F5EC;   --review-easy-text: #166534;
+  --review-medium: #FBF0E0; --review-medium-text: #92400E;
+  --review-hard: #F6E5E2;   --review-hard-text: #991B1B;
 
   --shadow: 0 1px 2px rgba(30,50,40,.04), 0 10px 30px -12px rgba(30,50,40,.16);
   --shadow-hover: 0 2px 6px rgba(30,50,40,.06), 0 18px 44px -18px rgba(30,50,40,.22);
@@ -369,6 +381,9 @@
   --danger-tint: rgba(240,138,126,.12);
   --ok-tint: rgba(74,222,128,.12);
   --warn-tint: rgba(251,191,107,.12);
+  --review-easy: #142A1C;   --review-easy-text: #86efac;
+  --review-medium: #332512; --review-medium-text: #fde68a;
+  --review-hard: #3A2422;   --review-hard-text: #fca5a5;
 }
 
 /* ---- Grafite claro (mono sóbrio) ---- */
@@ -416,6 +431,9 @@
   --warn: #ecb127;   --warn-bg: #FBF0E0;
   --crit: #DC2626;   --crit-bg: #FBE9E9;
   --info: #3B82F6;   --info-bg: #DBEAFE;
+  --review-easy: #E7F5EC;   --review-easy-text: #166534;
+  --review-medium: #FBF0E0; --review-medium-text: #92400E;
+  --review-hard: #F6E5E2;   --review-hard-text: #991B1B;
 
   --shadow: 0 1px 2px rgba(27,34,31,.05), 0 10px 30px -12px rgba(27,34,31,.16);
   --shadow-hover: 0 2px 6px rgba(27,34,31,.07), 0 18px 44px -18px rgba(27,34,31,.22);
@@ -473,6 +491,9 @@
   --danger-tint: rgba(240,138,126,.12);
   --ok-tint: rgba(74,222,128,.12);
   --warn-tint: rgba(251,191,107,.12);
+  --review-easy: #142A1C;   --review-easy-text: #86efac;
+  --review-medium: #332512; --review-medium-text: #fde68a;
+  --review-hard: #3A2422;   --review-hard-text: #fca5a5;
 }
 /* ===================================================================
    TIERS DE MAESTRIA — metálicos, independentes de paleta (bronze/prata/ouro
