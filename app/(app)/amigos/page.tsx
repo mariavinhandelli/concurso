@@ -30,6 +30,8 @@ import { IconButton } from '@/components/ui/IconButton';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { PageContainer, PageHeader } from '@/components/ui/Page';
 import { SegmentedControl } from '@/components/ui/SegmentedControl';
+import { Skeleton } from '@/components/ui/Skeleton';
+import { Input } from '@/components/ui/Input';
 
 // A mediana pode vir fracionária (grupo par), então "4,5 dias" é resultado
 // legítimo — arredondar aqui esconderia a diferença entre 4 e 5.
@@ -219,7 +221,7 @@ function AmigosContent() {
       {tab === 'turmas' ? (
         <TurmasTab />
       ) : isLoading || !data ? (
-        <p style={s.muted}>Carregando…</p>
+        <Skeleton height={140} borderRadius={16} />
       ) : !p?.enabled ? (
         <section style={s.card}>
           <h2 style={s.cardH}>Ative seu perfil social</h2>
@@ -234,9 +236,9 @@ function AmigosContent() {
             <Badge variant="brand"><Check size={12} strokeWidth={2.5} />% do edital</Badge>
             <Badge variant="neutral"><X size={12} strokeWidth={2.5} />conteúdo · erros · anotações</Badge>
           </div>
-          <button onClick={ativar} disabled={busy} style={{ ...s.primary, marginTop: 18, opacity: busy ? 0.6 : 1 }}>
-            {busy ? 'Ativando…' : 'Ativar perfil social'}
-          </button>
+          <Button onClick={ativar} loading={busy} style={{ marginTop: 18 }}>
+            Ativar perfil social
+          </Button>
         </section>
       ) : (
         <>
@@ -245,17 +247,22 @@ function AmigosContent() {
             <p style={s.body}>Compartilhe seu link ou código. Quem abrir vira seu amigo depois que você aceitar.</p>
             <div style={s.inviteRow}>
               <code style={s.codeBox}>{p.inviteCode}</code>
-              <button onClick={() => copiarLink(inviteUrl(p.inviteCode ?? ''))} style={s.secondary}>{copiado ? 'Copiado!' : 'Copiar link'}</button>
+              <Button variant="outline" onClick={() => copiarLink(inviteUrl(p.inviteCode ?? ''))}>{copiado ? 'Copiado!' : 'Copiar link'}</Button>
               <Button onClick={() => compartilharLink(inviteUrl(p.inviteCode ?? ''))}>Compartilhar</Button>
             </div>
             <div style={s.addRow}>
-              <input value={code} onChange={(e) => setCode(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && adicionarPorCodigo()} placeholder="Tem um código? Cole aqui" style={s.input} aria-label="Código de amigo" />
-              <button onClick={adicionarPorCodigo} disabled={busy} style={s.secondary}>Adicionar</button>
+              <Input
+                value={code} onChange={(e) => setCode(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && adicionarPorCodigo()}
+                placeholder="Tem um código? Cole aqui" aria-label="Código de amigo"
+                style={{ flex: 1, minWidth: 0 }}
+              />
+              <Button variant="outline" onClick={adicionarPorCodigo} disabled={busy}>Adicionar</Button>
             </div>
             {/* P2-10: um link vazado valia para sempre — não havia como trocar. */}
-            <button onClick={gerarNovoCodigo} disabled={busy} style={s.linkBtn}>
+            <Button variant="ghost" size="sm" style={{ color: theme.inkFaint }} onClick={gerarNovoCodigo} disabled={busy}>
               Gerar um código novo (invalida o link antigo)
-            </button>
+            </Button>
           </section>
 
           {(data.incoming.length > 0 || data.outgoing.length > 0) && (
@@ -374,9 +381,9 @@ function AmigosContent() {
           )}
 
           <div style={s.rodape}>
-            <button onClick={confirmarDesativar} disabled={busy} style={s.disableBtn}>Desativar perfil social</button>
+            <Button variant="ghost" size="sm" style={{ color: theme.inkFaint, textDecoration: 'underline' }} onClick={confirmarDesativar} disabled={busy}>Desativar perfil social</Button>
             {/* P2-12: "desativar" só esconde os números; faltava a exclusão. */}
-            <button onClick={confirmarExclusao} disabled={busy} style={s.deleteBtn}>Apagar meus dados sociais</button>
+            <Button variant="dangerSoft" size="sm" style={{ background: 'transparent', textDecoration: 'underline' }} onClick={confirmarExclusao} disabled={busy}>Apagar meus dados sociais</Button>
           </div>
         </>
       )}
@@ -413,8 +420,6 @@ export default function AmigosPage() {
 }
 
 const s: Record<string, CSSProperties> = {
-  muted: { fontSize: 14, color: theme.inkFaint, padding: '16px 4px' },
-
   card: { background: theme.card, border: `0.5px solid ${theme.line}`, borderRadius: theme.radius, boxShadow: theme.shadow, padding: 22, marginBottom: 16, minWidth: 0 },
   cardTitle: { fontSize: 12, fontWeight: 600, color: theme.inkFaint, letterSpacing: 1, textTransform: 'uppercase', marginBottom: 14 },
   cardH: { fontSize: 18, fontWeight: 800, color: theme.ink, margin: '0 0 8px', letterSpacing: -0.3 },
@@ -427,8 +432,6 @@ const s: Record<string, CSSProperties> = {
   inviteRow: { display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' },
   codeBox: { fontFamily: 'ui-monospace, monospace', fontSize: 16, fontWeight: 700, letterSpacing: 2, color: theme.ink, background: theme.bg, border: `0.5px solid ${theme.line}`, borderRadius: theme.radiusSm, padding: '10px 14px', flex: 1, minWidth: 120, textAlign: 'center' },
   addRow: { display: 'flex', gap: 8, marginTop: 12 },
-  input: { flex: 1, minWidth: 0, boxSizing: 'border-box', padding: '10px 14px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.card, fontSize: 14, color: theme.ink, fontFamily: 'inherit', outline: 'none' },
-  linkBtn: { border: 'none', background: 'transparent', color: theme.inkFaint, fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit', padding: '10px 2px 0', textDecoration: 'underline', display: 'block' },
 
   reqRow: { display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderTop: `0.5px solid ${theme.line}` },
   // minWidth:0: min-width:auto de um item flex com white-space:nowrap é o
@@ -443,9 +446,4 @@ const s: Record<string, CSSProperties> = {
   quietBlock: { display: 'flex', flexDirection: 'column', gap: 2, marginTop: 14, paddingTop: 12, borderTop: `0.5px solid ${theme.line}` },
 
   rodape: { display: 'flex', gap: 18, flexWrap: 'wrap', alignItems: 'center' },
-
-  primary: { padding: '11px 20px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onPrimary, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
-  secondary: { padding: '11px 16px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.ink, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
-  disableBtn: { border: 'none', background: 'transparent', color: theme.inkFaint, fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit', padding: '4px 2px', textDecoration: 'underline' },
-  deleteBtn: { border: 'none', background: 'transparent', color: theme.danger, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', padding: '4px 2px', textDecoration: 'underline' },
 };

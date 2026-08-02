@@ -56,7 +56,7 @@ export default function SubjectsPage() {
   }, [toast, handleTabChange]);
 
   return (
-    <PageContainer width="wide" style={{ minWidth: 0 }}>
+    <PageContainer width="default" style={{ minWidth: 0 }}>
       <PageHeader title="Matérias" subtitle="Explore o banco de matérias ou gerencie as suas." />
 
       <div style={{ marginBottom: 20 }}>

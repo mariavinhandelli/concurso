@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { PartyPopper } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/components/ui/ToastProvider';
 import { refreshHomeAfterSession } from '@/lib/home-refresh';
@@ -11,14 +12,13 @@ import {
   listRevisoesHoje, submitRevisao,
   type JurisComInteracao,
 } from '@/services/jurisInteracoes.service';
-import { RATING_LABEL, type JurisRating, jurisDaysOverdue, calculateNextJurisReview, fromJurisDbRow, INITIAL_JURIS_STATE } from '@/lib/juris-review';
-import { RATING_STYLE } from '@/lib/juris-labels';
+import { type JurisRating, jurisDaysOverdue, fromJurisDbRow } from '@/lib/juris-review';
 import { useUI } from '@/components/layout/UIContext';
 import { theme } from '@/lib/theme';
 import { PageContainer } from '@/components/ui/Page';
+import { BackLink } from '@/components/ui/BackLink';
 import { Button } from '@/components/ui/Button';
-
-const RATINGS = RATING_STYLE;
+import { JurisRevisaoCard } from '@/components/features/jurisprudencias/JurisRevisaoCard';
 
 export default function RevisarPage() {
   const router = useRouter();
@@ -100,7 +100,7 @@ export default function RevisarPage() {
   if (done || total === 0) {
     return (
       <PageContainer width="narrow" style={{ padding: isMobile ? '40px 16px' : '72px 40px', textAlign: 'center' }}>
-        <div style={{ fontSize: 56, marginBottom: 20 }}>🎉</div>
+        <PartyPopper size={48} color={theme.teal} strokeWidth={1.5} style={{ marginBottom: 20 }} />
         <h1 style={{ fontSize: 22, fontWeight: 700, color: theme.ink, margin: '10px 0 6px' }}>
           {total === 0 ? 'Nada para revisar hoje!' : feitas > 0 ? 'Sessão concluída!' : 'Até a próxima!'}
         </h1>
@@ -128,13 +128,7 @@ export default function RevisarPage() {
 
       {/* Cabeçalho */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
-        <button
-          className="touch-target"
-          onClick={() => router.push('/jurisprudencias')}
-          style={{ border: 'none', background: 'transparent', color: theme.teal, fontSize: 13, fontWeight: 500, cursor: 'pointer', padding: 0, fontFamily: 'inherit' }}
-        >
-          ← Jurisprudências
-        </button>
+        <BackLink href="/jurisprudencias" style={{ marginBottom: 0 }}>Jurisprudências</BackLink>
         <span style={{ fontSize: 13, color: theme.inkFaint, fontWeight: 500 }}>
           {idx + 1} / {total}
         </span>
@@ -147,127 +141,19 @@ export default function RevisarPage() {
 
       {current && (
         <>
-          {/* Tags do item */}
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 16 }}>
-            <span style={styles.badge(theme.teal, '#fff')}>{current.tribunal}</span>
-            <span style={styles.badge('rgba(15,23,42,.08)', theme.inkSoft)}>{current.disciplina}</span>
-            {overdue > 0 && (
-              <span style={styles.badge(theme.dangerTint, theme.danger)}>
-                {overdue}d atrasada
-              </span>
-            )}
-          </div>
-
-          {/* Card principal — quando há flashcard, revisa em modo pergunta→resposta
-              (memória ativa); sem flashcard, cai no modo releitura da tese. */}
-          <div style={styles.card}>
-            {current.flashcard_frente && current.flashcard_verso ? (
-              <div style={styles.teseBox}>
-                <p style={{ fontSize: 11, fontWeight: 700, color: theme.teal, textTransform: 'uppercase', letterSpacing: 0.8, margin: '0 0 10px' }}>
-                  Pergunta
-                </p>
-                <p style={{ fontSize: isMobile ? 16 : 17, color: theme.ink, lineHeight: 1.65, margin: 0, fontWeight: 500 }}>
-                  {current.flashcard_frente}
-                </p>
-              </div>
-            ) : (
-              <div style={styles.teseBox}>
-                <p style={{ fontSize: 11, fontWeight: 700, color: theme.teal, textTransform: 'uppercase', letterSpacing: 0.8, margin: '0 0 10px' }}>
-                  Tese Principal
-                </p>
-                <p style={{ fontSize: isMobile ? 16 : 17, color: theme.ink, lineHeight: 1.65, margin: 0, fontWeight: 500 }}>
-                  {current.tese}
-                </p>
-              </div>
-            )}
-
-            {/* Conteúdo revelado */}
-            {revealed && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12, paddingTop: 4 }}>
-                {current.flashcard_frente && current.flashcard_verso && (
-                  <>
-                    <div style={{ background: theme.okTint, borderRadius: 10, padding: '12px 14px' }}>
-                      <p style={{ ...styles.sectionLabel, color: theme.okDeep }}>Resposta</p>
-                      <p style={styles.sectionText}>{current.flashcard_verso}</p>
-                    </div>
-                    <div>
-                      <p style={styles.sectionLabel}>Tese completa</p>
-                      <p style={styles.sectionText}>{current.tese}</p>
-                    </div>
-                  </>
-                )}
-                {!current.flashcard_frente && current.resumo && (
-                  <div>
-                    <p style={styles.sectionLabel}>Resumo</p>
-                    <p style={styles.sectionText}>{current.resumo}</p>
-                  </div>
-                )}
-                {current.como_banca_cobra && (
-                  <div style={{ background: 'rgba(99,102,241,.06)', borderRadius: 10, padding: '12px 14px' }}>
-                    <p style={{ ...styles.sectionLabel, color: theme.clay }}>Como a banca cobra</p>
-                    <p style={styles.sectionText}>{current.como_banca_cobra}</p>
-                  </div>
-                )}
-                {current.pegadinhas && (
-                  <div style={{ background: theme.dangerTint, borderRadius: 10, padding: '12px 14px' }}>
-                    <p style={{ ...styles.sectionLabel, color: theme.danger }}>Pegadinha</p>
-                    <p style={styles.sectionText}>{current.pegadinhas}</p>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* Ações */}
-          {!revealed ? (
-            <div style={{ textAlign: 'center', marginTop: 20 }}>
-              <Button size="lg" onClick={() => setRevealed(true)}>
-                {current.flashcard_frente && current.flashcard_verso ? 'Ver resposta e avaliar' : 'Ver tudo e avaliar'}
-              </Button>
-              <p style={{ fontSize: 12, color: theme.inkFaint, marginTop: 12 }}>
-                {current.flashcard_frente && current.flashcard_verso
-                  ? 'Tente responder de cabeça antes de revelar'
-                  : 'Clique para revelar o conteúdo completo antes de avaliar'}
-              </p>
-              <button
-                onClick={handleSkip}
-                style={{ marginTop: 8, border: 'none', background: 'transparent', color: theme.inkFaint, fontSize: 13, cursor: 'pointer', fontFamily: 'inherit' }}
-              >
-                Pular por agora →
-              </button>
-            </div>
-          ) : (
-            <div style={{ marginTop: 20 }}>
-              <p style={{ fontSize: 12, fontWeight: 600, color: theme.inkFaint, textAlign: 'center', marginBottom: 14, textTransform: 'uppercase', letterSpacing: 0.5 }}>
-                Como foi?
-              </p>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
-                {RATINGS.map(({ key, color, bg }) => {
-                  const state = current?.interacao
-                    ? fromJurisDbRow(current.interacao)
-                    : INITIAL_JURIS_STATE;
-                  const nextDays = calculateNextJurisReview(state, key).intervalDays;
-                  return (
-                  <button
-                    key={key}
-                    onClick={() => handleRate(key)}
-                    disabled={submitting}
-                    style={{
-                      padding: '14px 10px', borderRadius: theme.radiusSm,
-                      border: `0.5px solid ${color}`, background: bg,
-                      color, fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: theme.font,
-                      display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3,
-                    }}
-                  >
-                    {RATING_LABEL[key]}
-                    <span style={{ fontSize: 11, fontWeight: 400, opacity: 0.75 }}>
-                      → volta em {nextDays} {nextDays === 1 ? 'dia' : 'dias'}
-                    </span>
-                  </button>
-                  );
-                })}
-              </div>
-              <div style={{ textAlign: 'center', marginTop: 14 }}>
+          <JurisRevisaoCard
+            item={current}
+            interacaoState={current.interacao ? fromJurisDbRow(current.interacao) : null}
+            revealed={revealed}
+            onReveal={() => setRevealed(true)}
+            onRate={handleRate}
+            disabled={submitting}
+            overdueDays={overdue}
+            revealHint={current.flashcard_frente && current.flashcard_verso
+              ? 'Tente responder de cabeça antes de revelar'
+              : 'Clique para revelar o conteúdo completo antes de avaliar'}
+            footer={(
+              <div style={{ textAlign: 'center', marginTop: 4 }}>
                 <button
                   onClick={() => router.push(`/jurisprudencias/${current.id}`)}
                   style={{ border: 'none', background: 'transparent', color: theme.teal, fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}
@@ -275,6 +161,16 @@ export default function RevisarPage() {
                   Ver jurisprudência completa →
                 </button>
               </div>
+            )}
+          />
+          {!revealed && (
+            <div style={{ textAlign: 'center', marginTop: 12 }}>
+              <button
+                onClick={handleSkip}
+                style={{ border: 'none', background: 'transparent', color: theme.inkFaint, fontSize: 13, cursor: 'pointer', fontFamily: 'inherit' }}
+              >
+                Pular por agora →
+              </button>
             </div>
           )}
         </>
@@ -282,20 +178,3 @@ export default function RevisarPage() {
     </PageContainer>
   );
 }
-
-const styles = {
-  card: {
-    background: theme.card, border: `0.5px solid ${theme.line}`,
-    borderRadius: theme.radius, boxShadow: theme.shadow,
-    padding: '22px 24px', display: 'flex', flexDirection: 'column' as const, gap: 16,
-  },
-  teseBox: {
-    background: theme.tealBg, border: `1px solid ${theme.teal}`,
-    borderRadius: theme.radiusSm, padding: '16px 18px',
-  },
-  sectionLabel: { fontSize: 11, fontWeight: 700, color: theme.inkFaint, textTransform: 'uppercase' as const, letterSpacing: 0.4, margin: '0 0 5px' },
-  sectionText: { fontSize: 14, color: theme.ink, lineHeight: 1.65, margin: 0 },
-  badge: (bg: string, color: string): React.CSSProperties => ({
-    fontSize: 12, fontWeight: 600, color, background: bg, borderRadius: 6, padding: '3px 10px',
-  }),
-};

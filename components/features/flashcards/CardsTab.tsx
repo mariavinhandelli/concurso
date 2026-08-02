@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { invalidateReviewCounts } from '@/lib/review-counts';
 import Link from 'next/link';
-import { ChevronLeft, Pencil, Trash2 } from 'lucide-react';
+import { ChevronLeft, Pencil, Trash2, Play } from 'lucide-react';
 import { useToast } from '@/components/ui/ToastProvider';
 import { useConfirm } from '@/hooks/useConfirm';
 import { useFlashcardNavigation } from '@/hooks/useFlashcardNavigation';
@@ -122,7 +122,7 @@ export function CardsTab({ onStudy }: Props) {
                   onClick={() => nav.openSubject(s, msg => toast.error(msg))}
                 />
                 {nav.counts[s.id] ? (
-                  <button onClick={() => studySubject(s)} style={styles.studyBtn}>Estudar</button>
+                  <Button variant="outline" size="sm" style={{ flexShrink: 0 }} onClick={() => studySubject(s)}>Estudar</Button>
                 ) : null}
               </div>
             ))}
@@ -167,7 +167,7 @@ export function CardsTab({ onStudy }: Props) {
             <div style={styles.cardsHeader}>
               <p style={styles.crumb}>{nav.curTopic === 'none' ? 'Sem tópico' : (nav.curTopic as PickerOption)?.name}</p>
               {nav.cards.length > 0 && (
-                <Button size="sm" onClick={studyCurrentTopic}>▶ Estudar tópico</Button>
+                <Button size="sm" onClick={studyCurrentTopic}><Play size={13} strokeWidth={2} fill="currentColor" />Estudar tópico</Button>
               )}
             </div>
 
@@ -242,9 +242,7 @@ const styles: Record<string, React.CSSProperties> = {
   subjectRow: { display: 'flex', alignItems: 'center', gap: 6, borderRadius: 9, transition: 'background .12s, transform .12s' },
   subjectRowHover: { background: 'rgba(15,23,42,.03)', transform: 'translateX(2px)' },
   subjectPill: { flex: 1, minWidth: 0 },
-  studyBtn: { padding: '5px 13px', borderRadius: theme.radiusXs, border: 'none', background: theme.tealBg, color: theme.tealDeep, fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', flexShrink: 0 },
   cardsHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, flexWrap: 'wrap' },
-  studyTopicBtn: { padding: '7px 15px', borderRadius: 10, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', flexShrink: 0 },
   newBtn: { width: '100%', padding: '11px 0', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', marginBottom: 4, fontFamily: 'inherit' },
   muted: { color: theme.inkFaint, fontSize: 14 },
   cardItem: { position: 'relative', background: theme.card, borderRadius: theme.radiusSm, border: `1px solid ${theme.lineStrong}`, boxShadow: '0 1px 2px var(--line)', padding: '13px 15px', paddingRight: 72, transition: 'box-shadow .12s' },

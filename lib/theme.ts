@@ -58,6 +58,7 @@ export const theme = {
 
   okDeep: 'var(--ok-deep)',
   warnDeep: 'var(--warn-deep)',
+  dangerDeep: 'var(--danger-deep)',
   dangerTint: 'var(--danger-tint)',
   okTint: 'var(--ok-tint)',
   warnTint: 'var(--warn-tint)',

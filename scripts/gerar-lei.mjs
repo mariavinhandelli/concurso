@@ -329,15 +329,22 @@ const ENTITIES = {
 };
 
 function decodeEntities(s) {
+  // Entidades numéricas 128-159 são interpretadas como Windows-1252 (regra dos
+  // browsers p/ páginas legadas): "&#150;" é o en-dash do rótulo de inciso
+  // ("II &#150; se o crime..." na l9455) — fromCharCode puro daria o controle
+  // C1 invisível U+0096 e o rótulo sumiria; normalizarC1 faz o mapeamento.
   return s
-    .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(Number(n)))
+    .replace(/&#(\d+);/g, (_, n) => normalizarC1(String.fromCharCode(Number(n))))
     .replace(/&([a-zA-Z]+);/g, (_, name) => ENTITIES[name] ?? `&${name};`);
 }
 
 // Tags puramente cosméticas (fonte/tamanho/negrito) que o Planalto às vezes usa
 // PARTEADAS no meio de um número de artigo ("Art. 21<font>7</font>." = 217) —
 // removidas sem inserir espaço, ao contrário das demais tags (ver abaixo).
-const INLINE_COSMETIC = /<\/?(?:font|b|i|em|u|sup|sub|small|big|strong)\b[^>]*>/gi;
+// <a> idem: é invólucro inline (link/âncora) e às vezes fecha no meio de um
+// número ("de 194</a>0" no art. 44 da Lei 13.869 → "194 0"); a separação de
+// palavras real vem sempre de espaço no próprio texto, nunca do limite da tag.
+const INLINE_COSMETIC = /<\/?(?:font|b|i|em|u|sup|sub|small|big|strong|a)\b[^>]*>/gi;
 
 function stripTags(s) {
   return s.replace(INLINE_COSMETIC, '').replace(/<[^>]*>/g, ' ');

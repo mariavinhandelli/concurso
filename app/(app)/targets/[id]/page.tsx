@@ -18,10 +18,12 @@ import { theme } from '@/lib/theme';
 import { Overlay } from '@/components/ui/Overlay';
 import { useUI } from '@/components/layout/UIContext';
 import { Button } from '@/components/ui/Button';
+import { IconButton } from '@/components/ui/IconButton';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { SegmentedControl } from '@/components/ui/SegmentedControl';
 import { PageContainer } from '@/components/ui/Page';
+import { BackLink } from '@/components/ui/BackLink';
 
 const HubOverviewTab = dynamic(
   () => import('@/components/features/targets/HubOverviewTab').then((m) => ({ default: m.HubOverviewTab })),
@@ -238,14 +240,14 @@ export default function TargetDetailPage() {
 
   if (!target) return (
     <PageContainer width="narrow">
-      <button onClick={() => router.push('/targets')} style={s.back}>← Concursos</button>
+      <BackLink href="/targets">Concursos</BackLink>
       <p style={{ color: theme.inkFaint, fontSize: 14 }}>Concurso não encontrado.</p>
     </PageContainer>
   );
 
   return (
     <PageContainer width="narrow">
-      <button onClick={() => router.push('/targets')} style={s.back}>← Concursos</button>
+      <BackLink href="/targets">Concursos</BackLink>
 
       <div style={s.headerRow}>
         <div style={{ minWidth: 0, flex: '1 1 240px' }}>
@@ -263,23 +265,22 @@ export default function TargetDetailPage() {
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
-          <button
+          <IconButton
+            className="icon-touch-target" variant="ghost"
             onClick={handleOpenEdit}
-            style={s.editBtn}
             title="Editar concurso"
             aria-label="Editar concurso (cargo, órgão, ano, banca)"
           >
             <Pencil size={15} color={theme.inkSoft} strokeWidth={1.8} />
-          </button>
+          </IconButton>
           <div title={!canGenerate ? 'Vincule ao menos um tópico para gerar o cronograma' : undefined}>
-            <button
-              onClick={() => canGenerate && setGeneratorOpen(true)}
-              style={{ ...s.genBtn, ...(canGenerate ? {} : s.genBtnDisabled) }}
-              aria-disabled={!canGenerate}
+            <Button
+              onClick={() => setGeneratorOpen(true)}
+              disabled={!canGenerate}
             >
               <Sparkles size={15} strokeWidth={2} style={{ marginRight: 7 }} />
               Gerar cronograma
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -437,25 +438,14 @@ export default function TargetDetailPage() {
 }
 
 const s: Record<string, CSSProperties> = {
-  back: {
-    border: 'none', background: 'transparent', color: theme.teal, fontSize: 13, fontWeight: 500,
-    cursor: 'pointer', padding: '10px 12px', marginBottom: 10, fontFamily: 'inherit',
-    minHeight: 44, display: 'inline-flex', alignItems: 'center',
-    borderRadius: theme.radiusSm, marginLeft: -12, transition: 'background .12s',
-  },
   headerRow: { display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, marginBottom: 24, flexWrap: 'wrap' },
   h1: { fontWeight: 800, color: theme.ink, letterSpacing: -0.6, margin: '0 0 12px', overflowWrap: 'break-word', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' },
   coverageRow: { display: 'flex', alignItems: 'center', gap: 10 },
   coverageTrack: { flex: 1, maxWidth: 260, height: 6, background: theme.muted, borderRadius: theme.radiusPill, overflow: 'hidden' },
   coverageFill: { height: '100%', background: theme.teal, borderRadius: theme.radiusPill, transition: 'width 0.4s ease' },
   coverageLabel: { fontSize: 12, color: theme.inkFaint, whiteSpace: 'nowrap', fontVariantNumeric: 'tabular-nums' },
-  genBtn: { display: 'inline-flex', alignItems: 'center', padding: '10px 18px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onPrimary, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
-  editBtn: { display: 'inline-flex', alignItems: 'center', justifyContent: 'center', minWidth: 44, minHeight: 44, borderRadius: theme.radiusSm, border: 'none', background: 'transparent', cursor: 'pointer', transition: 'background .12s' },
   demoteLink: { background: 'transparent', border: 'none', color: theme.inkSoft, fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit', padding: '10px 0', textDecoration: 'underline', textUnderlineOffset: 3 },
-  genBtnDisabled: { background: theme.muted, color: theme.inkFaint, cursor: 'not-allowed' },
 
   promoteTitle: { fontSize: 16, fontWeight: 700, color: theme.ink, margin: '0 0 6px' },
   promoteSub: { fontSize: 13, color: theme.inkSoft, margin: '0 0 16px', lineHeight: 1.5 },
-  btnPrimary: { padding: '10px 20px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
-  btnGhost: { padding: '10px 12px', borderRadius: theme.radiusSm, border: 'none', background: 'transparent', color: theme.inkFaint, fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
 };

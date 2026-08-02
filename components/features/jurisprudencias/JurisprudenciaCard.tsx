@@ -4,6 +4,7 @@ import { memo, useEffect, useState } from 'react';
 import { Star, X } from 'lucide-react';
 import { theme } from '@/lib/theme';
 import { EstrelasBadge } from './EstrelasBadge';
+import { Badge } from '@/components/ui/Badge';
 import { getInteracao, toggleFavorito } from '@/services/jurisInteracoes.service';
 import type { Jurisprudencia } from '@/services/jurisprudencias.service';
 import { INCIDENCIA_LABEL, INCIDENCIA_COLOR, STATUS_LABEL, tipoRefLabel } from '@/lib/juris-labels';
@@ -58,10 +59,10 @@ export const JurisprudenciaCard = memo(function JurisprudenciaCard({ item, onCli
     >
       {/* Topo: tribunal + tipo + status + favorito */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-        <span style={styles.tribunalBadge}>{item.tribunal}</span>
-        <span style={styles.tipoBadge}>
+        <Badge variant="brand">{item.tribunal}</Badge>
+        <Badge variant="neutral">
           {tipoRefLabel(item.tipo, item.numero_sumula, { short: true })}
-        </span>
+        </Badge>
         {(() => {
           // Entendimento não mais aplicável: o status (enum) e as flags de
           // súmula sinalizam superação — a lista precisa refletir ambos.
@@ -71,16 +72,10 @@ export const JurisprudenciaCard = memo(function JurisprudenciaCard({ item, onCli
               : item.superada ? 'Superada'
               : item.superada_parcialmente ? 'Superada em parte'
               : null;
-          return superadoLabel ? (
-            <span style={{ ...styles.tipoBadge, background: theme.dangerTint, color: theme.danger }}>
-              {superadoLabel}
-            </span>
-          ) : null;
+          return superadoLabel ? <Badge variant="danger">{superadoLabel}</Badge> : null;
         })()}
         {reviewOverdueDays > 0 && (
-          <span style={{ fontSize: 11, fontWeight: 700, color: theme.danger, background: theme.dangerTint, borderRadius: 6, padding: '2px 8px' }}>
-            ↻ {reviewOverdueDays}d atrasada
-          </span>
+          <Badge variant="danger">↻ {reviewOverdueDays}d atrasada</Badge>
         )}
         <button
           onClick={handleFavorito}
@@ -144,8 +139,6 @@ const styles: Record<string, React.CSSProperties> = {
     transition: 'border-color .15s, box-shadow .15s', fontFamily: theme.font,
     display: 'flex', flexDirection: 'column', gap: 10,
   },
-  tribunalBadge: { fontSize: 12, fontWeight: 700, color: theme.onTeal, background: theme.teal, borderRadius: 6, padding: '2px 8px' },
-  tipoBadge: { fontSize: 12, fontWeight: 500, color: theme.inkSoft, background: 'rgba(15,23,42,.06)', borderRadius: 6, padding: '2px 8px' },
   tese: {
     fontSize: 14, color: theme.ink, margin: 0, lineHeight: 1.55, fontWeight: 500,
     display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden',

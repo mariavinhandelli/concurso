@@ -75,6 +75,8 @@
   --gradient-brand: linear-gradient(135deg, #22C55E 0%, #6EE7B7 45%, #6366F1 100%);
   --ok-deep: #16a34a;
   --warn-deep: #b45309;
+  /* Texto de badge "danger soft" — --danger (#EF4444) sobre --danger-bg dava só 3,1:1, reprovando AA. */
+  --danger-deep: #b91c1c;
   --danger-tint: rgba(239,68,68,.08);
   --ok-tint: rgba(34,197,94,.08);
   --warn-tint: rgba(245,158,11,.08);
@@ -136,6 +138,7 @@
   --shadow-modal: 0 18px 48px rgba(0,0,0,.50);
   --ok-deep: #86efac;
   --warn-deep: #fcd34d;
+  --danger-deep: #fca5a5;
   --danger-tint: rgba(248,113,113,.12);
   --ok-tint: rgba(74,222,128,.12);
   --warn-tint: rgba(251,191,36,.12);
@@ -147,7 +150,8 @@
   --gradient-cta: linear-gradient(135deg, #A85F62 0%, #7A4456 100%);
   --gradient-cta-hover: linear-gradient(135deg, #8A4850 0%, #5E3242 100%);
   --on-cta: #FFFFFF;
-  --brand-accent: #A85F62;
+  /* Era #A85F62 (4,48:1 sobre --bg, reprovava AA por um fio como texto de link). */
+  --brand-accent: #A55C60;
   --backdrop: rgba(60,40,40,0.45);
   --on-danger: #FFFFFF;
   --on-warn: #452A00;
@@ -159,17 +163,24 @@
   --line-strong: rgba(60,40,40,.18);
   --ink: #2E2422;
   --ink-soft: #7A6B66;
-  --ink-faint: #80716D;
+  /* Era #80716D (4,46:1 sobre --bg) — AA como no petroleo: 4,7:1 bg / 4,9:1 card. */
+  --ink-faint: #7C6D69;
 
-  --teal: #C67D80;
-  --teal-deep: #A85F62;
+  /* teal é COR DE TEXTO em dezenas de componentes: #C67D80 dava 2,5–3,2:1.
+     #8F4E53 passa AA em todos os fundos (4,9:1 no --teal-bg, 5,9:1 no --bg)
+     e mantém --on-teal branco legível (6,2:1). --teal-deep (texto de pill
+     sobre --teal-bg) idem: #A85F62 dava 3,7:1 → #8A4850 = 5,3:1. */
+  --teal: #8F4E53;
+  --teal-deep: #8A4850;
   --teal-soft: #DCA8AA;
   --teal-bg: #F2E0E0;
   --on-teal: #FFFFFF;
 
-  --primary: #C67D80;
-  --primary-hover: #A85F62;
-  --primary-pressed: #8A4850;
+  /* Botão primário: branco sobre #C67D80 dava 3,2:1 → escala desloca um tom
+     (#A85F62 = 4,7:1 com branco; hover 6,7:1; pressed 7,5:1). */
+  --primary: #A85F62;
+  --primary-hover: #8A4850;
+  --primary-pressed: #7A4456;
   --on-primary: #FFFFFF;
 
   --clay: #9B5C6E;
@@ -206,18 +217,23 @@
   --line-strong: rgba(255,235,235,.15);
   --ink: #F2E8E6;
   --ink-soft: #B09A96;
-  --ink-faint: #8C7975;
+  /* Era #8C7975 (3,8:1 sobre --card) — #A08D89 = 5,0:1 card / 4,5:1 muted. */
+  --ink-faint: #A08D89;
 
   --teal: #D7969A;
   --teal-deep: #E6B3B6;
   --teal-soft: #C67D80;
   --teal-bg: #3A2A2B;
-  --on-teal: #FFFFFF;
+  /* Branco sobre o rosa claro #D7969A dava 2,4:1 (badges ilegíveis).
+     Texto escuro segue o padrão do petroleo dark (primária clara + tinta
+     escura): 7,1:1 sobre --teal e 5,4:1 sobre --primary-hover. */
+  --on-teal: #33110D;
 
   --primary: #D7969A;
   --primary-hover: #C67D80;
-  --primary-pressed: #B06065;
-  --on-primary: #FFFFFF;
+  /* Pressed era #B06065 (4,5:1 no limite com o novo on-primary) → 4,9:1. */
+  --primary-pressed: #C07377;
+  --on-primary: #33110D;
 
   --clay: #C98A9C;
   --clay-deep: #DDA8B6;
@@ -235,6 +251,7 @@
   --shadow-hover: 0 2px 6px rgba(0,0,0,.4), 0 18px 44px -18px rgba(0,0,0,.6);
   --ok-deep: #86efac;
   --warn-deep: #fde68a;
+  --danger-deep: #fca5a5;
   --danger-tint: rgba(240,138,126,.12);
   --ok-tint: rgba(74,222,128,.12);
   --warn-tint: rgba(251,191,107,.12);
@@ -243,7 +260,8 @@
 /* ---- Menta claro ---- */
 [data-palette="menta"][data-mode="light"] {
   --bg: #F8FAFC;
-  --gradient-cta: linear-gradient(135deg, #6366F1 0%, #4338CA 100%);
+  /* Ponta clara era #6366F1 (4,47:1 com texto branco, reprovava por um fio). */
+  --gradient-cta: linear-gradient(135deg, #5A5DEF 0%, #4338CA 100%);
   --gradient-cta-hover: linear-gradient(135deg, #4F46E5 0%, #3730A3 100%);
   --on-cta: #FFFFFF;
   --brand-accent: #4F46E5;
@@ -258,15 +276,21 @@
   --line-strong: rgba(30,55,45,.18);
   --ink: #1E2B26;
   --ink-soft: #5E7268;
-  --ink-faint: #697A70;
+  /* Era #697A70 (4,35:1 sobre --bg) — #657668 = 4,6:1 bg / 4,8:1 card. */
+  --ink-faint: #657668;
 
-  --teal: #6366F1;
-  --teal-deep: #b3a7f5;
+  /* teal é COR DE TEXTO: #6366F1 dava 4,47:1 no card e 2,7:1 sobre o antigo
+     --teal-bg #cac3f4. #4F46E5 + fundo mais claro #E2DEFB = 4,8:1 na pill,
+     6,3:1 no card. --teal-deep estava INVERTIDO (#b3a7f5, mais claro que o
+     teal, 1,3:1 como texto de pill) → #4338CA = 6,1:1. */
+  --teal: #4F46E5;
+  --teal-deep: #4338CA;
   --teal-soft: #6366F1;
-  --teal-bg: #cac3f4;
+  --teal-bg: #E2DEFB;
   --on-teal: #FFFFFF;
 
-  --primary: #6366F1;
+  /* Branco sobre #6366F1 dava 4,47:1 (reprovava por um fio) → 4,9:1. */
+  --primary: #5A5DEF;
   --primary-hover: #4338CA;
   --primary-pressed: #3730A3;
   --on-primary: #FFFFFF;
@@ -304,19 +328,26 @@
   --line: rgba(200,220,240,.08);
   --line-strong: rgba(220,255,240,.15);
   --ink: #E4F2EC;
-  --ink-soft: #8FA89D;
-  --ink-faint: #6F857B;
+  /* Superfícies do menta dark são claras (--card #2D4148): o par antigo
+     reprovava AA (soft 4,2:1 e faint 2,7:1 no card) → 5,8:1 e 5,2:1. */
+  --ink-soft: #ACC5B9;
+  --ink-faint: #A1BAAF;
 
-  --teal: #6366F1;
+  /* teal é COR DE TEXTO: índigo #6366F1 dava 2,0–3,0:1 nos fundos do modo
+     escuro. Índigo pastel #A9B8FC passa em todos (5,6:1 card, 4,7:1 muted)
+     e vira também a primária, com tinta escura #1E1B4B (8,3:1) — mesmo
+     padrão do petroleo dark (primária clara + on-* escuro). teal-soft
+     acompanha (é anel de foco/fills: #6366F1 sumia sobre --bg, 2,9:1). */
+  --teal: #A9B8FC;
   --teal-deep: #8FE8CC;
-  --teal-soft: #6366F1;
+  --teal-soft: #C7D2FE;
   --teal-bg: #1e323a;
-  --on-teal: #FFFFFF;
+  --on-teal: #1E1B4B;
 
-  --primary: #7577F3;
-  --primary-hover: #6366F1;
-  --primary-pressed: #4338CA;
-  --on-primary: #FFFFFF;
+  --primary: #A9B8FC;
+  --primary-hover: #95A7FB;
+  --primary-pressed: #8296FA;
+  --on-primary: #1E1B4B;
 
   --clay: #E0A07A;
   --clay-deep: #ECB890;
@@ -334,6 +365,7 @@
   --shadow-hover: 0 2px 6px rgba(0,0,0,.4), 0 18px 44px -18px rgba(0,0,0,.6);
   --ok-deep: #86efac;
   --warn-deep: #fde68a;
+  --danger-deep: #fca5a5;
   --danger-tint: rgba(240,138,126,.12);
   --ok-tint: rgba(74,222,128,.12);
   --warn-tint: rgba(251,191,107,.12);
@@ -358,7 +390,9 @@
   --line-strong: rgba(27,34,31,.32);
   --ink: #1b221f;
   --ink-soft: #4f645a;
-  --ink-faint: #68746E;
+  /* Era #68746E (4,05:1 sobre --muted, que aqui também é o --teal-bg) —
+     #5D6A64 = 4,7:1 muted / 5,4:1 bg. */
+  --ink-faint: #5D6A64;
 
   --teal: #1b221f;
   --teal-deep: #10140f;
@@ -405,7 +439,8 @@
   --line-strong: rgba(232,236,234,.22);
   --ink: #ffffffd9;
   --ink-soft: #9AAAA2;
-  --ink-faint: #76857D;
+  /* Era #76857D (4,2:1 card / 3,7:1 muted) — #8A998F = 5,5:1 / 4,8:1. */
+  --ink-faint: #8A998F;
 
   --teal: #cacacad1;
   --teal-deep: #FFFFFF;
@@ -434,6 +469,7 @@
   --shadow-hover: 0 2px 6px rgba(0,0,0,.4), 0 18px 44px -18px rgba(0,0,0,.6);
   --ok-deep: #86efac;
   --warn-deep: #fde68a;
+  --danger-deep: #fca5a5;
   --danger-tint: rgba(240,138,126,.12);
   --ok-tint: rgba(74,222,128,.12);
   --warn-tint: rgba(251,191,107,.12);
@@ -513,7 +549,8 @@
 
 /* Menta — primária clara: usa o tom -deep como fundo p/ texto branco legível */
 [data-palette="menta"][data-mode="light"] {
-  --sidebar-bg: #6366F1;
+  /* Acompanha o novo --primary: branco sobre #6366F1 dava 4,47:1. */
+  --sidebar-bg: #5A5DEF;
   --sidebar-ink: #FFFFFF;
   --sidebar-ink-idle: #FFFFFF;
   --sidebar-icon: #C5EEDD;
@@ -788,6 +825,10 @@ img, video, canvas {
 /* ── Primitivo IconButton (components/ui/IconButton.tsx) ── */
 .ui-icon-btn { transition: background .12s ease, border-color .12s ease; }
 .ui-icon-btn-ghost:hover:not(:disabled) { background: var(--muted) !important; }
+
+/* ── Primitivo BackLink (components/ui/BackLink.tsx) ── */
+.back-link { transition: background .12s ease; }
+.back-link:hover { background: var(--muted); }
 .ui-icon-btn-outline:hover:not(:disabled) { background: var(--muted) !important; border-color: var(--line-strong) !important; }
 
 /* ── Primitivo Menu/MenuItem (components/ui/Menu.tsx) ── */
@@ -1073,22 +1114,6 @@ textarea:focus-visible {
   animation: conquistas-prog-grow .7s cubic-bezier(.4,0,.2,1) both;
   animation-delay: 60ms;
 }
-.conquistas-filter-tab {
-  /* P0: 13→14px (md da escala) */
-  font-size: 14px;
-  /* P1: padding vertical mínimo para área de toque adequada */
-  padding: 7px 16px;
-  border-radius: 99px;
-  border: 0.5px solid;
-  cursor: pointer;
-  font-family: inherit;
-  transition: background .14s ease, color .14s ease, border-color .14s ease;
-}
-/* P2: focus-visible para navegação por teclado */
-.conquistas-filter-tab:focus-visible {
-  outline: 2px solid var(--teal);
-  outline-offset: 2px;
-}
 /* M4 — botão de compartilhar no card desbloqueado: discreto até o hover. */
 .conquistas-share-btn {
   margin-left: auto;
@@ -1116,7 +1141,6 @@ textarea:focus-visible {
    .touch-target também vale aqui — a regra do bloco mobile (767px) não
    cobre tablets, que são touch do mesmo jeito. */
 @media (pointer: coarse) {
-  .conquistas-filter-tab { min-height: 44px; }
   .touch-target { min-height: 44px; }
 }
 

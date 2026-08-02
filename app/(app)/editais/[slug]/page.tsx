@@ -27,6 +27,7 @@ import { theme } from '@/lib/theme';
 import { useUI } from '@/components/layout/UIContext';
 import { useToast } from '@/components/ui/ToastProvider';
 import { Button } from '@/components/ui/Button';
+import { BackLink } from '@/components/ui/BackLink';
 import { PageContainer } from '@/components/ui/Page';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { EditalTimeline } from '@/components/features/editais/EditalTimeline';
@@ -253,7 +254,7 @@ export default function EditalDetailPage() {
   if (isError || !edital) {
     return (
       <PageContainer width="narrow">
-        <button onClick={() => router.push('/editais')} style={s.back}>← Banco de editais</button>
+        <BackLink href="/editais">Banco de editais</BackLink>
         <p style={{ color: theme.inkFaint, fontSize: 14 }}>
           {isError ? 'Não foi possível carregar o edital. Tente de novo.' : 'Edital não encontrado.'}
         </p>
@@ -668,7 +669,6 @@ export default function EditalDetailPage() {
 }
 
 const s: Record<string, CSSProperties> = {
-  back: { border: 'none', background: 'transparent', color: theme.teal, fontSize: 13, fontWeight: 500, cursor: 'pointer', padding: '10px 12px', marginBottom: 10, fontFamily: 'inherit', minHeight: 44, display: 'inline-flex', alignItems: 'center', borderRadius: theme.radiusSm, marginLeft: -12, transition: 'background .12s' },
 
   headerRow: { display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, marginBottom: 16, flexWrap: 'wrap' },
   h1: { fontWeight: 800, color: theme.ink, letterSpacing: -0.6, margin: '0 0 10px', overflowWrap: 'break-word' },

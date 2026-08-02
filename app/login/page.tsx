@@ -25,6 +25,7 @@ const B = {
   borderLight: 'var(--line)',
   danger: 'var(--danger)',
   dangerBg: 'var(--danger-bg)',
+  dangerDeep: 'var(--danger-deep)',
   ok: 'var(--ok)',
   okBg: 'var(--ok-bg)',
 };
@@ -452,7 +453,7 @@ export default function LoginPage() {
 
             {/* Feedback */}
             {feedback && (
-              <p role={feedback.kind === 'error' ? 'alert' : 'status'} aria-live="polite" style={{ fontSize: 13, marginTop: 14, textAlign: 'center', padding: '10px 14px', borderRadius: 10, lineHeight: 1.5, color: feedback.kind === 'error' ? B.danger : B.ok, background: feedback.kind === 'error' ? B.dangerBg : B.okBg }}>
+              <p role={feedback.kind === 'error' ? 'alert' : 'status'} aria-live="polite" style={{ fontSize: 13, marginTop: 14, textAlign: 'center', padding: '10px 14px', borderRadius: 10, lineHeight: 1.5, color: feedback.kind === 'error' ? B.dangerDeep : B.ok, background: feedback.kind === 'error' ? B.dangerBg : B.okBg }}>
                 {feedback.text}
               </p>
             )}

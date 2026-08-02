@@ -16,6 +16,7 @@ import { EditalCard } from '@/components/features/editais/EditalCard';
 import { pushRecent } from '@/lib/recents';
 import { theme } from '@/lib/theme';
 import { PageContainer } from '@/components/ui/Page';
+import { BackLink } from '@/components/ui/BackLink';
 import { Skeleton } from '@/components/ui/Skeleton';
 
 const ESFERA_LABEL: Record<string, string> = {
@@ -74,7 +75,7 @@ export default function OrgaoPage() {
   if (isError || !orgao) {
     return (
       <PageContainer width="narrow">
-        <button onClick={() => router.push('/editais')} style={s.back}>← Banco de editais</button>
+        <BackLink href="/editais">Banco de editais</BackLink>
         <p style={{ color: theme.inkFaint, fontSize: 14 }}>
           {isError ? 'Não foi possível carregar o órgão. Tente de novo.' : 'Órgão não encontrado.'}
         </p>
@@ -138,8 +139,6 @@ export default function OrgaoPage() {
 }
 
 const s: Record<string, CSSProperties> = {
-  back: { border: 'none', background: 'transparent', color: theme.teal, fontSize: 13, fontWeight: 500, cursor: 'pointer', padding: '10px 12px', marginBottom: 10, fontFamily: 'inherit', minHeight: 44, display: 'inline-flex', alignItems: 'center', borderRadius: theme.radiusSm, marginLeft: -12, transition: 'background .12s' },
-
   headerRow: { display: 'flex', alignItems: 'flex-start', gap: 14, marginBottom: 12 },
   iconWrap: { width: 46, height: 46, borderRadius: theme.radiusSm, background: theme.tealBg, display: 'grid', placeItems: 'center', flexShrink: 0, marginTop: 2 },
   h1: { fontSize: 28, fontWeight: 800, color: theme.ink, letterSpacing: -0.6, margin: 0, overflowWrap: 'break-word' },

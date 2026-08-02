@@ -27,6 +27,14 @@ const NIVEL_BG: Record<NivelProntidao, string> = {
   quase_la: theme.tealBg,
   pronto: theme.okBg,
 };
+// Texto do chip precisa de 4,5:1 sobre NIVEL_BG (NIVEL_COR sozinho reprova AA em "construcao");
+// usado só aqui, NIVEL_COR segue servindo a barra/dot que só exigem contraste 3:1 (não-texto).
+const NIVEL_COR_TEXTO: Record<NivelProntidao, string> = {
+  construcao: theme.dangerDeep,
+  progresso: theme.warnDeep,
+  quase_la: theme.teal,
+  pronto: theme.ok,
+};
 
 export const RaioXCard = memo(function RaioXCard() {
   const router = useRouter();
@@ -96,7 +104,7 @@ export const RaioXCard = memo(function RaioXCard() {
       <div style={styles.heroRow}>
         <span style={styles.heroPct}>{score}</span>
         <div>
-          <Badge style={{ color: NIVEL_COR[nivel], background: NIVEL_BG[nivel] }}>{NIVEL_LABEL[nivel]}</Badge>
+          <Badge style={{ color: NIVEL_COR_TEXTO[nivel], background: NIVEL_BG[nivel] }}>{NIVEL_LABEL[nivel]}</Badge>
           <p style={styles.heroLabel}>se a prova fosse hoje</p>
         </div>
       </div>

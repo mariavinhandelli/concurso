@@ -7,7 +7,7 @@
 import { useCallback, useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Book, Star } from 'lucide-react';
-import { getLei, LEIS_CATALOG, type Lei, type LeiArtigo } from '@/services/leis.service';
+import { getLei, type Lei, type LeiArtigo } from '@/services/leis.service';
 import { listInteracoesByLei, type LeiInteracao, type GrifoCor } from '@/services/leiInteracoes.service';
 import { getQuestoesLei, agruparPorArtigo, type LeiQuestao } from '@/services/leiQuestoes.service';
 import { GRIFO_CORES, GRIFO_CORES_ORDEM } from '@/lib/lei-grifos';
@@ -18,6 +18,8 @@ import { useToast } from '@/components/ui/ToastProvider';
 import { useUI } from '@/components/layout/UIContext';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { PageContainer, PageHeader } from '@/components/ui/Page';
+import { BackLink } from '@/components/ui/BackLink';
+import { Skeleton } from '@/components/ui/Skeleton';
 import { pushRecent } from '@/lib/recents';
 import { theme } from '@/lib/theme';
 
@@ -307,7 +309,7 @@ export default function LeiReaderPage() {
 
   if (erro) {
     return (
-      <PageContainer width="default" style={{ padding: 40 }}>
+      <PageContainer width="narrow" style={{ padding: 40 }}>
         <EmptyState
           icon={<Book size={26} color={theme.teal} strokeWidth={1.8} />}
           title="Não encontramos essa lei"
@@ -318,8 +320,14 @@ export default function LeiReaderPage() {
     );
   }
   if (!lei) {
-    const meta = LEIS_CATALOG.find((l) => l.slug === slug);
-    return <PageContainer width="default" style={{ padding: 40 }}><p style={{ color: theme.inkFaint }}>Carregando {meta?.nomeCurto ?? 'a lei'}…</p></PageContainer>;
+    return (
+      <PageContainer width="narrow">
+        <Skeleton width={220} height={28} borderRadius={8} style={{ marginBottom: 20 }} />
+        <Skeleton height={16} borderRadius={6} style={{ marginBottom: 10 }} />
+        <Skeleton height={16} borderRadius={6} style={{ marginBottom: 10 }} />
+        <Skeleton width="70%" height={16} borderRadius={6} />
+      </PageContainer>
+    );
   }
 
   const totalGrifos = [...interacoes.values()].reduce((sum, i) => sum + i.grifos.length, 0);
@@ -331,9 +339,9 @@ export default function LeiReaderPage() {
   const pctGrifado = artigosVigentes.length > 0 ? Math.round((artigosComGrifo / artigosVigentes.length) * 100) : 0;
 
   return (
-    <PageContainer width="default">
+    <PageContainer width="narrow">
       {/* Cabeçalho */}
-      <button onClick={() => router.push('/vademecum')} style={s.voltar}>← Vade Mecum</button>
+      <BackLink href="/vademecum">Vade Mecum</BackLink>
       <PageHeader
         title={lei.nomeCurto}
         subtitle={(
@@ -548,7 +556,6 @@ export default function LeiReaderPage() {
 }
 
 const s: Record<string, CSSProperties> = {
-  voltar: { border: 'none', background: 'transparent', color: theme.inkFaint, fontSize: 13, cursor: 'pointer', fontFamily: 'inherit', padding: 0, marginBottom: 10 },
   statsRow: { display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' },
   stat: { fontSize: 13, color: theme.inkSoft, background: theme.card, border: `0.5px solid ${theme.line}`, borderRadius: theme.radiusPill, padding: '5px 12px' },
   abas: { display: 'flex', alignItems: 'center', gap: 6, borderBottom: `0.5px solid ${theme.line}`, marginBottom: 16, paddingBottom: 0, flexWrap: 'wrap' },

@@ -74,8 +74,11 @@ function buildWeeks(byDay: Map<string, number>, numWeeks: number): { weeks: Cell
 }
 
 export function YearHeatmap() {
-  const { isMobile } = useUI();
-  const numWeeks = isMobile ? 26 : 52;
+  const { isMobile, isTablet } = useUI();
+  // Menos semanas em telas estreitas: com colunas fluidas (1fr), mais semanas
+  // em menos espaço vira célula ilegível em vez de scroll — melhor mostrar
+  // um período mais curto do que espremer o quadrado.
+  const numWeeks = isMobile ? 26 : isTablet ? 39 : 52;
 
   const { data: totals } = useQuery<DayTotal[]>({
     queryKey: ['study-day-totals-heatmap'],
@@ -112,9 +115,11 @@ export function YearHeatmap() {
     );
   }
 
-  const periodo = isMobile ? '6 meses' : '12 meses';
-  const cell = isMobile ? 10 : 11;
+  const periodo = isMobile ? '6 meses' : isTablet ? '9 meses' : '12 meses';
   const gap = 2.5;
+  // Colunas em fr (não px fixo): a grade sempre preenche a largura do card,
+  // encolhendo/esticando a célula em vez de estourar em scroll horizontal.
+  const monthRowHeight = 16;
 
   return (
     <div style={s.card}>
@@ -128,33 +133,32 @@ export function YearHeatmap() {
 
       <div style={s.gridWrap}>
         {/* rótulos dos dias */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap, marginRight: 6, paddingTop: 16 }}>
-          {['', 'seg', '', 'qua', '', 'sex', ''].map((l, i) => (
-            <span key={i} style={{ ...s.dowLabel, height: cell, lineHeight: `${cell}px` }}>{l}</span>
-          ))}
+        <div style={{ display: 'flex', flexDirection: 'column', marginRight: 6 }}>
+          <div style={{ height: monthRowHeight }} />
+          <div style={{ flex: 1, display: 'grid', gridTemplateRows: 'repeat(7, 1fr)' }}>
+            {['', 'seg', '', 'qua', '', 'sex', ''].map((l, i) => (
+              <span key={i} style={{ ...s.dowLabel, display: 'flex', alignItems: 'center' }}>{l}</span>
+            ))}
+          </div>
         </div>
 
-        <div style={{ minWidth: 0, overflowX: 'auto' }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
           {/* rótulos dos meses */}
           <div style={{ position: 'relative', height: 14, marginBottom: 2 }}>
             {monthLabels.map((m) => (
-              <span key={`${m.label}-${m.col}`} style={{ ...s.monthLabel, left: m.col * (cell + gap) }}>{m.label}</span>
+              <span key={`${m.label}-${m.col}`} style={{ ...s.monthLabel, left: `${(m.col / numWeeks) * 100}%` }}>{m.label}</span>
             ))}
           </div>
-          <div style={{ display: 'flex', gap }}>
-            {weeks.map((week, wi) => (
-              <div key={wi} style={{ display: 'flex', flexDirection: 'column', gap }}>
-                {week.map((d) => (
-                  <div
-                    key={d.date}
-                    title={d.minutes >= 0 ? `${new Date(d.date + 'T00:00:00').toLocaleDateString('pt-BR')} · ${d.minutes} min` : undefined}
-                    style={{
-                      width: cell, height: cell, borderRadius: 2.5,
-                      background: d.minutes < 0 ? 'transparent' : corDoDia(d.minutes),
-                    }}
-                  />
-                ))}
-              </div>
+          <div style={{ display: 'grid', gridTemplateColumns: `repeat(${numWeeks}, 1fr)`, gridTemplateRows: 'repeat(7, 1fr)', gridAutoFlow: 'column', gap }}>
+            {weeks.flat().map((d) => (
+              <div
+                key={d.date}
+                title={d.minutes >= 0 ? `${new Date(d.date + 'T00:00:00').toLocaleDateString('pt-BR')} · ${d.minutes} min` : undefined}
+                style={{
+                  aspectRatio: '1', borderRadius: 2.5,
+                  background: d.minutes < 0 ? 'transparent' : corDoDia(d.minutes),
+                }}
+              />
             ))}
           </div>
         </div>

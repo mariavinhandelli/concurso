@@ -15,6 +15,7 @@ import { FlashcardBankPreviewModal } from '@/components/features/flashcards/Flas
 import { useToast } from '@/components/ui/ToastProvider';
 import { theme } from '@/lib/theme';
 import { Button } from '@/components/ui/Button';
+import { Skeleton } from '@/components/ui/Skeleton';
 
 // Selo de origem: só aparece para conteúdo gerado a partir de lei/julgado —
 // um deck de curadoria manual não precisa de rótulo (é o padrão implícito).
@@ -69,7 +70,7 @@ export function BancoFlashcardsTab() {
     return (
       <div style={s.list}>
         {[1, 2, 3].map((i) => (
-          <div key={i} style={{ ...s.skeleton, animationDelay: `${i * 0.1}s` }} />
+          <Skeleton key={i} height={84} borderRadius={theme.radiusSm} style={{ animationDelay: `${i * 0.1}s` }} />
         ))}
       </div>
     );
@@ -137,7 +138,6 @@ export function BancoFlashcardsTab() {
 
 const s: Record<string, CSSProperties> = {
   muted: { fontSize: 14, color: theme.inkSoft, padding: '12px 0' },
-  skeleton: { height: 84, borderRadius: theme.radiusSm, background: theme.muted, animation: 'focali-pulse 1.4s ease infinite' },
 
   empty: { textAlign: 'center', padding: '40px 12px' },
   emptyTitle: { fontSize: 15, fontWeight: 600, color: theme.inkSoft, margin: '0 0 6px' },

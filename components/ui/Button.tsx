@@ -22,7 +22,7 @@ const VARIANTS: Record<ButtonVariant, CSSProperties> = {
   brandOutline: { background: theme.card, color: theme.inkSoft, border: `0.5px solid ${theme.teal}`, fontWeight: 600 },
   ghost:        { background: 'transparent', color: theme.inkSoft, border: 'none', fontWeight: 500 },
   danger:       { background: theme.danger, color: theme.onDanger, border: 'none', fontWeight: 600 },
-  dangerSoft:   { background: theme.dangerBg, color: theme.danger, border: '0.5px solid color-mix(in srgb, var(--danger) 30%, transparent)', fontWeight: 600 },
+  dangerSoft:   { background: theme.dangerBg, color: theme.dangerDeep, border: '0.5px solid color-mix(in srgb, var(--danger) 30%, transparent)', fontWeight: 600 },
 };
 
 const SIZES: Record<ButtonSize, CSSProperties> = {

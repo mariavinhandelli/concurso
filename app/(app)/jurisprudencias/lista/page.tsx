@@ -23,14 +23,16 @@ import { theme } from '@/lib/theme';
 import { Button } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { PageContainer } from '@/components/ui/Page';
+import { BackLink } from '@/components/ui/BackLink';
+import { Skeleton } from '@/components/ui/Skeleton';
 
 function ListaSkeleton() {
   return (
-    <div style={{ maxWidth: 1080, margin: '0 auto', padding: '34px 40px' }}>
+    <PageContainer width="wide">
       {[1, 2, 3, 4].map((i) => (
-        <div key={i} style={{ height: 150, background: theme.card, borderRadius: theme.radius, border: `0.5px solid ${theme.line}`, animation: 'skeleton-pulse 1.4s ease-in-out infinite', animationDelay: `${(i - 1) * 0.1}s`, marginBottom: 12 }} />
+        <Skeleton key={i} height={150} borderRadius={theme.radius} style={{ marginBottom: 12, animationDelay: `${(i - 1) * 0.1}s` }} />
       ))}
-    </div>
+    </PageContainer>
   );
 }
 
@@ -184,7 +186,7 @@ function ListaContent() {
         {/* Cabeçalho */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16, flexWrap: 'wrap', marginBottom: 20 }}>
           <div>
-            <button className="touch-target" onClick={() => router.push('/jurisprudencias')} style={styles.backBtn}>← Jurisprudências</button>
+            <BackLink href="/jurisprudencias" style={{ marginBottom: 0 }}>Jurisprudências</BackLink>
             <h1 style={{ fontSize: isMobile ? 24 : 28, fontWeight: 800, color: theme.ink, letterSpacing: -0.6, margin: '8px 0 0', display: 'flex', alignItems: 'center', gap: 8 }}>
               {isFavoritasView ? <><Star size={isMobile ? 20 : 24} fill={theme.ink} strokeWidth={1.7} />Favoritas</> : (filters.disciplina || 'Todas as jurisprudências')}
             </h1>
@@ -269,16 +271,24 @@ function ListaContent() {
 
                   {/* Botões de modo de estudo */}
                   {countFlash > 0 && (
-                    <button onClick={() => setShowFlashcards(true)} style={styles.studyBtn}>
-                      <Layers size={13} strokeWidth={1.7} style={{ marginRight: 6 }} />
+                    <Button
+                      size="sm"
+                      style={{ border: `0.5px solid ${theme.teal}`, background: theme.tealBg, color: theme.tealDeep }}
+                      onClick={() => setShowFlashcards(true)}
+                    >
+                      <Layers size={13} strokeWidth={1.7} />
                       Flashcards ({countFlash})
-                    </button>
+                    </Button>
                   )}
                   {countQuestao > 0 && (
-                    <button onClick={() => setShowSimulado(true)} style={styles.simuladoBtn}>
-                      <CircleHelp size={13} strokeWidth={1.7} style={{ marginRight: 6 }} />
+                    <Button
+                      size="sm"
+                      style={{ border: `0.5px solid ${theme.clay}`, background: theme.clayBg, color: theme.clayDeep }}
+                      onClick={() => setShowSimulado(true)}
+                    >
+                      <CircleHelp size={13} strokeWidth={1.7} />
                       Simular ({countQuestao})
-                    </button>
+                    </Button>
                   )}
                 </div>
 
@@ -332,27 +342,11 @@ function CoverageChip({ active, total, label, color, bg }: {
         background: `linear-gradient(to right, ${color} ${pct}%, ${bg} ${pct}%)`,
       }} />
       <span style={{ color, fontWeight: 700 }}>{active}</span>
-      <span style={{ color: '#9ca3af' }}>/ {total} {label}</span>
+      <span style={{ color: theme.inkFaint }}>/ {total} {label}</span>
     </span>
   );
 }
 
 const styles: Record<string, React.CSSProperties> = {
-  backBtn: { border: 'none', background: 'transparent', color: theme.teal, fontSize: 13, fontWeight: 500, cursor: 'pointer', padding: 0, fontFamily: 'inherit' },
-  addBtn: { padding: '11px 22px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
   searchInput: { width: '100%', boxSizing: 'border-box', padding: '12px 16px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.card, fontSize: 14, color: theme.ink, fontFamily: 'inherit', outline: 'none', boxShadow: theme.shadow },
-  studyBtn: {
-    display: 'flex', alignItems: 'center',
-    padding: '8px 14px', borderRadius: theme.radiusSm,
-    border: `0.5px solid ${theme.teal}`, background: theme.tealBg,
-    color: theme.tealDeep, fontSize: 13, fontWeight: 600,
-    cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap',
-  },
-  simuladoBtn: {
-    display: 'flex', alignItems: 'center',
-    padding: '8px 14px', borderRadius: theme.radiusSm,
-    border: `0.5px solid ${theme.clay}`, background: theme.clayBg,
-    color: theme.clayDeep, fontSize: 13, fontWeight: 600,
-    cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap',
-  },
 };

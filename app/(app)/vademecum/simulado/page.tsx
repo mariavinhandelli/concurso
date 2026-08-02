@@ -11,7 +11,7 @@ import { Suspense, useEffect, useMemo, useRef, useState, type CSSProperties } fr
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 import { refreshHomeAfterSession } from '@/lib/home-refresh';
-import { Check, X } from 'lucide-react';
+import { Check, X, PartyPopper, BookOpen } from 'lucide-react';
 import { LEIS_CATALOG, artigoNumeroFromKey, type LeiMeta } from '@/services/leis.service';
 import {
   getQuestoesLei, embaralhar, saveLeiSimuladoSession, listLeiSimuladoSessions,
@@ -22,6 +22,7 @@ import { useUI } from '@/components/layout/UIContext';
 import { theme } from '@/lib/theme';
 import { Button } from '@/components/ui/Button';
 import { PageContainer } from '@/components/ui/Page';
+import { BackLink } from '@/components/ui/BackLink';
 
 interface QuestaoComLei extends LeiQuestao {
   leiSlug: string;
@@ -202,7 +203,7 @@ function SimuladoContent() {
   return (
     <PageContainer width="narrow">
       <div style={s.topo}>
-        <button onClick={() => router.push('/vademecum')} style={s.voltar}>← {titulo}</button>
+        <BackLink href="/vademecum" style={{ marginBottom: 0 }}>{titulo}</BackLink>
         {!acabou && <span style={s.progresso}>{idx + 1} de {fila.length} · {acertos} certas</span>}
       </div>
       {leis.length > 1 && (
@@ -216,7 +217,9 @@ function SimuladoContent() {
 
       {acabou ? (
         <div style={s.doneBox}>
-          <div style={{ fontSize: 40 }}>{acertos / fila.length >= 0.7 ? '🎉' : '📖'}</div>
+          {acertos / fila.length >= 0.7
+            ? <PartyPopper size={40} color={theme.teal} strokeWidth={1.5} />
+            : <BookOpen size={40} color={theme.inkFaint} strokeWidth={1.5} />}
           <h1 style={s.doneTitle}>{acertos} de {fila.length} — {Math.round((acertos / fila.length) * 100)}%</h1>
           <p style={s.doneSub}>
             {acertos / fila.length >= 0.7
@@ -266,8 +269,8 @@ function SimuladoContent() {
 
           {resposta === null ? (
             <div style={s.btns}>
-              <button onClick={() => responder(true)} style={s.btnC}>Certo</button>
-              <button onClick={() => responder(false)} style={s.btnE}>Errado</button>
+              <Button variant="outline" style={{ flex: 1, border: `1.5px solid ${theme.ok}`, color: theme.ok, fontSize: 15, fontWeight: 700 }} onClick={() => responder(true)}>Certo</Button>
+              <Button variant="outline" style={{ flex: 1, border: `1.5px solid ${theme.danger}`, color: theme.danger, fontSize: 15, fontWeight: 700 }} onClick={() => responder(false)}>Errado</Button>
             </div>
           ) : (
             <>
@@ -298,7 +301,6 @@ export default function SimuladoPage() {
 
 const s: Record<string, CSSProperties> = {
   topo: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 },
-  voltar: { border: 'none', background: 'transparent', color: theme.inkFaint, fontSize: 13, cursor: 'pointer', fontFamily: 'inherit', padding: 0 },
   progresso: { fontSize: 13, fontWeight: 600, color: theme.inkSoft },
   leisChips: { fontSize: 12, color: theme.inkFaint, margin: '0 0 14px' },
   avisoInvalidos: { fontSize: 12, color: theme.warn, background: theme.muted, borderRadius: theme.radiusSm, padding: '7px 10px', margin: '0 0 14px' },
@@ -306,11 +308,9 @@ const s: Record<string, CSSProperties> = {
   artChip: { fontSize: 12, fontWeight: 700, color: theme.teal, background: theme.tealBg, borderRadius: theme.radiusPill, padding: '3px 10px' },
   enunciado: { fontSize: 15, color: theme.ink, lineHeight: 1.65, margin: '14px 0 18px' },
   btns: { display: 'flex', gap: 10 },
-  btnC: { flex: 1, padding: '13px 0', borderRadius: theme.radiusSm, border: `1.5px solid ${theme.ok}`, background: 'transparent', color: theme.ok, fontSize: 15, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' },
-  btnE: { flex: 1, padding: '13px 0', borderRadius: theme.radiusSm, border: `1.5px solid ${theme.danger}`, background: 'transparent', color: theme.danger, fontSize: 15, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' },
   resultado: { fontSize: 14, fontWeight: 600, borderRadius: theme.radiusSm, padding: '10px 14px', marginBottom: 10 },
   resultadoOk: { background: theme.okBg, color: theme.okDeep },
-  resultadoErro: { background: theme.dangerBg, color: theme.danger },
+  resultadoErro: { background: theme.dangerBg, color: theme.dangerDeep },
   comentario: { fontSize: 14, color: theme.inkSoft, lineHeight: 1.6, margin: '0 0 16px' },
   doneBox: { textAlign: 'center', padding: '50px 20px' },
   doneTitle: { fontSize: 22, fontWeight: 700, color: theme.ink, margin: '10px 0 6px' },

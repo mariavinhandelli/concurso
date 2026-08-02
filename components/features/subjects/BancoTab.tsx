@@ -7,6 +7,7 @@ import {
   type CatalogArea, type CatalogSubject, type CatalogTopic,
 } from '@/services/catalog.service';
 import { SubjectTopicsModal } from './SubjectTopicsModal';
+import { Input } from '@/components/ui/Input';
 import { theme } from '@/lib/theme';
 
 interface Props {
@@ -121,14 +122,13 @@ export function BancoTab({ isMobile, onError, onActivated }: Props) {
   return (
     <>
       {/* Busca */}
-      <div style={styles.searchBox}>
-        <Search size={16} color={theme.inkFaint} strokeWidth={2} />
-        <input
+      <div style={{ marginBottom: 14 }}>
+        <Input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Buscar matéria…"
           aria-label="Buscar matéria no banco"
-          style={styles.searchInput}
+          icon={<Search size={16} color={theme.inkFaint} strokeWidth={2} />}
         />
       </div>
 
@@ -219,13 +219,6 @@ export function BancoTab({ isMobile, onError, onActivated }: Props) {
 
 const styles: Record<string, React.CSSProperties> = {
   muted: { color: theme.inkFaint, fontSize: 14 },
-
-  searchBox: {
-    display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14,
-    border: `0.5px solid ${theme.line}`, borderRadius: theme.radiusSm,
-    background: theme.card, padding: '9px 12px',
-  },
-  searchInput: { flex: 1, minWidth: 0, border: 'none', background: 'transparent', outline: 'none', fontSize: 14, color: theme.ink, fontFamily: 'inherit' },
 
   pills: { display: 'flex', gap: 7, flexWrap: 'wrap', marginBottom: 18 },
   pill: {

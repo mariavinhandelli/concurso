@@ -95,18 +95,22 @@ export default function JurisprudenciasHubPage() {
 
       {/* Ações rápidas */}
       <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-start', marginBottom: 32, flexWrap: 'wrap' }}>
-        <button onClick={() => router.push('/jurisprudencias/lista?favoritas=1')} style={{ ...styles.quickBtn, display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+        <Button variant="outline" size="sm" style={{ borderRadius: theme.radiusPill }} onClick={() => router.push('/jurisprudencias/lista?favoritas=1')}>
           <Star size={13} fill={theme.gold} color={theme.gold} strokeWidth={1.7} />
           Favoritas
-        </button>
-        <button onClick={() => router.push('/jurisprudencias/revisar')} style={{ ...styles.quickBtn, ...(revisoesHoje ? styles.quickBtnAlert : {}), display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+        </Button>
+        <Button
+          variant="outline" size="sm"
+          style={{ borderRadius: theme.radiusPill, ...(revisoesHoje ? { border: `0.5px solid ${theme.warn}`, background: theme.warnTint, color: theme.warnDeep } : {}) }}
+          onClick={() => router.push('/jurisprudencias/revisar')}
+        >
           <RefreshCw size={13} strokeWidth={1.7} />
           Revisões de hoje{revisoesHoje ? ` (${revisoesHoje})` : ''}
-        </button>
-        <button onClick={() => router.push('/jurisprudencias/simulados')} style={{ ...styles.quickBtn, display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+        </Button>
+        <Button variant="outline" size="sm" style={{ borderRadius: theme.radiusPill }} onClick={() => router.push('/jurisprudencias/simulados')}>
           <CircleHelp size={13} strokeWidth={1.7} />
           Simulados
-        </button>
+        </Button>
         <Button size="sm" style={{ borderRadius: theme.radiusPill }} onClick={() => router.push('/jurisprudencias/nova')}>
           + Nova jurisprudência
         </Button>
@@ -190,9 +194,9 @@ export default function JurisprudenciasHubPage() {
       </div>
 
       <div style={{ textAlign: 'center', marginTop: 24 }}>
-        <button onClick={() => router.push('/jurisprudencias/lista')} style={styles.verTodasBtn}>
+        <Button variant="ghost" size="sm" style={{ color: theme.teal, fontWeight: 600 }} onClick={() => router.push('/jurisprudencias/lista')}>
           Ver todas as jurisprudências →
-        </button>
+        </Button>
       </div>
     </PageContainer>
   );
@@ -205,9 +209,6 @@ const styles: Record<string, React.CSSProperties> = {
     background: theme.card, boxShadow: theme.shadow, cursor: 'pointer',
     fontFamily: 'inherit', textAlign: 'left' as const, flex: '1 1 200px', minWidth: 0,
   },
-  quickBtn: { padding: '9px 18px', borderRadius: theme.radiusPill, border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.inkSoft, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
-  quickBtnAlert: { border: `0.5px solid ${theme.warn}`, background: theme.warnTint, color: theme.warnDeep },
-  quickBtnPrimary: { padding: '9px 18px', borderRadius: theme.radiusPill, border: 'none', background: theme.primary, color: theme.onPrimary, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
   discCard: {
     display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8,
     padding: '20px 12px', borderRadius: theme.radius, border: `0.5px solid ${theme.line}`,
@@ -217,5 +218,4 @@ const styles: Record<string, React.CSSProperties> = {
   discIcon: { width: 44, height: 44, borderRadius: theme.radiusSm, display: 'grid', placeItems: 'center', flexShrink: 0 },
   discLabel: { fontSize: 13, fontWeight: 600, color: theme.ink, textAlign: 'center', lineHeight: 1.3 },
   discCount: { fontSize: 11, color: theme.inkFaint, fontWeight: 500 },
-  verTodasBtn: { border: 'none', background: 'transparent', color: theme.teal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
 };

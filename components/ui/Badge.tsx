@@ -11,7 +11,7 @@ const SOFT: Record<BadgeVariant, CSSProperties> = {
   neutral: { background: theme.muted, color: theme.inkSoft },
   ok:      { background: theme.okBg, color: theme.okDeep },
   warn:    { background: theme.warnBg, color: theme.warnDeep },
-  danger:  { background: theme.dangerBg, color: theme.danger },
+  danger:  { background: theme.dangerBg, color: theme.dangerDeep },
   info:    { background: theme.infoBg, color: theme.info },
   brand:   { background: theme.tealBg, color: theme.tealDeep },
 };

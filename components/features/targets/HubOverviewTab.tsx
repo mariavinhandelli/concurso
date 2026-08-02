@@ -655,7 +655,7 @@ const s: Record<string, CSSProperties> = {
   updateBadge: { fontSize: 11, fontWeight: 700, borderRadius: theme.radiusXs, padding: '2px 8px', flexShrink: 0, letterSpacing: 0.2 },
   updateBadgeTeal: { color: theme.teal, background: theme.tealBg },
   updateBadgeWarn: { color: theme.warn, background: theme.warnBg },
-  updateBadgeDanger: { color: theme.danger, background: theme.dangerBg },
+  updateBadgeDanger: { color: theme.dangerDeep, background: theme.dangerBg },
   updateBadgeMuted: { color: theme.inkSoft, background: theme.muted },
   updateTitle: { flex: 1, fontSize: 13, color: theme.ink, minWidth: 0, lineHeight: 1.4 },
   updateDate: { fontSize: 12, color: theme.inkFaint, fontVariantNumeric: 'tabular-nums', flexShrink: 0 },

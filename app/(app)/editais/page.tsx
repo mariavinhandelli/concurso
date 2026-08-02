@@ -12,7 +12,7 @@ import { PageContainer, PageHeader } from '@/components/ui/Page';
 export default function EditaisPage() {
   const router = useRouter();
   return (
-    <PageContainer width="narrow">
+    <PageContainer width="default">
       <PageHeader
         title="Banco de Editais"
         subtitle="Concursos organizados por órgão, com grade verticalizada, pesos por disciplina, linha do tempo e provas anteriores."

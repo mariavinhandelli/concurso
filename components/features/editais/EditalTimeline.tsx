@@ -12,7 +12,7 @@ import type { EditalUpdate, EditalUpdateTipo } from '@/services/editaisCatalog.s
 
 const UPDATE_TIPO: Record<EditalUpdateTipo, { label: string; fg: string; bg: string }> = {
   noticia: { label: 'Notícia', fg: theme.teal, bg: theme.tealBg },
-  retificacao: { label: 'Retificação', fg: theme.danger, bg: theme.dangerBg },
+  retificacao: { label: 'Retificação', fg: theme.dangerDeep, bg: theme.dangerBg },
   // warnDeep (não warn cru): warn sobre warnBg reprova AA — fórmula do Badge.
   aviso: { label: 'Aviso', fg: theme.warnDeep, bg: theme.warnBg },
   resultado: { label: 'Resultado', fg: theme.inkSoft, bg: theme.muted },
@@ -118,11 +118,11 @@ const s: Record<string, CSSProperties> = {
   diffBox: { margin: '4px 0 2px 10px', padding: '10px 12px', borderLeft: `2px solid ${theme.danger}`, background: theme.card, borderRadius: `0 ${theme.radiusXs}px ${theme.radiusXs}px 0`, display: 'flex', flexDirection: 'column', gap: 8 },
   diffRow: { display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', minWidth: 0 },
   diffCampo: { fontSize: 11, fontWeight: 700, color: theme.inkFaint, textTransform: 'uppercase', letterSpacing: 0.4, flexShrink: 0 },
-  diffAntes: { fontSize: 12, color: theme.danger, background: theme.dangerBg, textDecoration: 'line-through', borderRadius: theme.radiusXs, padding: '2px 8px' },
+  diffAntes: { fontSize: 12, color: theme.dangerDeep, background: theme.dangerBg, textDecoration: 'line-through', borderRadius: theme.radiusXs, padding: '2px 8px' },
   diffArrow: { fontSize: 12, color: theme.inkFaint, flexShrink: 0 },
   diffDepois: { fontSize: 12, fontWeight: 600, color: theme.teal, background: theme.tealBg, borderRadius: theme.radiusXs, padding: '2px 8px' },
   diffDisciplina: { display: 'flex', flexDirection: 'column', gap: 5, minWidth: 0 },
   diffChips: { display: 'flex', gap: 5, flexWrap: 'wrap' },
   chipAdd: { fontSize: 12, fontWeight: 600, color: theme.teal, background: theme.tealBg, borderRadius: theme.radiusXs, padding: '2px 8px' },
-  chipDel: { fontSize: 12, fontWeight: 500, color: theme.danger, background: theme.dangerBg, borderRadius: theme.radiusXs, padding: '2px 8px', textDecoration: 'line-through' },
+  chipDel: { fontSize: 12, fontWeight: 500, color: theme.dangerDeep, background: theme.dangerBg, borderRadius: theme.radiusXs, padding: '2px 8px', textDecoration: 'line-through' },
 };

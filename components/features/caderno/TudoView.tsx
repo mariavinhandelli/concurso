@@ -23,6 +23,7 @@ import { ListPanel } from '@/components/features/caderno/ListPanel';
 import { SubjectPill } from '@/components/features/caderno/SubjectPill';
 import { KIND_CORES } from '@/components/features/caderno/notaCores';
 import { useToast } from '@/components/ui/ToastProvider';
+import { Skeleton } from '@/components/ui/Skeleton';
 import { fmtRelative } from '@/lib/relative-time';
 import { theme } from '@/lib/theme';
 import { Button } from '@/components/ui/Button';
@@ -209,7 +210,9 @@ export function TudoView({ onAbrir }: { onAbrir: (item: { fonte: 'nota' | 'erro'
       placeholder="Buscar em tudo que você escreveu…"
     >
       {itens === null ? (
-        <p style={s.muted}>Abrindo seu caderno…</p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {[1, 2, 3, 4].map((i) => <Skeleton key={i} height={72} borderRadius={12} />)}
+        </div>
       ) : filtrados.length === 0 ? (
         <div style={s.vazioBox}>
           <p style={s.vazioTitulo}>{busca || filtro !== 'all' ? 'Nada encontrado.' : 'Você ainda não escreveu nada.'}</p>

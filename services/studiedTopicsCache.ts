@@ -21,17 +21,24 @@ let _expiry = 0;
 let _cachedUserId: string | null = null;
 
 export async function getStudiedTopicIds(): Promise<Set<string>> {
+  // Achado da auditoria de isolamento (02/08): a checagem de usuário rodava só
+  // dentro da fetchPromise nova — enquanto o TTL de 15s não expirava, o cache
+  // era servido sem nunca confirmar de quem é. Agora o usuário é resolvido
+  // ANTES de decidir se o cache em memória pode ser reaproveitado.
+  const user = await getCachedUser();
+  if (!user) {
+    invalidateStudiedTopicsCache();
+    return new Set<string>();
+  }
+  if (_cachedUserId !== user.id) {
+    _cache = null;
+    _expiry = 0;
+    _cachedUserId = user.id;
+  }
   const now = Date.now();
   if (_cache && now < _expiry) return _cache;
   _expiry = now + 15_000;
   const fetchPromise = (async () => {
-    const user = await getCachedUser();
-    if (!user) { _cachedUserId = null; return new Set<string>(); }
-    if (_cachedUserId !== null && _cachedUserId !== user.id) {
-      _cache = null;
-      _expiry = 0;
-    }
-    _cachedUserId = user.id;
     const supabase = createClient();
     const { data, error } = await supabase.rpc('get_studied_topic_ids');
     if (error) throw new Error('Erro ao buscar tópicos estudados: ' + error.message);

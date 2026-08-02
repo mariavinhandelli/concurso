@@ -21,6 +21,7 @@ import { SubjectPill } from '@/components/features/caderno/SubjectPill';
 import { KIND_CORES } from '@/components/features/caderno/notaCores';
 import { useUI } from '@/components/layout/UIContext';
 import { useToast } from '@/components/ui/ToastProvider';
+import { Skeleton } from '@/components/ui/Skeleton';
 import { theme } from '@/lib/theme';
 
 const KIND_LABEL: Record<NotaKind, string> = {
@@ -192,7 +193,9 @@ export function AnotacoesView({ openNotaId }: { openNotaId?: string | null }) {
       novoLabel="+ Nova"
     >
       {notas === null ? (
-        <p style={s.vazio}>Abrindo seu caderno…</p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {[1, 2, 3, 4].map((i) => <Skeleton key={i} height={72} borderRadius={12} />)}
+        </div>
       ) : notasFiltradas.length === 0 ? (
         <div style={s.vazioBox}>
           <p style={s.vazioTitulo}>{busca ? 'Nada encontrado.' : 'Nenhuma anotação aqui ainda.'}</p>
@@ -244,7 +247,6 @@ export function AnotacoesView({ openNotaId }: { openNotaId?: string | null }) {
 }
 
 const s: Record<string, CSSProperties> = {
-  vazio: { fontSize: 13, color: theme.inkFaint, padding: '16px 4px' },
   vazioBox: { textAlign: 'center', padding: '28px 12px' },
   vazioTitulo: { fontSize: 15, fontWeight: 700, color: theme.ink, margin: '0 0 6px' },
   vazioSub: { fontSize: 13, color: theme.inkSoft, lineHeight: 1.55, maxWidth: 320, margin: '0 auto' },

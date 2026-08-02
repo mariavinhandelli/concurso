@@ -8,6 +8,7 @@ import { createClient } from '@/lib/supabase/client';
 import { theme } from '@/lib/theme';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
 import { useUI } from '@/components/layout/UIContext';
 import { useUser } from '@/components/layout/UserContext';
 import { AvatarCropper } from '@/components/features/profile/AvatarCropper';
@@ -222,22 +223,25 @@ export default function ProfilePage() {
 
         {/* Nome de exibição */}
         <section style={styles.section}>
-          <label style={styles.label} htmlFor="display_name">Nome de exibição</label>
-          <input
+          <Input
             id="display_name"
+            label="Nome de exibição"
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Como você quer ser chamado"
-            style={styles.input}
             maxLength={40}
           />
         </section>
 
         {/* Email (read-only) */}
         <section style={styles.section}>
-          <label style={styles.label}>Email</label>
-          <input value={email} disabled style={{ ...styles.input, ...styles.inputDisabled }} />
-          <div style={styles.hint}>O email é usado para login e não pode ser alterado aqui.</div>
+          <Input
+            label="Email"
+            value={email}
+            disabled
+            hint="O email é usado para login e não pode ser alterado aqui."
+            style={{ background: theme.bg, color: theme.inkSoft, cursor: 'not-allowed' }}
+          />
         </section>
 
         <div style={styles.footer}>
@@ -276,8 +280,6 @@ const styles: Record<string, React.CSSProperties> = {
   avatarInitial: { color: theme.onTeal, fontWeight: 600, fontSize: 32 },
   label: { display: 'block', fontSize: 13, fontWeight: 600, color: theme.ink, marginBottom: 8 },
   hint: { fontSize: 13, color: theme.inkFaint, marginTop: 6 },
-  input: { width: '100%', boxSizing: 'border-box', padding: '11px 14px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.card, fontSize: 15, color: theme.ink, fontFamily: 'inherit', outline: 'none' },
-  inputDisabled: { background: theme.bg, color: theme.inkSoft, cursor: 'not-allowed' },
   divider: { height: '0.5px', background: theme.line, margin: '22px 0' },
   footer: { display: 'flex', alignItems: 'center', gap: 12, marginTop: 24, paddingTop: 20, borderTop: `0.5px solid ${theme.line}`, flexWrap: 'wrap' },
   muted: { color: theme.inkFaint, fontSize: 14 },

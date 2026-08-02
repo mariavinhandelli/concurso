@@ -660,7 +660,7 @@ const s: Record<string, CSSProperties> = {
   questaoBtnE: { flex: 1, padding: '9px 0', borderRadius: theme.radiusSm, border: `1.5px solid ${theme.danger}`, background: 'transparent', color: theme.danger, fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' },
   questaoResultado: { fontSize: 13, fontWeight: 600, borderRadius: theme.radiusSm, padding: '8px 12px', marginBottom: 8 },
   questaoResultadoOk: { background: theme.okBg, color: theme.okDeep },
-  questaoResultadoErro: { background: theme.dangerBg, color: theme.danger },
+  questaoResultadoErro: { background: theme.dangerBg, color: theme.dangerDeep },
   questaoComentario: { fontSize: 13, color: theme.inkSoft, lineHeight: 1.55, margin: '0 0 10px' },
   questaoProxima: { border: 'none', background: 'transparent', color: theme.teal, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', padding: 0 },
   toolbar: { position: 'fixed', zIndex: zIndex.menu, display: 'flex', alignItems: 'center', gap: 6, background: theme.card, border: `0.5px solid ${theme.line}`, borderRadius: theme.radiusSm, padding: '7px 9px', boxShadow: theme.shadowHover },

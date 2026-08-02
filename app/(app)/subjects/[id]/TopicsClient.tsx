@@ -4,7 +4,7 @@ import dynamic from 'next/dynamic';
 import { useWindowVirtualizer } from '@tanstack/react-virtual';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { X, ChevronRight, Search, FilePlus } from 'lucide-react';
+import { X, Search, FilePlus } from 'lucide-react';
 import { useConfirm } from '@/hooks/useConfirm';
 import { useUI } from '@/components/layout/UIContext';
 import { useTopics } from '@/hooks/useTopics';
@@ -19,6 +19,7 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { PageContainer } from '@/components/ui/Page';
+import { BackLink } from '@/components/ui/BackLink';
 import { listEditalPresence, type EditalPresence } from '@/services/targetTopics.service';
 
 const BulkImportModal = dynamic(
@@ -232,14 +233,7 @@ export function TopicsClient({ subjectId, initialSubject }: Props) {
       {dialog}
       <PageContainer width="default">
 
-        {/* Breadcrumb */}
-        <nav style={styles.breadcrumb} aria-label="Navegação">
-          <button onClick={() => router.push('/subjects')} style={styles.breadcrumbLink}>
-            Matérias
-          </button>
-          <ChevronRight size={13} strokeWidth={2} style={{ color: 'var(--ink-faint)', flexShrink: 0 }} />
-          <span style={styles.breadcrumbCurrent}>{initialSubject.name}</span>
-        </nav>
+        <BackLink href="/subjects">Matérias</BackLink>
 
         <div style={styles.header}>
           <h1 style={{ ...styles.h1, fontSize: isMobile ? 24 : 28 }}>{initialSubject.name}</h1>
@@ -419,16 +413,6 @@ export function TopicsClient({ subjectId, initialSubject }: Props) {
 
 const styles: Record<string, React.CSSProperties> = {
 
-  breadcrumb: { display: 'flex', alignItems: 'center', gap: 6, marginBottom: 16 },
-  breadcrumbLink: {
-    border: 'none', background: 'transparent', color: theme.teal,
-    fontSize: 13, fontWeight: 500, cursor: 'pointer', padding: 0, fontFamily: 'inherit',
-  },
-  breadcrumbCurrent: {
-    fontSize: 13, color: theme.inkSoft, fontWeight: 500,
-    overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 220,
-  },
-
   header: { marginBottom: 24 },
   h1: { fontSize: 28, fontWeight: 800, color: theme.ink, letterSpacing: -0.6, margin: 0 },
   sub: { fontSize: 14, color: theme.inkSoft, margin: '5px 0 0', fontWeight: 500 },
@@ -446,9 +430,6 @@ const styles: Record<string, React.CSSProperties> = {
   presenceCount: { fontSize: 11, fontWeight: 700, color: theme.teal },
 
   createRow: { display: 'flex', gap: 10, marginBottom: 14 },
-  input: { flex: 1, minWidth: 0, padding: '11px 14px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.card, fontSize: 14, color: theme.ink, fontFamily: 'inherit', outline: 'none' },
-  addBtn: { padding: '11px 22px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
-  bulkBtn: { padding: '11px 18px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.teal}`, background: theme.card, color: theme.teal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
 
   filterRow: { display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16, padding: '9px 12px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.card },
   filterInput: { flex: 1, minWidth: 0, border: 'none', background: 'transparent', outline: 'none', fontSize: 14, color: theme.ink, fontFamily: 'inherit' },

@@ -121,7 +121,12 @@ export function CommandPalette() {
   });
 
   // M12: Recentes (client-side, lidos a cada abertura) + Favoritos (juris + lei).
-  const recents = useMemo(() => (open ? getRecents() : []), [open]);
+  // getRecents() é assíncrono (resolve o usuário atual antes de ler a chave
+  // escopada do localStorage — auditoria de isolamento 02/08), daí useQuery
+  // em vez do useMemo síncrono anterior.
+  const { data: recents = [] } = useQuery({
+    queryKey: ['cmd-recents'], queryFn: getRecents, enabled: open, staleTime: 0,
+  });
   // Perf F1: import dinâmico — listFavoritas puxa data/jurisprudencias (~766KB).
   // Como só roda ao abrir o palette (enabled: open), vira um chunk à parte em vez
   // de entrar no bundle compartilhado (AppShell → toda página, incl. Home).

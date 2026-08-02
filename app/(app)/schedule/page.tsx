@@ -11,6 +11,7 @@ import { usePersistedState } from '@/hooks/usePersistedState';
 import { CalendarView } from '@/components/features/calendar/CalendarView';
 import { BlockMenu } from '@/components/features/schedule/BlockMenu';
 import { Button } from '@/components/ui/Button';
+import { IconButton } from '@/components/ui/IconButton';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { PageContainer, PageHeader } from '@/components/ui/Page';
 import { SegmentedControl } from '@/components/ui/SegmentedControl';
@@ -149,9 +150,9 @@ export default function SchedulePage() {
                 Ciclo a semana não significa nada (só confundia). */}
             {!calendarOn && view !== 'ciclo' && (
             <div style={{ ...styles.nav, width: isMobile ? '100%' : undefined, gap: isMobile ? 6 : 10 }}>
-              <button className="icon-touch-target" style={styles.navBtn} onClick={() => navWeek(-1)} aria-label="Semana anterior">
+              <IconButton className="icon-touch-target" variant="outline" onClick={() => navWeek(-1)} aria-label="Semana anterior">
                 <ChevronLeft size={16} strokeWidth={2} />
-              </button>
+              </IconButton>
               {/* Input como IRMÃO sobreposto ao rótulo (input dentro de <button>
                   é HTML inválido e confunde tecnologia assistiva). */}
               <span
@@ -168,16 +169,16 @@ export default function SchedulePage() {
                   style={styles.datePicker}
                 />
               </span>
-              <button className="icon-touch-target" style={styles.navBtn} onClick={() => navWeek(1)} aria-label="Próxima semana">
+              <IconButton className="icon-touch-target" variant="outline" onClick={() => navWeek(1)} aria-label="Próxima semana">
                 <ChevronRight size={16} strokeWidth={2} />
-              </button>
-              <button
-                className="touch-target"
-                style={{ ...styles.todayBtn, padding: isMobile ? '8px 10px' : '8px 16px' }}
+              </IconButton>
+              <Button
+                className="touch-target" variant="outline" size="sm"
+                style={{ padding: isMobile ? '8px 10px' : '8px 16px' }}
                 onClick={() => setWeekStart(mondayOf(new Date()))}
               >
                 Hoje
-              </button>
+              </Button>
             </div>
             )}
 
@@ -190,14 +191,15 @@ export default function SchedulePage() {
           {/* Linha 2: ações — só no cronograma (a aba Mês não usa gerador/recorrência) */}
           {!calendarOn && (
           <div style={{ ...styles.toolbarActions, flexDirection: isMobile ? 'column' : 'row' }}>
-            <button className="touch-target"
+            <Button
+              className="touch-target"
               onClick={() => setGeneratorOpen(true)}
-              style={{ ...styles.genBtn, justifyContent: 'center', width: isMobile ? '100%' : undefined }}
+              style={{ justifyContent: 'center', width: isMobile ? '100%' : undefined }}
               title="Gera blocos automáticos a partir das matérias do seu edital"
             >
               <Sparkles size={14} strokeWidth={2} style={{ verticalAlign: '-2px', marginRight: 6 }} />
               Gerar do edital
-            </button>
+            </Button>
 
             <div style={{ display: isMobile ? 'grid' : 'flex', gridTemplateColumns: isMobile ? 'repeat(3, minmax(0, 1fr))' : undefined, gap: isMobile ? 6 : 10, width: isMobile ? '100%' : 'auto' }}>
               <Button className="touch-target" variant="brandOutline" size="sm" onClick={handleCycleButton} style={{ minWidth: 0, padding: isMobile ? '8px 6px' : '8px 12px' }}>
@@ -293,9 +295,13 @@ export default function SchedulePage() {
                 <span style={styles.replanMsg}>
                   <b>{replanMoves.length}</b> {replanMoves.length === 1 ? 'bloco ficou' : 'blocos ficaram'} para trás esta semana.
                 </span>
-                <button onClick={() => setReplanModalOpen(true)} style={styles.replanBtn}>
+                <Button
+                  size="sm"
+                  style={{ background: theme.warn, color: theme.onWarn, whiteSpace: 'nowrap' }}
+                  onClick={() => setReplanModalOpen(true)}
+                >
                   Reorganizar semana →
-                </button>
+                </Button>
               </div>
             )}
 
@@ -327,9 +333,9 @@ export default function SchedulePage() {
                       <RepeatIcon size={13} color={theme.teal} mr={0} />
                       Criar recorrência
                     </Button>
-                    <button onClick={() => setGeneratorOpen(true)} style={styles.genBtn}>
+                    <Button size="sm" onClick={() => setGeneratorOpen(true)}>
                       <Sparkles size={13} strokeWidth={2} /> Gerar do edital
-                    </button>
+                    </Button>
                   </div>
                 </div>
               )
@@ -376,7 +382,13 @@ export default function SchedulePage() {
                           onEditRule={handleEditRule}
                         />
                       ))}
-                      <button className="add-block-btn" style={styles.addBtn} onClick={() => setModalDate(localDateStr(d))}>+ bloco</button>
+                      <Button
+                        className="add-block-btn" variant="ghost" size="sm"
+                        style={{ padding: '7px', fontSize: 12, color: theme.inkFaint, marginTop: 'auto' }}
+                        onClick={() => setModalDate(localDateStr(d))}
+                      >
+                        + bloco
+                      </Button>
                     </div>
                   </div>
                 );
@@ -397,7 +409,7 @@ export default function SchedulePage() {
                       </span>
                       <div style={styles.listDayRight}>
                         {planned > 0 && <span style={styles.listDayLoad}>{fmtH(done)}/{fmtH(planned)} · {pct}%</span>}
-                        <button style={styles.addBtnSm} onClick={() => setModalDate(localDateStr(d))}>+ bloco</button>
+                        <Button variant="brandOutline" size="sm" style={{ padding: '5px 12px' }} onClick={() => setModalDate(localDateStr(d))}>+ bloco</Button>
                       </div>
                     </div>
                     {!empty && (
@@ -539,7 +551,7 @@ const BlockCard = memo(function BlockCard({ block, onToggle, onDelete, onEdit, o
         style={{
           ...blockStyles.check,
           ...(listMode ? {} : blockStyles.checkSm),
-          borderColor: block.is_done ? t.border : 'rgba(15,23,42,.2)',
+          borderColor: block.is_done ? t.border : theme.lineStrong,
           ...(block.is_done ? { background: t.border, color: '#fff' } : { background: 'transparent' }),
         }}
         aria-label={`${block.is_done ? 'Desmarcar' : 'Concluir'} ${block.subjectName ?? 'bloco'}`}
@@ -576,11 +588,8 @@ const styles: Record<string, React.CSSProperties> = {
   toolbarRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap', rowGap: 10 },
   toolbarActions: { display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', paddingTop: 12, borderTopWidth: 0.5, borderTopStyle: 'solid', borderTopColor: theme.line },
   nav: { display: 'flex', alignItems: 'center', gap: 10 },
-  navBtn: { width: 44, height: 44, borderRadius: 10, border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.inkSoft, display: 'grid', placeItems: 'center', cursor: 'pointer', flexShrink: 0 },
   weekLabel: { position: 'relative', fontSize: 15, fontWeight: 700, color: theme.ink, minWidth: 150, textAlign: 'center', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', fontFamily: 'inherit' },
   datePicker: { position: 'absolute', opacity: 0, width: '100%', height: '100%', left: 0, top: 0, cursor: 'pointer' },
-  todayBtn: { padding: '8px 16px', borderRadius: 10, border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.ink, fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit', flexShrink: 0 },
-  genBtn: { display: 'inline-flex', alignItems: 'center', padding: '8px 14px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onPrimary, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
   error: { color: theme.danger, fontSize: 13, marginBottom: 12 },
   muted: { color: theme.inkFaint, fontSize: 14 },
   footnote: { fontSize: 12, color: theme.inkFaint, margin: '24px 0 0', lineHeight: 1.5, textAlign: 'center' },
@@ -592,14 +601,13 @@ const styles: Record<string, React.CSSProperties> = {
   // Resumo semanal
   weekSummary: { display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px', background: theme.card, borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, marginBottom: 14 },
   weekSummaryLabel: { fontSize: 13, fontWeight: 600, color: theme.ink, whiteSpace: 'nowrap', minWidth: 0 },
-  weekSummaryTrack: { flex: 1, height: 8, background: 'rgba(15,23,42,.08)', borderRadius: theme.radiusPill, overflow: 'hidden' },
+  weekSummaryTrack: { flex: 1, height: 8, background: theme.muted, borderRadius: theme.radiusPill, overflow: 'hidden' },
   weekSummaryFill: { height: '100%', borderRadius: theme.radiusPill, transition: 'width .5s ease' },
   weekSummaryPct: { fontSize: 13, fontWeight: 700, whiteSpace: 'nowrap', minWidth: 36, textAlign: 'right' },
 
   // Cronograma vivo — banner de replanejamento
   replanBanner: { display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', background: theme.warnBg, borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.warn, marginBottom: 14 },
   replanMsg: { fontSize: 14, color: theme.ink },
-  replanBtn: { padding: '8px 14px', borderRadius: theme.radiusSm, border: 'none', background: theme.warn, color: theme.onWarn, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
 
   // Callout semana vazia
   emptyCallout: { display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', background: theme.card, borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, marginBottom: 14 },
@@ -618,11 +626,10 @@ const styles: Record<string, React.CSSProperties> = {
   progressLabels: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 },
   progressText: { fontSize: 11, color: theme.inkFaint, fontVariantNumeric: 'tabular-nums' },
   progressPct: { fontSize: 11, fontWeight: 700, fontVariantNumeric: 'tabular-nums' },
-  progressTrack: { height: 6, background: 'rgba(15,23,42,.08)', borderRadius: theme.radiusPill, overflow: 'hidden' },
+  progressTrack: { height: 6, background: theme.muted, borderRadius: theme.radiusPill, overflow: 'hidden' },
   progressFill: { height: '100%', borderRadius: theme.radiusPill, transition: 'width .4s ease' },
   progressEmpty: { fontSize: 11, color: theme.inkFaint, textAlign: 'center' },
   dayBody: { flex: 1, display: 'flex', flexDirection: 'column', gap: 6, padding: 6, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, borderRadius: '0 0 10px 10px', minHeight: 180, background: theme.bg },
-  addBtn: { marginTop: 'auto', padding: '7px', borderRadius: 7, border: 'none', background: 'transparent', color: theme.inkFaint, fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
 
   // Lista
   listView: { flexDirection: 'column', gap: 14 },
@@ -634,7 +641,6 @@ const styles: Record<string, React.CSSProperties> = {
   listDayName: { fontSize: 15, fontWeight: 700, color: theme.ink },
   listDayRight: { display: 'flex', alignItems: 'center', gap: 12 },
   listDayLoad: { fontSize: 12, color: theme.inkFaint, fontVariantNumeric: 'tabular-nums' },
-  addBtnSm: { padding: '5px 12px', borderRadius: 7, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.teal, background: 'transparent', color: theme.teal, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
   listEmpty: { fontSize: 13, color: theme.inkFaint, margin: 0 },
   listBlocks: { display: 'flex', flexDirection: 'column', gap: 8 },
 };

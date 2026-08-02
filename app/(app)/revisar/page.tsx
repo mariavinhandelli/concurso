@@ -9,28 +9,29 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
-import { X } from 'lucide-react';
+import { X, PartyPopper, Sprout, WifiOff } from 'lucide-react';
 import { buildFilaUnificada, getNextScheduledDateUnificada, type UnifiedItem, type UnifiedKind } from '@/services/revisaoUnificada.service';
 import { parseLocalDate, toLocalDateString, localDateInDays } from '@/lib/local-date';
 import { submitReview, rescheduleReview, type ReviewRating } from '@/services/reviews.service';
 import { submitCardReview, type ReviewRating as CardRating } from '@/services/flashcards.service';
 import { submitRevisaoArtigo } from '@/services/leiInteracoes.service';
 import { submitRevisao as submitJurisRevisao } from '@/services/jurisInteracoes.service';
-import {
-  RATING_LABEL, calculateNextJurisReview, fromJurisDbRow, INITIAL_JURIS_STATE,
-  type JurisRating, type JurisReviewState,
-} from '@/lib/juris-review';
-import { SUBLINHADO_COR, segmentarBloco, grifoVisual } from '@/lib/lei-grifos';
+import { fromJurisDbRow } from '@/lib/juris-review';
 import { refreshHomeAfterSession } from '@/lib/home-refresh';
 import { savePassiveSession } from '@/services/passiveSession.service';
 import { fmtInterval } from '@/lib/interval-format';
 import { ReviewCard } from '@/components/features/reviews/ReviewCard';
+import { RATINGS_4 } from '@/components/features/reviews/RatingRow4';
+import { LeiRevisaoCard } from '@/components/features/vademecum/LeiRevisaoCard';
+import { JurisRevisaoCard } from '@/components/features/jurisprudencias/JurisRevisaoCard';
 import { useUI } from '@/components/layout/UIContext';
 import { useToast } from '@/components/ui/ToastProvider';
 import { theme } from '@/lib/theme';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { PageContainer } from '@/components/ui/Page';
+import { Skeleton } from '@/components/ui/Skeleton';
+import { Card } from '@/components/ui/Card';
 
 // ── Metadados por tipo (rótulo + cor do chip) ──────────────────────────────
 const KIND_META: Record<UnifiedKind, { label: string; plural: string; fg: string; bg: string }> = {
@@ -56,13 +57,6 @@ const FC_RATINGS: { key: CardRating; label: string; fg: string; bg: string }[] =
   { key: 'dificil',       label: 'Difícil', fg: theme.inkSoft, bg: theme.muted  },
   { key: 'intermediario', label: 'Médio',   fg: theme.info,    bg: theme.muted  },
   { key: 'facil',         label: 'Fácil',   fg: theme.okDeep,  bg: theme.okBg   },
-];
-
-const RATINGS_4: { key: JurisRating; fg: string; bg: string }[] = [
-  { key: 'errei',   fg: theme.danger,   bg: theme.dangerBg },
-  { key: 'dificil', fg: theme.warnDeep, bg: theme.warnBg },
-  { key: 'ok',      fg: theme.tealDeep, bg: theme.tealBg },
-  { key: 'dominei', fg: theme.okDeep,   bg: theme.okBg },
 ];
 
 function KindBadge({ kind }: { kind: UnifiedKind }) {
@@ -293,7 +287,7 @@ export default function RevisarUnificadoPage() {
   if (erro) {
     return (
       <PageContainer width="narrow" style={{ padding: isMobile ? '40px 16px' : '72px 40px', textAlign: 'center' }}>
-        <div style={{ fontSize: 48, marginBottom: 16 }}>📡</div>
+        <WifiOff size={44} color={theme.inkFaint} strokeWidth={1.5} style={{ marginBottom: 16 }} />
         <h1 style={s.doneTitle}>Não conseguimos montar sua fila</h1>
         <p style={s.doneSub}>Verifique sua conexão e tente de novo — suas revisões continuam salvas.</p>
         <div style={s.doneActions}>
@@ -306,8 +300,9 @@ export default function RevisarUnificadoPage() {
 
   if (fila === null) {
     return (
-      <PageContainer width="narrow" style={{ padding: 40 }}>
-        <p style={{ color: theme.inkFaint }}>Montando sua fila de revisão…</p>
+      <PageContainer width="narrow">
+        <Skeleton height={5} borderRadius={999} style={{ marginBottom: 24 }} />
+        <Skeleton height={220} borderRadius={16} />
       </PageContainer>
     );
   }
@@ -340,7 +335,9 @@ export default function RevisarUnificadoPage() {
 
     return (
       <PageContainer width="narrow" style={{ padding: isMobile ? '40px 16px' : '72px 40px', textAlign: 'center' }}>
-        <div style={{ fontSize: 56, marginBottom: 16 }}>{nuncaTeveFila ? '🎉' : restante > 0 ? '🌱' : '🎉'}</div>
+        {restante > 0 && !nuncaTeveFila
+          ? <Sprout size={48} color={theme.teal} strokeWidth={1.5} style={{ marginBottom: 16 }} />
+          : <PartyPopper size={48} color={theme.teal} strokeWidth={1.5} style={{ marginBottom: 16 }} />}
         <h1 style={s.doneTitle}>
           {nuncaTeveFila ? 'Nada para revisar agora' : soPulou ? 'Até a próxima!' : restante > 0 ? 'Bom recomeço!' : 'Revisão em dia!'}
         </h1>
@@ -449,19 +446,23 @@ export default function RevisarUnificadoPage() {
           )}
 
           {current.kind === 'lei' && (
-            <LeiBody
+            <LeiRevisaoCard
               key={current.id}
-              item={current}
+              leiNomeCurto={current.lei.nomeCurto}
+              artigo={current.artigo}
+              interacao={current.interacao}
               reveladas={reveladas}
-              setReveladas={setReveladas}
+              onRevelar={(grifoId) => setReveladas(new Set(reveladas).add(grifoId))}
+              onRevelarTudo={() => setReveladas(new Set((current.interacao.grifos ?? []).map((g) => g.id)))}
               onRate={(rating) => { void commit(() => submitRevisaoArtigo(current.id, rating, current.interacao)); }}
             />
           )}
 
           {current.kind === 'juris' && (
-            <JurisBody
+            <JurisRevisaoCard
               key={current.id}
-              item={current}
+              item={current.juris}
+              interacaoState={current.juris.interacao ? fromJurisDbRow(current.juris.interacao) : null}
               revealed={revealed}
               onReveal={() => setRevealed(true)}
               onRate={(rating) => { void commit(() => submitJurisRevisao(current.id, rating, current.juris.interacao)); }}
@@ -483,7 +484,7 @@ function FlashcardBody({
 }) {
   const { card } = item;
   return (
-    <div style={s.card}>
+    <Card style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: 18, minWidth: 0 }}>
       <span style={{ ...s.subjBadge, background: card.subjectColor }}>{card.subjectName}</span>
       <div style={s.fcContent}>
         <p style={s.fcFront}>{card.front}</p>
@@ -497,130 +498,11 @@ function FlashcardBody({
       ) : (
         <RatingRowFC item={item} onRate={onRate} />
       )}
-    </div>
+    </Card>
   );
 }
 
-// ── Corpo: Lei seca (texto com lacunas → 4 avaliações) ──────────────────────
-function LeiBody({
-  item, reveladas, setReveladas, onRate,
-}: {
-  item: Extract<UnifiedItem, { kind: 'lei' }>;
-  reveladas: Set<string>; setReveladas: (s: Set<string>) => void;
-  onRate: (r: JurisRating) => void;
-}) {
-  const { artigo, lei, interacao } = item;
-  const grifos = interacao.grifos ?? [];
-  const temLacunas = grifos.length > 0;
-  return (
-    <div style={s.card}>
-      <div style={s.leiHead}>
-        <span style={{ ...s.subjBadge, background: theme.clay, color: theme.onClay }}>{lei.nomeCurto}</span>
-        <span style={s.leiRotulo}>{artigo.rotulo}</span>
-        {artigo.caminho && <span style={s.leiCaminho}>{artigo.caminho}</span>}
-      </div>
-      {temLacunas && (
-        <p style={s.leiHint}>
-          Complete as lacunas de memória — clique para revelar.
-          <button onClick={() => setReveladas(new Set(grifos.map((g) => g.id)))} style={s.revelarTudo}>revelar tudo</button>
-        </p>
-      )}
-      <div style={s.leiTexto}>
-        {artigo.blocos.map((b) => (
-          <p key={b.id} style={{ ...s.leiBloco, paddingLeft: b.nivel * 20 }}>
-            {b.rotulo && <span style={s.leiBlocoRotulo}>{b.rotulo} </span>}
-            {segmentarBloco(b.texto, grifos, b.id).map((seg, i) => {
-              if (!seg.grifo) return <span key={i}>{seg.texto}</span>;
-              const aberta = reveladas.has(seg.grifo.id);
-              if (!aberta) {
-                // Botão (não span): focável por teclado e com largura fixa —
-                // largura proporcional vazaria o tamanho da resposta, e spans
-                // só com espaços colapsam para 0px de largura.
-                return (
-                  <button
-                    key={i}
-                    type="button"
-                    onClick={() => setReveladas(new Set(reveladas).add(seg.grifo!.id))}
-                    title="Revelar trecho oculto"
-                    aria-label="Revelar trecho oculto"
-                    style={s.lacuna}
-                  />
-                );
-              }
-              const estilo: CSSProperties = seg.grifo.estilo === 'sublinhado'
-                ? { borderBottom: `2px solid ${SUBLINHADO_COR}` }
-                : { background: grifoVisual(seg.grifo).bg, borderRadius: 3 };
-              return <span key={i} style={estilo}>{seg.texto}</span>;
-            })}
-          </p>
-        ))}
-      </div>
-      <RatingRow4 state={fromJurisDbRow(interacao)} onRate={onRate} />
-    </div>
-  );
-}
-
-// ── Corpo: Jurisprudência (tese/pergunta → revelar → 4 avaliações) ──────────
-function JurisBody({
-  item, revealed, onReveal, onRate,
-}: {
-  item: Extract<UnifiedItem, { kind: 'juris' }>;
-  revealed: boolean;
-  onReveal: () => void; onRate: (r: JurisRating) => void;
-}) {
-  const j = item.juris;
-  const temFlash = !!(j.flashcard_frente && j.flashcard_verso);
-  return (
-    <div style={s.card}>
-      <div style={s.leiHead}>
-        <span style={{ ...s.subjBadge, background: theme.teal, color: theme.onTeal }}>{j.tribunal}</span>
-        <span style={{ ...s.subjBadge, background: 'rgba(15,23,42,.08)', color: theme.inkSoft }}>{j.disciplina}</span>
-      </div>
-      <div style={s.teseBox}>
-        <p style={s.teseLabel}>{temFlash ? 'Pergunta' : 'Tese principal'}</p>
-        <p style={s.teseText}>{temFlash ? j.flashcard_frente : j.tese}</p>
-      </div>
-      {revealed && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          {temFlash && (
-            <div style={{ background: theme.okTint, borderRadius: 10, padding: '12px 14px' }}>
-              <p style={{ ...s.secLabel, color: theme.okDeep }}>Resposta</p>
-              <p style={s.secText}>{j.flashcard_verso}</p>
-            </div>
-          )}
-          {!temFlash && j.resumo && (
-            <div><p style={s.secLabel}>Resumo</p><p style={s.secText}>{j.resumo}</p></div>
-          )}
-          {j.como_banca_cobra && (
-            <div style={{ background: 'rgba(99,102,241,.06)', borderRadius: 10, padding: '12px 14px' }}>
-              <p style={{ ...s.secLabel, color: theme.clay }}>Como a banca cobra</p>
-              <p style={s.secText}>{j.como_banca_cobra}</p>
-            </div>
-          )}
-          {j.pegadinhas && (
-            <div style={{ background: theme.dangerTint, borderRadius: 10, padding: '12px 14px' }}>
-              <p style={{ ...s.secLabel, color: theme.danger }}>Pegadinha</p>
-              <p style={s.secText}>{j.pegadinhas}</p>
-            </div>
-          )}
-        </div>
-      )}
-      {!revealed ? (
-        <div style={{ textAlign: 'center' }}>
-          <Button onClick={onReveal} style={{ padding: '13px 32px', fontSize: 15 }}>{temFlash ? 'Ver resposta' : 'Ver tudo'}</Button>
-          <p style={s.kbdHint}>ou aperte <kbd style={s.kbd}>espaço</kbd></p>
-        </div>
-      ) : (
-        <RatingRow4
-          state={j.interacao ? fromJurisDbRow(j.interacao) : INITIAL_JURIS_STATE}
-          onRate={onRate}
-        />
-      )}
-    </div>
-  );
-}
-
-// ── Linhas de avaliação reutilizáveis ───────────────────────────────────────
+// ── Linha de avaliação reutilizável (flashcards — usa CardRating, não JurisRating) ──
 function RatingRowFC({
   item, onRate,
 }: {
@@ -634,25 +516,6 @@ function RatingRowFC({
           <span style={s.ratingKey}>{i + 1}</span>
           <span style={s.ratingLbl}>{r.label}</span>
           <span style={s.ratingInterval}>→ {fmtInterval(item.card.nextIntervals[r.key])}</span>
-        </button>
-      ))}
-    </div>
-  );
-}
-
-function RatingRow4({
-  state, onRate,
-}: {
-  state: JurisReviewState; onRate: (r: JurisRating) => void;
-}) {
-  return (
-    <div style={s.ratings4}>
-      {RATINGS_4.map((r, i) => (
-        <button key={r.key} onClick={() => onRate(r.key)}
-          style={{ ...s.rating4Btn, border: `0.5px solid ${r.fg}`, background: r.bg, color: r.fg }}>
-          <span style={s.ratingKey}>{i + 1}</span>
-          <span style={s.ratingLbl}>{RATING_LABEL[r.key]}</span>
-          <span style={s.ratingInterval}>→ {fmtInterval(calculateNextJurisReview(state, r.key).intervalDays)}</span>
         </button>
       ))}
     </div>
@@ -676,7 +539,6 @@ const s: Record<string, CSSProperties> = {
   adiarPresetBtn: { border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.ink, fontSize: 13, fontWeight: 600, padding: '7px 12px', borderRadius: theme.radiusXs, cursor: 'pointer', fontFamily: 'inherit' },
   adiarDateInput: { border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.ink, fontSize: 13, padding: '6px 10px', borderRadius: theme.radiusXs, fontFamily: 'inherit' },
 
-  card: { background: theme.card, border: `0.5px solid ${theme.line}`, borderRadius: theme.radius, boxShadow: theme.shadow, padding: '24px', display: 'flex', flexDirection: 'column', gap: 18, minWidth: 0 },
   subjBadge: { alignSelf: 'flex-start', fontSize: 11, color: '#fff', padding: '3px 10px', borderRadius: theme.radiusXs, fontWeight: 700, letterSpacing: 0.3 },
 
   // flashcard
@@ -684,24 +546,6 @@ const s: Record<string, CSSProperties> = {
   fcFront: { fontSize: 19, fontWeight: 600, color: theme.ink, textAlign: 'center', margin: 0, lineHeight: 1.5, overflowWrap: 'break-word' },
   sep: { height: 1, background: theme.line, margin: '18px 0' },
   fcBack: { fontSize: 16, color: theme.inkSoft, textAlign: 'center', margin: 0, lineHeight: 1.6, overflowWrap: 'break-word' },
-
-  // lei
-  leiHead: { display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' },
-  leiRotulo: { fontSize: 16, fontWeight: 700, color: theme.ink },
-  leiCaminho: { fontSize: 12, color: theme.inkFaint, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
-  leiHint: { fontSize: 13, color: theme.inkSoft, margin: 0, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' },
-  revelarTudo: { border: 'none', background: 'transparent', color: theme.teal, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', textDecoration: 'underline', padding: 0 },
-  leiTexto: { fontSize: 15, lineHeight: 1.9, color: theme.ink },
-  leiBloco: { margin: '0 0 8px' },
-  leiBlocoRotulo: { fontWeight: 600, color: theme.inkSoft },
-  lacuna: { display: 'inline-block', width: 72, height: '1.05em', verticalAlign: 'text-bottom', background: theme.muted, borderRadius: 4, cursor: 'pointer', border: 'none', borderBottom: `1.5px dashed ${theme.inkFaint}`, padding: 0 },
-
-  // juris
-  teseBox: { background: theme.tealBg, border: `1px solid ${theme.teal}`, borderRadius: theme.radiusSm, padding: '16px 18px' },
-  teseLabel: { fontSize: 11, fontWeight: 700, color: theme.teal, textTransform: 'uppercase', letterSpacing: 0.8, margin: '0 0 10px' },
-  teseText: { fontSize: 17, color: theme.ink, lineHeight: 1.65, margin: 0, fontWeight: 500 },
-  secLabel: { fontSize: 11, fontWeight: 700, color: theme.inkFaint, textTransform: 'uppercase', letterSpacing: 0.4, margin: '0 0 5px' },
-  secText: { fontSize: 14, color: theme.ink, lineHeight: 1.65, margin: 0 },
 
   // ações
   kbdHint: { fontSize: 12, color: theme.inkFaint, marginTop: 10 },

@@ -6,20 +6,12 @@ import { countDailyQueue } from '@/services/flashcards.service';
 import { theme } from '@/lib/theme';
 import { Button } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { Skeleton } from '@/components/ui/Skeleton';
 
 interface Props {
   onStart: () => void;
   loading?: boolean;
 }
-
-const SKEL: React.CSSProperties = {
-  background: 'rgba(15,23,42,.07)',
-  borderRadius: 10,
-  animationName: 'skeleton-pulse',
-  animationDuration: '1.5s',
-  animationTimingFunction: 'ease-in-out',
-  animationIterationCount: 'infinite',
-};
 
 export function ReviewTab({ onStart, loading }: Props) {
   const [counts, setCounts] = useState<{ pending: number; news: number } | null>(null);
@@ -42,11 +34,11 @@ export function ReviewTab({ onStart, loading }: Props) {
       {counts === null ? (
         <div style={styles.skeleton}>
           <div style={{ display: 'flex', gap: 28, alignItems: 'center' }}>
-            <div style={{ ...SKEL, width: 80, height: 52, borderRadius: theme.radiusSm }} />
-            <div style={{ ...SKEL, width: 1, height: 40, borderRadius: 1 }} />
-            <div style={{ ...SKEL, width: 80, height: 52, borderRadius: theme.radiusSm }} />
+            <Skeleton width={80} height={52} borderRadius={theme.radiusSm} />
+            <Skeleton width={1} height={40} borderRadius={1} />
+            <Skeleton width={80} height={52} borderRadius={theme.radiusSm} />
           </div>
-          <div style={{ ...SKEL, width: 220, height: 46, borderRadius: theme.radiusSm }} />
+          <Skeleton width={220} height={46} borderRadius={theme.radiusSm} />
         </div>
       ) : hasError ? (
         <div style={styles.empty}>

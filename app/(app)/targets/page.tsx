@@ -176,7 +176,7 @@ export default function TargetsPage() {
   return (
     <>
       {dialog}
-      <PageContainer width="narrow">
+      <PageContainer width="default">
         <PageHeader title="Concursos" subtitle="Acompanhe seus concursos e explore editais prontos para começar em um clique." />
 
         {/* Abas */}
@@ -211,20 +211,24 @@ export default function TargetsPage() {
               >
                 {showCreate ? '– Fechar' : '+ Novo concurso'}
               </Button>
-              <button onClick={() => setImportarOpen(true)} style={s.importarLink}>
+              <Button variant="ghost" size="sm" onClick={() => setImportarOpen(true)}>
                 importar edital colado →
-              </button>
-              <button onClick={() => setImportarPdfOpen(true)} style={s.importarLink}>
+              </Button>
+              <Button variant="ghost" size="sm" onClick={() => setImportarPdfOpen(true)}>
                 importar edital em PDF →
-              </button>
+              </Button>
             </div>
 
             {/* Formulário de criação — recolhido por padrão */}
             {showCreate && (
               <div style={{ ...s.createCard, animation: 'focali-slide-down 0.18s ease' }}>
-                <div style={s.phaseToggle}>
-                  <button onClick={() => setPhase('pre')} style={{ ...s.phaseBtn, ...(phase === 'pre' ? s.phaseBtnOn : {}) }}>Pré-edital</button>
-                  <button onClick={() => setPhase('pos')} style={{ ...s.phaseBtn, ...(phase === 'pos' ? s.phaseBtnOn : {}) }}>Pós-edital</button>
+                <div style={{ marginBottom: 8 }}>
+                  <SegmentedControl
+                    options={[{ value: 'pre', label: 'Pré-edital' }, { value: 'pos', label: 'Pós-edital' }]}
+                    value={phase}
+                    onChange={setPhase}
+                    equalWidth={false}
+                  />
                 </div>
                 <p style={s.phaseHint}>
                   {phase === 'pre'
@@ -296,10 +300,10 @@ export default function TargetsPage() {
                 )}
 
                 <div style={s.formFooter}>
-                  <button onClick={() => setShowAdvanced((v) => !v)} style={s.btnAdvanced}>
+                  <Button variant="ghost" size="sm" style={{ color: theme.teal }} onClick={() => setShowAdvanced((v) => !v)}>
                     <ChevronSmall open={showAdvanced} />
                     {showAdvanced ? 'Menos detalhes' : 'Mais detalhes'}
-                  </button>
+                  </Button>
                   <Button onClick={handleCreate} style={{ width: isMobile ? '100%' : undefined }}>
                     Adicionar concurso
                   </Button>
@@ -418,7 +422,7 @@ const TargetRow = memo(function TargetRow({
   const days = t.exam_date ? daysUntilExam(t.exam_date) : null;
   const cd = days !== null ? countdownInfo(days) : null;
   const cdStyle = cd ? {
-    danger: { color: theme.danger, background: theme.dangerBg },
+    danger: { color: theme.dangerDeep, background: theme.dangerBg },
     warn: { color: theme.warn, background: theme.warnBg },
     ok: { color: theme.teal, background: theme.tealBg },
     past: { color: theme.inkFaint, background: theme.muted },
@@ -561,15 +565,10 @@ const TargetRow = memo(function TargetRow({
 const s: Record<string, CSSProperties> = {
 
   actionsRow: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 14, flexWrap: 'wrap' },
-  newBtn: { padding: '9px 18px', borderRadius: theme.radiusSm, border: `1px solid ${theme.teal}`, background: theme.tealBg, color: theme.teal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
-  importarLink: { background: 'transparent', border: 'none', color: theme.inkSoft, fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit', padding: '12px 4px', minHeight: 44, display: 'inline-flex', alignItems: 'center', whiteSpace: 'nowrap' },
 
   // Card de criação
   createCard: { background: theme.card, border: `0.5px solid ${theme.line}`, borderRadius: theme.radius, boxShadow: theme.shadow, padding: 20, marginBottom: 20 },
 
-  phaseToggle: { display: 'inline-flex', gap: 0, background: 'rgba(15,23,42,.06)', borderRadius: theme.radiusSm, padding: 3, marginBottom: 8 },
-  phaseBtn: { padding: '7px 18px', border: 'none', background: 'transparent', color: theme.inkSoft, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', borderRadius: theme.radiusXs },
-  phaseBtnOn: { background: theme.card, color: theme.teal, boxShadow: theme.shadow },
   phaseHint: { fontSize: 12, color: theme.inkFaint, margin: '0 0 16px' },
 
   formGrid: { display: 'flex', gap: 12, marginBottom: 12, flexWrap: 'wrap' },
@@ -578,10 +577,6 @@ const s: Record<string, CSSProperties> = {
   fieldLabel: { fontSize: 12, color: theme.inkFaint, fontWeight: 500 },
   formFooter: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10, marginTop: 4 },
 
-  btnPrimary: { padding: '10px 20px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onTeal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
-  btnSecondary: { padding: '6px 14px', borderRadius: theme.radiusSm, border: `1px solid ${theme.teal}`, background: theme.tealBg, color: theme.teal, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
-  btnGhost: { padding: '10px 12px', borderRadius: theme.radiusSm, border: 'none', background: 'transparent', color: theme.inkFaint, fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' },
-  btnAdvanced: { display: 'inline-flex', alignItems: 'center', gap: 5, background: 'transparent', border: 'none', color: theme.teal, fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit', padding: '4px 2px' },
   iconBtn: { border: 'none', cursor: 'pointer', minWidth: 44, minHeight: 44, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: theme.radiusSm, transition: 'background .12s', flexShrink: 0 },
 
   skeletonList: { display: 'flex', flexDirection: 'column', gap: 8 },
@@ -589,7 +584,6 @@ const s: Record<string, CSSProperties> = {
   emptyState: { display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '48px 20px', color: theme.inkFaint, textAlign: 'center' },
   emptyTitle: { fontSize: 15, fontWeight: 600, color: theme.inkSoft, margin: '0 0 6px' },
   emptyHint: { fontSize: 13, color: theme.inkFaint, maxWidth: 340, lineHeight: 1.6, margin: '0 0 16px' },
-  emptyCta: { padding: '10px 20px', borderRadius: theme.radiusSm, border: `1px solid ${theme.teal}`, background: theme.tealBg, color: theme.teal, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
 
   list: { display: 'flex', flexDirection: 'column', gap: 8 },
 
@@ -598,7 +592,6 @@ const s: Record<string, CSSProperties> = {
   archivedList: { display: 'flex', flexDirection: 'column', gap: 6, marginTop: 10 },
   archivedRow: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, padding: '10px 14px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.bg, minWidth: 0 },
   archivedName: { fontSize: 14, color: theme.inkSoft, fontWeight: 500, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
-  restoreBtn: { flexShrink: 0, padding: '6px 14px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.teal}`, background: theme.tealBg, color: theme.teal, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
   // border desmembrado (sem shorthand): o hover sobrescreve só o borderColor e
   // misturar shorthand + longhand no mesmo style dispara warning do React.
   targetRow: { display: 'flex', alignItems: 'center', gap: 12, background: theme.card, borderRadius: theme.radiusSm, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, padding: '12px 14px', transition: 'border-color .15s, box-shadow .15s', minWidth: 0 },

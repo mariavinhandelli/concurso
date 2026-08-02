@@ -23,7 +23,7 @@ interface Props {
 }
 
 const RATINGS: { key: ReviewRating; grade: RecallGrade; label: string; fg: string; bg: string }[] = [
-  { key: 'errei',         grade: 'errou',   label: 'Errei',   fg: theme.danger,  bg: theme.dangerBg },
+  { key: 'errei',         grade: 'errou',   label: 'Errei',   fg: theme.dangerDeep, bg: theme.dangerBg },
   { key: 'dificil',       grade: 'dificil', label: 'Difícil', fg: theme.inkSoft, bg: theme.muted  },
   { key: 'intermediario', grade: 'bom',     label: 'Médio',   fg: theme.info,    bg: theme.infoBg },
   { key: 'facil',         grade: 'facil',   label: 'Fácil',   fg: theme.okDeep,  bg: theme.okBg   },

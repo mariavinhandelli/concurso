@@ -210,7 +210,7 @@ let _userCreatedCache: Promise<Jurisprudencia[]> | null = null;
 let _userCreatedExpiry = 0;
 let _userCreatedUserId: string | null = null;
 
-function invalidateUserCreatedCache(): void {
+export function invalidateUserCreatedCache(): void {
   _userCreatedCache = null;
   _userCreatedExpiry = 0;
 }

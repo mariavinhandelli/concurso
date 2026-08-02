@@ -17,6 +17,9 @@ import { useUI } from '@/components/layout/UIContext';
 import { pushRecent } from '@/lib/recents';
 import { theme } from '@/lib/theme';
 import { PageContainer } from '@/components/ui/Page';
+import { BackLink } from '@/components/ui/BackLink';
+import { SegmentedControl } from '@/components/ui/SegmentedControl';
+import { Badge } from '@/components/ui/Badge';
 
 import { INCIDENCIA_LABEL, TIPO_LABEL } from '@/lib/juris-labels';
 
@@ -138,12 +141,7 @@ export default function JurisprudenciaPage() {
 
         {/* Navegação e ações */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, flexWrap: 'wrap', gap: 10 }}>
-          <button
-            onClick={() => router.push('/jurisprudencias')}
-            style={{ border: 'none', background: 'transparent', color: theme.teal, fontSize: 13, fontWeight: 500, cursor: 'pointer', padding: 0, fontFamily: 'inherit' }}
-          >
-            ← Jurisprudências
-          </button>
+          <BackLink href="/jurisprudencias" style={{ marginBottom: 0 }}>Jurisprudências</BackLink>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
             {!editing && (prevId || nextId) && (
               <span style={{ display: 'inline-flex', gap: 4, marginRight: 4 }}>
@@ -195,12 +193,8 @@ export default function JurisprudenciaPage() {
         {!editing && (
           <div style={{ marginBottom: 20 }}>
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 10, alignItems: 'center' }}>
-              <span style={{ fontSize: 12, fontWeight: 700, color: theme.onTeal, background: theme.teal, borderRadius: 6, padding: '3px 10px' }}>
-                {item.tribunal}
-              </span>
-              <span style={{ fontSize: 12, color: theme.inkSoft, background: 'rgba(15,23,42,.06)', borderRadius: 6, padding: '3px 10px' }}>
-                {TIPO_LABEL[item.tipo] ?? item.tipo}
-              </span>
+              <Badge variant="brand">{item.tribunal}</Badge>
+              <Badge variant="neutral">{TIPO_LABEL[item.tipo] ?? item.tipo}</Badge>
               {item.informativo && (
                 <span style={{ fontSize: 12, color: theme.inkSoft }}>#{item.informativo}</span>
               )}
@@ -224,23 +218,13 @@ export default function JurisprudenciaPage() {
 
         {/* Tabs (só quando não está editando) */}
         {!editing && (
-          <div style={{ display: 'flex', gap: 2, marginBottom: 16, background: 'rgba(15,23,42,.06)', borderRadius: 10, padding: 3, width: 'fit-content' }}>
-            {TABS.map(({ key, label }) => (
-              <button
-                key={key}
-                onClick={() => setTab(key)}
-                style={{
-                  padding: '7px 16px', borderRadius: theme.radiusXs, border: 'none', cursor: 'pointer',
-                  fontFamily: theme.font, fontSize: 13, fontWeight: 600,
-                  background: tab === key ? theme.card : 'transparent',
-                  color: tab === key ? theme.ink : theme.inkSoft,
-                  boxShadow: tab === key ? theme.shadow : 'none',
-                  transition: 'all .15s',
-                }}
-              >
-                {label}
-              </button>
-            ))}
+          <div style={{ marginBottom: 16 }}>
+            <SegmentedControl
+              options={TABS.map(({ key, label }) => ({ value: key, label }))}
+              value={tab}
+              onChange={setTab}
+              equalWidth={false}
+            />
           </div>
         )}
 
@@ -321,6 +305,6 @@ const styles: Record<string, React.CSSProperties> = {
   actionBtnDanger: {
     padding: '8px 16px', borderRadius: theme.radiusSm,
     border: `1px solid ${theme.danger}`, background: theme.dangerBg,
-    color: theme.danger, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
+    color: theme.dangerDeep, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
   },
 };

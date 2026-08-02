@@ -15,6 +15,7 @@ import { LEIS_COM_QUESTOES } from '@/services/leiQuestoes.service';
 import { VademecumSimuladoModal } from '@/components/features/vademecum/VademecumSimuladoModal';
 import { theme } from '@/lib/theme';
 import { Badge } from '@/components/ui/Badge';
+import { Button } from '@/components/ui/Button';
 import { PageContainer, PageHeader } from '@/components/ui/Page';
 import { useBreakpoints } from '@/components/layout/UIContext';
 
@@ -187,10 +188,10 @@ function VademecumContent() {
       {/* Ações rápidas — mesmo padrão do hub de jurisprudências */}
       {LEIS_COM_QUESTOES.length > 0 && (
         <div style={s.acoesRow}>
-          <button onClick={() => setShowSimulado(true)} style={s.simuladoBtn}>
-            <CircleHelp size={13} strokeWidth={1.7} style={{ marginRight: 6 }} />
+          <Button variant="outline" size="sm" style={{ borderRadius: theme.radiusPill }} onClick={() => setShowSimulado(true)}>
+            <CircleHelp size={13} strokeWidth={1.7} />
             Simulado C/E
-          </button>
+          </Button>
         </div>
       )}
       {showSimulado && <VademecumSimuladoModal onClose={() => setShowSimulado(false)} />}
@@ -266,7 +267,6 @@ const s: Record<string, CSSProperties> = {
   dueBanner: { display: 'block', width: '100%', textAlign: 'left', background: theme.dangerTint, color: theme.danger, border: `0.5px solid color-mix(in srgb, ${theme.danger} 35%, transparent)`, borderRadius: theme.radius, padding: '12px 16px', fontSize: 14, cursor: 'pointer', fontFamily: 'inherit', marginBottom: 18 },
 
   acoesRow: { display: 'flex', gap: 10, marginBottom: 18 },
-  simuladoBtn: { display: 'inline-flex', alignItems: 'center', padding: '9px 18px', borderRadius: theme.radiusPill, border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.inkSoft, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
 
   buscaRow: { marginBottom: 10 },
   buscaInput: { width: '100%', boxSizing: 'border-box', padding: '11px 16px', borderRadius: theme.radiusPill, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, background: theme.card, fontSize: 14, color: theme.ink, fontFamily: 'inherit', outline: 'none' },

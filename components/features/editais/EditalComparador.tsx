@@ -407,7 +407,7 @@ const s: Record<string, CSSProperties> = {
   pesoChange: { fontSize: 12, color: theme.inkSoft, fontVariantNumeric: 'tabular-nums' },
   topicChips: { display: 'flex', gap: 5, flexWrap: 'wrap', marginTop: 8 },
   chipAdd: { fontSize: 12, fontWeight: 600, color: theme.teal, background: theme.tealBg, borderRadius: theme.radiusXs, padding: '2px 8px' },
-  chipDel: { fontSize: 12, fontWeight: 500, color: theme.danger, background: theme.dangerBg, borderRadius: theme.radiusXs, padding: '2px 8px', textDecoration: 'line-through' },
+  chipDel: { fontSize: 12, fontWeight: 500, color: theme.dangerDeep, background: theme.dangerBg, borderRadius: theme.radiusXs, padding: '2px 8px', textDecoration: 'line-through' },
   chipMore: { fontSize: 12, fontWeight: 600, color: theme.teal, background: 'transparent', border: `1px dashed ${theme.teal}`, borderRadius: theme.radiusXs, padding: '2px 8px', cursor: 'pointer', fontFamily: 'inherit' },
   unchangedNote: { fontSize: 12, color: theme.inkFaint, margin: '4px 0 0' },
   totaisNote: { fontSize: 12, color: theme.inkSoft, margin: '8px 0 0', lineHeight: 1.55 },

@@ -8,6 +8,7 @@ import { ChevronDown } from 'lucide-react';
 import { theme } from '@/lib/theme';
 import { PageContainer, PageHeader } from '@/components/ui/Page';
 import { Skeleton } from '@/components/ui/Skeleton';
+import { Button } from '@/components/ui/Button';
 import { usePersistedState } from '@/hooks/usePersistedState';
 import { useUI } from '@/components/layout/UIContext';
 import { useUser } from '@/components/layout/UserContext';
@@ -187,9 +188,9 @@ function HomeContent() {
       ) : returnMode ? (
         /* Modo retorno (hiato): acolhe + 1 ação; o resto fica atrás de "ver tudo"
            para não entregar a montanha nem a parede de zeros a quem voltou de longe. */
-        <button style={styles.verTudo} onClick={() => setExpandido(true)}>
+        <Button variant="outline" fullWidth style={{ marginTop: 16 }} onClick={() => setExpandido(true)}>
           Ver painel completo ↓
-        </button>
+        </Button>
       ) : (
         <>
           <div style={{ marginTop: 16 }}>
@@ -232,10 +233,6 @@ function HomeContent() {
 export default function Home() {
   return <HomeContent />;
 }
-
-const styles: Record<string, React.CSSProperties> = {
-  verTudo: { marginTop: 16, width: '100%', padding: '11px 16px', borderRadius: theme.radiusSm, border: `0.5px solid ${theme.line}`, background: theme.card, color: theme.inkSoft, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: theme.font },
-};
 
 const zoneStyles: Record<string, React.CSSProperties> = {
   header: { display: 'flex', alignItems: 'center', gap: 10, padding: '0 2px 10px' },

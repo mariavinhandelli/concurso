@@ -8,6 +8,7 @@ import { useToast } from '@/components/ui/ToastProvider';
 import { useUI } from '@/components/layout/UIContext';
 import { theme } from '@/lib/theme';
 import { PageContainer, PageHeader } from '@/components/ui/Page';
+import { BackLink } from '@/components/ui/BackLink';
 
 export default function NovaJurisprudenciaPage() {
   const router = useRouter();
@@ -30,13 +31,7 @@ export default function NovaJurisprudenciaPage() {
 
   return (
     <PageContainer style={{ minWidth: 0 }}>
-      <button
-        className="touch-target"
-        onClick={() => router.push('/jurisprudencias')}
-        style={{ border: 'none', background: 'transparent', color: theme.teal, fontSize: 13, fontWeight: 500, cursor: 'pointer', padding: 0, marginBottom: 20, fontFamily: 'inherit' }}
-      >
-        ← Jurisprudências
-      </button>
+      <BackLink href="/jurisprudencias" style={{ marginBottom: 20 }}>Jurisprudências</BackLink>
 
       <PageHeader title="Nova jurisprudência" subtitle="Preencha os campos obrigatórios (Tribunal, Disciplina e Tese). Os demais podem ser preenchidos depois." />
 

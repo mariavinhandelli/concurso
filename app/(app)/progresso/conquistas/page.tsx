@@ -8,6 +8,8 @@ import { Check, List, Clock, Flame, Star, Medal, Target, Share2 } from 'lucide-r
 import { theme } from '@/lib/theme';
 import { track, EV } from '@/lib/analytics';
 import { useBreakpoints } from '@/components/layout/UIContext';
+import { SegmentedControl } from '@/components/ui/SegmentedControl';
+import { Card } from '@/components/ui/Card';
 import { ShareProgressCard, type ShareBadgeInfo } from '@/components/features/home/ShareProgressCard';
 import {
   getBadgeState,
@@ -174,7 +176,9 @@ export default function ConquistasPage() {
 
       {nextUp.length > 0 && <NextUpSection badges={nextUp} isMobile={isMobile} />}
 
-      <FilterTabs value={filter} onChange={setFilter} />
+      <div style={s.filterWrap}>
+        <SegmentedControl options={FILTER_TABS.map((t) => ({ value: t.id, label: t.label }))} value={filter} onChange={setFilter} equalWidth={false} />
+      </div>
 
       {byFamily.map(({ family, badges: fb, allBadgesInFamily }) => (
         <FamilySection
@@ -228,11 +232,11 @@ function SkeletonPage({ isMobile }: { isMobile: boolean }) {
     // Só o conteúdo — header e container reais vêm do layout de /progresso.
     <div style={{ minWidth: 0 }}>
       {/* SummaryCard skeleton — altura calibrada ao conteúdo real (32+16+12+10+16 = ~110px + padding) */}
-      <div style={{ ...s.card, marginBottom: 32, padding: '20px 24px' }}>
+      <Card style={{ marginBottom: 32, padding: '20px 24px' }}>
         <div className="skel" style={{ ...r, height: 36, width: 140, marginBottom: 16 }} />
         <div className="skel" style={{ ...r, height: 12, width: '100%', borderRadius: theme.radiusPill }} />
         <div className="skel" style={{ ...r, height: 13, width: 220, marginTop: 10 }} />
-      </div>
+      </Card>
       <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: 16, marginBottom: 32 }}>
         {[0, 1, 2].map(i => (
           <div key={i} className="skel" style={{ ...r, height: 96, borderRadius: 14 }} />
@@ -253,7 +257,7 @@ function SummaryCard({ unlockedCount, totalCount, pct }: {
   unlockedCount: number; totalCount: number; pct: number;
 }) {
   return (
-    <div style={{ ...s.card, padding: '20px 24px', marginBottom: 32 }}>
+    <Card style={{ padding: '20px 24px', marginBottom: 32 }}>
       <div style={s.summaryTop}>
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
           {/* P0: count sobe de 28→32px — hero number com mais impacto */}
@@ -279,7 +283,7 @@ function SummaryCard({ unlockedCount, totalCount, pct }: {
       </div>
       {/* P1: mensagem contextual baseada no progresso */}
       <p style={s.summaryMsg}>{summaryMsg(pct)}</p>
-    </div>
+    </Card>
   );
 }
 
@@ -339,38 +343,6 @@ function NextUpCard({ badge, index }: { badge: Badge; index: number }) {
         </span>
         {eta && <span style={s.nextUpEta}>{eta}</span>}
       </div>
-    </div>
-  );
-}
-
-// ─── Filtros ──────────────────────────────────────────────────────────────────
-
-function FilterTabs({ value, onChange }: { value: Filter; onChange: (v: Filter) => void }) {
-  return (
-    <div style={s.filterWrap}>
-      {FILTER_TABS.map(t => {
-        const active = value === t.id;
-        return (
-          <button
-            key={t.id}
-            onClick={() => onChange(t.id)}
-            className="conquistas-filter-tab"
-            // sem isto o leitor de tela não distingue o filtro ativo (a única
-            // pista era cor de fundo)
-            aria-pressed={active}
-            style={{
-              // P1: active usa muted+inkStrong em vez de color-mix quasi-invisível
-              color:       active ? theme.ink     : theme.inkSoft,
-              background:  active ? theme.muted   : 'transparent',
-              borderColor: active ? theme.lineStrong : theme.line,
-              fontWeight:  active ? 600 : 500,
-              fontFamily:  theme.font,
-            }}
-          >
-            {t.label}
-          </button>
-        );
-      })}
     </div>
   );
 }
@@ -554,13 +526,6 @@ function CheckIcon({ color }: { color: string }) {
 // ─── Estilos ──────────────────────────────────────────────────────────────────
 
 const s: Record<string, React.CSSProperties> = {
-  card: {
-    background:   theme.card,
-    border:       `0.5px solid ${theme.line}`,
-    borderRadius: theme.radius,
-    boxShadow:    theme.shadow,
-  },
-
   summaryTop:   { display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, marginBottom: 16 },
   // P0: 28→32px — hero number com mais impacto
   summaryCount: { fontSize: T.hero, fontWeight: 800, color: theme.ink, letterSpacing: -0.8 },

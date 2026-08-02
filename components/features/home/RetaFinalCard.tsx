@@ -73,6 +73,9 @@ export function RetaFinalCard() {
   const critico = dias <= 7;
   const cor = critico ? theme.danger : theme.warn;
   const corBg = critico ? theme.dangerBg : theme.warnBg;
+  // Texto sobre corBg precisa de 4,5:1 (cor sozinho reprova AA no crítico);
+  // cor segue servindo a borda e o botão sólido, que não têm esse requisito.
+  const corTexto = critico ? theme.dangerDeep : theme.warnDeep;
   const nome = formatTargetLabel(exam);
   const foco = raiox?.focoPrincipal ?? null;
   const temProntidao = !!raiox?.hasBlueprint && (raiox?.materias.length ?? 0) > 0;
@@ -89,8 +92,8 @@ export function RetaFinalCard() {
   return (
     <div style={{ ...s.card, background: corBg, borderColor: cor }}>
       <div style={s.top}>
-        <span style={{ ...s.eyebrow, color: cor }}>Reta final</span>
-        <span style={{ ...s.diasNum, color: cor }}>{dias}</span>
+        <span style={{ ...s.eyebrow, color: corTexto }}>Reta final</span>
+        <span style={{ ...s.diasNum, color: corTexto }}>{dias}</span>
       </div>
 
       <h2 style={s.titulo}>{tituloDias(dias)} para <span style={{ whiteSpace: 'nowrap' }}>{nome}</span></h2>

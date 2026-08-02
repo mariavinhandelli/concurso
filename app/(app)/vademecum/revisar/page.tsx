@@ -4,33 +4,24 @@
 // lacuna; avalie com Errei/Difícil/Ok/Dominei (intervalos 1/3/15/45).
 'use client';
 
-import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { useRouter } from 'next/navigation';
+import { PartyPopper } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import {
   listRevisoesDue, submitRevisaoArtigo, hydrateLeiInteracoes,
   type LeiItemHidratado,
 } from '@/services/leiInteracoes.service';
-import { RATING_LABEL, type JurisRating } from '@/lib/juris-review';
-import { SUBLINHADO_COR, segmentarBloco, grifoVisual } from '@/lib/lei-grifos';
+import { type JurisRating } from '@/lib/juris-review';
 import { refreshHomeAfterSession } from '@/lib/home-refresh';
 import { savePassiveSession } from '@/services/passiveSession.service';
 import { useUI } from '@/components/layout/UIContext';
 import { useToast } from '@/components/ui/ToastProvider';
 import { theme } from '@/lib/theme';
 import { Button } from '@/components/ui/Button';
-import { Badge } from '@/components/ui/Badge';
 import { PageContainer } from '@/components/ui/Page';
-
-// Lacuna com largura fixa via CSS — não proporcional ao trecho oculto, para
-// não vazar pista do tamanho da resposta (recall ativo puro).
-
-const RATINGS: { value: JurisRating; cor: string }[] = [
-  { value: 'errei',   cor: theme.danger },
-  { value: 'dificil', cor: theme.warnDeep },
-  { value: 'ok',      cor: theme.tealDeep },
-  { value: 'dominei', cor: theme.okDeep },
-];
+import { BackLink } from '@/components/ui/BackLink';
+import { LeiRevisaoCard } from '@/components/features/vademecum/LeiRevisaoCard';
 
 export default function RevisarArtigosPage() {
   const router = useRouter();
@@ -76,8 +67,6 @@ export default function RevisarArtigosPage() {
   }, []);
 
   const atual = fila?.[idx] ?? null;
-  const grifos = useMemo(() => atual?.interacao.grifos ?? [], [atual]);
-  const temLacunas = grifos.length > 0;
 
   async function avaliar(rating: JurisRating) {
     if (!atual || saving) return;
@@ -105,7 +94,7 @@ export default function RevisarArtigosPage() {
     return (
       <PageContainer width="narrow" style={{ padding: isMobile ? '40px 16px' : '72px 40px', textAlign: 'center' }}>
         <div style={s.doneBox}>
-          <div style={{ fontSize: 40 }}>🎉</div>
+          <PartyPopper size={40} color={theme.teal} strokeWidth={1.5} />
           <h1 style={s.doneTitle}>
             {feitas > 0 ? `${feitas} artigo${feitas === 1 ? '' : 's'} revisado${feitas === 1 ? '' : 's'}!` : 'Nenhuma revisão de lei vencida'}
           </h1>
@@ -123,89 +112,28 @@ export default function RevisarArtigosPage() {
   return (
     <PageContainer width="narrow">
       <div style={s.topo}>
-        <button onClick={() => router.push('/vademecum')} style={s.voltar}>← Vade Mecum</button>
+        <BackLink href="/vademecum" style={{ marginBottom: 0 }}>Vade Mecum</BackLink>
         <span style={s.progresso}>{idx + 1} de {fila.length}</span>
       </div>
 
-      <div style={s.card}>
-        <div style={s.cardHead}>
-          <Badge variant="brand">{atual.lei.nomeCurto}</Badge>
-          <span style={s.rotulo}>{atual.artigo.rotulo}</span>
-          {atual.artigo.caminho && <span style={s.caminho}>{atual.artigo.caminho}</span>}
-        </div>
-
-        {temLacunas && (
-          <p style={s.hint}>
-            Tente completar as lacunas de memória — clique para revelar.
-            <button onClick={() => setReveladas(new Set(grifos.map((g) => g.id)))} style={s.revelarTudo}>
-              revelar tudo
-            </button>
-          </p>
-        )}
-
-        <div style={s.texto}>
-          {atual.artigo.blocos.map((b) => (
-            <p key={b.id} style={{ ...s.bloco, paddingLeft: b.nivel * 20 }}>
-              {b.rotulo && <span style={s.blocoRotulo}>{b.rotulo} </span>}
-              {segmentarBloco(b.texto, grifos, b.id).map((seg, i) => {
-                if (!seg.grifo) return <span key={i}>{seg.texto}</span>;
-                const aberta = reveladas.has(seg.grifo.id);
-                if (!aberta) {
-                  return (
-                    <button
-                      key={i}
-                      type="button"
-                      onClick={() => setReveladas((prev) => new Set(prev).add(seg.grifo!.id))}
-                      title="Revelar trecho oculto"
-                      aria-label="Revelar trecho oculto"
-                      style={s.lacuna}
-                    />
-                  );
-                }
-                const estiloSeg: CSSProperties = seg.grifo.estilo === 'sublinhado'
-                  ? { borderBottom: `2px solid ${SUBLINHADO_COR}` }
-                  : { background: grifoVisual(seg.grifo).bg, borderRadius: 3 };
-                return <span key={i} style={estiloSeg}>{seg.texto}</span>;
-              })}
-            </p>
-          ))}
-        </div>
-
-        <div style={s.ratings}>
-          {RATINGS.map((r) => (
-            <button
-              key={r.value}
-              onClick={() => avaliar(r.value)}
-              disabled={saving}
-              style={{ ...s.ratingBtn, borderColor: r.cor, color: r.cor }}
-            >
-              {RATING_LABEL[r.value]}
-            </button>
-          ))}
-        </div>
-      </div>
+      <LeiRevisaoCard
+        leiNomeCurto={atual.lei.nomeCurto}
+        artigo={atual.artigo}
+        interacao={atual.interacao}
+        reveladas={reveladas}
+        onRevelar={(grifoId) => setReveladas((prev) => new Set(prev).add(grifoId))}
+        onRevelarTudo={() => setReveladas(new Set((atual.interacao.grifos ?? []).map((g) => g.id)))}
+        onRate={(rating) => void avaliar(rating)}
+        disabled={saving}
+      />
     </PageContainer>
   );
 }
 
 const s: Record<string, CSSProperties> = {
   topo: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 },
-  voltar: { border: 'none', background: 'transparent', color: theme.inkFaint, fontSize: 13, cursor: 'pointer', fontFamily: 'inherit', padding: 0 },
   progresso: { fontSize: 13, fontWeight: 600, color: theme.inkSoft },
-  card: { background: theme.card, border: `0.5px solid ${theme.line}`, borderRadius: theme.radius, padding: '20px 22px' },
-  cardHead: { display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 12 },
-  rotulo: { fontSize: 16, fontWeight: 700, color: theme.ink },
-  caminho: { fontSize: 12, color: theme.inkFaint, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
-  hint: { fontSize: 13, color: theme.inkSoft, margin: '0 0 12px', display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' },
-  revelarTudo: { border: 'none', background: 'transparent', color: theme.teal, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', textDecoration: 'underline', padding: 0 },
-  texto: { fontSize: 15, lineHeight: 1.9, color: theme.ink },
-  bloco: { margin: '0 0 8px' },
-  blocoRotulo: { fontWeight: 600, color: theme.inkSoft },
-  lacuna: { display: 'inline-block', width: 72, height: '1.05em', verticalAlign: 'text-bottom', background: theme.muted, borderRadius: 4, cursor: 'pointer', border: 'none', borderBottom: `1.5px dashed ${theme.inkFaint}`, padding: 0 },
-  ratings: { display: 'flex', gap: 8, marginTop: 18, flexWrap: 'wrap' },
-  ratingBtn: { flex: 1, minWidth: 90, padding: '11px 8px', borderRadius: theme.radiusSm, borderWidth: 1.5, borderStyle: 'solid', background: 'transparent', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' },
   doneBox: { textAlign: 'center', padding: '60px 20px' },
   doneTitle: { fontSize: 22, fontWeight: 700, color: theme.ink, margin: '10px 0 6px' },
   doneSub: { fontSize: 14, color: theme.inkSoft, margin: '0 0 20px' },
-  doneBtn: { padding: '11px 22px', borderRadius: theme.radiusSm, border: 'none', background: theme.primary, color: theme.onPrimary, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' },
 };

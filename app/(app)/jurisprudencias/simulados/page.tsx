@@ -9,6 +9,7 @@ import { theme } from '@/lib/theme';
 import { Button } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { PageContainer, PageHeader } from '@/components/ui/Page';
+import { BackLink } from '@/components/ui/BackLink';
 import { Skeleton } from '@/components/ui/Skeleton';
 
 // Auditoria de performance (02/08) — recharts fora do payload inicial da
@@ -117,13 +118,7 @@ export default function SimuladosPage() {
 
   return (
     <PageContainer>
-      <button
-        className="touch-target"
-        onClick={() => router.push('/jurisprudencias')}
-        style={{ border: 'none', background: 'transparent', color: theme.teal, fontSize: 13, fontWeight: 500, cursor: 'pointer', padding: 0, fontFamily: 'inherit', marginBottom: 8 }}
-      >
-        ← Jurisprudências
-      </button>
+      <BackLink href="/jurisprudencias" style={{ marginBottom: 8 }}>Jurisprudências</BackLink>
 
       <PageHeader
         title="Histórico de Simulados"

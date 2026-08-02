@@ -15,9 +15,9 @@ import { AccuracyChart } from '@/components/features/dashboard/AccuracyChart';
 import { RaioXCard } from '@/components/features/home/RaioXCard';
 import { CoberturaEdital } from '@/components/features/home/CoberturaEdital';
 import { TimePieCard } from '@/components/features/home/TimePieCard';
-import { theme } from '@/lib/theme';
 import { useUI } from '@/components/layout/UIContext';
 import { Skeleton } from '@/components/ui/Skeleton';
+import { Card } from '@/components/ui/Card';
 import { track, EV } from '@/lib/analytics';
 
 // Recharts fora do payload inicial — mesmo padrão da antiga /performance.
@@ -58,36 +58,36 @@ export default function EvolucaoPage() {
       </div>
 
       {/* ritmo de estudo */}
-      <div style={{ ...styles.card, gridColumn: '1 / -1', padding: isMobile ? 16 : 24 }}>
+      <Card style={{ gridColumn: '1 / -1', padding: isMobile ? 16 : 24, minWidth: 0, overflow: 'hidden' }}>
         <ConstanciaResumo />
-      </div>
+      </Card>
 
       {/* prontidão + cobertura do edital — lado a lado no desktop */}
       <RaioXCard />
       <CoberturaEdital />
 
       {/* tempo de estudo */}
-      <div style={{ ...styles.card, gridColumn: '1 / -1', padding: isMobile ? 16 : 24 }}>
+      <Card style={{ gridColumn: '1 / -1', padding: isMobile ? 16 : 24, minWidth: 0, overflow: 'hidden' }}>
         <StudyTimeChart />
-      </div>
+      </Card>
 
       {/* acerto por matéria + evolução */}
-      <div style={{ ...styles.card, padding: isMobile ? 16 : 24 }}>
+      <Card style={{ padding: isMobile ? 16 : 24, minWidth: 0, overflow: 'hidden' }}>
         <AccuracyChart />
-      </div>
-      <div style={{ ...styles.card, padding: isMobile ? 16 : 24 }}>
+      </Card>
+      <Card style={{ padding: isMobile ? 16 : 24, minWidth: 0, overflow: 'hidden' }}>
         <AccuracyEvolutionChart />
-      </div>
+      </Card>
 
       {/* retenção — estudar ≠ aprender (M3) */}
-      <div style={{ ...styles.card, gridColumn: '1 / -1', padding: isMobile ? 16 : 24 }}>
+      <Card style={{ gridColumn: '1 / -1', padding: isMobile ? 16 : 24, minWidth: 0, overflow: 'hidden' }}>
         <RetencaoChart />
-      </div>
+      </Card>
 
       {/* energia × desempenho */}
-      <div style={{ ...styles.card, gridColumn: '1 / -1', padding: isMobile ? 16 : 24 }}>
+      <Card style={{ gridColumn: '1 / -1', padding: isMobile ? 16 : 24, minWidth: 0, overflow: 'hidden' }}>
         <EnergiaDesempenho />
-      </div>
+      </Card>
 
       {/* distribuição da semana por matéria */}
       <div style={{ gridColumn: '1 / -1' }}>
@@ -103,5 +103,4 @@ const styles: Record<string, React.CSSProperties> = {
   // trilha além do container e a página inteira rolava na horizontal em tablet
   // portrait (768–914px). Com minmax(0,…) o heatmap rola dentro do próprio card.
   grid: { display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 18, minWidth: 0 },
-  card: { background: theme.card, border: `0.5px solid ${theme.line}`, borderRadius: theme.radius, boxShadow: theme.shadow, padding: 24, minWidth: 0, overflow: 'hidden' },
 };

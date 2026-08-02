@@ -19,6 +19,9 @@ import { invalidateArchivedCache } from '@/services/archivedCache';
 import { invalidatePrimaryTargetCache } from '@/services/primaryTargetCache';
 import { invalidateProfileSettingsCache } from '@/services/profileSettingsCache';
 import { invalidateCatalogCache } from '@/services/catalog.service';
+import { invalidateStudiedTopicsCache } from '@/services/studiedTopicsCache';
+import { invalidateUserCreatedCache } from '@/services/jurisprudencias.service';
+import { clearLegacyRecents } from '@/lib/recents';
 
 export function clearAllClientCaches(): void {
   clearAuthCache();
@@ -29,4 +32,9 @@ export function clearAllClientCaches(): void {
   // `is_activated`, que é do USUÁRIO — sem limpar, o Banco de Matérias mostrava
   // "já ativada" para matérias da conta anterior.
   invalidateCatalogCache();
+  // Achados da auditoria de isolamento (02/08): mesmo defeito de classe, dois
+  // caches novos que não tinham sido registrados aqui.
+  invalidateStudiedTopicsCache();
+  invalidateUserCreatedCache();
+  clearLegacyRecents();
 }
