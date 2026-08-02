@@ -23,6 +23,14 @@ import type { NextConfig } from "next";
 const csp = "img-src 'self' data: blob: https://*.supabase.co";
 
 const nextConfig: NextConfig = {
+  // "/configuracoes" é o nome óbvio em pt-BR pra quem digita a URL de cabeça;
+  // a rota real é "/settings" (convenção em inglês do resto do app) e sem
+  // isto cai em 404 puro.
+  async redirects() {
+    return [
+      { source: '/configuracoes', destination: '/settings', permanent: false },
+    ];
+  },
   async headers() {
     return [{
       source: '/:path*',

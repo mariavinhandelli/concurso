@@ -51,7 +51,12 @@ export default function ProfilePage() {
         if (u) {
           setUserId(u.id);
           setEmail(u.email ?? '');
-          setName(u.user_metadata?.display_name ?? '');
+          // Mesma cadeia de fallback do UserContext (saudação da Home): o
+          // cadastro só grava full_name — sem isto, quem nunca abriu "Meu
+          // perfil" pra digitar um display_name via aqui em branco mesmo
+          // depois de ter dado o nome no formulário de cadastro.
+          const meta = u.user_metadata ?? {};
+          setName(String(meta.display_name || meta.full_name || meta.name || ''));
           const rawUrl = u.user_metadata?.avatar_url;
           setAvatarUrl(isHttpsUrl(rawUrl) ? rawUrl : '');
         }

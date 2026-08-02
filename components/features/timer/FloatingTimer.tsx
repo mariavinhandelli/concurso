@@ -27,7 +27,10 @@ export function FloatingTimer() {
   const [expanded, setExpanded] = useState(false);
   const [saving, setSaving] = useState(false);
   const [showPicker, setShowPicker] = useState(false);
-  const pickerRef = useRef<HTMLDivElement>(null);
+  // Picker (parado) e cartão (expandido) nunca renderizam ao mesmo tempo —
+  // estados mutuamente exclusivos do timer — então uma ref só basta pros dois
+  // efeitos de fechamento abaixo.
+  const floatingRef = useRef<HTMLDivElement>(null);
 
   // O que está sendo cronometrado ("Matéria · Tópico") — sem isso o usuário
   // abria o painel e não sabia a que sessão o tempo pertencia.
@@ -40,25 +43,32 @@ export function FloatingTimer() {
     staleTime: Infinity,
   });
 
-  // Fecha o picker ao clicar fora dele.
+  // Fecha o picker (ou o cartão expandido) ao clicar fora dele. Sem isto, o
+  // cartão expandido (fixed, ~340×230) ficava aberto até alguém acertar o
+  // chevron minúsculo pra recolher — e enquanto isso ele cobria qualquer
+  // formulário que terminasse no canto inferior direito (ex.: "Salvar erro"
+  // no composer do Caderno), sem nenhum jeito óbvio de destravar.
   useEffect(() => {
-    if (!showPicker) return;
+    if (!showPicker && !expanded) return;
     function onDown(e: MouseEvent) {
-      if (pickerRef.current && !pickerRef.current.contains(e.target as Node)) {
+      if (floatingRef.current && !floatingRef.current.contains(e.target as Node)) {
         setShowPicker(false);
+        setExpanded(false);
       }
     }
     document.addEventListener('mousedown', onDown);
     return () => document.removeEventListener('mousedown', onDown);
-  }, [showPicker]);
+  }, [showPicker, expanded]);
 
-  // Fecha o picker com Escape.
+  // Fecha com Escape.
   useEffect(() => {
-    if (!showPicker) return;
-    function onKey(e: KeyboardEvent) { if (e.key === 'Escape') setShowPicker(false); }
+    if (!showPicker && !expanded) return;
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') { setShowPicker(false); setExpanded(false); }
+    }
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
-  }, [showPicker]);
+  }, [showPicker, expanded]);
 
   // O timer continua contando no contexto, mas sua interface não disputa espaço
   // nem camada com o drawer de navegação no mobile.
@@ -102,7 +112,7 @@ export function FloatingTimer() {
   if (timer.status === 'idle') {
     if (showPicker) {
       return (
-        <div ref={pickerRef} className="floating-root" style={{ ...styles.card, ...pos, width: isMobile ? 'calc(100vw - 32px)' : 236, maxWidth: 340 }}>
+        <div ref={floatingRef} className="floating-root" style={{ ...styles.card, ...pos, width: isMobile ? 'calc(100vw - 32px)' : 236, maxWidth: 340 }}>
           <div style={styles.cardHead}>
             <span style={styles.eyebrow}>Iniciar sessão</span>
             <button className="icon-touch-target" onClick={() => setShowPicker(false)} style={styles.collapseBtn} aria-label="Fechar">
@@ -150,7 +160,7 @@ export function FloatingTimer() {
 
   // EXPANDIDO: cartão com controles.
   return (
-    <div className="floating-root" style={{ ...styles.card, ...pos, width: isMobile ? 'calc(100vw - 32px)' : 220, maxWidth: 340 }}>
+    <div ref={floatingRef} className="floating-root" style={{ ...styles.card, ...pos, width: isMobile ? 'calc(100vw - 32px)' : 220, maxWidth: 340 }}>
       <div style={styles.cardHead}>
         <span style={styles.eyebrow}>Sessão de estudo</span>
         <button className="icon-touch-target" onClick={() => setExpanded(false)} style={styles.collapseBtn} aria-label="Recolher">

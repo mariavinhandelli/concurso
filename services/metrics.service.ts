@@ -163,6 +163,39 @@ export async function getSaudeMap(topicIds: string[]): Promise<Record<string, nu
   return mapa;
 }
 
+// Um tópico estudado só em modo teoria/lei/juris (nunca em "questões", nunca
+// com flashcard revisado) cai em saude=0 por FALTA de dado, não por
+// desempenho ruim — recalcularSaude vira 0 quando os dois componentes são
+// null (ver acima). getSaudeMap devolve só o número, indistinguível dos dois
+// casos; isto aqui devolve quais tópicos têm sinal REAL, para quem for rotular
+// "frágil"/"precisa reforço" não acusar quem simplesmente ainda não fez uma
+// questão.
+export async function getAssessedTopicIds(topicIds: string[]): Promise<Set<string>> {
+  if (topicIds.length === 0) return new Set();
+  const auth = await tryGetUser();
+  if (!auth) return new Set();
+
+  const lotes = await Promise.all(
+    chunk(topicIds, IN_CHUNK).map((ids) =>
+      auth.supabase
+        .from('topic_metrics')
+        .select('topic_id, saude_componentes')
+        .eq('user_id', auth.userId)
+        .in('topic_id', ids),
+    ),
+  );
+
+  const assessed = new Set<string>();
+  for (const { data, error } of lotes) {
+    if (error) throw new Error('Erro ao ler avaliação dos tópicos: ' + error.message);
+    for (const row of data ?? []) {
+      const c = row.saude_componentes as SaudeComponentes | null;
+      if (c && (c.acerto_recente !== null || c.srs_score !== null)) assessed.add(row.topic_id);
+    }
+  }
+  return assessed;
+}
+
 export async function getAcertoRecente(): Promise<number | null> {
   const auth = await tryGetUser();
   if (!auth) return null;

@@ -5,10 +5,11 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { Bold, Italic, Heading1, Heading2, List, ListOrdered, Image as ImageIcon, Highlighter, Sparkles } from 'lucide-react';
+import { Bold, Italic, Underline as UnderlineIcon, Heading1, Heading2, List, ListOrdered, Image as ImageIcon, Highlighter, Sparkles } from 'lucide-react';
 import { useEditor, EditorContent, type Editor } from '@tiptap/react';
 import { BubbleMenu } from '@tiptap/react/menus';
 import StarterKit from '@tiptap/starter-kit';
+import Underline from '@tiptap/extension-underline';
 import Highlight from '@tiptap/extension-highlight';
 import Image from '@tiptap/extension-image';
 import { Color, TextStyle } from '@tiptap/extension-text-style';
@@ -40,6 +41,7 @@ const HIGHLIGHT_COLORS = [
 const Icon = {
   bold: <Bold size={16} strokeWidth={2.4} />,
   italic: <Italic size={16} strokeWidth={2} />,
+  underline: <UnderlineIcon size={16} strokeWidth={2} />,
   h1: <Heading1 size={18} strokeWidth={2} />,
   h2: <Heading2 size={18} strokeWidth={2} />,
   bullet: <List size={16} strokeWidth={2} />,
@@ -85,6 +87,7 @@ export function RichTextEditor({
   const editor = useEditor({
     extensions: [
       StarterKit,
+      Underline,
       TextStyle,
       Color,
       Highlight.configure({ multicolor: true }),
@@ -247,6 +250,8 @@ function Toolbar({ editor, onPickImage, uploading }: { editor: Editor; onPickIma
           style={btn(editor.isActive('bold'))} title="Negrito">{Icon.bold}</button>
         <button onClick={() => editor.chain().focus().toggleItalic().run()}
           style={btn(editor.isActive('italic'))} title="Itálico">{Icon.italic}</button>
+        <button onClick={() => editor.chain().focus().toggleUnderline().run()}
+          style={btn(editor.isActive('underline'))} title="Sublinhado">{Icon.underline}</button>
       </div>
 
       <span style={styles.divider} />

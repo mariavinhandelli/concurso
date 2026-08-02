@@ -6,7 +6,7 @@
 import { createClient } from '@/lib/supabase/client';
 import { getCachedUser } from '@/lib/supabase/authCache';
 import { listDueReviews } from '@/services/reviews.service';
-import { getSaudeMap } from '@/services/metrics.service';
+import { getSaudeMap, getAssessedTopicIds } from '@/services/metrics.service';
 import { getPrimaryTargetExam } from '@/services/primaryTargetCache';
 
 export type SuggestionKind = 'revisao' | 'reforco' | 'recuperar';
@@ -77,6 +77,10 @@ export async function getSuggestions(): Promise<SuggestionsResult> {
   const idsTopicos = (topicos ?? []).map((t) => t.id).filter((id) => !idsVencidos.has(id));
   const todosIds = [...idsVencidos, ...idsTopicos];
   const saudeMap = todosIds.length > 0 ? await getSaudeMap(todosIds) : {};
+  // Bloco B só pode chamar "frágil" quem TEM avaliação real (questões
+  // respondidas ou flashcard já revisado) — sem isso, saude=0 é ausência de
+  // dado, não desempenho ruim, e o alerta soaria como bronca no 1º dia.
+  const idsAvaliados = idsTopicos.length > 0 ? await getAssessedTopicIds(idsTopicos) : new Set<string>();
 
   // N10: peso por matéria do edital primário (exam_blueprints.weight, ex.: 2–4).
   const primaryTargetId = primTarget?.id;
@@ -148,6 +152,10 @@ export async function getSuggestions(): Promise<SuggestionsResult> {
     if (idsVencidos.has(t.id)) continue;
     const saude = saudeMap[t.id];
     if (saude === undefined || saude >= SAUDE_BAIXA) continue;
+    // Sem avaliação real (nenhuma questão respondida, nenhum flashcard
+    // revisado), o 0 é "ainda não sabemos", não "sabemos que é fraco" — não
+    // é um caso de "precisa de reforço".
+    if (!idsAvaliados.has(t.id)) continue;
 
     const subj = Array.isArray(t.subjects) ? t.subjects[0] : t.subjects;
     const aj = ajuste(t.subject_id, t.id);

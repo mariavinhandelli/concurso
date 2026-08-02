@@ -182,8 +182,11 @@ export function CycleView({
             </div>
           </div>
 
-          {/* Lista de matérias */}
-          <div style={styles.list}>
+          {/* Lista de matérias — no mobile precisa de basis 100% explícita: a
+              bússola acima tem basis 100% MAS maxWidth 360, então sobra vão na
+              linha dela; com basis 0 a lista se espremia nesse vão (104px) em
+              vez de quebrar pra baixo, e os "Registrar" estouravam a página. */}
+          <div style={{ ...styles.list, ...(isMobile ? { flex: '1 1 100%' } : {}) }}>
             {state.subjects.map((s) => {
               const isSug = s.isSuggested;
               // Um slot que fechou EXATAMENTE o planejado tem resto 0 (60 % 60),
