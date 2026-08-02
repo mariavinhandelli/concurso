@@ -9,7 +9,7 @@ import {
   calculateNextJurisReview, fromJurisDbRow, toJurisDbRow, isJurisDue, jurisDaysOverdue,
   type JurisRating,
 } from '@/lib/juris-review';
-import { localDateInDays, toLocalDateString } from '@/lib/local-date';
+import { localDateInDays, parseLocalDate, toLocalDateString } from '@/lib/local-date';
 import type { Jurisprudencia } from '@/services/jurisprudencias.service';
 
 export interface JurisInteracao {
@@ -104,6 +104,19 @@ export async function activateRevisao(jurisId: string, intervalDays: number): Pr
     next_review_date: localDateInDays(days),
     interval_days: days,
     repetitions: 0,
+  });
+}
+
+// Adiar: reagenda sem avaliar (não mexe em repetitions) — o usuário escolhe a
+// data que quiser em vez do intervalo sugerido.
+export async function rescheduleRevisao(jurisId: string, dateStr: string): Promise<void> {
+  const todayMs = parseLocalDate(toLocalDateString()).getTime();
+  const targetMs = parseLocalDate(dateStr).getTime();
+  const intervalDays = Math.max(1, Math.round((targetMs - todayMs) / 86_400_000));
+  await upsertInteracao(jurisId, {
+    next_review_date: dateStr,
+    is_review_active: true,
+    interval_days: intervalDays,
   });
 }
 

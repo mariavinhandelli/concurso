@@ -9,7 +9,7 @@ import {
   calculateNextJurisReview, fromJurisDbRow, toJurisDbRow,
   type JurisRating,
 } from '@/lib/juris-review';
-import { toLocalDateString } from '@/lib/local-date';
+import { parseLocalDate, toLocalDateString } from '@/lib/local-date';
 import { getLei, LEIS_CATALOG, type Lei, type LeiArtigo } from '@/services/leis.service';
 
 export type GrifoCor = 'regra' | 'prazo' | 'competencia' | 'excecao' | 'livre';
@@ -195,6 +195,19 @@ export async function submitRevisaoArtigo(
   const state = fromJurisDbRow(atual ?? { interval_days: 0, repetitions: 0 });
   const result = calculateNextJurisReview(state, rating);
   return upsertInteracao(artigoKey, { ...toJurisDbRow(result), is_review_active: true });
+}
+
+// Adiar: reagenda sem avaliar (não mexe em repetitions) — o usuário escolhe a
+// data que quiser em vez do intervalo sugerido.
+export async function rescheduleRevisaoArtigo(artigoKey: string, dateStr: string): Promise<void> {
+  const todayMs = parseLocalDate(toLocalDateString()).getTime();
+  const targetMs = parseLocalDate(dateStr).getTime();
+  const intervalDays = Math.max(1, Math.round((targetMs - todayMs) / 86_400_000));
+  await upsertInteracao(artigoKey, {
+    next_review_date: dateStr,
+    is_review_active: true,
+    interval_days: intervalDays,
+  });
 }
 
 // Artigos com revisão vencida (para a fila e para badges).

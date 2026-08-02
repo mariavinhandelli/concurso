@@ -13,10 +13,10 @@ interface ReviewCardProps {
 }
 
 // Usa as variáveis --review-* do globals.css que já garantem contraste WCAG AA
-// (texto escuro sobre fundo claro), resolvendo o falha de contraste do pressed state anterior.
-// Mesma gramática dos flashcards (Errei/Difícil/Médio/Fácil): 'Esqueci' é o
-// lapso vermelho que zera o intervalo; 'Difícil' vira neutro — antes era
-// vermelho e induzia o usuário a achar que reiniciava a contagem.
+// (texto escuro sobre fundo claro). Tópicos seguem o método 24h/7/30 (calendário
+// fixo, lib/topic-review.ts) — sem nota de dificuldade, só 2 ações: 'Esqueci'
+// reinicia em 24h, 'Revisei' avança pro próximo marco. A graduação por nota
+// (Esqueci/Difícil/Médio/Fácil) é exclusiva dos flashcards (SM-2).
 const RATINGS: {
   key:       ReviewRating;
   label:     string;
@@ -24,10 +24,8 @@ const RATINGS: {
   pressedBg: string;
   pressedFg: string;
 }[] = [
-  { key: 'esqueci',       label: 'Esqueci',       fg: theme.danger,   pressedBg: 'var(--review-hard)',   pressedFg: 'var(--review-hard-text)'   },
-  { key: 'dificil',       label: 'Difícil',      fg: theme.inkSoft,  pressedBg: 'var(--muted)',         pressedFg: 'var(--ink)'                },
-  { key: 'intermediario', label: 'Médio',         fg: theme.warn, pressedBg: 'var(--review-medium)', pressedFg: 'var(--review-medium-text)' },
-  { key: 'facil',         label: 'Fácil',         fg: theme.ok,   pressedBg: 'var(--review-easy)',   pressedFg: 'var(--review-easy-text)'   },
+  { key: 'esqueci', label: 'Esqueci', fg: theme.danger, pressedBg: 'var(--review-hard)', pressedFg: 'var(--review-hard-text)' },
+  { key: 'revisei', label: 'Revisei', fg: theme.ok,     pressedBg: 'var(--review-easy)', pressedFg: 'var(--review-easy-text)' },
 ];
 
 export const ReviewCard = memo(function ReviewCard({ item, isExiting, onRate }: ReviewCardProps) {

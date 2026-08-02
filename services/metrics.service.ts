@@ -56,7 +56,7 @@ export async function recalcularSaude(topicId: string): Promise<number> {
       .eq('topic_id', topicId),
     supabase
       .from('topics')
-      .select('last_reviewed, interval_days')
+      .select('last_reviewed, interval_days, repetitions')
       .eq('id', topicId)
       .single(),
   ]);
@@ -92,7 +92,15 @@ export async function recalcularSaude(topicId: string): Promise<number> {
   let fatorDecaimento = 1.0;
   if (ref) {
     const diasSem = (hoje.getTime() - ref.getTime()) / (1000 * 60 * 60 * 24);
-    const meiaVida = Math.max(topic.interval_days ?? 0, 7); // mínimo 7 dias (1 semana) — menos punitivo para tópicos conhecidos
+    // O método 24h/7/30 (lib/topic-review.ts) trava interval_days num platô de
+    // ~30 dias a partir da 2ª repetição — diferente do SM-2 antigo, que crescia
+    // sem limite pra tópicos dominados. Sem compensar, um tópico revisado 2x e
+    // um revisado 20x decairiam no mesmo ritmo. repetitions continua crescendo
+    // sem limite, então cada repetição madura além do platô (a partir da 3ª)
+    // alonga a meia-vida — recompensa maturidade de novo sem depender do
+    // interval_days em si.
+    const repeticoesMaduras = Math.max(0, (topic.repetitions ?? 0) - 2);
+    const meiaVida = Math.max(topic.interval_days ?? 0, 7) + repeticoesMaduras * 10; // mínimo 7 dias — menos punitivo para tópicos conhecidos
     fatorDecaimento = Math.pow(0.5, diasSem / meiaVida);
   }
 

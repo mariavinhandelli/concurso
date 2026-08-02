@@ -13,9 +13,9 @@ import { X, PartyPopper, Sprout, WifiOff } from 'lucide-react';
 import { buildFilaUnificada, getNextScheduledDateUnificada, type UnifiedItem, type UnifiedKind } from '@/services/revisaoUnificada.service';
 import { parseLocalDate, toLocalDateString, localDateInDays } from '@/lib/local-date';
 import { submitReview, rescheduleReview, type ReviewRating } from '@/services/reviews.service';
-import { submitCardReview, type ReviewRating as CardRating } from '@/services/flashcards.service';
-import { submitRevisaoArtigo } from '@/services/leiInteracoes.service';
-import { submitRevisao as submitJurisRevisao } from '@/services/jurisInteracoes.service';
+import { submitCardReview, rescheduleCardReview, type ReviewRating as CardRating } from '@/services/flashcards.service';
+import { submitRevisaoArtigo, rescheduleRevisaoArtigo } from '@/services/leiInteracoes.service';
+import { submitRevisao as submitJurisRevisao, rescheduleRevisao as rescheduleJurisRevisao } from '@/services/jurisInteracoes.service';
 import { fromJurisDbRow } from '@/lib/juris-review';
 import { refreshHomeAfterSession } from '@/lib/home-refresh';
 import { savePassiveSession } from '@/services/passiveSession.service';
@@ -43,8 +43,9 @@ const KIND_META: Record<UnifiedKind, { label: string; plural: string; fg: string
   juris:     { label: 'Jurisprudência', plural: 'Jurisprudências', fg: theme.warnDeep, bg: theme.warnBg },
 };
 
-// Ordem 1..4 dos atalhos de teclado para tópicos — espelha os botões do ReviewCard.
-const TOPIC_KEYS: ReviewRating[] = ['esqueci', 'dificil', 'intermediario', 'facil'];
+// Ordem 1..2 dos atalhos de teclado para tópicos — espelha os botões do ReviewCard
+// (método 24h/7/30, sem nota de dificuldade — só Esqueci/Revisei).
+const TOPIC_KEYS: ReviewRating[] = ['esqueci', 'revisei'];
 
 // Flashcards ganham o lapso ("Errei"): quality 0 no SM-2 — reseta repetições e
 // derruba o ease factor. Alinha com lei/juris, que já tinham o botão.
@@ -169,20 +170,31 @@ export default function RevisarUnificadoPage() {
     advance();
   }
 
-  // Adiar (só tópicos, únicos com data manual — reagenda sem passar pelo SM-2):
+  // Adiar (reagenda sem avaliar — não passa pelo SM-2 nem pelo motor de juris):
   // diferente de pular, o item sai do vencimento de hoje de verdade, então não
   // conta como "restante" na tela final. Otimista como o commit() — e usa a
   // MESMA savingRef: dois presets clicados em sequência rápida (ou o date
   // input disparando onChange duas vezes) senão pulariam 2 itens de uma vez.
+  // Disponível nos 4 tipos: quando o intervalo sugerido pelas notas não serve,
+  // o usuário escolhe a data que quiser.
   async function adiar(dateStr: string) {
-    if (savingRef.current || !current || current.kind !== 'topic') return;
+    if (savingRef.current || !current) return;
     savingRef.current = true;
     const item = current;
     setAdiadas((n) => n + 1);
     advance();
     try {
-      await rescheduleReview(item.id, dateStr);
-      queryClient.invalidateQueries({ queryKey: ['due-reviews-count'] });
+      if (item.kind === 'topic') {
+        await rescheduleReview(item.id, dateStr);
+        queryClient.invalidateQueries({ queryKey: ['due-reviews-count'] });
+      } else if (item.kind === 'flashcard') {
+        await rescheduleCardReview(item.id, dateStr);
+      } else if (item.kind === 'lei') {
+        await rescheduleRevisaoArtigo(item.id, dateStr);
+      } else {
+        await rescheduleJurisRevisao(item.id, dateStr);
+        queryClient.invalidateQueries({ queryKey: ['due-juris-count'] });
+      }
     } catch (e) {
       setAdiadas((n) => Math.max(0, n - 1));
       toast.error(e instanceof Error ? e.message : 'Não foi possível adiar essa revisão.');
@@ -249,7 +261,7 @@ export default function RevisarUnificadoPage() {
       if (!Number.isInteger(n) || n < 1) return;
       if (needsReveal && !revealed) return;
 
-      if (current.kind === 'topic' && n <= 4) {
+      if (current.kind === 'topic' && n <= TOPIC_KEYS.length) {
         void commit(() => submitReview(current.id, TOPIC_KEYS[n - 1]));
       } else if (current.kind === 'flashcard' && n <= 4) {
         const rating = FC_RATINGS[n - 1].key;
@@ -395,18 +407,16 @@ export default function RevisarUnificadoPage() {
           <div style={s.itemHead}>
             <KindBadge kind={current.kind} />
             <div style={s.itemHeadActions}>
-              {current.kind === 'topic' && (
-                <button onClick={() => setAdiarAberto((v) => !v)} style={s.skipBtn} className="touch-target">
-                  Adiar
-                </button>
-              )}
+              <button onClick={() => setAdiarAberto((v) => !v)} style={s.skipBtn} className="touch-target">
+                Adiar
+              </button>
               <button onClick={skip} style={s.skipBtn} className="touch-target">
                 Pular por agora →
               </button>
             </div>
           </div>
 
-          {current.kind === 'topic' && adiarAberto && (
+          {adiarAberto && (
             <div style={s.adiarPop}>
               <p style={s.adiarTitle}>Adiar esta revisão para</p>
               <div style={s.adiarPresets}>
@@ -530,7 +540,9 @@ const s: Record<string, CSSProperties> = {
   progressBar: { height: '100%', background: theme.teal, borderRadius: theme.radiusPill, transition: 'width .3s ease' },
   progressLabel: { fontSize: 13, fontWeight: 600, color: theme.inkFaint, flexShrink: 0, fontVariantNumeric: 'tabular-nums' },
   body: { minWidth: 0 },
-  itemHead: { marginBottom: 10, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 },
+  // wrap: "Adiar" agora aparece nos 4 tipos (antes só tópico) — badges mais
+  // longos (Jurisprudência) + as 2 ações não cabem numa linha só no mobile.
+  itemHead: { marginBottom: 10, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap' },
   itemHeadActions: { display: 'flex', alignItems: 'center', gap: 14, flexShrink: 0 },
   skipBtn: { border: 'none', background: 'transparent', color: theme.inkFaint, fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit', padding: 0, flexShrink: 0 },
   adiarPop: { background: theme.muted, border: `0.5px solid ${theme.line}`, borderRadius: theme.radiusSm, padding: '12px 14px', marginBottom: 12 },

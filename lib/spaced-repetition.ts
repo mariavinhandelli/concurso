@@ -20,8 +20,17 @@ export interface ReviewResult extends BaseScheduleResult, SpacedRepetitionState 
 
 const MIN_EASE_FACTOR = 1.3;
 export const DEFAULT_EASE_FACTOR = 2.5;
-const FIRST_INTERVAL = 1;
-const SECOND_INTERVAL = 6;
+
+// Degraus de graduação das duas primeiras repetições bem-sucedidas, por nota.
+// No SM-2 clássico esses dois passos são fixos (1 e 6 dias) pra qualquer nota
+// >= "dificil" — mas isso faz Difícil/Médio/Fácil caírem no mesmo intervalo
+// na 1ª e 2ª revisão de um tópico, e os botões mostram todos "amanhã" ao
+// mesmo tempo (confuso). Diferenciamos por nota, igual aos learning steps do Anki.
+const GRADUATION_STEPS: Record<Exclude<RecallGrade, 'errou'>, { first: number; second: number }> = {
+  dificil: { first: 1, second: 3 },
+  bom:     { first: 2, second: 6 },
+  facil:   { first: 4, second: 10 },
+};
 
 export const INITIAL_SR_STATE: SpacedRepetitionState = {
   easeFactor: DEFAULT_EASE_FACTOR, intervalDays: 0, repetitions: 0,
@@ -57,11 +66,12 @@ export function calculateNextReview(
 
   if (quality < 3) {
     repetitions = 0;
-    intervalDays = FIRST_INTERVAL;
+    intervalDays = 1;
   } else {
     repetitions += 1;
-    if (repetitions === 1) intervalDays = FIRST_INTERVAL;
-    else if (repetitions === 2) intervalDays = SECOND_INTERVAL;
+    const steps = GRADUATION_STEPS[grade as Exclude<RecallGrade, 'errou'>];
+    if (repetitions === 1) intervalDays = steps.first;
+    else if (repetitions === 2) intervalDays = steps.second;
     else intervalDays = Math.max(1, Math.round(intervalDays * easeFactor * mod));
   }
 

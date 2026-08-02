@@ -1,27 +1,23 @@
 // services/reviews.service.ts
-// Camada de aplicação: orquestra requireUser, repositório e algoritmo SM-2.
-// Sem acesso direto ao Supabase. Sem duplicação de auth.
+// Camada de aplicação: orquestra requireUser, repositório e o método 24h/7/30
+// de tópicos (lib/topic-review.ts). Sem acesso direto ao Supabase. Sem
+// duplicação de auth.
 
 import { requireUser, tryGetUser } from '@/lib/supabase/requireUser';
 import {
-  calculateNextReview, daysOverdue, DEFAULT_EASE_FACTOR,
-  type RecallGrade,
-} from '@/lib/spaced-repetition';
-import { fromDbRow, toDbRow } from '@/lib/spaced-repetition.mapper';
+  calculateNextTopicReview, topicReviewDaysOverdue as daysOverdue,
+  fromTopicDbRow as fromDbRow, toTopicDbRow as toDbRow,
+  type TopicRating,
+} from '@/lib/topic-review';
 import { localDateInDays, toLocalDateString, parseLocalDate } from '@/lib/local-date';
 import { getArchivedSubjectIds } from '@/services/archivedCache';
 import { getUserFeatures, srsModifierFor } from '@/services/userFeatures.service';
 import * as repo from '@/services/reviews.repository';
 
-// 'esqueci' = lapso (quality 0 no SM-2): zera repetições e volta o tópico para
-// amanhã — antes o grade 'errou' existia no algoritmo mas era inalcançável.
-export type ReviewRating = 'esqueci' | 'dificil' | 'intermediario' | 'facil';
-const RATING_TO_GRADE: Record<ReviewRating, RecallGrade> = {
-  esqueci: 'errou',
-  dificil: 'dificil',
-  intermediario: 'bom',
-  facil: 'facil',
-};
+// Método 24h/7/30 (lib/topic-review.ts) — calendário fixo, sem nota de
+// dificuldade (isso é só dos flashcards): 'esqueci' reinicia em 24h; 'revisei'
+// avança pro próximo marco (7 → 30 → platô de 30 dias).
+export type ReviewRating = TopicRating;
 
 export interface ReviewItem {
   id: string;
@@ -31,8 +27,8 @@ export interface ReviewItem {
   subjectColor: string;
   nextReviewDate: string | null;
   overdueDays: number;
-  // Próximos intervalos pré-computados — exibidos nos botões de avaliação (inspiração Anki).
-  nextIntervals: { esqueci: number; dificil: number; intermediario: number; facil: number };
+  // Próximos intervalos pré-computados — exibidos nos 2 botões de avaliação.
+  nextIntervals: { esqueci: number; revisei: number };
 }
 
 // ---------- Queries ----------
@@ -47,7 +43,7 @@ export async function listDueReviews(): Promise<ReviewItem[]> {
 
   return rows.map(t => {
     const subj = Array.isArray(t.subjects) ? t.subjects[0] : t.subjects;
-    const srState = fromDbRow({ ease_factor: t.ease_factor, interval_days: t.interval_days, repetitions: t.repetitions });
+    const srState = fromDbRow({ interval_days: t.interval_days, repetitions: t.repetitions });
     // Ajuste pessoal por matéria — os botões mostram o intervalo que será aplicado de fato.
     const mod = srsModifierFor(features, t.subject_id);
     return {
@@ -59,10 +55,8 @@ export async function listDueReviews(): Promise<ReviewItem[]> {
       nextReviewDate: t.next_review_date,
       overdueDays: daysOverdue(t.next_review_date),
       nextIntervals: {
-        esqueci:      calculateNextReview(srState, RATING_TO_GRADE.esqueci, new Date(), mod).intervalDays,
-        dificil:      calculateNextReview(srState, RATING_TO_GRADE.dificil, new Date(), mod).intervalDays,
-        intermediario: calculateNextReview(srState, RATING_TO_GRADE.intermediario, new Date(), mod).intervalDays,
-        facil:        calculateNextReview(srState, RATING_TO_GRADE.facil, new Date(), mod).intervalDays,
+        esqueci: calculateNextTopicReview(srState, 'esqueci', new Date(), mod).intervalDays,
+        revisei: calculateNextTopicReview(srState, 'revisei', new Date(), mod).intervalDays,
       },
     };
   });
@@ -136,7 +130,6 @@ export async function activateReview(topicId: string): Promise<void> {
     next_review_date: localDateInDays(1),
     interval_days: 1,
     repetitions: 0,
-    ease_factor: 2.5,
   });
 }
 
@@ -155,7 +148,7 @@ export async function submitReview(topicId: string, rating: ReviewRating): Promi
     getUserFeatures(),
   ]);
   const mod = srsModifierFor(features, topic.subject_id);
-  const result = calculateNextReview(fromDbRow(topic), RATING_TO_GRADE[rating], new Date(), mod);
+  const result = calculateNextTopicReview(fromDbRow(topic), rating, new Date(), mod);
   await repo.updateTopicReview(supabase, userId, topicId, toDbRow(result));
 }
 
@@ -189,6 +182,5 @@ export async function scheduleReviewFromError(topicId: string, days: number): Pr
     is_review_active: true,
     interval_days: intervalDays,
     repetitions: 0,
-    ease_factor: DEFAULT_EASE_FACTOR,
   });
 }

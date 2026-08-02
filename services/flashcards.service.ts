@@ -5,7 +5,7 @@
 import { requireUser, tryGetUser } from '@/lib/supabase/requireUser';
 import { calculateNextReview, daysOverdue, type RecallGrade } from '@/lib/spaced-repetition';
 import { fromDbRow, toDbRow } from '@/lib/spaced-repetition.mapper';
-import { localDateInDays, toLocalDateString } from '@/lib/local-date';
+import { localDateInDays, parseLocalDate, toLocalDateString } from '@/lib/local-date';
 import { getArchivedSubjectIds } from '@/services/archivedCache';
 import { getUserFeatures, srsModifierFor, type UserFeatures } from '@/services/userFeatures.service';
 import * as repo from '@/services/flashcards.repository';
@@ -119,6 +119,20 @@ export async function submitCardReview(cardId: string, rating: ReviewRating, fea
   const mod = srsModifierFor(resolvedFeatures, row.subject_id);
   const result = calculateNextReview(fromDbRow(row), RATING_TO_GRADE[rating], new Date(), mod);
   await repo.updateFlashcard(supabase, userId, cardId, { ...toDbRow(result), is_review_active: true });
+}
+
+// Adiar: reagenda sem avaliar (não mexe em ease_factor/repetitions) — o
+// usuário escolhe a data que quiser em vez do intervalo sugerido.
+export async function rescheduleCardReview(cardId: string, dateStr: string): Promise<void> {
+  const { supabase, userId } = await requireUser();
+  const todayMs = parseLocalDate(toLocalDateString()).getTime();
+  const targetMs = parseLocalDate(dateStr).getTime();
+  const intervalDays = Math.max(1, Math.round((targetMs - todayMs) / 86_400_000));
+  await repo.updateFlashcard(supabase, userId, cardId, {
+    next_review_date: dateStr,
+    is_review_active: true,
+    interval_days: intervalDays,
+  });
 }
 
 export async function activateCardReview(cardId: string): Promise<void> {

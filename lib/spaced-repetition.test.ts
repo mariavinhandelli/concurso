@@ -8,13 +8,23 @@ import {
 import { toDbRow } from '@/lib/spaced-repetition.mapper';
 
 describe('spaced repetition', () => {
-  it('agenda a primeira revisão para o próximo dia local', () => {
+  it('agenda a primeira revisão graduando por nota (dificil=1, bom=2, facil=4 dias)', () => {
     const now = new Date(2026, 5, 27, 22, 0, 0);
-    const result = calculateNextReview(INITIAL_SR_STATE, 'bom', now);
 
-    expect(result.intervalDays).toBe(1);
-    expect(result.repetitions).toBe(1);
-    expect(toDbRow(result).next_review_date).toBe('2026-06-28');
+    const dificil = calculateNextReview(INITIAL_SR_STATE, 'dificil', now);
+    expect(dificil.intervalDays).toBe(1);
+    expect(dificil.repetitions).toBe(1);
+    expect(toDbRow(dificil).next_review_date).toBe('2026-06-28');
+
+    const bom = calculateNextReview(INITIAL_SR_STATE, 'bom', now);
+    expect(bom.intervalDays).toBe(2);
+    expect(bom.repetitions).toBe(1);
+    expect(toDbRow(bom).next_review_date).toBe('2026-06-29');
+
+    const facil = calculateNextReview(INITIAL_SR_STATE, 'facil', now);
+    expect(facil.intervalDays).toBe(4);
+    expect(facil.repetitions).toBe(1);
+    expect(toDbRow(facil).next_review_date).toBe('2026-07-01');
   });
 
   it('considera uma revisão vencida durante todo o dia civil', () => {
@@ -51,9 +61,9 @@ describe('spaced repetition', () => {
       expect(com.intervalDays).toBeGreaterThanOrEqual(1);
     });
 
-    it('não mexe nos degraus fixos de 1 e 6 dias nem no reset por erro', () => {
-      expect(calculateNextReview(INITIAL_SR_STATE, 'bom', new Date(), 0.7).intervalDays).toBe(1);
-      expect(calculateNextReview({ easeFactor: 2.5, intervalDays: 1, repetitions: 1 }, 'bom', new Date(), 1.3).intervalDays).toBe(6);
+    it('não mexe nos degraus de graduação (1ª/2ª repetição) nem no reset por erro', () => {
+      expect(calculateNextReview(INITIAL_SR_STATE, 'bom', new Date(), 0.7).intervalDays).toBe(2);
+      expect(calculateNextReview({ easeFactor: 2.5, intervalDays: 2, repetitions: 1 }, 'bom', new Date(), 1.3).intervalDays).toBe(6);
       expect(calculateNextReview(maduro, 'errou', new Date(), 1.3).intervalDays).toBe(1);
     });
 
