@@ -6,6 +6,7 @@
 'use client';
 
 import { createClient } from '@/lib/supabase/client';
+import { getCachedUser } from '@/lib/supabase/authCache';
 import { rpcErrorMessage } from '@/lib/rpc-error';
 
 // 'curadoria' = baralho montado à mão (Anki, etc.); 'lei_seca'/'jurisprudencia'
@@ -35,7 +36,7 @@ interface DeckRow {
 
 export async function listCatalogFlashcardDecks(): Promise<CatalogFlashcardDeck[]> {
   const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getCachedUser();
 
   const [decksRes, minhasRes] = await Promise.all([
     supabase

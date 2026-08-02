@@ -23,6 +23,7 @@ import {
 import type { LeiQuestao } from '@/services/leiQuestoes.service';
 import { useQueryClient } from '@tanstack/react-query';
 import { invalidateReviewCounts } from '@/lib/review-counts';
+import { subscribeSelectionChange } from '@/lib/selectionchange-bus';
 import { useToast } from '@/components/ui/ToastProvider';
 import { theme, zIndex } from '@/lib/theme';
 import { Button } from '@/components/ui/Button';
@@ -103,8 +104,6 @@ export const ArtigoCard = memo(function ArtigoCard({ artigo, interacao, onUpdate
   // quando um trecho cruza dois artigos. A barra é posicionada pelo retângulo
   // da própria seleção — não há coordenadas de mouse em toque.
   useEffect(() => {
-    let timer: ReturnType<typeof setTimeout> | undefined;
-
     function processarSelecao() {
       const root = rootRef.current;
       if (!root) return;
@@ -159,16 +158,10 @@ export const ArtigoCard = memo(function ArtigoCard({ artigo, interacao, onUpdate
       }
     }
 
-    function onSelectionChange() {
-      if (timer) clearTimeout(timer);
-      timer = setTimeout(processarSelecao, 250);
-    }
-
-    document.addEventListener('selectionchange', onSelectionChange);
-    return () => {
-      document.removeEventListener('selectionchange', onSelectionChange);
-      if (timer) clearTimeout(timer);
-    };
+    // Auditoria de performance (02/08) — listener nativo + debounce
+    // compartilhados entre todos os ArtigoCard montados (lib/selectionchange-
+    // bus.ts), em vez de um `addEventListener` + `setTimeout` por card.
+    return subscribeSelectionChange(processarSelecao);
   }, [grifos, toast, touch]);
 
   // Fecha a toolbar de grifo e o popover ao clicar fora deles — sem isso, um
@@ -312,10 +305,11 @@ export const ArtigoCard = memo(function ArtigoCard({ artigo, interacao, onUpdate
     try {
       const subjectId = await subjectIdDaLei();
       await createFlashcard({ front, back, topicId: null, subjectId, sourceErrorId: null, addToReview: true });
-      // O toast promete "já entra na sua fila" — o contador tem que concordar.
+      // createFlashcard agenda o 1º review para amanhã (ver CardForm.tsx) — o
+      // card não aparece na fila HOJE, então o toast não pode prometer isso.
       invalidateReviewCounts(queryClient);
       setFlashOpen(false);
-      toast.success('Flashcard criado — ele já entra na sua fila de revisão.');
+      toast.success('Flashcard criado — primeira revisão amanhã.');
     } catch (e) {
       toast.error(e instanceof Error ? e.message : 'Erro ao criar flashcard.');
     } finally {

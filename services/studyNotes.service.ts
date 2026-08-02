@@ -43,12 +43,17 @@ export async function listStudyNotes(): Promise<StudyNoteMeta[]> {
   const auth = await tryGetUser();
   if (!auth) return [];
 
+  // Auditoria de performance (02/08) — sem `.limit()`, uma conta com anos de
+  // notas puxava a tabela inteira pra uma lista não virtualizada (TudoView).
+  // 500 cobre folgadamente o uso real hoje; a virtualização em si (a correção
+  // completa do DOM pesado) fica como próximo passo, não feita nesta rodada.
   const { data, error } = await auth.supabase
     .from('study_notes')
     .select('id, subject_id, topic_id, title, content_text, kind, is_pinned, created_at, updated_at, topics(name)')
     .eq('user_id', auth.userId)
     .order('is_pinned', { ascending: false })
-    .order('updated_at', { ascending: false });
+    .order('updated_at', { ascending: false })
+    .limit(500);
 
   if (error) throw new Error('Erro ao listar anotações: ' + error.message);
 

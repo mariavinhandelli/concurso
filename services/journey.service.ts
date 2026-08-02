@@ -25,78 +25,51 @@ const EMPTY: JourneyStats = {
   topicsThisWeek: 0,
 };
 
+interface JourneyStatsRow {
+  total_minutes:        number | null;
+  sessions_this_month:  number | null;
+  topics_covered:       number | null;
+  topics_this_week:     number | null;
+  topics_28d:           number | null;
+}
+
 export async function getJourneyStats(): Promise<JourneyStats> {
   const supabase = createClient();
   const user = await getCachedUser();
   if (!user) return EMPTY;
 
-  const now = new Date();
-  const firstOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-  const thirtyDaysAgo = new Date(now.getTime() - 28 * 86_400_000).toISOString();
-  const sevenDaysAgo = new Date(now.getTime() - 7 * 86_400_000).toISOString();
+  const tz = (typeof Intl !== 'undefined' && Intl.DateTimeFormat().resolvedOptions().timeZone) || 'America/Sao_Paulo';
 
-  // 4 queries em paralelo — duas all-time leves (só colunas necessárias) e duas filtradas
-  const [
-    { data: allLogs },
-    { count: sessionsMesCount },
-    { data: recent30Logs },
-    { count: totalTopicsCount },
-  ] = await Promise.all([
-    // All-time: só duration_sec + topic_id — coluna numérica leve mesmo com centenas de linhas
-    supabase
-      .from('study_logs')
-      .select('duration_sec, topic_id')
-      .eq('user_id', user.id),
-
-    // Sessões do mês — apenas contagem, sem dados
-    supabase
-      .from('study_logs')
-      .select('id', { count: 'exact', head: true })
-      .eq('user_id', user.id)
-      .gte('started_at', firstOfMonth),
-
-    // Últimos 30 dias — para calcular pace (tópicos/semana)
-    supabase
-      .from('study_logs')
-      .select('started_at, topic_id')
-      .eq('user_id', user.id)
-      .not('topic_id', 'is', null)
-      .gte('started_at', thirtyDaysAgo),
-
-    // Total de tópicos criados
+  // Auditoria de performance (02/08) — antes buscava study_logs (duration_sec,
+  // topic_id) INTEIRO e sem `.limit()`, duas vezes (all-time + últimos 30
+  // dias), pra derivar somas e distintos de tópico em JS. get_journey_stats
+  // agrega tudo no servidor numa passagem só (migration 20260802222000).
+  const [{ data: statsData, error }, { count: totalTopicsCount }] = await Promise.all([
+    supabase.rpc('get_journey_stats', { p_tz: tz }).maybeSingle(),
     supabase
       .from('topics')
       .select('id', { count: 'exact', head: true })
       .eq('user_id', user.id),
   ]);
+  if (error) throw new Error('Erro ao calcular jornada: ' + error.message);
 
-  // Totais all-time
-  const totalMinutes = Math.round(
-    (allLogs?.reduce((s, l) => s + (l.duration_sec ?? 0), 0) ?? 0) / 60,
-  );
-  const topicsCovered = new Set(
-    allLogs?.filter((l) => l.topic_id).map((l) => l.topic_id as string),
-  ).size;
-
+  const row = (statsData ?? {}) as JourneyStatsRow;
+  const topicsCovered = row.topics_covered ?? 0;
   const totalTopics = totalTopicsCount ?? 0;
   const coveragePct = totalTopics > 0 ? Math.round((topicsCovered / totalTopics) * 100) : 0;
 
-  // Pace: tópicos distintos nos últimos 7 e 28 dias
-  const topicsThisWeek = new Set(
-    recent30Logs?.filter((l) => l.started_at >= sevenDaysAgo).map((l) => l.topic_id as string),
-  ).size;
-  const topicsCovered28d = new Set(recent30Logs?.map((l) => l.topic_id as string)).size;
+  const topicsCovered28d = row.topics_28d ?? 0;
   const avgTopicsPerWeek4w = topicsCovered28d > 0
     ? Math.round((topicsCovered28d / 4) * 10) / 10
     : 0;
 
   return {
-    totalMinutes,
-    sessionsThisMonth: sessionsMesCount ?? 0,
+    totalMinutes: row.total_minutes ?? 0,
+    sessionsThisMonth: row.sessions_this_month ?? 0,
     topicsCovered,
     totalTopics,
     coveragePct,
     avgTopicsPerWeek4w,
-    topicsThisWeek,
+    topicsThisWeek: row.topics_this_week ?? 0,
   };
 }

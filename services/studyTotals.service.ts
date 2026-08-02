@@ -17,6 +17,17 @@ export interface DayTotal {
 const DEFAULT_DAYS = 1100; // cobre a janela de 3 anos do streak (1095)
 let inflight: Promise<DayTotal[]> | null = null;
 
+// Chamar depois de salvar uma sessão (ver lib/home-refresh.ts), ANTES de
+// invalidar as queries que dependem deste RPC. Sem isto: goals-summary,
+// questions-summary e streak invalidam quase juntos, então o refetch de
+// qualquer um deles podia colar numa chamada AINDA em voo desde antes da
+// sessão salvar — e herdar dado de antes dela existir (ex.: "0min" piscando
+// por ~1s até um F5 mostrar o minuto certo). Zerar aqui garante que o
+// próximo `getStudyDayTotals()` dispara uma RPC nova, depois do INSERT.
+export function resetStudyDayTotalsInflight(): void {
+  inflight = null;
+}
+
 export async function getStudyDayTotals(days: number = DEFAULT_DAYS): Promise<DayTotal[]> {
   if (inflight) return inflight;
   inflight = (async () => {

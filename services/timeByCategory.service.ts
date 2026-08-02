@@ -116,30 +116,30 @@ export async function getTimeByCategory(
 
   const { start, end, label, canGoForward } = periodRange(view, offset, range);
 
-  // Sessões do período, com a matéria e a cor.
-  const { data: logs, error } = await supabase
-    .from('study_logs')
-    .select('duration_sec, subject_id, subjects(name, color)')
-    .eq('user_id', user.id)
-    .gte('started_at', start.toISOString())
-    .lte('started_at', end.toISOString());
+  // Auditoria de performance (02/08) — antes buscava study_logs cru (com join
+  // subjects) sem `.limit()`; na visão "total" (desde 2000) uma conta antiga
+  // podia puxar dezenas de milhares de linhas. get_time_by_category já soma
+  // por disciplina no servidor (migration 20260802223000) — o resultado é do
+  // tamanho do nº de disciplinas, não do nº de sessões.
+  const { data: rows, error } = await supabase.rpc('get_time_by_category', {
+    p_start: start.toISOString(),
+    p_end: end.toISOString(),
+  });
 
   if (error) throw new Error('Erro ao agregar tempo: ' + error.message);
 
-  // Soma segundos por disciplina. Sessões SEM matéria (revisões passivas,
-  // simulados de VM) entram numa fatia própria — antes eram descartadas e o
-  // card dizia "nenhum estudo" enquanto o Ritmo, na mesma página, contava a
-  // sessão. A mesma fonte não pode dar duas respostas.
+  // Sessões SEM matéria (revisões passivas, simulados de VM) entram numa
+  // fatia própria — antes eram descartadas e o card dizia "nenhum estudo"
+  // enquanto o Ritmo, na mesma página, contava a sessão. A mesma fonte não
+  // pode dar duas respostas.
   const SEM_MATERIA_ID = '__sem_materia__';
   const porSubject = new Map<string, { name: string; color: string; sec: number }>();
-  for (const log of logs ?? []) {
-    const key = log.subject_id ?? SEM_MATERIA_ID;
-    const subj = Array.isArray(log.subjects) ? log.subjects[0] : log.subjects;
-    const atual = porSubject.get(key) ?? (log.subject_id
-      ? { name: subj?.name ?? 'Sem matéria', color: subj?.color ?? '#C9B8DD', sec: 0 }
-      : { name: 'Revisões e treinos', color: '#94A3B8', sec: 0 }); // cinza neutro (dado dinâmico do gráfico)
-    atual.sec += log.duration_sec ?? 0;
-    porSubject.set(key, atual);
+  type TimeByCategoryRow = { subject_id: string | null; subject_name: string | null; subject_color: string | null; seconds: number | null };
+  for (const row of (rows ?? []) as TimeByCategoryRow[]) {
+    const key = row.subject_id ?? SEM_MATERIA_ID;
+    porSubject.set(key, row.subject_id
+      ? { name: row.subject_name ?? 'Sem matéria', color: row.subject_color ?? '#C9B8DD', sec: row.seconds ?? 0 }
+      : { name: 'Revisões e treinos', color: '#94A3B8', sec: row.seconds ?? 0 }); // cinza neutro (dado dinâmico do gráfico)
   }
 
   const slices: CategorySlice[] = Array.from(porSubject.entries())

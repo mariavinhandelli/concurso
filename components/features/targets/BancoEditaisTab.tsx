@@ -57,9 +57,13 @@ export function BancoEditaisTab({ onImportar, onImportarPdf }: Props) {
   const [expandedRaw, setExpandedRaw] = usePersistedState<string>('editais_grupos_abertos', '', parseExpandedGroups);
   const expanded = useMemo(() => new Set(expandedRaw.split('|').filter(Boolean)), [expandedRaw]);
 
+  // Auditoria de performance (02/08) — catálogo curado por admin, muda por
+  // deploy/migration, não por interação do usuário. staleTime default (60s)
+  // gerava refetch redundante numa tela revisitada várias vezes por sessão.
   const { data: editais, isLoading, isError } = useQuery<CatalogEdital[]>({
     queryKey: ['catalog-editais'],
     queryFn: listCatalogEditais,
+    staleTime: 15 * 60_000,
   });
   const { data: orgaos } = useQuery<OrgaoCatalog[]>({
     queryKey: ['orgaos'],

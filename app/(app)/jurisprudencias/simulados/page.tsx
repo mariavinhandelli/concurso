@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { Check, X, ClipboardList } from 'lucide-react';
 import { listSimuladoSessions, type SimuladoSession } from '@/services/jurisInteracoes.service';
@@ -8,10 +9,14 @@ import { theme } from '@/lib/theme';
 import { Button } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { PageContainer, PageHeader } from '@/components/ui/Page';
-import {
-  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
-  LineChart, Line, CartesianGrid,
-} from 'recharts';
+import { Skeleton } from '@/components/ui/Skeleton';
+
+// Auditoria de performance (02/08) — recharts fora do payload inicial da
+// rota, mesmo padrão de app/(app)/progresso/page.tsx.
+const SimuladoCharts = dynamic(
+  () => import('@/components/features/jurisprudencias/SimuladoCharts').then((m) => ({ default: m.SimuladoCharts })),
+  { ssr: false, loading: () => <Skeleton height={140} borderRadius={12} /> },
+);
 
 function fmtDate(iso: string): string {
   return new Date(iso).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
@@ -94,41 +99,7 @@ function SimuladoAnalytics({ sessions }: { sessions: SimuladoSession[] }) {
         </div>
       )}
 
-      {/* Evolução de score */}
-      <div style={{ background: theme.card, border: `0.5px solid ${theme.line}`, borderRadius: theme.radius, padding: '16px 18px', marginBottom: 12 }}>
-        <p style={{ fontSize: 12, fontWeight: 700, color: theme.inkFaint, textTransform: 'uppercase', letterSpacing: 0.4, margin: '0 0 14px' }}>
-          Evolução de score (últimas {evolucao.length} sessões)
-        </p>
-        <ResponsiveContainer width="100%" height={140}>
-          <LineChart data={evolucao} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke={theme.line} />
-            <XAxis dataKey="label" tick={{ fontSize: 11, fill: theme.inkFaint }} axisLine={false} tickLine={false} />
-            <YAxis domain={[0, 100]} tick={{ fontSize: 11, fill: theme.inkFaint }} axisLine={false} tickLine={false} tickFormatter={(v) => `${v}%`} />
-            <Tooltip formatter={(v) => [`${v}%`, 'Acerto']} contentStyle={{ background: theme.card, border: `0.5px solid ${theme.line}`, borderRadius: theme.radiusXs, fontSize: 12 }} />
-            <Line type="monotone" dataKey="pct" stroke={theme.teal} strokeWidth={2} dot={{ r: 3, fill: theme.teal }} activeDot={{ r: 5 }} />
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
-
-      {/* Acerto por disciplina */}
-      {disciplinas.length > 0 && (
-        <div style={{ background: theme.card, border: `0.5px solid ${theme.line}`, borderRadius: theme.radius, padding: '16px 18px' }}>
-          <p style={{ fontSize: 12, fontWeight: 700, color: theme.inkFaint, textTransform: 'uppercase', letterSpacing: 0.4, margin: '0 0 14px' }}>
-            Acerto por disciplina (todas as sessões)
-          </p>
-          <ResponsiveContainer width="100%" height={Math.max(120, disciplinas.length * 30)}>
-            <BarChart layout="vertical" data={disciplinas} margin={{ top: 0, right: 40, left: 10, bottom: 0 }}>
-              <XAxis type="number" domain={[0, 100]} tick={{ fontSize: 10, fill: theme.inkFaint }} axisLine={false} tickLine={false} tickFormatter={(v) => `${v}%`} />
-              <YAxis type="category" dataKey="name" tick={{ fontSize: 11, fill: theme.ink }} axisLine={false} tickLine={false} width={110} />
-              <Tooltip formatter={(v) => [`${v}%`, 'Acerto']} contentStyle={{ background: theme.card, border: `0.5px solid ${theme.line}`, borderRadius: theme.radiusXs, fontSize: 12 }} />
-              <Bar dataKey="pct" radius={[0, 4, 4, 0]}
-                fill={theme.teal}
-                label={{ position: 'right', formatter: (v: unknown) => `${v}%`, style: { fontSize: 11, fill: theme.inkSoft } }}
-              />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      )}
+      <SimuladoCharts evolucao={evolucao} disciplinas={disciplinas} />
     </div>
   );
 }

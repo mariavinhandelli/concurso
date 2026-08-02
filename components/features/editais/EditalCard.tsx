@@ -5,8 +5,9 @@
 
 import { useState, type CSSProperties } from 'react';
 import Link from 'next/link';
+import { useQueryClient } from '@tanstack/react-query';
 import { Check, Users } from 'lucide-react';
-import { STUDYING_BADGE_MIN, type CatalogEdital } from '@/services/editaisCatalog.service';
+import { STUDYING_BADGE_MIN, getCatalogEditalBySlug, type CatalogEdital } from '@/services/editaisCatalog.service';
 import { formatDateBR } from '@/lib/targets';
 import { theme } from '@/lib/theme';
 
@@ -41,6 +42,18 @@ interface Props {
 
 export function EditalCard({ edital: e, hideOrgao, estudando }: Props) {
   const [hov, setHov] = useState(false);
+  const queryClient = useQueryClient();
+
+  // Auditoria de performance (02/08) — <Link> já faz prefetch da ROTA/JS
+  // (comentário abaixo), mas não da query de dados que a página do edital
+  // dispara (['edital', slug]); mesmo padrão de prefetch já usado em
+  // useSchedulePage.ts. Clicar no card não paga mais o RTT completo.
+  const prefetchEdital = () => {
+    queryClient.prefetchQuery({
+      queryKey: ['edital', e.slug],
+      queryFn: () => getCatalogEditalBySlug(e.slug),
+    });
+  };
   const meta = [
     e.banca,
     e.uf,
@@ -67,11 +80,11 @@ export function EditalCard({ edital: e, hideOrgao, estudando }: Props) {
     // crawlers seguem o href nas páginas públicas e o Next faz prefetch.
     <Link
       href={`/editais/${e.slug}`}
-      onMouseEnter={() => setHov(true)}
+      onMouseEnter={() => { setHov(true); prefetchEdital(); }}
       onMouseLeave={() => setHov(false)}
       // Paridade teclado: o foco recebe o mesmo realce (borda teal + sombra)
       // que o mouse — o anel global de :focus-visible continua por cima.
-      onFocus={() => setHov(true)}
+      onFocus={() => { setHov(true); prefetchEdital(); }}
       onBlur={() => setHov(false)}
       style={{
         ...s.card,

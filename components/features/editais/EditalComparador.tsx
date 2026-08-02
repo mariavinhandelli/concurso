@@ -225,6 +225,10 @@ export function EditalComparador({ editalAtualId, editalAtualSlug, options }: Pr
     queryKey: ['edital-compare', editalAtualId, otherId],
     queryFn: () => compareEditais(editalAtualId, otherId),
     enabled: Boolean(otherId),
+    // Auditoria de performance (02/08) — mesmo padrão de TimePieCard.tsx:
+    // mantém o comparativo anterior na tela enquanto o novo carrega, em vez
+    // de piscar pro skeleton a cada troca de edital selecionado.
+    placeholderData: (prev) => prev,
   });
 
   // Sem opção para comparar (órgão com um cargo só, sem outra edição curada):

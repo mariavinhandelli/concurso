@@ -29,9 +29,13 @@ export function BancoFlashcardsTab() {
   const [activatingId, setActivatingId] = useState<string | null>(null);
   const [previewDeck, setPreviewDeck] = useState<CatalogFlashcardDeck | null>(null);
 
+  // Auditoria de performance (02/08) — catálogo curado por admin; ativação já
+  // invalida explicitamente (linha abaixo), então um staleTime longo aqui não
+  // arrisca dado velho pós-escrita, só corta refetch redundante em revisitas.
   const { data: decks, isLoading, isError } = useQuery<CatalogFlashcardDeck[]>({
     queryKey: ['catalog-flashcard-decks'],
     queryFn: listCatalogFlashcardDecks,
+    staleTime: 15 * 60_000,
   });
 
   async function handleActivate(deck: CatalogFlashcardDeck) {

@@ -2,6 +2,7 @@
 // CRUD de lembretes manuais do calendário (tabela reminders).
 
 import { createClient } from '@/lib/supabase/client';
+import { getCachedUser } from '@/lib/supabase/authCache';
 
 export interface Reminder {
   id: string;
@@ -12,7 +13,7 @@ export interface Reminder {
 // Lista lembretes num intervalo de datas (inclusive).
 export async function listReminders(startDate: string, endDate: string): Promise<Reminder[]> {
   const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getCachedUser();
   if (!user) return [];
 
   const { data, error } = await supabase
@@ -29,7 +30,7 @@ export async function listReminders(startDate: string, endDate: string): Promise
 
 export async function createReminder(title: string, date: string): Promise<void> {
   const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getCachedUser();
   if (!user) throw new Error('Você precisa estar logado.');
 
   const { error } = await supabase.from('reminders').insert({
@@ -42,8 +43,8 @@ export async function createReminder(title: string, date: string): Promise<void>
 
 export async function deleteReminder(id: string): Promise<void> {
   const supabase = createClient();
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
-  if (authError || !user) throw new Error('Você precisa estar logado.');
+  const user = await getCachedUser();
+  if (!user) throw new Error('Você precisa estar logado.');
 
   const { error } = await supabase
     .from('reminders')

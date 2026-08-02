@@ -7,6 +7,7 @@
 // cima, e sua falha/ausência não desliga o lembrete no sino.
 
 import { createClient } from '@/lib/supabase/client';
+import { getCachedUser } from '@/lib/supabase/authCache';
 import { track, EV } from '@/lib/analytics';
 
 const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? '';
@@ -53,7 +54,7 @@ export async function getReminderState(): Promise<ReminderState> {
   }
 
   const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getCachedUser();
   let reminderEnabled = false;
   let hour = DEFAULT_REMINDER_HOUR;
   if (user) {
@@ -89,7 +90,7 @@ async function trySubscribePush(): Promise<void> {
 
     const json = sub.toJSON();
     const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = await getCachedUser();
     if (!user) return;
 
     await supabase.from('push_subscriptions').upsert({
@@ -120,7 +121,7 @@ async function unsubscribePush(): Promise<void> {
 // passa a valer) e só then tenta o bônus de push — nessa ordem, de propósito.
 export async function setReminderEnabled(enabled: boolean, reminderHour: number = DEFAULT_REMINDER_HOUR): Promise<void> {
   const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getCachedUser();
   if (!user) throw new Error('Você precisa estar logado.');
 
   if (!enabled) {
@@ -144,7 +145,7 @@ export async function setReminderEnabled(enabled: boolean, reminderHour: number 
 
 export async function setReminderHour(hour: number): Promise<void> {
   const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getCachedUser();
   if (!user) return;
   // reminderHourManual: a pessoa escolheu a hora de propósito — o cron passa a
   // respeitá-la sempre. Sem o flag, o lembrete segue o horário de pico real de

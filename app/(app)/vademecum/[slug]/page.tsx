@@ -23,6 +23,14 @@ import { theme } from '@/lib/theme';
 
 type Aba = 'texto' | 'mapa' | 'questoes';
 
+// Auditoria de performance (02/08) — mesmo teto já usado na busca por termo,
+// agora também aplicado ao filtro por cor/favoritos (artigosFiltrados):
+// ativar "Favoritos" ou um filtro de cor numa lei muito grifada (CF, CC, CP)
+// montava TODOS os artigos batidos de uma vez, sem limite — cada ArtigoCard
+// tem vários hooks/refs próprios, então isso podia travar o clique por um
+// instante em leis muito grifadas.
+const LIMITE_RESULTADOS = 80;
+
 interface Grupo {
   caminho: string;
   artigos: LeiArtigo[];
@@ -187,8 +195,8 @@ export default function LeiReaderPage() {
 
   const filtroAtivo = filtroCores.size > 0 || filtroLabels.size > 0 || soFavoritos;
   const artigosFiltrados = useMemo(() => {
-    if (!lei || !filtroAtivo) return [];
-    return lei.artigos.filter((a) => {
+    if (!lei || !filtroAtivo) return { artigos: [] as LeiArtigo[], total: 0 };
+    const todos = lei.artigos.filter((a) => {
       const inter = interacoes.get(a.key);
       if (soFavoritos && !inter?.favorito) return false;
       if (filtroCores.size === 0 && filtroLabels.size === 0) return true;
@@ -198,6 +206,7 @@ export default function LeiReaderPage() {
         return false;
       });
     });
+    return { artigos: todos.slice(0, LIMITE_RESULTADOS), total: todos.length };
   }, [lei, filtroAtivo, filtroCores, filtroLabels, soFavoritos, interacoes]);
 
   function toggleCorFiltro(cor: GrifoCor) {
@@ -272,7 +281,6 @@ export default function LeiReaderPage() {
   }, [jumpTo]);
 
   const normalizarTexto = (s: string) => s.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();
-  const LIMITE_RESULTADOS = 80;
   const resultadoTermo = useMemo(() => {
     if (!lei || !termo) return null;
     const alvo = normalizarTexto(termo);
@@ -453,13 +461,14 @@ export default function LeiReaderPage() {
           ) : filtroAtivo ? (
             <>
               <p style={s.filtroResumo}>
-                {artigosFiltrados.length} artigo{artigosFiltrados.length === 1 ? '' : 's'}
+                {artigosFiltrados.total} artigo{artigosFiltrados.total === 1 ? '' : 's'}
                 {soFavoritos && filtroCores.size > 0
                   ? ' favorito(s) com marcações desse tipo'
-                  : soFavoritos ? ' favoritado' + (artigosFiltrados.length === 1 ? '' : 's')
+                  : soFavoritos ? ' favoritado' + (artigosFiltrados.total === 1 ? '' : 's')
                   : ' com marcações desse tipo'}
+                {artigosFiltrados.total > artigosFiltrados.artigos.length && ` (mostrando os ${artigosFiltrados.artigos.length} primeiros)`}
               </p>
-              {artigosFiltrados.length === 0 ? (
+              {artigosFiltrados.artigos.length === 0 ? (
                 <p style={s.filtroVazio}>
                   {soFavoritos && filtroCores.size > 0
                     ? 'Nenhum favorito tem grifo dessa cor.'
@@ -467,7 +476,7 @@ export default function LeiReaderPage() {
                     : 'Nenhum artigo grifado com essa cor ainda.'}
                 </p>
               ) : (
-                artigosFiltrados.map((a) => (
+                artigosFiltrados.artigos.map((a) => (
                   <ArtigoCard
                     key={a.key}
                     artigo={a}

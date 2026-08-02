@@ -7,6 +7,7 @@
 import { tryGetUser } from '@/lib/supabase/requireUser';
 import { getSaudeMap } from '@/services/metrics.service';
 import { getPrimaryTargetExam } from '@/services/primaryTargetCache';
+import { getStudiedTopicIds } from '@/services/studiedTopicsCache';
 
 const LIMIAR_DOMINIO = 70; // saúde >= isso conta como "dominado"
 
@@ -32,7 +33,7 @@ const EMPTY: EditalCoverage = {
 export async function getEditalCoverage(): Promise<EditalCoverage> {
   const auth = await tryGetUser();
   if (!auth) return EMPTY;
-  const { supabase, userId } = auth;
+  const { supabase } = auth;
 
   // Alvo primário (ou o mais antigo, se nenhum marcado como primário).
   // H12 — cache compartilhado com raiox/suggestion (mesma query, 3x por carga).
@@ -53,26 +54,20 @@ export async function getEditalCoverage(): Promise<EditalCoverage> {
   const total = linkedIds.length;
   if (total === 0) return { ...EMPTY, hasTarget: true, targetId: target.id, targetName };
 
-  // Estudados ≥1 vez (interseção com study_logs) + saúde em lote.
-  // A interseção é feita em memória: mandar os ids do edital num `.in()` gerava
-  // uma URL com 300+ UUIDs (editais grandes já existem em produção), perto do
-  // limite de URI do gateway. As sessões do próprio usuário são um conjunto
-  // pequeno e já filtrado por RLS — trazer só a coluna topic_id sai mais barato.
-  const [{ data: studiedRows, error: studiedError }, saudeMap] = await Promise.all([
-    supabase
-      .from('study_logs')
-      .select('topic_id')
-      .eq('user_id', userId)
-      .not('topic_id', 'is', null),
+  // Estudados ≥1 vez (interseção com o conjunto de tópicos estudados) + saúde
+  // em lote. studiedTopicIds vem de get_studied_topic_ids() (RPC, distinct no
+  // servidor, cache compartilhado com raiox.service — mesma dado, uma query só)
+  // em vez de buscar study_logs.topic_id cru sem limite. A interseção com o
+  // edital continua em memória: mandar os ids num `.in()` gerava uma URL com
+  // 300+ UUIDs (editais grandes já existem em produção), perto do limite de
+  // URI do gateway.
+  const [studiedTopicIds, saudeMap] = await Promise.all([
+    getStudiedTopicIds(),
     getSaudeMap(linkedIds),
   ]);
-  if (studiedError) throw new Error('Erro ao buscar tópicos estudados: ' + studiedError.message);
 
-  const linkedSet = new Set(linkedIds);
   const coveredSet = new Set(
-    (studiedRows ?? [])
-      .map((r) => r.topic_id as string)
-      .filter((id) => linkedSet.has(id)),
+    linkedIds.filter((id) => studiedTopicIds.has(id)),
   );
   const covered = coveredSet.size;
   const mastered = linkedIds.filter(

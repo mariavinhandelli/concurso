@@ -12,6 +12,7 @@
 // "Desativar perfil social" não escondia nada de quem já era amigo.
 
 import { createClient } from '@/lib/supabase/client';
+import { getCachedUser } from '@/lib/supabase/authCache';
 import { track, EV } from '@/lib/analytics';
 
 export interface SocialProfile {
@@ -176,7 +177,7 @@ function identidadeDe(user: AuthUser, prof: PerfilRow) {
 // mudava nada do que os amigos viam. Roda junto com o pushMyStats, no load.
 export async function syncMySocialIdentity(): Promise<void> {
   const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getCachedUser();
   if (!user) return;
 
   const { data: sp } = await supabase.from('social_profiles')
@@ -196,7 +197,7 @@ export async function syncMySocialIdentity(): Promise<void> {
 
 export async function getMySocialProfile(): Promise<SocialProfile | null> {
   const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getCachedUser();
   if (!user) return null;
   const { data } = await supabase.from('social_profiles').select('*').eq('user_id', user.id).maybeSingle();
   if (!data) return { userId: user.id, enabled: false, inviteCode: null, displayName: null, avatarUrl: null };
@@ -205,7 +206,7 @@ export async function getMySocialProfile(): Promise<SocialProfile | null> {
 
 export async function enableSocial(): Promise<SocialProfile> {
   const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getCachedUser();
   if (!user) throw new Error('Você precisa estar logado.');
 
   const [{ data: prof }, { data: existing }] = await Promise.all([
@@ -230,7 +231,7 @@ export async function enableSocial(): Promise<SocialProfile> {
 
 export async function disableSocial(): Promise<void> {
   const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getCachedUser();
   if (!user) return;
   const { error } = await supabase.from('social_profiles')
     .update({ enabled: false, updated_at: new Date().toISOString() })
@@ -255,7 +256,7 @@ export async function pushMyStats(): Promise<void> {
 // remédio para um link vazado, que antes valia para sempre (P2-10).
 export async function rotateInviteCode(): Promise<string> {
   const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getCachedUser();
   if (!user) throw new Error('Você precisa estar logado.');
 
   // Colisão é astronômicamente rara, mas a coluna é unique — tenta de novo.
@@ -291,7 +292,7 @@ export async function findProfileByCode(code: string): Promise<{ userId: string;
 
 export async function sendFriendRequest(targetUserId: string): Promise<'sent' | 'accepted'> {
   const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getCachedUser();
   if (!user) throw new Error('Você precisa estar logado.');
   if (user.id === targetUserId) throw new Error('Você não pode adicionar a si mesmo.');
 
@@ -366,7 +367,7 @@ export async function blockUser(userId: string): Promise<void> {
 
 export async function unblockUser(userId: string): Promise<void> {
   const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getCachedUser();
   if (!user) throw new Error('Você precisa estar logado.');
   const { error } = await supabase.from('social_blocks').delete()
     .eq('blocker_id', user.id).eq('blocked_id', userId);
@@ -392,7 +393,7 @@ export const MOTIVOS_DENUNCIA = [
 
 export async function reportUser(userId: string, reason: string, details?: string): Promise<void> {
   const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getCachedUser();
   if (!user) throw new Error('Você precisa estar logado.');
   const { error } = await supabase.from('social_reports').insert({
     reporter_id: user.id,
@@ -438,7 +439,7 @@ export async function getPeerComparison(): Promise<PeerComparison | null> {
 // restringe friendships às linhas em que sou parte.
 export async function getPendingRequestCount(): Promise<number> {
   const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getCachedUser();
   if (!user) return 0;
   const { count, error } = await supabase.from('friendships')
     .select('id', { count: 'exact', head: true })
@@ -450,7 +451,7 @@ export async function getPendingRequestCount(): Promise<number> {
 
 export async function getSocialOverview(): Promise<SocialOverview> {
   const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getCachedUser();
   const empty: SocialProfile = { userId: '', enabled: false, inviteCode: null, displayName: null, avatarUrl: null };
   if (!user) return { profile: empty, ranking: [], inactive: [], incoming: [], outgoing: [] };
 

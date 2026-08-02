@@ -18,7 +18,7 @@ import { JurisSimulado } from '@/components/features/jurisprudencias/JurisSimula
 import { useToast } from '@/components/ui/ToastProvider';
 import { useConfirm } from '@/hooks/useConfirm';
 import { useUI } from '@/components/layout/UIContext';
-import { createClient } from '@/lib/supabase/client';
+import { getCachedUser } from '@/lib/supabase/authCache';
 import { theme } from '@/lib/theme';
 import { Button } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/EmptyState';
@@ -76,7 +76,7 @@ function ListaContent() {
   const [showSimulado, setShowSimulado] = useState(false);
 
   useEffect(() => {
-    createClient().auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null)).catch(() => {});
+    getCachedUser().then((user) => setUserId(user?.id ?? null)).catch(() => {});
   }, []);
 
   useEffect(() => {

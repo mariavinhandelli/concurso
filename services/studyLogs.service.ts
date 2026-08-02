@@ -1,5 +1,6 @@
 // services/studyLogs.service.ts
 import { createClient } from '@/lib/supabase/client';
+import { getCachedUser } from '@/lib/supabase/authCache';
 import type { LogMode, PendingSession } from '@/lib/timer-storage';
 import { activateReview, deactivateReview } from '@/services/reviews.service';
 import { recalcularSaude } from '@/services/metrics.service';
@@ -43,8 +44,8 @@ export async function saveStudyLog(
   validateStudyLogInput(session, feedback);
   const supabase = createClient();
 
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
-  if (authError || !user) {
+  const user = await getCachedUser();
+  if (!user) {
     throw new Error('Você precisa estar logado para salvar uma sessão.');
   }
 
@@ -172,7 +173,7 @@ export async function updateStudyLogDuration(logId: string, durationMinutes: num
     throw new Error('Informe uma duração maior que zero.');
   }
   const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getCachedUser();
   if (!user) throw new Error('Você precisa estar logado.');
 
   const { data: log, error: readErr } = await supabase
@@ -216,7 +217,7 @@ export async function updateStudyLogDuration(logId: string, durationMinutes: num
 
 export async function deleteStudyLog(logId: string): Promise<void> {
   const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getCachedUser();
   if (!user) throw new Error('Você precisa estar logado.');
 
   const { data: log, error: readErr } = await supabase

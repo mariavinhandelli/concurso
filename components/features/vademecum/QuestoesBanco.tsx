@@ -8,7 +8,7 @@
 // simulado, que grava sessões fechadas.
 'use client';
 
-import { useEffect, useMemo, useState, type CSSProperties } from 'react';
+import { memo, useCallback, useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { Check, X, TriangleAlert } from 'lucide-react';
 import type { Lei } from '@/services/leis.service';
 import { artigoNumeroFromKey } from '@/services/leis.service';
@@ -95,7 +95,10 @@ export function QuestoesBanco({ lei, questoes, onNavigate }: Props) {
   const erradasCount = questoes.filter((q) => respostas.get(q.id)?.acertou === false).length;
   const pctAcerto = respondidas > 0 ? Math.round((acertos / respondidas) * 100) : 0;
 
-  function responder(q: LeiQuestao, resposta: boolean) {
+  // Auditoria de performance (02/08) — useCallback pra QuestaoCard (memo()
+  // abaixo) não re-renderizar TODOS os cards a cada resposta: sem isto,
+  // `responder`/`reabrir` eram recriadas a cada render e derrubavam o memo.
+  const responder = useCallback((q: LeiQuestao, resposta: boolean) => {
     const acertou = resposta === q.gabarito;
     setRespostas((prev) => {
       const next = new Map(prev);
@@ -105,11 +108,11 @@ export function QuestoesBanco({ lei, questoes, onNavigate }: Props) {
     setReabertas((prev) => { const next = new Set(prev); next.delete(q.id); return next; });
     upsertRespostaQuestao({ leiSlug: lei.slug, questaoId: q.id, resposta, acertou })
       .catch(() => toast.error('Não consegui salvar a resposta — ela vale só nesta sessão.'));
-  }
+  }, [lei.slug, toast]);
 
-  function reabrir(id: string) {
+  const reabrir = useCallback((id: string) => {
     setReabertas((prev) => new Set(prev).add(id));
-  }
+  }, []);
 
   async function zerar() {
     const ok = await confirm({
@@ -184,19 +187,21 @@ export function QuestoesBanco({ lei, questoes, onNavigate }: Props) {
           resposta={reabertas.has(q.id) ? undefined : respostas.get(q.id)}
           onResponder={responder}
           onReabrir={reabrir}
-          onVerArtigo={() => onNavigate(artigoNumeroFromKey(q.artigoKey))}
+          onNavigate={onNavigate}
         />
       ))}
     </div>
   );
 }
 
-function QuestaoCard({ questao: q, resposta, onResponder, onReabrir, onVerArtigo }: {
+// Auditoria de performance (02/08) — memo() evita reconciliar TODOS os cards
+// da lista a cada resposta; só o card cujo `resposta` mudou re-renderiza.
+const QuestaoCard = memo(function QuestaoCard({ questao: q, resposta, onResponder, onReabrir, onNavigate }: {
   questao: LeiQuestao;
   resposta: LeiQuestaoResposta | undefined;
   onResponder: (q: LeiQuestao, r: boolean) => void;
   onReabrir: (id: string) => void;
-  onVerArtigo: () => void;
+  onNavigate: (numero: string) => void;
 }) {
   const numero = artigoNumeroFromKey(q.artigoKey);
   const respondida = resposta !== undefined;
@@ -207,7 +212,7 @@ function QuestaoCard({ questao: q, resposta, onResponder, onReabrir, onVerArtigo
   return (
     <div style={{ ...s.card, borderColor: borda }}>
       <div style={s.cardHead}>
-        <button onClick={onVerArtigo} style={s.artChip} title="Ver o artigo na aba Texto">Art. {numero} →</button>
+        <button onClick={() => onNavigate(numero)} style={s.artChip} title="Ver o artigo na aba Texto">Art. {numero} →</button>
         {respondida && (
           <span style={{ ...s.resultado, color: resposta.acertou ? theme.okDeep : theme.danger, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
             {resposta.acertou ? <Check size={13} strokeWidth={2.5} /> : <X size={13} strokeWidth={2.5} />}
@@ -237,7 +242,7 @@ function QuestaoCard({ questao: q, resposta, onResponder, onReabrir, onVerArtigo
       )}
     </div>
   );
-}
+});
 
 const s: Record<string, CSSProperties> = {
   vazio: { fontSize: 14, color: theme.inkFaint, textAlign: 'center', padding: '30px 0' },

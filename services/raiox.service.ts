@@ -13,6 +13,7 @@
 import { tryGetUser } from '@/lib/supabase/requireUser';
 import { getSaudeMap, mediaPonderadaRenormalizada } from '@/services/metrics.service';
 import { getPrimaryTargetExam } from '@/services/primaryTargetCache';
+import { getStudiedTopicIds } from '@/services/studiedTopicsCache';
 
 export type NivelProntidao = 'construcao' | 'progresso' | 'quase_la' | 'pronto';
 
@@ -110,26 +111,28 @@ export async function getRaioX(): Promise<RaioX> {
   // com todos os UUIDs, na fronteira do limite de URI do gateway — e uma falha
   // aqui derruba o Raio-X inteiro. Busca-se pelas MATÉRIAS do edital (lista
   // curta) e a interseção com os tópicos vinculados é feita em memória.
+  // studiedTopicIds vem de get_studied_topic_ids() (RPC, distinct no servidor,
+  // cache compartilhado com coverage.service — mesmo dado, uma query só) em
+  // vez de buscar study_logs.topic_id cru sem limite.
   const linkedSet = new Set(linkedIds);
   const [
     { data: topicRowsRaw, error: topicsError },
-    { data: studiedRows, error: studiedError },
+    studiedTopicIds,
     { data: accRows, error: accError },
     saudeMap,
   ] = await Promise.all([
     supabase.from('topics').select('id, subject_id').in('subject_id', subjectIds),
-    supabase.from('study_logs').select('topic_id').eq('user_id', userId).not('topic_id', 'is', null),
+    getStudiedTopicIds(),
     supabase.from('study_logs').select('subject_id, questions_total, questions_correct')
       .eq('user_id', userId).eq('mode', 'questoes').in('subject_id', subjectIds),
     getSaudeMap(linkedIds),
   ]);
   if (topicsError) throw new Error('Erro ao buscar tópicos: ' + topicsError.message);
-  if (studiedError) throw new Error('Erro ao buscar tópicos estudados: ' + studiedError.message);
   if (accError) throw new Error('Erro ao buscar acerto em questões: ' + accError.message);
 
   const topicRows = (topicRowsRaw ?? []).filter((t) => linkedSet.has(t.id as string));
   const coveredSet = new Set(
-    (studiedRows ?? []).map((r) => r.topic_id as string).filter((id) => linkedSet.has(id)),
+    linkedIds.filter((id) => studiedTopicIds.has(id)),
   );
 
   const accBySubject = new Map<string, { total: number; correct: number }>();

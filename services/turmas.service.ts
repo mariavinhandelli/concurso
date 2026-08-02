@@ -5,6 +5,7 @@
 // opt-in mantida: criar/entrar ativa o perfil social conscientemente.
 
 import { createClient } from '@/lib/supabase/client';
+import { getCachedUser } from '@/lib/supabase/authCache';
 import { enableSocial, getMySocialProfile } from '@/services/social.service';
 import { track, EV } from '@/lib/analytics';
 
@@ -109,7 +110,7 @@ export async function listMyTurmas(): Promise<Turma[]> {
 
 export async function getTurmaRanking(turmaId: string): Promise<TurmaMemberRank[]> {
   const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getCachedUser();
   const { data } = await supabase.rpc('get_turma_ranking', { p_turma_id: turmaId });
   return ((data ?? []) as { user_id: string; name: string | null; avatar_url: string | null; streak_current: number; week_minutes: number; coverage_pct: number; days_on_target: number; role: string; enabled: boolean }[])
     .map((r) => ({
@@ -122,7 +123,7 @@ export async function getTurmaRanking(turmaId: string): Promise<TurmaMemberRank[
 
 export async function leaveTurma(turmaId: string): Promise<void> {
   const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getCachedUser();
   if (!user) return;
   const { error } = await supabase.from('turma_members').delete().eq('turma_id', turmaId).eq('user_id', user.id);
   if (error) throw new Error(erroAmigavel(error, 'Não foi possível sair da turma.'));

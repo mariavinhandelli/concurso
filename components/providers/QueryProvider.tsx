@@ -14,6 +14,13 @@ export function QueryProvider({ children }: { children: React.ReactNode }) {
             staleTime: 60_000,
             gcTime: 10 * 60_000,
             retry: 1,
+            // Auditoria de performance (02/08) — refetchOnWindowFocus (default
+            // true no RQ v5) + staleTime de 60s em ~40 queries: qualquer
+            // alt-tab/troca de aba após 60s de inatividade disparava um burst
+            // de refetches em toda tela montada. O app já invalida
+            // explicitamente após mutações (lib/cache-invalidation.ts,
+            // invalidateAfter) — refetch por foco só duplicava tráfego.
+            refetchOnWindowFocus: false,
           },
         },
       }),

@@ -8,7 +8,6 @@ import { getStreak } from '@/services/streak.service';
 import { getEditalCoverage, type EditalCoverage } from '@/services/coverage.service';
 import { getRaioX, type RaioX } from '@/services/raiox.service';
 import { track, EV } from '@/lib/analytics';
-import { toLocalDateString as localDateStr } from '@/lib/local-date';
 
 export type BadgeFamily = 'edital' | 'volume' | 'maestria' | 'tempo' | 'consistencia';
 
@@ -90,10 +89,10 @@ const MAESTRIA_TIERS: {
   { tier: 'ouro',   rotulo: '90% ou mais', minPct: 90, meta: 100 }, // menos volume: manter 90%+ já é a conquista
 ];
 
-// Amostra mínima por sessão para a maestria. Sem isso, 100 sessões de 1 questão
-// certa desbloqueiam Maestria Ouro — o streak já tem piso de 30 min pelo mesmo
-// motivo. 10 é o mesmo limiar que o coach usa para apontar "melhor matéria".
-const MIN_QUESTOES_SESSAO_MAESTRIA = 10;
+// Amostra mínima por sessão para a maestria (10, mesmo limiar que o coach usa
+// para "melhor matéria"). Sem isso, 100 sessões de 1 questão certa
+// desbloqueiam Maestria Ouro. O corte agora vive em get_badge_totals (SQL,
+// migration 20260802220000) — se mudar, atualizar os dois lugares.
 
 function clamp01(n: number): number {
   return n < 0 ? 0 : n > 1 ? 1 : n;
@@ -110,87 +109,53 @@ function etaDaysCalc(remaining: number, avgPerDay: number): number | undefined {
 
 type SupabaseClient = ReturnType<typeof createClient>;
 
-// ─── Query interna consolidada (QW6) ─────────────────────────────────────────
-// Uma única passagem paginada sobre study_logs calcula tanto as estatísticas
-// globais (stats) quanto o ritmo dos últimos 30 dias (rhythm).
-// Elimina a segunda query separada de _getRhythm.
+// ─── Query interna consolidada (QW6, migrada p/ RPC na auditoria de perf 02/08) ──
+// Antes paginava study_logs INTEIRO no cliente (while true + .range de 1000)
+// só para somar volume/tempo/maestria e o ritmo dos últimos 30 dias — dezenas
+// de round-trips sequenciais com histórico grande. get_badge_totals agrega
+// tudo no servidor numa passagem só (mesmo padrão de get_study_day_totals).
 
 interface BadgeData {
   stats: BadgeStats;
   rhythm: RhythmStats;
 }
 
-async function _getBadgeData(
-  supabase: SupabaseClient,
-  userId: string,
-): Promise<BadgeData | null> {
-  const since30 = new Date();
-  since30.setDate(since30.getDate() - 30);
-  const since30Iso = since30.toISOString();
+interface BadgeTotalsRow {
+  total_questions:  number | null;
+  total_correct:    number | null;
+  total_sec:        number | null;
+  questoes_bronze:  number | null;
+  questoes_prata:   number | null;
+  questoes_ouro:    number | null;
+  q30:              number | null;
+  sec30:            number | null;
+  active_days_30:   number | null;
+}
 
-  const PAGE_SIZE = 1000;
-  type LogRow = {
-    questions_total:   number | null;
-    questions_correct: number | null;
-    duration_sec:      number | null;
-    started_at:        string;
-  };
-  const logs: LogRow[] = [];
-  let from = 0;
-  while (true) {
-    const { data, error } = await supabase
-      .from('study_logs')
-      .select('questions_total, questions_correct, duration_sec, started_at')
-      .eq('user_id', userId)
-      .order('id', { ascending: true })
-      .range(from, from + PAGE_SIZE - 1);
-    if (error) throw new Error('Erro ao calcular conquistas: ' + error.message);
-    if (!data || data.length === 0) break;
-    logs.push(...data);
-    if (data.length < PAGE_SIZE) break;
-    from += PAGE_SIZE;
-  }
+async function _getBadgeData(supabase: SupabaseClient): Promise<BadgeData | null> {
+  const tz = (typeof Intl !== 'undefined' && Intl.DateTimeFormat().resolvedOptions().timeZone) || 'America/Sao_Paulo';
+  const { data, error } = await supabase.rpc('get_badge_totals', { p_tz: tz }).maybeSingle();
+  if (error) throw new Error('Erro ao calcular conquistas: ' + error.message);
+  if (!data) return null;
 
-  let totalQuestions = 0, totalCorrect = 0, totalSec = 0;
-  let questoesBronze = 0, questoesPrata = 0, questoesOuro = 0;
-  // Métricas dos últimos 30 dias (rhythm) — calculadas na mesma iteração
-  let totalQ30 = 0, totalSec30 = 0;
-  const activeDays30 = new Set<string>();
-
-  for (const l of logs) {
-    const q = l.questions_total  ?? 0;
-    const c = l.questions_correct ?? 0;
-    totalQuestions += q;
-    totalCorrect   += c;
-    totalSec       += l.duration_sec ?? 0;
-    // Faixas cumulativas (ver MAESTRIA_TIERS): 92% soma nos três tiers.
-    if (q >= MIN_QUESTOES_SESSAO_MAESTRIA) {
-      const pct = (c / q) * 100;
-      if (pct >= 70) questoesBronze += q;
-      if (pct >= 80) questoesPrata  += q;
-      if (pct >= 90) questoesOuro   += q;
-    }
-    if (l.started_at >= since30Iso) {
-      totalQ30   += q;
-      totalSec30 += l.duration_sec ?? 0;
-      activeDays30.add(localDateStr(new Date(l.started_at)));
-    }
-  }
+  const row = data as BadgeTotalsRow;
+  const totalQuestions = row.total_questions ?? 0;
+  const totalCorrect = row.total_correct ?? 0;
 
   return {
     stats: {
       totalQuestions,
       totalCorrect,
       accuracy: totalQuestions > 0 ? (totalCorrect / totalQuestions) * 100 : 0,
-      totalHours: totalSec / 3600,
-      questoesBronze,
-      questoesPrata,
-      questoesOuro,
+      totalHours: (row.total_sec ?? 0) / 3600,
+      questoesBronze: row.questoes_bronze ?? 0,
+      questoesPrata: row.questoes_prata ?? 0,
+      questoesOuro: row.questoes_ouro ?? 0,
     },
     rhythm: {
-      avgQuestionsPerDay: totalQ30 / 30,
-      avgHoursPerDay:     totalSec30 / 3600 / 30,
-      activeDaysLast30:   activeDays30.size,
+      avgQuestionsPerDay: (row.q30 ?? 0) / 30,
+      avgHoursPerDay:     (row.sec30 ?? 0) / 3600 / 30,
+      activeDaysLast30:   row.active_days_30 ?? 0,
     },
   };
 }
@@ -499,7 +464,7 @@ export async function getBadgeState(): Promise<BadgeState | null> {
   // Cobertura e Raio-X alimentam a família "edital" (M2). Falha em qualquer um
   // não derruba as conquistas globais — a família só fica ausente nesta carga.
   const [badgeData, streak, { data: persistedRows }, coverage, raiox] = await Promise.all([
-    _getBadgeData(supabase, user.id),
+    _getBadgeData(supabase),
     getStreak(supabase, user.id),
     supabase.from('user_badges').select('badge_id, unlocked_at').eq('user_id', user.id),
     getEditalCoverage().catch(() => null),

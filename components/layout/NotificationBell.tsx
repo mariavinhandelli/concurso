@@ -17,6 +17,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Bell } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+import { getCachedUser } from '@/lib/supabase/authCache';
 import { getPendingRequestCount } from '@/services/social.service';
 import { theme, zIndex } from '@/lib/theme';
 
@@ -80,8 +81,8 @@ export function NotificationBell() {
   // aberto — no load do mount, é só pra montar o badge.
   async function load(markSeen = false) {
     const supabase = createClient();
-    const { data: auth } = await supabase.auth.getUser();
-    if (!auth.user) return;
+    const user = await getCachedUser();
+    if (!user) return;
 
     // Data de hoje em 'YYYY-MM-DD' local para comparar com a coluna `date`.
     const t = startOfToday();
@@ -91,13 +92,13 @@ export function NotificationBell() {
       supabase
         .from('reminders')
         .select('id, title, date')
-        .eq('user_id', auth.user.id)
+        .eq('user_id', user.id)
         .lte('date', todayStr)
         .order('date', { ascending: false }),
       supabase
         .from('notifications')
         .select('id, title, body, link, created_at')
-        .eq('user_id', auth.user.id)
+        .eq('user_id', user.id)
         .is('read_at', null)
         .order('created_at', { ascending: false })
         .limit(20),
@@ -106,7 +107,7 @@ export function NotificationBell() {
       supabase
         .from('notifications')
         .select('id', { count: 'exact', head: true })
-        .eq('user_id', auth.user.id)
+        .eq('user_id', user.id)
         .is('read_at', null),
       getPendingRequestCount(),
     ]);

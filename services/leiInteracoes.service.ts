@@ -297,12 +297,16 @@ export async function listFavoriteLeiArtigos(): Promise<{ artigoKey: string }[]>
 // M8 fase 2: artigos com anotação — para a busca unificada "Tudo" do Caderno.
 export async function listAnotacoesLei(): Promise<{ artigoKey: string; anotacoes: string; updated_at: string }[]> {
   const { supabase, userId } = await requireUser();
+  // Auditoria de performance (02/08) — mesmo teto de listStudyNotes/
+  // listAnotacoesJuris (500), pelo mesmo motivo: alimenta a busca "Tudo" do
+  // Caderno, hoje sem virtualização.
   const { data, error } = await supabase
     .from('lei_interacoes')
     .select('artigo_key, anotacoes, updated_at')
     .eq('user_id', userId)
     .not('anotacoes', 'is', null)
-    .order('updated_at', { ascending: false });
+    .order('updated_at', { ascending: false })
+    .limit(500);
   if (error) return [];
   return (data ?? [])
     .filter((r) => (r.anotacoes ?? '').trim())

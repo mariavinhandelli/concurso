@@ -6,6 +6,7 @@
 // drift de string — adicionar um evento = adicionar uma constante aqui.
 
 import { createClient } from '@/lib/supabase/client';
+import { getCachedUser } from '@/lib/supabase/authCache';
 
 export const EV = {
   appOpened: 'app_opened',
@@ -57,7 +58,7 @@ export function track(name: EventName, props: Record<string, unknown> = {}): voi
   void (async () => {
     try {
       const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
+      const user = await getCachedUser();
       if (!user) return;
       await supabase.from('events').insert({
         user_id: user.id,

@@ -3,6 +3,7 @@
 // Cada linha diz: "neste alvo, a matéria X pesa W e cai ~N questões".
 
 import { createClient } from '@/lib/supabase/client';
+import { getCachedUser } from '@/lib/supabase/authCache';
 
 export interface Blueprint {
   id: string;
@@ -16,8 +17,8 @@ export interface Blueprint {
 // Lista os pesos já definidos para um alvo (mapa subject_id -> blueprint).
 export async function listBlueprints(targetExamId: string): Promise<Blueprint[]> {
   const supabase = createClient();
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
-  if (authError || !user) throw new Error('Você precisa estar logado.');
+  const user = await getCachedUser();
+  if (!user) throw new Error('Você precisa estar logado.');
 
   const { data, error } = await supabase
     .from('exam_blueprints')
@@ -38,8 +39,8 @@ export async function upsertBlueprint(input: {
   numQuestionsExpected?: number | null;
 }): Promise<void> {
   const supabase = createClient();
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
-  if (authError || !user) throw new Error('Você precisa estar logado.');
+  const user = await getCachedUser();
+  if (!user) throw new Error('Você precisa estar logado.');
 
   const { error } = await supabase
     .from('exam_blueprints')
@@ -57,8 +58,8 @@ export async function upsertBlueprint(input: {
 // Remove o peso de uma disciplina num alvo (volta ao default implícito).
 export async function deleteBlueprint(targetExamId: string, subjectId: string): Promise<void> {
   const supabase = createClient();
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
-  if (authError || !user) throw new Error('Você precisa estar logado.');
+  const user = await getCachedUser();
+  if (!user) throw new Error('Você precisa estar logado.');
 
   const { error } = await supabase
     .from('exam_blueprints')

@@ -10,7 +10,16 @@
 
 import type { QueryClient } from '@tanstack/react-query';
 import { invalidateAfter } from '@/lib/cache-invalidation';
+import { resetStudyDayTotalsInflight } from '@/services/studyTotals.service';
+import { invalidateStudiedTopicsCache } from '@/services/studiedTopicsCache';
 
 export function refreshHomeAfterSession(queryClient: QueryClient): void {
+  // Antes de invalidar: se uma chamada a getStudyDayTotals()/getStudiedTopicIds()
+  // de ANTES desta sessão salvar ainda estava em voo (ou em cache com TTL), o
+  // refetch que a invalidação dispara colaria nela e devolveria dado velho —
+  // mesmo cuidado do studyTotals.service.ts (H11), agora também para o tópico
+  // recém-estudado não aparecer defasado em Cobertura/Raio-X.
+  resetStudyDayTotalsInflight();
+  invalidateStudiedTopicsCache();
   invalidateAfter(queryClient, 'session');
 }

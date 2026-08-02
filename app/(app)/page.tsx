@@ -1,11 +1,13 @@
 'use client';
 
 import { Suspense, useEffect, useRef, useState } from 'react';
+import dynamic from 'next/dynamic';
 import { useSearchParams } from 'next/navigation';
 import { useRouter } from 'next/navigation';
 import { ChevronDown } from 'lucide-react';
 import { theme } from '@/lib/theme';
 import { PageContainer, PageHeader } from '@/components/ui/Page';
+import { Skeleton } from '@/components/ui/Skeleton';
 import { usePersistedState } from '@/hooks/usePersistedState';
 import { useUI } from '@/components/layout/UIContext';
 import { useUser } from '@/components/layout/UserContext';
@@ -15,16 +17,35 @@ import { useCoachDecision } from '@/hooks/useCoach';
 import { useLocalToday } from '@/hooks/useLocalToday';
 import { parseLocalDate } from '@/lib/local-date';
 import { SemanaPanel } from '@/components/features/home/SemanaPanel';
-import { OnboardingGate } from '@/components/features/home/OnboardingWizard';
 import { CoachSlot } from '@/components/features/home/CoachSlot';
 import { PlanoHoje } from '@/components/features/home/PlanoHoje';
 import { TodayBlock } from '@/components/features/home/TodayBlock';
 import { MetaSugeridaHint } from '@/components/features/home/MetaSugeridaHint';
-import { MarcoEditalCelebracao } from '@/components/features/home/MarcoEditalCelebracao';
-import { UltimaNotaCard } from '@/components/features/home/UltimaNotaCard';
-import { JourneyStats } from '@/components/features/home/JourneyStats';
 import { PlanoProntoBanner } from '@/components/features/home/PlanoProntoBanner';
 import { ExamCountdown } from '@/components/features/dashboard/ExamCountdown';
+
+// Auditoria de performance (02/08) — onboarding só aparece p/ conta nova e
+// celebração de marco é rara: sem fallback, tela em branco até o JS carregar
+// é aceitável (quase ninguém vê). UltimaNotaCard e JourneyStats já aparecem
+// por padrão pra quem já abriu o Panorama (preferência persiste) — esses dois
+// levam loading com o formato do próprio skeleton interno deles, senão o
+// card pisca de "nada" pra "skeleton" pra "conteúdo" no primeiro paint.
+const OnboardingGate = dynamic(
+  () => import('@/components/features/home/OnboardingWizard').then((m) => ({ default: m.OnboardingGate })),
+  { ssr: false },
+);
+const MarcoEditalCelebracao = dynamic(
+  () => import('@/components/features/home/MarcoEditalCelebracao').then((m) => ({ default: m.MarcoEditalCelebracao })),
+  { ssr: false },
+);
+const UltimaNotaCard = dynamic(
+  () => import('@/components/features/home/UltimaNotaCard').then((m) => ({ default: m.UltimaNotaCard })),
+  { ssr: false, loading: () => <Skeleton height={52} borderRadius={theme.radius} /> },
+);
+const JourneyStats = dynamic(
+  () => import('@/components/features/home/JourneyStats').then((m) => ({ default: m.JourneyStats })),
+  { ssr: false, loading: () => <Skeleton height={104} borderRadius={theme.radius} /> },
+);
 
 // Componente mínimo isolado no Suspense — usa useSearchParams apenas para
 // o auto-start do timer via ?topicId=, sem bloquear a renderização da Home.

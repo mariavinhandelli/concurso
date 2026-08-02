@@ -5,6 +5,7 @@
 'use client';
 
 import { memo, useCallback, useEffect, useRef, useState, type CSSProperties } from 'react';
+import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { ChevronDown, Star, Trash2, TriangleAlert, Archive, Check, X, Calendar } from 'lucide-react';
@@ -15,8 +16,16 @@ import { type TargetExam, listArchivedTargetExams } from '@/services/targetExams
 import { unarchiveConcurso } from '@/services/concursoArchive.service';
 import { BancoEditaisTab } from '@/components/features/targets/BancoEditaisTab';
 import { ImportarEditalModal } from '@/components/features/targets/ImportarEditalModal';
-import { ImportarEditalPdfModal } from '@/components/features/targets/ImportarEditalPdfModal';
 import { ArquivarConcursoModal } from '@/components/features/targets/ArquivarConcursoModal';
+
+// Auditoria de performance (02/08) — modal só usado sob clique ("importar
+// PDF"); mesmo tratamento já dado ao GeneratorModal em app/(app)/schedule/
+// page.tsx. Tira services/editalPdfExtraction.service.ts do bundle inicial
+// desta rota.
+const ImportarEditalPdfModal = dynamic(
+  () => import('@/components/features/targets/ImportarEditalPdfModal').then((m) => m.ImportarEditalPdfModal),
+  { ssr: false },
+);
 import { useToast } from '@/components/ui/ToastProvider';
 import { theme } from '@/lib/theme';
 import { Overlay } from '@/components/ui/Overlay';

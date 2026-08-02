@@ -14,67 +14,53 @@ export interface AccuracyPoint {
   color: string;       // cor pastel da matéria
 }
 
+interface AccuracyRow {
+  subject_id: string;
+  subject_name: string;
+  subject_color: string;
+  total: number | null;
+  correct: number | null;
+}
+
 // undefined = todo o histórico (comportamento original). Um número filtra aos
 // últimos N dias — para responder "como ANDO agora", não só "como fui sempre".
+//
+// Auditoria de performance (02/08) — antes buscava study_logs cru sem
+// `.limit()` + query separada de subjects, e somava por disciplina em JS.
+// get_accuracy_by_subject (migration 20260802224000) já agrupa no servidor;
+// o corte de data continua calculado aqui (mesma meia-noite local de sempre)
+// e só é passado pronto pra RPC, sem mudar o comportamento.
 export async function getAccuracyBySubject(dias?: number): Promise<AccuracyPoint[]> {
   const supabase = createClient();
   const user = await getCachedUser();
   if (!user) return [];
 
-  // Busca logs de questões com matéria e ao menos 1 questão registrada.
-  let query = supabase
-    .from('study_logs')
-    .select('subject_id, questions_total, questions_correct')
-    .eq('user_id', user.id)
-    .eq('mode', 'questoes')
-    .not('subject_id', 'is', null)
-    .gt('questions_total', 0);
+  let since: string | null = null;
   if (dias) {
     const corte = new Date();
     corte.setDate(corte.getDate() - dias);
     corte.setHours(0, 0, 0, 0);
-    query = query.gte('started_at', corte.toISOString());
+    since = corte.toISOString();
   }
-  const { data: logs, error } = await query;
 
+  const { data: rows, error } = await supabase.rpc('get_accuracy_by_subject', { p_since: since });
   if (error) throw new Error('Erro ao buscar acertos: ' + error.message);
-  if (!logs || logs.length === 0) return [];
+  if (!rows || rows.length === 0) return [];
 
-  // Busca nomes e cores das matérias envolvidas.
-  const { data: subjects, error: subjectsError } = await supabase
-    .from('subjects')
-    .select('id, name, color')
-    .eq('user_id', user.id);
-  if (subjectsError) throw new Error('Erro ao buscar matérias: ' + subjectsError.message);
-
-  const subjectMap = new Map(
-    (subjects ?? []).map((s) => [s.id, { name: s.name, color: s.color }]),
-  );
-
-  // Soma total e acertos por matéria.
-  const agg = new Map<string, { total: number; correct: number }>();
-  for (const log of logs) {
-    const key = log.subject_id as string;
-    const cur = agg.get(key) ?? { total: 0, correct: 0 };
-    cur.total += log.questions_total ?? 0;
-    cur.correct += log.questions_correct ?? 0;
-    agg.set(key, cur);
-  }
-
-  // Monta os pontos, ordenados por % de acerto (pior primeiro = prioridade).
-  const points: AccuracyPoint[] = [];
-  for (const [subjectId, { total, correct }] of agg.entries()) {
-    const info = subjectMap.get(subjectId);
-    points.push({
-      subjectId,
-      subjectName: info?.name ?? 'Matéria',
+  const points: AccuracyPoint[] = (rows as AccuracyRow[]).map((r) => {
+    const total = r.total ?? 0;
+    const correct = r.correct ?? 0;
+    return {
+      subjectId: r.subject_id,
+      subjectName: r.subject_name,
       total,
       correct,
       pct: total === 0 ? 0 : Math.round((correct / total) * 100),
-      color: info?.color ?? '#C9B8DD',
-    });
-  }
+      color: r.subject_color,
+    };
+  });
 
+  // Ordenados por % de acerto (pior primeiro = prioridade).
   points.sort((a, b) => a.pct - b.pct);
   return points;
 }

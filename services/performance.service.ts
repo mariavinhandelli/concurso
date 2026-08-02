@@ -121,42 +121,25 @@ export async function getConstanciaResumo(dias = 30): Promise<ConstanciaResumo |
 }
 
 // Energia × desempenho: acerto médio por nível de energia (1..5).
+//
+// Auditoria de performance (02/08) — antes buscava study_logs cru sem
+// `.limit()` e agrupava por energy_level em JS. get_energia_desempenho
+// (migration 20260802224000) já agrupa no servidor (resultado tem no máximo
+// 5 linhas, um por nível).
 export async function getEnergiaDesempenho(): Promise<EnergiaPonto[]> {
   const supabase = createClient();
   const user = await getCachedUser();
   if (!user) return [];
 
-  const { data: logs, error } = await supabase
-    .from('study_logs')
-    .select('energy_level, questions_total, questions_correct')
-    .eq('user_id', user.id)
-    .not('energy_level', 'is', null);
+  const { data: rows, error } = await supabase.rpc('get_energia_desempenho');
   if (error) throw new Error('Erro ao analisar energia e desempenho: ' + error.message);
 
-  // Acumula questões por nível de energia (só sessões com questões).
-  const acc: Record<number, { total: number; correct: number; sessoes: number }> = {};
-  for (const l of logs ?? []) {
-    const e = l.energy_level as number;
-    const q = l.questions_total ?? 0;
-    const c = l.questions_correct ?? 0;
-    if (q <= 0) continue; // sem questões não há acerto a medir
-    if (!acc[e]) acc[e] = { total: 0, correct: 0, sessoes: 0 };
-    acc[e].total += q;
-    acc[e].correct += c;
-    acc[e].sessoes += 1;
-  }
-
-  // Monta os pontos dos níveis 1..5 que têm dados.
-  const pontos: EnergiaPonto[] = [];
-  for (let nivel = 1; nivel <= 5; nivel++) {
-    const a = acc[nivel];
-    if (!a || a.total === 0) continue;
-    pontos.push({
-      energia: nivel,
-      acertoMedio: Math.round((a.correct / a.total) * 100),
-      sessoes: a.sessoes,
-    });
-  }
-
-  return pontos;
+  type EnergiaRow = { energia: number; total: number | null; correct: number | null; sessoes: number | null };
+  return ((rows ?? []) as EnergiaRow[])
+    .filter((r) => (r.total ?? 0) > 0)
+    .map((r) => ({
+      energia: r.energia,
+      acertoMedio: Math.round(((r.correct ?? 0) / (r.total ?? 1)) * 100),
+      sessoes: r.sessoes ?? 0,
+    }));
 }

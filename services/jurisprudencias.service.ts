@@ -4,6 +4,7 @@
 // jurisInteracoes.service.ts, isoladas por usuário no Supabase.
 
 import { createClient } from '@/lib/supabase/client';
+import { getCachedUser } from '@/lib/supabase/authCache';
 import { jurisprudencias as ALL } from '@/data/jurisprudencias';
 import { normalizeDisciplina } from '@/lib/juris-disciplinas';
 
@@ -198,16 +199,45 @@ function applyFilters(items: Jurisprudencia[], filters: JurisFilters): Jurisprud
   return result;
 }
 
+// Auditoria de performance (02/08) — listJurisprudencias/listDistinct/
+// countByDisciplina/etc chamam fetchUserCreated cada uma, e a tela de lista
+// refaz essa MESMA busca de rede a cada troca de filtro (o filtro em si é
+// aplicado em memória sobre o array combinado — só a busca era redundante).
+// Cache curto (dedup de chamadas concorrentes + TTL de 10s, mesmo padrão de
+// primaryTargetCache.ts) elimina o refetch em rajada sem arriscar dado velho:
+// create/update/delete abaixo invalidam na hora.
+let _userCreatedCache: Promise<Jurisprudencia[]> | null = null;
+let _userCreatedExpiry = 0;
+let _userCreatedUserId: string | null = null;
+
+function invalidateUserCreatedCache(): void {
+  _userCreatedCache = null;
+  _userCreatedExpiry = 0;
+}
+
 async function fetchUserCreated(supabase: ReturnType<typeof createClient>, userId: string): Promise<Jurisprudencia[]> {
-  const staticIds = new Set((ALL as Jurisprudencia[]).map((j) => j.id));
-  const { data } = await supabase
-    .from('jurisprudencias')
-    .select('*')
-    .is('deleted_at', null)
-    .eq('created_by', userId)
-    .order('created_at', { ascending: false })
-    .limit(500);
-  return ((data ?? []) as Jurisprudencia[]).filter((item) => !staticIds.has(item.id));
+  const now = Date.now();
+  if (_userCreatedUserId !== userId) invalidateUserCreatedCache();
+  _userCreatedUserId = userId;
+  if (_userCreatedCache && now < _userCreatedExpiry) return _userCreatedCache;
+
+  _userCreatedExpiry = now + 10_000;
+  const fetchPromise = (async () => {
+    const staticIds = new Set((ALL as Jurisprudencia[]).map((j) => j.id));
+    const { data } = await supabase
+      .from('jurisprudencias')
+      .select('*')
+      .is('deleted_at', null)
+      .eq('created_by', userId)
+      .order('created_at', { ascending: false })
+      .limit(500);
+    return ((data ?? []) as Jurisprudencia[]).filter((item) => !staticIds.has(item.id));
+  })();
+  _userCreatedCache = fetchPromise;
+  fetchPromise.catch(() => {
+    if (_userCreatedCache === fetchPromise) _userCreatedCache = null;
+  });
+  return fetchPromise;
 }
 
 export const JURIS_PAGE_LIMIT = 5000;
@@ -222,7 +252,7 @@ function sortRelevancia(a: Jurisprudencia, b: Jurisprudencia): number {
 
 export async function listJurisprudencias(filters: JurisFilters = {}): Promise<Jurisprudencia[]> {
   const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getCachedUser();
   if (!user) throw new Error('Você precisa estar logado.');
   const userItems = await fetchUserCreated(supabase, user.id);
   const merged = [...userItems, ...(ALL as Jurisprudencia[])];
@@ -240,7 +270,7 @@ export async function listJurisprudencias(filters: JurisFilters = {}): Promise<J
 
 export async function listUltimasAdicionadas(limit = 5): Promise<Jurisprudencia[]> {
   const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getCachedUser();
   if (!user) return [];
   const userItems = await fetchUserCreated(supabase, user.id);
   return [...userItems, ...(ALL as Jurisprudencia[])]
@@ -250,7 +280,7 @@ export async function listUltimasAdicionadas(limit = 5): Promise<Jurisprudencia[
 
 export async function listMaisCobradas(limit = 5): Promise<Jurisprudencia[]> {
   const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getCachedUser();
   if (!user) return [];
   const userItems = await fetchUserCreated(supabase, user.id);
   return [...userItems, ...(ALL as Jurisprudencia[])]
@@ -266,7 +296,7 @@ export async function getJurisprudencia(id: string): Promise<Jurisprudencia | nu
   const staticItem = (ALL as Jurisprudencia[]).find((j) => j.id === id);
   if (staticItem) return staticItem;
   const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getCachedUser();
   if (!user) return null;
   // Julgados criados são privados do criador — mesmo escopo da lista
   // (a RLS também garante isso; aqui é defesa em profundidade).
@@ -276,8 +306,8 @@ export async function getJurisprudencia(id: string): Promise<Jurisprudencia | nu
 
 export async function createJurisprudencia(input: JurisprudenciaInput): Promise<Jurisprudencia> {
   const supabase = createClient();
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
-  if (authError || !user) throw new Error('Você precisa estar logado.');
+  const user = await getCachedUser();
+  if (!user) throw new Error('Você precisa estar logado.');
 
   const { data, error } = await supabase
     .from('jurisprudencias')
@@ -286,13 +316,14 @@ export async function createJurisprudencia(input: JurisprudenciaInput): Promise<
     .single();
 
   if (error) throw new Error('Erro ao criar jurisprudência: ' + error.message);
+  invalidateUserCreatedCache();
   return data as Jurisprudencia;
 }
 
 export async function updateJurisprudencia(id: string, input: Partial<JurisprudenciaInput>): Promise<Jurisprudencia> {
   const supabase = createClient();
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
-  if (authError || !user) throw new Error('Você precisa estar logado.');
+  const user = await getCachedUser();
+  if (!user) throw new Error('Você precisa estar logado.');
 
   const { data, error } = await supabase
     .from('jurisprudencias')
@@ -303,13 +334,14 @@ export async function updateJurisprudencia(id: string, input: Partial<Jurisprude
     .single();
 
   if (error) throw new Error('Erro ao atualizar jurisprudência: ' + error.message);
+  invalidateUserCreatedCache();
   return data as Jurisprudencia;
 }
 
 export async function deleteJurisprudencia(id: string): Promise<void> {
   const supabase = createClient();
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
-  if (authError || !user) throw new Error('Você precisa estar logado.');
+  const user = await getCachedUser();
+  if (!user) throw new Error('Você precisa estar logado.');
 
   const { error } = await supabase
     .from('jurisprudencias')
@@ -319,11 +351,12 @@ export async function deleteJurisprudencia(id: string): Promise<void> {
     .is('deleted_at', null);
 
   if (error) throw new Error('Erro ao apagar jurisprudência: ' + error.message);
+  invalidateUserCreatedCache();
 }
 
 export async function listDistinct(field: 'tribunal' | 'disciplina' | 'materia'): Promise<string[]> {
   const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getCachedUser();
   if (!user) return [];
   const userItems = await fetchUserCreated(supabase, user.id);
   const merged = [...userItems, ...(ALL as Jurisprudencia[])];
@@ -343,7 +376,7 @@ function disciplinasNormalizadas(j: Jurisprudencia): string[] {
 
 export async function countByDisciplina(): Promise<Record<string, number>> {
   const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getCachedUser();
   if (!user) return {};
   const userItems = await fetchUserCreated(supabase, user.id);
   const counts: Record<string, number> = {};

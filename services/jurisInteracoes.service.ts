@@ -4,6 +4,7 @@
 // Tudo isolado por usuário via RLS (auth.uid() = user_id) + filtro explícito.
 
 import { createClient } from '@/lib/supabase/client';
+import { getCachedUser } from '@/lib/supabase/authCache';
 import {
   calculateNextJurisReview, fromJurisDbRow, toJurisDbRow, isJurisDue, jurisDaysOverdue,
   type JurisRating,
@@ -47,8 +48,8 @@ const EMPTY_INTERACAO_FIELDS = {
 // Busca a interação do usuário com uma jurisprudência (ou null se nunca interagiu).
 export async function getInteracao(jurisId: string): Promise<JurisInteracao | null> {
   const supabase = createClient();
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
-  if (authError || !user) throw new Error('Você precisa estar logado.');
+  const user = await getCachedUser();
+  if (!user) throw new Error('Você precisa estar logado.');
 
   const { data, error } = await supabase
     .from('juris_interacoes')
@@ -63,8 +64,8 @@ export async function getInteracao(jurisId: string): Promise<JurisInteracao | nu
 
 async function upsertInteracao(jurisId: string, patch: Record<string, unknown>): Promise<JurisInteracao> {
   const supabase = createClient();
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
-  if (authError || !user) throw new Error('Você precisa estar logado.');
+  const user = await getCachedUser();
+  if (!user) throw new Error('Você precisa estar logado.');
 
   const { data, error } = await supabase
     .from('juris_interacoes')
@@ -135,7 +136,7 @@ export async function submitRevisao(
 
 export async function listFavoritas(): Promise<JurisComInteracao[]> {
   const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getCachedUser();
   if (!user) return [];
 
   const { data, error } = await supabase
@@ -152,15 +153,19 @@ export async function listFavoritas(): Promise<JurisComInteracao[]> {
 // M8 fase 2: julgados com anotação pessoal — para a busca unificada "Tudo".
 export async function listAnotacoesJuris(): Promise<JurisComInteracao[]> {
   const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getCachedUser();
   if (!user) return [];
 
+  // Auditoria de performance (02/08) — mesmo teto de listStudyNotes/
+  // listAnotacoesLei (500): alimenta a busca "Tudo" do Caderno, hoje sem
+  // virtualização.
   const { data, error } = await supabase
     .from('juris_interacoes')
     .select('*')
     .eq('user_id', user.id)
     .not('anotacoes', 'is', null)
-    .order('updated_at', { ascending: false });
+    .order('updated_at', { ascending: false })
+    .limit(500);
 
   if (error) throw new Error('Erro ao listar anotações: ' + error.message);
   return hydrateInteracoes((data ?? []).filter((r) => (r.anotacoes ?? '').trim()) as JurisInteracao[]);
@@ -168,7 +173,7 @@ export async function listAnotacoesJuris(): Promise<JurisComInteracao[]> {
 
 export async function listRevisoesHoje(): Promise<JurisComInteracao[]> {
   const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getCachedUser();
   if (!user) return [];
 
   const hoje = toLocalDateString(); // YYYY-MM-DD no fuso local
@@ -191,7 +196,7 @@ export async function listRevisoesHoje(): Promise<JurisComInteracao[]> {
 export async function listFavoritosByIds(ids: string[]): Promise<Record<string, boolean>> {
   if (ids.length === 0) return {};
   const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getCachedUser();
   if (!user) return {};
 
   const { data } = await supabase
@@ -214,7 +219,7 @@ export async function listInteracoesSummaryByIds(
 ): Promise<Record<string, { favorito: boolean; overdueDays: number }>> {
   if (ids.length === 0) return {};
   const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getCachedUser();
   if (!user) return {};
 
   const chunks: string[][] = [];
@@ -258,7 +263,7 @@ export interface SimuladoInsights {
 
 export async function getSimuladoInsights(): Promise<SimuladoInsights> {
   const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getCachedUser();
   if (!user) return { ultimoScore: null, ultimaData: null, disciplinaMaisFraga: null, taxaDisciplinaMaisFraga: null, totalSessoesRecentes: 0 };
 
   const { data, error } = await supabase
@@ -304,7 +309,7 @@ export async function getSimuladoInsights(): Promise<SimuladoInsights> {
 
 export async function listSimuladoSessions(): Promise<SimuladoSession[]> {
   const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getCachedUser();
   if (!user) return [];
 
   const { data, error } = await supabase
@@ -370,7 +375,7 @@ export async function saveSimuladoSession(input: {
   respostas: SimuladoResposta[];
 }): Promise<void> {
   const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getCachedUser();
   if (!user) throw new Error('Você precisa estar logado para salvar o resultado.');
 
   const { error } = await supabase.from('juris_simulado_sessions').insert({

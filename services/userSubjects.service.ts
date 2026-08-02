@@ -3,6 +3,7 @@
 // Separado de catalog.service.ts, que é read-only sobre dados globais.
 
 import { createClient } from '@/lib/supabase/client';
+import { getCachedUser } from '@/lib/supabase/authCache';
 import { invalidateArchivedCache } from '@/services/archivedCache';
 import { invalidateCatalogCache } from '@/services/catalog.service';
 import { buildFolderIdSet } from '@/lib/topic-tree';
@@ -28,8 +29,8 @@ export interface MySubject {
 // Pais (tópicos que têm filhos) são pastas e não contam no progresso.
 export async function getMySubjects(status: SubjectStatus = 'ativo'): Promise<MySubject[]> {
   const supabase = createClient();
-  const { data: { user }, error: authErr } = await supabase.auth.getUser();
-  if (authErr || !user) throw new Error('Você precisa estar logado.');
+  const user = await getCachedUser();
+  if (!user) throw new Error('Você precisa estar logado.');
 
   const { data: subjects, error: subErr } = await supabase
     .from('subjects')
@@ -83,8 +84,8 @@ export async function getMySubjects(status: SubjectStatus = 'ativo'): Promise<My
 // Arquiva uma matéria do usuário (não apaga — preserva histórico).
 export async function archiveSubject(subjectId: string): Promise<void> {
   const supabase = createClient();
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
-  if (authError || !user) throw new Error('Você precisa estar logado.');
+  const user = await getCachedUser();
+  if (!user) throw new Error('Você precisa estar logado.');
 
   const { error } = await supabase
     .from('subjects')
@@ -99,8 +100,8 @@ export async function archiveSubject(subjectId: string): Promise<void> {
 // Desarquiva (volta para ativo).
 export async function unarchiveSubject(subjectId: string): Promise<void> {
   const supabase = createClient();
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
-  if (authError || !user) throw new Error('Você precisa estar logado.');
+  const user = await getCachedUser();
+  if (!user) throw new Error('Você precisa estar logado.');
 
   const { error } = await supabase
     .from('subjects')

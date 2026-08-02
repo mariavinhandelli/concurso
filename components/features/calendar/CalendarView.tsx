@@ -104,6 +104,17 @@ export function CalendarView() {
     }));
     return [...(events as ViewEvent[]), ...blockEvents];
   }, [events, blocks]);
+  // Auditoria de performance (02/08) — eventsForDay fazia allEvents.filter()
+  // DENTRO do .map de até 42 células do mês (O(42×N) por render). Agrupar uma
+  // vez por data (O(N)) e cada célula só faz Map.get.
+  const eventsByDay = useMemo(() => {
+    const map = new Map<string, ViewEvent[]>();
+    for (const e of allEvents) {
+      const list = map.get(e.date);
+      if (list) list.push(e); else map.set(e.date, [e]);
+    }
+    return map;
+  }, [allEvents]);
   const reload = () => queryClient.invalidateQueries({ queryKey: ['calendar-events'] });
 
   function navigate(dir: -1 | 1) {
@@ -115,7 +126,7 @@ export function CalendarView() {
 
   function eventsForDay(d: Date | string): ViewEvent[] {
     const iso = typeof d === 'string' ? d : toLocalISO(d);
-    return allEvents.filter((e) => e.date === iso);
+    return eventsByDay.get(iso) ?? [];
   }
 
   function abrirDia(dateISO: string) {

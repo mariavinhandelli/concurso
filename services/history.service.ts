@@ -3,6 +3,7 @@
 // de uma janela de dias, cruza com os nomes das matérias e agrupa por dia.
 
 import { createClient } from '@/lib/supabase/client';
+import { getCachedUser } from '@/lib/supabase/authCache';
 import { toLocalDateString as localDateStr } from '@/lib/local-date';
 
 export interface HistorySession {
@@ -29,19 +30,26 @@ export interface HistoryDay {
 // Busca o histórico dos últimos `dias` dias, agrupado por dia (mais recente primeiro).
 export async function getHistory(dias: number): Promise<HistoryDay[]> {
   const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getCachedUser();
   if (!user) return [];
 
   const since = new Date();
   since.setDate(since.getDate() - dias);
   since.setHours(0, 0, 0, 0);
 
+  // Auditoria de performance (02/08) — `dias` já limita a janela (máx. 365,
+  // "Tudo" no seletor), mas sem `.limit()` uma usuária muito intensa dentro
+  // dessa janela ainda podia se aproximar do teto do PostgREST. Nota: o teto
+  // de 365 dias em si (sessões mais antigas somem do "Tudo") e a falta de
+  // virtualização da lista NÃO foram resolvidos nesta rodada — precisam de
+  // paginação cursor-based, mudança maior de UI.
   const { data: logs, error } = await supabase
     .from('study_logs')
     .select('id, subject_id, mode, started_at, duration_sec, questions_total, questions_correct, energy_level, qualitative_feedback, insight')
     .eq('user_id', user.id)
     .gte('started_at', since.toISOString())
-    .order('started_at', { ascending: false });
+    .order('started_at', { ascending: false })
+    .limit(5000);
 
   if (error) throw new Error('Erro ao carregar histórico: ' + error.message);
 

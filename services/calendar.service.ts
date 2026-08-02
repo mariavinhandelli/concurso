@@ -3,6 +3,7 @@
 // e lembretes manuais. Lembretes carregam id (são apagáveis); o resto é derivado.
 
 import { createClient } from '@/lib/supabase/client';
+import { getCachedUser } from '@/lib/supabase/authCache';
 import { listReminders } from '@/services/reminders.service';
 
 export interface CalendarEvent {
@@ -25,7 +26,7 @@ function examColor(key: string): string {
 
 export async function listEvents(startDate: string, endDate: string): Promise<CalendarEvent[]> {
   const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getCachedUser();
   if (!user) return [];
 
   const events: CalendarEvent[] = [];
