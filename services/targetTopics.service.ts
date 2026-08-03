@@ -17,31 +17,46 @@ export async function listLinkedTopicIds(targetExamId: string): Promise<Set<stri
 }
 
 // Em quais editais os tópicos aparecem — alimenta os chips "presente nos
-// editais" na página da matéria (integração Targets → Subjects).
+// editais" E o agrupamento "fora dos seus editais" na página da matéria.
 export interface EditalPresence {
   targetId: string;
   label: string;
   count: number;
 }
 
-export async function listEditalPresence(topicIds: string[]): Promise<EditalPresence[]> {
-  if (topicIds.length === 0) return [];
+export interface SubjectEditalLinks {
+  presence: EditalPresence[];
+  // Tópicos desta matéria vinculados a ALGUM concurso ativo — o complemento é
+  // o que a UI agrupa como "fora dos seus editais".
+  linkedTopicIds: string[];
+}
+
+export async function getSubjectEditalLinks(topicIds: string[]): Promise<SubjectEditalLinks> {
+  if (topicIds.length === 0) return { presence: [], linkedTopicIds: [] };
   const { supabase } = await requireUser();
+  // !inner + filtro de archived_at: concurso arquivado não conta como "cai na
+  // sua prova" — sem isso o chip (e o agrupamento) ressuscitava alvo morto.
   const { data, error } = await supabase
     .from('topic_target_exams')
-    .select('target_exam_id, target_exams(orgao, cargo, ano_alvo)')
-    .in('topic_id', topicIds);
+    .select('topic_id, target_exam_id, target_exams!inner(orgao, cargo, ano_alvo, archived_at)')
+    .in('topic_id', topicIds)
+    .is('target_exams.archived_at', null);
   if (error) throw new Error('Erro ao buscar editais do tópico: ' + error.message);
 
   const byTarget = new Map<string, EditalPresence>();
+  const linked = new Set<string>();
   for (const row of data ?? []) {
+    linked.add(row.topic_id);
     const existing = byTarget.get(row.target_exam_id);
     if (existing) { existing.count += 1; continue; }
     const t = Array.isArray(row.target_exams) ? row.target_exams[0] : row.target_exams;
     const label = [t?.orgao, t?.cargo, t?.ano_alvo].filter(Boolean).join(' · ') || 'Concurso';
     byTarget.set(row.target_exam_id, { targetId: row.target_exam_id, label, count: 1 });
   }
-  return [...byTarget.values()].sort((a, b) => b.count - a.count);
+  return {
+    presence: [...byTarget.values()].sort((a, b) => b.count - a.count),
+    linkedTopicIds: [...linked],
+  };
 }
 
 // Contagem de tópicos vinculados por alvo — alimenta a listagem de concursos.

@@ -4,7 +4,9 @@ import dynamic from 'next/dynamic';
 import { useWindowVirtualizer } from '@tanstack/react-virtual';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { X, Search, FilePlus } from 'lucide-react';
+import { X, Search, FilePlus, ChevronDown, Trash2 } from 'lucide-react';
+import { useQueryClient } from '@tanstack/react-query';
+import { invalidateAfter } from '@/lib/cache-invalidation';
 import { useConfirm } from '@/hooks/useConfirm';
 import { useUI } from '@/components/layout/UIContext';
 import { useTopics } from '@/hooks/useTopics';
@@ -20,7 +22,7 @@ import { Input } from '@/components/ui/Input';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { PageContainer } from '@/components/ui/Page';
 import { BackLink } from '@/components/ui/BackLink';
-import { listEditalPresence, type EditalPresence } from '@/services/targetTopics.service';
+import { getSubjectEditalLinks, linkTopicsBulk, type EditalPresence } from '@/services/targetTopics.service';
 
 const BulkImportModal = dynamic(
   () => import('@/components/features/topics/BulkImportModal').then((m) => ({ default: m.BulkImportModal })),
@@ -71,15 +73,24 @@ export function TopicsClient({ subjectId, initialSubject }: Props) {
 
   const [notasTopic, setNotasTopic] = useState<Topic | null>(null);
 
-  // Integração Targets → Subjects: em quais editais esta matéria aparece.
+  // Integração Targets → Subjects: em quais editais esta matéria aparece e
+  // QUAIS tópicos estão vinculados a algum concurso ativo — alimenta os chips
+  // e o agrupamento "fora dos seus editais".
   // Busca única após o load (ref evita refetch a cada toggle de tópico).
+  const queryClient = useQueryClient();
   const [presence, setPresence] = useState<EditalPresence[]>([]);
+  const [linkedIds, setLinkedIds] = useState<Set<string>>(new Set());
   const presenceFetched = useRef(false);
+  const refreshEditalLinks = useCallback(async () => {
+    const res = await getSubjectEditalLinks(topics.map((t) => t.id));
+    setPresence(res.presence);
+    setLinkedIds(new Set(res.linkedTopicIds));
+  }, [topics]);
   useEffect(() => {
     if (loading || presenceFetched.current || topics.length === 0) return;
     presenceFetched.current = true;
-    listEditalPresence(topics.map((t) => t.id)).then(setPresence).catch(() => {});
-  }, [loading, topics]);
+    refreshEditalLinks().catch(() => {});
+  }, [loading, topics, refreshEditalLinks]);
 
   // Barra de progresso: inicia em 0 e anima para o valor real após loading.
   const pct = totalLeaf === 0 ? 0 : Math.round((doneLeaf / totalLeaf) * 100);
@@ -100,6 +111,74 @@ export function TopicsClient({ subjectId, initialSubject }: Props) {
       return (childrenOf.get(p.id) ?? []).some((k) => k.name.toLowerCase().includes(q));
     });
   }, [parents, childrenOf, filter]);
+
+  // ── Agrupamento "fora dos seus editais" ──
+  // Só quando a matéria participa de algum concurso ativo E não há busca em
+  // curso (com filtro ativo a lista volta a mostrar tudo — senão a busca
+  // "esconderia" tópicos que estão no grupo de baixo).
+  const agrupar = presence.length > 0 && filter.trim() === '';
+
+  interface ForaItem {
+    topic: Topic;
+    parentName?: string;   // filho de pasta mista: mostra o contexto
+    leafIds: string[];     // o que o "Ativar" vincula (só folhas, regra do sistema)
+    isFolder: boolean;
+    kidsCount: number;
+  }
+
+  const { mainParents, kidsVisiveis, foraItems, foraLeafCount } = useMemo(() => {
+    if (!agrupar) {
+      return { mainParents: filteredParents, kidsVisiveis: null as Map<string, Topic[]> | null, foraItems: [] as ForaItem[], foraLeafCount: 0 };
+    }
+    const dentro: Topic[] = [];
+    const fora: ForaItem[] = [];
+    const kidsMap = new Map<string, Topic[]>();
+    for (const p of filteredParents) {
+      const kids = childrenOf.get(p.id) ?? [];
+      // Pasta é julgada pelos FILHOS: vínculo legado no registro-pai (alvos
+      // antigos vinculavam pastas) não pode fazer a pasta ficar "dentro" com
+      // zero filhos visíveis — ela renderizaria como folha.
+      const linkedDeep = kids.length > 0 ? kids.some((k) => linkedIds.has(k.id)) : linkedIds.has(p.id);
+      if (!linkedDeep) {
+        fora.push({
+          topic: p,
+          leafIds: kids.length > 0 ? kids.map((k) => k.id) : [p.id],
+          isFolder: kids.length > 0,
+          kidsCount: kids.length,
+        });
+        continue;
+      }
+      dentro.push(p);
+      kidsMap.set(p.id, kids.filter((k) => linkedIds.has(k.id)));
+      // Filhos de pasta mista que não caem descem para o grupo, com contexto.
+      for (const k of kids) {
+        if (!linkedIds.has(k.id)) {
+          fora.push({ topic: k, parentName: p.name, leafIds: [k.id], isFolder: false, kidsCount: 0 });
+        }
+      }
+    }
+    const leafCount = fora.reduce((acc, f) => acc + (f.isFolder ? f.kidsCount : 1), 0);
+    return { mainParents: dentro, kidsVisiveis: kidsMap, foraItems: fora, foraLeafCount: leafCount };
+  }, [agrupar, filteredParents, childrenOf, linkedIds]);
+
+  const [mostrarFora, setMostrarFora] = useState(false);
+  const [ativandoId, setAtivandoId] = useState<string | null>(null);
+  const [foraError, setForaError] = useState<string | null>(null);
+  const handleAtivar = useCallback(async (item: ForaItem) => {
+    if (ativandoId) return;
+    setAtivandoId(item.topic.id);
+    setForaError(null);
+    try {
+      // Vincula às provas ativas em que esta matéria participa (os chips acima).
+      for (const t of presence) await linkTopicsBulk(item.leafIds, t.targetId);
+      invalidateAfter(queryClient, 'edital');
+      await refreshEditalLinks();
+    } catch {
+      setForaError('Não foi possível ativar agora — tente de novo em instantes.');
+    } finally {
+      setAtivandoId(null);
+    }
+  }, [ativandoId, presence, queryClient, refreshEditalLinks]);
 
   // Estado de collapse persistido por matéria
   const [collapsed, setCollapsed] = useState<Set<string>>(() => {
@@ -148,7 +227,7 @@ export function TopicsClient({ subjectId, initialSubject }: Props) {
   }, [loading, filteredParents.length === 0]);
 
   const rowVirtualizer = useWindowVirtualizer({
-    count: loading ? 0 : filteredParents.length,
+    count: loading ? 0 : mainParents.length,
     estimateSize: () => 68,
     overscan: 5,
     scrollMargin,
@@ -331,8 +410,8 @@ export function TopicsClient({ subjectId, initialSubject }: Props) {
         ) : (
           <div ref={listRef} style={{ height: `${rowVirtualizer.getTotalSize()}px`, position: 'relative' }}>
             {rowVirtualizer.getVirtualItems().map((virtualRow) => {
-              const p = filteredParents[virtualRow.index];
-              const kids = childrenOf.get(p.id) ?? [];
+              const p = mainParents[virtualRow.index];
+              const kids = (kidsVisiveis ? kidsVisiveis.get(p.id) : null) ?? childrenOf.get(p.id) ?? [];
               return (
                 <div
                   key={virtualRow.key}
@@ -397,6 +476,73 @@ export function TopicsClient({ subjectId, initialSubject }: Props) {
             })}
           </div>
         )}
+
+        {/* ── Fora dos seus editais ──
+            O acervo recebe a matéria INTEIRA do catálogo (ela serve a vários
+            concursos), mas só os tópicos vinculados caem nas suas provas. O
+            resto fica agrupado aqui embaixo, fechado — visível sob demanda,
+            ativável se o aluno quiser estudar mesmo assim. */}
+        {!loading && agrupar && foraItems.length > 0 && (
+          <div style={styles.foraCard}>
+            <button
+              onClick={() => setMostrarFora((v) => !v)}
+              style={styles.foraHeader}
+              aria-expanded={mostrarFora}
+            >
+              <span style={styles.foraTitle}>Fora dos seus editais</span>
+              <span style={styles.foraBadge}>{foraLeafCount} tópico{foraLeafCount === 1 ? '' : 's'}</span>
+              <ChevronDown
+                size={15}
+                strokeWidth={2}
+                style={{ marginLeft: 'auto', flexShrink: 0, transform: mostrarFora ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s ease' }}
+              />
+            </button>
+            {mostrarFora && (
+              <>
+                <p style={styles.foraHint}>
+                  Estes tópicos existem no catálogo da matéria, mas não caem em nenhuma das suas provas
+                  ativas — não entram no progresso do edital nem no plano. Ative um tópico se quiser
+                  estudá-lo mesmo assim.
+                </p>
+                {foraError && <p style={styles.error}>{foraError}</p>}
+                <div style={styles.foraList}>
+                  {foraItems.map((item) => (
+                    <div key={item.topic.id} style={styles.foraRow}>
+                      <div style={styles.foraInfo}>
+                        <span style={styles.foraName}>{item.topic.name}</span>
+                        {item.parentName && <span style={styles.foraContext}>em {item.parentName}</span>}
+                        {item.isFolder && (
+                          <span style={styles.foraContext}>
+                            pasta · {item.kidsCount} subtópico{item.kidsCount === 1 ? '' : 's'}
+                          </span>
+                        )}
+                      </div>
+                      <div style={styles.foraActions}>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleAtivar(item)}
+                          disabled={ativandoId != null}
+                          title="Vincular às suas provas ativas — passa a contar no progresso do edital"
+                        >
+                          {ativandoId === item.topic.id ? 'Ativando…' : 'Ativar'}
+                        </Button>
+                        <button
+                          onClick={() => (item.isFolder ? handleDeleteFolder(item.topic.id) : handleDeleteLeaf(item.topic.id))}
+                          style={styles.foraDelete}
+                          aria-label={`Apagar ${item.topic.name}`}
+                          title="Apagar do acervo"
+                        >
+                          <Trash2 size={14} strokeWidth={2} />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        )}
       </PageContainer>
 
       {notasTopic && (
@@ -437,4 +583,17 @@ const styles: Record<string, React.CSSProperties> = {
 
   error: { color: theme.danger, fontSize: 13, marginBottom: 12 },
   muted: { color: theme.inkFaint, fontSize: 14, marginTop: 8 },
+
+  foraCard: { marginTop: 16, border: `0.5px solid ${theme.line}`, borderRadius: theme.radiusSm, background: theme.card, overflow: 'hidden' },
+  foraHeader: { display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '12px 14px', border: 'none', background: 'transparent', cursor: 'pointer', fontFamily: 'inherit', color: theme.inkSoft, textAlign: 'left' },
+  foraTitle: { fontSize: 13, fontWeight: 600 },
+  foraBadge: { fontSize: 11, fontWeight: 700, color: theme.inkFaint, background: theme.muted, borderRadius: theme.radiusPill, padding: '2px 8px', flexShrink: 0 },
+  foraHint: { fontSize: 12, color: theme.inkFaint, lineHeight: 1.55, margin: 0, padding: '0 14px 10px' },
+  foraList: { display: 'flex', flexDirection: 'column' },
+  foraRow: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, padding: '9px 14px', borderTop: `0.5px solid ${theme.line}`, opacity: 0.75 },
+  foraInfo: { display: 'flex', flexDirection: 'column', gap: 1, minWidth: 0 },
+  foraName: { fontSize: 13, fontWeight: 500, color: theme.inkSoft, overflowWrap: 'anywhere' },
+  foraContext: { fontSize: 11, color: theme.inkFaint },
+  foraActions: { display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 },
+  foraDelete: { border: 'none', background: 'transparent', color: theme.inkFaint, cursor: 'pointer', padding: 6, borderRadius: 6, display: 'grid', placeItems: 'center' },
 };

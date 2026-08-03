@@ -230,6 +230,32 @@ export async function getCatalogEditalSubjects(catalogEditalId: string): Promise
   });
 }
 
+// Programa oficial (verbatim do Anexo II) por matéria — quando existe, a UI
+// mostra o texto que fundamenta a curadoria em vez de pedir fé no selo
+// "tópicos conferidos". Chaveado por NOME da matéria (o painel de disciplinas
+// só tem nomes em mãos).
+export interface EditalPrograma {
+  texto: string;
+  fonteUrl: string | null;
+  conferidoEm: string | null;
+}
+
+export async function getEditalProgramas(catalogEditalId: string): Promise<Record<string, EditalPrograma>> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from('edital_programas')
+    .select('texto, fonte_url, conferido_em, subjects_catalog(name)')
+    .eq('edital_catalog_id', catalogEditalId);
+  if (error) throw new Error('Erro ao carregar o programa oficial: ' + error.message);
+  const map: Record<string, EditalPrograma> = {};
+  for (const row of data ?? []) {
+    const sc = Array.isArray(row.subjects_catalog) ? row.subjects_catalog[0] : row.subjects_catalog;
+    if (!sc?.name) continue;
+    map[sc.name] = { texto: row.texto, fonteUrl: row.fonte_url, conferidoEm: row.conferido_em };
+  }
+  return map;
+}
+
 // Notícias, retificações e resultados de um edital — linha do tempo do hub.
 export type EditalUpdateTipo = 'noticia' | 'retificacao' | 'aviso' | 'resultado';
 

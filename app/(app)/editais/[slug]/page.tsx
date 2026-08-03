@@ -13,10 +13,10 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Bell, BellRing, Check, Download, ExternalLink, FileDown } from 'lucide-react';
 import {
   activateCatalogEdital, followEdital, getCatalogEditalBySlug, getCatalogEditalSubjects,
-  getEditalPdfMirror, isFollowingEdital, listCatalogEditais, listConcursoStats,
-  listEditalUpdates, listPastPapers, unfollowEdital,
+  getEditalPdfMirror, getEditalProgramas, isFollowingEdital, listCatalogEditais,
+  listConcursoStats, listEditalUpdates, listPastPapers, unfollowEdital,
   type CatalogEdital, type CatalogEditalDetail, type CatalogEditalSubject,
-  type ConcursoStat, type EditalPdfMirror, type EditalUpdate, type PastPaper,
+  type ConcursoStat, type EditalPdfMirror, type EditalPrograma, type EditalUpdate, type PastPaper,
 } from '@/services/editaisCatalog.service';
 import { getTargetTopicProgress } from '@/services/targetTopics.service';
 import { tryGetUser } from '@/lib/supabase/requireUser';
@@ -69,6 +69,15 @@ export default function EditalDetailPage() {
     queryFn: () => getCatalogEditalSubjects(editalId!),
     enabled: Boolean(editalId),
   });
+  // Programa oficial verbatim por matéria (só existe onde a curadoria conferiu
+  // contra o Anexo II — hoje, PM-GO). Falha aqui não derruba a seção de
+  // disciplinas: sem dados, os expansores simplesmente não aparecem.
+  const { data: programas } = useQuery<Record<string, EditalPrograma>>({
+    queryKey: ['catalog-edital-programas', editalId],
+    queryFn: () => getEditalProgramas(editalId!),
+    enabled: !!editalId,
+  });
+
   const { data: updates } = useQuery<EditalUpdate[]>({
     queryKey: ['catalog-edital-updates', editalId],
     queryFn: () => listEditalUpdates(editalId!),
@@ -566,6 +575,21 @@ export default function EditalDetailPage() {
                       )}
                       <span style={s.subjectSub}>{sub.topicCount} tópico{sub.topicCount === 1 ? '' : 's'}</span>
                     </div>
+                    {/* Programa oficial verbatim (Anexo II) — a prova concreta
+                        do selo "tópicos conferidos". <details> nativo: sem
+                        estado, teclado e leitor de tela de graça. */}
+                    {programas?.[sub.name] && (
+                      <details style={s.programaDetails}>
+                        <summary style={s.programaSummary}>Ver programa oficial desta matéria</summary>
+                        <p style={s.programaTexto}>{programas[sub.name].texto}</p>
+                        {programas[sub.name].fonteUrl && (
+                          <a href={programas[sub.name].fonteUrl!} target="_blank" rel="noopener noreferrer" style={s.programaFonte}>
+                            Fonte oficial (PDF)
+                            <ExternalLink size={11} strokeWidth={2} style={{ verticalAlign: -1, marginLeft: 4 }} />
+                          </a>
+                        )}
+                      </details>
+                    )}
                   </div>
                 );
               })}
@@ -725,6 +749,10 @@ const s: Record<string, CSSProperties> = {
   // ~15% (edital com 10+ matérias), a barra parecia "travada perto do zero".
   sharePct: { fontSize: 12, fontWeight: 700, color: theme.teal, fontVariantNumeric: 'tabular-nums', flexShrink: 0, minWidth: 30, textAlign: 'right' },
   subjectSub: { fontSize: 12, color: theme.inkFaint, fontVariantNumeric: 'tabular-nums', flexShrink: 0 },
+  programaDetails: { marginTop: 8, borderTop: `0.5px solid ${theme.line}`, paddingTop: 8 },
+  programaSummary: { fontSize: 12, fontWeight: 600, color: theme.teal, cursor: 'pointer' },
+  programaTexto: { fontSize: 12, color: theme.inkSoft, lineHeight: 1.65, margin: '8px 0 0', overflowWrap: 'break-word' },
+  programaFonte: { display: 'inline-block', fontSize: 11, fontWeight: 600, color: theme.teal, textDecoration: 'none', marginTop: 6 },
   weightDots: { display: 'inline-flex', gap: 3, alignItems: 'center' },
   weightDot: { width: 6, height: 6, borderRadius: '50%', display: 'inline-block' },
   questionBadge: { fontSize: 12, fontWeight: 700, color: theme.teal, background: theme.tealBg, borderRadius: theme.radiusXs, padding: '4px 10px', whiteSpace: 'nowrap' },
