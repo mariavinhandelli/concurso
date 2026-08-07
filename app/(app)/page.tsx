@@ -21,6 +21,7 @@ import { SemanaPanel } from '@/components/features/home/SemanaPanel';
 import { CoachSlot } from '@/components/features/home/CoachSlot';
 import { PlanoHoje } from '@/components/features/home/PlanoHoje';
 import { TodayBlock } from '@/components/features/home/TodayBlock';
+import { TimePieCard } from '@/components/features/home/TimePieCard';
 import { MetaSugeridaHint } from '@/components/features/home/MetaSugeridaHint';
 import { PlanoProntoBanner } from '@/components/features/home/PlanoProntoBanner';
 import { ExamCountdown } from '@/components/features/dashboard/ExamCountdown';
@@ -204,9 +205,16 @@ function HomeContent() {
           </div>
           <SemanaPanel />
 
-          {/* ── ZONA 3 · Panorama — enxuto (M1): Cobertura, Raio-X e TimePie
-              moraram para /progresso; a Home guarda o atalho de retomada
-              (última nota) e os 4 chips com o link "ver progresso". ── */}
+          {/* TimePie voltou pra Home (pedido recorrente de concurseiras reais,
+              recurso padrão em apps como Aprovado/Estudei): sempre visível,
+              fora do "Panorama" recolhido — ver também em /progresso. */}
+          <div style={{ marginTop: 16 }}>
+            <TimePieCard />
+          </div>
+
+          {/* ── ZONA 3 · Panorama — enxuto (M1): Cobertura e Raio-X moraram
+              para /progresso; a Home guarda o atalho de retomada (última
+              nota) e os 4 chips com o link "ver progresso". ── */}
           <div style={{ marginTop: 28 }}>
             <ZoneHeader
               label="Panorama"
