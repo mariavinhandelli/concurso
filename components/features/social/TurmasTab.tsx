@@ -12,7 +12,7 @@ import {
   type Turma, type TurmaMemberRank,
 } from '@/services/turmas.service';
 import { reportUser } from '@/services/social.service';
-import { RankRow, QuietRow } from './SocialUI';
+import { RankRow, QuietRow, disambiguateNames } from './SocialUI';
 import { ReportDialog } from './ReportDialog';
 import { theme } from '@/lib/theme';
 import { Skeleton } from '@/components/ui/Skeleton';
@@ -86,30 +86,34 @@ export function TurmasTab() {
 
   const ativos = (ranking ?? []).filter((m) => m.enabled);
   const inativos = (ranking ?? []).filter((m) => !m.enabled);
+  const nomeExibicao = disambiguateNames(ranking ?? []);
 
   // Ações sobre um membro. Denunciar vale para qualquer um (P1-5) — numa turma
   // você convive com gente que não é sua amiga e que você não escolheu.
   // Remover é só do dono, e agora pede confirmação em vez do "X" de um clique.
-  function menuMembro(m: TurmaMemberRank) {
+  // `nome` já vem desambiguado por disambiguateNames (colisão é mais provável
+  // aqui que em Amigos: turma é gente que você não escolheu, não só quem você
+  // adicionou de propósito).
+  function menuMembro(m: TurmaMemberRank, nome: string) {
     if (m.isMe) return undefined;
     const podeRemover = !!selected?.isOwner;
     return (
       <Menu
         trigger={({ onClick }) => (
-          <IconButton size="sm" aria-label={`Ações para ${m.name}`} onClick={onClick} disabled={busy}>
+          <IconButton size="sm" aria-label={`Ações para ${nome}`} onClick={onClick} disabled={busy}>
             <MoreHorizontal size={16} strokeWidth={2} />
           </IconButton>
         )}
       >
         {podeRemover && (
           <MenuItem onClick={() => setConfirmacao({
-            titulo: `Remover ${m.name} da turma?`,
+            titulo: `Remover ${nome} da turma?`,
             descricao: 'A pessoa perde acesso ao ranking do grupo. Ela pode entrar de novo se ainda tiver o código — gere um código novo se não for isso que você quer.',
             rotulo: 'Remover',
             acao: () => removeMember(selected!.id, m.userId),
           })}>Remover da turma</MenuItem>
         )}
-        <MenuItem onClick={() => setDenunciando({ userId: m.userId, nome: m.name })}>Denunciar</MenuItem>
+        <MenuItem onClick={() => setDenunciando({ userId: m.userId, nome })}>Denunciar</MenuItem>
       </Menu>
     );
   }
@@ -167,36 +171,42 @@ export function TurmasTab() {
             diária — não é uma corrida de horas.
           </p>
           <div style={s.rankList}>
-            {ativos.map((m, i) => (
-              <RankRow
-                key={m.userId}
-                position={i}
-                name={m.name}
-                avatarUrl={m.avatarUrl}
-                isMe={m.isMe}
-                streak={m.streak}
-                weekMinutes={m.weekMinutes}
-                daysOnTarget={m.daysOnTarget}
-                badge={m.role === 'owner' ? 'dono' : undefined}
-                actions={menuMembro(m)}
-              />
-            ))}
+            {ativos.map((m, i) => {
+              const nome = nomeExibicao.get(m.userId) ?? m.name;
+              return (
+                <RankRow
+                  key={m.userId}
+                  position={i}
+                  name={nome}
+                  avatarUrl={m.avatarUrl}
+                  isMe={m.isMe}
+                  streak={m.streak}
+                  weekMinutes={m.weekMinutes}
+                  daysOnTarget={m.daysOnTarget}
+                  badge={m.role === 'owner' ? 'dono' : undefined}
+                  actions={menuMembro(m, nome)}
+                />
+              );
+            })}
           </div>
 
           {/* Membros com o perfil social desativado: seguem na turma, mas sem
               números. Fora do pódio — 0 min aqui seria uma comparação falsa. */}
           {inativos.length > 0 && (
             <div style={s.quietBlock}>
-              {inativos.map((m) => (
-                <QuietRow
-                  key={m.userId}
-                  name={m.name}
-                  avatarUrl={m.avatarUrl}
-                  isMe={m.isMe}
-                  nota="perfil social desativado"
-                  actions={menuMembro(m)}
-                />
-              ))}
+              {inativos.map((m) => {
+                const nome = nomeExibicao.get(m.userId) ?? m.name;
+                return (
+                  <QuietRow
+                    key={m.userId}
+                    name={nome}
+                    avatarUrl={m.avatarUrl}
+                    isMe={m.isMe}
+                    nota="perfil social desativado"
+                    actions={menuMembro(m, nome)}
+                  />
+                );
+              })}
             </div>
           )}
         </section>

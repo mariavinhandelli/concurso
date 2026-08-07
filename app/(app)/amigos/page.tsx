@@ -19,7 +19,7 @@ import {
   rotateInviteCode, deleteMySocialData, getPeerComparison,
   type SocialOverview, type PendingRequest, type BlockedUser, type PeerComparison,
 } from '@/services/social.service';
-import { Avatar, RankRow, QuietRow } from '@/components/features/social/SocialUI';
+import { Avatar, RankRow, QuietRow, disambiguateNames } from '@/components/features/social/SocialUI';
 import { ReportDialog } from '@/components/features/social/ReportDialog';
 import { TurmasTab } from '@/components/features/social/TurmasTab';
 import { theme } from '@/lib/theme';
@@ -204,6 +204,9 @@ function AmigosContent() {
   // derruba a página inteira no error boundary.
   const inativos = data?.inactive ?? [];
   const listaBloqueados = bloqueados ?? [];
+  // Ranking + inativos são a mesma lista de amigos, só divididas por perfil
+  // social ligado/desligado — colisão de nome pode acontecer entre os dois.
+  const nomeExibicao = disambiguateNames([...(data?.ranking ?? []), ...inativos]);
 
   return (
     <PageContainer width="narrow">
@@ -316,19 +319,22 @@ function AmigosContent() {
               <p style={s.body}>Você ainda não tem amigos por aqui. Convide alguém com seu link acima — o ranking fica bem mais divertido a dois. 😉</p>
             ) : (
               <div style={s.rankList}>
-                {data.ranking.map((f, i) => (
-                  <RankRow
-                    key={f.userId}
-                    position={i}
-                    name={f.name}
-                    avatarUrl={f.avatarUrl}
-                    isMe={f.isMe}
-                    streak={f.streak}
-                    weekMinutes={f.weekMinutes}
-                    daysOnTarget={f.daysOnTarget}
-                    actions={!f.isMe ? menuPessoa(f.name, f.userId, f.friendshipId) : undefined}
-                  />
-                ))}
+                {data.ranking.map((f, i) => {
+                  const nome = nomeExibicao.get(f.userId) ?? f.name;
+                  return (
+                    <RankRow
+                      key={f.userId}
+                      position={i}
+                      name={nome}
+                      avatarUrl={f.avatarUrl}
+                      isMe={f.isMe}
+                      streak={f.streak}
+                      weekMinutes={f.weekMinutes}
+                      daysOnTarget={f.daysOnTarget}
+                      actions={!f.isMe ? menuPessoa(nome, f.userId, f.friendshipId) : undefined}
+                    />
+                  );
+                })}
               </div>
             )}
 
@@ -337,15 +343,18 @@ function AmigosContent() {
                 gerenciados — somem do ranking, não da sua lista de amizades. */}
             {inativos.length > 0 && (
               <div style={s.quietBlock}>
-                {inativos.map((f) => (
-                  <QuietRow
-                    key={f.userId}
-                    name={f.name}
-                    avatarUrl={f.avatarUrl}
-                    nota="perfil social desativado"
-                    actions={menuPessoa(f.name, f.userId, f.friendshipId)}
-                  />
-                ))}
+                {inativos.map((f) => {
+                  const nome = nomeExibicao.get(f.userId) ?? f.name;
+                  return (
+                    <QuietRow
+                      key={f.userId}
+                      name={nome}
+                      avatarUrl={f.avatarUrl}
+                      nota="perfil social desativado"
+                      actions={menuPessoa(nome, f.userId, f.friendshipId)}
+                    />
+                  );
+                })}
               </div>
             )}
           </section>

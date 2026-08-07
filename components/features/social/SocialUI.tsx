@@ -10,6 +10,24 @@ import { Badge } from '@/components/ui/Badge';
 
 const MEDALHAS = ['🥇', '🥈', '🥉'];
 
+// Não existe @usuário na plataforma — só "nome de exibição" livre — então duas
+// pessoas na mesma lista (ranking de Amigos, de Turma) podem ter o mesmo nome
+// (ex.: "Maria" é comum). Sem isso, tanto a linha quanto "Ações para {nome}"
+// do menu ficam ambíguos entre as duas. Sufixo curto e estável (baseado no id,
+// não em ordem de array) e só aparece quando há colisão de fato.
+export function disambiguateNames<T extends { userId: string; name: string }>(
+  people: readonly T[],
+): Map<string, string> {
+  const counts = new Map<string, number>();
+  for (const p of people) counts.set(p.name, (counts.get(p.name) ?? 0) + 1);
+  const out = new Map<string, string>();
+  for (const p of people) {
+    const duplicado = (counts.get(p.name) ?? 0) > 1;
+    out.set(p.userId, duplicado ? `${p.name} · ${p.userId.slice(0, 4).toUpperCase()}` : p.name);
+  }
+  return out;
+}
+
 export function Avatar({ name, url, size = 40, ring }: { name: string; url: string | null; size?: number; ring?: boolean }) {
   // Até 28/07 nenhum avatar chegava aqui (o perfil social lia de uma coluna
   // sempre vazia), então a foto nunca tinha sido exercitada de verdade. Com

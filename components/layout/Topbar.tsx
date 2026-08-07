@@ -20,7 +20,7 @@ import { ManualLogModal } from '@/components/features/timer/ManualLogModal';
 import { QuickLogModal } from '@/components/features/timer/QuickLogModal';
 import { NotificationBell } from './NotificationBell';
 import { useToast } from '@/components/ui/ToastProvider';
-import { OPEN_COMMAND_EVENT, OPEN_QUICKLOG_EVENT } from '@/components/features/command/CommandPalette';
+import { OPEN_COMMAND_EVENT, OPEN_QUICKLOG_EVENT, COMMAND_PALETTE_OPENED_EVENT } from '@/components/features/command/CommandPalette';
 
 export function Topbar() {
   const router = useRouter();
@@ -50,6 +50,14 @@ export function Topbar() {
     function onQuickLog() { setQuickOpen(true); }
     window.addEventListener(OPEN_QUICKLOG_EVENT, onQuickLog);
     return () => window.removeEventListener(OPEN_QUICKLOG_EVENT, onQuickLog);
+  }, []);
+
+  // A paleta abrindo por Ctrl+K não passa pelo mousedown-fora-do-ref que fecha
+  // estes dois menus normalmente (clicar no botão de busca já fechava certo).
+  useEffect(() => {
+    function onPaletteOpened() { setAddMenuOpen(false); setMenuOpen(false); }
+    window.addEventListener(COMMAND_PALETTE_OPENED_EVENT, onPaletteOpened);
+    return () => window.removeEventListener(COMMAND_PALETTE_OPENED_EVENT, onPaletteOpened);
   }, []);
 
   async function handleLogout() {

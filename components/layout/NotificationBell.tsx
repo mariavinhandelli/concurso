@@ -9,16 +9,19 @@
 // amizade não avisava em lugar nenhum — a pessoa só descobria se entrasse em
 // /amigos por conta própria (auditoria de Amigos, P2-8).
 // Badge com contagem + dropdown no mesmo estilo do menu da conta. Avisos do
-// sistema são marcados como lidos (e somem do sino) ao abrir o dropdown;
-// lembretes manuais só somem quando apagados na Agenda.
+// sistema são marcados como lidos automaticamente ao abrir o dropdown, e
+// também têm ação explícita: botão de check por item + "marcar tudo como
+// lido" no cabeçalho (pedido direto, já que o automático é invisível).
+// Lembretes manuais só somem quando apagados na Agenda.
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Bell } from 'lucide-react';
+import { Bell, Check, CheckCheck } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { getCachedUser } from '@/lib/supabase/authCache';
 import { getPendingRequestCount } from '@/services/social.service';
+import { COMMAND_PALETTE_OPENED_EVENT } from '@/components/features/command/CommandPalette';
 import { theme, zIndex } from '@/lib/theme';
 
 type Reminder = {
@@ -119,8 +122,51 @@ export function NotificationBell() {
 
     if (markSeen && sysNotices?.length) {
       const ids = sysNotices.map((n) => n.id);
-      // Fire-and-forget: não trava a UI: some do sino só na próxima carga.
-      supabase.from('notifications').update({ read_at: new Date().toISOString() }).in('id', ids);
+      // Fire-and-forget: não trava a UI, some do sino só na próxima carga.
+      // O builder do supabase-js só dispara o fetch de fato dentro do seu
+      // .then() (é "thenable" preguiçoso) — sem chamar .then()/await aqui,
+      // a requisição nunca sai, e read_at nunca é gravado (bug real, achado
+      // ao investigar o sino "nunca soma como lido").
+      void supabase
+        .from('notifications')
+        .update({ read_at: new Date().toISOString() })
+        .in('id', ids)
+        .then(({ error }) => {
+          if (error) console.error('Erro ao marcar avisos como lidos:', error.message);
+        });
+    }
+  }
+
+  // Marca um único aviso como lido — ação explícita (botão), independente do
+  // marcar-automático ao abrir. Otimista: some da lista na hora; se o servidor
+  // recusar, `load()` traz o estado real de volta.
+  async function markOneRead(id: string) {
+    setNotices((prev) => prev.filter((n) => n.id !== id));
+    setNoticesCount((prev) => Math.max(0, prev - 1));
+    const supabase = createClient();
+    const { error } = await supabase.from('notifications').update({ read_at: new Date().toISOString() }).eq('id', id);
+    if (error) {
+      console.error('Erro ao marcar aviso como lido:', error.message);
+      load();
+    }
+  }
+
+  // Marca TODOS os avisos do sistema como lidos de uma vez (não só os 20
+  // carregados) — filtra por read_at is null direto no servidor.
+  async function markAllRead() {
+    setNotices([]);
+    setNoticesCount(0);
+    const supabase = createClient();
+    const user = await getCachedUser();
+    if (!user) return;
+    const { error } = await supabase
+      .from('notifications')
+      .update({ read_at: new Date().toISOString() })
+      .eq('user_id', user.id)
+      .is('read_at', null);
+    if (error) {
+      console.error('Erro ao marcar tudo como lido:', error.message);
+      load();
     }
   }
 
@@ -140,6 +186,14 @@ export function NotificationBell() {
     }
     document.addEventListener('mousedown', onClick);
     return () => document.removeEventListener('mousedown', onClick);
+  }, []);
+
+  // Ctrl+K abre a paleta sem passar por nenhum mousedown — o listener acima
+  // não pega esse caminho, e o dropdown do sino ficava aberto por baixo dela.
+  useEffect(() => {
+    function onPaletteOpened() { setOpen(false); }
+    window.addEventListener(COMMAND_PALETTE_OPENED_EVENT, onPaletteOpened);
+    return () => window.removeEventListener(COMMAND_PALETTE_OPENED_EVENT, onPaletteOpened);
   }, []);
 
   const count = items.length + noticesCount + pedidos;
@@ -162,10 +216,18 @@ export function NotificationBell() {
       {open && (
         <div className="notification-menu floating-root" style={styles.menu} role="dialog" aria-label="Notificações">
           <div style={styles.menuHead}>
-            <div style={styles.menuName}>Notificações</div>
-            <div style={styles.menuSub}>
-              {count > 0 ? `${count} pendente${count > 1 ? 's' : ''}` : 'Nada pendente'}
+            <div>
+              <div style={styles.menuName}>Notificações</div>
+              <div style={styles.menuSub}>
+                {count > 0 ? `${count} pendente${count > 1 ? 's' : ''}` : 'Nada pendente'}
+              </div>
             </div>
+            {noticesCount > 0 && (
+              <button style={styles.markAllBtn} onClick={markAllRead}>
+                <CheckCheck size={13} />
+                Marcar tudo como lido
+              </button>
+            )}
           </div>
 
           {count === 0 ? (
@@ -187,22 +249,31 @@ export function NotificationBell() {
                 </button>
               )}
               {notices.map((n) => (
-                <button
-                  key={n.id}
-                  style={styles.item}
-                  onClick={() => {
-                    setOpen(false);
-                    router.push(n.link || '/');
-                  }}
-                >
-                  <span style={styles.dot} />
-                  <span style={styles.itemBody}>
-                    <span style={styles.itemTitle}>{n.title}</span>
-                    <span style={styles.itemDate}>
-                      {n.body ? `${n.body} · ${sinceLabel(n.created_at)}` : sinceLabel(n.created_at)}
+                <div key={n.id} style={styles.itemRow}>
+                  <button
+                    style={{ ...styles.item, width: 'auto', flex: 1, minWidth: 0 }}
+                    onClick={() => {
+                      setOpen(false);
+                      router.push(n.link || '/');
+                    }}
+                  >
+                    <span style={styles.dot} />
+                    <span style={styles.itemBody}>
+                      <span style={styles.itemTitle}>{n.title}</span>
+                      <span style={styles.itemDate}>
+                        {n.body ? `${n.body} · ${sinceLabel(n.created_at)}` : sinceLabel(n.created_at)}
+                      </span>
                     </span>
-                  </span>
-                </button>
+                  </button>
+                  <button
+                    style={styles.markReadBtn}
+                    title="Marcar como lido"
+                    aria-label="Marcar como lido"
+                    onClick={(e) => { e.stopPropagation(); markOneRead(n.id); }}
+                  >
+                    <Check size={14} />
+                  </button>
+                </div>
               ))}
               {items.map((r) => (
                 <button
@@ -244,15 +315,28 @@ const styles: Record<string, React.CSSProperties> = {
     border: `0.5px solid ${theme.line}`, borderRadius: 14, boxShadow: theme.shadowHover,
     padding: 6, zIndex: zIndex.menu, fontFamily: theme.font,
   },
-  menuHead: { padding: '10px 12px 12px', borderBottom: `0.5px solid ${theme.line}`, marginBottom: 6 },
+  menuHead: {
+    display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8,
+    padding: '10px 12px 12px', borderBottom: `0.5px solid ${theme.line}`, marginBottom: 6,
+  },
   menuName: { fontSize: 13, fontWeight: 700, color: theme.ink },
   menuSub: { fontSize: 12, color: theme.inkFaint, marginTop: 2 },
+  markAllBtn: {
+    display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0, marginTop: 1,
+    padding: '4px 6px', borderRadius: theme.radiusXs, border: 'none', background: 'transparent',
+    color: theme.teal, fontSize: 11, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap',
+  },
   empty: { padding: '18px 12px', fontSize: 13, color: theme.inkFaint, textAlign: 'center' },
   list: { display: 'flex', flexDirection: 'column', maxHeight: 'min(320px, calc(100vh - 200px))', overflowY: 'auto' },
   item: {
     display: 'flex', alignItems: 'flex-start', gap: 10, width: '100%', padding: '10px 12px',
     borderRadius: 9, border: 'none', background: 'transparent', cursor: 'pointer',
     textAlign: 'left', fontFamily: 'inherit',
+  },
+  itemRow: { display: 'flex', alignItems: 'center', gap: 2 },
+  markReadBtn: {
+    flexShrink: 0, width: 28, height: 28, borderRadius: 8, border: 'none', background: 'transparent',
+    color: theme.inkFaint, display: 'grid', placeItems: 'center', cursor: 'pointer', marginRight: 4,
   },
   dot: {
     width: 7, height: 7, borderRadius: '50%', background: theme.teal, marginTop: 5, flexShrink: 0,

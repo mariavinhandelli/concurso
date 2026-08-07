@@ -18,6 +18,7 @@ import { buildPreview, type GeneratorPreview } from '@/services/scheduleGenerato
 import { createRule, type RecurrenceItemInput } from '@/services/recurrence.service';
 import { getActiveCycleRule } from '@/services/cycleEngine.service';
 import { getDailyTarget, setDailyTarget, setStudyAnchor } from '@/services/goals.service';
+import { setReminderEnabled } from '@/services/push.service';
 import { ANCORAS_SUGERIDAS } from '@/components/features/home/PactoEstudo';
 import { refreshHomeAfterSession } from '@/lib/home-refresh';
 import { fmtMin } from '@/lib/format/time';
@@ -150,6 +151,15 @@ function OnboardingWizard({ userId, onClose }: { userId: string; onClose: (remem
         try { await setStudyAnchor(ancora); } catch (e) {
           console.error('Pacto não salvo (plano criado mesmo assim):', e);
         }
+      }
+      // Lembrete diário liga por padrão só aqui, pra quem está criando a
+      // conta agora — nunca para quem já usa a plataforma (este passo só
+      // roda com getOnboardingStatus().isNew, ou seja, zero alvo e zero
+      // sessão; depois de rodar uma vez, o ativateCatalogEdital acima já
+      // criou um target_exam e isNew nunca mais é true pra essa conta). Só
+      // grava a preferência (sino) — não pede permissão de push nenhuma.
+      try { await setReminderEnabled(true); } catch (e) {
+        console.error('Lembrete diário não ativado (plano criado mesmo assim):', e);
       }
       setPreview(prev);
       if (typeof window !== 'undefined' && prev.subjects.length > 0) {

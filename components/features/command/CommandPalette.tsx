@@ -23,6 +23,13 @@ import { theme, zIndex } from '@/lib/theme';
 
 export const OPEN_COMMAND_EVENT = 'focali:open-command';
 export const OPEN_QUICKLOG_EVENT = 'focali:open-quicklog';
+// Disparado só quando a paleta de fato ABRE (não no toggle que fecha). O sino
+// e os dois dropdowns da Topbar ("Registrar estudo", conta) fecham a si mesmos
+// no mousedown fora do próprio ref — mas Ctrl+K não passa por mousedown
+// nenhum, então um desses menus abertos ficava empilhado por baixo da paleta
+// quando ela abria pelo atalho de teclado (o clique no botão de busca já
+// fechava certo, só o atalho não). Este evento cobre esse caminho.
+export const COMMAND_PALETTE_OPENED_EVENT = 'focali:command-palette-opened';
 
 type Group = 'Recentes' | 'Favoritos' | 'Ações' | 'Ir para' | 'Matérias' | 'Tópicos' | 'Leis' | 'Erros' | 'Editais';
 
@@ -82,20 +89,25 @@ export function CommandPalette() {
     function modalAberto() {
       return document.querySelector('[aria-modal="true"]') !== null;
     }
+    function abrir() {
+      setOpen(true);
+      window.dispatchEvent(new CustomEvent(COMMAND_PALETTE_OPENED_EVENT));
+    }
     function onKey(e: KeyboardEvent) {
       if ((e.ctrlKey || e.metaKey) && (e.key === 'k' || e.key === 'K')) {
         e.preventDefault();
-        setOpen((v) => (v ? false : (modalAberto() ? false : true)));
+        if (open) { close(); return; }
+        if (!modalAberto()) abrir();
       }
     }
-    function onOpenEvent() { if (!modalAberto()) setOpen(true); }
+    function onOpenEvent() { if (!modalAberto()) abrir(); }
     window.addEventListener('keydown', onKey);
     window.addEventListener(OPEN_COMMAND_EVENT, onOpenEvent);
     return () => {
       window.removeEventListener('keydown', onKey);
       window.removeEventListener(OPEN_COMMAND_EVENT, onOpenEvent);
     };
-  }, []);
+  }, [open, close]);
 
   // Foca o input ao abrir.
   useEffect(() => {

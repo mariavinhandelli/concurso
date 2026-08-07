@@ -134,6 +134,9 @@ export function CycleView({
   const R = 48;
   const C = 2 * Math.PI * R;
   const offset = C - (pct / 100) * C;
+  // Soma dos planned_minutes da lista — não é o mesmo campo que dailyMinutes
+  // (cycle_daily_minutes, configurado à parte na regra do ciclo).
+  const lapTotalMinutes = state.subjects.reduce((acc, s) => acc + s.plannedMinutes, 0);
 
   return (
     <>
@@ -180,6 +183,12 @@ export function CycleView({
             <div style={styles.compassLap}>
               <span style={styles.lapNum}>{state.totalLaps + 1}ª</span> volta do ciclo
             </div>
+            {/* dailyMinutes (meta diária configurada no ciclo) e a soma dos
+                planned_minutes da lista abaixo (1 volta completa) são números
+                de fontes diferentes e podem não bater — mostrar a soma aqui
+                evita que a pessoa leia como inconsistência o que é só "meta
+                do dia" vs. "quanto dá 1 volta inteira". */}
+            <div style={styles.lapTotal}>1 volta completa = {fmtH(lapTotalMinutes)}</div>
           </div>
 
           {/* Lista de matérias — no mobile precisa de basis 100% explícita: a
@@ -281,6 +290,7 @@ const styles: Record<string, React.CSSProperties> = {
   compassLabel: { marginTop: 12, fontSize: 13, color: theme.inkSoft },
   compassLap: { marginTop: 14, paddingTop: 14, borderTopWidth: 0.5, borderTopStyle: 'solid', borderTopColor: theme.line, fontSize: 13, color: theme.inkSoft },
   lapNum: { fontSize: 20, fontWeight: 700, color: theme.ink },
+  lapTotal: { marginTop: 4, fontSize: 12, color: theme.inkFaint },
   list: { flex: 1, minWidth: 0 },
   suggestedTag: { display: 'inline-flex', alignItems: 'center', fontSize: 11, fontWeight: 700, color: theme.tealDeep, background: theme.tealBg, padding: '2px 7px', borderRadius: 6, letterSpacing: '0.02em' },
   row: { display: 'flex', alignItems: 'center', gap: 12, padding: 14, borderWidth: 0.5, borderStyle: 'solid', borderColor: theme.line, borderRadius: theme.radius, marginBottom: 8, background: theme.card, minWidth: 0 },
