@@ -266,7 +266,7 @@ export function HubOverviewTab({
           </div>
           <p style={s.statusHint}>
             {isPre
-              ? 'Sem edital vigente — use a central de preparação abaixo para chegar na frente quando o edital sair.'
+              ? 'Sem edital vigente — continue estudando para chegar na frente quando o edital sair.'
               : 'Edital publicado — acompanhe o progresso e mantenha o cronograma em dia.'}
           </p>
           {isPre && (
@@ -442,8 +442,10 @@ export function HubOverviewTab({
         </div>
       )}
 
-      {/* ── Central de preparação (pré-edital) ── */}
-      {isPre && (
+      {/* ── Central de preparação (pré-edital) ──
+             Escondida 06/08: dados incompletos, experiência confusa. Deixar
+             o bloco no código para religar depois, mas nunca renderizar. */}
+      {false && isPre && (
         <div style={s.card}>
           <div
             style={{ ...s.cardHead, cursor: 'pointer' }}

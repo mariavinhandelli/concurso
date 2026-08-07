@@ -178,20 +178,8 @@ const EDITAL_PRONTIDAO_ALVO = 70; // mesma régua "quase_la" do Raio-X e do dom�
 // abandonada, não é rigor excessivo.
 const EDITAL_SEM_LACUNAS_MIN_SCORE = 50;
 
-// Itens do checklist da Central de Preparação (HubOverviewTab.PREP_ITEMS) que
-// contam para "Checklist de véspera". Mantidos em espelho — se a lista de lá
-// mudar, esta precisa acompanhar. Os catalog-gated (comparar-editais,
-// mapa-incidencia, estilo-banca) só entram quando há vínculo com o catálogo,
-// exatamente como na Central — senão o badge nunca fecharia por motivo fora
-// do controle da usuária.
-const PREP_CHECKLIST_MANUAL_KEYS = ['prova-ultima', 'estudar-edital', 'cronograma', 'juris', 'lei-seca'];
-const PREP_CHECKLIST_CATALOG_KEYS = ['comparar-editais', 'mapa-incidencia', 'estilo-banca'];
-
 export interface EditalChecklistInfo {
-  targetId: string;
   phase: 'pre' | 'pos';
-  hasCatalogLink: boolean;
-  prepChecklist: string[];
 }
 
 function buildEditalBadges(
@@ -276,38 +264,10 @@ function buildEditalBadges(
     });
   }
 
-  // Checklist de véspera: os itens manuais + os automáticos (montar edital,
-  // definir pesos — já garantidos pela própria família existir/ter blueprint)
-  // + os catalog-gated SE o concurso está vinculado ao catálogo.
+  // Checklist de véspera removido 06/08: dependia da Central de Preparação,
+  // escondida por dados incompletos/experiência confusa (HubOverviewTab).
+  // Sem a UI, os itens manuais viram inalcançáveis e o badge nunca fecharia.
   if (checklist) {
-    const chaves = new Set(checklist.prepChecklist);
-    const manualDone = PREP_CHECKLIST_MANUAL_KEYS.filter((k) => chaves.has(k)).length;
-    const catalogKeys = checklist.hasCatalogLink ? PREP_CHECKLIST_CATALOG_KEYS : [];
-    const catalogDone = catalogKeys.filter((k) => chaves.has(k)).length;
-    // 'montar-edital' e 'pesos' são automáticos: já provados por esta família
-    // existir (cov.total > 0) e por hasBlueprint, respectivamente.
-    const autoTotal = 2;
-    const autoDone = (cov.total > 0 ? 1 : 0) + (raiox?.hasBlueprint ? 1 : 0);
-    const total = PREP_CHECKLIST_MANUAL_KEYS.length + catalogKeys.length + autoTotal;
-    const done = manualDone + catalogDone + autoDone;
-    const faltamItens = Math.max(0, total - done);
-    badges.push({
-      id: `edital-${cov.targetId}-checklist-vespera`,
-      family: 'edital',
-      label: 'Checklist de véspera',
-      description: 'Complete a Central de Preparação do seu concurso.',
-      unlocked: done >= total,
-      current: done,
-      target: total,
-      unit: 'itens',
-      progress: total > 0 ? clamp01(done / total) : 0,
-      // Sem hint, "1 restantes" (fallback genérico da UI) lê mal — unidades
-      // fora de horas/dias caem nesse fallback sem palavra nenhuma.
-      hint: done >= total
-        ? undefined
-        : `${faltamItens} ${faltamItens === 1 ? 'item restante' : 'itens restantes'} na Central de Preparação`,
-    });
-
     // Dia de prova: chegar à fase pós-edital. Independe de resultado — celebra
     // ter chegado lá, que já é mais do que a maioria faz.
     badges.push({
@@ -479,17 +439,12 @@ export async function getBadgeState(): Promise<BadgeState | null> {
     try {
       const { data } = await supabase
         .from('target_exams')
-        .select('phase, catalog_edital_id, prep_checklist')
+        .select('phase')
         .eq('id', coverage.targetId)
         .eq('user_id', user.id)
         .maybeSingle();
       if (data) {
-        checklist = {
-          targetId: coverage.targetId,
-          phase: data.phase as 'pre' | 'pos',
-          hasCatalogLink: !!data.catalog_edital_id,
-          prepChecklist: (data.prep_checklist as string[] | null) ?? [],
-        };
+        checklist = { phase: data.phase as 'pre' | 'pos' };
       }
     } catch { /* checklist/dia-de-prova ficam ausentes; resto da família segue */ }
   }
